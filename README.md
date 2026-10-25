@@ -178,3 +178,7 @@ See `UI_COMPONENT_REFERENCE_GUIDE.md` and `MOTION_IMPLEMENTATION.md`. Motion is 
 The LMS now choreographs entrance animations **per page**: headings, hero panels, cards, charts, course modules, question lists and form fields appear in a deliberate order on navigation and scrolling. A restrained question transition is included while timer controls and answer selection stay immediate. Mobile and reduced-motion alternatives are supported. No database or dependencies were added. See `PAGE_ENTRANCE_ANIMATION_GUIDE.md` for routes, design choices, motion timings, QA and limitations.
 
 Check the motion definitions with `npm run test:motion` in addition to the existing project tests.
+
+
+### v1.9.2 assessment behavior
+The assessment start CTA sits beside the Before you start instructions. Attempts are unlimited (the prior demo cap is no longer enforced or configured by Admin). Unanswered warning markers show only at the final Review and submit action for both Practice and Assessment. See `ASSESSMENT_UX_UPDATE_v1.9.2.md`.

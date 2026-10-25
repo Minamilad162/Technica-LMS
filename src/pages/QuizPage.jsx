@@ -3,7 +3,7 @@ import{useNavigate}from'react-router-dom';
 import{Bookmark,BookOpen,Layers3,Flag,ArrowRight,ArrowLeft,Check,Clock3,List,FileText,AlertCircle,AlertTriangle,X}from'lucide-react';
 import{useDemo,timeString}from'../lib/store';
 import{assessmentQuestions}from'../data/mock';
-import{getUnansweredQuestionIds,getSkippedQuestionIds}from'../lib/quizNavigation';
+import{getUnansweredQuestionIds}from'../lib/quizNavigation';
 import{Modal,MiniProgress}from'../components/UI';
 
 export default function QuizPage({kind='assessment'}){
@@ -22,8 +22,9 @@ export default function QuizPage({kind='assessment'}){
  const selected=session?.answers?.[current];
  const unansweredIds=getUnansweredQuestionIds(count,session?.answers);
  const unansweredSet=new Set(unansweredIds);
- const skippedIds=getSkippedQuestionIds(count,session?.answers,session?.visitedQuestions);
- const attentionIds=new Set(showAllUnanswered?unansweredIds:skippedIds);
+ // Do not flag skipped questions as the learner presses Next. Only reveal
+ // unanswered markers after an explicit Review and submit action.
+ const attentionIds=new Set(showAllUnanswered?unansweredIds:[]);
  const answered=count-unansweredIds.length;
  const flags=session?.flags||[];
  const duration=session?.durationSeconds;

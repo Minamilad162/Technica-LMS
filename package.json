@@ -1,6 +1,6 @@
 {
   "name": "technica-consult-lms-demo",
-  "version": "1.9.1",
+  "version": "1.9.2",
   "private": true,
   "type": "module",
   "scripts": {

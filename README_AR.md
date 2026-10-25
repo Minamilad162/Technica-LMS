@@ -114,3 +114,10 @@ npm run check
 - زر أي Domain في **Home → ASP Domains** يفتح Assessment لهذا الـDomain؛ صفحة Practice متاحة من القائمة.
 - الاختبارات الآلية `npm run test:selection` نجحت لكل Domain ولحالات الـCustom وUnseen وMistakes.
 - اختبار واجهة المتصفح/Production Build لم يتم هنا لأن بيئة البناء لا تتصل بخدمة npm Registry؛ شغّل `npm install && npm run build` على جهازك.
+
+
+## تحديث v1.9.2 — Assessment
+
+- شيلنا كارت عرض دومينات ASP المكرر من شاشة الـAssessment، وحطينا زر Start assessment في كارت بجانب Before you start (وعلى الموبايل التعليمات قبل زر البداية).
+- مفيش حد أقصى لعدد مرات أداء الـAssessment، وMaximum attempts اتشال من إعدادات الـAdmin. مدة الاختبار وعدد الأسئلة ونسبة النجاح لسه من إعدادات الـAdmin.
+- في الـPractice والـAssessment علامة تحذير الأسئلة اللي من غير إجابة **مش هتظهر بمجرد Next**؛ هتظهر لما المستخدم يضغط Review and submit، ويقدر يرجع للأسئلة دي أو يعمل Submit بإجابات ناقصة بعد تأكيد واضح.

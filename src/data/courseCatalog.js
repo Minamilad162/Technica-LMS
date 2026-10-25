@@ -11,6 +11,6 @@ export const aspCourse = courses[0];
 export const findCourse = id => courses.find(c=>c.id===id);
 export const courseQuestionCount = (course,bank) => course ? (bank||[]).filter(q=>course.domainIds.includes(q.domainId)).length : 0;
 export const defaultAssessmentSettings = Object.freeze({
-  asp:{enabled:true,questionCount:50,durationMinutes:60,passMark:70,maxAttempts:3,domainIds:[...aspCourse.domainIds]},
-  psee:{enabled:false,questionCount:50,durationMinutes:60,passMark:70,maxAttempts:3,domainIds:[]},
+  asp:{enabled:true,questionCount:50,durationMinutes:60,passMark:70,domainIds:[...aspCourse.domainIds]},
+  psee:{enabled:false,questionCount:50,durationMinutes:60,passMark:70,domainIds:[]},
 });

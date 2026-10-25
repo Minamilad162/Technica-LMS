@@ -11,17 +11,15 @@ export function assessmentSettings(courseId,stored={}) {
   questionCount:bounded(saved.questionCount,1,50,base.questionCount),
   durationMinutes:bounded(saved.durationMinutes,1,180,base.durationMinutes),
   passMark:bounded(saved.passMark,1,100,base.passMark),
-  maxAttempts:bounded(saved.maxAttempts,1,20,base.maxAttempts),
   domainIds:[...new Set(eligible)],
  };
 }
-export function prepareAssessment({courseId,settings,bank,attempts=0,random=Math.random}){
+export function prepareAssessment({courseId,settings,bank,random=Math.random}){
  const course=findCourse(courseId);
  const config=assessmentSettings(courseId,settings);
  if(!course||!config)return {error:'Course not found.'};
  if(!course.domainIds.length||!config.enabled)return {error:`${course.name} is coming soon. No questions are available yet.`};
  if(!config.domainIds.length)return {error:'The admin has not selected any domains for this assessment.'};
- if(attempts>=config.maxAttempts)return {error:'No assessment attempts remaining for this course.'};
  const selectedBank=(bank||[]).filter(q=>config.domainIds.includes(q.domainId));
  if(selectedBank.length<config.questionCount)return {error:`This course does not yet have ${config.questionCount} questions available. Contact the admin.`};
  const selection=createQuestionSet({bank:selectedBank,domainIds:config.domainIds,count:config.questionCount,balanced:config.domainIds.length>1,pool:'all',random});

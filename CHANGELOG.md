@@ -1,3 +1,10 @@
+## v1.9.2 — Assessment CTA and final-review warning polish
+
+- Removed ASP content/domain card on assessment overview; Start assessment now sits in a dedicated card to the left of Before you start on desktop.
+- Removed the three-attempt limit and the max-attempts Admin setting; historical caps in localStorage are ignored.
+- Question navigator unanswered warning markers appear only after learner explicitly selects Review and submit, not after each Next.
+- All ASP question-bank content and admin-configured exam rules preserved.
+
 # v1.9.0 — ASP Course / Practice versus Assessment
 
 - ASP Course is the parent of 5 imported workbook domains (1,625 verified questions); PSEE is an empty upcoming course.

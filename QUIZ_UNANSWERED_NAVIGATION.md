@@ -1,18 +1,11 @@
-# v1.9.1 — Question navigator & missing-answer review
+# Question Navigator — Final review warning (v1.9.2)
 
-## Both learner modes: Practice and Assessment
+The same rules apply to **Practice** and **Assessment**.
 
-- Selecting **Next question**, **Previous** or any numbered item records the question the learner left in `visitedQuestions` within that session. If still unanswered, its navigator number gets a visible coral/red outline and **!** icon. Answered items are green (option index 0 counts), the current item has a teal focus outline; saved/flagged state stays independent.
-- Choosing **Review and submit** on the final question or from Question navigator inspects **all questions**. If some are blank, a warning modal shows the exact count and directly clickable question numbers. All missing answers become visibly marked in the navigator, including never visited questions.
-- **Review unanswered** takes the learner straight to the first missing question. They may also intentionally **Submit with unanswered**; the results already count blanks as unanswered. An explicit user choice prevents accidental completion. The fixed assessment configuration is unchanged.
-- The reminder and needs-answer markers work equally for timed Practice and timed Assessment. Timer expiry retains the previous auto-submit policy; it cannot block on a modal.
-- Existing React demo session persistence remains local (`localStorage`); the skipped list is stored in the same session. Old in-flight sessions without `visitedQuestions` still work with an empty list.
-- All warning buttons use accessible names and keyboard-focusable elements; no heavy animation was added to the timed quiz.
+1. Moving with **Next question**, **Previous** or numbered navigation does not add red/coral unanswered markers, even if the learner leaves an item blank. Answered items keep their standard highlight; flagged items keep their separate flag indicator.
+2. When the learner explicitly chooses **Review and submit** (including Next on the last question), the review dialog checks all unanswered items. Only then do the unanswered numbers gain the **!** warning in the Question Navigator.
+3. The dialog lists missing question numbers and allows directly revisiting them. Submission with blank answers remains an explicit final choice.
+4. The number of unanswered questions is calculated from answers, including option A with index 0 as a valid answer.
+5. A timer reaching zero continues to auto-submit according to the existing timer rules. It is not a learner-initiated review.
 
-## Assessment overview
-
-The redundant **Assessment configuration — read only** panel was removed. Existing course selector, fixed Questions / Time / Pass mark / Attempts summary tiles, and admin-owned configuration remain unchanged.
-
-## Verification
-
-Run `npm run test:quiz-navigation`, plus all previous `npm` test scripts. A real `npm run build` and browser/mobile QA are recommended before production release.
+The previous v1.9.1 behavior (marking a question immediately after leaving it) has been replaced. Legacy session `visitedQuestions` is harmless and not used for warning rendering. The Assessment overview no longer contains the separate domain-content panel or attempt-count tile.

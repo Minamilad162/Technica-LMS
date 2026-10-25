@@ -1,0 +1,28 @@
+/* v1.9.2: Start is beside Before you start. Removed the duplicate course-content section. */
+.assessment-overview .assessment-stat-grid{grid-template-columns:repeat(3,minmax(0,1fr))}
+.assessment-overview .assessment-start-layout{grid-template-columns:minmax(280px,.88fr) minmax(0,1.35fr);align-items:stretch;gap:14px}
+.assessment-overview .assessment-start-layout>.white-panel{padding:22px}
+.assessment-start-panel{display:flex;flex-direction:column;align-items:flex-start;gap:11px;min-width:0}
+.assessment-start-icon{display:grid;place-items:center;width:54px;height:54px;border-radius:16px;background:#dcf8ec;color:#087e82}
+.assessment-start-panel h3{margin:0;font-size:19px}
+.assessment-start-panel p{margin:0;color:#60727c;font-size:12px;line-height:1.7}
+.assessment-start-summary{display:flex;gap:10px;flex-wrap:wrap;margin:8px 0}
+.assessment-start-summary>span{display:inline-flex;align-items:center;gap:7px;padding:8px 10px;background:#ecf8f7;border-radius:9px;color:#28656a;font-size:11px;font-weight:750}
+.assessment-start-panel .assessment-start-button{width:100%;min-height:49px;display:flex;align-items:center;justify-content:center;gap:8px;margin-top:auto;font-weight:750}
+.assessment-start-hint{font-size:11px;color:#65747c;line-height:1.5}
+.assessment-back-link{display:inline-flex;gap:6px;align-items:center;padding:9px 0;background:none;border:0;color:#667a84;font-size:11px;cursor:pointer}
+.assessment-back-link:hover,.assessment-back-link:focus-visible{color:#00777d}
+.assessment-start-layout .before-panel .checkbox-line{display:flex;margin:16px 0 0;align-items:center;gap:9px;font-size:12px;font-weight:650}
+@media(max-width:740px){
+ .assessment-overview .assessment-stat-grid{grid-template-columns:repeat(3,minmax(0,1fr))}
+ .assessment-overview .assessment-stat{padding:9px;gap:6px;min-width:0;flex-wrap:wrap}
+ .assessment-overview .assessment-stat small{overflow-wrap:anywhere}
+ .assessment-overview .assessment-start-layout{grid-template-columns:1fr}
+ .assessment-overview .assessment-start-layout>.white-panel{padding:17px}
+ .assessment-start-layout .before-panel{order:0}
+ .assessment-start-layout .assessment-start-panel{order:1}
+ .assessment-start-panel .assessment-start-button{position:static}
+}
+@media(max-width:390px){.assessment-overview .assessment-stat-grid{grid-template-columns:1fr 1fr}.assessment-overview .assessment-stat:last-child{grid-column:1/-1}}
+
+@media (min-width:741px) and (max-width:1050px){.assessment-overview .assessment-start-layout{grid-template-columns:1fr}.assessment-start-layout .before-panel{order:0}.assessment-start-layout .assessment-start-panel{order:1}}

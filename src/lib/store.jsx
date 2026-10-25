@@ -29,7 +29,7 @@ export function DemoProvider({children}) {
   if(state.role==='admin'){notify('Switch to Learner workspace to take an assessment.');return false}
   const allBank=[...questionPool,...state.addedQuestions];
   const attemptNo=state.assessmentAttempts?.[courseId]||0;
-  const prepared=prepareAssessment({courseId,settings:state.courseAssessmentSettings,bank:allBank,attempts:attemptNo});
+  const prepared=prepareAssessment({courseId,settings:state.courseAssessmentSettings,bank:allBank});
   if(prepared.error){notify(prepared.error);return false}
   const {course,config,questions}=prepared;
   update({assessmentCourseId:courseId,assessmentAttempts:{...state.assessmentAttempts,[courseId]:attemptNo+1},assessmentSession:{
