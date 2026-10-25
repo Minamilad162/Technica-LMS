@@ -1,6 +1,6 @@
 {
   "name": "technica-consult-lms-demo",
-  "version": "1.8.0",
+  "version": "1.9.0",
   "private": true,
   "type": "module",
   "scripts": {
@@ -12,7 +12,8 @@
     "test:selection": "node scripts/test-random-domain.mjs",
     "verify:images": "node scripts/verify-image-assets.mjs",
     "test:auth": "node scripts/test-demo-auth.mjs",
-    "test:motion": "node scripts/test-motion.mjs"
+    "test:motion": "node scripts/test-motion.mjs",
+    "test:courses": "node scripts/test-course-model.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.58.0",

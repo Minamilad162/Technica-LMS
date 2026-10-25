@@ -1,10 +1,12 @@
 import React,{createContext,useContext,useEffect,useMemo,useState} from 'react';
 import {startingModules,assessmentQuestions,demoResult,topics,questionPool} from '../data/mock';
 import {createQuestionSet} from './questionSelection';
+import {aspCourse,findCourse} from '../data/courseCatalog';
+import {assessmentSettings,prepareAssessment,canPracticeCourse} from './courseAssessment';
 const Context=createContext(null);
 const initial={
- role:'learner', name:'Alex Morgan', published:false, courseDetails:{title:'PSM Foundations',domain:'Process Safety',summary:'Core principles and implementation of Process Safety Management.'}, selectedTopics:['domain1'], questionCount:50,timerMode:'none',feedbackMode:'end',pool:'all', customMinutes:30,
- assessmentDomain:'domain1', assessmentQuestionCount:50, assessmentCustomCount:50, assessmentTimerMode:'whole', assessmentDurationMinutes:60, assessmentFeedbackMode:'end', assessmentPool:'all',
+ role:'learner', name:'Alex Morgan', published:false, courseDetails:{title:'ASP Course',domain:'Safety Certification',summary:'Five ASP question-bank domains.'}, practiceCourseId:'asp', selectedTopics:[...aspCourse.domainIds], questionCount:50,timerMode:'none',feedbackMode:'end',pool:'all', customMinutes:30,
+ assessmentCourseId:'asp', courseAssessmentSettings:{}, assessmentAttempts:{},
  modules:startingModules, addedQuestions:[], savedQuestions:[], seenQuestions:[], flags:[], assessmentSession:null,practiceSession:null, lastResult:null,
  notifications:[{id:1,text:'Your PSM Foundations lesson is ready to continue.',unread:true},{id:2,text:'12 questions are ready for your mistakes review.',unread:true}],
 };
@@ -20,37 +22,52 @@ export function DemoProvider({children}) {
   const previous=state.lastResult;
   return (previous?.questions||[]).filter(q=>previous.answers?.[q.id]!==undefined&&previous.answers[q.id]!==q.correct).map(q=>q.bankId||q.id);
  }
- // One domain = 50 random questions drawn ONLY from that domain by default.
- // Choosing "all" = 50 questions shared evenly across the five domains.
- function beginAssessment(overrides={}){
-  const setup={...state,...overrides};
-  const domainIds=setup.assessmentDomain==='all'?topics.map(t=>t.id):[setup.assessmentDomain||'domain1'];
-  const {questions,fallback}=createQuestionSet({
-   bank:[...questionPool,...state.addedQuestions],domainIds,
-   count:setup.assessmentQuestionCount,pool:setup.assessmentPool,
-   seenIds:state.seenQuestions,wrongIds:previousWrongIds(),balanced:domainIds.length>1
-  });
-  if(!questions.length){notify('No questions available for this domain. Choose another pool.');return false}
-  if(fallback)notify('No matching questions for that pool yet. Using the full domain bank.');
-  const timerMode=setup.assessmentTimerMode||'whole';
-  update({assessmentSession:{startedAt:Date.now(),questionStartedAt:Date.now(),answers:{},flags:[],current:1,questionSet:questions,
-   durationSeconds:timerMode==='none'?null:timerMode==='per'?60:Math.max(1,Number(setup.assessmentDurationMinutes)||60)*60,
-   timerMode,feedbackMode:setup.assessmentFeedbackMode||'end',domainIds,submitted:false}});
+ // Learners select a COURSE. Assessment parameters always come from the admin-owned
+ // course configuration, never the old learner-customisable assessment fields.
+ function beginAssessment(courseId=state.assessmentCourseId){
+  if(state.role==='admin'){notify('Switch to Learner workspace to take an assessment.');return false}
+  const allBank=[...questionPool,...state.addedQuestions];
+  const attemptNo=state.assessmentAttempts?.[courseId]||0;
+  const prepared=prepareAssessment({courseId,settings:state.courseAssessmentSettings,bank:allBank,attempts:attemptNo});
+  if(prepared.error){notify(prepared.error);return false}
+  const {course,config,questions}=prepared;
+  update({assessmentCourseId:courseId,assessmentAttempts:{...state.assessmentAttempts,[courseId]:attemptNo+1},assessmentSession:{
+   startedAt:Date.now(),questionStartedAt:Date.now(),answers:{},flags:[],current:1,questionSet:questions,
+   courseId,courseName:course.name,passMark:config.passMark,attempt:attemptNo+1,
+   durationSeconds:config.durationMinutes*60,timerMode:'whole',feedbackMode:'end',domainIds:config.domainIds,submitted:false
+  }});
+  return true;
+ }
+ function updateAssessmentSettings(courseId,patch){
+  if(state.role!=='admin'){notify('Only the Admin workspace can configure assessments.');return false}
+  const course=findCourse(courseId);
+  if(!course||!course.domainIds.length){notify('Add a question bank before configuring this course.');return false}
+  const existing=assessmentSettings(courseId,state.courseAssessmentSettings);
+  const next=assessmentSettings(courseId,{...state.courseAssessmentSettings,[courseId]:{...existing,...patch}});
+  update({courseAssessmentSettings:{...state.courseAssessmentSettings,[courseId]:next}});
+  notify(`${course.name} assessment settings saved (demo)`);
   return true;
  }
  function beginPractice(overrides={}){
   const setup={...state,...overrides};
-  const domainIds=setup.selectedTopics?.length?setup.selectedTopics:topics.map(t=>t.id);
+  const courseId=setup.practiceCourseId||'asp';
+  const bank=[...questionPool,...state.addedQuestions];
+  if(!canPracticeCourse(courseId,bank)){notify('This course has no practice questions yet.');return false}
+  const course=findCourse(courseId);
+  const domainIds=[...new Set(setup.selectedTopics||[])].filter(id=>course.domainIds.includes(id));
+  if(!domainIds.length){notify('Choose at least one domain to begin.');return false}
   const {questions,fallback}=createQuestionSet({
-   bank:[...questionPool,...state.addedQuestions],domainIds,
+   bank:bank.filter(q=>course.domainIds.includes(q.domainId)),domainIds,
    count:setup.questionCount,pool:setup.pool,seenIds:state.seenQuestions,
-   wrongIds:previousWrongIds(),balanced:false
+   wrongIds:previousWrongIds(),balanced:domainIds.length>1
   });
   if(!questions.length){notify('No practice questions available. Change your selection.');return false}
   if(fallback)notify('No matching questions for that pool yet. Using the full domain bank.');
+  const timerMode=setup.timerMode||'none';
   update({practiceSession:{startedAt:Date.now(),questionStartedAt:Date.now(),answers:{},flags:[],current:1,questionSet:questions,
-   durationSeconds:setup.timerMode==='none'?null:setup.timerMode==='per'?60:Math.max(1,Number(setup.customMinutes)||30)*60,
-   timerMode:setup.timerMode,feedbackMode:setup.feedbackMode,submitted:false}});
+   courseId,courseName:course.name,
+   durationSeconds:timerMode==='none'?null:timerMode==='per'?60:Math.min(180,Math.max(1,Number(setup.customMinutes)||30))*60,
+   timerMode,feedbackMode:setup.feedbackMode,submitted:false}});
   return true;
  }
  function answer(kind,id,index){const key=kind==='practice'?'practiceSession':'assessmentSession';setState(s=>({...s,[key]:{...s[key],answers:{...s[key]?.answers,[id]:index}}}))}
@@ -60,7 +77,7 @@ export function DemoProvider({children}) {
  function submit(kind){
   const key=kind==='practice'?'practiceSession':'assessmentSession';const s=state[key];if(!s)return;
   const questions=s.questionSet||assessmentQuestions;
-  const result={answers:s.answers,flags:s.flags||[],questions,total:questions.length,timeTaken:timeString(Math.round((Date.now()-s.startedAt)/1000)),submittedAt:new Date().toISOString(),kind};
+  const result={answers:s.answers,flags:s.flags||[],questions,total:questions.length,timeTaken:timeString(Math.round((Date.now()-s.startedAt)/1000)),submittedAt:new Date().toISOString(),kind,courseId:s.courseId||'asp',courseName:s.courseName||'ASP Course',passMark:s.passMark||70,attempt:s.attempt};
   const seen=[...new Set([...state.seenQuestions,...questions.map(q=>q.bankId).filter(Boolean)])];
   update({lastResult:result,seenQuestions:seen,[key]:{...s,submitted:true}});
   notify(kind==='practice'?'Practice session completed':'Assessment submitted successfully')
@@ -74,9 +91,9 @@ export function DemoProvider({children}) {
  function editLesson(moduleId,id,lesson){setState(s=>({...s,modules:s.modules.map(m=>m.id===moduleId?{...m,lessons:m.lessons.map(l=>l.id===id?{...l,...lesson}:l)}:m)}));notify('Lesson updated')}
  function deleteLesson(moduleId,id){setState(s=>({...s,modules:s.modules.map(m=>m.id===moduleId?{...m,lessons:m.lessons.filter(l=>l.id!==id)}:m)}));notify('Lesson removed')}
  function moveLesson(moduleId,id,direction){setState(s=>({...s,modules:s.modules.map(m=>{if(m.id!==moduleId)return m;let arr=[...m.lessons];const i=arr.findIndex(l=>l.id===id),j=i+direction;if(i>=0&&j>=0&&j<arr.length)[arr[i],arr[j]]=[arr[j],arr[i]];return {...m,lessons:arr}})}))}
- const value=useMemo(()=>({state,update,notify,toast,beginAssessment,beginPractice,answer,jump,flag,saveQuestion,submit,addQuestion,addModule,editModule,deleteModule,toggleModule,addLesson,editLesson,deleteLesson,moveLesson,reset:()=>{setState(initial);notify('Demo data reset')} }),[state,toast]);
+ const value=useMemo(()=>({state,update,notify,toast,beginAssessment,beginPractice,answer,jump,flag,saveQuestion,submit,updateAssessmentSettings,addQuestion,addModule,editModule,deleteModule,toggleModule,addLesson,editLesson,deleteLesson,moveLesson,reset:()=>{setState(initial);notify('Demo data reset')} }),[state,toast]);
  return <Context.Provider value={value}>{children}</Context.Provider>
 }
 export function useDemo(){return useContext(Context)}
 export function timeString(seconds){const m=Math.floor(seconds/60),s=seconds%60;return `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`}
-export function calculateResult(result){const src=result||demoResult;let correct=0,incorrect=0,unanswered=0;const qs=src.questions||assessmentQuestions;qs.forEach(q=>{const a=src.answers[q.id];if(a===undefined)unanswered++;else if(a===q.correct)correct++;else incorrect++});return {correct,incorrect,unanswered,score:Math.round(correct/qs.length*100),passed:correct/qs.length>=.7,answers:src.answers,timeTaken:src.timeTaken,questions:qs,total:qs.length,flags:src.flags||[],kind:src.kind||'assessment'}}
+export function calculateResult(result){const src=result||demoResult;let correct=0,incorrect=0,unanswered=0;const qs=src.questions||assessmentQuestions;qs.forEach(q=>{const a=src.answers[q.id];if(a===undefined)unanswered++;else if(a===q.correct)correct++;else incorrect++});const passMark=src.passMark||70;return {correct,incorrect,unanswered,score:qs.length?Math.round(correct/qs.length*100):0,passed:!!qs.length&&correct/qs.length>=passMark/100,passMark,courseName:src.courseName||'ASP Course',courseId:src.courseId||'asp',answers:src.answers,timeTaken:src.timeTaken,questions:qs,total:qs.length,flags:src.flags||[],kind:src.kind||'assessment'}}

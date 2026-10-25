@@ -1,0 +1,24 @@
+/* v1.9 — Course-first ASP/PSEE learning and admin-governed assessments. */
+.course-choice-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;margin:16px 0 26px}
+.course-choice{min-width:0;display:flex;align-items:center;gap:14px;text-align:left;padding:13px;border:1.5px solid #e0e9e8;background:#fbfdfc;border-radius:17px;cursor:pointer;color:#223641;min-height:102px;transition:border-color .2s,box-shadow .2s,transform .2s,background .2s}
+.course-choice:hover{border-color:#7cbcb6;box-shadow:0 8px 26px #0a636215;transform:translateY(-2px)}
+.course-choice:focus-visible{outline:3px solid #03b09f;outline-offset:3px}
+.course-choice.active{border-color:#039b8d;background:#edfaf7;box-shadow:0 0 0 2px #02a18d17}
+.course-choice img{width:88px;height:75px;object-fit:cover;border-radius:11px;flex-shrink:0}
+.course-choice-copy{display:flex;flex:1;min-width:0;flex-direction:column;gap:4px}.course-choice-copy strong{font-size:17px;line-height:1.25}.course-choice-copy small{color:#617578;font-size:12px}.course-choice-meta{font-size:11px;color:#137f76;font-weight:700;line-height:1.4}.course-choice-indicator{align-self:flex-start;color:#008f81;margin-top:4px}
+.course-choice:not(.active) .course-choice-indicator{color:#839a9d}
+.practice-time-control{display:flex;align-items:center;gap:10px;font-size:13px;color:#37535a;font-weight:600;margin-top:12px}
+.practice-time-control input{width:90px;padding:9px 12px;border:1px solid #d3e2df;border-radius:9px;color:#15383f;background:#fff}
+.course-empty-panel{display:flex;flex-direction:column;align-items:flex-start;gap:10px;padding:25px;border:1px dashed #bbd1d0;border-radius:17px;background:#f7fbfa;margin:18px 0 26px;color:#345558}
+.course-empty-panel h3{margin:0;color:#19353c}.course-empty-panel p{margin:0;max-width:65ch;line-height:1.6;color:#62767c}.course-empty-panel svg{color:#008d80}
+.assessment-config-panel .course-choice-grid{margin-bottom:0}
+.assessment-lock-heading{display:flex;align-items:center;gap:12px;color:#168a83;margin-bottom:17px}.assessment-lock-heading h3{margin:0 0 4px;color:#123c43}.assessment-lock-heading p{margin:0;color:#5d777b;line-height:1.5}.assessment-lock-heading>svg:last-child{margin-left:auto}
+.locked-assessment-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}.locked-assessment-grid>div{border:1px solid #e2eeea;border-radius:13px;background:#f8fcfb;padding:14px;display:flex;flex-direction:column;gap:7px}.locked-assessment-grid small{color:#667b7e}.locked-assessment-grid strong{color:#214349;overflow-wrap:anywhere}
+.admin-assessment-settings{display:grid;gap:15px;max-width:1050px}.admin-assessment-settings>p{margin:0;color:#657c80;line-height:1.6}.admin-assessment-settings h3,.admin-assessment-settings h4{margin:6px 0 0}
+.admin-assessment-settings .course-choice{display:flex;flex-direction:column;align-items:flex-start;justify-content:center;gap:5px;min-height:84px}.admin-assessment-settings .course-choice small{color:#697f80}
+.admin-config-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:15px}.admin-config-grid label{display:flex;flex-direction:column;gap:8px;font-weight:650;color:#33525a}.admin-config-grid input{width:100%;padding:12px 13px;border:1px solid #cfdfde;border-radius:10px;color:#243f46;background:#fff;font:inherit}
+.admin-domain-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}.admin-domain-grid .checkbox-line{padding:12px 14px;background:#f8fcfb;border-radius:10px;border:1px solid #ddecea}
+.admin-setting-footer{display:flex;align-items:center;gap:18px;justify-content:space-between;flex-wrap:wrap;border-top:1px solid #e4edeb;padding-top:18px;margin-top:8px}.admin-setting-footer span{color:#607679;font-size:13px}
+@media(max-width:900px){.course-choice-grid{grid-template-columns:1fr}.locked-assessment-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:640px){.course-choice{gap:10px;padding:11px}.course-choice img{width:74px;height:76px}.course-choice-copy strong{font-size:15px}.locked-assessment-grid,.admin-config-grid,.admin-domain-grid{grid-template-columns:1fr}.assessment-lock-heading{align-items:flex-start}.assessment-lock-heading>svg:last-child{flex-shrink:0}.admin-setting-footer .btn{width:100%}}
+@media(prefers-reduced-motion:reduce){.course-choice{transition:none!important}.course-choice:hover{transform:none!important}}

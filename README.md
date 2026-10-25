@@ -1,3 +1,13 @@
+# Latest: v1.9.0 — Course-first ASP Practice & Assessment
+
+- **ASP Course** contains Domain 1–5 and all 1,625 imported questions; **PSEE** is shown without any questions.
+- **Practice** is customizable (domain selection, 1–50 questions, timer, feedback, pool).
+- **Assessment** lets learners choose a course only; all other parameters are set in the **Admin workspace → Course Builder → Assessment**.
+- The source of truth for this demo remains browser-local. Before production, server-side auth and exam-rule enforcement are required.
+- Implementation & test instructions: [ASP_COURSE_ASSESSMENT_GUIDE.md](./ASP_COURSE_ASSESSMENT_GUIDE.md).
+
+---
+
 > **v1.6.1 demo login fix:** On the Login screen choose **Login with Demo Account** to log in directly as `TC1001`. Typing `TC1001` / `Demo@1234` still works. If a hosted version still shows the old error, redeploy this version and hard-refresh the browser.
 
 # Update v1.6.0 — Auth UI

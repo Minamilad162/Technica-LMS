@@ -1,3 +1,13 @@
+# تحديث v1.9.0 — ASP Course
+
+- كورس **ASP Course** يحتوي 5 Domains بإجمالي **1,625 سؤال**، مستوردة من أول 5 شيتات في ملف Excel.
+- **PSEE** كورس قادم بدون أي أسئلة حتى إضافة بنك أسئلته.
+- **Practice**: المتدرب يحدد الكورس والـDomains وعدد الأسئلة والوقت وخيارات التدريب.
+- **Assessment**: المتدرب يختار الكورس فقط، ويُطبّق النظام إعدادات الامتحان المحددة من شاشة **Admin → Course Builder → Assessment**.
+- هذه النسخة Demo وتخزن الإعدادات محليًا؛ غير آمنة للامتحانات الإنتاجية حتى ربطها بـSupabase وصلاحيات السيرفر.
+
+---
+
 > **v1.6.1 demo login fix:** On the Login screen choose **Login with Demo Account** to log in directly as `TC1001`. Typing `TC1001` / `Demo@1234` still works. If a hosted version still shows the old error, redeploy this version and hard-refresh the browser.
 
 ## تحديث v1.6.0 — شاشات تسجيل الدخول وإنشاء حساب تجريبي

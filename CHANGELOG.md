@@ -1,3 +1,15 @@
+# v1.9.0 — ASP Course / Practice versus Assessment
+
+- ASP Course is the parent of 5 imported workbook domains (1,625 verified questions); PSEE is an empty upcoming course.
+- Learner practice can choose ASP course domains, question count, timing (including custom total minutes), feedback and question pool.
+- Learner assessment chooses a course only. Question count, duration, pass mark, covered domains and attempts are defined in Admin → Course Builder → Assessment.
+- Old locally persisted learner assessment overrides no longer determine assessment questions or timer.
+- Course names now appear in Home, selection, quiz and results; internal Domain 1–5 labels remain under ASP only.
+- Added course-isolation/configuration regression tests. No change to the supplied question bank.
+- See ASP_COURSE_ASSESSMENT_GUIDE.md. Browser-only demo, not secure production assessment.
+
+---
+
 ## v1.5.1 — Technica Consult logo in navigation
 
 - Added the supplied transparent Technica Consult logo next to **TECHNICA CONSULT LMS**.

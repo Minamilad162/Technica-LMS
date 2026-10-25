@@ -6,11 +6,8 @@ export const assets = {
   moc: '/images/moc-plant.webp', pha: '/images/pha-plant.webp', pump: '/images/pump.webp', emergency: '/images/emergency-plant.webp', course: '/images/course-banner.webp',
 };
 export const catalog = [
-  { id:'psm', name:'PSM Foundations', domain:'Process Safety', description:'Core principles, elements and implementation of Process Safety Management.', topics:24, progress:64, art:'refinery', theme:'mint', action:'Start learning' },
-  { id:'hazop', name:'HAZOP Studies', domain:'Risk Studies', description:'Methodology, facilitation techniques and real-world applications.', topics:18, progress:32, art:'engineers', theme:'coral', action:'Continue' },
-  { id:'risk', name:'Risk Assessment', domain:'Risk Studies', description:'Identify, analyse and evaluate process risks using industry best practice.', topics:20, progress:0, art:'tank', theme:'lilac', action:'Start learning' },
-  { id:'moc', name:'Management of Change', domain:'Process Safety', description:'Manage change safely with a structured risk assessment process.', topics:12, progress:22, art:'moc', theme:'butter', action:'Explore course' },
-  { id:'integrity', name:'Mechanical Integrity', domain:'Process Safety', description:'Inspection, maintenance and asset integrity fundamentals.', topics:16, progress:0, art:'pump', theme:'blue', action:'Explore course' },
+ {id:'asp',name:'ASP Course',domain:'Available',description:'Associate Safety Professional · five imported domains with 1,625 questions.',topics:5,progress:0,art:'refinery',theme:'mint',action:'Start practice'},
+ {id:'psee',name:'PSEE',domain:'Coming soon',description:'Upcoming course. Question bank and assessments have not been uploaded.',topics:0,progress:0,art:'engineers',theme:'blue',action:'View course'},
 ];
 export const topics = aspDomains;
 export const questionPool = aspBank;
