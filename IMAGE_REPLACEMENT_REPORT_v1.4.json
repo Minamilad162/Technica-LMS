@@ -1,0 +1,95 @@
+{
+  "version": "1.4.0",
+  "replacements": [
+    {
+      "asset": "moc-plant.webp",
+      "master": "compact_industrial_processing_skid_with_yellow_rai.png",
+      "new_hd_px": "1190x1322",
+      "mobile_px": "480x533",
+      "hd_kb": 159.7,
+      "mobile_kb": 32.9
+    },
+    {
+      "asset": "pha-plant.webp",
+      "master": "industrial_refinery_processing_skid.png",
+      "new_hd_px": "1173x1341",
+      "mobile_px": "480x549",
+      "hd_kb": 176.3,
+      "mobile_kb": 36.9
+    },
+    {
+      "asset": "emergency-plant.webp",
+      "master": "stainless_steel_process_tanks_and_piping.png",
+      "new_hd_px": "1254x1254",
+      "mobile_px": "500x500",
+      "hd_kb": 274.8,
+      "mobile_kb": 55.5
+    },
+    {
+      "asset": "pump.webp",
+      "master": "industrial_centrifugal_pump_assembly.png",
+      "new_hd_px": "1254x1254",
+      "mobile_px": "480x480",
+      "hd_kb": 153.7,
+      "mobile_kb": 23.2
+    },
+    {
+      "asset": "refinery.webp",
+      "master": "stainless_steel_distillation_towers_and_piping.png",
+      "new_hd_px": "1086x1448",
+      "mobile_px": "500x667",
+      "hd_kb": 248.1,
+      "mobile_kb": 61.2
+    },
+    {
+      "asset": "tank-farm.webp",
+      "master": "industrial_tank_dome_with_yellow_stairway.png",
+      "new_hd_px": "1122x1402",
+      "mobile_px": "500x625",
+      "hd_kb": 194.2,
+      "mobile_kb": 45.1
+    },
+    {
+      "asset": "course-banner.webp",
+      "master": "sunlit_stainless_steel_refinery_complex.png",
+      "new_hd_px": "1672x941",
+      "mobile_px": "760x428",
+      "hd_kb": 339.9,
+      "mobile_kb": 84.2
+    }
+  ],
+  "retained": [
+    {
+      "asset": "hero-plant.webp",
+      "master": "retained from v1.3.0 to preserve composition",
+      "new_hd_px": "2214x1296",
+      "mobile_px": "996x583",
+      "hd_kb": 196.4,
+      "mobile_kb": 52.1
+    },
+    {
+      "asset": "practice-plant.webp",
+      "master": "retained from v1.3.0 to preserve composition",
+      "new_hd_px": "1953x1287",
+      "mobile_px": "879x579",
+      "hd_kb": 219.7,
+      "mobile_kb": 60.4
+    },
+    {
+      "asset": "process-vessel.webp",
+      "master": "retained from v1.3.0 to preserve composition",
+      "new_hd_px": "2223x1926",
+      "mobile_px": "1000x867",
+      "hd_kb": 300.2,
+      "mobile_kb": 80.9
+    },
+    {
+      "asset": "hazop-engineers.webp",
+      "master": "retained from v1.3.0 to preserve composition",
+      "new_hd_px": "1212x1372",
+      "mobile_px": "485x549",
+      "hd_kb": 109.8,
+      "mobile_kb": 25.3
+    }
+  ]
+}

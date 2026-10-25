@@ -1,6 +1,18 @@
+> **v1.6.1 demo login fix:** On the Login screen choose **Login with Demo Account** to log in directly as `TC1001`. Typing `TC1001` / `Demo@1234` still works. If a hosted version still shows the old error, redeploy this version and hard-refresh the browser.
+
+# Update v1.6.0 — Auth UI
+
+See [AUTH_DEMO_GUIDE.md](AUTH_DEMO_GUIDE.md) for Login / Sign Up, routes, credentials, tests and security limitations.
+
+> **v1.5.0:** All 11 site photos replaced with new clear, topic-specific scenes. See `HD_IMAGE_REPLACEMENT_v1.5.md`.
+
+**v1.4.0:** 7 new real HD replacement WebP photographs; original `public/images` paths retained, responsive smaller variants corrected. Details: [HD_IMAGE_REPLACEMENT_GUIDE.md](HD_IMAGE_REPLACEMENT_GUIDE.md).
+
+**v1.3.0 HD imagery update:** All 11 LMS photographs have higher-resolution local WebP assets and responsive mobile versions, preserving the existing layout and subjects. See [IMAGE_QUALITY_UPGRADE.md](IMAGE_QUALITY_UPGRADE.md).
+
 # TECHNICA CONSULT — LMS Interactive Client Demo
 
-Version **v1.2.0 — ASP 5 Domains / 50 Random Questions Per Domain**. A responsive **React 19 + Vite** learning management system prototype created from the seven supplied TECHNICA CONSULT UI/UX reference images. It uses sample data, local persistence, and local images so that the client can explore a realistic end-to-end learner + administrator workflow **without creating a database**.
+Version **v1.4.0 — ASP 5 Domains / 50 Random Questions Per Domain**. A responsive **React 19 + Vite** learning management system prototype created from the seven supplied TECHNICA CONSULT UI/UX reference images. It uses sample data, local persistence, and local images so that the client can explore a realistic end-to-end learner + administrator workflow **without creating a database**.
 
 ## Run locally
 
@@ -143,3 +155,6 @@ Quality checks: `npm run verify:bank` validates counts, stable IDs, all four opt
 Run `npm run test:selection` to verify 50 questions from each domain, no repetitions, varied retakes, All 5 balanced selection, Custom sizes and Unseen/Mistakes pools. All tests are pure Node.js and do not require npm installation.
 
 **Build caveat:** The source files were JSX-parse-checked, and pure JavaScript / question-bank tests passed; a Vite build and browser interaction test remain unverified because npm Registry connectivity was unavailable in the authoring environment.
+
+### Branding update (v1.5.1)
+The supplied official logo is stored at `public/images/technica-logo.webp` and displayed by `src/components/Layout.jsx` in navigation and quiz headers. This is a frontend-only change.

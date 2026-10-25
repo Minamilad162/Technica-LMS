@@ -1,0 +1,118 @@
+{
+  "version": "1.5.0",
+  "change": "All 11 site images replaced with newly generated high-detail original scenes; source assets for photo use in this demo",
+  "images": [
+    {
+      "asset": "hero-plant",
+      "description": "Plant overview — industrial operator at a spherical vessel",
+      "source": "a_wide_ultra_detailed_photorealistic_industrial.png",
+      "original_pixels": "1672x941",
+      "main_pixels": "1672x941",
+      "mobile_pixels": "780x439",
+      "main_bytes": 267996,
+      "mobile_bytes": 84164
+    },
+    {
+      "asset": "process-vessel",
+      "description": "Process Safety — spherical pressure vessel at dusk",
+      "source": "a_wide_cinematic_industrial_landscape_scene_an_o.png",
+      "original_pixels": "1536x1024",
+      "main_pixels": "1536x1024",
+      "mobile_pixels": "780x520",
+      "main_bytes": 325046,
+      "mobile_bytes": 102992
+    },
+    {
+      "asset": "hazop-engineers",
+      "description": "HAZOP Studies — engineers inspecting piping and P&IDs",
+      "source": "wide_outdoor_industrial_refinery_chemical_plant_sc.png",
+      "original_pixels": "1536x1024",
+      "main_pixels": "1536x1024",
+      "mobile_pixels": "780x520",
+      "main_bytes": 292256,
+      "mobile_bytes": 103264
+    },
+    {
+      "asset": "refinery",
+      "description": "PSM Foundations — refinery and process equipment",
+      "source": "a_wide_ultra_detailed_industrial_oil_gas_chemical.png",
+      "original_pixels": "1672x941",
+      "main_pixels": "1672x941",
+      "mobile_pixels": "780x439",
+      "main_bytes": 406486,
+      "mobile_bytes": 115052
+    },
+    {
+      "asset": "practice-plant",
+      "description": "Practice — operational walkdown in a refinery",
+      "source": "wide_industrial_refinery_chemical_plant_scene_unde.png",
+      "original_pixels": "1672x940",
+      "main_pixels": "1672x940",
+      "mobile_pixels": "780x439",
+      "main_bytes": 427480,
+      "mobile_bytes": 115766
+    },
+    {
+      "asset": "pump",
+      "description": "Mechanical Integrity — centrifugal pump and motor",
+      "source": "wide_industrial_plant_scene_sharp_realistic_photo.png",
+      "original_pixels": "1672x941",
+      "main_pixels": "1672x941",
+      "mobile_pixels": "780x439",
+      "main_bytes": 377450,
+      "mobile_bytes": 107664
+    },
+    {
+      "asset": "tank-farm",
+      "description": "Risk Assessment — storage tanks and safe access",
+      "source": "a_wide_high_resolution_industrial_landscape_scene.png",
+      "original_pixels": "1672x941",
+      "main_pixels": "1672x941",
+      "mobile_pixels": "780x439",
+      "main_bytes": 324252,
+      "mobile_bytes": 90694
+    },
+    {
+      "asset": "moc-plant",
+      "description": "Management of Change — valve inspection and field engineering",
+      "source": "wide_industrial_oil_gas_chemical_plant_scene_with.png",
+      "original_pixels": "1672x941",
+      "main_pixels": "1672x941",
+      "mobile_pixels": "780x439",
+      "main_bytes": 242046,
+      "mobile_bytes": 79292
+    },
+    {
+      "asset": "pha-plant",
+      "description": "Process Hazard Analysis — team assessing process diagrams",
+      "source": "wide_angle_cinematic_high_resolution_industrial.png",
+      "original_pixels": "1536x1024",
+      "main_pixels": "1536x1024",
+      "mobile_pixels": "780x520",
+      "main_bytes": 243976,
+      "mobile_bytes": 86670
+    },
+    {
+      "asset": "emergency-plant",
+      "description": "Emergency Planning — industrial response drill",
+      "source": "wide_industrial_emergency_training_response_scene.png",
+      "original_pixels": "1672x941",
+      "main_pixels": "1672x941",
+      "mobile_pixels": "780x439",
+      "main_bytes": 368066,
+      "mobile_bytes": 105316
+    },
+    {
+      "asset": "course-banner",
+      "description": "Course Builder — refinery process equipment panorama",
+      "source": "a_wide_detailed_industrial_landscape_scene_of_a_l.png",
+      "original_pixels": "1536x1024",
+      "main_pixels": "1536x1024",
+      "mobile_pixels": "780x520",
+      "main_bytes": 416550,
+      "mobile_bytes": 123444
+    }
+  ],
+  "routing": "Original /images/<name>.webp and -sm.webp filenames retained",
+  "notes": "Original v1.4 imagery is not included in public/images. Generated new illustrations resemble industrial photographs; not documentation of actual facilities."
+}

@@ -1,0 +1,101 @@
+[
+  {
+    "asset": "moc-plant.webp",
+    "hd_dimensions": "1190x1322",
+    "mobile_dimensions": "480x533",
+    "hd_kb": 159.7,
+    "mobile_kb": 32.9,
+    "source": "compact_industrial_processing_skid_with_yellow_rai.png",
+    "replaced_with_new_hd": true
+  },
+  {
+    "asset": "pha-plant.webp",
+    "hd_dimensions": "1173x1341",
+    "mobile_dimensions": "480x549",
+    "hd_kb": 176.3,
+    "mobile_kb": 36.9,
+    "source": "industrial_refinery_processing_skid.png",
+    "replaced_with_new_hd": true
+  },
+  {
+    "asset": "emergency-plant.webp",
+    "hd_dimensions": "1254x1254",
+    "mobile_dimensions": "500x500",
+    "hd_kb": 274.8,
+    "mobile_kb": 55.5,
+    "source": "stainless_steel_process_tanks_and_piping.png",
+    "replaced_with_new_hd": true
+  },
+  {
+    "asset": "pump.webp",
+    "hd_dimensions": "1254x1254",
+    "mobile_dimensions": "480x480",
+    "hd_kb": 153.7,
+    "mobile_kb": 23.2,
+    "source": "industrial_centrifugal_pump_assembly.png",
+    "replaced_with_new_hd": true
+  },
+  {
+    "asset": "refinery.webp",
+    "hd_dimensions": "1086x1448",
+    "mobile_dimensions": "500x667",
+    "hd_kb": 248.1,
+    "mobile_kb": 61.2,
+    "source": "stainless_steel_distillation_towers_and_piping.png",
+    "replaced_with_new_hd": true
+  },
+  {
+    "asset": "tank-farm.webp",
+    "hd_dimensions": "1122x1402",
+    "mobile_dimensions": "500x625",
+    "hd_kb": 194.2,
+    "mobile_kb": 45.1,
+    "source": "industrial_tank_dome_with_yellow_stairway.png",
+    "replaced_with_new_hd": true
+  },
+  {
+    "asset": "course-banner.webp",
+    "hd_dimensions": "1672x941",
+    "mobile_dimensions": "760x428",
+    "hd_kb": 339.9,
+    "mobile_kb": 84.2,
+    "source": "sunlit_stainless_steel_refinery_complex.png",
+    "replaced_with_new_hd": true
+  },
+  {
+    "asset": "hero-plant.webp",
+    "hd_dimensions": "2214x1296",
+    "mobile_dimensions": "996x583",
+    "hd_kb": 196.4,
+    "mobile_kb": 52.1,
+    "source": "retained from v1.3.0 to preserve composition",
+    "replaced_with_new_hd": false
+  },
+  {
+    "asset": "practice-plant.webp",
+    "hd_dimensions": "1953x1287",
+    "mobile_dimensions": "879x579",
+    "hd_kb": 219.7,
+    "mobile_kb": 60.4,
+    "source": "retained from v1.3.0 to preserve composition",
+    "replaced_with_new_hd": false
+  },
+  {
+    "asset": "process-vessel.webp",
+    "hd_dimensions": "2223x1926",
+    "mobile_dimensions": "1000x867",
+    "hd_kb": 300.2,
+    "mobile_kb": 80.9,
+    "source": "retained from v1.3.0 to preserve composition",
+    "replaced_with_new_hd": false
+  },
+  {
+    "asset": "hazop-engineers.webp",
+    "hd_dimensions": "1212x1372",
+    "mobile_dimensions": "485x549",
+    "hd_kb": 109.8,
+    "mobile_kb": 25.3,
+    "source": "retained from v1.3.0 to preserve composition",
+    "replaced_with_new_hd": false
+  }
+]

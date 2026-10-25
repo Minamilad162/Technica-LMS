@@ -1,6 +1,6 @@
 {
   "name": "technica-consult-lms-demo",
-  "version": "1.2.0",
+  "version": "1.6.1",
   "private": true,
   "type": "module",
   "scripts": {
@@ -9,7 +9,9 @@
     "preview": "vite preview --host 0.0.0.0",
     "check": "node scripts/check-project.mjs",
     "verify:bank": "node scripts/verify-asp-bank.mjs",
-    "test:selection": "node scripts/test-random-domain.mjs"
+    "test:selection": "node scripts/test-random-domain.mjs",
+    "verify:images": "node scripts/verify-image-assets.mjs",
+    "test:auth": "node scripts/test-demo-auth.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.58.0",

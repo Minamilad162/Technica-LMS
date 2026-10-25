@@ -1,4 +1,16 @@
-# TECHNICA CONSULT LMS — نسخة عرض للعميل v1.2.0 · Randomized 50 Questions Per Domain
+> **v1.6.1 demo login fix:** On the Login screen choose **Login with Demo Account** to log in directly as `TC1001`. Typing `TC1001` / `Demo@1234` still works. If a hosted version still shows the old error, redeploy this version and hard-refresh the browser.
+
+## تحديث v1.6.0 — شاشات تسجيل الدخول وإنشاء حساب تجريبي
+
+تمت إضافة التصميم المختار لشاشات Login وSign Up مع عرض مناسب للموبايل، وتسجيل خروج وRemember me. للتجربة: Employee ID: `TC1001`، Password: `Demo@1234`. الحسابات الجديدة مخزنة محليًا في المتصفح فقط، بدون Supabase أو رسائل بريد. **هذه ليست منظومة مصادقة آمنة للإنتاج**؛ لا تستخدم كلمات مرور أو بيانات شخصية حقيقية. التفاصيل بملف `AUTH_DEMO_GUIDE.md`.
+
+> **v1.5.0:** All 11 site photos replaced with new clear, topic-specific scenes. See `HD_IMAGE_REPLACEMENT_v1.5.md`.
+
+**تحديث v1.4.0:** استبدال 7 صور فعلية بصور جديدة عالية الجودة مع الحفاظ على الـPaths ونسخ الموبايل المتجاوبة. التفاصيل في `HD_IMAGE_REPLACEMENT_GUIDE.md`.
+
+**تحديث v1.3.0 للصور:** تم تحسين أبعاد ووضوح صور المنصة الـ11، مع صور WebP أصغر للموبايل وتحميل متجاوب، مع الحفاظ على المحتوى والتصميم. اقرأ [IMAGE_QUALITY_UPGRADE.md](IMAGE_QUALITY_UPGRADE.md).
+
+# TECHNICA CONSULT LMS — نسخة عرض للعميل v1.4.0 · Randomized 50 Questions Per Domain
 
 المشروع ده نسخة **React + Vite** تفاعلية من التصميمات السبعة المرفقة، متجهزة للشاشات الكبيرة والموبايل.
 
@@ -82,7 +94,7 @@ npm run check
 
 **التحقق الفعلي:** الـJSON والـDomains اتحقق منهم؛ مراجعة Syntax لكل ملفات JSX/JS تمت بنجاح. تعذر تنفيذ `npm run build` داخل بيئة إنشاء النسخة لعدم اتصال npm Registry، لذلك مطلوب اختبار الـBuild محليًا قبل نشر الديمو.
 
-## تحديث v1.2.0 — اختيار 50 سؤالًا عشوائيًا لكل Domain
+## تحديث v1.4.0 — اختيار 50 سؤالًا عشوائيًا لكل Domain
 
 - افتح **Assessments**: اختر Domain 1 إلى Domain 5. الاختبار الافتراضي 50 سؤال من نفس الـDomain فقط، مهما كان عدد الأسئلة الموجود في البنك (250/625/200/300/250).
 - اختر **All 5 domains** لو عايز اختبارًا مختلطًا ومتوازنًا.

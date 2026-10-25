@@ -1,3 +1,33 @@
+## v1.5.1 — Technica Consult logo in navigation
+
+- Added the supplied transparent Technica Consult logo next to **TECHNICA CONSULT LMS**.
+- Updated the sidebar, desktop assessment/practice header, mobile top navigation, and mobile slide-out menu.
+- Refined responsive sizing for compact laptop sidebars and narrow phone screens.
+- Kept course images, 1,625-question ASP bank, test configuration, and all routes unchanged.
+
+## v1.5.0 — Completely replaced image collection
+
+- Replaced all 11 older image assets with distinct new industrial scenes at native 1536–1672 pixel width.
+- Added matching smaller mobile WebP images; all 22 assets verified.
+- Preserved existing `/images/*.webp` paths and 11 React image mappings.
+- Updated `HDImage.jsx` responsive source widths and removed faded blend effects in banners and cards.
+- Kept the original 1,625-question demo and all previous LMS pages and interactions.
+
+## v1.4.0 — True HD image replacements (25 Oct 2026)
+
+- Replaced 7 low-detail LMS photos with the newly generated high-resolution industrial photographs, maintaining the exact public image paths.
+- Regenerated corresponding `-sm.webp` responsive variants from the new master images.
+- Corrected `HDImage.jsx` source set pixel width descriptors to match real file widths.
+- Kept the 4 approved image compositions for the dark hero, engineering image, practice with worker and HAZOP with people.
+- No database, question-bank, design, workflow, or routing changes.
+
+## v1.3.0 — HD assets and responsive image loading (2026-10-25)
+
+- Improved all 11 photographic LMS assets without changing layouts or subjects.
+- New locally hosted responsive image variants for desktop and mobile.
+- Added optimized high-priority loading for the hero and lazy loading for secondary imagery.
+- Continued to use the same 1,625-question ASP test bank and existing 50-question random selection workflow.
+
 # CHANGELOG
 
 ## v1.2.0 — 50 random questions per selected domain (2026-10-24)
