@@ -57,3 +57,10 @@
 ## v1.0.0 — Initial 7-screen LMS UI demo
 
 - React/Vite responsive learner/admin UI and simulated workflows.
+
+## v1.8.0 — Staggered content entrances (2026-10-26)
+- Redesigned entrance choreography for learner, practice, assessment, results, library and administration routes.
+- Added route-specific ordered motion plans and guarded dynamic content reveals; preserved all existing colors and UI layouts.
+- Added nonblocking question-to-question content transitions and gentle score panel emphasis.
+- Respected reduced-motion, capped animation delays, improved mobile choreography and avoided extra runtime dependencies.
+- Included `PAGE_ENTRANCE_ANIMATION_GUIDE.md` and `npm run test:motion` regression checks.

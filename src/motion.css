@@ -8,8 +8,6 @@
 }
 /* Scroll reveals use opacity/transform only. Never wait for motion to enable controls. */
 @media (prefers-reduced-motion:no-preference){
-  .motion-reveal{opacity:0;transform:translate3d(0,15px,0);transition:opacity var(--motion-reveal) var(--motion-ease),transform var(--motion-reveal) var(--motion-ease);transition-delay:calc(var(--motion-order,0) * 55ms)}
-  .motion-reveal.motion-seen{opacity:1;transform:translate3d(0,0,0)}
   .page-enter{animation:technica-page-enter 330ms var(--motion-ease) both}
   @keyframes technica-page-enter{from{opacity:.7;transform:translate3d(0,7px,0)}to{opacity:1;transform:translate3d(0,0,0)}}
   .mini-progress>span,.table-bar .mini-progress>span,.asp-coverage-track>span{animation:technica-progress 720ms var(--motion-ease) both}
@@ -69,13 +67,58 @@ button:active:not(:disabled){transform:scale(.984)}
 /* Keep reading-heavy assessment views and admin tables stationary. */
 .quiz-page .question-panel,.quiz-page .answer-options,.learners-table tr{animation:none}
 @media (max-width:760px){
-  .motion-reveal{transition-delay:0ms!important}
   .auth-story{animation-duration:350ms}
   .bottom-nav button.active{color:#006e76}
   .bottom-nav button.active svg{transform:translateY(-2px)}
 }
 @media (prefers-reduced-motion:reduce){
   *,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;scroll-behavior:auto!important;transition-duration:.01ms!important;transition-delay:0ms!important}
-  .motion-reveal{opacity:1!important;transform:none!important}
   .page-enter,.auth-layout,.auth-form-card{animation:none!important}
+}
+
+/* v1.8 — choreographed, page-specific arrivals. Components retain their real layout
+   and are ALWAYS accessible; JavaScript only attaches optional visual classes. */
+@media (prefers-reduced-motion: no-preference) {
+  .motion-pending { opacity:0; }
+  .motion-playing {
+    animation: tc-content-arrive var(--motion-duration,590ms) cubic-bezier(.16,1,.3,1) both;
+    animation-delay: var(--motion-delay,0ms);
+  }
+  @keyframes tc-content-arrive {
+    0% { opacity:0; transform:translate3d(var(--motion-x,0px),var(--motion-y,19px),0) scale(var(--motion-scale,.985)); }
+    68% { opacity:1; }
+    100% { opacity:1; transform:translate3d(0,0,0) scale(1); }
+  }
+  /* Interaction-critical quiz choices never enter with a delayed animation.
+     Only the nonblocking new-question text and answers refresh briefly. */
+  .quiz-page .question-tags,.quiz-page .question-panel h1,
+  .quiz-page .answer-options {
+    animation: tc-question-change 220ms cubic-bezier(.2,.85,.28,1) both;
+  }
+  .quiz-page .answer-options { animation-duration:275ms; }
+  @keyframes tc-question-change {
+    from { opacity:.64; transform:translateY(5px); }
+    to { opacity:1; transform:translateY(0); }
+  }
+  /* Activity and the feedback surfaces animate only as content enters. */
+  .result-stats .score-ring { animation:tc-score-arrive 650ms cubic-bezier(.18,1,.3,1) 180ms both; }
+  @keyframes tc-score-arrive {
+    from { opacity:.7; scale:.89; }
+    to { opacity:1; scale:1; }
+  }
+  .home-page .review-illustration,.home-page .orb-hero {
+    animation: tc-quiet-float 7s ease-in-out infinite alternate;
+  }
+  @keyframes tc-quiet-float {
+    from {translate:0 0;} to {translate:0 -5px;}
+  }
+}
+@media (max-width:700px) {
+  /* Phone entrance is shorter and never slides content sideways. */
+  .motion-playing { --motion-x:0px !important; --motion-y:12px !important; }
+}
+@media (prefers-reduced-motion:reduce) {
+  .motion-pending,.motion-playing { opacity:1!important;transform:none!important;animation:none!important; }
+  .quiz-page .question-tags,.quiz-page .question-panel h1,.quiz-page .answer-options,
+  .result-stats .score-ring { animation:none!important; }
 }

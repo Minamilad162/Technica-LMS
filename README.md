@@ -162,3 +162,9 @@ The supplied official logo is stored at `public/images/technica-logo.webp` and d
 
 ## v1.7.0 Motion polish
 See `UI_COMPONENT_REFERENCE_GUIDE.md` and `MOTION_IMPLEMENTATION.md`. Motion is implemented through `src/motion.css` and `src/components/MotionSystem.jsx` with reduced-motion support.
+
+## v1.8.0 — Progressive page introductions
+
+The LMS now choreographs entrance animations **per page**: headings, hero panels, cards, charts, course modules, question lists and form fields appear in a deliberate order on navigation and scrolling. A restrained question transition is included while timer controls and answer selection stay immediate. Mobile and reduced-motion alternatives are supported. No database or dependencies were added. See `PAGE_ENTRANCE_ANIMATION_GUIDE.md` for routes, design choices, motion timings, QA and limitations.
+
+Check the motion definitions with `npm run test:motion` in addition to the existing project tests.
