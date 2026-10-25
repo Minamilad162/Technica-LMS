@@ -34,7 +34,8 @@ assert.equal(practice.questions.length,12);assert.ok(practice.questions.every(q=
 const ui=fs.readFileSync(new URL('../src/pages/AssessmentOverview.jsx',import.meta.url),'utf8');
 assert.ok(!ui.includes('SelectButtons'));
 assert.ok(!ui.includes('assessmentQuestionCount'));
-assert.ok(ui.includes('read only'));
+assert.ok(!ui.includes('assessment-locked-setup'));
+assert.ok(ui.includes('Fixed questions') && ui.includes('Fixed time limit')); 
 const admin=fs.readFileSync(new URL('../src/pages/BuilderPage.jsx',import.meta.url),'utf8');
 assert.ok(admin.includes('updateAssessmentSettings'));
 assert.ok(admin.includes('Assessment'));

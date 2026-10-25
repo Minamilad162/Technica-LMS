@@ -76,3 +76,10 @@
 - Added nonblocking question-to-question content transitions and gentle score panel emphasis.
 - Respected reduced-motion, capped animation delays, improved mobile choreography and avoided extra runtime dependencies.
 - Included `PAGE_ENTRANCE_ANIMATION_GUIDE.md` and `npm run test:motion` regression checks.
+
+## v1.9.1 — Unanswered question warning
+- Separate visited-and-skipped from not-yet-seen questions in the Question navigator.
+- Highlight unanswered question numbers with visible alert markers in both Practice and Assessment.
+- When learner requests submission at the final question, show missing-answer count and quick links before allowing explicit blank submission.
+- Simplify Assessment overview by removing the redundant read-only configuration card; retain fixed admin settings and summary tiles.
+- Add `test:quiz-navigation` regression coverage.

@@ -61,7 +61,6 @@ const plans = {
     beat('.assessment-stat-grid > *', 245, 78, 4, 'pop'),
     beat('.assessment-config-panel', 135, 0, 1, 'up'),
     beat('.assessment-config-panel .course-choice', 195, 85, 2, 'pop'),
-    beat('.assessment-locked-setup', 325, 0, 1, 'up'),
     beat('.assessment-content-grid > *', 415, 100, 2, 'up'),
     beat('.instructions > *', 475, 65, 4, 'fade'),
   ],

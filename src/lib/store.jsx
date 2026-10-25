@@ -3,6 +3,7 @@ import {startingModules,assessmentQuestions,demoResult,topics,questionPool} from
 import {createQuestionSet} from './questionSelection';
 import {aspCourse,findCourse} from '../data/courseCatalog';
 import {assessmentSettings,prepareAssessment,canPracticeCourse} from './courseAssessment';
+import {markQuestionLeft} from './quizNavigation';
 const Context=createContext(null);
 const initial={
  role:'learner', name:'Alex Morgan', published:false, courseDetails:{title:'ASP Course',domain:'Safety Certification',summary:'Five ASP question-bank domains.'}, practiceCourseId:'asp', selectedTopics:[...aspCourse.domainIds], questionCount:50,timerMode:'none',feedbackMode:'end',pool:'all', customMinutes:30,
@@ -32,7 +33,7 @@ export function DemoProvider({children}) {
   if(prepared.error){notify(prepared.error);return false}
   const {course,config,questions}=prepared;
   update({assessmentCourseId:courseId,assessmentAttempts:{...state.assessmentAttempts,[courseId]:attemptNo+1},assessmentSession:{
-   startedAt:Date.now(),questionStartedAt:Date.now(),answers:{},flags:[],current:1,questionSet:questions,
+   startedAt:Date.now(),questionStartedAt:Date.now(),answers:{},flags:[],visitedQuestions:[],current:1,questionSet:questions,
    courseId,courseName:course.name,passMark:config.passMark,attempt:attemptNo+1,
    durationSeconds:config.durationMinutes*60,timerMode:'whole',feedbackMode:'end',domainIds:config.domainIds,submitted:false
   }});
@@ -64,14 +65,14 @@ export function DemoProvider({children}) {
   if(!questions.length){notify('No practice questions available. Change your selection.');return false}
   if(fallback)notify('No matching questions for that pool yet. Using the full domain bank.');
   const timerMode=setup.timerMode||'none';
-  update({practiceSession:{startedAt:Date.now(),questionStartedAt:Date.now(),answers:{},flags:[],current:1,questionSet:questions,
+  update({practiceSession:{startedAt:Date.now(),questionStartedAt:Date.now(),answers:{},flags:[],visitedQuestions:[],current:1,questionSet:questions,
    courseId,courseName:course.name,
    durationSeconds:timerMode==='none'?null:timerMode==='per'?60:Math.min(180,Math.max(1,Number(setup.customMinutes)||30))*60,
    timerMode,feedbackMode:setup.feedbackMode,submitted:false}});
   return true;
  }
  function answer(kind,id,index){const key=kind==='practice'?'practiceSession':'assessmentSession';setState(s=>({...s,[key]:{...s[key],answers:{...s[key]?.answers,[id]:index}}}))}
- function jump(kind,id){const key=kind==='practice'?'practiceSession':'assessmentSession';setState(s=>({...s,[key]:{...s[key],current:id,questionStartedAt:Date.now()}}))}
+ function jump(kind,id){const key=kind==='practice'?'practiceSession':'assessmentSession';setState(s=>{const session=s[key];if(!session)return s;const count=session.questionSet?.length||0;if(!Number.isInteger(id)||id<1||id>count)return s;return {...s,[key]:{...session,visitedQuestions:markQuestionLeft(session.visitedQuestions||[],session.current,count),current:id,questionStartedAt:Date.now()}}})}
  function flag(kind,id){const key=kind==='practice'?'practiceSession':'assessmentSession';setState(s=>{const current=s[key]||{}, flags=current.flags||[];return {...s,[key]:{...current,flags:flags.includes(id)?flags.filter(x=>x!==id):[...flags,id]}}})}
  function saveQuestion(id){setState(s=>({...s,savedQuestions:s.savedQuestions.includes(id)?s.savedQuestions.filter(x=>x!==id):[...s.savedQuestions,id]}))}
  function submit(kind){
