@@ -1,0 +1,81 @@
+/* Technica motion system 1.7 — based on UI_COMPONENT_REFERENCE_GUIDE.md
+   Brand colors and existing layouts remain authoritative. Motion is enhancement only. */
+:root{
+  --motion-fast:150ms;
+  --motion-ui:220ms;
+  --motion-reveal:510ms;
+  --motion-ease:cubic-bezier(.22,1,.36,1);
+}
+/* Scroll reveals use opacity/transform only. Never wait for motion to enable controls. */
+@media (prefers-reduced-motion:no-preference){
+  .motion-reveal{opacity:0;transform:translate3d(0,15px,0);transition:opacity var(--motion-reveal) var(--motion-ease),transform var(--motion-reveal) var(--motion-ease);transition-delay:calc(var(--motion-order,0) * 55ms)}
+  .motion-reveal.motion-seen{opacity:1;transform:translate3d(0,0,0)}
+  .page-enter{animation:technica-page-enter 330ms var(--motion-ease) both}
+  @keyframes technica-page-enter{from{opacity:.7;transform:translate3d(0,7px,0)}to{opacity:1;transform:translate3d(0,0,0)}}
+  .mini-progress>span,.table-bar .mini-progress>span,.asp-coverage-track>span{animation:technica-progress 720ms var(--motion-ease) both}
+  @keyframes technica-progress{from{clip-path:inset(0 100% 0 0)}to{clip-path:inset(0 0 0 0)}}
+  .activity-panel svg polyline{stroke-dasharray:1800;stroke-dashoffset:1800;animation:technica-line 1200ms ease-out 160ms forwards}
+  @keyframes technica-line{to{stroke-dashoffset:0}}
+  .continue-hero .hero-photo,.assessment-banner img{animation:technica-image-settle 1300ms ease-out both}
+  @keyframes technica-image-settle{from{opacity:.65;transform:scale(1.055)}to{opacity:1;transform:scale(1)}}
+  .auth-story{background-size:cover;animation:technica-auth-arrival 700ms ease-out both}
+  @keyframes technica-auth-arrival{from{filter:saturate(.82)}to{filter:saturate(1)}}
+  .auth-brand img{animation:technica-logo-settle 850ms var(--motion-ease) both}
+  @keyframes technica-logo-settle{from{opacity:.55;transform:translateY(-8px)}to{opacity:1;transform:translateY(0)}}
+  .toast.show{animation:technica-toast-in 250ms var(--motion-ease)}
+  @keyframes technica-toast-in{from{transform:translateY(20px);opacity:0}to{transform:translateY(0);opacity:1}}
+  .modal{animation:technica-modal-in 240ms var(--motion-ease)}
+  @keyframes technica-modal-in{from{opacity:.65;transform:translateY(9px) scale(.99)}to{opacity:1;transform:translateY(0) scale(1)}}
+  .floating-menu,.search-dropdown,.mobile-more{animation:technica-menu-in 200ms var(--motion-ease) both;transform-origin:top right}
+  @keyframes technica-menu-in{from{opacity:0;transform:translateY(-5px) scale(.985)}to{opacity:1;transform:translateY(0) scale(1)}}
+}
+/* Bencho-style tactile polish without a runtime dependency. */
+.btn,.mint-btn,.review-action,.auth-main-button,.auth-demo-login-button,.start-practice,
+.auth-alt-button,.course-footer button,.text-link,.filter-pill,.segmented button,
+.bottom-nav button,.topic-option,.icon-btn,.nav-item,.account-button,.round-arrow{
+  transition-property:background-color,border-color,color,box-shadow,transform,filter;
+  transition-duration:var(--motion-ui);
+  transition-timing-function:var(--motion-ease);
+}
+@media (hover:hover) and (pointer:fine){
+  .btn:hover:not(:disabled),.mint-btn:hover:not(:disabled),.review-action:hover:not(:disabled),
+  .auth-main-button:hover:not(:disabled),.start-practice:hover:not(:disabled),.auth-demo-login-button:hover:not(:disabled){
+    transform:translateY(-2px);filter:brightness(1.045);box-shadow:0 11px 24px #00667322;
+  }
+  .course-card,.white-panel,.analytics-stat,.weekly-tile,.topic-option,.asp-home-domains>button,
+  .assessment-stat,.result-tile,.module-panel,.builder-aside-card{
+    transition:transform 250ms var(--motion-ease),box-shadow 250ms ease,border-color 250ms ease;
+  }
+  .course-card:hover,.topic-option:hover,.asp-home-domains>button:hover,.module-panel:hover{
+    transform:translateY(-3px);box-shadow:0 12px 25px #053a4818;
+  }
+  .analytics-stat:hover,.weekly-tile:hover,.assessment-stat:hover,.result-tile:hover{
+    transform:translateY(-2px);box-shadow:0 9px 22px #053a4810;
+  }
+  .course-card:hover .course-photo img,.topic-option:hover img{transform:scale(1.035)}
+  .course-card .course-photo img,.topic-option img{transition:transform 460ms var(--motion-ease)}
+}
+button:active:not(:disabled){transform:scale(.984)}
+.nav-item.active{box-shadow:inset 3px 0 0 #007f80}
+.nav-item:hover:not(.active){background:#e9f6f2}
+.filter-pill.active,.segmented button.selected{box-shadow:0 2px 8px #00667322}
+.topic-option.checked{box-shadow:0 0 0 1px #007f8050,inset 0 0 0 1px #007f8033}
+.auth-input-wrap:focus-within{box-shadow:0 0 0 3px #3ae9bd27,0 7px 22px #04c1ae14}
+:where(button,a,input,select,textarea):focus-visible{outline:2px solid #008e91;outline-offset:3px}
+.auth-page :where(button,a,input,select,textarea):focus-visible{outline-color:#6bf5da}
+.question-numbers button,.answer-options button,.review-option-list>*{
+  transition:background-color 180ms ease,border-color 180ms ease,box-shadow 180ms ease;
+}
+/* Keep reading-heavy assessment views and admin tables stationary. */
+.quiz-page .question-panel,.quiz-page .answer-options,.learners-table tr{animation:none}
+@media (max-width:760px){
+  .motion-reveal{transition-delay:0ms!important}
+  .auth-story{animation-duration:350ms}
+  .bottom-nav button.active{color:#006e76}
+  .bottom-nav button.active svg{transform:translateY(-2px)}
+}
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;scroll-behavior:auto!important;transition-duration:.01ms!important;transition-delay:0ms!important}
+  .motion-reveal{opacity:1!important;transform:none!important}
+  .page-enter,.auth-layout,.auth-form-card{animation:none!important}
+}

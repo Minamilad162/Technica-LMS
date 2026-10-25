@@ -158,3 +158,7 @@ Run `npm run test:selection` to verify 50 questions from each domain, no repetit
 
 ### Branding update (v1.5.1)
 The supplied official logo is stored at `public/images/technica-logo.webp` and displayed by `src/components/Layout.jsx` in navigation and quiz headers. This is a frontend-only change.
+
+
+## v1.7.0 Motion polish
+See `UI_COMPONENT_REFERENCE_GUIDE.md` and `MOTION_IMPLEMENTATION.md`. Motion is implemented through `src/motion.css` and `src/components/MotionSystem.jsx` with reduced-motion support.
