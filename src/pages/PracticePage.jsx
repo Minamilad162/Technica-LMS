@@ -3,19 +3,21 @@ import React,{useState} from 'react';
 import {useNavigate} from 'react-router-dom';
 import {Layers3,Check,Clock3,MessageSquare,Database,FileQuestion,Play,ArrowRight,BookOpen,Save,LockKeyhole,SlidersHorizontal} from 'lucide-react';
 import {topics,assets,questionPool} from '../data/mock';
-import {courses,findCourse,courseQuestionCount} from '../data/courseCatalog';
+import {courses} from '../data/courseCatalog';
+import {getCourse,getCourseBank,learnerCourses} from '../lib/courseWorkspace';
 import {useDemo} from '../lib/store';
 import {SelectButtons} from '../components/UI';
 
 export default function PracticePage(){
  const navigate=useNavigate();const{state,update,beginPractice,notify}=useDemo();
- const course=findCourse(state.practiceCourseId)||courses[0];
+ const availableCourses=learnerCourses(state);const course=getCourse(state,state.practiceCourseId)||availableCourses[0]||courses[0];
  const [custom,setCustom]=useState('50');
- const selected=topics.filter(t=>course.domainIds.includes(t.id)&&state.selectedTopics.includes(t.id));
- const available=courseQuestionCount(course,[...questionPool,...state.addedQuestions]);
+ const choiceTopics=course.id==='asp'?topics.filter(t=>course.domainIds.includes(t.id)):[{id:course.domainIds[0],name:'General questions',questions:getCourseBank(state,course.id,questionPool).length,art:'plant',theme:'mint'}];
+ const selected=choiceTopics.filter(t=>state.selectedTopics.includes(t.id));
+ const available=getCourseBank(state,course.id,questionPool).length;
  const count=state.questionCount==='custom'?Math.max(1,Math.min(50,Number(custom)||50)):Number(state.questionCount)||50;
  const minutes=Math.max(1,Math.min(180,Number(state.customMinutes)||30));
- function setCourse(id){const next=findCourse(id);if(!next)return;update({practiceCourseId:id,selectedTopics:[...next.domainIds]})}
+ function setCourse(id){const next=getCourse(state,id);if(!next)return;update({practiceCourseId:id,selectedTopics:[...next.domainIds]})}
  function toggle(id){update({selectedTopics:state.selectedTopics.includes(id)?state.selectedTopics.filter(x=>x!==id):[...state.selectedTopics,id]})}
  function begin(){
   if(!available){notify(`${course.name} has no questions yet.`);return}
@@ -27,9 +29,9 @@ export default function PracticePage(){
   <div className="steps"><div className="step current"><span>1</span><b>Select course</b></div><div className="step-line"/><div className="step"><span>2</span><b>Customize</b></div><div className="step-line"/><div className="step"><span>3</span><b>Practice</b></div></div>
   <div className="practice-layout"><div className="practice-main">
    <h3 className="step-label">1. Choose your course</h3>
-   <div className="course-choice-grid" role="group" aria-label="Choose practice course">{courses.map(c=>{const size=courseQuestionCount(c,[...questionPool,...state.addedQuestions]);return <button key={c.id} type="button" aria-pressed={course.id===c.id} className={`course-choice ${course.id===c.id?'active':''}`} onClick={()=>setCourse(c.id)}><HDImage src={assets[c.art]} alt="" sizes="180px"/><span className="course-choice-copy"><strong>{c.name}</strong><small>{c.subtitle}</small><span className="course-choice-meta">{size?`${size.toLocaleString()} questions · ${c.domainIds.length} domains`:'Coming soon · No questions yet'}</span></span><span className="course-choice-indicator">{size?<Check size={17}/>:<LockKeyhole size={17}/>}</span></button>})}</div>
+   <div className="course-choice-grid" role="group" aria-label="Choose practice course">{availableCourses.map(c=>{const size=getCourseBank(state,c.id,questionPool).length;return <button key={c.id} type="button" aria-pressed={course.id===c.id} className={`course-choice ${course.id===c.id?'active':''}`} onClick={()=>setCourse(c.id)}><HDImage src={assets[c.art||'plant']} alt="" sizes="180px"/><span className="course-choice-copy"><strong>{c.name}</strong><small>{c.subtitle||c.category||'Course'}</small><span className="course-choice-meta">{size?`${size.toLocaleString()} course questions`:'No questions yet'}</span></span><span className="course-choice-indicator">{size?<Check size={17}/>:<LockKeyhole size={17}/>}</span></button>})}</div>
    {available>0?<><h3 className="step-label">2. Choose domains within {course.name} <small>(one or more)</small></h3>
-   <div className="practice-topics">{topics.filter(t=>course.domainIds.includes(t.id)).map(t=><button key={t.id} type="button" aria-pressed={state.selectedTopics.includes(t.id)} className={`topic-option ${t.theme} ${state.selectedTopics.includes(t.id)?'checked':''}`} onClick={()=>toggle(t.id)}><HDImage src={assets[t.art]} alt="" sizes="(max-width: 740px) 90px, 140px"/><div><b>{t.name}</b><small>{t.questions} imported questions</small></div><span className="topic-check">{state.selectedTopics.includes(t.id)&&<Check size={13}/>}</span></button>)}</div>
+   <div className="practice-topics">{choiceTopics.map(t=><button key={t.id} type="button" aria-pressed={state.selectedTopics.includes(t.id)} className={`topic-option ${t.theme} ${state.selectedTopics.includes(t.id)?'checked':''}`} onClick={()=>toggle(t.id)}><HDImage src={assets[t.art]} alt="" sizes="(max-width: 740px) 90px, 140px"/><div><b>{t.name}</b><small>{course.id==='asp'?`${t.questions} imported questions`:`${t.questions} course questions`}</small></div><span className="topic-check">{state.selectedTopics.includes(t.id)&&<Check size={13}/>}</span></button>)}</div>
    <h3 className="step-label options-title">3. Customize practice <small>(learner controlled)</small></h3>
    <div className="option-list"><div className="option-row"><label><FileQuestion size={17}/>Number of questions</label><div className="option-control"><SelectButtons values={[{value:10,label:'10'},{value:25,label:'25'},{value:50,label:'50'},{value:'custom',label:'Custom'}]} value={state.questionCount} onChange={n=>update({questionCount:n})}/>{state.questionCount==='custom'&&<input className="custom-field" aria-label="Custom practice question count" type="number" min="1" max="50" value={custom} onChange={e=>setCustom(e.target.value)}/>}</div></div>
    <div className="option-row"><label><Clock3 size={17}/>Timing</label><div className="option-control"><SelectButtons values={[{value:'none',label:'No timer'},{value:'whole',label:'Whole test'},{value:'per',label:'60 sec / question'}]} value={state.timerMode} onChange={n=>update({timerMode:n})}/>{state.timerMode==='whole'&&<label className="practice-time-control">Total minutes <input aria-label="Practice duration in minutes" type="number" min="1" max="180" value={state.customMinutes} onChange={e=>update({customMinutes:e.target.value})}/></label>}</div></div>

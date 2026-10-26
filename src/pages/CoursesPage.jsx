@@ -5,8 +5,9 @@ import {BookOpen,CalendarClock,ChevronDown,ChevronRight,CheckCircle2,Clock3,File
 import {useDemo} from '../lib/store';
 import {allAdminCourses,courseMediaFor,courseStatus,validateCourse} from '../lib/adminCourses';
 import {questionPool} from '../data/mock';
+import {COURSE_CATEGORIES,courseBankCount,getCourseModules} from '../lib/courseWorkspace';
 
-const EMPTY={name:'',category:'Engineering',description:'',status:'draft',publishAt:''};
+const EMPTY={name:'',category:'General Engineering',description:'',status:'draft',publishAt:''};
 const prettyDate=date=>date?new Date(date).toLocaleString(undefined,{dateStyle:'medium',timeStyle:'short'}):'Not scheduled';
 const localDate=date=>{
   if(!date)return '';
@@ -97,7 +98,7 @@ export default function CoursesPage(){
     <div className="admin-course-list">
     {visible.map(course=>{
       const status=courseStatus(course,clock),open=expanded===course.id;
-      const questions=questionPool.filter(q=>course.domainIds?.includes(q.domainId)).length;
+      const questions=courseBankCount(state,course.id,questionPool);const modules=getCourseModules(state,course.id);
       const materials=courseMediaFor(state,course.id);
       return <section key={course.id} className={`admin-course-card ${open?'is-open':''}`}>
         <button type="button" className="admin-course-main" aria-expanded={open} onClick={()=>setExpanded(open?null:course.id)}>
@@ -109,7 +110,7 @@ export default function CoursesPage(){
         </button>
         {open&&<div className="admin-course-detail">
           <p>{course.description||'No course description yet.'}</p>
-          <div className="admin-course-mini-grid"><div><Layers3 size={18}/><strong>{course.domainIds?.length||0}</strong><span>Domains</span></div><div><FileText size={18}/><strong>{materials.filter(m=>m.kind==='pdf').length}</strong><span>PDF resources</span></div><div><Film size={18}/><strong>{materials.filter(m=>m.kind==='video').length}</strong><span>Videos</span></div><div><CalendarClock size={18}/><strong>{status==='scheduled'?'Scheduled':status==='published'?'Live':'Not published'}</strong><span>{status==='scheduled'?prettyDate(course.publishAt):'Publication'}</span></div></div>
+          <div className="admin-course-mini-grid"><div><Layers3 size={18}/><strong>{modules.length}</strong><span>Modules</span></div><div><FileText size={18}/><strong>{materials.filter(m=>m.kind==='pdf').length}</strong><span>PDF resources</span></div><div><Film size={18}/><strong>{materials.filter(m=>m.kind==='video').length}</strong><span>Videos</span></div><div><CalendarClock size={18}/><strong>{status==='scheduled'?'Scheduled':status==='published'?'Live':'Not published'}</strong><span>{status==='scheduled'?prettyDate(course.publishAt):'Publication'}</span></div></div>
           <div className="admin-course-actions"><button className="btn btn-secondary" onClick={()=>openForm(course)}><Pencil size={16}/>Edit details</button><button className="btn" onClick={()=>navigate(`/builder?courseId=${encodeURIComponent(course.id)}`)}><Layers3 size={16}/>Open Course Builder <ArrowRight size={16}/></button><button className="btn btn-secondary" onClick={()=>changeStatus(course,status==='published'?'draft':'published')}>{status==='published'?<Archive size={16}/>:<CheckCircle2 size={16}/>} {status==='published'?'Move to draft':'Publish now'}</button></div>
           {status==='scheduled'&&<small className="admin-schedule-note"><CalendarDays size={14}/>Scheduled for {prettyDate(course.publishAt)} (local browser time). Actual server scheduling will require backend integration.</small>}
           {!questions&&<small className="admin-schedule-note">No question bank attached yet. This course cannot launch Practice or Assessment until questions are added.</small>}
@@ -123,7 +124,7 @@ export default function CoursesPage(){
       <button className="btn" type="submit" form="admin-course-form">{editing==='new'?'Create course':'Save changes'}</button>
     </>}><form id="admin-course-form" className="simple-fields course-dialog-form" onSubmit={submit}>
       <label>Course name<input required minLength={3} value={form.name} onChange={e=>setForm(s=>({...s,name:e.target.value}))} placeholder="e.g. PSM Leadership"/></label>
-      <label>Category<input value={form.category} onChange={e=>setForm(s=>({...s,category:e.target.value}))}/></label>
+      <label>Course category<select value={form.category} onChange={e=>setForm(s=>({...s,category:e.target.value}))}>{[...new Set([...COURSE_CATEGORIES,form.category].filter(Boolean))].map(c=><option key={c} value={c}>{c}</option>)}</select></label>
       <label>Description<textarea value={form.description} onChange={e=>setForm(s=>({...s,description:e.target.value}))}/></label>
       <label>Publication status<select value={form.status} onChange={e=>setForm(s=>({...s,status:e.target.value}))}><option value="draft">Save as draft</option><option value="scheduled">Schedule publication</option><option value="published">Publish now</option></select></label>
       {form.status==='scheduled'&&<label>Publish date and time<input required type="datetime-local" value={form.publishAt} onChange={e=>setForm(s=>({...s,publishAt:e.target.value}))}/></label>}

@@ -1,0 +1,14 @@
+/* v1.11 — native-course authoring, preserving Technica's design tokens */
+.builder-page .course-import-report{margin-top:12px;display:flex;flex-direction:column;gap:5px;padding:12px 14px;border-radius:12px;background:#e8f7f2;color:#15574f;border:1px solid #bce4d8;overflow-wrap:anywhere}
+.builder-page .course-import-report strong{font-size:13px}.builder-page .course-import-report small{font-size:12px;color:#345f59;line-height:1.5}
+.builder-page .course-import-guide{display:inline-flex;margin-top:11px;font-size:12px;font-weight:700;text-decoration:underline;text-underline-offset:3px;color:#056f70}
+.builder-page .lesson-media-box{display:flex;flex-direction:column;gap:12px;background:#eff8f7;border:1px solid #d3ebe6;padding:15px;border-radius:13px}
+.builder-page .lesson-media-box .lesson-upload-btn{align-self:flex-start;cursor:pointer;min-height:40px;display:inline-flex;align-items:center}
+.builder-page .lesson-media-box small{color:#427268;font-size:12px}
+.builder-page .builder-aside-card .checklist-item{width:100%;background:transparent;border:0;text-align:left;color:inherit;cursor:pointer;display:flex;align-items:center;gap:9px}
+.builder-page .builder-aside-card .checklist-item:hover{background:#ffffff75}
+.builder-page .builder-aside-card .checklist-item:focus-visible,.builder-page .course-import-guide:focus-visible{outline:3px solid #30c9bb;outline-offset:3px}
+.builder-page .module-panel{overflow:visible}.builder-page .module-head{min-width:0}.builder-page .module-title{min-width:0;overflow-wrap:anywhere}
+.builder-page .add-module-btn{width:100%}
+@media(max-width:780px){.builder-page .module-head{flex-wrap:wrap;gap:8px}.builder-page .lesson-row{flex-wrap:wrap;gap:10px}.builder-page .builder-side{min-width:0}.builder-page .aside-buttons{flex-wrap:wrap}.builder-page .aside-buttons .btn{white-space:normal}.builder-page .simple-fields{min-width:0}}
+@media(prefers-reduced-motion:reduce){.builder-page .module-panel,.builder-page .course-import-report{animation:none!important;transition:none!important}}

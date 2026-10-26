@@ -3,7 +3,8 @@ import {useNavigate} from 'react-router-dom';
 import {Check,X,Minus,Target,Clock3,ArrowLeft,ArrowRight,Bookmark,BookOpen,FileText,Play,ChevronRight,ChevronDown,Flag,RotateCcw,ClipboardCheck,CalendarDays,LockKeyhole,Layers3} from 'lucide-react';
 import HDImage from '../components/HDImage';
 import {assets,questionPool} from '../data/mock';
-import {courses,findCourse} from '../data/courseCatalog';
+import {courses} from '../data/courseCatalog';
+import {getCourse} from '../lib/courseWorkspace';
 import {getAuthSession} from '../lib/demoAuth';
 import {assessmentHistoryForUser,groupAssessmentHistory,DEMO_LEARNER_ID} from '../lib/assessmentHistory';
 import {useDemo,calculateResult} from '../lib/store';
@@ -62,7 +63,7 @@ export default function ResultsPage(){
  const [openCourseId,setOpenCourseId]=useState(recentCourseId||null);
  const [selectedAttemptByCourse,setSelectedAttemptByCourse]=useState({});
  function practiceAgain(courseId){
-  const course=findCourse(courseId);
+  const course=getCourse(state,courseId);
   update({practiceCourseId:courseId,selectedTopics:course?.domainIds||[],pool:'all'});
   navigate('/practice');
  }
@@ -71,7 +72,7 @@ export default function ResultsPage(){
   <div className="review-course-intro"><span><ClipboardCheck size={19}/></span><div><strong>Your assessment history</strong><small>Only completed assessments are listed. Practice sessions are kept separate.</small></div><b>{groups.length} {groups.length===1?'course':'courses'} · {records.length} {records.length===1?'attempt':'attempts'}</b></div>
   {groups.length===0?<section className="review-empty white-panel"><ClipboardCheck size={32}/><h2>No assessments completed yet</h2><p>When you finish an assessment, its course will appear here. You'll be able to expand it to review all previous attempts and answers.</p><button className="btn" type="button" onClick={()=>navigate('/assessments')}>Choose an assessment <ArrowRight size={17}/></button></section>:<div className="review-course-list">
    {groups.map(group=>{
-    const course=findCourse(group.courseId);const latest=group.attempts[0];const latestScore=calculateResult(latest);
+    const course=getCourse(state,group.courseId);const latest=group.attempts[0];const latestScore=calculateResult(latest);
     const expanded=openCourseId===group.courseId;
     const active=group.attempts.find(a=>a.id===selectedAttemptByCourse[group.courseId])||latest;
     const bodyId=`review-course-${group.courseId}`;

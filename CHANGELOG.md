@@ -1,3 +1,13 @@
+## v1.11.0 — Full course authoring for newly created courses
+
+- Removed ASP-only module and lesson editor restriction; independent module stacks per course, with legacy ASP migration.
+- Added lesson-linked PDF/video attachments in IndexedDB, direct upload and preview, and draft placeholders.
+- Added in-builder course Details editing and dummy category dropdown.
+- Added manual questions and real XLSX/CSV import with multiple sheets, row validation, duplicate handling and course isolation.
+- Added dynamic learner practice and assessment support after publishing courses; fixed per-course admin assessment settings.
+- Kept existing 1,625 ASP bank entries and UI styling intact.
+- See `COURSE_AUTHORING_GUIDE_v1.11.md`.
+
 ## v1.10.1 — Create / Edit Course dialog layout fix (2026-10-26)
 
 - Render course dialog via a React portal to document.body to avoid transformed page containers shifting/clipping fixed overlays.

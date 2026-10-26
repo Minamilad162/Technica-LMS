@@ -7,11 +7,12 @@ import {markQuestionLeft} from './quizNavigation';
 import {archiveAssessment,DEMO_LEARNER_ID} from './assessmentHistory';
 import {getAuthSession} from './demoAuth';
 import {allAdminCourses,createCourseId,validateCourse} from './adminCourses';
+import {getCourse,getCourseBank,courseDomainId,getCourseModules} from './courseWorkspace';
 const Context=createContext(null);
 const initial={
  role:'learner', name:'Alex Morgan', published:false, courseDetails:{title:'ASP Course',domain:'Safety Certification',summary:'Five ASP question-bank domains.'}, practiceCourseId:'asp', selectedTopics:[...aspCourse.domainIds], questionCount:50,timerMode:'none',feedbackMode:'end',pool:'all', customMinutes:30,
  assessmentCourseId:'asp', courseAssessmentSettings:{}, assessmentAttempts:{}, assessmentHistory:[],
- createdCourses:[],courseEdits:{},courseMedia:[],modules:startingModules, addedQuestions:[], savedQuestions:[], seenQuestions:[], flags:[], assessmentSession:null,practiceSession:null, lastResult:null,
+ createdCourses:[],courseEdits:{},courseMedia:[],modules:startingModules,courseModules:{}, addedQuestions:[], savedQuestions:[], seenQuestions:[], flags:[], assessmentSession:null,practiceSession:null, lastResult:null,
  notifications:[{id:1,text:'Your PSM Foundations lesson is ready to continue.',unread:true},{id:2,text:'12 questions are ready for your mistakes review.',unread:true}],
 };
 function load(){try{const v=JSON.parse(localStorage.getItem('technica-lms-demo-v1-asp5'));return v?{...initial,...v}:initial}catch{return initial}}
@@ -30,9 +31,12 @@ export function DemoProvider({children}) {
  // course configuration, never the old learner-customisable assessment fields.
  function beginAssessment(courseId=state.assessmentCourseId){
   if(state.role==='admin'){notify('Switch to Learner workspace to take an assessment.');return false}
-  const allBank=[...questionPool,...state.addedQuestions];
+  const courseForLearner=getCourse(state,courseId);
+  if(!courseForLearner||!['published','scheduled'].includes(courseForLearner.status)||
+     (courseForLearner.status==='scheduled'&&Date.parse(courseForLearner.publishAt)>Date.now())){notify('This course is not published yet.');return false}
+  const allBank=getCourseBank(state,courseId,questionPool);
   const attemptNo=state.assessmentAttempts?.[courseId]||0;
-  const prepared=prepareAssessment({courseId,settings:state.courseAssessmentSettings,bank:allBank});
+  const prepared=prepareAssessment({courseId,course:getCourse(state,courseId),settings:state.courseAssessmentSettings,bank:allBank});
   if(prepared.error){notify(prepared.error);return false}
   const {course,config,questions}=prepared;
   update({assessmentCourseId:courseId,assessmentAttempts:{...state.assessmentAttempts,[courseId]:attemptNo+1},assessmentSession:{
@@ -44,10 +48,10 @@ export function DemoProvider({children}) {
  }
  function updateAssessmentSettings(courseId,patch){
   if(state.role!=='admin'){notify('Only the Admin workspace can configure assessments.');return false}
-  const course=findCourse(courseId);
-  if(!course||!course.domainIds.length){notify('Add a question bank before configuring this course.');return false}
-  const existing=assessmentSettings(courseId,state.courseAssessmentSettings);
-  const next=assessmentSettings(courseId,{...state.courseAssessmentSettings,[courseId]:{...existing,...patch}});
+  const course=getCourse(state,courseId);
+  if(!course){notify('Course not found.');return false}
+  const existing=assessmentSettings(courseId,state.courseAssessmentSettings,course);
+  const next=assessmentSettings(courseId,{...state.courseAssessmentSettings,[courseId]:{...existing,...patch}},course);
   update({courseAssessmentSettings:{...state.courseAssessmentSettings,[courseId]:next}});
   notify(`${course.name} assessment settings saved (demo)`);
   return true;
@@ -55,9 +59,12 @@ export function DemoProvider({children}) {
  function beginPractice(overrides={}){
   const setup={...state,...overrides};
   const courseId=setup.practiceCourseId||'asp';
-  const bank=[...questionPool,...state.addedQuestions];
-  if(!canPracticeCourse(courseId,bank)){notify('This course has no practice questions yet.');return false}
-  const course=findCourse(courseId);
+  const practiceCourse=getCourse(state,courseId);
+  if(!practiceCourse||!['published','scheduled'].includes(practiceCourse.status)||
+     (practiceCourse.status==='scheduled'&&Date.parse(practiceCourse.publishAt)>Date.now())){notify('This course is not published yet.');return false}
+  const bank=getCourseBank(state,courseId,questionPool);
+  if(!canPracticeCourse(courseId,bank,getCourse(state,courseId))){notify('This course has no practice questions yet.');return false}
+  const course=getCourse(state,courseId);
   const domainIds=[...new Set(setup.selectedTopics||[])].filter(id=>course.domainIds.includes(id));
   if(!domainIds.length){notify('Choose at least one domain to begin.');return false}
   const {questions,fallback}=createQuestionSet({
@@ -96,7 +103,7 @@ export function DemoProvider({children}) {
   const all=allAdminCourses(state),error=validateCourse(values,all);
   if(error){notify(error);return null}
   const id=createCourseId(values.name,all);
-  setState(s=>({...s,createdCourses:[...(s.createdCourses||[]),{id,name:values.name.trim(),category:values.category?.trim()||'Engineering',description:values.description?.trim()||'',status:values.status||'draft',publishAt:values.status==='scheduled'?values.publishAt:null,domainIds:[],createdAt:new Date().toISOString()}]}));
+  setState(s=>({...s,createdCourses:[...(s.createdCourses||[]),{id,name:values.name.trim(),category:values.category?.trim()||'General Engineering',description:values.description?.trim()||'',status:values.status||'draft',publishAt:values.status==='scheduled'?values.publishAt:null,domainIds:[courseDomainId(id)],createdAt:new Date().toISOString()}]}));
   notify(`${values.name} created as ${values.status||'draft'} (demo)`);
   return id;
  }
@@ -120,16 +127,33 @@ export function DemoProvider({children}) {
   if(state.role!=='admin'){notify('Admin workspace required to delete materials');return false}
   setState(s=>({...s,courseMedia:(s.courseMedia||[]).filter(m=>m.id!==mediaId)}));return true;
  }
- function addQuestion(question){setState(s=>({...s,addedQuestions:[...s.addedQuestions,{id:'custom-'+Date.now(),bankId:'custom-'+Date.now(),domainId:question.domainId||'domain1',topic:question.topic||'Domain 1',...question}]}));notify('Question added to the demo bank')}
- function addModule(){const id='module'+Date.now();setState(s=>({...s,modules:[...s.modules.map(m=>({...m,expanded:false})),{id,title:'New module',expanded:true,lessons:[]}]}));notify('New module added')}
- function editModule(id,title){setState(s=>({...s,modules:s.modules.map(m=>m.id===id?{...m,title}:m)}))}
- function deleteModule(id){setState(s=>({...s,modules:s.modules.filter(m=>m.id!==id)}));notify('Module removed')}
- function toggleModule(id){setState(s=>({...s,modules:s.modules.map(m=>m.id===id?{...m,expanded:!m.expanded}:m)}))}
- function addLesson(moduleId,lesson){setState(s=>({...s,modules:s.modules.map(m=>m.id===moduleId?{...m,expanded:true,lessons:[...m.lessons,{id:'lesson'+Date.now(),...lesson}]}:m)}));notify('Lesson added to course')}
- function editLesson(moduleId,id,lesson){setState(s=>({...s,modules:s.modules.map(m=>m.id===moduleId?{...m,lessons:m.lessons.map(l=>l.id===id?{...l,...lesson}:l)}:m)}));notify('Lesson updated')}
- function deleteLesson(moduleId,id){setState(s=>({...s,modules:s.modules.map(m=>m.id===moduleId?{...m,lessons:m.lessons.filter(l=>l.id!==id)}:m)}));notify('Lesson removed')}
- function moveLesson(moduleId,id,direction){setState(s=>({...s,modules:s.modules.map(m=>{if(m.id!==moduleId)return m;let arr=[...m.lessons];const i=arr.findIndex(l=>l.id===id),j=i+direction;if(i>=0&&j>=0&&j<arr.length)[arr[i],arr[j]]=[arr[j],arr[i]];return {...m,lessons:arr}})}))}
- const value=useMemo(()=>({state,update,notify,toast,beginAssessment,beginPractice,answer,jump,flag,saveQuestion,submit,updateAssessmentSettings,createAdminCourse,editAdminCourse,addCourseMedia,deleteCourseMedia,addQuestion,addModule,editModule,deleteModule,toggleModule,addLesson,editLesson,deleteLesson,moveLesson,reset:()=>{setState(initial);notify('Demo data reset')} }),[state,toast]);
+ function importQuestions(courseId,questions){
+  if(state.role!=='admin'){notify('Admin access required');return {added:0,duplicates:0}}
+  const existing=getCourseBank(state,courseId,questionPool);
+  const hashes=new Set(existing.map(q=>String(q.prompt).trim().toLowerCase()));
+  const unique=[];let duplicates=0;
+  for(const q of questions){const hash=String(q.prompt).trim().toLowerCase();if(!hash||hashes.has(hash)){duplicates++;continue}hashes.add(hash);unique.push({...q,courseId,domainId:q.domainId||courseDomainId(courseId),topic:q.topic||'General questions',id:`import-${globalThis.crypto?.randomUUID?.()||Math.random().toString(36).slice(2)}`,bankId:`import-${globalThis.crypto?.randomUUID?.()||Math.random().toString(36).slice(2)}`})}
+  setState(s=>({...s,addedQuestions:[...(s.addedQuestions||[]),...unique]}));
+  notify(`${unique.length} questions imported into ${getCourse(state,courseId)?.name||courseId}; ${duplicates} duplicates skipped.`);
+  return {added:unique.length,duplicates};
+ }
+ function addQuestion(courseId,question){
+  if(state.role!=='admin'){notify('Admin access required');return}
+  const id=`custom-${globalThis.crypto?.randomUUID?.()||Date.now()+'-'+Math.random().toString(36).slice(2)}`;
+  setState(s=>({...s,addedQuestions:[...(s.addedQuestions||[]),{...question,id,bankId:id,courseId,domainId:question.domainId||courseDomainId(courseId),topic:question.topic||'General questions'}]}));
+  notify('Question added to this course');
+ }
+ const mutateModules=(courseId,fn)=>setState(s=>{const old=getCourseModules(s,courseId);const next=fn(old);return {...s,courseModules:{...(s.courseModules||{}),[courseId]:next},...(courseId==='asp'?{modules:next}:{})}});
+ function addModule(courseId){const id=`module-${globalThis.crypto?.randomUUID?.()||Date.now()}`;
+  mutateModules(courseId,arr=>[...arr.map(m=>({...m,expanded:false})),{id,title:'New module',expanded:true,lessons:[]}]);notify('Module added to course');}
+ function editModule(courseId,id,title){mutateModules(courseId,arr=>arr.map(m=>m.id===id?{...m,title}:m))}
+ function deleteModule(courseId,id){mutateModules(courseId,arr=>arr.filter(m=>m.id!==id));notify('Module removed')}
+ function toggleModule(courseId,id){mutateModules(courseId,arr=>arr.map(m=>m.id===id?{...m,expanded:!m.expanded}:m))}
+ function addLesson(courseId,moduleId,lesson){mutateModules(courseId,arr=>arr.map(m=>m.id===moduleId?{...m,expanded:true,lessons:[...m.lessons,{id:`lesson-${globalThis.crypto?.randomUUID?.()||Date.now()}`,...lesson}]}:m));notify('Lesson added to course')}
+ function editLesson(courseId,moduleId,id,lesson){mutateModules(courseId,arr=>arr.map(m=>m.id===moduleId?{...m,lessons:m.lessons.map(l=>l.id===id?{...l,...lesson}:l)}:m));notify('Lesson updated')}
+ function deleteLesson(courseId,moduleId,id){mutateModules(courseId,arr=>arr.map(m=>m.id===moduleId?{...m,lessons:m.lessons.filter(l=>l.id!==id)}:m));notify('Lesson removed')}
+ function moveLesson(courseId,moduleId,id,direction){mutateModules(courseId,arr=>arr.map(m=>{if(m.id!==moduleId)return m;const result=[...m.lessons],i=result.findIndex(l=>l.id===id),j=i+direction;if(i>=0&&j>=0&&j<result.length)[result[i],result[j]]=[result[j],result[i]];return {...m,lessons:result}}))}
+ const value=useMemo(()=>({state,update,notify,toast,beginAssessment,beginPractice,answer,jump,flag,saveQuestion,submit,updateAssessmentSettings,createAdminCourse,editAdminCourse,addCourseMedia,deleteCourseMedia,addQuestion,importQuestions,addModule,editModule,deleteModule,toggleModule,addLesson,editLesson,deleteLesson,moveLesson,reset:()=>{setState(initial);notify('Demo data reset')} }),[state,toast]);
  return <Context.Provider value={value}>{children}</Context.Provider>
 }
 export function useDemo(){return useContext(Context)}
