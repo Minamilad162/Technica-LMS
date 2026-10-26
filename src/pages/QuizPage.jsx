@@ -41,7 +41,7 @@ export default function QuizPage({kind='assessment'}){
   if(remaining===0&&session&&!session.submitted){
    // Time expiry is an automatic submission; learner-driven submission always receives the warning first.
    if(timerMode==='per'&&current<count){setRemaining(null);jump(kind,current+1)}
-   else{submit(kind);navigate('/results')}
+   else{submit(kind);navigate(isPractice?'/practice/results':'/results')}
   }
  },[remaining,session?.current,timerMode]);
 

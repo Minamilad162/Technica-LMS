@@ -1,3 +1,12 @@
+## v1.9.3 — Assessment review grouped by course (2026-10-26)
+- Course accordion inside Assessment review; attempts and question explanations load inline per selected course and attempt.
+- Save each completed assessment in learner-scoped assessment history instead of only keeping `lastResult`.
+- Preserve old sample-user last assessment without populating fake historical results.
+- Split immediate Practice results into `/practice/results`; Practice is not included in course assessment history.
+- Course-specific actions: Practice this course, Retake assessment, Practice mistakes from selected attempt.
+- No changes to imported ASP questions, PSEE Coming soon, assessment time/quantity, unlimited retakes or quiz unanswered-answer warnings.
+- Responsive, keyboard, and reduced-motion styling in `src/reviewCourses.css`.
+
 ## v1.9.2 — Assessment CTA and final-review warning polish
 
 - Removed ASP content/domain card on assessment overview; Start assessment now sits in a dedicated card to the left of Before you start on desktop.

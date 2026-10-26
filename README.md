@@ -1,3 +1,7 @@
+
+### v1.9.3 — Assessment review by course
+The learner Review page now opens completed assessment courses inline, with all their past attempts, answer explanations, Practice again and Retake assessment actions. Practice submissions keep their separate immediate results route and do not enter assessment history. Demo results are stored locally per account; the production database is not connected. See `ASSESSMENT_REVIEW_BY_COURSE_v1.9.3.md`.
+
 # Latest: v1.9.0 — Course-first ASP Practice & Assessment
 
 - **ASP Course** contains Domain 1–5 and all 1,625 imported questions; **PSEE** is shown without any questions.

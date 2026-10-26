@@ -4,10 +4,12 @@ import {createQuestionSet} from './questionSelection';
 import {aspCourse,findCourse} from '../data/courseCatalog';
 import {assessmentSettings,prepareAssessment,canPracticeCourse} from './courseAssessment';
 import {markQuestionLeft} from './quizNavigation';
+import {archiveAssessment,DEMO_LEARNER_ID} from './assessmentHistory';
+import {getAuthSession} from './demoAuth';
 const Context=createContext(null);
 const initial={
  role:'learner', name:'Alex Morgan', published:false, courseDetails:{title:'ASP Course',domain:'Safety Certification',summary:'Five ASP question-bank domains.'}, practiceCourseId:'asp', selectedTopics:[...aspCourse.domainIds], questionCount:50,timerMode:'none',feedbackMode:'end',pool:'all', customMinutes:30,
- assessmentCourseId:'asp', courseAssessmentSettings:{}, assessmentAttempts:{},
+ assessmentCourseId:'asp', courseAssessmentSettings:{}, assessmentAttempts:{}, assessmentHistory:[],
  modules:startingModules, addedQuestions:[], savedQuestions:[], seenQuestions:[], flags:[], assessmentSession:null,practiceSession:null, lastResult:null,
  notifications:[{id:1,text:'Your PSM Foundations lesson is ready to continue.',unread:true},{id:2,text:'12 questions are ready for your mistakes review.',unread:true}],
 };
@@ -60,7 +62,7 @@ export function DemoProvider({children}) {
   const {questions,fallback}=createQuestionSet({
    bank:bank.filter(q=>course.domainIds.includes(q.domainId)),domainIds,
    count:setup.questionCount,pool:setup.pool,seenIds:state.seenQuestions,
-   wrongIds:previousWrongIds(),balanced:domainIds.length>1
+   wrongIds:setup.wrongIds||previousWrongIds(),balanced:domainIds.length>1
   });
   if(!questions.length){notify('No practice questions available. Change your selection.');return false}
   if(fallback)notify('No matching questions for that pool yet. Using the full domain bank.');
@@ -78,9 +80,14 @@ export function DemoProvider({children}) {
  function submit(kind){
   const key=kind==='practice'?'practiceSession':'assessmentSession';const s=state[key];if(!s)return;
   const questions=s.questionSet||assessmentQuestions;
-  const result={answers:s.answers,flags:s.flags||[],questions,total:questions.length,timeTaken:timeString(Math.round((Date.now()-s.startedAt)/1000)),submittedAt:new Date().toISOString(),kind,courseId:s.courseId||'asp',courseName:s.courseName||'ASP Course',passMark:s.passMark||70,attempt:s.attempt};
+  const learnerId=getAuthSession()?.id || DEMO_LEARNER_ID;
+  const result={answers:s.answers,flags:s.flags||[],questions,total:questions.length,timeTaken:timeString(Math.round((Date.now()-s.startedAt)/1000)),submittedAt:new Date().toISOString(),kind,courseId:s.courseId||'asp',courseName:s.courseName||'ASP Course',passMark:s.passMark||70,attempt:s.attempt,learnerId};
   const seen=[...new Set([...state.seenQuestions,...questions.map(q=>q.bankId).filter(Boolean)])];
-  update({lastResult:result,seenQuestions:seen,[key]:{...s,submitted:true}});
+  // Only actual assessment submissions are added to the course review history.
+  const historyRecord=kind==='assessment'?archiveAssessment(result,learnerId):null;
+  update({lastResult:result,seenQuestions:seen,
+    ...(historyRecord?{assessmentHistory:[...(state.assessmentHistory||[]),historyRecord]}:{}),
+    [key]:{...s,submitted:true}});
   notify(kind==='practice'?'Practice session completed':'Assessment submitted successfully')
  }
  function addQuestion(question){setState(s=>({...s,addedQuestions:[...s.addedQuestions,{id:'custom-'+Date.now(),bankId:'custom-'+Date.now(),domainId:question.domainId||'domain1',topic:question.topic||'Domain 1',...question}]}));notify('Question added to the demo bank')}

@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import {MOTION_PLANS,getPageMotionPlan,capMotionDelay,MAX_ENTRANCE_DELAY_MS} from '../src/lib/motionPlan.js';
-const mandatory = ['/login','/signup','/home','/my-learning','/practice','/analytics','/builder','/assessments','/results','/learners','/question-bank','/saved','/assessments/take','/practice/session'];
+const mandatory = ['/login','/signup','/home','/my-learning','/practice','/analytics','/builder','/assessments','/results','/learners','/question-bank','/saved','/assessments/take','/practice/session','/practice/results'];
 for(const route of mandatory){
   const plan=getPageMotionPlan(route);
   assert(plan.length>1,`No animation plan for ${route}`);

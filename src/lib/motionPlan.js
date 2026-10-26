@@ -66,6 +66,8 @@ const plans = {
   ],
   results: [
     ...shared,
+    beat('.review-course-intro', 135, 0, 1, 'up'),
+    beat('.review-course-list > *', 210, 95, 6, 'up'),
     beat('.result-main-card', 155, 0, 1, 'left'),
     beat('.result-stats > .result-tile', 250, 95, 3, 'pop'),
     beat('.results-detail-grid > *', 395, 110, 2, 'up'),
@@ -112,7 +114,7 @@ export const getPageMotionPlan = pathname => {
   if (pathname === '/analytics') return plans.analytics;
   if (pathname === '/builder') return plans.builder;
   if (pathname === '/assessments') return plans.assessment;
-  if (pathname === '/results') return plans.results;
+  if (pathname === '/results' || pathname === '/practice/results') return plans.results;
   if (pathname === '/learners') return plans.directory;
   if (pathname === '/saved' || pathname === '/question-bank') return plans.library;
   if (pathname === '/practice/session' || pathname === '/assessments/take') return plans.quiz;
