@@ -1,6 +1,6 @@
 {
   "name": "technica-consult-lms-demo",
-  "version": "1.13.0",
+  "version": "1.14.0",
   "private": true,
   "type": "module",
   "scripts": {
@@ -20,7 +20,8 @@
     "test:course-dialog": "node scripts/test-course-dialog.mjs",
     "test:authoring": "node scripts/test-course-authoring.mjs",
     "test:admin-bank": "node scripts/test-admin-question-bank.mjs",
-    "test:lesson-media": "node scripts/test-lesson-media.mjs"
+    "test:lesson-media": "node scripts/test-lesson-media.mjs",
+    "test:learner-ui": "node scripts/test-learner-simplification.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.58.0",

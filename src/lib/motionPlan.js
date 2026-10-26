@@ -122,7 +122,7 @@ export const getPageMotionPlan = pathname => {
   if (pathname === '/assessments') return plans.assessment;
   if (pathname === '/results' || pathname === '/practice/results') return plans.results;
   if (pathname === '/learners') return plans.directory;
-  if (pathname === '/saved' || pathname === '/question-bank') return plans.library;
+  if (pathname === '/question-bank') return plans.library;
   if (pathname === '/practice/session' || pathname === '/assessments/take') return plans.quiz;
   return shared;
 };

@@ -1,6 +1,6 @@
 import React,{useState,useEffect}from'react';
 import{useNavigate}from'react-router-dom';
-import{Bookmark,BookOpen,Layers3,Flag,ArrowRight,ArrowLeft,Check,Clock3,List,FileText,AlertCircle,AlertTriangle,X}from'lucide-react';
+import{BookOpen,Layers3,Flag,ArrowRight,ArrowLeft,Check,Clock3,List,FileText,AlertCircle,AlertTriangle,X}from'lucide-react';
 import{useDemo,timeString}from'../lib/store';
 import{assessmentQuestions}from'../data/mock';
 import{getUnansweredQuestionIds}from'../lib/quizNavigation';
@@ -8,7 +8,7 @@ import{Modal,MiniProgress}from'../components/UI';
 
 export default function QuizPage({kind='assessment'}){
  const isPractice=kind==='practice';
- const{state,answer,jump,flag,saveQuestion,submit,notify}=useDemo();
+ const{state,answer,jump,flag,submit,notify}=useDemo();
  const navigate=useNavigate();
  const session=isPractice?state.practiceSession:state.assessmentSession;
  const questions=session?.questionSet||(isPractice?assessmentQuestions.slice(0,25):assessmentQuestions);
@@ -59,7 +59,7 @@ export default function QuizPage({kind='assessment'}){
  return <div className="quiz-page page-enter">
   <div className="quiz-status"><div className="status-top"><strong>{session.courseName||'ASP Course'} · {isPractice?'Practice':'Assessment'} · Question {current} of {count}</strong><div className="quiz-progress"><MiniProgress value={Math.round(answered/count*100)}/></div><span className="status-detail">{answered} answered <span className="status-sep"/> {Math.round(answered/count*100)}% complete</span><span className={`timer-badge ${remaining!==null&&remaining<300?'urgent':''}`}><Clock3 size={18}/>{remaining===null?'Untimed':`${timeString(remaining)} remaining`}</span><button className={`mobile-question-nav ${attentionIds.size?'has-unanswered':''}`} onClick={()=>setShowNav(true)}><List size={17}/>Questions{attentionIds.size>0&&<span className="nav-alert-counter" aria-label={`${attentionIds.size} unanswered questions need attention`}>{attentionIds.size}</span>}</button></div></div>
   <div className="quiz-columns"><div className="question-panel"><div className="question-tags" key={`tags-${current}`}><span className="pill pill-mint"><BookOpen size={17}/>{q.topic}</span><span className="pill pill-grey"><Layers3 size={16}/>Single answer</span></div><h1 key={`prompt-${current}`}>{q.prompt}</h1><div className="answer-options" key={`answers-${current}`}>{q.options.map((option,i)=><button className={`answer-option ${selected===i?'selected':''}`} key={`${current}-${i}`} onClick={()=>answer(kind,current,i)}><span className="radio-indicator">{selected===i&&<span/>}</span><span className="answer-letter">{'ABCD'[i]}</span><span className="answer-text">{option}</span></button>)}</div>{(session.feedbackMode||'end')==='each'&&selected!==undefined&&<div className={`instant-feedback ${selected===q.correct?'correct':'incorrect'}`}><Check size={16}/>{selected===q.correct?'Correct! ':'Not quite. '}{q.explanation}</div>}
-  <div className="question-tools"><button className={state.savedQuestions.includes(q.bankId||q.id)?'tool-active':''} onClick={()=>{saveQuestion(q.bankId||q.id);notify(state.savedQuestions.includes(q.bankId||q.id)?'Question removed from saved':'Question saved for later')}}><Bookmark size={18} fill={state.savedQuestions.includes(q.bankId||q.id)?'currentColor':'none'}/>{state.savedQuestions.includes(q.bankId||q.id)?'Saved question':'Save question'}</button><button className={flags.includes(current)?'flag-active':''} onClick={()=>flag(kind,current)}><Flag size={18} fill={flags.includes(current)?'currentColor':'none'}/>{flags.includes(current)?'Flagged for review':'Flag for review'}</button></div>
+  <div className="question-tools"><button className={flags.includes(current)?'flag-active':''} onClick={()=>flag(kind,current)}><Flag size={18} fill={flags.includes(current)?'currentColor':'none'}/>{flags.includes(current)?'Flagged for review':'Flag for review'}</button></div>
   {showAllUnanswered&&unansweredIds.length>0&&<div className="quiz-unanswered-inline" role="status"><AlertCircle size={17}/><span><strong>{unansweredIds.length} unanswered.</strong> Select the marked numbers in Question navigator to answer them.</span><button onClick={()=>setShowNav(true)}>View questions <ArrowRight size={15}/></button></div>}
   <div className="quiz-action-row"><button className="btn btn-secondary" disabled={current===1} onClick={()=>jump(kind,current-1)}><ArrowLeft size={19}/>Previous</button><button className="btn" onClick={next}>{current===count?'Review and submit':'Next question'}<ArrowRight size={19}/></button></div></div>
   <aside className={`navigator-panel ${showNav?'nav-visible':''}`}><div className="navigator-head"><h3>Question navigator</h3><button className="only-mobile icon-btn" onClick={()=>setShowNav(false)} aria-label="Close questions"><X size={20}/></button></div>

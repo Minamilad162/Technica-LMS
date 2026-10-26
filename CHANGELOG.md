@@ -1,3 +1,10 @@
+## v1.14.0 — Simplified learner home and removed Saved questions
+
+- Removed the redundant ASP five-domain panel from Home / My learning.
+- Removed Saved from learner navigation and retired the /saved route.
+- Removed bookmark actions from quizzes and review screens; kept Flag for review.
+- Preserved admin-only course-based Question Bank and the original ASP bank.
+
 
 ## v1.12.0 — Admin-only course-first Question Bank (demo)
 - Removed Question Bank from learner navigation; restricted the direct route and demo role switching to authenticated admin sessions.
