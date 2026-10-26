@@ -1,0 +1,65 @@
+/* v1.10.1 — Course Create / Edit dialog. Deliberately isolated from global Modal. */
+.course-dialog-backdrop{
+  position:fixed;inset:0;z-index:1200;box-sizing:border-box;
+  display:flex;justify-content:center;align-items:center;
+  padding:clamp(12px,3vh,24px);
+  background:rgba(8,36,50,.62);backdrop-filter:blur(3px);
+  overflow-y:auto;overscroll-behavior:contain;
+}
+.course-dialog{
+  box-sizing:border-box;flex:0 1 600px;width:100%;min-width:0;
+  display:flex;flex-direction:column;min-height:0;
+  max-height:calc(100vh - 24px);max-height:calc(100dvh - clamp(24px,6vh,48px));
+  border:1px solid #e6eeee;border-radius:20px;background:#fff;
+  box-shadow:0 24px 70px rgba(4,32,46,.26);
+  overflow:hidden;color:#163345;outline:none;
+}
+.course-dialog-header{
+  flex:0 0 auto;display:flex;align-items:flex-start;justify-content:space-between;gap:14px;
+  padding:20px 24px 18px;border-bottom:1px solid #e5eeee;
+  background:linear-gradient(155deg,#fff 60%,#f2fbf8);
+}
+.course-dialog-eyebrow{display:block;color:#12817d;font-size:10px;font-weight:800;letter-spacing:.12em;margin-bottom:5px}
+.course-dialog-header h2{font-size:22px;line-height:1.2;letter-spacing:-.55px;margin:0;color:#102f40}
+.course-dialog-close{width:38px;height:38px;flex:none;display:grid;place-items:center;border:1px solid #e1ebeb;border-radius:11px;background:#fff;color:#355565;cursor:pointer}
+.course-dialog-close:hover{background:#ecf8f5;color:#006e72}
+.course-dialog-scroll{
+  flex:1 1 auto;min-height:0;overflow-y:auto;overflow-x:hidden;
+  overscroll-behavior:contain;scrollbar-gutter:stable;
+  -webkit-overflow-scrolling:touch;padding:23px 24px 25px;
+}
+.course-dialog-form{gap:17px;max-width:none}
+.course-dialog-form label{gap:8px;font-size:12px;font-weight:750;color:#163345}
+.course-dialog-form input,.course-dialog-form textarea,.course-dialog-form select{
+  box-sizing:border-box;max-width:100%;min-height:46px;padding:12px 14px;
+  border-radius:11px;background:#fff;border:1px solid #d8e5e6;font-size:13px;
+}
+.course-dialog-form textarea{min-height:108px;resize:vertical;max-height:38dvh}
+.course-dialog-form input:focus-visible,.course-dialog-form select:focus-visible,.course-dialog-form textarea:focus-visible{
+  outline:2px solid #3caea9;outline-offset:1px;border-color:#18877f;
+}
+.course-dialog-footer{
+  flex:0 0 auto;display:flex;align-items:center;justify-content:flex-end;gap:10px;
+  padding:15px 24px;padding-bottom:max(15px,env(safe-area-inset-bottom,0px));
+  border-top:1px solid #e5eeee;background:#fff;
+  box-shadow:0 -6px 20px rgba(10,51,64,.045);
+}
+.course-dialog-footer .btn{min-height:43px;align-self:center}
+.course-dialog-form .admin-form-error{margin:0;color:#a02d32}
+@media(max-width:600px){
+  .course-dialog-backdrop{padding:10px;align-items:center}
+  .course-dialog{max-height:calc(100dvh - 20px);border-radius:16px}
+  .course-dialog-header{padding:16px 17px 15px}
+  .course-dialog-header h2{font-size:19px}
+  .course-dialog-scroll{padding:19px 17px;scrollbar-gutter:auto}
+  .course-dialog-footer{padding:12px 17px;padding-bottom:max(12px,env(safe-area-inset-bottom,0px))}
+  .course-dialog-footer .btn{flex:1;min-width:0;white-space:normal;padding-inline:10px}
+}
+@media(max-height:500px){
+  .course-dialog-backdrop{padding:8px}
+  .course-dialog{max-height:calc(100dvh - 16px)}
+  .course-dialog-header{padding-top:11px;padding-bottom:11px}
+  .course-dialog-scroll{padding-top:13px;padding-bottom:13px}
+  .course-dialog-footer{padding-top:8px;padding-bottom:8px}
+}
+@media(prefers-reduced-motion:reduce){.course-dialog,.course-dialog-backdrop{animation:none!important;transition:none!important}}

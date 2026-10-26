@@ -1,10 +1,10 @@
 import React,{useState} from 'react';
+import {createPortal} from 'react-dom';
 import {useNavigate} from 'react-router-dom';
-import {BookOpen,CalendarClock,ChevronDown,ChevronRight,CheckCircle2,Clock3,FileText,Film,Layers3,Plus,Pencil,ArrowRight,Archive,CalendarDays} from 'lucide-react';
+import {BookOpen,CalendarClock,ChevronDown,ChevronRight,CheckCircle2,Clock3,FileText,Film,Layers3,Plus,Pencil,ArrowRight,Archive,CalendarDays,X} from 'lucide-react';
 import {useDemo} from '../lib/store';
 import {allAdminCourses,courseMediaFor,courseStatus,validateCourse} from '../lib/adminCourses';
 import {questionPool} from '../data/mock';
-import {Modal} from '../components/UI';
 
 const EMPTY={name:'',category:'Engineering',description:'',status:'draft',publishAt:''};
 const prettyDate=date=>date?new Date(date).toLocaleString(undefined,{dateStyle:'medium',timeStyle:'short'}):'Not scheduled';
@@ -14,6 +14,54 @@ const localDate=date=>{
   const local=new Date(d.getTime()-d.getTimezoneOffset()*60000);
   return local.toISOString().slice(0,16);
 };
+
+/**
+ * Course dialogs are portaled to <body>. The animated `.page-enter` container
+ * establishes a CSS transform/containing block; a fixed dialog inside it can
+ * render clipped or shifted under the sticky header. Keep the header and form
+ * actions visible while only the fields scroll.
+ */
+function CourseDialog({title,onClose,children,footer}){
+  const panelRef=React.useRef(null);
+  const openerRef=React.useRef(null);
+  const onCloseRef=React.useRef(onClose);
+  const titleId=React.useId();
+  onCloseRef.current=onClose;
+  React.useEffect(()=>{
+    openerRef.current=document.activeElement;
+    const previousOverflow=document.body.style.overflow;
+    document.body.style.overflow='hidden';
+    panelRef.current?.focus({preventScroll:true});
+    const onKey=e=>{if(e.key==='Escape'){e.preventDefault();onCloseRef.current();}};
+    document.addEventListener('keydown',onKey);
+    return()=>{
+      document.removeEventListener('keydown',onKey);
+      document.body.style.overflow=previousOverflow;
+      if(openerRef.current?.isConnected)openerRef.current.focus({preventScroll:true});
+    };
+  },[]);
+  const trapTab=e=>{
+    if(e.key!=='Tab')return;
+    const controls=[...panelRef.current.querySelectorAll('button:not([disabled]),input:not([disabled]),select:not([disabled]),textarea:not([disabled]),a[href],[tabindex]:not([tabindex="-1"])')]
+      .filter(el=>el.getClientRects().length && getComputedStyle(el).visibility!=='hidden');
+    if(!controls.length){e.preventDefault();panelRef.current.focus();return;}
+    const first=controls[0],last=controls[controls.length-1];
+    if(e.shiftKey && (document.activeElement===first || document.activeElement===panelRef.current)){
+      e.preventDefault();last.focus();
+    }else if(!e.shiftKey && document.activeElement===last){
+      e.preventDefault();first.focus();
+    }else if(!panelRef.current.contains(document.activeElement)){
+      e.preventDefault();first.focus();
+    }
+  };
+  return createPortal(<div className="course-dialog-backdrop" onMouseDown={e=>{if(e.target===e.currentTarget)onClose();}}>
+    <section className="course-dialog" role="dialog" aria-modal="true" aria-labelledby={titleId} tabIndex={-1} ref={panelRef} onKeyDown={trapTab}>
+      <header className="course-dialog-header"><div><span className="course-dialog-eyebrow">COURSE MANAGEMENT</span><h2 id={titleId}>{title}</h2></div><button type="button" className="course-dialog-close" aria-label="Close course dialog" onClick={onClose}><X size={20}/></button></header>
+      <div className="course-dialog-scroll">{children}</div>
+      <footer className="course-dialog-footer">{footer}</footer>
+    </section>
+  </div>,document.body);
+}
 
 export default function CoursesPage(){
   const {state,createAdminCourse,editAdminCourse,notify}=useDemo();
@@ -70,14 +118,16 @@ export default function CoursesPage(){
     })}
     {!visible.length&&<div className="white-panel admin-empty">No courses in this status. Use Create course to add one.</div>}
     </div>
-    {editing&&<Modal title={editing==='new'?'Create course':'Edit course'} onClose={()=>setEditing(null)}><form className="simple-fields" onSubmit={submit}>
+    {editing&&<CourseDialog title={editing==='new'?'Create course':'Edit course'} onClose={()=>setEditing(null)} footer={<>
+      <button className="btn btn-secondary" type="button" onClick={()=>setEditing(null)}>Cancel</button>
+      <button className="btn" type="submit" form="admin-course-form">{editing==='new'?'Create course':'Save changes'}</button>
+    </>}><form id="admin-course-form" className="simple-fields course-dialog-form" onSubmit={submit}>
       <label>Course name<input required minLength={3} value={form.name} onChange={e=>setForm(s=>({...s,name:e.target.value}))} placeholder="e.g. PSM Leadership"/></label>
       <label>Category<input value={form.category} onChange={e=>setForm(s=>({...s,category:e.target.value}))}/></label>
       <label>Description<textarea value={form.description} onChange={e=>setForm(s=>({...s,description:e.target.value}))}/></label>
       <label>Publication status<select value={form.status} onChange={e=>setForm(s=>({...s,status:e.target.value}))}><option value="draft">Save as draft</option><option value="scheduled">Schedule publication</option><option value="published">Publish now</option></select></label>
       {form.status==='scheduled'&&<label>Publish date and time<input required type="datetime-local" value={form.publishAt} onChange={e=>setForm(s=>({...s,publishAt:e.target.value}))}/></label>}
       {error&&<p className="admin-form-error" role="alert">{error}</p>}
-      <div className="modal-actions"><button className="btn btn-secondary" type="button" onClick={()=>setEditing(null)}>Cancel</button><button className="btn" type="submit">{editing==='new'?'Create course':'Save changes'}</button></div>
-    </form></Modal>}
+    </form></CourseDialog>}
   </div>
 }

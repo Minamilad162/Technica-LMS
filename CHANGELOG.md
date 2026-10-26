@@ -1,3 +1,12 @@
+## v1.10.1 — Create / Edit Course dialog layout fix (2026-10-26)
+
+- Render course dialog via a React portal to document.body to avoid transformed page containers shifting/clipping fixed overlays.
+- Keep course dialog title/close icon and Cancel/Create or Save footer continuously visible while the form has its own scroll area.
+- Center and constrain the popup to desktop, mobile, short and zoomed-in viewports (`dvh` fallback included).
+- Restore keyboard focus to the Create/Edit trigger after closing; support Escape, backdrop close, Tab focus containment and body scroll locking.
+- Retain all existing form validation, draft/scheduled/publish flows, and course data model.
+- Add targeted regression/source checks and a stand-alone height/scroll test fixture.
+
 # v1.10.0 — Admin course management & learner profiles (26 Oct 2026)
 
 - Remove ASP question bank coverage section from Overview, keeping the bank itself untouched.
