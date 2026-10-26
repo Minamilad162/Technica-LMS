@@ -37,9 +37,9 @@ export const demoResult = {
 };
 export const startingModules = [
  {id:'module1',title:'PSM Foundations',expanded:true,lessons:[
-  {id:'lesson1',title:'Introduction to Process Safety',type:'Reading',duration:10,description:'Key principles and industry context'},
-  {id:'lesson2',title:'PSM overview guide',type:'PDF',duration:15,description:'Core concepts and framework'},
-  {id:'lesson3',title:'Knowledge check',type:'Quiz',duration:5,description:'10 questions'},
+  {id:'lesson1',title:'Introduction to Process Safety',type:'Video',mediaId:'',durationSeconds:null,description:'Key principles and industry context'},
+  {id:'lesson2',title:'PSM overview guide',type:'PDF',mediaId:'',description:'Core concepts and framework'},
+  {id:'lesson3',title:'Assessment overview',type:'PDF',mediaId:'',description:'Assessment information document'},
  ]},
  {id:'module2',title:'Management of Change',expanded:false,lessons:[]},
 ];

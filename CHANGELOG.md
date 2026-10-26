@@ -139,3 +139,9 @@
 - When learner requests submission at the final question, show missing-answer count and quick links before allowing explicit blank submission.
 - Simplify Assessment overview by removing the redundant read-only configuration card; retain fixed admin settings and summary tiles.
 - Add `test:quiz-navigation` regression coverage.
+
+
+## v1.13.0 — Video/PDF-only lessons
+- Restrict course-builder lesson types to Video and PDF; remove manually-entered duration and module total duration.
+- Detect video runtime from attached media metadata when supported; PDF has no time.
+- Retain existing legacy lesson data and keep assessment timer settings unchanged.

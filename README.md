@@ -193,3 +193,7 @@ The assessment start CTA sits beside the Before you start instructions. Attempts
 
 ## v1.12.0 — Admin Question Bank by course
 Question Bank is available only inside the Admin demo workspace. Select **All courses**, **ASP Course** (1,625 original imported questions) or **PSEE** (12 clearly labeled fictitious demo questions). Saved Questions remains in the learner workspace. Admin demo: `TC9001 / AdminDemo@1234`; learner demo: `TC1001 / Demo@1234`. These are browser-local demo identities only. See `QUESTION_BANK_ADMIN_COURSE_VIEW_v1.12.md`.
+
+
+## v1.13.0 — Lesson content types
+The Course Builder now creates **Video** or **PDF** lessons only. There is no manual lesson duration. Video runtime is read from uploaded video metadata when available; PDF lessons have no runtime. The Practice and Assessment timer configurations are unchanged. See `LESSON_VIDEO_PDF_GUIDE_v1.13.md`.

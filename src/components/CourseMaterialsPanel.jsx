@@ -3,6 +3,7 @@ import {FileText,Film,Upload,Eye,Download,Trash2,HardDrive,AlertCircle,LoaderCir
 import {useDemo} from '../lib/store';
 import {courseMediaFor} from '../lib/adminCourses';
 import {saveMedia,readMedia,removeMedia,validateMediaFile,formatMediaSize} from '../lib/mediaVault';
+import {readVideoDurationSeconds,formatVideoRuntime} from '../lib/lessonMedia';
 
 export default function CourseMaterialsPanel({courseId='asp'}){
   const {state,addCourseMedia,deleteCourseMedia,notify}=useDemo();
@@ -20,8 +21,10 @@ export default function CourseMaterialsPanel({courseId='asp'}){
         if(issue){setError(`${file.name}: ${issue}`);continue}
         const id=`upload-${globalThis.crypto?.randomUUID?.()||Date.now()+'-'+Math.random().toString(36).slice(2)}`;
         try{
+          const kind=file.name.toLowerCase().endsWith('.pdf')?'pdf':'video';
+          const durationSeconds=kind==='video'?await readVideoDurationSeconds(file):null;
           await saveMedia(id,file);
-          addCourseMedia({id,courseId,title:file.name.replace(/\.[^.]+$/,''),fileName:file.name,size:file.size,kind:file.name.toLowerCase().endsWith('.pdf')?'pdf':'video',sample:false,uploadedAt:new Date().toISOString()});
+          addCourseMedia({id,courseId,title:file.name.replace(/\.[^.]+$/,''),fileName:file.name,size:file.size,kind,durationSeconds,sample:false,uploadedAt:new Date().toISOString()});
         }catch(err){setError(`${file.name}: ${err?.message||'Could not save this file. Browser storage may be full.'}`)}
       }
     }finally{setBusy(false);if(inputRef.current)inputRef.current.value=''}
@@ -57,7 +60,7 @@ export default function CourseMaterialsPanel({courseId='asp'}){
     <div className="media-resource-list">
       {items.map(item=><div className="media-resource" key={item.id}>
         <span className={`media-resource-icon ${item.kind}`}>{item.kind==='pdf'?<FileText size={19}/>:<Film size={19}/>}</span>
-        <div className="media-resource-copy"><strong title={item.fileName}>{item.title}</strong><small>{item.kind.toUpperCase()} · {item.sample?'Sample item · no file attached':`${formatMediaSize(item.size)} · Stored locally`}</small></div>
+        <div className="media-resource-copy"><strong title={item.fileName}>{item.title}</strong><small>{item.kind.toUpperCase()} · {item.sample?'Sample item · no file attached':`${formatMediaSize(item.size)}${item.kind==='video'&&formatVideoRuntime(item.durationSeconds)?` · ${formatVideoRuntime(item.durationSeconds)}`:''} · Stored locally`}</small></div>
         {!item.sample&&<div className="media-resource-actions"><button title={`Preview ${item.fileName}`} aria-label={`Preview ${item.fileName}`} onClick={()=>open(item)}><Eye size={16}/></button><button title={`Download ${item.fileName}`} aria-label={`Download ${item.fileName}`} onClick={()=>open(item,true)}><Download size={16}/></button><button title={`Delete ${item.fileName}`} aria-label={`Delete ${item.fileName}`} onClick={()=>remove(item)}><Trash2 size={16}/></button></div>}
       </div>)}
       {!items.length&&<p className="media-resource-empty">No files for this course yet.</p>}
