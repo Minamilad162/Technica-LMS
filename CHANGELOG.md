@@ -1,3 +1,14 @@
+# v1.10.0 — Admin course management & learner profiles (26 Oct 2026)
+
+- Remove ASP question bank coverage section from Overview, keeping the bank itself untouched.
+- Add clickable admin Learner profiles with per-person demo progress and training details.
+- Separate Courses (`/courses`) from Course Builder (`/builder`) and fix sidebar active states; remove Media library menu.
+- Introduce course catalogue with Draft/Published/Scheduled, create/edit and schedule by browser-local time.
+- Scope Course Builder's media materials and assessment selections to a chosen course.
+- Add local PDF/video uploads via IndexedDB, show clear sample media without attached files.
+- Preserve 1,625 ASP questions and the existing assessment/practice/review workflows.
+- See ADMIN_COURSE_MANAGEMENT_v1.10.md for feature scope, limits and QA.
+
 ## v1.9.3 — Assessment review grouped by course (2026-10-26)
 - Course accordion inside Assessment review; attempts and question explanations load inline per selected course and attempt.
 - Save each completed assessment in learner-scoped assessment history instead of only keeping `lastResult`.

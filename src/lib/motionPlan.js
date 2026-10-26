@@ -37,6 +37,11 @@ const plans = {
     beat('.option-row', 410, 75, 4, 'up'),
     beat('.practice-summary', 270, 0, 1, 'right'),
   ],
+  courses: [
+    ...shared,
+    beat('.admin-course-filters > *', 135, 65, 4, 'pop'),
+    beat('.admin-course-card', 230, 78, 7, 'up'),
+  ],
   analytics: [
     beat('.analytics-top', 0, 0, 1, 'up'),
     beat('.analytics-stats > *', 125, 85, 4, 'pop'),
@@ -111,7 +116,8 @@ export const getPageMotionPlan = pathname => {
   if (pathname === '/login' || pathname === '/signup' || pathname === '/forgot-password') return plans.auth;
   if (pathname === '/home' || pathname === '/my-learning') return plans.home;
   if (pathname === '/practice') return plans.practice;
-  if (pathname === '/analytics') return plans.analytics;
+  if (pathname === '/analytics' || pathname === '/reports') return plans.analytics;
+  if (pathname === '/courses') return plans.courses;
   if (pathname === '/builder') return plans.builder;
   if (pathname === '/assessments') return plans.assessment;
   if (pathname === '/results' || pathname === '/practice/results') return plans.results;

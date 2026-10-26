@@ -13,14 +13,14 @@ export const topics = aspDomains;
 export const questionPool = aspBank;
 export const learnerDomains = aspDomains;
 export const learners = [
- {id:1,name:'Priya Sharma', initials:'PS',job:'Process Engineer',course:'Process Safety Fundamentals',progress:75,accuracy:82,last:'Today',avatar:'rose'},
- {id:2,name:'Daniel O’Connor',initials:'DO',job:'Operations Manager',course:'Management of Change',progress:40,accuracy:68,last:'Today',avatar:'blue'},
- {id:3,name:'Michael Adeyemi',initials:'MA',job:'Maintenance Lead',course:'Mechanical Integrity',progress:90,accuracy:88,last:'Yesterday',avatar:'amber'},
- {id:4,name:'Sarah Kim',initials:'SK',job:'HSE Advisor',course:'Process Hazard Analysis',progress:60,accuracy:70,last:'Yesterday',avatar:'violet'},
- {id:5,name:'Alex Morgan',initials:'AM',job:'Plant Engineer',course:'PSM Foundations',progress:65,accuracy:76,last:'2 days ago',avatar:'teal'},
- {id:6,name:'Jamie Davis',initials:'JD',job:'Operations Technician',course:'Management of Change',progress:82,accuracy:91,last:'Today',avatar:'amber'},
- {id:7,name:'Maya Patel',initials:'MP',job:'Safety Specialist',course:'Risk Assessment',progress:48,accuracy:73,last:'3 days ago',avatar:'rose'},
- {id:8,name:'Omar Hassan',initials:'OH',job:'Shift Supervisor',course:'PSM Foundations',progress:95,accuracy:93,last:'Today',avatar:'blue'},
+ {id:1,name:'Priya Sharma', initials:'PS',job:'Process Engineer',course:'ASP Course',topic:'Process Safety Fundamentals',progress:75,accuracy:82,last:'Today',avatar:'rose'},
+ {id:2,name:'Daniel O’Connor',initials:'DO',job:'Operations Manager',course:'ASP Course',topic:'Management of Change',progress:40,accuracy:68,last:'Today',avatar:'blue'},
+ {id:3,name:'Michael Adeyemi',initials:'MA',job:'Maintenance Lead',course:'ASP Course',topic:'Mechanical Integrity',progress:90,accuracy:88,last:'Yesterday',avatar:'amber'},
+ {id:4,name:'Sarah Kim',initials:'SK',job:'HSE Advisor',course:'ASP Course',topic:'Process Hazard Analysis',progress:60,accuracy:70,last:'Yesterday',avatar:'violet'},
+ {id:5,name:'Alex Morgan',initials:'AM',job:'Plant Engineer',course:'ASP Course',topic:'PSM Foundations',progress:65,accuracy:76,last:'2 days ago',avatar:'teal'},
+ {id:6,name:'Jamie Davis',initials:'JD',job:'Operations Technician',course:'ASP Course',topic:'Management of Change',progress:82,accuracy:91,last:'Today',avatar:'amber'},
+ {id:7,name:'Maya Patel',initials:'MP',job:'Safety Specialist',course:'ASP Course',topic:'Risk Assessment',progress:48,accuracy:73,last:'3 days ago',avatar:'rose'},
+ {id:8,name:'Omar Hassan',initials:'OH',job:'Shift Supervisor',course:'ASP Course',topic:'PSM Foundations',progress:95,accuracy:93,last:'Today',avatar:'blue'},
 ];
 export const activity = [20,26,35,29,27,42,37,35,44,55,67,53,45,33,33,31,41,32,29,40,45,59,58,63];
 export const weakest = [

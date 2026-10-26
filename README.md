@@ -1,3 +1,7 @@
+## v1.10.0 Admin Courses Update
+
+**New:** distinct Courses admin page, draft/scheduled/published course management, clickable learner profiles, and per-course PDF/video demo uploads. See `ADMIN_COURSE_MANAGEMENT_v1.10.md`. All edits/files remain **local-browser demo data**; publication schedules do not run on a hosted background server.
+
 
 ### v1.9.3 — Assessment review by course
 The learner Review page now opens completed assessment courses inline, with all their past attempts, answer explanations, Practice again and Retake assessment actions. Practice submissions keep their separate immediate results route and do not enter assessment history. Demo results are stored locally per account; the production database is not connected. See `ASSESSMENT_REVIEW_BY_COURSE_v1.9.3.md`.

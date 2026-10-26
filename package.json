@@ -1,6 +1,6 @@
 {
   "name": "technica-consult-lms-demo",
-  "version": "1.9.3",
+  "version": "1.10.0",
   "private": true,
   "type": "module",
   "scripts": {
@@ -15,7 +15,8 @@
     "test:motion": "node scripts/test-motion.mjs",
     "test:courses": "node scripts/test-course-model.mjs",
     "test:quiz-navigation": "node scripts/test-quiz-navigation.mjs",
-    "test:review": "node scripts/test-assessment-history.mjs"
+    "test:review": "node scripts/test-assessment-history.mjs",
+    "test:admin": "node scripts/test-admin-courses.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.58.0",

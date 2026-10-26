@@ -1,10 +1,12 @@
 import React,{useEffect,useState}from'react';import{Routes,Route,Navigate,useLocation}from'react-router-dom';
 import Layout from './components/Layout';
+import {useDemo} from './lib/store';
 import MotionSystem from './components/MotionSystem';
 import AuthPage,{DemoPolicyPage} from './pages/AuthPage';
 import {getAuthSession} from './lib/demoAuth';
 import HomePage from './pages/HomePage';import PracticePage from './pages/PracticePage';import QuizPage from './pages/QuizPage';
-import AnalyticsPage from './pages/AnalyticsPage';import BuilderPage from './pages/BuilderPage';import AssessmentOverview from './pages/AssessmentOverview';import ResultsPage from './pages/ResultsPage';import PracticeResultsPage from './pages/PracticeResultsPage';import LearnersPage from './pages/LearnersPage';import SavedPage from './pages/SavedPage';
+import AnalyticsPage from './pages/AnalyticsPage';import BuilderPage from './pages/BuilderPage';import AssessmentOverview from './pages/AssessmentOverview';import ResultsPage from './pages/ResultsPage';import PracticeResultsPage from './pages/PracticeResultsPage';import LearnersPage from './pages/LearnersPage';import SavedPage from './pages/SavedPage';import CoursesPage from './pages/CoursesPage';
+function AdminOnly({children}){const {state}=useDemo();return state.role==='admin'?children:<Navigate to='/home' replace/>}
 function RoutePage({children,standalone=false}){return <><MotionSystem/><Layout standalone={standalone} onLogout={()=>{window.dispatchEvent(new Event('technica-demo-logout'))}}>{children}</Layout></>}
 export default function App(){const l=useLocation();const[auth,setAuth]=useState(getAuthSession);useEffect(()=>{window.scrollTo({top:0,behavior:'instant'})},[l.pathname]);useEffect(()=>{const fn=()=>setAuth(null);window.addEventListener('technica-demo-logout',fn);return()=>window.removeEventListener('technica-demo-logout',fn)},[]);
  if(!auth){return <Routes>
@@ -23,13 +25,15 @@ export default function App(){const l=useLocation();const[auth,setAuth]=useState
  <Route path="/my-learning" element={<RoutePage><HomePage learningOnly/></RoutePage>}/>
  <Route path="/practice" element={<RoutePage><PracticePage/></RoutePage>}/>
  <Route path="/practice/session" element={<RoutePage standalone><QuizPage kind="practice"/></RoutePage>}/>
- <Route path="/analytics" element={<RoutePage><AnalyticsPage/></RoutePage>}/>
- <Route path="/builder" element={<RoutePage><BuilderPage/></RoutePage>}/>
+ <Route path="/analytics" element={<AdminOnly><RoutePage><AnalyticsPage/></RoutePage></AdminOnly>}/>
+ <Route path="/builder" element={<AdminOnly><RoutePage><BuilderPage/></RoutePage></AdminOnly>}/>
+ <Route path="/courses" element={<AdminOnly><RoutePage><CoursesPage/></RoutePage></AdminOnly>}/>
+ <Route path="/reports" element={<AdminOnly><RoutePage><AnalyticsPage/></RoutePage></AdminOnly>}/>
  <Route path="/assessments" element={<RoutePage><AssessmentOverview/></RoutePage>}/>
  <Route path="/assessments/take" element={<RoutePage standalone><QuizPage kind="assessment"/></RoutePage>}/>
  <Route path="/results" element={<RoutePage><ResultsPage/></RoutePage>}/>
  <Route path="/practice/results" element={<RoutePage><PracticeResultsPage/></RoutePage>}/>
- <Route path="/learners" element={<RoutePage><LearnersPage/></RoutePage>}/>
+ <Route path="/learners" element={<AdminOnly><RoutePage><LearnersPage/></RoutePage></AdminOnly>}/>
  <Route path="/question-bank" element={<RoutePage><SavedPage questionBank/></RoutePage>}/>
  <Route path="/saved" element={<RoutePage><SavedPage/></RoutePage>}/>
  <Route path="*" element={<Navigate to="/home" replace/>}/>
