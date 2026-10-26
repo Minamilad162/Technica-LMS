@@ -1,3 +1,13 @@
+
+## v1.12.0 — Admin-only course-first Question Bank (demo)
+- Removed Question Bank from learner navigation; restricted the direct route and demo role switching to authenticated admin sessions.
+- Added a dedicated local demo admin account for client previews.
+- Added All courses / ASP Course / PSEE bank selector, preserving ASP's 1,625 imported questions.
+- Added 12 explicitly marked fictional PSEE demonstration questions; PSEE remains Draft, unpublished to learners.
+- New admin-created courses automatically appear in the question-bank course list.
+- Linked Course Builder to its selected course's bank and kept Saved Questions available to learners.
+- Added `test:admin-bank` regression suite and updated auth/course-authoring checks.
+
 ## v1.11.0 — Full course authoring for newly created courses
 
 - Removed ASP-only module and lesson editor restriction; independent module stacks per course, with legacy ASP migration.

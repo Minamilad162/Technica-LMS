@@ -47,7 +47,7 @@ export function DemoProvider({children}) {
   return true;
  }
  function updateAssessmentSettings(courseId,patch){
-  if(state.role!=='admin'){notify('Only the Admin workspace can configure assessments.');return false}
+  if(getAuthSession()?.role!=='admin'||state.role!=='admin'){notify('Only the Admin workspace can configure assessments.');return false}
   const course=getCourse(state,courseId);
   if(!course){notify('Course not found.');return false}
   const existing=assessmentSettings(courseId,state.courseAssessmentSettings,course);
@@ -99,7 +99,7 @@ export function DemoProvider({children}) {
   notify(kind==='practice'?'Practice session completed':'Assessment submitted successfully')
  }
  function createAdminCourse(values){
-  if(state.role!=='admin'){notify('Admin workspace required to create a course.');return null}
+  if(getAuthSession()?.role!=='admin'||state.role!=='admin'){notify('Admin workspace required to create a course.');return null}
   const all=allAdminCourses(state),error=validateCourse(values,all);
   if(error){notify(error);return null}
   const id=createCourseId(values.name,all);
@@ -108,7 +108,7 @@ export function DemoProvider({children}) {
   return id;
  }
  function editAdminCourse(courseId,values){
-  if(state.role!=='admin'){notify('Admin workspace required to edit courses.');return null}
+  if(getAuthSession()?.role!=='admin'||state.role!=='admin'){notify('Admin workspace required to edit courses.');return null}
   const all=allAdminCourses(state),original=all.find(c=>c.id===courseId);
   if(!original){notify('Course not found');return null}
   const updated={...original,...values};
@@ -120,15 +120,15 @@ export function DemoProvider({children}) {
   return courseId;
  }
  function addCourseMedia(record){
-  if(state.role!=='admin'){notify('Admin workspace required to upload materials');return false}
+  if(getAuthSession()?.role!=='admin'||state.role!=='admin'){notify('Admin workspace required to upload materials');return false}
   setState(s=>({...s,courseMedia:[...(s.courseMedia||[]),record]}));return true;
  }
  function deleteCourseMedia(mediaId){
-  if(state.role!=='admin'){notify('Admin workspace required to delete materials');return false}
+  if(getAuthSession()?.role!=='admin'||state.role!=='admin'){notify('Admin workspace required to delete materials');return false}
   setState(s=>({...s,courseMedia:(s.courseMedia||[]).filter(m=>m.id!==mediaId)}));return true;
  }
  function importQuestions(courseId,questions){
-  if(state.role!=='admin'){notify('Admin access required');return {added:0,duplicates:0}}
+  if(getAuthSession()?.role!=='admin'||state.role!=='admin'){notify('Admin access required');return {added:0,duplicates:0}}
   const existing=getCourseBank(state,courseId,questionPool);
   const hashes=new Set(existing.map(q=>String(q.prompt).trim().toLowerCase()));
   const unique=[];let duplicates=0;
@@ -138,7 +138,7 @@ export function DemoProvider({children}) {
   return {added:unique.length,duplicates};
  }
  function addQuestion(courseId,question){
-  if(state.role!=='admin'){notify('Admin access required');return}
+  if(getAuthSession()?.role!=='admin'||state.role!=='admin'){notify('Admin access required');return}
   const id=`custom-${globalThis.crypto?.randomUUID?.()||Date.now()+'-'+Math.random().toString(36).slice(2)}`;
   setState(s=>({...s,addedQuestions:[...(s.addedQuestions||[]),{...question,id,bankId:id,courseId,domainId:question.domainId||courseDomainId(courseId),topic:question.topic||'General questions'}]}));
   notify('Question added to this course');

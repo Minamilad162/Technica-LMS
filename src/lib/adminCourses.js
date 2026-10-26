@@ -1,4 +1,4 @@
-import {courses as importedCourses} from '../data/courseCatalog';
+import {courses as importedCourses} from '../data/courseCatalog.js';
 
 export const demoMediaExamples = [
   {id:'example-pdf-asp',courseId:'asp',title:'Introduction to Process Safety',fileName:'Process-Safety-Introduction.pdf',kind:'pdf',sample:true},

@@ -5,7 +5,7 @@ const aspDomainIds=['domain1','domain2','domain3','domain4','domain5'];
 // The Excel workbook has generic sheet titles only — no descriptive domain labels were supplied.
 export const courses = Object.freeze([
   {id:'asp',name:'ASP Course',subtitle:'Associate Safety Professional',description:'Five imported domains from the ASP question bank.',domainIds:aspDomainIds,art:'refinery',theme:'mint'},
-  {id:'psee',name:'PSEE',subtitle:'Upcoming course',description:'Course shell only. Questions and assessment configuration will be added after the next content upload.',domainIds:[],art:'plant',theme:'blue'},
+  {id:'psee',name:'PSEE',subtitle:'Draft · demo questions',description:'Demo draft course with example-only questions for the admin question bank. Course content and assessment settings are not yet published.',domainIds:[],art:'plant',theme:'blue'},
 ]);
 export const aspCourse = courses[0];
 export const findCourse = id => courses.find(c=>c.id===id);

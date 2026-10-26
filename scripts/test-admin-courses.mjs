@@ -5,7 +5,7 @@ const file = p=>readFileSync(new URL(p,root),'utf8');
 const catalog = JSON.parse(file('src/data/aspDomains.json'));
 assert.equal(catalog.length,5,'ASP retains five imported workbook domains');
 const source=file('src/lib/adminCourses.js');
-const moduleSource=source.replace("import {courses as importedCourses} from '../data/courseCatalog';", `const importedCourses = [{id:'asp',name:'ASP Course',domainIds:${JSON.stringify(catalog.map(x=>x.id))}},{id:'psee',name:'PSEE',domainIds:[]}];`);
+const moduleSource=source.replace("import {courses as importedCourses} from '../data/courseCatalog.js';", `const importedCourses = [{id:'asp',name:'ASP Course',domainIds:${JSON.stringify(catalog.map(x=>x.id))}},{id:'psee',name:'PSEE',domainIds:[]}];`);
 const {allAdminCourses,courseStatus,validateCourse,createCourseId,courseMediaFor}=await import('data:text/javascript;base64,'+Buffer.from(moduleSource).toString('base64'));
 const state={createdCourses:[],courseEdits:{},courseMedia:[]};
 assert.equal(allAdminCourses(state).length,2);

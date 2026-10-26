@@ -1,4 +1,5 @@
 import {courses} from '../data/courseCatalog.js';
+import {pseeDemoQuestions} from '../data/pseeDemoQuestions.js';
 
 export const COURSE_CATEGORIES=Object.freeze([
  'Safety Certification','Engineering Education','Process Safety','Mechanical Integrity',
@@ -23,7 +24,7 @@ export function getCourseModules(state,courseId){
  return state?.courseModules?.[courseId]??[];
 }
 export function getCourseBank(state,courseId,imported=[]){
- const legacy=courseId==='asp'?imported:[];
+ const legacy=courseId==='asp'?imported:courseId==='psee'?pseeDemoQuestions:[];
  return [...legacy,...(state?.addedQuestions||[]).filter(q=>(q.courseId||'asp')===courseId)];
 }
 export function courseBankCount(state,courseId,imported=[]){return getCourseBank(state,courseId,imported).length;}

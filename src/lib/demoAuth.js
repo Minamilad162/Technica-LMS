@@ -3,7 +3,9 @@
 const ACCOUNTS_KEY='technica-lms-demo-auth-accounts-v1';
 const SESSION_KEY='technica-lms-demo-auth-session-v1';
 export const DEMO_LOGIN={employeeId:'TC1001',password:'Demo@1234'};
+export const DEMO_ADMIN_LOGIN={employeeId:'TC9001',password:'AdminDemo@1234'};
 const DEFAULT_ACCOUNT={id:'demo-learner',name:'Alex Morgan',employeeId:DEMO_LOGIN.employeeId,email:'alex.demo@technica.example',role:'learner',sample:true};
+const ADMIN_ACCOUNT={id:'demo-admin',name:'Technica Admin',employeeId:DEMO_ADMIN_LOGIN.employeeId,email:'admin.demo@technica.example',role:'admin',sample:true};
 // Tolerate common copy/paste issues for employee IDs, including invisible
 // zero-width characters and extra spaces. Emails remain case-insensitive.
 const normalize=v=>String(v??'').normalize('NFKC').replace(/[\u200B-\u200D\uFEFF\u2060\u00AD]/g,'').trim().toLowerCase();
@@ -29,6 +31,7 @@ export async function loginDemo(identifier,password,remember=true){
  const id=normalizedIdentifier(identifier);
  if(!id||!password)throw new Error('Enter your Employee ID and password.');
  if((id===normalizedIdentifier(DEFAULT_ACCOUNT.employeeId)||id===normalize(DEFAULT_ACCOUNT.email))&&String(password).trim()===DEMO_LOGIN.password)return storeSession(DEFAULT_ACCOUNT,remember);
+ if((id===normalizedIdentifier(ADMIN_ACCOUNT.employeeId)||id===normalize(ADMIN_ACCOUNT.email))&&String(password).trim()===DEMO_ADMIN_LOGIN.password)return storeSession(ADMIN_ACCOUNT,remember);
  const user=getAccounts().find(x=>normalizedIdentifier(x.employeeId)===id||normalize(x.email)===id);
  if(!user)throw new Error('Account not found in this browser. For the sample account, use the Demo Login button below.');
  if(await digest(password,user.salt)!==user.passwordHash)throw new Error('Incorrect password. Please try again.');
@@ -43,8 +46,8 @@ export async function signupDemo({name,email,employeeId,password,confirmPassword
  if(password!==confirmPassword)throw new Error('The passwords do not match.');
  if(!accepted)throw new Error('Agree to the Terms and Privacy Policy to continue.');
  const users=getAccounts();
- if(normalize(employeeId)===normalize(DEFAULT_ACCOUNT.employeeId)||users.some(x=>normalize(x.employeeId)===normalize(employeeId)))throw new Error('This Employee ID is already registered in this demo.');
- if(normalize(email)===normalize(DEFAULT_ACCOUNT.email)||users.some(x=>normalize(x.email)===normalize(email)))throw new Error('This email is already registered in this demo.');
+ if([DEFAULT_ACCOUNT.employeeId,ADMIN_ACCOUNT.employeeId].some(id=>normalize(id)===normalize(employeeId))||users.some(x=>normalize(x.employeeId)===normalize(employeeId)))throw new Error('This Employee ID is already registered in this demo.');
+ if([DEFAULT_ACCOUNT.email,ADMIN_ACCOUNT.email].some(e=>normalize(e)===normalize(email))||users.some(x=>normalize(x.email)===normalize(email)))throw new Error('This email is already registered in this demo.');
  const salt=toHex(crypto.getRandomValues(new Uint8Array(16)));
  const account={id:crypto.randomUUID(),name,email,employeeId,role:'learner',salt,passwordHash:await digest(password,salt)};
  localStorage.setItem(ACCOUNTS_KEY,JSON.stringify([...users,account]));

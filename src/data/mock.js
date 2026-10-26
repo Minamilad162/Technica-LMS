@@ -7,7 +7,7 @@ export const assets = {
 };
 export const catalog = [
  {id:'asp',name:'ASP Course',domain:'Available',description:'Associate Safety Professional · five imported domains with 1,625 questions.',topics:5,progress:0,art:'refinery',theme:'mint',action:'Start practice'},
- {id:'psee',name:'PSEE',domain:'Coming soon',description:'Upcoming course. Question bank and assessments have not been uploaded.',topics:0,progress:0,art:'engineers',theme:'blue',action:'View course'},
+ {id:'psee',name:'PSEE',domain:'Draft · Demo bank',description:'Draft course with 12 clearly labeled example questions for the admin demo. No learner assessment is published yet.',topics:0,progress:0,art:'engineers',theme:'blue',action:'View course'},
 ];
 export const topics = aspDomains;
 export const questionPool = aspBank;

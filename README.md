@@ -190,3 +190,6 @@ Check the motion definitions with `npm run test:motion` in addition to the exist
 
 ### v1.9.2 assessment behavior
 The assessment start CTA sits beside the Before you start instructions. Attempts are unlimited (the prior demo cap is no longer enforced or configured by Admin). Unanswered warning markers show only at the final Review and submit action for both Practice and Assessment. See `ASSESSMENT_UX_UPDATE_v1.9.2.md`.
+
+## v1.12.0 — Admin Question Bank by course
+Question Bank is available only inside the Admin demo workspace. Select **All courses**, **ASP Course** (1,625 original imported questions) or **PSEE** (12 clearly labeled fictitious demo questions). Saved Questions remains in the learner workspace. Admin demo: `TC9001 / AdminDemo@1234`; learner demo: `TC1001 / Demo@1234`. These are browser-local demo identities only. See `QUESTION_BANK_ADMIN_COURSE_VIEW_v1.12.md`.

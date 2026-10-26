@@ -1,7 +1,7 @@
 import React,{useState} from 'react';
 import {Link,useLocation,useNavigate} from 'react-router-dom';
 import {UserRound,IdCard,Mail,LockKeyhole,Eye,EyeOff,ArrowRight,GraduationCap,ChartNoAxesColumn,BookMarked,Clock3,Check,AlertCircle,ShieldCheck,ArrowLeft,UserPlus,LogIn,KeyRound} from 'lucide-react';
-import {DEMO_LOGIN,loginDemo,signupDemo} from '../lib/demoAuth';
+import {DEMO_LOGIN,DEMO_ADMIN_LOGIN,loginDemo,signupDemo} from '../lib/demoAuth';
 import {useDemo} from '../lib/store';
 const PERKS=[[GraduationCap,'Expert','Courses'],[ChartNoAxesColumn,'Progress','Tracking'],[BookMarked,'Certificate','of Completion'],[Clock3,'Flexible','Learning']];
 function Field({label,icon:Icon,visible,canReveal,onReveal,...props}){
@@ -29,11 +29,16 @@ export default function AuthPage({mode='login',onAuthenticated}){
    navigate(from,{replace:true});
   }catch(err){setError(cleanError(err))}finally{setLoading(false)}
  }
+ async function enterAdminDemo(){
+  setError('');setLoading(true);
+  try{const account=await loginDemo(DEMO_ADMIN_LOGIN.employeeId,DEMO_ADMIN_LOGIN.password,remember);update({name:account.name,role:'admin'});onAuthenticated(account);navigate('/analytics',{replace:true});}
+  catch(err){setError(cleanError(err))}finally{setLoading(false)}
+ }
  async function submit(e){
   e.preventDefault();setError('');setLoading(true);
   try{
    const account=isSignup?await signupDemo({name,email,employeeId,password,confirmPassword,accepted}):await loginDemo(identifier,password,remember);
-   update({name:account.name,role:account.role});onAuthenticated(account);navigate(isSignup?'/home':from,{replace:true});
+   update({name:account.name,role:account.role});onAuthenticated(account);navigate(isSignup?'/home':account.role==='admin'&&from==='/home'?'/analytics':from,{replace:true});
   }catch(err){setError(cleanError(err))}finally{setLoading(false)}
  }
  return <div className="auth-page"><div className="auth-glow auth-glow-one"/><div className="auth-glow auth-glow-two"/>
@@ -52,9 +57,9 @@ export default function AuthPage({mode='login',onAuthenticated}){
     </form>
     <div className="auth-divider"><span>OR</span></div>
     <Link className="auth-alt-button" to={isSignup?'/login':'/signup'}>{isSignup?'Already have an account? Sign In':'Create New Account'} <ArrowRight size={17}/></Link>
-    {!isSignup&&<div className="auth-demo-credentials"><b>Demo access · no sign-up needed</b><span>Employee ID: <code>{DEMO_LOGIN.employeeId}</code></span><span>Password: <code>{DEMO_LOGIN.password}</code></span><button type="button" className="auth-demo-login-button" onClick={enterDemo} disabled={loading}><LogIn size={15}/> Login with Demo Account <ArrowRight size={15}/></button></div>}
+    {!isSignup&&<div className="auth-demo-credentials"><b>Demo access · no sign-up needed</b><span>Employee ID: <code>{DEMO_LOGIN.employeeId}</code></span><span>Password: <code>{DEMO_LOGIN.password}</code></span><button type="button" className="auth-demo-login-button" onClick={enterDemo} disabled={loading}><LogIn size={15}/> Login as Learner <ArrowRight size={15}/></button><span className="auth-demo-admin-info">Admin preview: <code>{DEMO_ADMIN_LOGIN.employeeId}</code> / <code>{DEMO_ADMIN_LOGIN.password}</code></span><button type="button" className="auth-demo-login-button" onClick={enterAdminDemo} disabled={loading}><LogIn size={15}/> Login as Admin <ArrowRight size={15}/></button></div>}
     </>}
-   </div><p className="auth-legal">Demo preview · v1.6.1 · Accounts remain in this browser · Do not reuse a real password.</p></section>
+   </div><p className="auth-legal">Demo preview · v1.12.0 · Accounts remain in this browser · Do not reuse a real password.</p></section>
   </div>
  </div>
 }

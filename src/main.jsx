@@ -3,3 +3,5 @@ import {DemoProvider} from './lib/store';import App from './App';import './style
 createRoot(document.getElementById('root')).render(<React.StrictMode><HashRouter><DemoProvider><App/></DemoProvider></HashRouter></React.StrictMode>);
 
 import './courseWorkspace.css';
+
+import './questionBankCourses.css';
