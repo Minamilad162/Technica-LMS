@@ -152,3 +152,10 @@
 - Restrict course-builder lesson types to Video and PDF; remove manually-entered duration and module total duration.
 - Detect video runtime from attached media metadata when supported; PDF has no time.
 - Retain existing legacy lesson data and keep assessment timer settings unchanged.
+
+## v1.15.0 — Learner Learning Player
+- My Learning now displays a dedicated Process Safety Essentials demo course, instead of a practice-only course landing page.
+- Added a responsive learning player with modules, Video/PDF lessons, explanatory text, multiple industrial visuals, local per-account progress, and completion actions.
+- Linked a CSB public safety video with an external fallback; produced a two-page original quick-reference PDF.
+- Added original 10-question end-of-course self-check (pass >= 70%, explanations, retries). ASP and PSEE question banks are unchanged.
+- New `test:learning`, dedicated responsive motion styles, and entrance motion plan. No new runtime dependencies.

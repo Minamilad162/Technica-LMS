@@ -4,7 +4,7 @@ import {useDemo} from './lib/store';
 import MotionSystem from './components/MotionSystem';
 import AuthPage,{DemoPolicyPage} from './pages/AuthPage';
 import {getAuthSession} from './lib/demoAuth';
-import HomePage from './pages/HomePage';import PracticePage from './pages/PracticePage';import QuizPage from './pages/QuizPage';
+import HomePage from './pages/HomePage';import LearningPlayer,{LearningLibrary} from './pages/LearningPage';import PracticePage from './pages/PracticePage';import QuizPage from './pages/QuizPage';
 import AnalyticsPage from './pages/AnalyticsPage';import BuilderPage from './pages/BuilderPage';import AssessmentOverview from './pages/AssessmentOverview';import ResultsPage from './pages/ResultsPage';import PracticeResultsPage from './pages/PracticeResultsPage';import LearnersPage from './pages/LearnersPage';import QuestionBankPage from './pages/QuestionBankPage';import CoursesPage from './pages/CoursesPage';
 function AdminOnly({children}){const {state}=useDemo();return getAuthSession()?.role==='admin'&&state.role==='admin'?children:<Navigate to='/home' replace/>}
 function RoutePage({children,standalone=false}){return <><MotionSystem/><Layout standalone={standalone} onLogout={()=>{window.dispatchEvent(new Event('technica-demo-logout'))}}>{children}</Layout></>}
@@ -22,7 +22,8 @@ export default function App(){const l=useLocation();const[auth,setAuth]=useState
  <Route path="/signup" element={<Navigate to="/home" replace/>}/>
  <Route path="/" element={<Navigate to="/home" replace/>}/>
  <Route path="/home" element={<RoutePage><HomePage/></RoutePage>}/>
- <Route path="/my-learning" element={<RoutePage><HomePage learningOnly/></RoutePage>}/>
+ <Route path="/my-learning" element={<RoutePage><LearningLibrary/></RoutePage>}/>
+ <Route path="/learning/process-safety-foundations" element={<RoutePage><LearningPlayer/></RoutePage>}/>
  <Route path="/practice" element={<RoutePage><PracticePage/></RoutePage>}/>
  <Route path="/practice/session" element={<RoutePage standalone><QuizPage kind="practice"/></RoutePage>}/>
  <Route path="/analytics" element={<AdminOnly><RoutePage><AnalyticsPage/></RoutePage></AdminOnly>}/>

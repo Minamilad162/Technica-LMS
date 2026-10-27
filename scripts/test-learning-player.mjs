@@ -1,0 +1,28 @@
+import fs from 'node:fs';
+import assert from 'node:assert/strict';
+import {learningDemo,learningQuiz,demoLessonList,learningCompletion,normaliseLearningProgress,learningProgressKey} from '../src/data/learningDemo.js';
+const app=fs.readFileSync('src/App.jsx','utf8');
+const home=fs.readFileSync('src/pages/HomePage.jsx','utf8');
+const page=fs.readFileSync('src/pages/LearningPage.jsx','utf8');
+const css=fs.readFileSync('src/learningPlayer.css','utf8');
+const motion=fs.readFileSync('src/lib/motionPlan.js','utf8');
+assert.equal(learningDemo.modules.length,2);
+assert.equal(demoLessonList.length,3);
+assert.deepEqual(demoLessonList.map(l=>l.type),['Video','PDF','PDF']);
+assert.equal(learningQuiz.length,10);
+assert.equal(new Set(learningQuiz.map(q=>q.id)).size,10);
+for(const q of learningQuiz){assert.equal(q.options.length,4);assert.ok(q.correct>=0&&q.correct<4);assert.ok(q.q&&q.why)}
+assert.equal(learningCompletion(normaliseLearningProgress(null)),0);
+assert.equal(learningCompletion(normaliseLearningProgress({completed:demoLessonList.map(x=>x.id),quizPassed:true})),100);
+assert.equal(learningCompletion(normaliseLearningProgress({completed:[demoLessonList[0].id]})),25);
+assert.equal(normaliseLearningProgress({completed:['fake',demoLessonList[0].id, demoLessonList[0].id]}).completed.length,1);
+assert.notEqual(learningProgressKey('TC1001'),learningProgressKey('TC9001'));
+assert.ok(app.includes('/learning/process-safety-foundations')&&app.includes('<LearningLibrary/>'));
+assert.ok(home.includes('/learning/process-safety-foundations'));
+assert.ok(page.includes('youtube-nocookie.com/embed')&&page.includes('Watch on YouTube'));
+assert.ok(page.includes('Mark lesson complete')&&page.includes('Retake knowledge check'));
+assert.ok(css.includes('prefers-reduced-motion'));
+assert.ok(motion.includes('plans.learning'));
+assert.ok(fs.existsSync('public/materials/process-safety-quick-guide.pdf'));
+for(const l of demoLessonList)assert.ok(fs.existsSync('public'+l.image));
+console.log('PASS: course / 3 lessons / 10 distinct questions / learner routes / local progress / media / responsive motion');

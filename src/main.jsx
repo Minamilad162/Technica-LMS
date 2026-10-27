@@ -5,3 +5,5 @@ createRoot(document.getElementById('root')).render(<React.StrictMode><HashRouter
 import './courseWorkspace.css';
 
 import './questionBankCourses.css';
+
+import './learningPlayer.css';

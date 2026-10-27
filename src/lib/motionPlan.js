@@ -26,6 +26,15 @@ const plans = {
     beat('.asp-home-domains > *', 420, 60, 5, 'pop'),
     beat('.weekly-grid > *', 490, 85, 3, 'up'),
   ],
+  learning: [
+    beat('.learn-library-heading', 55, 0, 1, 'up'),
+    beat('.learn-feature-card', 145, 0, 1, 'up'),
+    beat('.learn-library-bottom > *', 285, 75, 3, 'pop'),
+    beat('.learn-player-hero', 60, 0, 1, 'left'),
+    beat('.learn-progress-strip', 155, 0, 1, 'up'),
+    beat('.learn-outline', 215, 0, 1, 'left'),
+    beat('.learn-main-panel', 265, 0, 1, 'up'),
+  ],
   practice: [
     ...shared,
     beat('.steps .step', 150, 80, 3, 'pop'),
@@ -114,7 +123,8 @@ export const MOTION_PLANS = plans;
 export const MAX_ENTRANCE_DELAY_MS = 550;
 export const getPageMotionPlan = pathname => {
   if (pathname === '/login' || pathname === '/signup' || pathname === '/forgot-password') return plans.auth;
-  if (pathname === '/home' || pathname === '/my-learning') return plans.home;
+  if (pathname === '/home') return plans.home;
+  if (pathname === '/my-learning' || pathname.startsWith('/learning/')) return plans.learning;
   if (pathname === '/practice') return plans.practice;
   if (pathname === '/analytics' || pathname === '/reports') return plans.analytics;
   if (pathname === '/courses') return plans.courses;

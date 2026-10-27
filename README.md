@@ -197,3 +197,7 @@ Question Bank is available only inside the Admin demo workspace. Select **All co
 
 ## v1.13.0 — Lesson content types
 The Course Builder now creates **Video** or **PDF** lessons only. There is no manual lesson duration. Video runtime is read from uploaded video metadata when available; PDF lessons have no runtime. The Practice and Assessment timer configurations are unchanged. See `LESSON_VIDEO_PDF_GUIDE_v1.13.md`.
+
+## Learner Learning Player — v1.15.0
+
+Open **My Learning** or navigate to `/#/learning/process-safety-foundations`. The single featured **Process Safety Essentials** course includes two modules, three lessons (video and illustrated downloadable PDF reading), and an original 10-question self-check. The video is embedded from U.S. Chemical Safety Board / YouTube and provides a YouTube fallback. Progress is persisted locally per signed-in demo account. See `LEARNING_PLAYER_DEMO_v1.15.md` for limitations and sources. Run `npm run test:learning` to verify wiring and grading data.
