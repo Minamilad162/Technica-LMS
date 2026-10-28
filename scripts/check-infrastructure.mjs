@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import { existsSync, readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
+import { execFileSync } from 'node:child_process';
 
 const root = resolve(import.meta.dirname, '..');
 const required = [
@@ -31,8 +32,15 @@ assert.ok(blueprint.includes('300 minutes'), 'Mock must remain 300 minutes');
 assert.ok(agents.includes('TECHNICA_LMS_MASTER_BLUEPRINT.md'), 'Agents must use canonical blueprint');
 assert.ok(registry.includes('Mock Exclusive'), 'Logic registry must protect mock exclusivity');
 
-for (const forbidden of ['.env', '.env.local', '.dev.vars']) {
-  assert.ok(!existsSync(resolve(root, forbidden)), 'Local secret file must not be committed in working tree: ' + forbidden);
+// Check tracked Git paths, not local untracked developer secrets.
+// A .env file may legitimately exist on a developer's machine as long as it is NOT committed.
+const tracked = execFileSync('git', ['ls-files', '-z'], { cwd: root, encoding: 'utf8' })
+  .split('\0').filter(Boolean);
+for (const p of tracked) {
+  const file = p.split('/').at(-1);
+  const isSecret = file === '.env' || (file.startsWith('.env.') && file !== '.env.example')
+    || file === '.dev.vars' || file.startsWith('.dev.vars.');
+  assert.ok(!isSecret, 'Tracked secret file must be removed from Git index: ' + p);
 }
 const ignore = readFileSync(resolve(root, '.gitignore'), 'utf8');
 assert.ok(ignore.includes('.wrangler'), 'Missing .wrangler ignore');
