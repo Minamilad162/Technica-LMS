@@ -997,7 +997,8 @@
 يمكن للمستخدم كتابة هذه البيانات، وإن لم يكتبها يتم استنتاج المتاح من المشروع:
 
 - **Mode:** Audit Only / Audit and Fix / Pre-Production / Performance / Security
-- **Expected Users:**- **Expected Concurrent Users:**
+- **Expected Users:**
+- **Expected Concurrent Users:**
 - **Expected Data Size:**
 - **Target Environment:**
 - **Known Problem:**
