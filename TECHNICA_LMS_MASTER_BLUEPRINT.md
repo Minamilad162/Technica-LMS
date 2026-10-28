@@ -3,7 +3,7 @@
 > **Canonical project specification / single source of truth**
 >
 > Project: Technica Consult LMS
-> Version: 1.0.1 (infrastructure policy integration; no application feature change)
+> Version: 1.0.2 (infrastructure integration and source verification)
 > Last updated: 2026-10-28 (Africa/Cairo)
 > Repository: https://github.com/Minamilad162/Technica-LMS
 > Target branch: main
@@ -404,6 +404,7 @@ Indexes, RLS and data retention depend on live queries and privacy. Historic att
 | BUG-013 | HIGH | OPEN / build repeatability | Main branch lacks package-lock.json; npm ci gate cannot yet execute. Temporary CI fallback is explicitly warned; generate and commit a verified lockfile, then remove fallback. |
 | BUG-014 | MEDIUM | OPEN / type safety | Current v1.15 is React JavaScript/JSX with no genuine TypeScript check. Do not fake typecheck or blindly rewrite app; plan incremental migration and gate. |
 | BUG-015 | MEDIUM | GUARDED / UI provenance | Older uploaded September UI guide must not overwrite the more recent October 24 root guide (includes previously approved motion/video/3D references). Archived older source; current root unchanged. |
+| BUG-016 | LOW | FIX IMPLEMENTED / TEST PENDING | Initial infrastructure script rejected valid local untracked .env secrets; updated to use git ls-files for tracked secret detection, preserving secure local development. Runtime script verification remains pending in CI. |
 
 Add new BUG rows immediately when an issue is discovered, include reproduction, root cause, fix, commit, proof and regression-test identifier. Never erase bugs after fixing; change status to FIXED / VERIFIED.
 
@@ -480,3 +481,10 @@ GitHub Actions workflow .github/workflows/ci-security.yml and .github/dependabot
 - Preserved existing root UI guide and archived the supplied earlier snapshot without losing earlier accepted references.
 - Added CI, Dependabot, initial infrastructure verification script, security/release/audit/logic documentation, .gitignore hardening, and mandatory AGENTS workflow pointers.
 - Recorded missing lockfile and typecheck as open production blockers; retained app code and demo data unchanged.
+
+
+### 2026-10-28 — v1.0.2 infrastructure follow-up
+- Verified 20 required GitHub repository paths by direct reads on main, including three uploaded source snapshots with correct character lengths 21,682 / 28,547 / 32,077; preserved the larger newer UI root guide.
+- Enhanced .gitignore to exclude .env.* (but allow .env.example), .dev.vars variants, Wrangler outputs and ZIPs.
+- Fixed false-positive local-secret detection in scripts/check-infrastructure.mjs by checking Git-tracked files, not ignored local .env files; runtime confirmation pending.
+- CI, npm audit, node checks, browser QA and production launch have not been executed/verified in this session; status is configuration committed, not tests passing.
