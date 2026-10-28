@@ -1,0 +1,75 @@
+name: Technica LMS CI / Security Gate
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: technica-ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Check infrastructure policies
+        run: node scripts/check-infrastructure.mjs
+
+      - name: Install dependencies (temporary legacy compatibility)
+        shell: bash
+        run: |
+          if [ -f package-lock.json ]; then
+            echo "Using reproducible npm ci"
+            npm ci --no-fund
+          else
+            echo "::warning::Missing package-lock.json in v1.15 demo. Falling back to npm install temporarily. Production release remains blocked until lockfile is committed and npm ci passes."
+            npm install --no-fund
+          fi
+
+      - name: TypeScript typecheck when the repository has a typecheck script
+        shell: bash
+        run: |
+          if node -e "process.exit(require('./package.json').scripts?.typecheck ? 0 : 1)"; then
+            npm run typecheck
+          else
+            echo "::warning::TypeScript/typecheck not yet configured (legacy JS demo). Typecheck gate is PENDING, not PASS."
+          fi
+
+      - name: Legacy project integrity
+        run: npm run check
+
+      - name: ASP imported bank integrity
+        run: npm run verify:bank
+
+      - name: Existing regression suites
+        shell: bash
+        run: |
+          for name in test:selection verify:images test:auth test:motion test:courses test:quiz-navigation test:review test:admin test:course-dialog test:authoring test:admin-bank test:lesson-media test:learner-ui test:learning; do
+            npm run "$name"
+          done
+
+      - name: Production build
+        run: npm run build
+
+      - name: Dependency vulnerability audit
+        run: npm audit --audit-level=high
+
+      - name: Note remaining production gates
+        run: |
+          echo "Passing this CI validates a DEMO build only, not real Supabase/RLS, server grading, payments, DRM or Production readiness."
+          echo "See TECHNICA_LMS_MASTER_BLUEPRINT.md and docs/current/RELEASE_SECURITY_CHECKLIST.md."
