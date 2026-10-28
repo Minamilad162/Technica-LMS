@@ -1,3 +1,5 @@
+> **Technica LMS project governance:** [Master Blueprint](TECHNICA_LMS_MASTER_BLUEPRINT.md) · [Agent instructions](AGENTS.md) · [Infrastructure integration](docs/infrastructure/README.md) · [Audit playbook](docs/current/AUDIT_PLAYBOOK.md) · [Security/release checklist](docs/current/RELEASE_SECURITY_CHECKLIST.md). The existing app remains a browser-local demo, NOT a secure production LMS. See [PROJECT_CONTEXT.md](PROJECT_CONTEXT.md) for current gaps.
+
 ## v1.10.0 Admin Courses Update
 
 **New:** distinct Courses admin page, draft/scheduled/published course management, clickable learner profiles, and per-course PDF/video demo uploads. See `ADMIN_COURSE_MANAGEMENT_v1.10.md`. All edits/files remain **local-browser demo data**; publication schedules do not run on a hosted background server.
