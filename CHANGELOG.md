@@ -1,3 +1,9 @@
+### 2026-10-28 — Infrastructure verification and safeguard follow-up
+
+- Verified 20 expected repository paths on main, including all three owner-supplied original document snapshots by expected text lengths.
+- .gitignore now blocks all .env.* except .env.example; infrastructure check inspects Git-tracked secrets instead of rejecting ignored local developer secret files.
+- No executed npm, browser, security audit, Supabase or Cloudflare deployment result claimed. Production gaps retained in Blueprint.
+
 ## 2026-10-28 — Infrastructure integration (documentation + CI, no application feature release)
 
 - Archived the three original owner-provided infrastructure Markdown references under docs/infrastructure/source/; preserved the newer existing root UI_COMPONENT_REFERENCE_GUIDE.md rather than replacing it with an older reference.
