@@ -6,3 +6,12 @@ dist/
 .DS_Store
 *.log
 .vite/
+
+# Cloudflare local secrets/build outputs
+.wrangler/
+.dev.vars
+.dev.vars.*
+# Project deliverable archives
+*.zip
+# Do not ignore the safe placeholder environment spec
+!.env.example
