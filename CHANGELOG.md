@@ -1,3 +1,14 @@
+## 2026-10-28 — Infrastructure integration (documentation + CI, no application feature release)
+
+- Archived the three original owner-provided infrastructure Markdown references under docs/infrastructure/source/; preserved the newer existing root UI_COMPONENT_REFERENCE_GUIDE.md rather than replacing it with an older reference.
+- Added docs/infrastructure/README.md, project context, security plan, release checklist, test plan, audit playbook and LMS logic registry.
+- Added GitHub Actions initial CI/security gate, weekly Dependabot proposals, and scripts/check-infrastructure.mjs. Updated AGENTS.md and .gitignore to enforce read-first governance and secret safety.
+- Added SECURITY.md, DEPLOYMENT.md, DATABASE.md and recorded gaps in the canonical TECHNICA_LMS_MASTER_BLUEPRINT.md.
+- **Known gaps:** v1.15 JavaScript demo has no committed package-lock.json nor TypeScript typecheck; CI uses an explicitly warned legacy npm install fallback until fixed. Passing CI does NOT imply production auth/RLS, payment, DRM or protected exam logic.
+- **Verification:** files committed and retrieved via GitHub API; runtime npm tests/build/security audit, GitHub Actions run, Cloudflare smoke test and browser QA not performed in this documentation integration. No database migrations, app logic, or production settings changed.
+
+---
+
 ## v1.14.0 — Simplified learner home and removed Saved questions
 
 - Removed the redundant ASP five-domain panel from Home / My learning.
