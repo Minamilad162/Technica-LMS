@@ -3,7 +3,7 @@
 > **Canonical project specification / single source of truth**
 >
 > Project: Technica Consult LMS
-> Version: 1.0.0 (requirements and architecture baseline)
+> Version: 1.0.1 (infrastructure policy integration; no application feature change)
 > Last updated: 2026-10-28 (Africa/Cairo)
 > Repository: https://github.com/Minamilad162/Technica-LMS
 > Target branch: main
@@ -383,6 +383,7 @@ Indexes, RLS and data retention depend on live queries and privacy. Historic att
 | DEC-012 | 2026-10-28 | LOCKED | Use Pocket Prep screenshots as UX ideas, original Technica implementation |
 | DEC-013 | 2026-10-28 | PROPOSED | Stage minimum answered = 10 for reliable adaptive 70% check; calibrate short sessions |
 | DEC-014 | 2026-10-28 | PROPOSED | Server-side Supabase domain model, signed streamed video and PSP vendor selection |
+| DEC-015 | 2026-10-28 | LOCKED | Owner-supplied infrastructure, evidence-first audit, and UI reference governance are repo-integrated; existing newer root UI guide remains authoritative; maintain tests, docs, and prior accepted behavior. |
 
 ## 16. Error, conflict & regression prevention register
 
@@ -400,6 +401,9 @@ Indexes, RLS and data retention depend on live queries and privacy. Historic att
 | BUG-010 | MEDIUM | OPEN / truthfulness | Pocket Prep screenshot contains community average and concept diagnostics. Do not fabricate benchmarks; compute concept advice only from real scored history. |
 | BUG-011 | MEDIUM | OPEN / definition | “Mark read material finished when user passes through” requires real visible-section/scroll milestone; merely opening lesson must not increment coverage. |
 | BUG-012 | MEDIUM | OPEN / content rights | Review imported question/IP ownership and references before paid publication; never assume external certification question content can be redistributed. |
+| BUG-013 | HIGH | OPEN / build repeatability | Main branch lacks package-lock.json; npm ci gate cannot yet execute. Temporary CI fallback is explicitly warned; generate and commit a verified lockfile, then remove fallback. |
+| BUG-014 | MEDIUM | OPEN / type safety | Current v1.15 is React JavaScript/JSX with no genuine TypeScript check. Do not fake typecheck or blindly rewrite app; plan incremental migration and gate. |
+| BUG-015 | MEDIUM | GUARDED / UI provenance | Older uploaded September UI guide must not overwrite the more recent October 24 root guide (includes previously approved motion/video/3D references). Archived older source; current root unchanged. |
 
 Add new BUG rows immediately when an issue is discovered, include reproduction, root cause, fix, commit, proof and regression-test identifier. Never erase bugs after fixing; change status to FIXED / VERIFIED.
 
@@ -461,3 +465,18 @@ Until these are approved, implement configurable policies without presenting pro
 ---
 
 **Repository governance:** keep this file at repository root with AGENTS.md reminding all coding agents to read it before modifications. A future feature is not complete until this file and its change/error register are updated with the implementation evidence.
+
+
+## 20. Infrastructure integration, policies and evidence — 2026-10-28
+
+The project owner's three original foundation documents have been committed at docs/infrastructure/source/ and adapted through docs/infrastructure/README.md. The existing more comprehensive UI_COMPONENT_REFERENCE_GUIDE.md (reviewed 2026-10-24) is the current UI decision reference, while the owner's 2026-09-15 uploaded snapshot is archived for provenance. **This Blueprint remains the single source of truth for Technica LMS product requirements and locked decisions.**
+
+Infrastructure governance now includes AGENTS.md, PROJECT_CONTEXT.md, docs/current/LOGIC_REGISTRY.md, AUDIT_PLAYBOOK.md, SECURITY_PLAN.md, RELEASE_SECURITY_CHECKLIST.md, TEST_PLAN.md, DEPENDENCY_AND_SUPPLY_CHAIN_POLICY.md and SECRETS_ENVIRONMENT_AND_CLOUDFLARE_POLICY.md; root SECURITY.md, DEPLOYMENT.md and DATABASE.md. They apply the generic policies only where relevant to this existing app. CHEIRON-only checklists are explicitly non-applicable.
+
+GitHub Actions workflow .github/workflows/ci-security.yml and .github/dependabot.yml were added. The CI runs infrastructure source check, demo regression suites, Vite build, and npm audit high gate in a clean GitHub runner. **Temporary compatibility exceptions:** no package-lock.json so npm ci is currently replaced by an explicitly warned npm install fallback; no TypeScript script so typecheck is WARN/SKIP, not PASS. Fix these before production launch. No runtime test, CI execution status, Cloudflare deployment, RLS, live database migration or protected content behavior is claimed by this documentation commit.
+
+### 2026-10-28 — v1.0.1 changelog
+- Adopted original owner-provided Web App Build/Security Prompt and evidence-based Automated Audit Instructions as infrastructure standards.
+- Preserved existing root UI guide and archived the supplied earlier snapshot without losing earlier accepted references.
+- Added CI, Dependabot, initial infrastructure verification script, security/release/audit/logic documentation, .gitignore hardening, and mandatory AGENTS workflow pointers.
+- Recorded missing lockfile and typecheck as open production blockers; retained app code and demo data unchanged.
