@@ -998,6 +998,7 @@ The score is a decision aid, not a substitute for technical judgment.
 
 ## Heavy enterprise data grid
 `existing design system + AG Grid`
+
 ## Spreadsheet workflow
 `Handsontable`  
 Only after commercial licensing is confirmed.
