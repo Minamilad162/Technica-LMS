@@ -3,8 +3,8 @@
 > **Canonical project specification / single source of truth**
 >
 > Project: Technica Consult LMS
-> Version: 1.0.2 (infrastructure integration and source verification)
-> Last updated: 2026-10-28 (Africa/Cairo)
+> Version: 1.0.3 (execution-level implementation plan)
+> Last updated: 2026-10-30 (Africa/Cairo)
 > Repository: https://github.com/Minamilad162/Technica-LMS
 > Target branch: main
 > Current inspected source baseline: v1.15.0, commit 8021f604c63c59b2100d944ead86fed149eb1ceb
@@ -341,6 +341,140 @@ Indexes, RLS and data retention depend on live queries and privacy. Historic att
 
 **Implementation priority:** P0–P9 for credible Exam Preparation production. Keep video and Zoom interfaces architected from P1/P4 but deliver strong paid media protection and live integration when selected. Certificates stays deferred.
 
+## 13A. Executable implementation backlog — agreed scope, proposed delivery sequence (2026-10-30)
+
+> **Document-only planning update.** Phases and acceptance criteria below refine Section 13; they do NOT mark software as implemented or override the locked owner decisions. No implementation, migration, payment activation or release is authorized just by documenting the plan. Keep confirmed rules immutable; resolve open technical policy choices with owner before enforcing arbitrary defaults.
+
+### Execution rules / dependencies
+
+- **One source of truth:** this BLUEPRINT. AGENTS.md makes reading/updating it mandatory. Preserve all existing decisions, historic BUG rows and design constraints.
+- **Safe change workflow:** branch → audit/impact analysis → scoped implementation → unit/integration/E2E/security testing → blueprint/CHANGELOG/tests update → review → approval → merge/deploy/verification.
+- **No-regression gate at every phase:** demo ASP content and IDs, light/mobile UI, per-course editing, admin-only Question Bank, v1.14 learner Saved removal, bookmarks/flag distinctions, past practice/history, and isolation of Process Safety Essentials demo remain protected.
+- **Schema/status:** the 2026-10-28 audited React 19/Vite 6 localStorage/IndexedDB demo is the baseline, NOT a secure production backend. Recheck current HEAD before beginning P0.
+- **Product priority:** Exam Preparation first; Certificates only after future approval. English now, i18n-ready and Arabic RTL later.
+- **Secure media starts early:** install entitlement and private storage contracts in P1/P4, even if full DRM vendor work is completed at P10; never sell insecure public course recordings while waiting for DRM.
+
+### P0 — Baseline audit, workplan and safety net
+
+1. Read AGENTS.md, BLUEPRINT in full, CHANGELOG, relevant guides, current source, and automated tests. Identify current HEAD and deployed environment separately.
+2. Inventory all routes, accepted UI states, practice/assessment behavior, imports, course demo assets, fake/local user state, and backend scripts; tag DEMO vs PRODUCTION vs PLANNED.
+3. Audit the 2,500 original Excel workbook records (9 sheets), the existing 1,625 imported ASP demo questions (first five sheets), and the unrelated PSEE demo questions. Preserve source ID/row/wording/answer and citations.
+4. Create a protected rollback baseline; CI must produce reproducible install/build (lockfile issue BUG-013) and honest security/typecheck status (BUG-014).
+5. Design/approve wireframes for Admin Builder, Learning Player, Practice setup, Quiz, Results, Mock, learner dashboard, and account/checkout while preserving the accepted visual system.
+**Exit gate:** reviewed migration map, prioritized task list, test baseline, no existing behavior regression, source/question-rights concerns logged.
+
+### P1 — Production foundation and user management
+
+1. Create isolated Supabase development/staging/production environments with documented secret management and Cloudflare build configuration; no keys with elevated privileges in client bundles.
+2. Version SQL migrations and implement profiles, roles, role assignments, enrolments, entitlements, activity and audit trails. Implement Supabase Auth sign-up/sign-in, password reset/email verification, session handling, account deactivation and basic profile.
+3. Apply explicit per-table GRANT/REVOKE plus RLS and separate Storage policies; prohibit anonymous writes. Server validates user and course entitlements on protected operations. Roles: guest, trial learner, paid learner, instructor/content author, admin; grader and super-admin only when required by governance.
+4. Move admin authority and protected scoring/question delivery from browser-side flags/state to server-controlled API/Edge Functions. Maintain migration-safe adapters until demo state is retired deliberately.
+5. Introduce audit events for login/admin edits and rate-limiting; protect high-privilege admin operations with MFA and session review.
+**Exit gate:** two real learners cannot see/edit each other's progress, answers, billing or content permissions; learner cannot call admin APIs; refresh/second device retains account state; RLS positive/negative tests pass.
+
+### P2 — Course hierarchy and CMS
+
+1. Create canonical tables for courses, course_versions, domains, topics, lessons, lesson_blocks, media_assets and lesson_quiz_config with stable IDs, ordering, publish state, audit, archive and version history.
+2. Admin CRUD: course → domain → topic → lesson; duplicate/reorder; draft → preview → scheduled/published; archival without destroying learner history.
+3. Build safe rich block editor for headings, text, approved typography/colors, images, tables, PDFs, video, references, quiz; sanitize content, require alt text and accessible preview.
+4. Connect Course Builder to learner catalog and navigation. Enrolment/entitlements determine visibility. Do not hardcode ASP IDs or lesson count.
+**Exit gate:** create and publish a second independent course with full content; ASP content remains intact; learner sees only entitled published versions on phone/desktop.
+
+### P3 — ASP question import, provenance and difficulty
+
+1. Import each source workbook row into a staging/provenance layer, avoiding automatic publication and retaining immutable original content/answer keys/IDs.
+2. Validate 2025 ASP11 official nine-domain/topic taxonomy against each question; DO NOT assume old workbook sheet Domain 1 maps to ASP11 Domain 1.
+3. Detect duplicates, ambiguous choices, missing/wrong answers, broken formula formatting, citations and commercial-use licensing restrictions; review through admin queue.
+4. Propose Low/Medium/High classification using rubric (recall/application/analysis, computation steps, distractor complexity) with confidence and human reviewer approval.
+5. Establish published Practice eligibility and Mock-exclusive reservation relation at database/query boundary (separate protected correct-answer fields).
+**Exit gate:** counts reconciled (raw, imported, rejected, awaiting review, published), mapping reviewer approvals recorded; each published question is traceable and correctly excluded from unauthorized pools.
+
+### P4 — Learning Player, media access and progress
+
+1. Connect published lessons to real learner player with responsive sections, reading/images/PDF and secure video playback interface.
+2. Store private media behind authorized access checks and short-lived access tokens from day one; never ship permanent direct URLs to paid assets.
+3. Emit idempotent server events for visible reading/image/PDF progress; video tracks watched segments and end checkpoint (seeking to end does not complete); handle idle time and multi-device resume.
+4. Support admin-configured lesson quiz (usually 10–20 questions), submit/review and configurable pass rule. Separate **viewed**, **completed**, and **passed**.
+5. Roll up lesson → topic → domain → course progress and learner resume state.
+**Exit gate:** cross-device course continuation; viewing only the first page doesn't mark a lesson complete; seeking to last video second doesn't mark complete; entitled media works, unentitled media fails.
+
+### P5 — Practice UX and secure exam API
+
+1. Implement Quick 10, Timed Quiz, Build Your Own, Weakest Subject and Missed Questions without altering accepted fixed Admin Assessment.
+2. Custom inputs: course/domain/topic scope, eligible counts, number of questions, timer off/whole-test/per-question, difficulty Low/Medium/High/Mixed/Adaptive, answers per-question/at-end, manual check/auto-advance, New/Answered/Flagged/Incorrect pools.
+3. Enforce available-pool limits and **server-side** unique question selection; keep correctness/references unrevealed until selected feedback policy allows.
+4. Implement question navigator, flags, autosave, keyboard/mobile, answer card, result details and All/Flagged/Incorrect/Correct filters.
+5. Build an original scientific calculator with TI-30XS-like functions and independent test vectors (NOT copied TI design/software); floats on desktop, docks as mobile bottom-sheet.
+**Exit gate:** tested configuration matrix (timers, item counts, reveal policy, flags, missed/new filters) with no Mock-only questions in any pool; arithmetic/fraction/trig/negative-power correctness verified.
+
+### P6 — Adaptive 70% Level Up
+
+1. Store server-side adaptive session policy, stage, per-stage answered/correct, selected question IDs, allowed scope and audit sequence.
+2. Begin LOW. At approved minimum sample checkpoint, promote to MEDIUM when cumulative current-stage accuracy >=70%, then to HIGH under same rule; below threshold continue stage. Never reveal difficulty/stage live.
+3. User controls total question count; prospective quotas are **elastic**. A learner may spend all N at LOW. Never invent/repeat protected items to fill shortfalls.
+4. Decide shortage behavior and short-quiz threshold with product owner. Existing proposal = minimum 10 answered per stage (not locked). Keep exact 70% owner requirement.
+5. Make session restart/idempotency and scoring deterministic under reconnection and concurrency.
+**Exit gate:** boundary at 69% stays/70% advances; 100-question uneven distribution works; no duplicated item/early level exposure; exhausted pools, interrupted sessions and concurrent submissions tested.
+
+### P7 — ASP exclusive Mock Exam
+
+1. Admin reserves **exactly 200 reviewed ASP questions** to a versioned Mock form through atomic server operation; reservation excludes them from every other quiz/diagnostic/review generator.
+2. Server-enforced deadline = **300 minutes (5 hours)** with submitted/expired state, persisted answers, reopen/refresh rules and automatic submit at expiry. No learner customization of count/time.
+3. Add full 200-question navigation, skipped/flagged grid, reliable autosave, exam-safe calculator and final review/submit confirmation.
+4. Results record immutable form/question versions, blank/correct/incorrect counts, domain analysis, timing and carefully controlled post-mock explanation policy. Retake/cooldown/pause policy to be approved.
+**Exit gate:** exactly 200 exclusive/300 minutes; browser clock changes/reload/tab closure don't reset deadline; all non-mock routes provably exclude reserved items; attempts stay historically stable after admin edits.
+
+### P8 — Pre-assessment, learner dashboard and analytics
+
+1. Build a diagnostic quiz sampling reviewed non-mock questions by official domain/topic coverage.
+2. Aggregate per learner: confidence/sample size, domain/topic accuracy, recent trend, practice history, mistakes, course completion, time on learning and mock history.
+3. Personalized suggestions link weak concepts to actual lessons and eligible follow-up practice (e.g., “4 mistakes in Topic X — practice 10 more” only when supported by data).
+4. Learner dashboard shows continue learning, strengths/gaps and estimated readiness with sample-size safeguards; admin aggregate insights do not expose unrelated learner private data.
+**Exit gate:** users receive measurably different dashboards from distinct histories, sparse data says “insufficient evidence”, no fake community benchmark, recommendations lead to valid question pools.
+
+### P9 — Trials, subscriptions and checkout
+
+1. Admin defines plans/SKUs, durations, course access, quotas and trial/demo content/sessions; content and attempts enforce entitlement on every server call.
+2. Validate Egypt merchant onboarding + international payment capability; compare PSP settlement, currencies, recurring support, refunds, tax/invoicing. Provider remains OPEN until commercial approval.
+3. Create orders/payments/provider_events and verify signed webhooks with idempotency and reconciliation. Activation depends on verified payment state, never a client redirect query string.
+4. Handle failures, pending, renewals, expirations, refunds, cancellation and support/admin adjustments with audit logging.
+**Exit gate:** trial users cannot see paid resources; paid user gains exact purchased scope; forged/replayed webhook or client tampering does not activate access; refund/expiry revokes relevant access.
+
+### P10 — Paid-video protection and embedded live classes
+
+1. Vendor decision gate before commercial video rollout: compare Cloudflare Stream signed-token controls with DRM-capable playback (e.g. Mux DRM Widevine/FairPlay/PlayReady), actual cost, browser matrix, onboarding and contract.
+2. Add identity/session watermark and concurrent playback constraints, protected source files and cache rules, authorization audit, reasonable token expiry/refresh. State plainly that **100% screen-recording prevention is impossible** on user-owned hardware.
+3. Integrate Zoom Meeting SDK with server-created signatures/authorization. Use component view where suitable on desktop and client view on mobile; keep Zoom secrets out of browser bundle.
+4. Admin schedule, enroll attendees, send reminders, verify join entitlement, save attendance where permitted and enforce recording/privacy policy.
+**Exit gate:** paid lessons unavailable without entitlement; authorized playback works on target browser/device matrix; Zoom session plays embedded on desktop/mobile, revocation and audit tested.
+
+### P11 — Release/security/performance readiness
+
+1. Test role and RLS matrices, XSS in lesson blocks, media token leaks, mock exclusivity and time, payments replay, answer-key leakage, vulnerability/dependency audit, backups/restores, accessibility and privacy.
+2. Load-test concurrent learners/exams and large progress event volume; verify responsive layouts and long-session autosave under network interruption.
+3. Reproducible CI build and DB migration rollback, stage smoke, signed-off release checklist and measured production verification. Add structured errors/monitoring and support response paths.
+**Exit gate:** all production blockers resolved or explicitly accepted; live deployment only after approval; document proof separately from CI pass.
+
+### P12 — Certificates (FUTURE; not in active build scope)
+
+Reserve relation to identity, entitlements and courses; later design admin-created certificate programmes, learner assignment uploads, grader feedback, approval, grade, certificate issue/revocation/verification. Do not advertise Technica-issued certificates as BCSP-issued credentials.
+
+### Cross-phase acceptance and review checklist
+
+- Database/roles: zero anonymous writes; explicit GRANT/RLS for all exposed data, private Storage policies, admin actions audited.
+- Questions/content: original ASP IDs/answer/reference preserved, approval/rubric and rights recorded, no PSEE demo mixing, no 200 Mock leaks.
+- Exams: automated tests for 69% vs 70%, count limits, timers, submit idempotency, refresh/resume, disclosure and scoring.
+- UX: preserve Technica color/theme, v1.14 removed Saved screen, admin-only Question Bank; test keyboard/mobile/tablet/desktop and loading/error states.
+- Release hygiene: every completed phase requires master blueprint status update, append-only bug/change entries, regression tests, rollback steps, evidence/commit. No silent main push of implementation.
+
+### Decisions to settle before their relevant implementation gate
+
+- P3: question rights; reviewed ASP11 mapping and which 200 items get reserved for Mock.
+- P5/P6: small-session/adaptive checkpoint threshold; question-filter union/intersection semantics and empty-pool policy.
+- P7: mock pause/resume and retake limits; whether full per-question mock answer review is allowed.
+- P9: exact trial quotas, packages/pricing, merchant and payment gateway.
+- P10: selected DRM/streaming provider, cost, browser support and Zoom account/licence.
+
 ## 14. Change-control workflow (MANDATORY for every future change)
 
 1. **Before coding:** Read THIS file, the latest CHANGELOG.md, relevant per-feature guide and source/tests. Identify locked invariants, code/data origin and current verified release.
@@ -488,3 +622,10 @@ GitHub Actions workflow .github/workflows/ci-security.yml and .github/dependabot
 - Enhanced .gitignore to exclude .env.* (but allow .env.example), .dev.vars variants, Wrangler outputs and ZIPs.
 - Fixed false-positive local-secret detection in scripts/check-infrastructure.mjs by checking Git-tracked files, not ignored local .env files; runtime confirmation pending.
 - CI, npm audit, node checks, browser QA and production launch have not been executed/verified in this session; status is configuration committed, not tests passing.
+
+
+### 2026-10-30 — v1.0.3 actionable implementation-plan update
+- Added Section 13A, a dependency-ordered backlog P0–P12 with concrete engineering tasks, tests, phase exit gates and owner decision checkpoints; this refines Section 13 without competing with the canonical source.
+- Confirmed unchanged locked rules: Course → Domain → Topic → Lesson; 70% Low→Medium→High; Mock-only 200 items in 300 minutes; original Technica theme and learner Saved removal.
+- Distinguished private-stream access from full DRM, prepared media security early in P1/P4, and kept certificates for a later scope.
+- Documentation update only; no application code, database migrations, streaming vendor, payment integration, browser QA or release modified/verified by this plan.
