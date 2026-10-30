@@ -1,3 +1,9 @@
+### 2026-10-30 — P1 disposable PostgreSQL security smoke (PR #7)
+
+- Added \`scripts/test-p1-postgres-smoke.sh\` and a \`postgres:16\` ephemeral CI job which executes the real P1 migration and verifies RLS with mock anon/authenticated users and sample entitlements.
+- GitHub Actions [run #52](https://github.com/Minamilad162/Technica-LMS/actions/runs/40980524294) verified **both jobs PASS**, including denied anonymous lesson access, course separation, paid/trial gates, expiry/revoke and suspended account. No live Supabase instance was used; final CI head should be checked again.
+- This is only the first backend foundation slice. Production Auth, real Supabase JWT/Data API and Storage tests, frontend integration and 200/300 Mock are not implemented. Existing demo left intact.
+
 ### 2026-10-30 — P1 backend foundation draft (PR #7; no DB deployment)
 
 - Added a review-only Supabase SQL migration for Course → Domain → Topic → Lesson hierarchy with strict foreign keys and refusal to overwrite legacy tables.
