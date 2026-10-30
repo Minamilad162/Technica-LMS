@@ -68,4 +68,29 @@ if query_as anon 00000000-0000-0000-0000-000000000000 "SELECT count(*) FROM publ
   echo "FAIL anonymous read blocks"; exit 1
 fi
 echo "PASS anonymous blocked from lesson blocks"
-echo "PASS P1 ephemeral PostgreSQL syntax + initial RLS smoke"
+# Extend fixtures after baseline to verify strict cross-course isolation.
+psql -X -v ON_ERROR_STOP=1 -q <<'SQL'
+INSERT INTO public.lms_domains(id,course_id,slug,title)
+ VALUES ('20000000-0000-0000-0000-000000000002','10000000-0000-0000-0000-000000000002','other','Other domain');
+INSERT INTO public.lms_topics(id,domain_id,slug,title)
+ VALUES ('30000000-0000-0000-0000-000000000002','20000000-0000-0000-0000-000000000002','other','Other topic');
+INSERT INTO public.lms_lessons(id,topic_id,slug,title,publication_state)
+ VALUES ('40000000-0000-0000-0000-000000000004','30000000-0000-0000-0000-000000000002','other','Other lesson','published');
+INSERT INTO public.lms_lesson_blocks(lesson_id,block_type,payload)
+ VALUES ('40000000-0000-0000-0000-000000000004','text','{"text":"another course"}');
+SQL
+assert_count "paid ASP isolated from other course" 2 authenticated 00000000-0000-0000-0000-000000000003 "SELECT count(*) FROM public.lms_lesson_blocks"
+assert_count "admin sees both courses" 4 authenticated 00000000-0000-0000-0000-000000000001 "SELECT count(*) FROM public.lms_lesson_blocks"
+if query_as authenticated 00000000-0000-0000-0000-000000000003 \
+ "UPDATE public.lms_profiles SET account_status='active' WHERE id='00000000-0000-0000-0000-000000000003'" >/dev/null 2>&1; then
+ echo "FAIL user can update protected account status"; exit 1
+fi
+echo "PASS account-status column write denied"
+psql -X -v ON_ERROR_STOP=1 -q -c "UPDATE public.lms_entitlements SET status='revoked' WHERE user_id='00000000-0000-0000-0000-000000000003'"
+assert_count "revoked paid entitlement denied" 0 authenticated 00000000-0000-0000-0000-000000000003 "SELECT count(*) FROM public.lms_lesson_blocks"
+psql -X -v ON_ERROR_STOP=1 -q -c "UPDATE public.lms_entitlements SET status='active',starts_at=now()-interval '2 days',ends_at=now()-interval '1 day' WHERE user_id='00000000-0000-0000-0000-000000000003'"
+assert_count "expired paid entitlement denied" 0 authenticated 00000000-0000-0000-0000-000000000003 "SELECT count(*) FROM public.lms_lesson_blocks"
+psql -X -v ON_ERROR_STOP=1 -q -c "UPDATE public.lms_entitlements SET ends_at=NULL WHERE user_id='00000000-0000-0000-0000-000000000003'"
+psql -X -v ON_ERROR_STOP=1 -q -c "UPDATE public.lms_profiles SET account_status='suspended' WHERE id='00000000-0000-0000-0000-000000000003'"
+assert_count "suspended paid user denied" 0 authenticated 00000000-0000-0000-0000-000000000003 "SELECT count(*) FROM public.lms_lesson_blocks"
+echo "PASS P1 ephemeral PostgreSQL migration + expanded RLS smoke; real Supabase staging still required."
