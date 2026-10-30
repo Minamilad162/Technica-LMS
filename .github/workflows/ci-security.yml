@@ -50,6 +50,9 @@ jobs:
             echo "::warning::TypeScript/typecheck not yet configured (legacy JS demo). Typecheck gate is PENDING, not PASS."
           fi
 
+      - name: P1 schema contract (static checks only)
+        run: npm run test:p1:schema
+
       - name: Legacy project integrity
         run: npm run check
 
