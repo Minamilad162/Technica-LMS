@@ -3,7 +3,7 @@
 > **Canonical project specification / single source of truth**
 >
 > Project: Technica Consult LMS
-> Version: 1.0.3 (execution-level implementation plan)
+> Version: 1.0.4 (P0 source-only baseline findings)
 > Last updated: 2026-10-30 (Africa/Cairo)
 > Repository: https://github.com/Minamilad162/Technica-LMS
 > Target branch: main
@@ -540,6 +540,11 @@ Reserve relation to identity, entitlements and courses; later design admin-creat
 | BUG-015 | MEDIUM | GUARDED / UI provenance | Older uploaded September UI guide must not overwrite the more recent October 24 root guide (includes previously approved motion/video/3D references). Archived older source; current root unchanged. |
 | BUG-016 | LOW | FIX IMPLEMENTED / TEST PENDING | Initial infrastructure script rejected valid local untracked .env secrets; updated to use git ls-files for tracked secret detection, preserving secure local development. Runtime script verification remains pending in CI. |
 
+| BUG-017 | CRITICAL | OPEN / proposed SQL not deployed | Proposed \`supabase/001_lms_schema_PROPOSED.sql\` lacks Course → Domain → Topic → Lesson ancestry: courses.domain text, modules under course, lessons under modules, and topics directly under course. Do not deploy unreviewed; design new four-level migrations and FK tests. Evidence: [P0 source audit](docs/current/P0_BASELINE_AUDIT_2026-10-30.md). |
+| BUG-018 | CRITICAL | OPEN / entitlement model | The proposed SQL lets any authenticated user SELECT published course/module/lesson/topic rows without active enrollment, trial scope or purchase. Introduce entitlement-scoped policies/queries, protect private media and test direct API access before commercial launch. Proposed SQL is not confirmed deployed. |
+| BUG-019 | HIGH | OPEN / onboarding | Proposed SQL restricts profile INSERT to admin but defines no trusted learner profile provisioning after sign-up. Add audited trigger/service-mediated bootstrap with default learner role; test no self-promotion. |
+| BUG-020 | MEDIUM | OPEN / verification gap | P0 2026-10-30 used connected GitHub source inspection only; direct git checkout failed due DNS, and npm/CI/browser/Supabase live tests not independently verified. Record runtime evidence before marking any phase PASS. |
+
 Add new BUG rows immediately when an issue is discovered, include reproduction, root cause, fix, commit, proof and regression-test identifier. Never erase bugs after fixing; change status to FIXED / VERIFIED.
 
 ## 17. Test and release checklist
@@ -629,3 +634,23 @@ GitHub Actions workflow .github/workflows/ci-security.yml and .github/dependabot
 - Confirmed unchanged locked rules: Course → Domain → Topic → Lesson; 70% Low→Medium→High; Mock-only 200 items in 300 minutes; original Technica theme and learner Saved removal.
 - Distinguished private-stream access from full DRM, prepared media security early in P1/P4, and kept certificates for a later scope.
 - Documentation update only; no application code, database migrations, streaming vendor, payment integration, browser QA or release modified/verified by this plan.
+
+
+## 21. P0 source-only audit (2026-10-30)
+
+**Status: P0 IN PROGRESS — NOT PASSED. Paid production remains NO-GO.**
+
+New auditable report: [docs/current/P0_BASELINE_AUDIT_2026-10-30.md](docs/current/P0_BASELINE_AUDIT_2026-10-30.md).
+
+- Inspected repository files: \`package.json\`, app routes, browser-local demo auth/storage, course and question paths, lesson progress, draft Supabase SQL, test scripts and CI config.
+- Confirmed from source: React/Vite demo 1.15.0; protected admin navigation in frontend only; \`src/lib/store.jsx\` and \`src/pages/LearningPage.jsx\` use local browser persistence; \`src/lib/supabase.js\` remains unintegrated with real app flows.
+- **Blockers exposed by direct source review:** proposed SQL lacks the four-level Course/Domain/Topic/Lesson hierarchy; published lesson RLS does not enforce entitlement; proposed profile provisioning after Auth signup is undefined; server-delivered secure questions/timer/mock reservations absent; existing CI lacks package-lock and typecheck.
+- The draft SQL is **not deployed/verified**; findings are pre-deployment risks, not confirmed incidents. Preserve existing v1.15 demo and current designs until a reviewed implementation.
+- Audit method limit: direct git checkout in this environment failed DNS; no npm install, runtime checks, browser tests, live RLS probes, independent CI result, or deployed app verification was performed. GitHub-connected file reads are **static source evidence**, NOT automated test PASS.
+- Proposed P1 packages are explicitly in the audit report: environment separation, Supabase Auth/profile bootstrap, trusted role/entitlement management, canonical schema migrations, GRANT/RLS/direct API tests, demo-to-production adapter, regression/release evidence.
+- Must not move to P1 deployment or declare P0 closed until P0 missing evidence and owner-approved technical/design gates are resolved.
+
+### 2026-10-30 — v1.0.4 P0 inspection notes
+- Added P0 source-only audit report and security/design discrepancies with evidence, acceptance tests and P1 work packages.
+- App code, existing question bank, database migrations and UI were left unchanged; only documentation was committed.
+- Added BUG-017..BUG-020 to permanent register. No reported runtime PASS, paid launch or Supabase migration.
