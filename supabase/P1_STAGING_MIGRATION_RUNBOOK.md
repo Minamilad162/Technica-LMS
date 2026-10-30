@@ -96,3 +96,17 @@ Note: run negative tests under real authenticated identities or accurately imper
 
 - 2026-10-30: SQL/source and \`scripts/test-p1-foundation.mjs\` created on feature branch. CI source-contract checks can pass independently of real SQL execution.
 - No database or Cloudflare environment modified; no production credentials used.
+
+
+## 8. Disposable PostgreSQL CI testing — 2026-10-30
+
+The separate GitHub Actions \`p1-postgres-smoke\` job runs \`scripts/test-p1-postgres-smoke.sh\` against a disposable \`postgres:16\` container. It defines minimal **mock** Supabase \`auth.uid()\` and Auth users table, executes the migration as a PostgreSQL superuser, inserts fake course/user/entitlement fixtures, and verifies behavior under \`anon\` and \`authenticated\` database roles. Cases include:
+- Anonymous catalog read succeeds; anonymous protected lesson blocks read fails.
+- No-entitlement user cannot read lesson blocks; paid user can read published content for their course only.
+- Trial lesson grants allow one explicitly allowlisted lesson; other lessons remain denied.
+- Fake signup metadata \`role=admin\` does not create an admin assignment; direct learner insertion is denied.
+- Authenticated learner cannot change protected profile account-status field.
+- Cross-course isolation; revoked/expired entitlements and suspended account all deny access.
+- Admin can view draft content.
+
+**Distinction:** This verifies migration **PostgreSQL syntax and mocked-role RLS** when CI run is green. It does NOT validate Supabase-hosted Auth triggers, live JWT claims, Data API grants, Storage bucket access, Edge Functions, media signing or real registration/browser behavior. Complete Section 3 negative API matrix on real Supabase staging before any release.
