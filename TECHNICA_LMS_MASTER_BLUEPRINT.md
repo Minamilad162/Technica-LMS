@@ -3,7 +3,7 @@
 > **Canonical project specification / single source of truth**
 >
 > Project: Technica Consult LMS
-> Version: 1.0.5 (P1 authorization and schema design proposal)
+> Version: 1.0.6 (P1 backend foundation draft implementation)
 > Last updated: 2026-10-30 (Africa/Cairo)
 > Repository: https://github.com/Minamilad162/Technica-LMS
 > Target branch: main
@@ -671,3 +671,28 @@ New auditable report: [docs/current/P0_BASELINE_AUDIT_2026-10-30.md](docs/curren
 ### 2026-10-30 — v1.0.5 design documentation
 - Added P1 Auth/Data Model Design for review, with role/entitlement matrix, four-level hierarchy, migration plan and negative security test suite.
 - No code, media, questions, database, environment or production settings changed.
+
+
+## 24. P1 foundation implementation (DRAFT PR #7) — 2026-10-30
+
+**Branch:** \`feat/p1-secure-foundation-20261030\`; **PR:** [#7](https://github.com/Minamilad162/Technica-LMS/pull/7). **Status: CODE IMPLEMENTED IN REVIEW BRANCH / NOT DEPLOYED / NOT MERGED.**
+
+### Implemented code (not live features)
+- \`supabase/migrations/202610300001_p1_foundation.sql\`: fail-on-conflict new migration for dedicated Technica Supabase *staging*, 11 proposed tables and four-level \`courses → domains → topics → lessons → lesson_blocks\`, role assignments, signup profile trigger, trial/paid/manual course entitlements and limited trial lesson grants, protected media metadata, audit table, authorized helper functions, explicit grants/RLS and server-only privileged data writes.
+- \`scripts/test-p1-foundation.mjs\` + \`package.json\` script + GitHub Actions static contract gate, checking ancestry, trigger and no client-driven admin role, time/status entitlement logic, public vs protected access, RLS/GRANT and absent destructive statements.
+- \`supabase/P1_STAGING_MIGRATION_RUNBOOK.md\`: mandatory staging application checklist, direct REST / JWT RLS positive/negative tests, manual verification queries and rollback.
+- \`supabase/README.md\`: explicit warning that older \`supabase/001_lms_schema_PROPOSED.sql\` must **not** be deployed as it conflicts with approved hierarchy.
+
+### Verification, limits and next gate
+- [GitHub Actions run #45](https://github.com/Minamilad162/Technica-LMS/actions/runs/40979943570) on branch commit \`5c8b2f9428daac43ad068571e3aa6e45d4172ea6\`: **SUCCESS**. Log confirms P1 static schema check PASS (11 tables, course chain, trusted signup, time/entitlement and RLS/GRANT guardrails), 1,625 imported ASP questions PASS, old demo regression suite PASS, Vite build PASS, and \`npm audit --audit-level=high\` found 0 known vulnerabilities at that time.
+- These checks **DO NOT parse or execute PostgreSQL**; the new SQL may require adjustments before deployment. No actual Supabase credentials, migration, RBAC negative test, live payment, protected video, user login or device QA were run.
+- PR #7 is independent of Draft PR #6 (which adds a reproducible npm lockfile). PR #7 still uses main's temporary CI \`npm install\` fallback; typecheck remains pending. Do not misrepresent either as resolved in main.
+- **P1 incomplete:** obtain approved development/staging Supabase project, execute/review migration, verify auth signup trigger and correct data access using separate identities, document Storage policies, build server-protected question/role/grant APIs, and integrate Auth frontend adapters after verified backend.
+- Current legacy React demo, ASP/PSEE question banks, current assessment/practice settings, UI/animations and route behavior are unchanged.
+- Decision status: architecture and UX owner-approved invariants preserved; implementation SQL is **PROPOSED FOR REVIEW**, not a silent approval of every role/permission choice.
+- **Risk registry:** BUG-017 (wrong older hierarchy), BUG-018 (published content not entitlement-checked) and BUG-019 (signup profile path) have draft mitigations in PR #7, but **remain OPEN until staged SQL and direct API tests PASS**.
+
+### 2026-10-30 — v1.0.6 P1 review implementation
+- Added first actual P1 backend migration, test gate, runbook and warning against outdated schema.
+- GitHub Actions static test passed on development branch; database/migrations/front-end production integration remain unexecuted.
+- No merge to main, cloud deployment, database change, uploaded customer material or user-visible UI change.
