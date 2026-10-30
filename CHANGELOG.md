@@ -1,3 +1,11 @@
+### 2026-10-30 — P0 build reproducibility (Draft PR #6, not merged)
+
+- Verified existing \`main\` CI run #37 (2026-10-30, head \`274bcad\`): 1,625 original imported ASP questions, existing demo regression scripts, Vite build, dependency audit all PASS; that run used a warned \`npm install\` fallback.
+- Generated \`package-lock.json\` using npm on GitHub Actions and committed it to feature branch \`chore/p0-reproducible-install-20261030\`. Changed CI to require \`npm ci --no-fund\`, and removed temporary diagnostic logging.
+- CI run #41 (head \`4cbf887\`) passed \`npm ci\`, regression suite, build and audit with 0 known vulnerabilities found at the time of execution. The final PR head must pass too.
+- Fixed BUG-013 **in draft PR**, not yet merged; TypeScript typecheck is still pending. No app code, design, imported data, Supabase schema, storage or deployed behavior was changed.
+- Updated \`docs/current/P0_BASELINE_AUDIT_2026-10-30.md\` and the canonical \`TECHNICA_LMS_MASTER_BLUEPRINT.md\` with evidence and remaining blockers. P0 partially complete; production remains NO-GO.
+
 ### 2026-10-28 — Infrastructure verification and safeguard follow-up
 
 - Verified 20 expected repository paths on main, including all three owner-supplied original document snapshots by expected text lengths.
