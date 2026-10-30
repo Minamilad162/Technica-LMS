@@ -43,3 +43,12 @@ Desktop at 1280+; mobile at 375/390/430 widths; browser reload and back button; 
 
 ## Test evidence template
 Command / environment / commit / timestamp / duration / PASS-FAIL-SKIPPED / observed output / screenshots or link / owner. Record blocked checks instead of fabricating results.
+
+
+## P1 disposable PostgreSQL test gate (implementation branch only)
+
+- \`npm run test:p1:schema\` runs Node-only contract assertions, NOT SQL execution.
+- \`bash scripts/test-p1-postgres-smoke.sh\` runs in a GitHub Actions \`postgres:16\` temporary service. It requires PostgreSQL client \`psql\` and test role/bootstrap stubs; do not point it at user databases.
+- CI job \`p1-postgres-smoke\` applies \`supabase/migrations/202610300001_p1_foundation.sql\` to a disposable test DB and validates anonymous/paid/trial/admin access, cross-course isolation, revoked/expired entitlements, suspension and self-privilege escalation denial.
+- The passing CI job does **not** replace a real Supabase staging test with signed JWTs, Auth user lifecycle, Data API, Storage and Edge Functions. Keep those as release blockers.
+
