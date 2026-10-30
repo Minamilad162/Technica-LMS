@@ -3,7 +3,7 @@
 > **Canonical project specification / single source of truth**
 >
 > Project: Technica Consult LMS
-> Version: 1.0.6 (P1 backend foundation draft implementation)
+> Version: 1.0.7 (P1 PostgreSQL sandbox smoke tests)
 > Last updated: 2026-10-30 (Africa/Cairo)
 > Repository: https://github.com/Minamilad162/Technica-LMS
 > Target branch: main
@@ -696,3 +696,15 @@ New auditable report: [docs/current/P0_BASELINE_AUDIT_2026-10-30.md](docs/curren
 - Added first actual P1 backend migration, test gate, runbook and warning against outdated schema.
 - GitHub Actions static test passed on development branch; database/migrations/front-end production integration remain unexecuted.
 - No merge to main, cloud deployment, database change, uploaded customer material or user-visible UI change.
+
+
+## 25. P1 ephemeral SQL/RLS verification — 2026-10-30
+
+- Added \`scripts/test-p1-postgres-smoke.sh\` and a dedicated GitHub Actions job with a disposable PostgreSQL 16 container. The smoke harness provisions fake Supabase Auth/DB roles and exercises the **actual new migration SQL** (not just text matching).
+- [GitHub Actions run #51](https://github.com/Minamilad162/Technica-LMS/actions/runs/40980401056) at head \`68b66c972d631de7be37d0d9b3e49b945c159d84\`: both \`validate\` and \`p1-postgres-smoke\` jobs **SUCCESS**. Job logs confirm public catalog, unentitled deny, paid read, trial allowlist, admin draft read, no client admin self-grant and anonymous block deny. Later test refinements further cover cross-course isolation, expiry, revoke and suspension; use their final job run as proof.
+- **Important status:** PostgreSQL success is a significant SQL/role-policy test, but mocks Supabase Auth and uses a disposable service. Live Supabase Staging JWT, Auth, Data API, Storage and other modules are NOT tested/deployed. No production claim or merge into main.
+- Updated \`supabase/P1_STAGING_MIGRATION_RUNBOOK.md\` with exact test boundaries. Maintain owner approval gate for applying real database migrations. BUG-017/018/019 still OPEN until real Supabase tests.
+
+### 2026-10-30 — v1.0.7 ephemeral database test
+- Improved P1 test evidence from static source-only checks to actual PostgreSQL 16 migration/RLS test on disposable GitHub runner; no external database used.
+- No user-facing UI, original ASP bank, cloud environment, payment or real video changed.
