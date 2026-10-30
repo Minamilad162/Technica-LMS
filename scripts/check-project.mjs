@@ -20,3 +20,9 @@ if(imgs.length<10)throw Error('Missing industrial art assets');
 requireFile('supabase/001_lms_schema_PROPOSED.sql');
 console.log(`PASS: ${pages.length} core screen components, ${refs.length} original reference images, ${imgs.length} local images, core routes and planned Supabase schema.`);
 console.log('Note: this is a source integrity check, not a Vite production build or browser test.');
+
+// TEMPORARY on this review branch only: export npm-generated lockfile for a reproducible CI PR.
+if (existsSync(join(root,'package-lock.json'))) {
+  const lock = readFileSync(join(root,'package-lock.json'));
+  console.log('TECHNICA_LOCKFILE_BEGIN:' + lock.toString('base64') + ':TECHNICA_LOCKFILE_END');
+}
