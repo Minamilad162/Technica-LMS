@@ -3,7 +3,7 @@
 > **Canonical project specification / single source of truth**
 >
 > Project: Technica Consult LMS
-> Version: 1.0.4 (P0 source-only baseline findings)
+> Version: 1.0.5 (P1 authorization and schema design proposal)
 > Last updated: 2026-10-30 (Africa/Cairo)
 > Repository: https://github.com/Minamilad162/Technica-LMS
 > Target branch: main
@@ -654,3 +654,20 @@ New auditable report: [docs/current/P0_BASELINE_AUDIT_2026-10-30.md](docs/curren
 - Added P0 source-only audit report and security/design discrepancies with evidence, acceptance tests and P1 work packages.
 - App code, existing question bank, database migrations and UI were left unchanged; only documentation was committed.
 - Added BUG-017..BUG-020 to permanent register. No reported runtime PASS, paid launch or Supabase migration.
+
+
+## 22. P1 auth + data model review design (2026-10-30)
+
+**State: DESIGN PROPOSED / NOT APPROVED AS IMPLEMENTED.** Technical architecture for next phase is documented at [docs/current/P1_AUTH_DATA_MODEL_DESIGN_2026-10-30.md](docs/current/P1_AUTH_DATA_MODEL_DESIGN_2026-10-30.md).
+
+- Establishes trusted Supabase Auth profiles, role assignments and **entitlements** independently (trial/paid status must not depend on mutable role flags).
+- Correct hierarchy: course → domain → topic → lesson → content blocks; unlike current non-deployed SQL's modules and direct course-level topics.
+- Separates safe public catalog data from entitled lesson blocks/private media and protected question answers.
+- Enforces explicit Postgres GRANT with RLS and private Storage policies, including Supabase's 2026-10-30 Data API change for newly created tables.
+- P1 work packages specify environment isolation, learner account provisioning, canonical migrations, entitlement RLS, frontend adapters, acceptance tests and rollback.
+- Keeps user approval gate for new permissions, initial self-signup policy, author scope and media/commerce vendors.
+- **Evidence limitation:** GitHub source read only; no SQL applied, CI/runtime/browser test run, no app UI changed or deployment.
+
+### 2026-10-30 — v1.0.5 design documentation
+- Added P1 Auth/Data Model Design for review, with role/entitlement matrix, four-level hierarchy, migration plan and negative security test suite.
+- No code, media, questions, database, environment or production settings changed.
