@@ -1,3 +1,12 @@
+### 2026-10-30 — P1 backend foundation draft (PR #7; no DB deployment)
+
+- Added a review-only Supabase SQL migration for Course → Domain → Topic → Lesson hierarchy with strict foreign keys and refusal to overwrite legacy tables.
+- Proposed trusted profile creation on Auth signup, scoped admin/content-author role assignments, published-content access gated by active trial/paid/manual entitlements, trial lesson allowlist and server-only media metadata/audit records.
+- Applied explicit Data API grants and RLS policy declarations to all 11 proposed P1 tables. An old incompatible schema proposal is explicitly marked **do not deploy**.
+- Added a static \`test:p1:schema\` and GitHub Actions gate; full pre-existing demo/ASP tests and Vite build were preserved.
+- Added P1 staging migration/test/rollback runbook. **Static CI PASS does not establish PostgreSQL syntax correctness or live RLS security.** No database was accessed and no app/UX behavior changed.
+- Updated TECHNICA_LMS_MASTER_BLUEPRINT.md; BUG-017/018/019 remain open until staged RLS/auth verification. Reproducible npm-ci lockfile remains separate Draft PR #6.
+
 ### 2026-10-28 — Infrastructure verification and safeguard follow-up
 
 - Verified 20 expected repository paths on main, including all three owner-supplied original document snapshots by expected text lengths.
