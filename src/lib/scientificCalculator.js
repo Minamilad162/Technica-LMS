@@ -44,15 +44,23 @@ const calcFunction=(name,args,mode)=>{
  case 'fact':unary();return factorial(x);
  case 'nCr':binary();return choose(x,z);
  case 'nPr':binary();return permute(x,z);
- case 'root':binary();return Math.pow(z,1/x);
- case 'mod':binary();return x%z;
+ case 'root':binary();if(x===0)throw Error('Zero-degree root');if(z<0){if(!Number.isInteger(x)||Math.abs(x)%2!==1)throw Error('Even root of a negative number');return -Math.pow(-z,1/x)}return Math.pow(z,1/x);
+ case 'mod':binary();if(z===0)throw Error('Division by zero');return x%z;
+ case 'deg':unary();return fromRad(x,mode);
+ case 'rad':unary();return x*ANGLE[mode];
+ case 'grad':unary();return x*200/Math.PI;
+ case 'dms':{if(args.length<1||args.length>3)throw Error('dms expects 1–3 inputs');const deg=x,minutes=args[1]||0,seconds=args[2]||0;if(minutes<0||minutes>=60||seconds<0||seconds>=60)throw Error('Invalid DMS minutes/seconds');return Math.sign(deg||1)*(Math.abs(deg)+minutes/60+seconds/3600)}
+ case 'RtoPr':binary();return Math.hypot(x,z);
+ case 'RtoPtheta':binary();return fromRad(Math.atan2(z,x),mode);
+ case 'PtoRx':binary();return x*Math.cos(toRad(z,mode));
+ case 'PtoRy':binary();return x*Math.sin(toRad(z,mode));
  case 'mixed':{if(args.length!==3)throw Error('mixed expects whole, numerator, denominator');if(args[2]===0)throw Error('Division by zero');return args[0]+Math.sign(args[0]||1)*args[1]/args[2]}
  case 'rand':if(args.length)throw Error('rand takes no inputs');return Math.random();
  case 'randInt':binary();if(!Number.isInteger(x)||!Number.isInteger(z)||x>z)throw Error('randInt expects two ordered integers');return Math.floor(Math.random()*(z-x+1))+x;
  default:throw Error('Unknown function: '+name);
  }
 };
-const KNOWN=new Set('sin cos tan asin acos atan sinh cosh tanh asinh acosh atanh ln log log2 exp pow10 sqrt cbrt abs inv floor ceil round fact nCr nPr root mod mixed rand randInt'.split(' '));
+const KNOWN=new Set('sin cos tan asin acos atan sinh cosh tanh asinh acosh atanh ln log log2 exp pow10 sqrt cbrt abs inv floor ceil round fact nCr nPr root mod mixed rand randInt deg rad grad dms RtoPr RtoPtheta PtoRx PtoRy'.split(' '));
 export const CALC_ANGLE_MODES=Object.freeze(['DEG','RAD','GRAD']);
 export function evaluateScientific(raw,options={}){
  const expression=String(raw||'').trim();
@@ -93,6 +101,7 @@ export function evaluateScientific(raw,options={}){
     else if(name==='Ans')left=Number(options.ans)||0;
     else if(name==='M')left=Number(options.memory)||0;
     else if(name==='x'&&Number.isFinite(options.x))left=options.x;
+    else if(Object.prototype.hasOwnProperty.call(options.variables||{},name)&&/^(?:x|y|z|t|a|b|c|L1|L2|L3)$/.test(name)&&Number.isFinite(options.variables[name]))left=options.variables[name];
     else throw Error('Unknown symbol: '+name);
   }else throw Error('Expected a number or function');
   while(true){
