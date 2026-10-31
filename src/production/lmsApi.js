@@ -18,9 +18,11 @@ export function nestStructure(domains=[],topics=[],lessons=[]) {
 const ordered = q => q.order('position',{ascending:true}).order('id',{ascending:true});
 function value(data,error){if(error)throw new Error(error.message||'Database request failed');return data;}
 export async function loadIdentity(db,user) {
-  const profile=value(...Object.values(await db.from('lms_profiles').select('full_name,account_status').eq('id',user.id).maybeSingle()).slice(0,2));
+  const {data:profileData,error:profileError}=await db.from('lms_profiles').select('full_name,account_status').eq('id',user.id).maybeSingle();
+  const profile=value(profileData,profileError);
   if(!profile)throw Error('Your account profile is missing. Contact the LMS administrator; do not create an admin role from the browser.');
-  const roles=value(...Object.values(await db.from('lms_role_assignments').select('role,scope_course_id').eq('user_id',user.id).is('revoked_at',null)).slice(0,2));
+  const {data:roleData,error:roleError}=await db.from('lms_role_assignments').select('role,scope_course_id').eq('user_id',user.id).is('revoked_at',null);
+  const roles=value(roleData,roleError);
   return {profile,roles:roles||[],isAdmin:profile.account_status==='active'&&(roles||[]).some(r=>r.role==='admin')};
 }
 export async function listCourses(db) {
