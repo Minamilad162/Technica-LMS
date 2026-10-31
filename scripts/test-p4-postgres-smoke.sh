@@ -78,6 +78,12 @@ qid=$(run_as authenticated "$paid" \
  "SELECT public.lms_p4_attempt_payload('$attempt')->'questions'->0->>'id'")
 saved=$(run_as authenticated "$paid" "SELECT public.lms_p4_save_answer('$attempt','$qid',0)->>'saved'")
 [[ "$saved" == true ]] || { echo 'FAIL server answer save'; exit 1; }
+instant=$(run_as authenticated "$paid" "SELECT public.lms_p4_save_answer('$attempt','$qid',0)->>'correctIndex'")
+[[ "$instant" == 0 ]] || { echo 'FAIL Quick10 feedback after saving'; exit 1; }
+if run_as authenticated "$paid" "SELECT public.lms_p4_save_answer('$attempt','$qid',1)" >/dev/null 2>&1; then
+ echo 'FAIL Quick10 changed answer after feedback'; exit 1
+fi
+echo 'PASS immediate feedback + immutable Quick10 answer'
 if run_as authenticated "$trial" "SELECT public.lms_p4_finish_practice('$attempt')" >/dev/null 2>&1; then
  echo 'FAIL another user finished attempt';exit 1
 fi
@@ -98,4 +104,15 @@ fi
 echo 'PASS post-finish answer mutation denied'
 psql -X -v ON_ERROR_STOP=1 -q -c \
  "UPDATE public.lms_practice_attempts SET deadline_at=now()-interval '1 minute' WHERE id='$attempt'" >/dev/null 2>&1 || true
+# Deadline cannot be reset by client; timed attempt rejects late answers.
+timedrequest=88888888-8888-8888-8888-888888888888
+timed=$(run_as authenticated "$paid" "SELECT public.lms_p4_start_practice('$course','timed25',25,'$timedrequest',NULL,1200)->>'attemptId'")
+timedqid=$(run_as authenticated "$paid" "SELECT public.lms_p4_attempt_payload('$timed')->'questions'->0->>'id'")
+psql -X -v ON_ERROR_STOP=1 -q -c "UPDATE public.lms_practice_attempts SET deadline_at=now()-interval '1 second' WHERE id='$timed'"
+if run_as authenticated "$paid" "SELECT public.lms_p4_save_answer('$timed','$timedqid',0)" >/dev/null 2>&1; then
+ echo 'FAIL expired timed attempt accepted answer';exit 1
+fi
+timed_state=$(run_as authenticated "$paid" "SELECT public.lms_p4_finish_practice('$timed')->>'state'")
+[[ "$timed_state" == expired ]] || { echo 'FAIL timed quiz not expired';exit 1; }
+echo 'PASS server clock rejects late saves and returns expired review'
 echo 'PASS P4 RLS, session security, fixed preset, reserved exclusions and transactional scoring'
