@@ -3,7 +3,7 @@
 > **Canonical project specification / single source of truth**
 >
 > Project: Technica Consult LMS
-> Version: 1.1.3 (TI-30XS reference parity audit and real browser tests)
+> Version: 1.1.4 (photo-reference physical calculator UI)
 > Last updated: 2026-10-31 (Africa/Cairo)
 > Repository: https://github.com/Minamilad162/Technica-LMS
 > Target branch: main
@@ -851,3 +851,23 @@ Verification:
 ### 2026-10-31 — v1.1.3 calculator audit record
 - Maintained accepted quiz styles and answer/score/timer business logic; no database migration or live cloud deployment claimed. Do not reduce existing operations merely to match a test.
 - Pending release gates: most recent Playwright desktop/mobile and all CI checks on exact review SHA; manual iOS/Android usability and official device output parity remain unverified.
+
+
+## 32. User photo-based calculator physical layout / compact keypad — 2026-10-31
+
+Owner explicitly requested implementing the supplied TI‑30XS MultiView **visual shape, exact keypad grouping and spatial layout** IN THE CODE of Technica LMS, not an image mockup. They also requested **as little internal scrolling as possible**, while keeping questions and choices visible and preserving all existing scientific functionality. The reference is user-supplied image in the conversation, not artwork embedded in the app.
+
+**Implemented as an independently designed, Technica-branded physical-style UI** (no TI trademark/logo/photographic assets, no claim of firmware parity):
+- \`src/components/CalculatorPhysicalKeypad.jsx\`: stable 5-column layout of **35 main keys in 7 rows**, plus **6 upper function keys in 2 rows**, circular four-arrow navigation pad occupying upper-right two columns, yellow-green second-labels and color-separated white numeric, dark operations, blue scientific keys and lime 2nd key. Key order LOCKED across responsive widths:
+  - upper: 2nd / MODE / DELETE alongside four-arrow pad; LOG / PRB / DATA below.
+  - main: LN n/d ×10^x TABLE CLEAR / π SIN COS TAN ÷ / ^ x⁻¹ ( ) × / x² 7 8 9 − / a b/c 4 5 6 + / STO► 1 2 3 ◀▶ / ON 0 . (−) ENTER.
+- \`src/calculatorPhysical.css\`: blue-grey physical rounded shell, white side rails, pale LCD, compact nested math input and mode labels, responsive per-viewport key heights. The **PRIMARY keypad remains rendered with all main key rows visible and no internal scroll/reordering** on 1440×900 desktop and 375/390/430 widths in Chromium tests. The menu panels may scroll *only if the advanced form content genuinely exceeds available space*. No permanent 8-button tab nav taking up primary calculator height.
+- \`src/components/ScientificCalculator.jsx\`: same safe science/math engine and state, with primary physical keypad and contextual **MODE, PRB, DATA, TABLE, STO/MEMORY** menus. \`2nd\` now maps visible upper legends to inverse trig, 10ˣ/eˣ, HYP, K, angle/stats, mixed/decimal, etc. All advanced tools remain reachable by TOOLS button/menu panel. Existing MathTemplateEditor, previous answer, memory, statistics, list editor, K, history, variable panels and random seed remain; menus overlay keypad rather than permanently expand it.
+- The circular directional control is linked to nested MathTemplateEditor focus/field navigation (or Classic text cursor).
+- Calculator remains floating and non-modal in Practice, Assessment and Lesson Quiz; no change to question/answer state, navigation, timer or quiz scoring. On mobile the question area is independently scrollable during calculator use; only menus and long math expressions can scroll inside the calculator.
+- \`scripts/test-calculator-physical-layout.mjs\` and strengthened real Chromium \`scripts/test-calculator-browser.mjs\` assert the photo-based key order, 35+6 keys, directional pad, key visibility/no internal keypad scroll, menu behavior, desktop drag, calculator operations, answers/navigation with tool open and viewport bounds. CI includes all previous science/TI-reference cases plus disposable PostgreSQL tests.
+
+**Known limitations / non-regression:** A visually familiar layout is NOT an official TI-30XS MultiView replica or a guarantee of all firmware functions. Protected code and state remain unchanged. Desktop and viewport-simulated browser QA do not replace real iOS/Android hardware testing. UI reference must remain original Technica brand design (no TI logos and no licensed firmware/image code). If height is extremely constrained, the fallback may expose a menu scrollbar while the main keypad still fits supported test sizes.
+
+### 2026-10-31 — v1.1.4 physical keypad layout
+- Implemented user-approved physical reference and compact scrolling-free primary calculator. Requires review-head unit/Chromium CI success before merge into main. Rollback: revert isolated \`CalculatorPhysicalKeypad\` + \`calculatorPhysical.css\` and parent UI integration, without touching math engine or SQL.
