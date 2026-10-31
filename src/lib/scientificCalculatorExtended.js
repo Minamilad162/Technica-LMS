@@ -1,6 +1,7 @@
 /* Original Technica extensions for textbook-like exact results, TI-style lists,
    memories, angle tools and constant operator. No vendor firmware/emulation. */
 import {evaluateScientific,formatScientific,toFraction,oneVariableStats,twoVariableStats} from './scientificCalculator.js';
+import {exactRationalExpression,formatCalculatorDisplay} from './calculatorPrecision.js';
 export const STORED_VARIABLES=Object.freeze(['x','y','z','t','a','b','c']);
 export const freshVariables=()=>Object.fromEntries(STORED_VARIABLES.map(k=>[k,0]));
 const finite=v=>{if(!Number.isFinite(v))throw Error('Math error');return Object.is(v,-0)?0:v};
@@ -30,6 +31,12 @@ export function exactScientific(value,expression=''){
  }
  // Rational display is only used for explicit rational input, not all measured decimals.
  if(/[/%]/.test(exp)||/^mixed\(/.test(exp)){
+  const rational=exactRationalExpression(expression);
+  if(rational){
+   const n=Number(rational.n),d=Number(rational.d);
+   if(Number.isSafeInteger(n)&&Number.isSafeInteger(d)&&d>0&&Math.abs(value-n/d)<1e-10)
+     return {type:d===1?'integer':'fraction',numerator:n,denominator:d,value:String(n)};
+  }
   const f=toFraction(value,100000);
   if(f&&Math.abs(value-f.numerator/f.denominator)<1e-10){
    return {type:f.denominator===1?'integer':'fraction',numerator:f.numerator,denominator:f.denominator,value:String(f.numerator)};
@@ -164,5 +171,6 @@ export function applyConstantOperator(previousValue,expression,opts={}){
  return evaluateScientific(expression,{...opts,x:previousValue,variables:{...opts.variables,x:previousValue}});
 }
 export function formatWithMode(value,{notation='NORM',fixed=null,asFraction=false,mixed=false}={}){
- return formatScientific(value,{notation,digits:fixed,asFraction,mixed});
+ if(asFraction)return formatScientific(value,{notation,digits:fixed,asFraction,mixed});
+ return formatCalculatorDisplay(value,{notation,fixed});
 }
