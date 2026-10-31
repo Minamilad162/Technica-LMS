@@ -121,6 +121,7 @@ try{
    const curtain=page.locator('.tc-capture-curtain');
    await curtain.waitFor({state:'visible'});
    assert.equal(await curtain.getAttribute('data-reason'),'focus-loss');
+   assert.equal(await curtain.evaluate(el=>el.parentElement===document.body),true,'Curtain must be portaled outside moving page containers');
    const png=await page.screenshot();
    const pixel=await page.evaluate(async base64=>{
     const img=new Image();
