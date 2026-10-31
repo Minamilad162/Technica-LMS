@@ -5,12 +5,14 @@ on:
     branches: [main]
     paths:
       - 'src/components/ScientificCalculator.jsx'
+      - 'src/components/CalculatorPhysicalKeypad.jsx'
       - 'src/components/MathTemplateEditor.jsx'
       - 'src/components/CalculatorAdvancedPanels.jsx'
       - 'src/lib/calculator*.js'
       - 'src/lib/scientificCalculator*.js'
       - 'src/lib/mathTemplateEditor.js'
       - 'src/scientificCalculator.css'
+      - 'src/calculatorPhysical.css'
       - 'scripts/test-calculator-browser.mjs'
       - '.github/workflows/calculator-browser-audit.yml'
   workflow_dispatch:

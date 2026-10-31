@@ -32,6 +32,7 @@ try{
  for(const device of [{name:'desktop',viewport:{width:1440,height:900},touch:false},{name:'mobile375',viewport:{width:375,height:812},touch:true},{name:'mobile390',viewport:{width:390,height:844},touch:true},{name:'mobile430',viewport:{width:430,height:932},touch:true}]){
   const context=await browser.newContext({viewport:device.viewport,hasTouch:device.touch,isMobile:device.touch});
   const page=await context.newPage(),exceptions=[];
+  page.setDefaultTimeout(6500);
   page.on('pageerror',e=>exceptions.push(String(e)));
   await demoLogin(page);
   await check(device.name+' login and start practice',async()=>{
@@ -46,6 +47,43 @@ try{
    await page.locator('.tc-calc-window').waitFor({state:'visible'});
    assert.ok(await page.locator('.answer-option').count()>1);
    assert.ok(await page.locator('.tc-calc-window').isVisible());
+  });
+  await check(device.name+' physical keypad matches reference layout without internal scrolling',async()=>{
+   const keys=page.locator('.tc-calc-main-grid .tc-calc-physical-key');
+   assert.equal(await keys.count(),35,'Expected seven rows of five scientific keys');
+   const top=page.locator('.tc-calc-top-grid .tc-calc-physical-key');
+   assert.equal(await top.count(),6,'Expected six upper functions around arrow pad');
+   assert.ok(await page.locator('.tc-calc-direction-pad').isVisible());
+   const order=await keys.evaluateAll(els=>els.map(el=>el.dataset.calcKey));
+   assert.deepEqual(order.slice(0,5),['ln','fraction','ee','table','clear']);
+   assert.deepEqual(order.slice(15,20),['square','7','8','9','subtract']);
+   assert.deepEqual(order.slice(30,35),['on','0','dot','neg','enter']);
+   const geometry=await page.locator('.tc-calc-body').evaluate(el=>({
+     height:el.getBoundingClientRect().height,
+     viewport:el.closest('.tc-calc-window').getBoundingClientRect().height,
+     screen:window.innerHeight,clientHeight:el.clientHeight,scrollHeight:el.scrollHeight,
+     keyHeight:el.querySelector('.tc-calc-keys').getBoundingClientRect().height,
+     bodyBottom:el.getBoundingClientRect().bottom,
+     winBottom:el.closest('.tc-calc-window').getBoundingClientRect().bottom
+   }));
+   assert.ok(geometry.scrollHeight-geometry.clientHeight<=4,'Calculator requires body scrolling: '+JSON.stringify(geometry));
+   assert.ok(geometry.winBottom<=geometry.screen+2,'Calculator extends below visible viewport: '+JSON.stringify(geometry));
+   const last=await page.locator('.tc-calc-main-grid [data-calc-key="enter"]').boundingBox();
+   const win=await page.locator('.tc-calc-window').boundingBox();
+   assert.ok(last.y+last.height<=win.y+win.height-2,'Last row clipped behind shell');
+  });
+  await check(device.name+' 2nd function layer and real menu controls',async()=>{
+   await page.locator('.tc-calc-top-grid [data-calc-key="second"]').click();
+   assert.ok(await page.locator('.tc-calc-top-grid [data-calc-key="second"]').getAttribute('aria-pressed')==='true');
+   await page.locator('.tc-calc-top-grid [data-calc-key="prb"]').click();
+   assert.ok(await page.locator('.tc-calc-menu-title').innerText().then(x=>x.includes('Angle')));
+   await page.getByRole('button',{name:'Return to calculator keypad'}).click();
+   await page.locator('.tc-calc-top-grid [data-calc-key="mode"]').click();
+   assert.ok(await page.locator('.tc-calc-display-settings').isVisible());
+   await page.getByRole('button',{name:'Return to calculator keypad'}).click();
+   await page.locator('.tc-calc-top-grid [data-calc-key="data"]').click();
+   assert.ok(await page.getByText('Data editor · L1 / L2 / L3').isVisible());
+   await page.getByRole('button',{name:'Return to calculator keypad'}).click();
   });
   await check(device.name+' mathematical input and keyboard ENTER',async()=>{
    const input=page.locator('input.tc-math-field').first();
@@ -71,7 +109,7 @@ try{
    assert.ok(await page.locator('.tc-calc-window').isVisible());
   });
   await check(device.name+' question navigation preserves calculator',async()=>{
-   const next=page.locator('.quiz-action-row button').last();
+   const next=device.touch?page.getByRole('button',{name:'Next question while calculator open'}):page.locator('.quiz-action-row button').last();
    await next.click();
    assert.ok(await page.locator('.tc-calc-window').isVisible());
    assert.ok((await page.locator('.quiz-status').innerText()).includes('Question 2'));
@@ -104,6 +142,7 @@ try{
  }
  const ctx=await browser.newContext({viewport:{width:1280,height:800}});
  const page=await ctx.newPage();
+ page.setDefaultTimeout(6500);
  await demoLogin(page);
  await check('assessment route opens scientific calculator',async()=>{
    await page.goto(ROOT+'/#/assessments',{waitUntil:'domcontentloaded'});

@@ -8,6 +8,7 @@ import MathTemplateEditor from './MathTemplateEditor';
 import{createMathDocument,serializeMathDocument}from'../lib/mathTemplateEditor';
 import{seededCalculatorRandom}from'../lib/calculatorRandom';
 import{finishCalculatorEntry}from'../lib/calculatorEntry';
+import CalculatorPhysicalKeypad from './CalculatorPhysicalKeypad';
 
 // Original Technica keypad and calculation code; no third-party calculator emulator.
 const KEYS=[
@@ -43,7 +44,7 @@ function ExactOutput({exact}){
  if(exact.type==='radical')return <span className="tc-exact-radical">{exact.coefficient===1?'':exact.coefficient}<span>√{exact.radicand}</span></span>;
  return exact.value;
 }
-export default function ScientificCalculator({context='Quiz'}){
+export default function ScientificCalculator({context='Quiz',onNext=null,onPrevious=null,canPrevious=false,currentQuestion=null,questionCount=null}){
  const[open,setOpen]=useState(false),[minimized,setMinimized]=useState(false);
  const[expression,setExpression]=useState(''),[result,setResult]=useState('0');
  const[answer,setAnswer]=useState(0),[memory,setMemory]=useState(0),[history,setHistory]=useState([]);
@@ -80,10 +81,39 @@ export default function ScientificCalculator({context='Quiz'}){
    }catch(e){setError(e.message||'Math error')}
  },[expression,mathDoc,angle,answer,memory,variables,notation,fraction,mixed,fixed,showExact,viewMode,random]);
  const press=useCallback(key=>{
-   if(key==='second'){setSecond(s=>!s);return}
-   if(key==='mode'){setAngle(a=>a==='DEG'?'RAD':a==='RAD'?'GRAD':'DEG');return}
+   if(key==='second'){setSecond(v=>!v);return}
+   const openMenu=name=>{setSecond(false);setTab(current=>current===name?'keys':name);setShowHistory(false)};
+   // Hardware-inspired 2nd layer: secondary marks above the photographed keys.
+   if(second){
+     if(key==='mode'){setSecond(false);setTab('keys');return}
+     if(key==='delete'){setSecond(false);mathEditor.current?.focus();return}
+     if(key==='prb'){openMenu('angle');return}
+     if(key==='data'){openMenu('stats');return}
+     if(key==='pi'){openMenu('extra');return}
+     if(key==='divide'){openMenu('constant');return}
+     if(key==='ee'){openMenu('extra');return}
+     if(key==='table'){setSecond(false);setShowExact(v=>!v);return}
+     if(key==='clear'||key==='0'){setSecond(false);resetCalculator();return}
+     if(key==='fraction'){setSecond(false);setFraction(v=>!v);setShowExact(false);setResult(formatWithMode(answer,{notation,fixed:fixed==='FLOAT'?null:Number(fixed),asFraction:!fraction,mixed}));return}
+     if(key==='mixed'){openMenu('vars');return}
+     if(key==='store'){setSecond(false);insert('M');return}
+     if(key==='neg'){setSecond(false);insert('Ans');return}
+     if(key==='on'){setSecond(false);setMinimized(true);return}
+     if(key==='history'){setSecond(false);insert('Ans');return}
+     if(key==='pow'){setSecond(false);template('nthRoot');return}
+     if(key==='inv'){setSecond(false);template('squareRoot');return}
+     if(key==='multiply'){setSecond(false);insert('%');return}
+     if(key==='dot'){setSecond(false);openMenu('mode');return}
+     if(key==='enter'){setSecond(false);setShowHistory(v=>!v);return}
+   }
+   if(key==='mode'){openMenu('mode');return}
+   if(key==='prb'){openMenu('prb');return}
+   if(key==='data'){openMenu('lists');return}
+   if(key==='table'){openMenu('table');return}
+   if(key==='on'){setTab('keys');setMinimized(false);return}
+   if(key==='history'){setShowHistory(v=>!v);return}
    if(key==='delete'){if(viewMode==='MATH')mathEditor.current?.deleteBackward();else setExpression(e=>e.slice(0,-1));setError('');return}
-   if(key==='clear'){setExpression('');setMathDoc(createMathDocument());setResult('0');setError('');return}
+   if(key==='clear'){setExpression('');setMathDoc(createMathDocument());setResult('0');setError('');setTab('keys');return}
    if(key==='history'){setShowHistory(s=>!s);return}
    if(key==='enter'){evaluate();return}
    if(key==='nCr'||key==='nPr'){insert(key+'(');return}
@@ -91,7 +121,7 @@ export default function ScientificCalculator({context='Quiz'}){
    if(key==='fraction'){template('fraction');return}
    if(key==='mixed'){template('mixed');return}
    if(second){
-     const alt={log:'pow10(',ln:'exp(',sin:'asin(',cos:'acos(',tan:'atan(',sqrt:'cbrt(',square:'sqrt(',fact:'rand()',inv:'abs('};
+     const alt={log:'pow10(',ln:'exp(',sin:'asin(',cos:'acos(',tan:'atan(',sqrt:'cbrt(',square:'sqrt(',fact:'rand()',inv:'sqrt(',square:'sqrt('};
      if(alt[key]){insert(alt[key]);setSecond(false);return}
    }
    const dict={add:'+',subtract:'-',multiply:'×',divide:'÷',pow:'^',square:'^2',cube:'^3',
@@ -102,7 +132,7 @@ export default function ScientificCalculator({context='Quiz'}){
    if(viewMode==='MATH'&&key==='pow'){template('power');return}
    const value=NUMBERS.has(key)?(key==='dot'?'.':key):dict[key];
    if(value)insert(value);
- },[expression,answer,angle,memory,second,insert,evaluate,fraction,mixed,notation,variables,viewMode]);
+ },[expression,answer,angle,memory,second,insert,evaluate,fraction,mixed,notation,variables,viewMode,showExact,fixed]);
  useEffect(()=>{
    if(!open||minimized)return;
    function onKey(e){
@@ -134,6 +164,15 @@ export default function ScientificCalculator({context='Quiz'}){
    const rect=root.current?.getBoundingClientRect();if(!rect)return;
    setCoords({left:clamp(e.clientX-drag.current.x,8,Math.max(8,window.innerWidth-rect.width-8)),
               top:clamp(e.clientY-drag.current.y,8,Math.max(8,window.innerHeight-rect.height-8))});
+ }
+ function navigate(direction){
+   if(tab!=='keys'){if(direction==='left'||direction==='right')setTab('keys');return}
+   if(viewMode==='MATH'){mathEditor.current?.move(direction);return}
+   const el=textField.current;
+   if(!el){if(direction==='up'||direction==='down')setShowHistory(v=>!v);return}
+   const cursor=el.selectionStart||0;
+   const next=direction==='left'?Math.max(0,cursor-1):direction==='right'?Math.min(el.value.length,cursor+1):direction==='up'?0:el.value.length;
+   el.focus({preventScroll:true});el.setSelectionRange(next,next);
  }
  function makeStats(){
    try{setStatsResult(statsType==='1var'?oneVariableStats(statsInput):twoVariableStats(statsInput));setError('')}
@@ -173,12 +212,19 @@ export default function ScientificCalculator({context='Quiz'}){
    style={coords&&window.innerWidth>700?{left:coords.left,top:coords.top,right:'auto',bottom:'auto'}:undefined}>
    <header className="tc-calc-window-header" onPointerDown={dragStart} onPointerMove={dragMove}
      onPointerUp={()=>drag.current=null} onLostPointerCapture={()=>drag.current=null} title="Drag to move">
-     <Grip size={15}/><strong>TECHNICA <span>SCIENTIFIC</span></strong><small>{context}</small>
+     <Grip size={15}/><strong>TECHNICA <span>SCIENTIFIC</span></strong>
+     {onNext&&<div className="tc-calc-quiz-navigation" role="group" aria-label="Navigate questions while calculator open">
+       <button type="button" onClick={onPrevious} disabled={!canPrevious} aria-label="Previous question while calculator open">‹</button>
+       <span title={context}>{currentQuestion}/{questionCount}</span>
+       <button type="button" onClick={onNext} aria-label="Next question while calculator open">›</button>
+     </div>}
+     <small>{context}</small>
      <button type="button" title={minimized?'Restore':'Minimize'} aria-label={minimized?'Restore calculator':'Minimize calculator'}
       onClick={()=>setMinimized(v=>!v)}><Minus size={15}/></button>
      <button type="button" aria-label="Close calculator" title="Close" onClick={()=>setOpen(false)}><X size={18}/></button>
    </header>
    {!minimized&&<div className="tc-calc-body">
+     <div className="tc-calc-identity" aria-label="Technica scientific calculator"><span>TECHNICA</span><em>MultiView Scientific</em><button type="button" aria-label="Open advanced calculator functions" onClick={()=>setTab(v=>v==='extra'?'keys':'extra')}>TOOLS</button></div>
      <div className="tc-calc-display">
        <div className="tc-calc-display-status"><span>{angle} · {notation} · {fixed==='FLOAT'?'FLOAT':'FIX '+fixed} · {viewMode}</span><span>{second?'2nd · ':''}{memory?'M · ':''}{fraction?'FRAC':''}</span></div>
        {viewMode==='MATH'
@@ -192,34 +238,43 @@ export default function ScientificCalculator({context='Quiz'}){
        <div className="tc-calc-display-result" aria-live="polite">{error?<span className="tc-calc-error">{error}</span>:
     percentView?formatScientific(answer*100)+'%':lastExact&&viewMode==='MATH'&&showExact?<ExactOutput exact={lastExact}/>:result}</div>
      </div>
-     <div className="tc-calc-modebar">
-       {['DEG','RAD','GRAD'].map(a=><button key={a} type="button" className={angle===a?'active':''} onClick={()=>setAngle(a)}>{a}</button>)}
-       <span className="tc-calc-mode-separator"/><button type="button" title="Toggle exact/approximate result"
-       onClick={()=>{setShowExact(v=>!v);const e=exactScientific(answer,lastCalcExpression);setResult(!showExact&&viewMode==='MATH'&&e?formatExactPlain(e):formatWithMode(answer,{notation,fixed:fixed==='FLOAT'?null:Number(fixed),asFraction:fraction,mixed}))}}>≈/≡</button>
-       <button type="button" title="Toggle fraction/decimal" onClick={()=>{setFraction(v=>!v);setShowExact(false);setPercentView(false);setResult(formatWithMode(answer,{notation,fixed:fixed==='FLOAT'?null:Number(fixed),asFraction:!fraction,mixed}))}}>f↔d</button>
-       <button type="button" title="Toggle percent/decimal display" onClick={()=>setPercentView(v=>!v)}>%↔d</button>
-       {['NORM','SCI','ENG'].map(a=><button key={a} type="button" className={notation===a?'active':''}
-        onClick={()=>{setNotation(a);setShowExact(false);setResult(formatWithMode(answer,{notation:a,fixed:fixed==='FLOAT'?null:Number(fixed),asFraction:fraction,mixed}))}}>{a}</button>)}
-     </div>
-     <div className="tc-calc-display-settings">
-       <button type="button" className={viewMode==='MATH'?'active':''} onClick={()=>{setMathDoc(createMathDocument(expression));setViewMode('MATH');setPercentView(false)}}>Textbook</button>
-       <button type="button" className={viewMode==='CLASSIC'?'active':''} onClick={()=>{try{setExpression(serializeMathDocument(mathDoc))}catch(e){setError(e.message);return}setViewMode('CLASSIC');setPercentView(false);setResult(formatWithMode(answer,{notation,fixed:fixed==='FLOAT'?null:Number(fixed),asFraction:fraction,mixed}))}}>Classic</button>
-       <label>Decimals <select value={fixed} onChange={e=>{setFixed(e.target.value);setShowExact(false);setResult(formatWithMode(answer,{notation,fixed:e.target.value==='FLOAT'?null:Number(e.target.value),asFraction:fraction,mixed}))}}>
-        <option value="FLOAT">FLOAT</option>{Array.from({length:10},(_,i)=><option value={String(i)} key={i}>FIX {i}</option>)}
-       </select></label>
-     </div>
-     <nav className="tc-calc-tabs" aria-label="Calculator tools">
-       {[['keys','Keypad'],['extra','Functions'],['stats','Stats'],['lists','L1–L3'],['table','Table'],['vars','Memory'],['angle','Angle'],['constant','K']].map(([k,label])=>
-        <button type="button" key={k} className={tab===k?'active':''} onClick={()=>{setTab(k);setError('')}}>{label}</button>)}
-     </nav>
-     {tab==='keys'&&<div className="tc-calc-keys" aria-label="Scientific calculator keypad">
-       {KEYS.map(([label,key])=><button type="button" key={key} data-calc-key={key}
-        className={['tc-calc-key',NUMBERS.has(key)?'tc-calc-num':'',OPERATIONS.has(key)?'tc-calc-operator':'',
-          key==='enter'?'tc-calc-enter':'',['second','mode','delete','clear','history'].includes(key)?'tc-calc-utility':'',
-          second&&key==='second'?'tc-calc-2nd-active':''].join(' ')}
-        onClick={()=>press(key)} title={second&&SECONDARY[key]?SECONDARY[key]:label}
-        aria-label={second&&SECONDARY[key]?SECONDARY[key]+' function':label}>{second&&SECONDARY[key]?SECONDARY[key]:label}</button>)}
-     </div>}
+     <CalculatorPhysicalKeypad second={second} onPress={press} onNavigate={navigate}/>
+     {tab!=='keys'&&<div className="tc-calc-menu-panel" aria-label="Scientific calculator functions menu">
+       <div className="tc-calc-menu-title"><strong>{({mode:'Mode & settings',prb:'Probability',extra:'Additional functions',stats:'Statistics',lists:'Data lists',table:'Function table',vars:'Memory registers',angle:'Angle tools',constant:'Constant K'})[tab]||'Tools'}</strong>
+        <button type="button" onClick={()=>setTab('keys')} aria-label="Return to calculator keypad">✕</button></div>
+       <nav className="tc-calc-menu-shortcuts" aria-label="Calculator menu shortcuts">
+         {[['mode','MODE'],['prb','PRB'],['lists','DATA'],['stats','STAT'],['table','TABLE'],['vars','MEM'],['extra','f(x)']].map(([key,label])=>
+           <button type="button" key={key} className={tab===key?'active':''} onClick={()=>setTab(key)}>{label}</button>)}
+       </nav>
+       {tab==='mode'&&<div className="tc-calc-settings-panel">
+         <label>Angle mode</label>
+         <div className="tc-calc-modebar">
+           {['DEG','RAD','GRAD'].map(a=><button key={a} type="button" className={angle===a?'active':''} onClick={()=>setAngle(a)}>{a}</button>)}
+         </div>
+         <label>Number notation</label>
+         <div className="tc-calc-modebar">
+           {['NORM','SCI','ENG'].map(a=><button key={a} type="button" className={notation===a?'active':''}
+            onClick={()=>{setNotation(a);setShowExact(false);setResult(formatWithMode(answer,{notation:a,fixed:fixed==='FLOAT'?null:Number(fixed),asFraction:fraction,mixed}))}}>{a}</button>)}
+         </div>
+         <div className="tc-calc-display-settings">
+           <button type="button" className={viewMode==='MATH'?'active':''} onClick={()=>{setMathDoc(createMathDocument(expression));setViewMode('MATH');setPercentView(false)}}>Textbook</button>
+           <button type="button" className={viewMode==='CLASSIC'?'active':''} onClick={()=>{try{setExpression(serializeMathDocument(mathDoc))}catch(e){setError(e.message);return}setViewMode('CLASSIC');setPercentView(false);setResult(formatWithMode(answer,{notation,fixed:fixed==='FLOAT'?null:Number(fixed),asFraction:fraction,mixed}))}}>Classic</button>
+           <label>Decimals <select aria-label="Decimal precision" value={fixed} onChange={e=>{setFixed(e.target.value);setShowExact(false);setResult(formatWithMode(answer,{notation,fixed:e.target.value==='FLOAT'?null:Number(e.target.value),asFraction:fraction,mixed}))}}>
+             <option value="FLOAT">FLOAT</option>{Array.from({length:10},(_,i)=><option value={String(i)} key={i}>FIX {i}</option>)}
+           </select></label>
+         </div>
+         <div className="tc-calc-tool-actions">
+           <button type="button" onClick={()=>{setShowExact(v=>!v);setResult(formatWithMode(answer,{notation,fixed:fixed==='FLOAT'?null:Number(fixed),asFraction:fraction,mixed}))}}>Exact / Approx</button>
+           <button type="button" onClick={()=>{setFraction(v=>!v);setShowExact(false);setResult(formatWithMode(answer,{notation,fixed:fixed==='FLOAT'?null:Number(fixed),asFraction:!fraction,mixed}))}}>Fraction / Decimal</button>
+           <button type="button" onClick={()=>setPercentView(v=>!v)}>Percent / Decimal</button>
+         </div>
+       </div>}
+       {tab==='prb'&&<div className="tc-calc-extra tc-calc-prb-menu">
+         <p>Probability operations</p><div>
+          {[['nPr','nPr('],['nCr','nCr('],['x!','!'],['rand','rand()'],['randInt','randInt(']].map(([label,value])=>
+            <button key={label} type="button" onClick={()=>{insert(value);setTab('keys')}}>{label}</button>)}
+         </div>
+       </div>}
      {tab==='extra'&&<div className="tc-calc-extra">
        <p>Insert a function. Use commas to separate inputs.</p>
        <div>{ADVANCED.map(([label,value])=><button type="button" key={label} onClick={()=>{insert(value);setTab('keys')}}>{label}</button>)}</div>
@@ -261,14 +316,13 @@ export default function ScientificCalculator({context='Quiz'}){
        {!!tableRows.length&&<div className="tc-calc-table-results"><table><thead><tr><th>x</th><th>f(x)</th></tr></thead>
         <tbody>{tableRows.map((r,i)=><tr key={i}><td>{formatScientific(r.x)}</td><td>{formatScientific(r.y)}</td></tr>)}</tbody></table></div>}
      </div>}
+     </div>}
      {showHistory&&<div className="tc-calc-history" aria-label="Calculation history">
        <div><b>Recent calculations</b><button onClick={()=>setHistory([])}>Clear</button></div>
        {!history.length?<p>No calculations yet</p>:history.map((h,i)=>
         <button type="button" key={i} onClick={()=>{setExpression(h.expression);setMathDoc(createMathDocument(h.expression));setShowHistory(false)}} title="Reuse and edit previous expression">
          <small>{h.expression}</small><b>{formatScientific(h.value)} ↵</b></button>)}
      </div>}
-     <div className="tc-calc-footer"><span>Independent scientific calculator</span>
-      <button type="button" onClick={resetCalculator}><Delete size={13}/> Reset</button></div>
    </div>}
   </section>}
  </>,document.body);
