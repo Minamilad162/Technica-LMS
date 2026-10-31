@@ -112,8 +112,38 @@ try{
    await curtain.waitFor({state:'visible'});
    const bg=await curtain.evaluate(el=>getComputedStyle(el).backgroundColor);
    assert.equal(bg,'rgb(3, 6, 11)');
-   await curtain.waitFor({state:'detached',timeout:3500});
+   await curtain.waitFor({state:'hidden',timeout:3500});
    assert.ok(await page.locator('.answer-option').first().isVisible(),'Screen restored after keyboard attempt');
+  });
+  await check(device.name+' exam focus-loss privacy shield blackens actual browser screenshot',async()=>{
+   // Simulate an OS snip tool stealing focus. This is not a native OS capture test.
+   await page.evaluate(()=>window.dispatchEvent(new Event('blur')));
+   const curtain=page.locator('.tc-capture-curtain');
+   await curtain.waitFor({state:'visible'});
+   assert.equal(await curtain.getAttribute('data-reason'),'focus-loss');
+   const png=await page.screenshot();
+   const pixel=await page.evaluate(async base64=>{
+    const img=new Image();
+    return await new Promise((resolve,reject)=>{
+     img.onload=()=>{
+      const canvas=document.createElement('canvas');canvas.width=img.width;canvas.height=img.height;
+      const ctx=canvas.getContext('2d');ctx.drawImage(img,0,0);
+      resolve(Array.from(ctx.getImageData(12,12,1,1).data));
+     };
+     img.onerror=reject;img.src='data:image/png;base64,'+base64;
+    });
+   },png.toString('base64'));
+   assert.deepEqual(pixel.slice(0,3),[3,6,11],'Screenshot taken DURING the focus shield must be black');
+   await page.evaluate(()=>window.dispatchEvent(new Event('focus')));
+   await curtain.waitFor({state:'hidden'});
+   assert.ok(await page.locator('.question-panel h1').isVisible());
+  });
+  await check(device.name+' PrintScreen keyup fallback shows a temporary black shield',async()=>{
+   await page.evaluate(()=>window.dispatchEvent(new KeyboardEvent('keyup',{key:'PrintScreen',code:'PrintScreen',bubbles:true,cancelable:true})));
+   const curtain=page.locator('.tc-capture-curtain');
+   await curtain.waitFor({state:'visible'});
+   assert.equal(await curtain.getAttribute('data-reason'),'keyboard-shortcut');
+   await curtain.waitFor({state:'hidden',timeout:3500});
   });
   await check(device.name+' browser print preview masks protected content',async()=>{
    await page.emulateMedia({media:'print'});
@@ -147,6 +177,12 @@ try{
    assert.ok(await stamp.isVisible(),'Video needs its own visible watermark over iframe');
    assert.ok((await stamp.innerText()).includes('TC1001'));
    assert.equal(await stamp.evaluate(el=>getComputedStyle(el).pointerEvents),'none');
+   // Embedded videos can move focus to an iframe during normal playback.
+   // The focus-loss screen must NOT interrupt them.
+   await page.evaluate(()=>window.dispatchEvent(new Event('blur')));
+   assert.equal(await page.locator('.tc-capture-curtain').isVisible(),false,'Video focus must not trigger exam shield');
+   await page.evaluate(()=>window.dispatchEvent(new Event('focus')));
+
    if(device.touch)await page.locator('.learn-outline-toggle').click();
    await page.locator('.learn-outline-lesson').filter({hasText:'10-question knowledge check'}).first().click();
    await page.locator('.learn-quiz-content.tc-protected-content').waitFor();
