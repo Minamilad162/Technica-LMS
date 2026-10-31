@@ -1,3 +1,12 @@
+### 2026-10-31 — Nested math entry, precision, lists and menus (PR #11)
+
+- Added interactive Math-style expression entry templates (up to 4 levels of fraction, mixed fraction, square/n-th root, power, e-power and 10-power) with keyboard and pointer navigation/edit/remove. Existing Classic text input remains available.
+- Added bounded BigInt exact rational calculation to avoid binary floating-point drift for fraction/finite-decimal formulas, 10-significant-digit display, FIX and SCI/ENG presentation.
+- Corrected Classic vs Textbook power associativity: 2^3^2 -> 64 vs 512.
+- Added dependent L1/L2/L3 formula recalculation and cycle detection, CLEAR/FORMULA menu actions and confirm-before-full-reset. Preserved 42-element limit.
+- Added \`npm run test:calculator:mathprint\` and CI gate for nested editor model, rational precision and list behavior. Existing ASP questions, quizzes, timer, learning, routes, authentication demo and Supabase schema unchanged.
+- The original Technica UI does not copy TI firmware. This is not officially certified/fully screen-equivalent to MathPrint; specific symbolic combinations and real-device/menu behavior require independent comparative/manual QA.
+
 ## 2026-10-31 — Calculator: advanced TI-style functions (source PR #10)
 
 - Added textbook-style exact fraction, simplified integer-root and π-multiple display where mathematically supported, plus approximate toggle, CLASSIC/Textbook, FIX 0–9 and percent display.
