@@ -24,7 +24,8 @@
     "test:learner-ui": "node scripts/test-learner-simplification.mjs",
     "test:learning": "node scripts/test-learning-player.mjs",
     "test:p1:schema": "node scripts/test-p1-foundation.mjs",
-    "test:calculator": "node scripts/test-scientific-calculator.mjs"
+    "test:calculator": "node scripts/test-scientific-calculator.mjs",
+    "test:calculator:extended": "node scripts/test-scientific-calculator-extended.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.58.0",
