@@ -3,7 +3,7 @@
 > **Canonical project specification / single source of truth**
 >
 > Project: Technica Consult LMS
-> Version: 1.1.6 (calculator LCD cleanup, TOOLS migration and blue 3D shell)
+> Version: 1.1.7 (web-only protected content pilot)
 > Last updated: 2026-10-31 (Africa/Cairo)
 > Repository: https://github.com/Minamilad162/Technica-LMS
 > Target branch: main
@@ -908,3 +908,17 @@ Implementation on isolated [PR #14](https://github.com/Minamilad162/Technica-LMS
 
 ### 2026-10-31 — v1.1.6 math TOOLS and 3D body
 - Refined outer casing and moved display chips to contextual TOOLS while retaining full Math input functionality. PR #15 stays on review branch until browser + source CI pass.
+
+## 35. Web-only assessment, lesson and video content protection pilot — 2026-10-31
+
+**User-approved scope:** without native apps or database readiness, implement low-friction watermarks and copy/drag/print deterrence on questions, exam/practice, reviews, lesson quizzes and lesson/video content. Add an **experimental** short black curtain when JavaScript receives a PrintScreen/capture key event; do not pretend to control OS screenshots or screen recording. Keep the user experience smooth and preserve calculator typing, answer interactions, timers, progress and normal site features.
+
+**Implementation:** `src/components/ProtectedContent.jsx`, `src/lib/contentProtection.js`, `src/contentProtection.css`; wrappers around `QuizPage.jsx`, `LearningPage.jsx`, `ResultsPage.jsx` and `PracticeResultsPage.jsx`; import CSS from main. Watermarks use an opaque ephemeral browser session identifier plus demo learner ID and UTC minute, nine tiles at ≤10% opacity; invisible to hit testing. Only protected-area selection/copy/context menu/drag are suppressed. `PrintScreen` or select OS capture shortcuts are *unreliable* browser events; an event triggers a ~1.25s black privacy curtain, which is **not proof of screenshot blocking**. Print CSS hides protected route in print preview. Unprotected app pages and calculator input remain available.
+
+**Threat model and verified limitations:** A normal website cannot guarantee black screenshots or prevent OS recordings. No interception of outside processes, extensions, DevTools, own device cameras or screen share is possible. `display-capture=()` limits only a site's own Screen Capture API and is NOT a general OS screenshot ban; avoid breaking future live sessions. Real production data is NOT protected: the React demo bundles 1,625 ASP questions with solutions; YouTube demo video and sample PDF are public. Must migrate to server Auth/RLS, secure question delivery/answer key separation and DRM/signed media when backend is ready.
+
+**Acceptance:** `npm run test:content-protection` + dedicated desktop/mobile Chromium protection test, all legacy math/quiz/learning/security/DB regressions, build. Publish the exact tested-versus-impossible matrix at [WEB_CONTENT_PROTECTION_PILOT_20261031.md](docs/current/WEB_CONTENT_PROTECTION_PILOT_20261031.md). No merging until tests pass; no Supabase migration or production Cloudflare deploy in this stage.
+
+### 2026-10-31 — v1.1.7 web-only deterrence
+- Added per-learner watermark, protected copy/drag/context menu, browser print mask, and simulated screenshot-key black curtain to key learner routes; unchanged exam logic and main site UX.
+- **Never assert this blocks actual OS screenshots/recording.**
