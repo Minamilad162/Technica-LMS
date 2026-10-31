@@ -54,6 +54,9 @@ jobs:
       - name: TI-30XS MultiView guidebook reference audit
         run: npm run test:calculator:ti-audit
 
+      - name: Physical calculator reference layout regression
+        run: npm run test:calculator:physical
+
       - name: P1 schema contract (static checks only)
         run: npm run test:p1:schema
 
