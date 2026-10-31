@@ -161,7 +161,7 @@ export default function ScientificCalculator({context='Quiz'}){
        <div>{ADVANCED.map(([label,value])=><button type="button" key={label} onClick={()=>{insert(value);setTab('keys')}}>{label}</button>)}</div>
        <div className="tc-calc-memory"><b>M: {formatScientific(memory)}</b>
          <button onClick={()=>setMemory(0)}>MC</button><button onClick={()=>insert('M')}>MR</button>
-         <button onClick={()=>{try{setMemory(m=>m+evaluateScientific(expression||String(answer),{angleMode:angle,ans:answer,memory}));setError('')}catch(e){setError(e.message)}}}>M+</button>
+         <button onClick={()=>{try{const amount=evaluateScientific(expression||String(answer),{angleMode:angle,ans:answer,memory});setMemory(m=>m+amount);setError('')}catch(e){setError(e.message)}}}>M+</button>
        </div>
      </div>}
      {tab==='stats'&&<div className="tc-calc-data">
