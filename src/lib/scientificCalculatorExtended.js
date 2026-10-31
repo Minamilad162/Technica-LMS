@@ -121,6 +121,40 @@ const quantiles=values=>{
  const sorted=[...values].sort((a,b)=>a-b),mid=Math.floor(sorted.length/2);
  return {Q1:halfMedian(sorted.slice(0,mid)),Q3:halfMedian(sorted.slice(sorted.length%2?mid+1:mid))};
 };
+/**
+ * TI-style formula dependency propagation: change L1 recalculates formula-fed L2/L3.
+ * Detect indirect circular references and restore raw independent list values.
+ */
+export function recalculateListFormulas(state,opts={}){
+ const base=Object.fromEntries(['L1','L2','L3'].map(k=>[k, state[k]||[]]));
+ const formulas={...(state.formulas||{})};
+ const done=new Set(),active=new Set();
+ function visit(k){
+  if(done.has(k))return;
+  if(active.has(k))throw Error('Circular list formula');
+  active.add(k);
+  const formula=String(formulas[k]||'').trim();
+  if(formula){
+   for(const other of ['L1','L2','L3']){
+    if(new RegExp('\\b'+other+'\\b').test(formula)&&other!==k)visit(other);
+   }
+   if(new RegExp('\\b'+k+'\\b').test(formula))throw Error('Circular list formula');
+   const result=applyListFormula(base,k,formula,opts);
+   base[k]=result[k];
+  }
+  active.delete(k);done.add(k);
+ }
+ for(const k of ['L1','L2','L3'])visit(k);
+ return {...base,formulas};
+}
+export function updateStoredList(state,key,values,opts={}){
+ if(!['L1','L2','L3'].includes(key))throw Error('Unknown list');
+ validateList(values);
+ const formulas={...(state.formulas||{})};
+ delete formulas[key];
+ return recalculateListFormulas({...state,[key]:[...values],formulas},opts);
+}
+
 export function statsFromLists(lists,kind='1var',xKey='L1',yKey='L2',frequencyKey=null){
  const x=validateList(lists[xKey]||[]);
  if(!x.length)throw Error('Enter data in '+xKey);
