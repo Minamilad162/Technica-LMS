@@ -1,3 +1,10 @@
+### 2026-10-31 — Mobile calculator soft keyboard focus regression (v1.1.10)
+
+- Preserve desktop exam focus-loss black shield and existing screenshot-key heuristics.
+- Fix mobile false blackouts when opening the software keyboard, dismissing it or minimizing/restoring the calculator: ignore \`window.blur\` alone on touch/mobile; use actual page visibility for background privacy instead.
+- Restore any stale shield when the mobile VisualViewport resizes while the page remains visible. No changes to calculator UI, calculations, quiz scores, copy/print, or learner watermarks.
+- Add real desktop and 375/390/430 mobile Chromium regression for keyboard focus, blur and resize, calculator minimize/restore, desktop black screenshot when focus lost and mobile hidden-tab masking. Native phone screenshots remain uncontrolled by JavaScript.
+
 ### 2026-10-31 — Screenshot focus-loss privacy experiment (v1.1.9, PR #18)
 
 - Pre-mount and synchronously toggle the black privacy overlay on best-effort capture keyboard keydown/keyup, reducing React rerender latency.
