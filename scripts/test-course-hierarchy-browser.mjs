@@ -18,7 +18,7 @@ try{
   const context=await browser.newContext({viewport:{width:device.width,height:device.height},hasTouch:device.touch,isMobile:device.touch});
   await context.addInitScript(account=>{
    sessionStorage.setItem('technica-lms-demo-auth-session-v1',JSON.stringify(account));
-   localStorage.setItem('technica-lms-demo-v1-asp5',JSON.stringify({role:'admin'}));
+   if(!localStorage.getItem('technica-lms-demo-v1-asp5')) localStorage.setItem('technica-lms-demo-v1-asp5',JSON.stringify({role:'admin'}));
   },account);
   const page=await context.newPage();page.setDefaultTimeout(8000);
   await test(device.name+' create nested hierarchy, isolate other course and persist',async()=>{
