@@ -42,7 +42,7 @@ const val=39+26/60+23/3600;
 const dms=degreesToDMS(val);
 assert.deepEqual(dms,{negative:false,degrees:39,minutes:26,seconds:23});
 near(dmsToDegrees(39,26,23),val,'DMS to decimal');
-assert.equal(formatDMS(39.5),'39° 30′ 0″');
+assert.equal(formatDMS(39.5),'39° 30′ 00″');
 assert.throws(()=>dmsToDegrees(30,60,0),/DMS/);
 near(rectToPolar(3,4,'DEG').r,5,'Polar radius');
 near(rectToPolar(3,4,'DEG').theta,53.13010235415598,'Polar theta');
