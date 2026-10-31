@@ -1,3 +1,11 @@
+### 2026-10-31 — Calculator unified 3D blue casing and clean LCD (v1.1.6)
+
+- Removed bright white side strips, replacing them with smooth blue molded edges and darker 3D inset shadows. Retained original physical keypad and rounded 384px body.
+- Removed always-on a/b, mixed, root, nth-root, power, eˣ, 10ˣ and X slot shortcut row from the LCD. The LCD now focuses on mode/status, editable expression, recent calculation and result.
+- Moved all template actions into TOOLS → Math templates (including Remove slot). The nested editor ref, keyboard shortcuts, existing calculations and Classic input behavior remain available.
+- Added source and real Chromium assertions for clean display, TOOLS insertion and calculation, blue casing without white strips, visible main keypad and quiz answer/navigation on mobile.
+- No database, scores, timer, question bank, Cloudflare deployment or TI brand/firmware changes.
+
 ### 2026-10-31 — Calculator screenshot-based visual polish (v1.1.5)
 
 - Slightly increased physical calculator width on desktop from 354px to 384px, maintained no-scroll keypad and narrow mobile viewport fit.

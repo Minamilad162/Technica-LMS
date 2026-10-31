@@ -3,7 +3,7 @@
 > **Canonical project specification / single source of truth**
 >
 > Project: Technica Consult LMS
-> Version: 1.1.5 (calculator casing, contrast and responsive polish)
+> Version: 1.1.6 (calculator LCD cleanup, TOOLS migration and blue 3D shell)
 > Last updated: 2026-10-31 (Africa/Cairo)
 > Repository: https://github.com/Minamilad162/Technica-LMS
 > Target branch: main
@@ -889,3 +889,22 @@ Implementation on isolated [PR #14](https://github.com/Minamilad162/Technica-LMS
 
 ### 2026-10-31 — v1.1.5 visual polish
 - Per user screenshot: refine edges and contrast, modestly enlarge physical calculator, retain full-size/key order and non-scrolling main keypad.
+
+
+## 34. Calculator LCD cleanup and continuous 3D blue casing — 2026-10-31
+
+**Approved user request:** remove the visually intrusive white vertical side rails; form the calculator casing as one smoothly beveled 3D blue molded body. Move the persistent a/b, a b/c, square-root, nth-root, x-power, exponential and remove-slot chips OUT of the LCD and into the contextual TOOLS panel. Preserve every working MathPrint-style input function, scientific calculation, physical key location, keyboard route, quiz answer navigation and no-scroll base keypad.
+
+**Implementation on isolated PR #15:**
+- src/calculatorPhysical.css uses a continuous dark-to-mid blue cross-body gradient with tonal raised side bevels and inner light/shadow edges, rather than bright white/silver side strips. Retains the 384px desktop shell and responsive 375/390/430px layout. This affects the calculator casing only, not white numeric keys.
+- src/components/MathTemplateEditor.jsx renders the **editable structured math expression only** (no fixed template-button toolbar inside the LCD). Screen continues to show status/mode, selected input, previous calculation and result. The MathTemplateEditor ref API / keyboard shortcuts / four-level nested fields are unchanged.
+- src/components/ScientificCalculator.jsx places all seven math-template actions (fraction, mixed fraction, square/nth root, exponent, eˣ, 10ˣ) and **Remove slot** inside TOOLS → Math templates, above existing advanced scientific functions. Buttons call the EXISTING template insertion/deletion APIs and close TOOLS back to keypad; focus selection survives the menu transition. Classic input still inserts linear expressions.
+- Long advanced function lists may scroll ONLY while TOOLS is open, but the normal 35-key / 6-utility-key physical keypad remains fully visible and non-scrolling, with question/answer controls independent.
+
+**Regression / release gates:**
+- Real desktop and mobile Chromium 375/390/430 tests: LCD contains no persistent Math tool buttons; TOOLS exposes all seven insertion actions plus removal; nested fraction and root insertion through menu computes correctly; verify last keypad row and arrow pad visible, blue shell RGB border, no white rail gradient, screenshot evidence, answer selection/navigation with calculator open.
+- Existing scientific calculations, Math-template parsing, TI reference vectors, P1 SQL smoke and bank/learning/assessment regressions must pass. No Supabase migration or live Cloudflare deployment.
+- Preserve independent Technica branding; not a licensed TI firmware clone. Changes approved by owner and documented here before main merge.
+
+### 2026-10-31 — v1.1.6 math TOOLS and 3D body
+- Refined outer casing and moved display chips to contextual TOOLS while retaining full Math input functionality. PR #15 stays on review branch until browser + source CI pass.

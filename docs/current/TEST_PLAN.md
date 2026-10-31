@@ -89,3 +89,11 @@ Command / environment / commit / timestamp / duration / PASS-FAIL-SKIPPED / obse
 - A previous 390px Playwright run exposed fixed overlay click interception. Both the answer-click check and next-question check must PASS at all supported mobile widths after the split-pane fix. Source/test-only coverage is insufficient.
 - Maintain a feature-level status matrix at [TI30XS_CALCULATOR_AUDIT_20261031.md](TI30XS_CALCULATOR_AUDIT_20261031.md). All remaining partial/not-implemented firmware behavior must be tracked; do not present a high-level green CI result as 100% certified TI compatibility.
 - Browser tests on CI are Chromium; actual Safari on iPhone, Android browsers, accessibility and manufacturer hardware-output fidelity remain separate acceptance gates. No connected cloud or production database is exercised by this UI audit.
+
+
+## v1.1.6 calculator TOOLS / LCD and molded-shell regression
+
+- Run all existing calculator maths, Math template, TI-guide cases and the physical-keypad static test. Ensure removal of the LCD toolbar does NOT remove editor imperative methods or keyboard shortcuts.
+- In desktop Chromium and 375/390/430 mobile: assert **zero template buttons in .tc-calc-display**, status/input/result remain, TOOLS shows all seven structured-template actions and Remove slot, click fraction and nested square root via TOOLS and verify evaluation.
+- Verify rounded shell border is blue/dark (not white/silver), computed shell gradient does not reintroduce bright strips, 35 main + 6 upper keys remain and the calculator body does not require scrolling. Screenshot each viewport.
+- Confirm student can still select answers and use next/previous while the calculator is open. No backend/database changes.
