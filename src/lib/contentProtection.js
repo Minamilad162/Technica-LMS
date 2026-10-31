@@ -29,9 +29,9 @@ export function selectionTouchesProtected(selection,container){
  return false;
 }
 export function shouldBlockClipboardEvent(event,container,selection,activeElement){
+ if(selectionTouchesProtected(selection,container))return true;
  if(isEditableElement(activeElement)||isEditableElement(event?.target))return false;
- return shouldBlockContentEvent(event?.target,container)||
-  selectionTouchesProtected(selection,container);
+ return shouldBlockContentEvent(event?.target,container);
 }
 
 export function isPotentialCaptureShortcut(event){
