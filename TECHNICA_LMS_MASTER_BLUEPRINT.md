@@ -3,7 +3,7 @@
 > **Canonical project specification / single source of truth**
 >
 > Project: Technica Consult LMS
-> Version: 1.1.0 (floating scientific calculator quiz integration)
+> Version: 1.1.1 (extended TI-style calculator operations)
 > Last updated: 2026-10-31 (Africa/Cairo)
 > Repository: https://github.com/Minamilad162/Technica-LMS
 > Target branch: main
@@ -772,3 +772,26 @@ New auditable report: [docs/current/P0_BASELINE_AUDIT_2026-10-30.md](docs/curren
 
 ### 2026-10-31 — v1.1.0 scientific calculator worklog
 - Implemented and tested original scientific calculator in the three current question-taking flows on an isolated review branch. Kept legacy CSS and exam/business logic untouched except importing the shared component. No database changes.
+
+## 29. Scientific calculator extension — 2026-10-31
+
+**User change:** implement remaining useful TI‑30XS MultiView scientific calculation functions on top of existing floating calculator, preserving its presence in Practice, Assessment, and the Learning 10-question knowledge check.
+
+**Implementation in review PR #10** (`feat/ti-scientific-parity-v2-20261031`):
+- Exact-style rational output (stacked numerator/denominator), simplified integer square roots (e.g. `sqrt(8) → 2√2`), and rational multiples of π when directly supported by expressions; explicit approximate/exact answer toggle. This is **not a complete symbolic algebra engine**, and unrecognized expressions return accurate numerical values.
+- Textbook/Classic display selection and FLOAT/FIX 0–9 decimal mode. Supports NORM/SCI/ENG and DEG/RAD/GRAD from first implementation; percent/decimal display and fraction conversion.
+- Seven independent stored variables `x,y,z,t,a,b,c` with store/recall/clear within a quiz; preserved original M memory and Ans. No storage in Supabase or other exam sessions.
+- Angle conversions, DEG/minute/second input and output, rectangular↔polar helper calculations with selected angle mode; explicit angle modifier expression functions and signed odd roots.
+- Three-list `L1,L2,L3` numeric editor, independently edited inputs, formula expressions referencing other lists, integer/fractionally weighted 1Var statistics with medians/quartiles and summary sums, 2Var regression diagnostics; dependent list formula safeguards.
+- Function table adds automatic Start/Step/Count and custom Ask-x values. Constant K panel allows repeated operations on last result.
+- Source code: `src/lib/scientificCalculatorExtended.js`, `src/components/CalculatorAdvancedPanels.jsx`, additions to `src/lib/scientificCalculator.js`, `src/components/ScientificCalculator.jsx` and scoped CSS.
+- Automated checks: `scripts/test-scientific-calculator-extended.mjs` and `npm run test:calculator:extended` in GitHub Actions, plus all prior scientific, question bank, learning, React build and PostgreSQL regression tests.
+- Official feature inventory cross-checked against the public TI-30XS MultiView specification and Guidebook (https://education.ti.com/en/products/calculators/scientific-calculators/ti-30xs-mv and https://education.ti.com/en/guidebook/details/en/50BE24C84836434485BD2E8D49374AF7/30x_mv).
+
+**Boundaries:** No TI firmware/software/emulator, logo, photographed keypad, or proprietary MathPrint implementation copied; original Technica rendering is not certified 1:1 model parity. Exact symbolic output covers intentionally limited cases; advanced list/menu navigation, full 4-line hardware LCD limits, numeric precision of the real model, and random number seeding may differ. Must perform an independently validated feature-by-feature output parity matrix, browser/mobile functional QA and exam-allowed-calculator review before commercial claims.
+
+**Non-regression:** no changes to the assessment/quiz timer, grading, navigation, session/save semantics, user data, 1,625 imported ASP questions or Supabase schema. Future exam routes must reuse shared calculator.
+
+### 2026-10-31 — v1.1.1 scientific extensions
+- Added independent pure-math modules and React panels, extended math/angle/memory/list/table feature tests; tracked model comparison limitations explicitly.
+- This stage is source code on review branch until CI and owner release gate pass; not a Supabase migration.

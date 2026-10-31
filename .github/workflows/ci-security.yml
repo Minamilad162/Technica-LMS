@@ -45,6 +45,9 @@ jobs:
       - name: Scientific calculator math and quiz integration
         run: npm run test:calculator
 
+      - name: Advanced scientific calculator modes and mathematical regression
+        run: npm run test:calculator:extended
+
       - name: P1 schema contract (static checks only)
         run: npm run test:p1:schema
 

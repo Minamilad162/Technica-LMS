@@ -53,3 +53,22 @@ Feature set covers the main operations and several advanced ones, but some genui
 - Automated tests: independent calculation vectors, angle modes, fractions, stats, error handling and integration references; existing demo regression suite, Vite build and P1 PostgreSQL CI must still succeed.
 - Manual browser checks still required: desktop drag and focus, 375/390/430px viewport legibility, touch scrolling, keyboard shortcut isolation, calculator repositioning and overlap with timer/answer cards, reconnect and continuous answer selection with calculator open.
 - No real production Supabase exam engine/entitlements/media is activated by this UI feature.
+
+## TI-style additional capabilities (2026-10-31)
+
+New calculator tabs:
+- **Memory:** select any of seven memory slots `x, y, z, t, a, b, c`. Save current expression to selected slot; recall its symbol or clear it. These values do not modify quiz answers.
+- **L1–L3:** enter each list of up to 42 finite values separated by comma/whitespace, save, apply formulas to another list, view one- or two-variable statistics; fractional weights are supported for mean/population sigma, but sample SD and quartiles may be undefined for non-integer frequencies.
+- **Angle:** angle-unit conversion (degrees/radians/gradians), DMS and rectangular/polar conversions.
+- **K:** repeat a formula involving `x` on the last computed answer. Example enter `x+2`, enable and press Apply K repeatedly.
+- **Table:** Auto generates values from Start/Step/Rows; Ask-x evaluates a custom list of x-values.
+
+Expanded keypad and result modes:
+- `Textbook` renders supported rational fractions stacked, simplified integer square roots and multiples of π (e.g. sqrt(8) → 2√2). `Classic` shows a line of numeric output. Exact-to-decimal, fraction and percent toggles are independent display actions, not changes to the stored numeric answer.
+- `Decimals`: FLOAT or FIX 0–9 decimal places (rendering only; internal engine retains JS floating-point calculation value).
+- `NORM/SCI/ENG` and `DEG/RAD/GRAD` continue to work.
+- Advanced functions also accept explicit `deg(...)`, `rad(...)`, `grad(...)`, `dms(degrees,minutes,seconds)`, `RtoPr(x,y)`, `RtoPtheta(x,y)`, `PtoRx(r,theta)`, `PtoRy(r,theta)`, and `root(n,value)`.
+
+**Important:** This is independently implemented functionality inspired by the actual TI-30XS MultiView reference. It is not a licensed TI emulator or a promise of exact TI firmware parity. Not all nested MathPrint templates, display menus, and numeric edge cases are implemented. For official exam compliance, confirm whether the exam permits a browser-based calculator and obtain a separately verified output reference before deployment.
+
+Source: [Official TI-30XS MultiView specifications](https://education.ti.com/en/products/calculators/scientific-calculators/ti-30xs-mv), [official guidebook](https://education.ti.com/en/guidebook/details/en/50BE24C84836434485BD2E8D49374AF7/30x_mv).
