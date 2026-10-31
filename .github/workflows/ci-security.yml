@@ -60,6 +60,9 @@ jobs:
       - name: Practice quick-select modes, presets and history regression
         run: npm run test:practice-modes
 
+      - name: Course > Domain > Topic > Lesson hierarchy regression
+        run: npm run test:hierarchy
+
       - name: Protected exam and video deterrence contract
         run: npm run test:content-protection
 
