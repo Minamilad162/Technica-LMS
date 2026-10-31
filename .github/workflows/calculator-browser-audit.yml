@@ -37,3 +37,12 @@ jobs:
         run: npx playwright install --with-deps chromium
       - name: Desktop + mobile Chromium calculator end-to-end QA
         run: node scripts/test-calculator-browser.mjs
+
+      - name: Archive calculator visual screenshots (desktop / 3 phones)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: calculator-visual-qa
+          path: artifacts/calculator-qa/*.png
+          if-no-files-found: warn
+          retention-days: 14
