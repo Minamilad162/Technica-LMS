@@ -119,7 +119,7 @@ CREATE FUNCTION public.lms_p4_can_practice(p_course uuid) RETURNS boolean
 $$;
 
 CREATE FUNCTION public.lms_p4_attempt_payload(p_attempt uuid) RETURNS jsonb
- LANGUAGE plpgsql VOLATILE SECURITY DEFINER SET search_path = '' AS $
+ LANGUAGE plpgsql VOLATILE SECURITY DEFINER SET search_path = '' AS $$
 DECLARE a public.lms_practice_attempts%ROWTYPE;
 DECLARE entries jsonb;
 BEGIN
