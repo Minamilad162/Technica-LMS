@@ -108,7 +108,7 @@ psql -X -v ON_ERROR_STOP=1 -q -c \
 timedrequest=88888888-8888-8888-8888-888888888888
 timed=$(run_as authenticated "$paid" "SELECT public.lms_p4_start_practice('$course','timed25',25,'$timedrequest',NULL,1200)->>'attemptId'")
 timedqid=$(run_as authenticated "$paid" "SELECT public.lms_p4_attempt_payload('$timed')->'questions'->0->>'id'")
-psql -X -v ON_ERROR_STOP=1 -q -c "UPDATE public.lms_practice_attempts SET deadline_at=now()-interval '1 second' WHERE id='$timed'"
+psql -X -v ON_ERROR_STOP=1 -q -c "UPDATE public.lms_practice_attempts SET started_at=now()-interval '30 minutes', deadline_at=now()-interval '10 minutes' WHERE id='$timed'"
 if run_as authenticated "$paid" "SELECT public.lms_p4_save_answer('$timed','$timedqid',0)" >/dev/null 2>&1; then
  echo 'FAIL expired timed attempt accepted answer';exit 1
 fi
