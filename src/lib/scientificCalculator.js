@@ -112,7 +112,7 @@ export function evaluateScientific(raw,options={}){
    let op=t.type,lbp=0,rightBp=0,implicit=false;
    if(op==='+'||op==='-'){lbp=10;rightBp=11}
    else if(op==='*'||op==='/'){lbp=20;rightBp=21}
-   else if(op==='^'){lbp=30;rightBp=30}
+   else if(op==='^'){lbp=30;rightBp=options.viewMode==='CLASSIC'?31:30}
    else if(op==='('||op==='id'||op==='number'){lbp=20;rightBp=21;op='*';implicit=true}
    else break;
    if(lbp<min)break;
