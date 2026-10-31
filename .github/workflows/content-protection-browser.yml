@@ -1,0 +1,39 @@
+name: Protected Content Browser QA
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'src/components/ProtectedContent.jsx'
+      - 'src/lib/contentProtection.js'
+      - 'src/contentProtection.css'
+      - 'src/pages/QuizPage.jsx'
+      - 'src/pages/LearningPage.jsx'
+      - 'src/pages/ResultsPage.jsx'
+      - 'src/pages/PracticeResultsPage.jsx'
+      - 'scripts/test-content-protection-browser.mjs'
+      - '.github/workflows/content-protection-browser.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  chromium-protection:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install reproducible LMS dependencies
+        run: npm ci --no-fund
+      - name: Install isolated Playwright test tooling
+        run: npm install --no-save --no-package-lock --ignore-scripts playwright@1.57.0
+      - name: Install Chromium browser and OS requirements
+        run: npx playwright install --with-deps chromium
+      - name: Real desktop/mobile protection deterrence smoke
+        run: node scripts/test-content-protection-browser.mjs
+      - name: Scope disclosure
+        run: echo "PASS validates only browser copy/print UI and synthetic keyboard capture-key events; it CANNOT validate OS screenshot or recorder blocking."
