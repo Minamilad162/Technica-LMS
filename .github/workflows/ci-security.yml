@@ -63,6 +63,9 @@ jobs:
       - name: Course > Domain > Topic > Lesson hierarchy regression
         run: npm run test:hierarchy
 
+      - name: Supabase production-mode repository / identity contracts
+        run: npm run test:p3
+
       - name: Protected exam and video deterrence contract
         run: npm run test:content-protection
 
@@ -84,6 +87,15 @@ jobs:
 
       - name: Production build
         run: npm run build
+
+      - name: Build isolated Supabase bundle and prove demo question answers are absent
+        env:
+          VITE_DATA_MODE: supabase
+          VITE_SUPABASE_URL: https://placeholder.supabase.co
+          VITE_SUPABASE_ANON_KEY: ci-placeholder-public-key
+        run: |
+          npm run build
+          npm run test:p3:bundle
 
       - name: Dependency vulnerability audit
         run: npm audit --audit-level=high
