@@ -2,13 +2,27 @@ import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import {
  PROTECTION_HOLD_MS,WATERMARK_POSITIONS,formatWatermarkLabel,
- isPotentialCaptureShortcut,isEditableElement,shouldBlockContentEvent,shouldBlockClipboardEvent,selectionTouchesProtected,shouldFocusShield,
+ isPotentialCaptureShortcut,isEditableElement,shouldBlockContentEvent,shouldBlockClipboardEvent,selectionTouchesProtected,shouldFocusShield,isMobileWebContext,shouldBlackoutForBlur,shouldBlackoutForVisibility,
  watermarkIdentity
 }from'../src/lib/contentProtection.js';
 
 assert.ok(PROTECTION_HOLD_MS>=500&&PROTECTION_HOLD_MS<=2500);
 assert.equal(shouldFocusShield('exam-question'),true);
 assert.equal(shouldFocusShield('lesson-quiz'),true);
+assert.equal(isMobileWebContext({pointerCoarse:true,touchPoints:5,viewportWidth:390,userAgent:''}),true);
+assert.equal(isMobileWebContext({pointerCoarse:true,touchPoints:5,viewportWidth:1100,userAgent:''}),true);
+assert.equal(isMobileWebContext({pointerCoarse:false,touchPoints:0,viewportWidth:390,userAgent:'Mozilla/5.0 (iPhone)'}),true);
+assert.equal(isMobileWebContext({pointerCoarse:false,touchPoints:0,viewportWidth:1366,userAgent:'Mozilla/5.0 desktop'}),false);
+assert.equal(isMobileWebContext({pointerCoarse:true,touchPoints:10,viewportWidth:1600,userAgent:'Mozilla/5.0 desktop'}),false);
+assert.equal(shouldBlackoutForBlur('exam-question',false),true,'Desktop focus loss still protected');
+assert.equal(shouldBlackoutForBlur('lesson-quiz',false),true);
+assert.equal(shouldBlackoutForBlur('exam-question',true),false,'Mobile keyboard blur cannot black content');
+assert.equal(shouldBlackoutForBlur('lesson-quiz',true),false);
+assert.equal(shouldBlackoutForBlur('lesson-video',false),false);
+assert.equal(shouldBlackoutForVisibility('exam-question','hidden'),true);
+assert.equal(shouldBlackoutForVisibility('exam-question','visible'),false);
+assert.equal(shouldBlackoutForVisibility('lesson-video','hidden'),false);
+
 for(const kind of ['lesson-video','lesson-material','answer-review','lesson-review']){
  assert.equal(shouldFocusShield(kind),false,'Video/lesson/review should not be blacked by focus changes');
 }
