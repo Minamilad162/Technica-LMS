@@ -70,3 +70,13 @@ Command / environment / commit / timestamp / duration / PASS-FAIL-SKIPPED / obse
 - Verify no input field outside the expression editor is hijacked by global calculator shortcuts; in particular check the 3-list editor, statistics, Ask-x table inputs, dropdowns and answer choices while the calculator is open.
 - Test 375/390/430px touch layout, desktop 1280×720 floating window, keyboard and pointer, free movement of the calculator, question+answer visibility, minimize/close/reopen, persistent state within quiz navigation.
 - Benchmark TI-model calculation parity separately, distinguishing direct numerical formulas from full exact MathPrint/template editing, menus and precision settings. Passing CI is not permission to claim official TI hardware equivalence.
+
+
+
+## Math-style template editing and precision release gate (2026-10-31)
+
+- Run new \`npm run test:calculator:mathprint\`; assert four nested fields, slot serialization, deletion, empty-slot error, navigation wiring, Classic right/left power precedence, bounded BigInt rational arithmetic, 10-display-digit FLOAT and FIX, list formula recompute and circular detection.
+- Repeat previous scientific tests (\`test:calculator\`, \`test:calculator:extended\`), all bank and practice/assessment/learning suites, Vite production build and PostgreSQL RLS smoke. Protect question/answer state, timer, course taxonomy and 1,625 imported ASP questions.
+- Manual desktop: click a/b then type numerator, ArrowDown to denominator, tab out, nest a root within another template, enter calculation, delete template and test Classic↔Textbook conversion.
+- Manual mobile widths 375/390/430: touch edit slots and toggle keypad; confirm bottom dock lets learner see and answer original question; test virtual keyboard viewport, rotation, pointer focus and non-modal overlay.
+- Model parity: independently benchmark actual TI-30XS MultiView or authorized reference for display/nested behavior, precision rounding, exact radical/π combinations and data menus. Automated code/source checks alone do not certify hardware or actual browser interactivity.
