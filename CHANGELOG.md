@@ -1,3 +1,11 @@
+### 2026-10-31 — Practice quick-select modes (v1.1.11)
+
+- Added original Technica light-theme quick mode grid referencing previously supplied Pocket Prep conceptual screenshots: Quick 10, Timed Quiz, Practice by Domain, Weakest Subject, Missed Questions, Build Your Own, Level Up and Mock Exam.
+- Working modes: Quick 10 (10 untimed, immediate feedback), Timed Quiz (25, whole-test 20 minutes), Practice by Domain (inline course-domain choice), Weakest Subject (from latest scored attempt), Missed Questions (actual wrong bank IDs from latest attempt), and Build Your Own (original editable setup).
+- Level Up intentionally marked Coming later until vetted LOW/MEDIUM/HIGH difficulty metadata exists. The distinct 200-question/5-hour mock remains unavailable until the admin-reserved pool is ready. No false ordinary assessment/mock launches.
+- Practice selection functions and labels centralized; session records mode while preserving saved Custom setup, scoring, calculator, watermarks and all fixed admin Assessment rules.
+- Added deterministic policy/selection tests and end-to-end Chromium desktop/mobile quick mode tests; no DB migrations or Cloudflare deployment.
+
 ### 2026-10-31 — Mobile calculator soft keyboard focus regression (v1.1.10)
 
 - Preserve desktop exam focus-loss black shield and existing screenshot-key heuristics.
