@@ -52,7 +52,7 @@ export default function ScientificCalculator({context='Quiz'}){
  const[variables,setVariables]=useState(freshVariables);
  const[lists,setLists]=useState(makeListState);
  const[fixed,setFixed]=useState('FLOAT'),[viewMode,setViewMode]=useState('MATH'),[showExact,setShowExact]=useState(true);
- const[lastExact,setLastExact]=useState(null),[lastCalcExpression,setLastCalcExpression]=useState('');
+ const[lastExact,setLastExact]=useState(null),[lastCalcExpression,setLastCalcExpression]=useState(''),[percentView,setPercentView]=useState(false);
  const[tableMode,setTableMode]=useState('auto'),[askValues,setAskValues]=useState('1,2,3'),[tableCount,setTableCount]=useState(8);
  const root=useRef(null),textField=useRef(null),drag=useRef(null);
  const insert=useCallback(s=>{setExpression(e=>e.length+s.length<=220?e+s:e);setError('')},[]);
@@ -61,7 +61,7 @@ export default function ScientificCalculator({context='Quiz'}){
      const v=evaluateScientific(expression,{angleMode:angle,ans:answer,memory,variables});
      const exact=exactScientific(v,expression);
      const formatted=(showExact&&viewMode==='MATH'&&exact)?formatExactPlain(exact):formatWithMode(v,{notation,fixed:fixed==='FLOAT'?null:Number(fixed),asFraction:fraction,mixed});
-     setLastExact(exact);setLastCalcExpression(expression);
+     setLastExact(exact);setLastCalcExpression(expression);setPercentView(false);
      setAnswer(v);setResult(formatted);setHistory(h=>[{expression,value:v},...h].slice(0,12));
      setExpression(formatScientific(v));setShowHistory(false);setError('');
    }catch(e){setError(e.message||'Math error')}
@@ -126,7 +126,7 @@ export default function ScientificCalculator({context='Quiz'}){
  }
  function useComputedValue(v,formula){
    const exp=formula||String(v),exact=exactScientific(v,exp);
-   setAnswer(v);setLastExact(exact);setLastCalcExpression(exp);
+   setAnswer(v);setLastExact(exact);setLastCalcExpression(exp);setPercentView(false);
    setResult(showExact&&viewMode==='MATH'&&exact?formatExactPlain(exact):formatWithMode(v,{notation,fixed:fixed==='FLOAT'?null:Number(fixed),asFraction:fraction,mixed}));
    setExpression(formatScientific(v));setHistory(h=>[{expression:exp,value:v},...h].slice(0,12));setError('');
  }
@@ -164,19 +164,20 @@ export default function ScientificCalculator({context='Quiz'}){
         placeholder="Type an expression…" />
        <div className="tc-calc-lcd-history" aria-label="Previous calculation">{history[0]&&<span>{history[0].expression} = {formatScientific(history[0].value)}</span>}</div>
        <div className="tc-calc-display-result" aria-live="polite">{error?<span className="tc-calc-error">{error}</span>:
-    lastExact&&viewMode==='MATH'&&showExact?<ExactOutput exact={lastExact}/>:result}</div>
+    percentView?formatScientific(answer*100)+'%':lastExact&&viewMode==='MATH'&&showExact?<ExactOutput exact={lastExact}/>:result}</div>
      </div>
      <div className="tc-calc-modebar">
        {['DEG','RAD','GRAD'].map(a=><button key={a} type="button" className={angle===a?'active':''} onClick={()=>setAngle(a)}>{a}</button>)}
        <span className="tc-calc-mode-separator"/><button type="button" title="Toggle exact/approximate result"
        onClick={()=>{setShowExact(v=>!v);const e=exactScientific(answer,lastCalcExpression);setResult(!showExact&&viewMode==='MATH'&&e?formatExactPlain(e):formatWithMode(answer,{notation,fixed:fixed==='FLOAT'?null:Number(fixed),asFraction:fraction,mixed}))}}>≈/≡</button>
-       <button type="button" title="Toggle fraction/decimal" onClick={()=>{setFraction(v=>!v);setShowExact(false);setResult(formatWithMode(answer,{notation,fixed:fixed==='FLOAT'?null:Number(fixed),asFraction:!fraction,mixed}))}}>f↔d</button>
+       <button type="button" title="Toggle fraction/decimal" onClick={()=>{setFraction(v=>!v);setShowExact(false);setPercentView(false);setResult(formatWithMode(answer,{notation,fixed:fixed==='FLOAT'?null:Number(fixed),asFraction:!fraction,mixed}))}}>f↔d</button>
+       <button type="button" title="Toggle percent/decimal display" onClick={()=>setPercentView(v=>!v)}>%↔d</button>
        {['NORM','SCI','ENG'].map(a=><button key={a} type="button" className={notation===a?'active':''}
         onClick={()=>{setNotation(a);setShowExact(false);setResult(formatWithMode(answer,{notation:a,fixed:fixed==='FLOAT'?null:Number(fixed),asFraction:fraction,mixed}))}}>{a}</button>)}
      </div>
      <div className="tc-calc-display-settings">
-       <button type="button" className={viewMode==='MATH'?'active':''} onClick={()=>setViewMode('MATH')}>Textbook</button>
-       <button type="button" className={viewMode==='CLASSIC'?'active':''} onClick={()=>setViewMode('CLASSIC')}>Classic</button>
+       <button type="button" className={viewMode==='MATH'?'active':''} onClick={()=>{setViewMode('MATH');setPercentView(false)}}>Textbook</button>
+       <button type="button" className={viewMode==='CLASSIC'?'active':''} onClick={()=>{setViewMode('CLASSIC');setPercentView(false);setResult(formatWithMode(answer,{notation,fixed:fixed==='FLOAT'?null:Number(fixed),asFraction:fraction,mixed}))}}>Classic</button>
        <label>Decimals <select value={fixed} onChange={e=>{setFixed(e.target.value);setShowExact(false);setResult(formatWithMode(answer,{notation,fixed:e.target.value==='FLOAT'?null:Number(e.target.value),asFraction:fraction,mixed}))}}>
         <option value="FLOAT">FLOAT</option>{Array.from({length:10},(_,i)=><option value={String(i)} key={i}>FIX {i}</option>)}
        </select></label>
@@ -198,7 +199,7 @@ export default function ScientificCalculator({context='Quiz'}){
        <div>{ADVANCED.map(([label,value])=><button type="button" key={label} onClick={()=>{insert(value);setTab('keys')}}>{label}</button>)}</div>
        <div className="tc-calc-memory"><b>M: {formatScientific(memory)}</b>
          <button onClick={()=>setMemory(0)}>MC</button><button onClick={()=>insert('M')}>MR</button>
-         <button onClick={()=>{try{const amount=evaluateScientific(expression||String(answer),{angleMode:angle,ans:answer,memory});setMemory(m=>m+amount);setError('')}catch(e){setError(e.message)}}}>M+</button>
+         <button onClick={()=>{try{const amount=evaluateScientific(expression||String(answer),{angleMode:angle,ans:answer,memory,variables});setMemory(m=>m+amount);setError('')}catch(e){setError(e.message)}}}>M+</button>
        </div>
      </div>}
      {tab==='vars'&&<VariablePanel variables={variables} setVariables={setVariables} answer={answer} expression={expression} angle={angle} memory={memory} onInsert={insert} onError={setError}/>}
