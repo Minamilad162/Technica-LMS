@@ -524,3 +524,109 @@
    max-height:calc(100dvh - 16px);
  }
 }
+
+
+/* v1.1.6 — unified molded-blue 3D casing. Replace the formerly white/silver
+   side strips with raised tonal plastic edges (no separate bright rails).
+   Keep the existing 384px shell, key positions and viewport-fit geometry. */
+.tc-calc-window,
+.tc-calc-window:not(.tc-calc-minimized){
+  border:3px solid #294a61;
+  background:linear-gradient(90deg,
+    #294b63 0%,
+    #426781 1.8%,
+    #60859f 4.2%,
+    #537d98 7%,
+    #4e7793 19%,
+    #517c98 49%,
+    #507b96 81%,
+    #527b95 93%,
+    #6489a1 96%,
+    #41677f 98.4%,
+    #284b64 100%);
+  box-shadow:
+    0 22px 48px rgba(12,32,49,.33),
+    0 3px 12px rgba(14,38,60,.24),
+    inset 0 2px 1px rgba(223,242,252,.24),
+    inset 5px 0 6px rgba(213,238,252,.14),
+    inset -5px 0 6px rgba(17,45,67,.34),
+    inset 0 -4px 7px rgba(19,48,69,.25);
+}
+.tc-calc-window:not(.tc-calc-minimized){
+  border-radius:31px 31px 38px 38px;
+}
+.tc-calc-window:not(.tc-calc-minimized)::before{
+  content:"";
+  pointer-events:none;
+  position:absolute;
+  inset:1px;
+  border:1px solid rgba(208,232,246,.16);
+  border-bottom-color:rgba(18,46,66,.32);
+  border-radius:inherit;
+  z-index:0;
+}
+.tc-calc-window .tc-calc-body,
+.tc-calc-window .tc-calc-window-header{position:relative;z-index:1}
+/* A pure expression screen: no permanent template chips inside the LCD. */
+.tc-calc-window .tc-math-editor .tc-math-entry-scroll{
+  min-height:29px;
+  max-height:70px;
+}
+.tc-calc-window .tc-calc-display:has(.tc-math-editor){min-height:0}
+.tc-calc-template-menu{
+  border:1px solid #bad3d9;
+  border-radius:10px;
+  background:linear-gradient(170deg,#f8fbfc,#e0eff1);
+  padding:9px;
+  margin:0 0 12px;
+}
+.tc-calc-template-title{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  flex-wrap:wrap;
+  gap:5px;
+  margin:0 0 8px;
+  color:#1c4b5d;
+  font-size:12px;
+}
+.tc-calc-template-title small{
+  font-size:9px;
+  font-weight:600;
+  color:#506e76;
+}
+.tc-calc-template-actions{
+  display:grid;
+  grid-template-columns:repeat(4,minmax(0,1fr));
+  gap:5px;
+}
+.tc-calc-window .tc-calc-template-actions button{
+  min-height:34px;
+  padding:5px 2px;
+  border:1px solid #83acb7;
+  border-bottom:2px solid #5b8998;
+  border-radius:7px;
+  background:linear-gradient(160deg,#fff,#d9eaed);
+  color:#173e52;
+  font-size:12px;
+  font-weight:850;
+  cursor:pointer;
+}
+.tc-calc-window .tc-calc-template-actions button:hover,
+.tc-calc-window .tc-calc-template-actions button:focus-visible{
+  background:#d0ebef;
+  outline-color:#3c8c9c;
+}
+.tc-calc-window .tc-calc-template-actions [data-math-template="remove"]{
+  background:#e5ebed;
+  border-color:#b1c4c8;
+  color:#435e69;
+}
+@media(max-width:700px){
+  .tc-calc-window:not(.tc-calc-minimized){
+    border-radius:25px 25px 29px 29px;
+  }
+  .tc-calc-template-actions{gap:4px}
+  .tc-calc-window .tc-calc-template-actions button{min-height:31px}
+  .tc-calc-window .tc-math-editor .tc-math-entry-scroll{max-height:38px}
+}
