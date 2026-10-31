@@ -102,10 +102,13 @@ export function parseNumericList(raw){
 export function applyListFormula(lists,column,formula,options={}){
  if(!['L1','L2','L3'].includes(column))throw Error('Unknown list');
  const base=Object.fromEntries(['L1','L2','L3'].map(k=>[k,validateList(lists[k]||[])]));
- const rows=Math.max(0,...Object.values(base).map(x=>x.length));
- if(!rows)throw Error('Add list data before applying a formula');
  if(!formula||formula.length>110)throw Error('Enter a list formula');
- if(new RegExp('\\b'+column+'\\b').test(formula))throw Error('List formula cannot refer to itself');
+ const refs=[...new Set(String(formula).match(/\\bL[123]\\b/g)||[])];
+ if(!refs.length)throw Error('List formula must reference L1, L2, or L3');
+ if(refs.includes(column))throw Error('List formula cannot refer to itself');
+ const rows=base[refs[0]].length;
+ if(!rows)throw Error('Referenced list is empty');
+ if(refs.some(k=>base[k].length!==rows))throw Error('DIM MISMATCH: referenced lists need equal lengths');
  const values=Array.from({length:rows},(_,i)=>evaluateScientific(formula,{
   ...options,variables:{...options.variables,L1:base.L1[i]??0,L2:base.L2[i]??0,L3:base.L3[i]??0,x:i+1}
  }));
