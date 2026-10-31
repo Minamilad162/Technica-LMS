@@ -66,6 +66,11 @@ jobs:
       - name: Supabase production-mode repository / identity contracts
         run: npm run test:p3
 
+      - name: P4 secure practice model and ASP draft import contract
+        run: |
+          npm run test:p4
+          npm run test:p4:bank
+
       - name: Protected exam and video deterrence contract
         run: npm run test:content-protection
 
