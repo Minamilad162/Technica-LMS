@@ -3,7 +3,7 @@
 > **Canonical project specification / single source of truth**
 >
 > Project: Technica Consult LMS
-> Version: 1.1.4 (photo-reference physical calculator UI)
+> Version: 1.1.5 (calculator casing, contrast and responsive polish)
 > Last updated: 2026-10-31 (Africa/Cairo)
 > Repository: https://github.com/Minamilad162/Technica-LMS
 > Target branch: main
@@ -871,3 +871,21 @@ Owner explicitly requested implementing the supplied TI‑30XS MultiView **visua
 
 ### 2026-10-31 — v1.1.4 physical keypad layout
 - Implemented user-approved physical reference and compact scrolling-free primary calculator. Requires review-head unit/Chromium CI success before merge into main. Rollback: revert isolated \`CalculatorPhysicalKeypad\` + \`calculatorPhysical.css\` and parent UI integration, without touching math engine or SQL.
+
+
+## 33. Physical calculator screenshot review: contrast, edging & modest resize — 2026-10-31
+
+**Owner-provided current screenshot:** 353 × 590 physical-layout calculator with blue shell, white/silver rails, lime second key, LCD and 5×7 main keypad. Owner requested **more polished borders, colors, color contrast and a slightly larger calculator**, while preserving key placement and keeping the basic keypad wholly visible without scrolling. This is a CSS-only visual-refinement scope; no algorithm/React layout restructuring approved or required.
+
+Implementation on isolated [PR #14](https://github.com/Minamilad162/Technica-LMS/pull/14):
+- Scoped overrides in \`src/calculatorPhysical.css\`: desktop shell increases **354 → 384 px** (~8.5%); rounded and beveled bottom casing, gradient silver rails and deeper colored shell, improved outline/shadow of the LCD, rounder 3D key surfaces with stronger light/dark differentiation, higher contrast pale keycaps, dark operations and lime 2nd key; function/alternate legends enlarged within available key height.
+- Preserve hard-won **5-column × 7-row physical keypad ordering**, 6 upper keys, circular arrow pad, all key handlers and every menu/button; do not reintroduce permanent multirow tabs or any scrolling on the main keypad.
+- Mobile: width uses almost entire viewport, with responsive 375/390/430px fit and slight 1–2px step-height increase when space allows. On low-height phones retain compact responsive bound, keep exam text and answer interactions available; advanced data menus and very long math expressions may still scroll as necessary.
+- **Contrast implementation:** dark navy operation keys with white text; white number keys with dark ink; blue function keys with bright text and high-visibility green 2nd legends; muted green LCD with charcoal text. Differentiation is intentional; there is no use of original TI branding or firmware.
+- Enhanced real Chromium screenshot/geometry tests in \`scripts/test-calculator-browser.mjs\`: 1440×900 desktop and mobile widths 375/390/430; verify rounded casing, distinct color categories, small secondary legend readability, desktop ≥380px width, handset width fit, all 35+6 keys, keypad never scrolls, last row unclipped, mode/2nd controls and quiz answer/next behavior. Screenshot PNGs are captured per viewport and archived by \`.github/workflows/calculator-browser-audit.yml\` (14 days).
+- Preserve existing P1 disposable Postgres, all calculator/TI guide reference math, ASP bank, learning/quiz, Vite build and CI security gates.
+
+**Release constraint:** only merge to main after most recent HEAD GitHub Actions + real Chromium both PASS. CI screenshots are evidence for visual review, not a guarantee of pixel-identical TI device or physical phone/Safari appearance. No Cloudflare deployment or database changes in this visual stage.
+
+### 2026-10-31 — v1.1.5 visual polish
+- Per user screenshot: refine edges and contrast, modestly enlarge physical calculator, retain full-size/key order and non-scrolling main keypad.
