@@ -201,8 +201,11 @@ export function makeFunctionTable(formula,{mode='auto',start=0,step=1,values=[],
 }
 export function applyConstantOperator(previousValue,expression,opts={}){
  if(!Number.isFinite(previousValue)||!String(expression).trim())throw Error('Enter a constant operation');
- if(!/\bx\b/.test(expression))throw Error('Use x as the previous answer, e.g. x+2');
- return evaluateScientific(expression,{...opts,x:previousValue,variables:{...opts.variables,x:previousValue}});
+ const raw=String(expression).trim();
+ if(raw.length>44)throw Error('K constant must be 44 characters or fewer');
+ const normalized=/^[+*/^]/.test(raw)?'x'+raw:raw;
+ if(!/\bx\b/.test(normalized))throw Error('Use x or an operator-first expression, e.g. x+2 or *2+3');
+ return evaluateScientific(normalized,{...opts,x:previousValue,variables:{...opts.variables,x:previousValue}});
 }
 export function formatWithMode(value,{notation='NORM',fixed=null,asFraction=false,mixed=false}={}){
  if(asFraction)return formatScientific(value,{notation,digits:fixed,asFraction,mixed});
