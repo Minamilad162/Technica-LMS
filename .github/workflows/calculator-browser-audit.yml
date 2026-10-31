@@ -1,0 +1,37 @@
+name: Calculator Real Browser Audit
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'src/components/ScientificCalculator.jsx'
+      - 'src/components/MathTemplateEditor.jsx'
+      - 'src/components/CalculatorAdvancedPanels.jsx'
+      - 'src/lib/calculator*.js'
+      - 'src/lib/scientificCalculator*.js'
+      - 'src/lib/mathTemplateEditor.js'
+      - 'src/scientificCalculator.css'
+      - 'scripts/test-calculator-browser.mjs'
+      - '.github/workflows/calculator-browser-audit.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  calculator-chromium:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Reproducible application dependencies
+        run: npm ci --no-fund
+      - name: Install isolated browser test tooling
+        run: npm install --no-save --no-package-lock --ignore-scripts playwright@1.57.0
+      - name: Install Chromium and Linux dependencies
+        run: npx playwright install --with-deps chromium
+      - name: Desktop + mobile Chromium calculator end-to-end QA
+        run: node scripts/test-calculator-browser.mjs
