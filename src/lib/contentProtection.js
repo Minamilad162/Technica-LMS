@@ -11,6 +11,22 @@ export function shouldFocusShield(kind){
  return kind==='exam-question'||kind==='lesson-quiz';
 }
 
+/**
+ * Mobile on-screen keyboards can emit window.blur without backgrounding a tab.
+ * Avoid treating that as capture. The signal is intentionally conservative:
+ * real native phone screenshots have NO standard web callback.
+ */
+export function isMobileWebContext({pointerCoarse=false,touchPoints=0,viewportWidth=1024,userAgent=''}={}){
+ return /Android|iPhone|iPad|iPod|Mobile/i.test(userAgent) ||
+  (pointerCoarse && touchPoints>0 && viewportWidth<=1280);
+}
+export function shouldBlackoutForBlur(kind,mobile){
+ return shouldFocusShield(kind)&&!mobile;
+}
+export function shouldBlackoutForVisibility(kind,visibilityState){
+ return shouldFocusShield(kind)&&visibilityState==='hidden';
+}
+
 const SESSION_KEY='technica-content-watermark-session-v1';
 export function isEditableElement(el){
  return !!el?.closest?.('input, textarea, select, [contenteditable=""], [contenteditable="true"], [role="textbox"]');
