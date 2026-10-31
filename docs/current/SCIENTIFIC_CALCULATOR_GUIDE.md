@@ -120,3 +120,12 @@ The floating panel remains draggable on desktop and its question/answer workspac
 ### v1.1.5 screenshot-based appearance adjustment
 
 Using the owner's screenshot of the actual current Technica calculator, the casing is subtly widened on desktop (354 → 384px) with smoother silver bevels, navy and white key contrast, deeper LCD border, improved green 2nd labels and a more distinct navigation pad. On phones the keypad remains full-width and responsive without introducing internal scrolling; desktop and three mobile viewport screenshots are archived in the Chromium UI audit. This visual change does **not** modify the calculation algorithms or guarantee identical styling on actual iOS/Android devices.
+
+
+### v1.1.6 — Math templates moved from LCD into TOOLS
+
+The calculator LCD now shows only status, mathematical input, last calculation and computed result. The former permanent green chips (a/b, a b/c, square root, nth root, xⁿ, eˣ, 10ˣ and ✕ slot) are no longer inside the LCD.
+
+To insert a structured expression, select the desired input field in the LCD, press **TOOLS**, and choose an item in the **Math templates** section. It inserts at the saved input cursor and closes TOOLS so you can continue typing on the keypad. **✕ slot** removes the selected nested template. The physical n/d and power buttons, cursor arrows and existing keyboard shortcuts continue working. Classic mode uses equivalent linear expressions.
+
+Long advanced menus may scroll, but the primary physical keypad does not. The outer shell is now one continuously molded blue 3D shape with tonal edges, not white rails. This is a visual refactor only; it does not change the numerical engine, the LMS assessment flow, or TI-equivalence status.
