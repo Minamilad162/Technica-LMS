@@ -51,6 +51,9 @@ jobs:
       - name: Advanced scientific calculator modes and mathematical regression
         run: npm run test:calculator:extended
 
+      - name: TI-30XS MultiView guidebook reference audit
+        run: npm run test:calculator:ti-audit
+
       - name: P1 schema contract (static checks only)
         run: npm run test:p1:schema
 
