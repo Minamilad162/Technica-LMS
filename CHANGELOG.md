@@ -1,3 +1,12 @@
+## 2026-10-31 — Calculator: advanced TI-style functions (source PR #10)
+
+- Added textbook-style exact fraction, simplified integer-root and π-multiple display where mathematically supported, plus approximate toggle, CLASSIC/Textbook, FIX 0–9 and percent display.
+- Added seven stored calculator variables, data lists L1/L2/L3 and safe formulas, weighted statistics and quartile/regression outputs.
+- Added angle units, DMS, rectangular/polar coordinate conversions, Ask-x table and repeated K operations; repaired signed odd-root handling.
+- Added independent math/UI regression script to CI. Existing quiz/assessment/learning scoring, timers, routes, original ASP/PSEE question banks and database have not changed.
+- Calculations and UI are original Technica work, not TI proprietary firmware/brand or a pixel-exact licensed emulator. Browser/mobile manual acceptance and device/model output-parity matrix remain outstanding.
+- No claims of real Supabase deployment or finished 200-question production Mock.
+
 ### 2026-10-31 — Floating scientific calculator in quiz and assessment routes
 
 - New reusable \`ScientificCalculator\` React component with floating desktop window, draggable header, close/minimize, and compact mobile dock. The question and answer controls remain available while it is open.
