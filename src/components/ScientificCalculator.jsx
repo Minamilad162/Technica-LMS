@@ -7,6 +7,7 @@ import{VariablePanel,ListPanel,AnglePanel,ConstantPanel}from'./CalculatorAdvance
 import MathTemplateEditor from './MathTemplateEditor';
 import{createMathDocument,serializeMathDocument}from'../lib/mathTemplateEditor';
 import{seededCalculatorRandom}from'../lib/calculatorRandom';
+import{finishCalculatorEntry}from'../lib/calculatorEntry';
 
 // Original Technica keypad and calculation code; no third-party calculator emulator.
 const KEYS=[
@@ -69,7 +70,7 @@ export default function ScientificCalculator({context='Quiz'}){
  const template=kind=>{if(viewMode==='MATH')mathEditor.current?.insertTemplate(kind);else insert(kind==='fraction'?'/':kind==='power'?'^(':kind==='squareRoot'?'sqrt(':kind==='mixed'?'mixed(':kind==='nthRoot'?'root(':kind==='exp10'?'pow10(':'exp(')};
  const evaluate=useCallback(()=>{
    try{
-     const input=viewMode==='MATH'?serializeMathDocument(mathDoc):expression;
+     const input=finishCalculatorEntry(viewMode==='MATH'?serializeMathDocument(mathDoc):expression);
      const v=evaluateScientific(input,{angleMode:angle,ans:answer,memory,variables,viewMode,random});
      const exact=exactScientific(v,input);
      const formatted=(showExact&&viewMode==='MATH'&&exact)?formatExactPlain(exact):formatWithMode(v,{notation,fixed:fixed==='FLOAT'?null:Number(fixed),asFraction:fraction,mixed});
