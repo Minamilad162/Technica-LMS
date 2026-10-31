@@ -3,7 +3,7 @@
 > **Canonical project specification / single source of truth**
 >
 > Project: Technica Consult LMS
-> Version: 1.0.8 (integrated P0 and P1 source release)
+> Version: 1.0.9 (P0 + P1 main source merged and CI verified)
 > Last updated: 2026-10-31 (Africa/Cairo)
 > Repository: https://github.com/Minamilad162/Technica-LMS
 > Target branch: main
@@ -736,3 +736,16 @@ New auditable report: [docs/current/P0_BASELINE_AUDIT_2026-10-30.md](docs/curren
 
 ### 2026-10-31 — v1.0.8 change record
 - Canonical Blueprint combined from both reviewed branches. P0 documented FIXED in main; P1 SQL and tests now form a single versioned source proposal. No actual DB migration performed.
+
+
+## 27. Verified main-branch integrated source — 2026-10-31
+
+- PR #6 (P0 lockfile/npm ci) merged to `main` as `e742d3b4a4b7035d624756b7f5dcd57e436abca4`. Main run [#56](https://github.com/Minamilad162/Technica-LMS/actions/runs/41175791663) **SUCCESS**.
+- P0/P1 integration [PR #8](https://github.com/Minamilad162/Technica-LMS/pull/8) merged to `main` as `343a91386d069bc5549d547e03cc711159075303`. Combined feature branch run [#57](https://github.com/Minamilad162/Technica-LMS/actions/runs/41175943743) and post-merge main run [#58](https://github.com/Minamilad162/Technica-LMS/actions/runs/41175995195) both **SUCCESS**: `npm ci`, P1 SQL static contract, legacy 1,625 imported ASP bank integrity, demo regressions, Vite build, npm vulnerability audit, disposable PostgreSQL 16 migration and role/RLS smoke tests.
+- Old P1 draft [PR #7](https://github.com/Minamilad162/Technica-LMS/pull/7) closed unmerged as superseded by integration PR #8; its P1 implementation is present in the main tree via PR #8.
+- **Implementation vs deployment:** SQL migration exists under `supabase/migrations/`, and was executed only on ephemeral PostgreSQL testing. NO Supabase environment/migration, payment, protected media, adaptive/mock server engine or real user Auth was deployed by this release. No cloud deployment or browser verification claimed.
+- Application `package.json` remains the historical `1.15.0` browser-local demo; master specification release version `1.0.9` is DOCUMENT GOVERNANCE, not a product production-version claim.
+- Preserve canonical rules and all regression locks. P1 backend integration and real staging tests are next work; no destructive old-schema import without migration plan.
+
+### 2026-10-31 — v1.0.9 documented main release
+- Recorded verified merge SHAs and GitHub CI proof without changing application/database behavior. No direct Supabase or Cloudflare action.
