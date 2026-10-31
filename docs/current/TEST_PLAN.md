@@ -80,3 +80,12 @@ Command / environment / commit / timestamp / duration / PASS-FAIL-SKIPPED / obse
 - Manual desktop: click a/b then type numerator, ArrowDown to denominator, tab out, nest a root within another template, enter calculation, delete template and test Classic↔Textbook conversion.
 - Manual mobile widths 375/390/430: touch edit slots and toggle keypad; confirm bottom dock lets learner see and answer original question; test virtual keyboard viewport, rotation, pointer focus and non-modal overlay.
 - Model parity: independently benchmark actual TI-30XS MultiView or authorized reference for display/nested behavior, precision rounding, exact radical/π combinations and data menus. Automated code/source checks alone do not certify hardware or actual browser interactivity.
+
+
+## TI-30XS MultiView calculator audit and actual Chromium UI tests
+
+- \`npm run test:calculator:ti-audit\` must PASS, alongside all previous calculator, Math-template, 1Var/2Var stats, ASP imported bank and P1 SQL tests. Test vectors come from official TI product/reference/guidebook documentation, not TI proprietary firmware.
+- New [Calculator Real Browser Audit](../../.github/workflows/calculator-browser-audit.yml) executes real Chromium 1440×900 and touch-emulated 375×812, 390×844 and 430×932, including calculator window state, nested fractions/Enter, answer selection while floating window is open, dragging, question navigation, and browser exceptions. It also checks Assessment and Learning Knowledge Check entry flows.
+- A previous 390px Playwright run exposed fixed overlay click interception. Both the answer-click check and next-question check must PASS at all supported mobile widths after the split-pane fix. Source/test-only coverage is insufficient.
+- Maintain a feature-level status matrix at [TI30XS_CALCULATOR_AUDIT_20261031.md](TI30XS_CALCULATOR_AUDIT_20261031.md). All remaining partial/not-implemented firmware behavior must be tracked; do not present a high-level green CI result as 100% certified TI compatibility.
+- Browser tests on CI are Chromium; actual Safari on iPhone, Android browsers, accessibility and manufacturer hardware-output fidelity remain separate acceptance gates. No connected cloud or production database is exercised by this UI audit.
