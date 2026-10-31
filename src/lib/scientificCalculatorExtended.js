@@ -103,7 +103,7 @@ export function applyListFormula(lists,column,formula,options={}){
  if(!['L1','L2','L3'].includes(column))throw Error('Unknown list');
  const base=Object.fromEntries(['L1','L2','L3'].map(k=>[k,validateList(lists[k]||[])]));
  if(!formula||formula.length>110)throw Error('Enter a list formula');
- const refs=[...new Set(String(formula).match(/\\bL[123]\\b/g)||[])];
+ const refs=[...new Set(String(formula).match(/\bL[123]\b/g)||[])];
  if(!refs.length)throw Error('List formula must reference L1, L2, or L3');
  if(refs.includes(column))throw Error('List formula cannot refer to itself');
  const rows=base[refs[0]].length;
