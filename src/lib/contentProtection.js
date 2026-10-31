@@ -13,6 +13,27 @@ export function isEditableElement(el){
 export function shouldBlockContentEvent(target,container){
  return !!container?.contains?.(target)&&!isEditableElement(target);
 }
+/**
+ * Some browsers send native copy events to document/body or the currently
+ * focused control, not the element containing the selected question text.
+ * Check the actual Selection range, not only event.target.
+ */
+export function selectionTouchesProtected(selection,container){
+ if(!selection||!container||selection.isCollapsed)return false;
+ if(container.contains(selection.anchorNode)||container.contains(selection.focusNode))return true;
+ try{
+  for(let i=0;i<selection.rangeCount;i++){
+   if(selection.getRangeAt(i).intersectsNode(container))return true;
+  }
+ }catch{}
+ return false;
+}
+export function shouldBlockClipboardEvent(event,container,selection,activeElement){
+ if(isEditableElement(activeElement)||isEditableElement(event?.target))return false;
+ return shouldBlockContentEvent(event?.target,container)||
+  selectionTouchesProtected(selection,container);
+}
+
 export function isPotentialCaptureShortcut(event){
  if(!event||event.repeat)return false;
  const key=String(event.key||'').toLowerCase();
