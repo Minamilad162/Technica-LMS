@@ -1,3 +1,5 @@
+> **2026-10-31 code release:** P0 reproducible CI and P1 staged database foundation are included in source. The P1 migration is NOT deployed to Supabase and the UI remains a browser-local demo. See [Master Blueprint](TECHNICA_LMS_MASTER_BLUEPRINT.md) and [P1 Staging Runbook](supabase/P1_STAGING_MIGRATION_RUNBOOK.md).
+
 > **Technica LMS project governance:** [Master Blueprint](TECHNICA_LMS_MASTER_BLUEPRINT.md) · [Agent instructions](AGENTS.md) · [Infrastructure integration](docs/infrastructure/README.md) · [Audit playbook](docs/current/AUDIT_PLAYBOOK.md) · [Security/release checklist](docs/current/RELEASE_SECURITY_CHECKLIST.md). The existing app remains a browser-local demo, NOT a secure production LMS. See [PROJECT_CONTEXT.md](PROJECT_CONTEXT.md) for current gaps.
 
 ## v1.10.0 Admin Courses Update

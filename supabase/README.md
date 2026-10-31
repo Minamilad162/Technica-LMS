@@ -1,3 +1,5 @@
+> **2026-10-30 P1 UPDATE (DRAFT PR #7):** A new, guarded foundation migration now exists at [migrations/202610300001_p1_foundation.sql](migrations/202610300001_p1_foundation.sql). Its [staging runbook](P1_STAGING_MIGRATION_RUNBOOK.md) is mandatory. The old \`001_lms_schema_PROPOSED.sql\` below is **incompatible** with the approved Course → Domain → Topic → Lesson model and **MUST NOT be deployed**. The new migration is **not applied to any database**, and does not prove Auth/RLS/Storage functionality. Run \`npm run test:p1:schema\` for source contract checks only; staging execution and real user permission tests remain required.
+
 # Supabase integration plan (not active in the demo)
 
 The demo uses **local React state, hard-coded sample data, and browser `localStorage`**. No Supabase account, database, login, Edge Function, Storage, email or network access is required to demonstrate the seven screens.

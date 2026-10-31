@@ -42,6 +42,9 @@ jobs:
             echo "::warning::TypeScript/typecheck not yet configured (legacy JS demo). Typecheck gate is PENDING, not PASS."
           fi
 
+      - name: P1 schema contract (static checks only)
+        run: npm run test:p1:schema
+
       - name: Legacy project integrity
         run: npm run check
 
@@ -65,3 +68,32 @@ jobs:
         run: |
           echo "Passing this CI validates a DEMO build only, not real Supabase/RLS, server grading, payments, DRM or Production readiness."
           echo "See TECHNICA_LMS_MASTER_BLUEPRINT.md and docs/current/RELEASE_SECURITY_CHECKLIST.md."
+
+  p1-postgres-smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_PASSWORD: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: PostgreSQL client
+        run: |
+          if ! command -v psql >/dev/null 2>&1; then
+            sudo apt-get update -qq
+            sudo apt-get install -y -qq postgresql-client
+          fi
+      - name: Apply P1 schema to disposable PostgreSQL and test RLS
+        run: bash scripts/test-p1-postgres-smoke.sh
+      - name: Test scope disclosure
+        run: echo "Ephemeral local PostgreSQL smoke only; live Supabase Auth, Storage, Data API and device tests still pending."

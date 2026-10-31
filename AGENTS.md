@@ -34,6 +34,6 @@ The following are REQUIRED reference reads before relevant changes:
 - docs/current/LOGIC_REGISTRY.md (approved ASP question selection, 70% adaptive threshold, 200 exclusive / 300-minute Mock)
 - docs/current/SECURITY_PLAN.md, RELEASE_SECURITY_CHECKLIST.md, TEST_PLAN.md (production gates)
 
-Apply generic guidance selectively: current app is JavaScript React/Vite, not TypeScript, and the main branch has no package-lock. Do not mask missing reproducibility or typecheck as successful. Do not apply the CHEIRON-only audit addendum to Technica. Preserve the learner v1.14 Saved-page removal and the admin-only Question Bank.
+Apply generic guidance selectively: current app is JavaScript React/Vite, not TypeScript, and the main branch now has a package-lock and CI runs npm ci. Typecheck remains missing and must not be reported as PASS. Do not apply the CHEIRON-only audit addendum to Technica. Preserve the learner v1.14 Saved-page removal and the admin-only Question Bank.
 
 Before merging, record observed CI status and failures; neither passing static checks nor the existence of these documents makes the current demo production-ready.
