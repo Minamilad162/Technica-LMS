@@ -28,7 +28,8 @@
     "test:calculator:extended": "node scripts/test-scientific-calculator-extended.mjs",
     "test:calculator:mathprint": "node scripts/test-mathprint-precision.mjs",
     "test:calculator:ti-audit": "node scripts/audit-ti30xs-reference.mjs",
-    "test:calculator:physical": "node scripts/test-calculator-physical-layout.mjs"
+    "test:calculator:physical": "node scripts/test-calculator-physical-layout.mjs",
+    "test:content-protection": "node scripts/test-content-protection.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.58.0",
