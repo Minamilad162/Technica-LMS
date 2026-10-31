@@ -52,3 +52,13 @@ Command / environment / commit / timestamp / duration / PASS-FAIL-SKIPPED / obse
 - CI job \`p1-postgres-smoke\` applies \`supabase/migrations/202610300001_p1_foundation.sql\` to a disposable test DB and validates anonymous/paid/trial/admin access, cross-course isolation, revoked/expired entitlements, suspension and self-privilege escalation denial.
 - The passing CI job does **not** replace a real Supabase staging test with signed JWTs, Auth user lifecycle, Data API, Storage and Edge Functions. Keep those as release blockers.
 
+
+
+## Scientific calculator integration — 2026-10-31
+
+- \`npm run test:calculator\` executes \`scripts/test-scientific-calculator.mjs\` using Node 22. No browser or GPU required.
+- Assert arithmetic and operator precedence, bracket/negative exponent, root/log and trig in three angle modes, hyperbolics, fractions/mixed forms, 1-/2-variable statistics, factorial/combinatorics/permutations, memory variables, random range and error handling.
+- Verify the same component imports on \`src/pages/QuizPage.jsx\` for Practice and Assessment, and \`src/pages/LearningPage.jsx\` for Lesson Quiz; CSS imported globally and mouse drag/keyboard listener logic present. These are static component wiring checks, not browser interactions.
+- **Manual QA required:** desktop 1280×720 and 1440×900 plus mobile 375/390/430 widths: question and choices readable while calculator open; drag and minimized state; calculator keypad with pointer; text input with physical keyboard; avoid shortcut interception while answering; scroll and safe area on phone; no quiz timer pause or answer state change; review modal stacking; keyboard accessibility/Escape.
+- Compare sampled outputs against an independently verified scientific calculator reference and record any differences. Do not label fully TI-model compatible without full qualification.
+- CI passing does not assert Cloudflare deployment or Supabase production exam security.
