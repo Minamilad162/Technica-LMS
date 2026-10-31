@@ -105,26 +105,45 @@ export function applyListFormula(lists,column,formula,options={}){
  validateList(values);
  return {...base,[column]:values};
 }
+const halfMedian=arr=>{
+ if(!arr.length)return null;
+ const i=Math.floor(arr.length/2);
+ return arr.length%2?arr[i]:(arr[i-1]+arr[i])/2;
+};
+const quantiles=values=>{
+ const sorted=[...values].sort((a,b)=>a-b),mid=Math.floor(sorted.length/2);
+ return {Q1:halfMedian(sorted.slice(0,mid)),Q3:halfMedian(sorted.slice(sorted.length%2?mid+1:mid))};
+};
 export function statsFromLists(lists,kind='1var',xKey='L1',yKey='L2',frequencyKey=null){
  const x=validateList(lists[xKey]||[]);
  if(!x.length)throw Error('Enter data in '+xKey);
  if(kind==='2var'){
   const y=validateList(lists[yKey]||[]);
   if(x.length!==y.length)throw Error('Lists for regression need equal lengths');
-  return twoVariableStats(x.map((v,i)=>v+','+y[i]).join(';'));
+  const base=twoVariableStats(x.map((v,i)=>v+','+y[i]).join(';'));
+  const n=x.length,sumX=x.reduce((a,b)=>a+b,0),sumY=y.reduce((a,b)=>a+b,0);
+  return {...base,meanX:sumX/n,meanY:sumY/n,sumX,sumY,
+   sumX2:x.reduce((a,b)=>a+b*b,0),sumY2:y.reduce((a,b)=>a+b*b,0),
+   sumXY:x.reduce((a,b,i)=>a+b*y[i],0),
+   predictY:base.slope!==null?'y = '+formatScientific(base.slope)+'x + '+formatScientific(base.intercept):null};
  }
  if(frequencyKey){
   const freq=validateList(lists[frequencyKey]||[]);
-  if(x.length!==freq.length||freq.some(v=>!Number.isInteger(v)||v<0)||freq.reduce((a,b)=>a+b,0)>2000)throw Error('Invalid frequencies (0–2000 total)');
-  const expanded=x.flatMap((v,i)=>Array.from({length:freq[i]},()=>v));
-  if(!expanded.length)throw Error('No observations');
-  // Existing calculator's 200-number cap is bypassed via the same stable math below.
-  const n=expanded.length,sum=expanded.reduce((a,b)=>a+b,0),mean=sum/n;
-  const variance=expanded.reduce((a,b)=>a+(b-mean)**2,0)/n;
-  const sorted=expanded.sort((a,b)=>a-b);
-  return {n,sum,mean,median:n%2?sorted[(n-1)/2]:(sorted[n/2-1]+sorted[n/2])/2,min:sorted[0],max:sorted[n-1],sigmaX:Math.sqrt(variance),sX:n>1?Math.sqrt(variance*n/(n-1)):null};
+  if(x.length!==freq.length||freq.some(v=>v<0)||!freq.some(v=>v>0))throw Error('Invalid frequencies');
+  const n=freq.reduce((a,b)=>a+b,0),sum=x.reduce((a,b,i)=>a+b*freq[i],0);
+  if(!Number.isFinite(n)||n<=0||n>2000)throw Error('Frequency total must be 0–2000');
+  const mean=sum/n,variance=x.reduce((a,b,i)=>a+freq[i]*(b-mean)**2,0)/n;
+  // Integer frequencies admit an exact expanded median/quartile.
+  const integer=freq.every(Number.isInteger);
+  const expanded=integer?x.flatMap((v,i)=>Array.from({length:freq[i]},()=>v)).sort((a,b)=>a-b):[];
+  const median=integer?halfMedian(expanded):null;
+  const extra=integer?quantiles(expanded):{Q1:null,Q3:null};
+  return {n,sum,mean,median,min:Math.min(...x),max:Math.max(...x),
+   sumX2:x.reduce((a,b,i)=>a+freq[i]*b*b,0),sigmaX:Math.sqrt(Math.max(0,variance)),
+   sX:integer&&n>1?Math.sqrt(variance*n/(n-1)):null,...extra};
  }
- return oneVariableStats(x.join(','));
+ const base=oneVariableStats(x.join(','));
+ return {...base,sumX2:x.reduce((a,b)=>a+b*b,0),...quantiles(x)};
 }
 export function makeFunctionTable(formula,{mode='auto',start=0,step=1,values=[],count=8,angleMode='DEG',ans=0,memory=0,variables={}}={}){
  if(!formula||formula.length>220)throw Error('Enter f(x)');
