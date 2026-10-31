@@ -3,7 +3,7 @@
 > **Canonical project specification / single source of truth**
 >
 > Project: Technica Consult LMS
-> Version: 1.1.2 (nested math entry and calculator precision)
+> Version: 1.1.3 (TI-30XS reference parity audit and real browser tests)
 > Last updated: 2026-10-31 (Africa/Cairo)
 > Repository: https://github.com/Minamilad162/Technica-LMS
 > Target branch: main
@@ -824,3 +824,30 @@ New auditable report: [docs/current/P0_BASELINE_AUDIT_2026-10-30.md](docs/curren
 ### 2026-10-31 — v1.1.2 calculator math entry change record
 - Built a functional structured nested-input editor, high-precision rational-only arithmetic, TI-style numeric display and dependent list formula menus; protected existing quiz behavior and data through dedicated CI.
 - Merge/deployment status must be confirmed separately by actual GitHub Actions results and main-branch commit after passing PR gates.
+
+
+## 31. TI-30XS MultiView verified-reference compliance audit — 2026-10-31
+
+**Owner requirement:** validate implementation by genuine tests and audit every original calculator function; do not accept broad claims of completion.
+
+**Audit document (canonical subsidiary):** [TI30XS_CALCULATOR_AUDIT_20261031.md](docs/current/TI30XS_CALCULATOR_AUDIT_20261031.md). This document includes a manufacturer-backed function-by-function matrix and explicit severity/status. It supersedes earlier casual phrasing of the calculator as feature-complete.
+
+Confirmed defects against TI documentation and work performed under [PR #12](https://github.com/Minamilad162/Technica-LMS/pull/12):
+- Factorial was wrongly allowed through 170, now TI-specified **0–69**.
+- 1Var frequency values exceeding 99 were incorrectly allowed, now TI-specified **0–99**.
+- K operator rejected TI-style \`*2+3\` syntax and had no 44-char guard; these are added, but the manufacturer's exact automatic UI cadence remains different.
+- RAND seed had no function; repeatable seeded random stream introduced, **NOT the certified TI sequence**.
+- List formulas previously silently treated missing linked data as zero and accepted formulas without list references; now enforce list names, length mismatches and circular dependency guards.
+- Pressing ENTER did not auto-close pending parentheses. Added a safe UI finalizer and bound while preserving strict parser APIs.
+- Real Chromium touch QA discovered actual blocker: the floating calculator intercepted answer clicks on a 390px phone. Reworked mobile question/calc split into an in-flow scrollable top question pane and bounded bottom calculator; run the new independent Chromium checks before calling this fully fixed.
+
+Verification:
+- Node reference cases \`npm run test:calculator:ti-audit\`; existing calculator/multilevel arithmetic suites; legacy bank/quiz/learning checks; Vite and P1 disposable Postgres smoke.
+- Real Chromium workflow [calculator-browser-audit.yml](.github/workflows/calculator-browser-audit.yml) checks desktop pointer drag, math templates, keyboard Enter, answer selection with tool open, navigation and currently built question routes on mobile 375/390/430.
+- Record exact **latest commit CI status** before merging. Old passing math unit tests alone did not verify mobile answer interactions.
+
+**Explicit strict parity outcome:** NOT equivalent to original TI-30XS MultiView firmware in all details. Known partial/missing capabilities include full symbolic simplification, exact TI PRNG sequence, firmware-specific K automatic input workflow, full StatVars menu/key navigation, four-line 16-char physical LCD, 23 pending values/8-value hardware EOS stack and actual internal numeric precision/errors. Hardware attributes do not apply to a cloud LMS. Any request to certify “all TI functions” must be handled as a separate measurable firmware-device reference test with physical hardware or an authorized source, not via a generic green CI result.
+
+### 2026-10-31 — v1.1.3 calculator audit record
+- Maintained accepted quiz styles and answer/score/timer business logic; no database migration or live cloud deployment claimed. Do not reduce existing operations merely to match a test.
+- Pending release gates: most recent Playwright desktop/mobile and all CI checks on exact review SHA; manual iOS/Android usability and official device output parity remain unverified.
