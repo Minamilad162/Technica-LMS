@@ -77,7 +77,7 @@ Status keys: **TESTED FUNCTIONAL** = automated mathematical/interaction tests; *
 - **AUDIT-CALC-003: TI K entry** — only x-explicit formula worked; official TI supports operator-first format and 44-character K. Added syntax and guard, but not identical auto-repeat firmware workflow.
 - **AUDIT-CALC-004: RAND seed** — lacked any seed control; added reproducible seed facility with **non-TI PRNG**. Exact manufacturer seed algorithm parity is still NOT proven.
 - **AUDIT-CALC-005: FORMULA DIM MISMATCH** — silently treated absent rows as zeros and accepted list formulas without references. Now requires source list references and matching lengths.
-- **AUDIT-CALC-006: Mobile overlay blocks answers** — real Chromium 390 px browser run #1 recorded 17 passing steps / **one real failed answer click**, due to calculator intersecting quiz answer button. Added split-screen mobile quiz + calculator layout; MUST pass a fresh independent Chromium run before FIX VERIFIED.
+- **AUDIT-CALC-006: Mobile overlay blocks answers** — real Chromium 390 px browser run #1 recorded 17 passing steps / **one real failed answer click**, due to calculator intersecting quiz answer button. Replaced the first flawed fixed-position split with an in-flow scrolling question workspace. **FIX VERIFIED** by Chromium [browser run #10](https://github.com/Minamilad162/Technica-LMS/actions/runs/41179635289): answer selection/navigation passed on 375/390/430px.
 - **AUDIT-CALC-007: Enter auto-close** — TI completes pending parentheses on ENTER while browser evaluator previously returned an unmatched-paren error. Added safe UI normalization without mutating strict low-level parser.
 
 ## Automated regression suite and browser evidence
@@ -86,9 +86,15 @@ Status keys: **TESTED FUNCTIONAL** = automated mathematical/interaction tests; *
 - New guide-reference suite: \`npm run test:calculator:ti-audit\`.
 - Existing P1 disposable PostgreSQL smoke, ASP 1,625-question integrity, all previous practice/assessment/learning tests and Vite production build.
 - New independent real Chromium pipeline: [Calculator Real Browser Audit](../../.github/workflows/calculator-browser-audit.yml), run \`scripts/test-calculator-browser.mjs\`, with **1440×900 desktop** and **390×844 mobile touch**. Validates real calculator open, Math field editing, numerator/denominator, Enter, quiz answer selection while open, question navigation, desktop dragging, mobile within viewport, close/reopen and browser exceptions.
-- The first Chromium run [#1](https://github.com/Minamilad162/Technica-LMS/actions/runs/41179220523) FAILED and exposed real mobile interception. See later runs in PR #12; a passing latest head is required for merge, and this report must record its exact run ID before calling the fix fully verified.
+- The first Chromium run [#1](https://github.com/Minamilad162/Technica-LMS/actions/runs/41179220523) FAILED and exposed real mobile interception. After two iterations, [browser run #10](https://github.com/Minamilad162/Technica-LMS/actions/runs/41179635289) **PASSED 38/38** real tests with 0 failures, covering desktop 1440×900, mobile 375/390/430px, Practice, Assessment, Lesson Quiz, mathematical fraction input, keyboard, dragging, answer selection and quiz navigation. Latest review-head run still required before merge.
 - Cloud browser/screenshots of published production instance, Safari/iOS physical device testing, exhaustive screen-reader testing, independent physical TI-calculator reference-output equivalence and real server exam tests remain **NOT DONE**.
 
 ## Release verdict
 
 The tool is **usable as an original scientific calculator for preparatory quizzes if the regression and browser gates pass**, but **NOT approved to claim “every TI function with exact TI behavior”**. The missing/partial cells above are visible release-blockers for any exact-device-parity contract. The user can prioritize parity improvement under a follow-up workstream; do not conceal or mark these rows PASS without independent evidence.
+
+## Verified automated evidence
+
+- [Chromium run #10, 38 PASS / 0 FAIL](https://github.com/Minamilad162/Technica-LMS/actions/runs/41179635289), including real mobile answer-click regression that failed in run #1.
+- [Combined CI run #95](https://github.com/Minamilad162/Technica-LMS/actions/runs/41179635132) PASS for the source portion before final documentation updates; [CI run #94](https://github.com/Minamilad162/Technica-LMS/actions/runs/41179559986) also PASS.
+- No assertion of manufacturer firmware parity or native Safari device QA is made from Chromium tests.
