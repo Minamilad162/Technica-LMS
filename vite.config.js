@@ -12,9 +12,12 @@ export default defineConfig(({mode})=>{
       ...(live?[{
         name:'technica-safe-live-entrypoint',
         enforce:'pre',
-        transformIndexHtml(html){
-          return html.replace('/src/main.jsx','/src/production/main.jsx')
-            .replace('LMS demo','LMS');
+        transformIndexHtml:{
+          order:'pre', // must run before Vite scans HTML module imports
+          handler(html){
+            return html.replace('/src/main.jsx','/src/production/main.jsx')
+              .replace('LMS demo','LMS');
+          }
         }
       }]:[])
     ],
