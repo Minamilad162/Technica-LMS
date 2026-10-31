@@ -1,3 +1,10 @@
+### 2026-10-31 — Calculator physical keypad from user reference
+
+- Replaced the old generic 5x9 scientific key grid and permanently visible 8-tab menu with a compact physical-style 5-column/7-row photo-referenced layout (35 main keys + 6 upper controls + circular arrow pad). Upper second labels, white numbers, dark arithmetic and Technica-branded blue shell visually preserve reference groupings without third-party TI assets.
+- All existing scientific computation, Math templates, numeric precision, statistics, 1Var/2Var, lists, memory and K remain available through physical keys and contextual menus. Navigation arrows now interact with math template fields.
+- Main keypad never scrolls on approved viewports; long Data and Table menus alone may scroll. Added photo-specific layout, real browser no-scroll/visibility checks and retained all quiz/assessment regression gates.
+- Original TI logos, firmware and device-level parity claims are not included. No Supabase or Cloudflare deployment.
+
 ### 2026-10-31 — TI-30XS MultiView audit, guidebook vectors and real browser QA
 
 - Audited original Technica scientific calculator against official manufacturer function, error, numeric mode, probability and list documentation; created detailed [audit report](docs/current/TI30XS_CALCULATOR_AUDIT_20261031.md) with tested/partial/missing parity for each major feature.
