@@ -3,7 +3,7 @@ import {getAuthSession} from '../lib/demoAuth';
 import {
  PROTECTION_HOLD_MS,WATERMARK_POSITIONS,formatWatermarkLabel,
  getContentProtectionSession,isPotentialCaptureShortcut,
- shouldBlockContentEvent,watermarkIdentity
+ shouldBlockContentEvent,shouldBlockClipboardEvent,selectionTouchesProtected,watermarkIdentity
 }from'../lib/contentProtection';
 
 /**
@@ -12,6 +12,7 @@ import {
  * Does NOT affect calculator input fields, navigation outside protected content,
  * browser accessibility focus or the surrounding LMS workspace.
  */
+let activeProtectedContainers=0;
 export default function ProtectedContent({as:Tag='div',className='',kind='questions',children}){
  const ref=useRef(null),timeout=useRef(null);
  const[covered,setCovered]=useState(false);
@@ -29,21 +30,46 @@ export default function ProtectedContent({as:Tag='div',className='',kind='questi
   timeout.current=setTimeout(()=>{setCovered(false);timeout.current=null},PROTECTION_HOLD_MS);
  },[]);
  useEffect(()=>{
-  const onKeyDown=e=>{
-   if(isPotentialCaptureShortcut(e)){
-    // Browser/OS may process the screenshot BEFORE this event, or never send
-    // the event. Blackout only occurs if the browser delivers the shortcut.
+  activeProtectedContainers++;
+  document.documentElement.classList.add('tc-has-protected-content');
+  const onBeforePrint=()=>document.documentElement.classList.add('tc-print-in-progress');
+  const onAfterPrint=()=>document.documentElement.classList.remove('tc-print-in-progress');
+  const onClipboard=e=>{
+   if(shouldBlockClipboardEvent(e,ref.current,window.getSelection(),document.activeElement)){
     if(e.cancelable)e.preventDefault();
-    cloak();
-   }
-   if((e.ctrlKey||e.metaKey)&&String(e.key).toLowerCase()==='p'){
-    if(e.cancelable)e.preventDefault();
-    cloak();
+    e.clipboardData?.clearData?.();
+    e.stopImmediatePropagation?.();
    }
   };
+  const onKeyDown=e=>{
+   if(isPotentialCaptureShortcut(e)){
+    // Only a delivered key event triggers the visible curtain. OS-native
+    // capture and recording cannot be intercepted by normal websites.
+    if(e.cancelable)e.preventDefault();
+    cloak();
+    return;
+   }
+   if((e.ctrlKey||e.metaKey)&&['c','x'].includes(String(e.key).toLowerCase())&&
+      selectionTouchesProtected(window.getSelection(),ref.current)){
+    if(e.cancelable)e.preventDefault();
+   }
+   // Ctrl/Cmd+P and browser-menu Print use beforeprint / @media print.
+   // Don't flicker the ordinary UI just because the print dialog opened.
+  };
+  document.addEventListener('copy',onClipboard,true);
+  document.addEventListener('cut',onClipboard,true);
   window.addEventListener('keydown',onKeyDown,true);
+  window.addEventListener('beforeprint',onBeforePrint);
+  window.addEventListener('afterprint',onAfterPrint);
   return()=>{
+   document.removeEventListener('copy',onClipboard,true);
+   document.removeEventListener('cut',onClipboard,true);
    window.removeEventListener('keydown',onKeyDown,true);
+   window.removeEventListener('beforeprint',onBeforePrint);
+   window.removeEventListener('afterprint',onAfterPrint);
+   document.documentElement.classList.remove('tc-print-in-progress');
+   activeProtectedContainers=Math.max(0,activeProtectedContainers-1);
+   if(activeProtectedContainers===0)document.documentElement.classList.remove('tc-has-protected-content');
    if(timeout.current)clearTimeout(timeout.current);
   };
  },[cloak]);
