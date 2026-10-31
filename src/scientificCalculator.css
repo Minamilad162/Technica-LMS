@@ -65,7 +65,7 @@
 .tc-calc-sr-only{position:absolute!important;clip:rect(0,0,0,0)!important;width:1px!important;height:1px!important;overflow:hidden!important}
 @media(max-width:700px){
  .tc-calc-launch{right:15px;bottom:76px;min-height:43px;padding:0 12px;gap:7px}
- .tc-calc-window{left:8px!important;right:8px!important;top:auto!important;bottom:126px!important;width:auto;max-width:none;max-height:min(67dvh,570px);border-radius:19px}
+ .tc-calc-window{left:8px!important;right:8px!important;top:auto!important;bottom:126px!important;width:auto;max-width:none;max-height:min(52dvh,460px);border-radius:19px}
  .tc-calc-window-header{touch-action:auto}
  .tc-calc-body{padding:6px 10px 9px}
  .tc-calc-window .tc-calc-key{height:36px;min-height:36px}
@@ -74,6 +74,8 @@
 @media(max-width:375px){
  .tc-calc-window .tc-calc-key{height:33px;min-height:33px;font-size:11px}
  .tc-calc-window .tc-calc-num{font-size:15px}
- .tc-calc-window{max-height:60dvh}
+ .tc-calc-window{max-height:48dvh}
 }
 @media(prefers-reduced-motion:reduce){.tc-calc-launch{transition:none}}
+
+.tc-calc-lcd-history{height:14px;min-height:14px;overflow:hidden;text-align:right;font:10px ui-monospace,monospace;color:#536f65;white-space:nowrap;text-overflow:ellipsis}
