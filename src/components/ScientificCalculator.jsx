@@ -141,6 +141,14 @@ export default function ScientificCalculator({context='Quiz'}){
    setResult(showExact&&viewMode==='MATH'&&exact?formatExactPlain(exact):formatWithMode(v,{notation,fixed:fixed==='FLOAT'?null:Number(fixed),asFraction:fraction,mixed}));
    setExpression(formatScientific(v));setHistory(h=>[{expression:exp,value:v},...h].slice(0,12));setError('');
  }
+ function resetCalculator(){
+   if(!window.confirm('Reset all calculator settings, memory, data, and calculation history?'))return;
+   setExpression('');setMathDoc(createMathDocument());setResult('0');setAnswer(0);setMemory(0);
+   setHistory([]);setVariables(freshVariables());setLists(makeListState());setSecond(false);
+   setError('');setAngle('DEG');setNotation('NORM');setFixed('FLOAT');setViewMode('MATH');
+   setFraction(false);setMixed(false);setLastExact(null);setLastCalcExpression('');setShowExact(true);
+   setPercentView(false);setStatsInput('');setStatsResult(null);setTableRows([]);setTableFormula('x^2');setTableMode('auto');setTab('keys');
+ }
  function makeTable(){
    try{
      const start=Number(tableStart),step=Number(tableStep);
@@ -247,7 +255,7 @@ export default function ScientificCalculator({context='Quiz'}){
          <small>{h.expression}</small><b>{formatScientific(h.value)} ↵</b></button>)}
      </div>}
      <div className="tc-calc-footer"><span>Independent scientific calculator</span>
-      <button type="button" onClick={()=>{setExpression('');setMathDoc(createMathDocument());setResult('0');setAnswer(0);setError('');setHistory([]);setSecond(false)}}><Delete size={13}/> Reset</button></div>
+      <button type="button" onClick={resetCalculator}><Delete size={13}/> Reset</button></div>
    </div>}
   </section>}
  </>,document.body);
