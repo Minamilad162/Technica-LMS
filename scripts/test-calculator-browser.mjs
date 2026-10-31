@@ -1,10 +1,12 @@
 /* Real Chromium UI smoke. Run with npm ci + Playwright installed in isolated CI job.
  * Browser tests are not a proof of TI hardware equivalence. */
 import assert from 'node:assert/strict';
+import {mkdirSync} from 'node:fs';
 import {spawn} from 'node:child_process';
 import {setTimeout as sleep} from 'node:timers/promises';
 import {chromium} from 'playwright';
 const ROOT='http://127.0.0.1:4173';
+mkdirSync('artifacts/calculator-qa',{recursive:true});
 const vite=spawn('node',['node_modules/vite/bin/vite.js','--host','127.0.0.1','--port','4173','--strictPort'],{stdio:['ignore','pipe','pipe'],env:{...process.env}});
 let logs='';
 for(const stream of [vite.stdout,vite.stderr])stream.on('data',chunk=>{logs+=String(chunk).slice(-1500)});
@@ -71,6 +73,32 @@ try{
    const last=await page.locator('.tc-calc-main-grid [data-calc-key="enter"]').boundingBox();
    const win=await page.locator('.tc-calc-window').boundingBox();
    assert.ok(last.y+last.height<=win.y+win.height-2,'Last row clipped behind shell');
+   // UI visual regression: refined colors, larger shell and tactile key geometry.
+   const appearance=await page.locator('.tc-calc-window').evaluate(win=>{
+     const get=sel=>getComputedStyle(win.querySelector(sel));
+     const box=win.getBoundingClientRect();
+     const fn=get('.tc-calc-main-grid [data-calc-kind="fn"]');
+     const num=get('.tc-calc-main-grid [data-calc-kind="num"]');
+     const op=get('.tc-calc-main-grid [data-calc-kind="op"]');
+     const shift=get('.tc-calc-physical-shift');
+     const lcd=get('.tc-calc-display');
+     return {
+       width:box.width,
+       borderRadius:parseFloat(getComputedStyle(win).borderTopLeftRadius),
+       shell:getComputedStyle(win).backgroundImage,
+       fnBg:fn.backgroundImage,numBg:num.backgroundImage,opBg:op.backgroundImage,
+       fnText:fn.color,numText:num.color,opText:op.color,
+       shiftFont:parseFloat(shift.fontSize),lcdBg:lcd.backgroundImage
+     };
+   });
+   assert.ok(appearance.borderRadius>=20,'Calculator shell should have rounded polished edges');
+   assert.notEqual(appearance.fnBg,appearance.numBg,'Function and number key finishes should visibly differ');
+   assert.notEqual(appearance.opBg,appearance.fnBg,'Operator and function key finishes should visibly differ');
+   assert.ok(appearance.shiftFont>=6.5,'Secondary legends became unreadably small');
+   if(!device.touch)assert.ok(appearance.width>=380,'Desktop calculator should be slightly larger than 354px original: '+appearance.width);
+   else assert.ok(appearance.width>=device.viewport.width-17,'Mobile calculator should use available viewport width');
+   await page.locator('.tc-calc-window').screenshot({path:'artifacts/calculator-qa/'+device.name+'.png'});
+
   });
   await check(device.name+' 2nd function layer and real menu controls',async()=>{
    await page.locator('.tc-calc-top-grid [data-calc-key="second"]').click();

@@ -261,3 +261,266 @@
  .tc-calc-quiz-navigation button{width:24px;min-width:24px}
  body:has(.tc-calc-window:not(.tc-calc-minimized)) .quiz-page .quiz-action-row{display:none}
 }
+
+
+/* ──────────────────────────────────────────────────────────────────────────
+   v1.1.5 — owner screenshot review: refined casing, higher key contrast,
+   better bevels and gently increased physical size. CSS only: no key movement,
+   math engine, quiz timing, or keyboard-mapping changes.
+   Desktop 354 → 384 px; mobile remains viewport-fitted with ~4 px side gap.
+   ────────────────────────────────────────────────────────────────────────── */
+.tc-calc-window:not(.tc-calc-minimized){
+  --tc-key-h:clamp(31px,4.55dvh,42px);
+  --tc-key-gap:5px;
+  width:384px;
+  max-width:calc(100vw - 10px);
+  border:3px solid #e3ebef;
+  border-radius:31px 31px 38px 38px;
+  background:linear-gradient(90deg,
+    #9cabb5 0%,#f7fbfd 1.3%,#eaf1f5 4.4%,
+    #52758b 6.8%,#5a829a 19%,#4f7792 53%,#527e98 92.5%,
+    #e4eef4 95.5%,#f7fbfd 98.6%,#a7b4be 100%);
+  box-shadow:
+    0 21px 52px #101f3161,
+    0 3px 10px #101f3145,
+    inset 0 2px 2px #fff9,
+    inset 3px 0 3px #fff7,
+    inset -3px 0 3px #fbffffa6;
+}
+.tc-calc-window:not(.tc-calc-minimized) .tc-calc-body{
+  padding:3px 17px 15px;
+  gap:6px;
+}
+.tc-calc-window-header{
+  min-height:31px;
+  padding:3px 11px;
+  background:linear-gradient(180deg,#456c84 0%,#34576f 100%);
+  box-shadow:inset 0 -1px #d5e8ef38;
+}
+.tc-calc-window-header strong{
+  font-size:11px;
+  font-weight:850;
+  letter-spacing:.035em;
+  color:#fcffff;
+  text-shadow:0 1px 1px #17364d99;
+}
+.tc-calc-window-header strong span{color:#e4f4ff;font-size:9px}
+.tc-calc-window-header button{
+  border:1px solid #92b6c799;
+  background:linear-gradient(170deg,#688a9d,#43677e);
+  box-shadow:inset 0 1px #ffffff52;
+  border-radius:9px;
+}
+.tc-calc-window-header button:hover{background:#2b5169}
+.tc-calc-quiz-navigation button{
+  width:27px;height:25px;min-height:25px;
+  border:1px solid #a3c9d7;
+  background:linear-gradient(165deg,#527e96,#244d69);
+  box-shadow:inset 0 1px #f1ffff65,0 1px 2px #102a3b59;
+}
+.tc-calc-quiz-navigation>span{font-size:10px;color:#f2ffff}
+.tc-calc-identity{
+  min-height:27px;
+  grid-template-rows:15px 11px;
+  color:#fff;
+  text-shadow:0 1px 2px #13344882;
+}
+.tc-calc-identity>span{
+  font-size:15px;
+  letter-spacing:.08em;
+  font-weight:900;
+}
+.tc-calc-identity>em{font-size:10px;font-weight:600;color:#e7f4fd;letter-spacing:.09em}
+.tc-calc-identity>button{
+  border:1px solid #b9d3e2;
+  border-radius:8px;
+  padding:4px 7px;
+  font-size:9px;
+  background:linear-gradient(165deg,#3d6984,#204762);
+  box-shadow:inset 0 1px #ffffff58,0 2px 3px #1a3c5244;
+}
+.tc-calc-identity>button:hover{background:#194c6c}
+.tc-calc-window .tc-calc-display{
+  border:3px solid #2b5360;
+  border-radius:12px;
+  background:linear-gradient(142deg,#dbe8dd 0%,#c7dacb 48%,#b7cdbc 100%);
+  box-shadow:
+    inset 0 3px 7px #24483e45,
+    inset 0 0 0 1px #f6ffed85,
+    0 2px 3px #15344d5c;
+  color:#17392f;
+  padding:5px 8px;
+}
+.tc-calc-window .tc-calc-display-status{
+  color:#365c52;
+  font-size:9px;
+  letter-spacing:.03em;
+  font-weight:850;
+}
+.tc-calc-window .tc-calc-display-result{
+  color:#15372e;
+  font-size:23px;
+  font-weight:850;
+  text-shadow:0 1px #f5fff78a;
+}
+.tc-calc-window .tc-calc-lcd-history{color:#47675c;font-size:9px}
+.tc-calc-window .tc-calc-display input.tc-math-field{
+  color:#173c32!important;
+  font-weight:750!important;
+}
+.tc-calc-window .tc-math-template-tools button{
+  border-color:#85a89d;
+  border-radius:4px;
+  background:#f0f7ec;
+  color:#1b5145;
+  box-shadow:inset 0 1px #fff;
+  font-weight:850;
+}
+.tc-calc-direction-pad{
+  border:4px solid #dce7ed;
+  background:radial-gradient(circle at 46% 37%,#35444e,#151c25 75%);
+  box-shadow:
+    0 3px 5px #1532486d,
+    0 0 0 1px #6f8996,
+    inset 0 2px 5px #050d14af;
+}
+.tc-calc-direction-pad button{
+  color:#eaf3f9;
+  font-size:13px;
+  font-weight:900;
+}
+.tc-calc-direction-pad button:hover{color:#c8f784}
+.tc-calc-direction-pad .tc-calc-direction-hub{
+  background:#263742;
+  box-shadow:inset 0 2px 5px #09151d8a,0 1px 1px #ffffff27;
+}
+.tc-calc-window .tc-calc-physical-key{
+  border:1px solid #173c54;
+  border-bottom:3px solid #19394e;
+  border-radius:12px;
+  background:linear-gradient(158deg,#547d99 0%,#345d79 56%,#294e69 100%);
+  color:#ffffff;
+  box-shadow:
+    inset 0 1px 1px #e9faff73,
+    0 2px 3px #122c4370;
+  font-size:13px;
+  font-weight:850;
+  text-shadow:0 1px 1px #0d233c59;
+}
+.tc-calc-window .tc-calc-physical-key[data-calc-kind="second"]{
+  background:linear-gradient(153deg,#e8ff82 0%,#b9eb47 60%,#9dd82e 100%);
+  border-color:#8cae36;
+  border-bottom-color:#6f9921;
+  color:#26420b;
+  text-shadow:none;
+  box-shadow:inset 0 1px #fffca9,0 2px 3px #3350296b;
+}
+.tc-calc-window .tc-calc-physical-key[data-calc-kind="num"]{
+  background:linear-gradient(165deg,#ffffff 0%,#f5f9fc 48%,#dce7ee 100%);
+  border-color:#b7c7d1;
+  border-bottom-color:#879eac;
+  color:#172f40;
+  font-size:19px;
+  font-weight:900;
+  text-shadow:none;
+  box-shadow:inset 0 1px #fff,0 2px 3px #14314970;
+}
+.tc-calc-window .tc-calc-physical-key[data-calc-kind="op"]{
+  background:linear-gradient(158deg,#38434d,#222c35 60%,#17212b);
+  border-color:#1a232c;
+  border-bottom-color:#0e141b;
+  color:#fff;
+  font-size:19px;
+  box-shadow:inset 0 1px #8b9ca452,0 2px 3px #1024358a;
+}
+.tc-calc-window .tc-calc-physical-key[data-calc-kind="enter"],
+.tc-calc-window .tc-calc-physical-key[data-calc-kind="light"]{
+  background:linear-gradient(160deg,#ffffff 0%,#eef6f8 55%,#d6e3e9 100%);
+  border-color:#b1c6d0;
+  border-bottom-color:#889eaa;
+  color:#183142;
+  text-shadow:none;
+  font-size:13px;
+}
+.tc-calc-window .tc-calc-physical-key[data-calc-kind="fn"]{font-size:13px}
+.tc-calc-window .tc-calc-physical-key:focus-visible,
+.tc-calc-direction-pad button:focus-visible{
+  outline:3px solid #e4ff90;
+  outline-offset:1px;
+}
+.tc-calc-window .tc-calc-physical-key:hover{filter:brightness(1.13)}
+.tc-calc-window .tc-calc-physical-key:active{
+  transform:translateY(2px);
+  box-shadow:inset 0 2px 3px #172b355c;
+}
+.tc-calc-physical-key .tc-calc-physical-shift{
+  color:#e8ff96;
+  font-size:8.3px;
+  font-weight:900;
+  letter-spacing:0;
+  text-shadow:0 1px 1px #1532449e;
+}
+.tc-calc-physical-key[data-calc-kind="num"] .tc-calc-physical-shift{
+  color:#517d11;
+  text-shadow:none;
+}
+.tc-calc-physical-key .tc-calc-physical-label{margin-top:6px}
+.tc-calc-physical-key:not(:has(.tc-calc-physical-shift)) .tc-calc-physical-label{margin-top:0}
+.tc-calc-window .tc-calc-physical-key.tc-calc-alt-active .tc-calc-physical-label{color:#eeff9e}
+.tc-calc-window .tc-calc-physical-key[data-calc-kind="num"].tc-calc-alt-active .tc-calc-physical-label{color:#355f0d}
+.tc-calc-window:not(.tc-calc-minimized) .tc-calc-menu-panel{
+  border:2px solid #8aaeba;
+  background:#e8f4f6;
+  color:#203f50;
+  box-shadow:0 10px 27px #0b293f8a,inset 0 1px #fff;
+}
+.tc-calc-window.tc-calc-minimized{width:384px}
+/* Maintain screenshot-verified full keypad visibility and readable question
+   on 375, 390 and 430px phones; do not create a second scrollbar. */
+@media(max-width:700px){
+  .tc-calc-window:not(.tc-calc-minimized){
+    --tc-key-h:clamp(27px,3.7dvh,36px);
+    --tc-key-gap:3px;
+    left:5px!important;right:5px!important;
+    width:auto;max-width:none;
+    border-radius:25px 25px 29px 29px;
+    max-height:calc(63dvh - 2px);
+  }
+  .tc-calc-window:not(.tc-calc-minimized) .tc-calc-body{
+    padding:2px 12px 9px;gap:3px;
+  }
+  .tc-calc-window-header{min-height:24px;padding:3px 8px}
+  .tc-calc-window-header strong{font-size:10px}
+  .tc-calc-identity{min-height:19px;grid-template-rows:11px 8px}
+  .tc-calc-identity>span{font-size:12px}
+  .tc-calc-identity>em{font-size:8px}
+  .tc-calc-identity>button{font-size:8px;padding:2px 4px}
+  .tc-calc-window .tc-calc-display{padding:3px 6px}
+  .tc-calc-window .tc-calc-display-status{font-size:8px;min-height:9px}
+  .tc-calc-window .tc-calc-display-result{min-height:21px;font-size:19px}
+  .tc-calc-window .tc-calc-lcd-history{font-size:8px;height:9px;min-height:9px}
+  .tc-calc-window .tc-calc-physical-key{border-radius:10px;padding-top:2px}
+  .tc-calc-window .tc-calc-physical-key[data-calc-kind="fn"]{font-size:11px}
+  .tc-calc-window .tc-calc-physical-key[data-calc-kind="num"]{font-size:17px}
+  .tc-calc-window .tc-calc-physical-key[data-calc-kind="op"]{font-size:17px}
+  .tc-calc-physical-key .tc-calc-physical-shift{font-size:7.1px}
+  .tc-calc-direction-pad button{font-size:12px}
+  body:has(.tc-calc-window:not(.tc-calc-minimized)) .quiz-page .quiz-columns{
+    height:min(29dvh,238px);
+  }
+  body:has(.tc-calc-window:not(.tc-calc-minimized)) .tc-calc-window{
+    max-height:calc(63dvh - 2px);
+    bottom:5px!important;
+  }
+}
+@media(max-width:375px){
+ .tc-calc-window:not(.tc-calc-minimized){--tc-key-h:clamp(26px,3.6dvh,31px)}
+ .tc-calc-window .tc-calc-physical-key[data-calc-kind="fn"]{font-size:11px}
+ .tc-calc-physical-key .tc-calc-physical-shift{font-size:7.2px}
+}
+@media(max-height:700px) and (min-width:701px){
+ .tc-calc-window:not(.tc-calc-minimized){
+   --tc-key-h:clamp(25px,4.4dvh,33px);
+   max-height:calc(100dvh - 16px);
+ }
+}

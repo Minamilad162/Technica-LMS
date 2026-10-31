@@ -1,3 +1,10 @@
+### 2026-10-31 — Calculator screenshot-based visual polish (v1.1.5)
+
+- Slightly increased physical calculator width on desktop from 354px to 384px, maintained no-scroll keypad and narrow mobile viewport fit.
+- Refined silver beveled frame and rounded bottom casing, deeper blue shell and LCD bezel, softer LCD green, tactile key borders and shadows.
+- Improved contrast between blue scientific, white numeric, dark arithmetic, yellow-green 2nd and small alternate-function legends. All original 35 main + 6 upper key positions unchanged.
+- Extended Chromium layout/contrast assertions with desktop and 375/390/430px phone screenshot artifacts; no changes to quiz logic, timers, scientific calculation, Supabase or learning flow.
+
 ### 2026-10-31 — Calculator physical keypad from user reference
 
 - Replaced the old generic 5x9 scientific key grid and permanently visible 8-tab menu with a compact physical-style 5-column/7-row photo-referenced layout (35 main keys + 6 upper controls + circular arrow pad). Upper second labels, white numbers, dark arithmetic and Technica-branded blue shell visually preserve reference groupings without third-party TI assets.

@@ -115,3 +115,8 @@ The owner supplied a TI-30XS MultiView photo and requested a physical-style shap
 The photo-inspired layout is not an original Texas Instruments product/emulator and does not include TI branding or images. Every base key has a corresponding calculation/UI action, with green secondary legend actions accessed using 2nd. MODE opens angle, numeric modes, Classic/Textbook and precision controls; PRB opens factorial, nCr/nPr, random; DATA accesses L1/L2/L3; TABLE opens the f(x) table; STO accesses memory, and additional scientific operations remain under the TOOLS selector. Long advanced data menus can scroll; **the regular physical keypad is fixed, not a scrolling catalog**.
 
 The floating panel remains draggable on desktop and its question/answer workspace remains independent on small screens. Chromium audit includes all key rows and no-scrolling assertions plus question answer interaction in current Practice, Assessment and Lesson Quiz. No changes to scoring, timer, questions or DB.
+
+
+### v1.1.5 screenshot-based appearance adjustment
+
+Using the owner's screenshot of the actual current Technica calculator, the casing is subtly widened on desktop (354 → 384px) with smoother silver bevels, navy and white key contrast, deeper LCD border, improved green 2nd labels and a more distinct navigation pad. On phones the keypad remains full-width and responsive without introducing internal scrolling; desktop and three mobile viewport screenshots are archived in the Chromium UI audit. This visual change does **not** modify the calculation algorithms or guarantee identical styling on actual iOS/Android devices.
