@@ -20,7 +20,7 @@ let browser;
 try{
  await ready();
  browser=await chromium.launch({headless:true});
- for(const device of [{name:'desktop',width:1366,height:900,touch:false},{name:'mobile390',width:390,height:844,touch:true}]){
+ for(const device of [{name:'desktop',width:1366,height:900,touch:false},{name:'mobile375',width:375,height:812,touch:true},{name:'mobile390',width:390,height:844,touch:true},{name:'mobile430',width:430,height:932,touch:true}]){
   const context=await browser.newContext({viewport:{width:device.width,height:device.height},hasTouch:device.touch,isMobile:device.touch});
   await context.addInitScript(()=>{
    sessionStorage.setItem('technica-lms-demo-auth-session-v1',
@@ -115,29 +115,68 @@ try{
    await curtain.waitFor({state:'hidden',timeout:3500});
    assert.ok(await page.locator('.answer-option').first().isVisible(),'Screen restored after keyboard attempt');
   });
-  await check(device.name+' exam focus-loss privacy shield blackens actual browser screenshot',async()=>{
-   // Simulate an OS snip tool stealing focus. This is not a native OS capture test.
-   await page.evaluate(()=>window.dispatchEvent(new Event('blur')));
+  await check(device.name+' platform-appropriate focus handling',async()=>{
    const curtain=page.locator('.tc-capture-curtain');
-   await curtain.waitFor({state:'visible'});
-   assert.equal(await curtain.getAttribute('data-reason'),'focus-loss');
-   assert.equal(await curtain.evaluate(el=>el.parentElement===document.body),true,'Curtain must be portaled outside moving page containers');
-   const png=await page.screenshot();
-   const pixel=await page.evaluate(async base64=>{
-    const img=new Image();
-    return await new Promise((resolve,reject)=>{
-     img.onload=()=>{
-      const canvas=document.createElement('canvas');canvas.width=img.width;canvas.height=img.height;
-      const ctx=canvas.getContext('2d');ctx.drawImage(img,0,0);
-      resolve(Array.from(ctx.getImageData(12,12,1,1).data));
-     };
-     img.onerror=reject;img.src='data:image/png;base64,'+base64;
-    });
-   },png.toString('base64'));
-   assert.deepEqual(pixel.slice(0,3),[3,6,11],'Screenshot taken DURING the focus shield must be black');
-   await page.evaluate(()=>window.dispatchEvent(new Event('focus')));
-   await curtain.waitFor({state:'hidden'});
+   if(device.touch){
+    // Mobile keyboard controls can blur the window without the tab being hidden.
+    const editor=page.locator('.tc-calc-window input.tc-math-field').first();
+    await editor.focus();
+    await page.evaluate(()=>window.dispatchEvent(new Event('blur')));
+    await page.waitForTimeout(85);
+    assert.equal(await curtain.isVisible(),false,'Soft keyboard window blur must not black exam');
+    await page.evaluate(()=>window.visualViewport?.dispatchEvent(new Event('resize')));
+    assert.equal(await curtain.isVisible(),false,'Virtual keyboard resizing must not black exam');
+    await editor.blur();
+    await page.evaluate(()=>window.dispatchEvent(new Event('blur')));
+    assert.equal(await curtain.isVisible(),false,'Soft keyboard dismissal must not black exam');
+    await page.getByRole('button',{name:'Minimize calculator'}).click();
+    assert.ok(await page.locator('.tc-calc-minimized').isVisible());
+    assert.equal(await curtain.isVisible(),false,'Minimizing calculator must not blackout exam');
+    await page.getByRole('button',{name:'Restore calculator'}).click();
+    assert.equal(await curtain.isVisible(),false,'Restoring calculator must not blackout exam');
+    await page.evaluate(()=>window.dispatchEvent(new Event('focus')));
+   }else{
+    // Preserve the desktop protection that already works for the user.
+    await page.evaluate(()=>window.dispatchEvent(new Event('blur')));
+    await curtain.waitFor({state:'visible'});
+    assert.equal(await curtain.getAttribute('data-reason'),'focus-loss');
+    assert.equal(await curtain.evaluate(el=>el.parentElement===document.body),true);
+    const png=await page.screenshot();
+    const pixel=await page.evaluate(async base64=>{
+     const img=new Image();
+     return await new Promise((resolve,reject)=>{
+      img.onload=()=>{
+       const canvas=document.createElement('canvas');canvas.width=img.width;canvas.height=img.height;
+       const ctx=canvas.getContext('2d');ctx.drawImage(img,0,0);
+       resolve(Array.from(ctx.getImageData(12,12,1,1).data));
+      };
+      img.onerror=reject;img.src='data:image/png;base64,'+base64;
+     });
+    },png.toString('base64'));
+    assert.deepEqual(pixel.slice(0,3),[3,6,11],'Desktop black screenshot under active shield');
+    await page.evaluate(()=>window.dispatchEvent(new Event('focus')));
+    await curtain.waitFor({state:'hidden'});
+   }
    assert.ok(await page.locator('.question-panel h1').isVisible());
+  });
+  await check(device.name+' true background visibility still masks protected questions',async()=>{
+   const curtain=page.locator('.tc-capture-curtain');
+   try{
+    await page.evaluate(()=>{
+      Object.defineProperty(document,'visibilityState',{configurable:true,value:'hidden'});
+      document.dispatchEvent(new Event('visibilitychange'));
+    });
+    await curtain.waitFor({state:'visible'});
+    assert.equal(await curtain.getAttribute('data-reason'),'focus-loss');
+   }finally{
+    await page.evaluate(()=>{
+      Object.defineProperty(document,'visibilityState',{configurable:true,value:'visible'});
+      document.dispatchEvent(new Event('visibilitychange'));
+      delete document.visibilityState;
+      window.dispatchEvent(new Event('focus'));
+    });
+   }
+   await curtain.waitFor({state:'hidden'});
   });
   await check(device.name+' PrintScreen keyup fallback shows a temporary black shield',async()=>{
    await page.evaluate(()=>window.dispatchEvent(new KeyboardEvent('keyup',{key:'PrintScreen',code:'PrintScreen',bubbles:true,cancelable:true})));
