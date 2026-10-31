@@ -19,6 +19,7 @@
     "test:admin": "node scripts/test-admin-courses.mjs",
     "test:course-dialog": "node scripts/test-course-dialog.mjs",
     "test:authoring": "node scripts/test-course-authoring.mjs",
+    "test:hierarchy": "node scripts/test-course-hierarchy.mjs",
     "test:admin-bank": "node scripts/test-admin-question-bank.mjs",
     "test:lesson-media": "node scripts/test-lesson-media.mjs",
     "test:learner-ui": "node scripts/test-learner-simplification.mjs",
