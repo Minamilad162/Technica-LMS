@@ -27,3 +27,7 @@
 
 ### Change discipline
 Every new calculation, denominator, filter, question selection, time policy, entitlement rule or scoring change must add a test and record old/new rule, acceptance and evidence. Existing local demo script results alone do not prove server security.
+
+| LMS-013 | P4 Practice: private question keys; only APPROVED & non-Mock eligible; 10 Q Quick 10, 25 Q / 1200s Timed, 1–50 Custom and Domain | SERVER-RPC backed in staged source; restricted JWT + RLS; disposable PG negative tests; LIVE SUPABASE deployment/SME approval pending | P4 STAGED |
+| LMS-014 | Quick 10 feedback only after server stores an answer; after feedback choice is immutable. Other P4 modes reveal answers only after final submission; deadline evaluated at database | P4 save/finish functions and RLS regression, real Supabase JWT testing pending | P4 STAGED |
+| LMS-015 | Keep ASP imported bank DRAFT, unmapped and unclassified until SME approves; never silently mix 5 old groups into 9 domains; reserve mock-exclusives before activation | 1625-row importer validates all source IDs, dry run default, no overwrite; approval workflow pending | P4 STAGED |
