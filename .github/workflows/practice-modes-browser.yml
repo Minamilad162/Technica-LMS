@@ -1,0 +1,37 @@
+name: Practice Modes Browser QA
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'src/pages/PracticePage.jsx'
+      - 'src/pages/QuizPage.jsx'
+      - 'src/lib/practiceModes.js'
+      - 'src/lib/store.jsx'
+      - 'src/practiceModes.css'
+      - 'scripts/test-practice-modes-browser.mjs'
+      - '.github/workflows/practice-modes-browser.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  practice-modes-chromium:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install reproducible dependencies
+        run: npm ci --no-fund
+      - name: Install isolated Playwright testing dependency
+        run: npm install --no-save --no-package-lock --ignore-scripts playwright@1.57.0
+      - name: Install Chromium and OS requirements
+        run: npx playwright install --with-deps chromium
+      - name: Verify responsive preset flows in real browser
+        run: node scripts/test-practice-modes-browser.mjs
+      - name: Demo-only note
+        run: echo "Tested quick mode buttons and client-only quiz flows. Level Up and reserved Mock remain disabled until real approved metadata/backend."

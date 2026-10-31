@@ -3,7 +3,7 @@
 > **Canonical project specification / single source of truth**
 >
 > Project: Technica Consult LMS
-> Version: 1.1.10 (mobile focus false-blackout fix)
+> Version: 1.1.11 (Practice Center quick mode selection)
 > Last updated: 2026-10-31 (Africa/Cairo)
 > Repository: https://github.com/Minamilad162/Technica-LMS
 > Target branch: main
@@ -973,3 +973,21 @@ Implementation on isolated [PR #14](https://github.com/Minamilad162/Technica-LMS
 **Regression:** extend \`scripts/test-content-protection.mjs\` for desktop/coarse-pointer/mobile/viewport cases; extend real Chromium QA to desktop 1366 and simulated touch phone widths 375/390/430, including focus on the calculator Math field, keyboard opening/dismissal \`blur\`, VisualViewport resize, minimize/restore, background visibility, desktop focus-loss black screenshot and no JavaScript crashes. Do NOT describe a simulated mobile test as proof of actual phone OS screenshots.
 
 **Risk/tradeoff:** A mobile snipping UI that only blurs the browser (without hiding the tab) will no longer trigger black. This is intentional to avoid blocking legitimate typing. The user's desired all-device black screenshots cannot be achieved in an ordinary public website; first-party backend controls and visible watermarks remain the nonintrusive deterrent.
+
+
+## 39. Pocket Prep-inspired quick-select Practice Center (original Technica UI) — 2026-10-31
+
+**User request and prior photo reference:** Preserve course-first and fully customizable Practice setup, but display high-visibility quick practice mode buttons based on previously shared quiz mode screenshots. The existing reference concepts are Quick 10, Timed Quiz, Level Up, Practice by Domain, Weakest Subject, Missed Questions, Build Your Own and separate Mock Exam. Use original Technica premium LIGHT design; never copy competitor artwork/visual assets/trade dress. Admin's fixed Assessment and exclusive 200-question/300-minute mock policies are **separate** from learner Practice.
+
+**Implemented in demo:**
+- In \`src/pages/PracticePage.jsx\` after selecting a course and before lengthy domain/custom configuration: responsive 2-column desktop/mobile mode-card grid; icon, name, grounded count/time, short help, clear disabled/planned state and keyboard focus. CSS is \`src/practiceModes.css\`.
+- **Quick 10** launches 10 random eligible course questions, untimed, feedback per answer. **Timed Quiz** launches 25 random questions with 20-minute **total** timer, feedback only at completion; presets do not overwrite saved custom settings. **Practice by Domain** expands inline domain picker, then starts up to 25 questions from selected domain. **Build Your Own** scrolls to the original detailed settings without replacing or changing them.
+- **Missed Questions** unlocks only after the latest completed attempt for the chosen course has incorrect answers, then practices the recorded wrong bank IDs (max 25) with no silent fallback. **Weakest Subject** unlocks only when a real scored previous attempt includes at least one incorrect answer, computes lowest accuracy among domains **of that latest completed attempt only**, and launches 15 practice questions in that domain. Does NOT fabricate server-based diagnosis or use unrelated mock/other-course history.
+- **Level Up** visibly marked *Coming later* because the current 1,625 ASP demo question records have **no vetted LOW/MEDIUM/HIGH difficulty tags**; cannot honestly implement the approved hidden 70% promotion. **Mock Exam** visibly marked *Coming later*: 200 admin-reserved questions and 5h/300min separate locked form are not provisioned; it MUST NOT launch a generic 50-question Practice or admin Assessment under mock label.
+- Shared \`src/lib/practiceModes.js\` centralizes presets and history-domain selection, making tests deterministic. \`src/lib/store.jsx\` persists \`practiceMode\`/\`practiceModeLabel\` per session/result without changing fixed assessment policy, question selection, calculator, watermark, learning progress or existing question bank.
+- **Known demo limitations:** original custom count cap 1–50, no server-side secure question distribution, no approved difficulty data or reserved mock questions, lastResult-only mistakes rather than full per-user practice-history aggregation. Broader customization, dynamic level-up algorithm, comprehensive per-user review history and backend-based anti-leak require separate future development. Never mislabel these as complete.
+
+**Regression gates:** \`npm run test:practice-modes\` checks eight mode policies (including disabled level-up and mock), real bank selections/unique IDs, course-scoped wrong/weakest calculation; \`Practice Modes Browser QA\` checks desktop + mobile Quick10/Timed/domain/custom/mistakes/weakest flows and exact labels/count/timing; all previous math/ASP bank/learning/RLS/tests + Vite build pass. Must update canonical blueprint and changelog together. No Supabase/Cloudflare deploy in this task.
+
+### 2026-10-31 — v1.1.11 quick practice modes
+- Restored user-referenced fast mode selection on Practice page, with honest gates for modes not yet supported by actual metadata.

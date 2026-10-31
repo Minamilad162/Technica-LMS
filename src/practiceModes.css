@@ -1,0 +1,59 @@
+/* Technica LMS original Practice Center quick-select UX.
+ * Reference-inspired interaction, no competitor UI assets or trade dress.
+ */
+.practice-quick-select{margin:7px 0 27px;padding:20px;border:1px solid #e1e9ec;border-radius:18px;background:linear-gradient(155deg,#ffffff 6%,#f7fafb 100%);box-shadow:0 8px 24px rgba(21,52,69,.035)}
+.practice-quick-heading{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;margin:0 0 17px}
+.practice-quick-heading h2{font-size:20px;line-height:1.22;font-weight:850;letter-spacing:-.025em;color:#15344a;margin:5px 0 6px}
+.practice-quick-heading p{color:#758796;line-height:1.5;font-size:11.5px;margin:0}
+.practice-quick-eyebrow{display:inline-flex;align-items:center;gap:5px;font-size:10px;font-weight:850;color:#008b82;letter-spacing:.09em}
+.practice-quick-count{border-radius:18px;background:#e7f6f3;color:#08756e;padding:7px 12px;font-size:10px;font-weight:750;white-space:nowrap}
+.practice-mode-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:11px}
+.practice-mode-card{border:1.5px solid #e1e9ed;background:#fff;min-width:0;min-height:103px;border-radius:14px;text-align:left;padding:15px 13px;display:grid;grid-template-columns:39px minmax(0,1fr) 18px;gap:11px;align-items:start;position:relative;cursor:pointer;box-shadow:0 2px 7px #11334a05;transition:transform .15s ease,border-color .15s ease,box-shadow .15s ease}
+.practice-mode-card:hover:not(:disabled){border-color:#57b1a9;box-shadow:0 9px 18px rgba(16,115,110,.09);transform:translateY(-2px)}
+.practice-mode-card:focus-visible{outline:3px solid #1a978c;outline-offset:2px}
+.practice-mode-card.is-selected{border-color:#089b8c;box-shadow:0 0 0 1px #089b8c33}
+.practice-mode-icon{width:39px;height:39px;border-radius:11px;display:grid;place-items:center;color:#087d78;background:#e2f4f1}
+.practice-mode-icon.timed{color:#346bd1;background:#eaf1ff}
+.practice-mode-icon.domain{color:#7a59a8;background:#f3eefe}
+.practice-mode-icon.weakest{color:#b96326;background:#fff0e5}
+.practice-mode-icon.missed{color:#b74e73;background:#fff0f5}
+.practice-mode-icon.custom{color:#485f7f;background:#eaf0f7}
+.practice-mode-icon.levelup{color:#55755c;background:#eff5ed}
+.practice-mode-icon.mock{color:#516886;background:#edf2f7}
+.practice-mode-copy{min-width:0;display:flex;flex-direction:column;gap:4px}
+.practice-mode-copy strong{font-size:13.5px;font-weight:850;line-height:1.25;color:#20374a}
+.practice-mode-copy>small{font-size:10.5px;color:#2e807c;font-weight:750;line-height:1.3}
+.practice-mode-description{font-size:10px;line-height:1.5;color:#728492}
+.practice-mode-action{color:#4b9a96;justify-self:end;margin-top:2px}
+.practice-mode-card.is-unavailable{background:#f9fbfc;border-style:dashed;opacity:.66;cursor:not-allowed}
+.practice-mode-card.is-unavailable .practice-mode-action{color:#83939f}
+.practice-mode-status{position:absolute;right:12px;bottom:9px;font-size:9px;font-weight:750;color:#8593a1}
+.practice-mode-card.is-unavailable .practice-mode-description{padding-bottom:9px}
+.practice-quick-domain{margin-top:12px;padding:12px 14px;background:#eef8f6;border:1px solid #b9e0db;border-radius:12px;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.practice-quick-domain label{font-size:11px;font-weight:800;color:#214e55}
+.practice-quick-domain select{min-width:170px;flex:1;border:1px solid #b9d5d8;border-radius:8px;background:#fff;font-size:12px;padding:10px;color:#15384c}
+.practice-quick-domain .btn{min-height:38px;gap:7px;font-size:11px;padding:8px 15px}
+.practice-mode-disclaimer{display:flex;align-items:flex-start;gap:7px;margin:12px 0 0;color:#85939d;font-size:10px;line-height:1.5}
+.practice-mode-disclaimer svg{flex:none;margin-top:1px}
+.options-title{scroll-margin-top:24px}
+@media(max-width:740px){
+ .practice-quick-select{padding:15px 12px;border-radius:15px;margin-bottom:22px}
+ .practice-quick-heading{align-items:start;gap:9px}
+ .practice-quick-heading h2{font-size:17px}
+ .practice-quick-heading p{font-size:10px}
+ .practice-quick-count{font-size:9px;padding:5px 7px}
+ .practice-mode-grid{gap:8px}
+ .practice-mode-card{min-height:111px;padding:11px 9px;gap:7px;grid-template-columns:30px minmax(0,1fr);align-content:start}
+ .practice-mode-icon{width:30px;height:30px;border-radius:9px}
+ .practice-mode-icon svg{width:17px;height:17px}
+ .practice-mode-copy strong{font-size:11px}
+ .practice-mode-copy>small{font-size:9px}
+ .practice-mode-description{font-size:9px;line-height:1.4}
+ .practice-mode-action{position:absolute;right:7px;top:8px;opacity:.5}
+ .practice-mode-action svg{width:13px;height:13px}
+ .practice-mode-status{font-size:8px;right:7px;bottom:5px}
+ .practice-quick-domain{align-items:stretch;flex-direction:column}
+ .practice-quick-domain select,.practice-quick-domain .btn{width:100%}
+}
+@media(max-width:350px){.practice-mode-grid{grid-template-columns:1fr}.practice-mode-card{min-height:78px;grid-template-columns:35px 1fr}}
+@media(prefers-reduced-motion:reduce){.practice-mode-card{transition:none}.practice-mode-card:hover:not(:disabled){transform:none}}

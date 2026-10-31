@@ -76,7 +76,7 @@ export function DemoProvider({children}) {
   if(fallback)notify('No matching questions for that pool yet. Using the full domain bank.');
   const timerMode=setup.timerMode||'none';
   update({practiceSession:{startedAt:Date.now(),questionStartedAt:Date.now(),answers:{},flags:[],visitedQuestions:[],current:1,questionSet:questions,
-   courseId,courseName:course.name,
+   courseId,courseName:course.name,practiceMode:setup.practiceMode||'custom',practiceModeLabel:setup.practiceModeLabel||'Build Your Own',
    durationSeconds:timerMode==='none'?null:timerMode==='per'?60:Math.min(180,Math.max(1,Number(setup.customMinutes)||30))*60,
    timerMode,feedbackMode:setup.feedbackMode,submitted:false}});
   return true;
@@ -88,7 +88,7 @@ export function DemoProvider({children}) {
   const key=kind==='practice'?'practiceSession':'assessmentSession';const s=state[key];if(!s)return;
   const questions=s.questionSet||assessmentQuestions;
   const learnerId=getAuthSession()?.id || DEMO_LEARNER_ID;
-  const result={answers:s.answers,flags:s.flags||[],questions,total:questions.length,timeTaken:timeString(Math.round((Date.now()-s.startedAt)/1000)),submittedAt:new Date().toISOString(),kind,courseId:s.courseId||'asp',courseName:s.courseName||'ASP Course',passMark:s.passMark||70,attempt:s.attempt,learnerId};
+  const result={answers:s.answers,flags:s.flags||[],questions,total:questions.length,timeTaken:timeString(Math.round((Date.now()-s.startedAt)/1000)),submittedAt:new Date().toISOString(),kind,courseId:s.courseId||'asp',courseName:s.courseName||'ASP Course',passMark:s.passMark||70,attempt:s.attempt,learnerId,...(kind==='practice'?{practiceMode:s.practiceMode||'custom',practiceModeLabel:s.practiceModeLabel||'Build Your Own'}:{})};
   const seen=[...new Set([...state.seenQuestions,...questions.map(q=>q.bankId).filter(Boolean)])];
   // Only actual assessment submissions are added to the course review history.
   const historyRecord=kind==='assessment'?archiveAssessment(result,learnerId):null;
