@@ -57,15 +57,24 @@ const MathTemplateEditor=forwardRef(function MathTemplateEditor({document,onChan
   try{const next=insertMathTemplate(document,fieldId,kind,start,end);commit(next.doc,{fieldId:next.focusId,index:0});onError?.('')}
   catch(e){onError?.(e.message)}
  };
+ const deleteBackward=()=>{
+   const {fieldId,start,end}=location(),found=findMathField(document,fieldId);
+   if(!found)return;
+   const begin=start===end?Math.max(0,start-1):start;
+   const value=found.field.value.slice(0,begin)+found.field.value.slice(end);
+   try{commit(updateMathField(document,fieldId,value),{fieldId,index:begin});onError?.('')}
+   catch(e){onError?.(e.message)}
+ };
  const move=(currentId,direction)=>{
   const ids=mathFieldIds(document);const ix=ids.indexOf(currentId);
   if(ix<0)return false;const next=ids[ix+direction];if(!next)return false;
   focusField(next,direction>0?0:(findMathField(document,next)?.field.value.length||0));return true;
  };
  useImperativeHandle(ref,()=>({
-  insertText:append,insertTemplate:makeTemplate,
+  insertText:append,insertTemplate:makeTemplate,deleteBackward,
   focus:()=>{const id=location().fieldId;focusField(id)}
  }),[document]);
+ useEffect(()=>{if(!active){const first=mathFieldIds(document)[0];if(first)focusField(first)}},[]);
  const renderSeq=node=><span className="tc-math-sequence">{node.parts.map(p=>p.type==='text'?
   <input key={p.id} data-math-field={p.id} autoComplete="off" spellCheck={false}
    aria-label="Math expression field" className={'tc-math-field '+(active===p.id?'active':'')}
