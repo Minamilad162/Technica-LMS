@@ -3,7 +3,7 @@
 > **Canonical project specification / single source of truth**
 >
 > Project: Technica Consult LMS
-> Version: 1.0.9 (P0 + P1 main source merged and CI verified)
+> Version: 1.1.0 (floating scientific calculator quiz integration)
 > Last updated: 2026-10-31 (Africa/Cairo)
 > Repository: https://github.com/Minamilad162/Technica-LMS
 > Target branch: main
@@ -105,7 +105,7 @@ Reference internal docs: README.md; CHANGELOG.md; DESIGN_GUIDE.md; UI_COMPONENT_
 | Adaptive 70% Level Up | PLANNED | New service/policy |
 | Exclusive ASP Mock 200 / 5h | PLANNED | New reserved question pool and attempt lifecycle |
 | Diagnostic/readiness analytics | PLANNED | Quality thresholds and truthful confidence labels |
-| Scientific calculator | PLANNED | Original, tested component |
+| Scientific calculator | IMPLEMENTED IN DEMO | Original floating calculator added to Practice, Assessment and Learning Knowledge Check; full device/manual verification pending |
 | Trial/paid access, Egypt/global payments | PLANNED | Payment provider, webhook and entitlement |
 | Secured video & in-platform Zoom | FUTURE | Provider evaluation/integration |
 | Certificates and admin assignments | FUTURE | Separate workflow |
@@ -749,3 +749,26 @@ New auditable report: [docs/current/P0_BASELINE_AUDIT_2026-10-30.md](docs/curren
 
 ### 2026-10-31 — v1.0.9 documented main release
 - Recorded verified merge SHAs and GitHub CI proof without changing application/database behavior. No direct Supabase or Cloudflare action.
+
+
+## 28. Floating scientific calculator — implementation (2026-10-31)
+
+**User-approved feature intent:** a TI-30XS MultiView-function-inspired calculator button on every actual question-taking page, with a floating window so the learner can read questions and choices during calculation and can use both mouse and keyboard. The original TI reference image is design input only, not distribution artwork.
+
+**Implemented on development branch [PR #9](https://github.com/Minamilad162/Technica-LMS/pull/9):**
+- \`src/lib/scientificCalculator.js\`: original safe no-eval arithmetic parser with order of operations, implicit multiplication, fractions/mixed-result formatting, percent, factorial/nCr/nPr, roots, powers, trig/inverse/hyperbolic trig, DEG/RAD/GRAD, logarithms/exponentials, SCI/ENG outputs, memory and last-answer variables, random/randInt, 1Var and 2Var stats and f(x) table.
+- \`src/components/ScientificCalculator.jsx\`: floating non-modal interactive UI with original blue shell/LCD-inspired display, function keys/2nd, history and data/table tabs. Desktop drag, close/minimize. Compact phone dock (max 52dvh). Keyboard shortcuts and editable expression with focus-safe handling; quiz time/answer state unaffected.
+- \`src/scientificCalculator.css\`: scoped responsive styling, independent of existing approved desktop/mobile quiz layouts.
+- Mounted in \`src/pages/QuizPage.jsx\` for BOTH practice and assessment (including all current question variants using these routes), and the 10-question \`src/pages/LearningPage.jsx\` CourseQuiz. Future production Mock/Adaptive flows must use this shared component when implemented.
+- \`scripts/test-scientific-calculator.mjs\` + CI: 52 independent arithmetic/scientific vectors, three angle tests, rational/decimal formats, stats/regression, 17 invalid-input cases, RNG boundaries and all three quiz entry points. Existing bank/quiz/regression/build/DB tests must stay green.
+- User guide: \`docs/current/SCIENTIFIC_CALCULATOR_GUIDE.md\`.
+
+**Scope/limitations and non-regression rules:**
+- Proprietary TI logos, exact photographic hardware shell, TI firmware/emulator and patented/copyrighted MathPrint-specific presentation are not copied; app has its own visual identity and math engine. This is a TI-*inspired* scientific tool, **not** a pixel-perfect TI-30XS replica or TI-certified equivalent. Some exact symbolic radical/fraction editing and fixed precision modes still require comparison and possible follow-up implementation.
+- The calculator is a client-side exam aid, NOT server grading; no change to answer selection, attempt timing, quiz session persistence, admin rules, original 1,625 imported ASP questions or current UI route behavior.
+- No new production Supabase access, paid functionality or standalone 200-question Mock is represented as implemented.
+- Browser QA on desktop and 375/390/430px phones, pointer/keyboard focus behavior, visibility of question and answers and assistive technology remain manual release acceptance items. Passing CI source tests is not screenshot/device evidence.
+- Before any commercial exam launch, confirm calculator policy and full output parity on a reviewed reference matrix, and preserve calculator availability in every newly created question screen.
+
+### 2026-10-31 — v1.1.0 scientific calculator worklog
+- Implemented and tested original scientific calculator in the three current question-taking flows on an isolated review branch. Kept legacy CSS and exam/business logic untouched except importing the shared component. No database changes.
