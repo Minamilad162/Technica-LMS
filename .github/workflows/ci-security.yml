@@ -57,6 +57,9 @@ jobs:
       - name: Physical calculator reference layout regression
         run: npm run test:calculator:physical
 
+      - name: Practice quick-select modes, presets and history regression
+        run: npm run test:practice-modes
+
       - name: Protected exam and video deterrence contract
         run: npm run test:content-protection
 
