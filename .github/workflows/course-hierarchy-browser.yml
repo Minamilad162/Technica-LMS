@@ -1,0 +1,37 @@
+name: Course Hierarchy Browser QA
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'src/components/CourseHierarchyEditor.jsx'
+      - 'src/lib/courseHierarchy.js'
+      - 'src/pages/BuilderPage.jsx'
+      - 'src/lib/store.jsx'
+      - 'src/courseHierarchy.css'
+      - 'scripts/test-course-hierarchy-browser.mjs'
+      - '.github/workflows/course-hierarchy-browser.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  hierarchy-chromium:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install reproducible dependencies
+        run: npm ci --no-fund
+      - name: Install isolated Playwright testing dependency
+        run: npm install --no-save --no-package-lock --ignore-scripts playwright@1.57.0
+      - name: Install Chromium and OS requirements
+        run: npx playwright install --with-deps chromium
+      - name: Verify course structure on desktop and touch mobile
+        run: node scripts/test-course-hierarchy-browser.mjs
+      - name: Scope note
+        run: echo "Local-browser demo verification only; dynamic learner player and production Supabase sync remain future work."

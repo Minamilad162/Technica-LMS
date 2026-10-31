@@ -308,3 +308,9 @@
 - Linked a CSB public safety video with an external fallback; produced a two-page original quick-reference PDF.
 - Added original 10-question end-of-course self-check (pass >= 70%, explanations, retries). ASP and PSEE question banks are unchanged.
 - New `test:learning`, dedicated responsive motion styles, and entrance motion plan. No new runtime dependencies.
+
+
+## 2026-10-31 — Course Builder hierarchy (staged)
+- Added first-class nested Course → Domain → Topic → Lesson authoring with per-course browser-local storage, stable IDs, add/edit/reorder/delete and optional previously uploaded media references.
+- Preserved previous modules/lessons under an opt-in legacy accordion; initial new tree labels imported old module headings as unmapped legacy topics, not official ASP exam domains.
+- Added `npm run test:hierarchy` and CI check. No production DB, Supabase migration execution or Cloudflare deployment. Existing P1 database migration already has the four-level foreign keys; optional P2 SQL handoff is separate and staging-only.
