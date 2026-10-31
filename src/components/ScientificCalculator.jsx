@@ -30,6 +30,10 @@ const ADVANCED=[
  ['ceil','ceil('],['round','round('],['fact','fact('],['nCr','nCr('],['nPr','nPr('],
  ['π','pi'],['e','e'],[',',',']
 ];
+const MATH_TEMPLATES=[
+ ['fraction','a/b'],['mixed','a b/c'],['squareRoot','√x'],
+ ['nthRoot','ⁿ√x'],['power','xⁿ'],['expE','eˣ'],['exp10','10ˣ']
+];
 const NUMBERS=new Set(['7','8','9','4','5','6','1','2','3','0','dot']);
 const OPERATIONS=new Set(['divide','multiply','add','subtract','pow','nCr','nPr']);
 const clamp=(x,lo,hi)=>Math.max(lo,Math.min(hi,x));
@@ -276,7 +280,24 @@ export default function ScientificCalculator({context='Quiz',onNext=null,onPrevi
          </div>
        </div>}
      {tab==='extra'&&<div className="tc-calc-extra">
-       <p>Insert a function. Use commas to separate inputs.</p>
+       <section className="tc-calc-template-menu" aria-label="Math templates">
+        <div className="tc-calc-template-title">
+         <strong>Math templates</strong>
+         <small>{viewMode==='MATH'?'Insert into the selected LCD slot':'Insert as a linear expression'}</small>
+        </div>
+        <div className="tc-calc-template-actions">
+         {MATH_TEMPLATES.map(([kind,label])=><button type="button" key={kind}
+           data-math-template={kind}
+           onPointerDown={e=>e.preventDefault()}
+           onClick={()=>{template(kind);setTab('keys')}}
+           title={'Insert '+kind+' template'}>{label}</button>)}
+         {viewMode==='MATH'&&<button type="button" data-math-template="remove"
+           onPointerDown={e=>e.preventDefault()}
+           onClick={()=>{mathEditor.current?.removeTemplate();setTab('keys')}}
+           title="Remove selected math template">✕ slot</button>}
+        </div>
+       </section>
+       <p>Advanced functions — insert into the selected expression.</p>
        <div>{ADVANCED.map(([label,value])=><button type="button" key={label} onClick={()=>{insert(value);setTab('keys')}}>{label}</button>)}</div>
        <div className="tc-calc-memory"><b>M: {formatScientific(memory)}</b>
          <button onClick={()=>setMemory(0)}>MC</button><button onClick={()=>insert('M')}>MR</button>
