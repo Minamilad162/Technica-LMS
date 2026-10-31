@@ -38,12 +38,14 @@ BEGIN
  IF NEW.domain_id IS NOT NULL AND NOT EXISTS (
   SELECT 1 FROM public.lms_domains d WHERE d.id=NEW.domain_id AND d.course_id=NEW.course_id
  ) THEN RAISE EXCEPTION 'Question domain must belong to its course'; END IF;
- IF EXISTS (
-  SELECT 1 FROM public.lms_practice_attempt_items ai WHERE ai.question_id=OLD.id
- ) AND TG_OP='UPDATE' AND (
-   NEW.prompt IS DISTINCT FROM OLD.prompt OR NEW.options IS DISTINCT FROM OLD.options
-   OR NEW.correct_index IS DISTINCT FROM OLD.correct_index
- ) THEN RAISE EXCEPTION 'Cannot rewrite a used question; create a new revision'; END IF;
+ IF TG_OP='UPDATE' THEN
+   IF EXISTS (
+     SELECT 1 FROM public.lms_practice_attempt_items ai WHERE ai.question_id=OLD.id
+   ) AND (
+     NEW.prompt IS DISTINCT FROM OLD.prompt OR NEW.options IS DISTINCT FROM OLD.options
+     OR NEW.correct_index IS DISTINCT FROM OLD.correct_index
+   ) THEN RAISE EXCEPTION 'Cannot rewrite a used question; create a new revision'; END IF;
+ END IF;
  RETURN NEW;
 END; $$;
 -- The validation trigger exists before attempt-items table is created. Runtime
