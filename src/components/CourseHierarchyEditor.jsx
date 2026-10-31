@@ -15,38 +15,35 @@ export default function CourseHierarchyEditor({courseId, availableMedia=[], onPr
   const [opened, setOpened] = useState({});
   const [editor, setEditor] = useState(null);
   const [form, setForm] = useState(blankLesson);
+  const [nameEditor, setNameEditor] = useState(null);
   const mutate = fn => saveCourseHierarchy(courseId, fn);
-  const askName = (caption, current='') => {
-    const value = window.prompt(caption, current);
-    if (value === null) return null;
-    if (!value.trim()) { notify('A title is required'); return null; }
-    return value.trim().slice(0,180);
-  };
   const toggle = id => setOpened(o => ({...o, [id]: !(o[id] ?? true)}));
-  const addDomain = () => {
-    const title = askName('New domain title');
-    if (!title) return;
-    const id = newHierarchyId('domain');
-    mutate(old => [...old, {id,title,topics:[]}]);
-    setOpened(o => ({...o,[id]:true}));
-  };
+  const addDomain = () => setNameEditor({kind:'add-domain',title:''});
   const updateDomain = (domainId, fn) => mutate(old => old.map(d => d.id===domainId?fn(d):d));
   const updateTopic = (domainId, topicId, fn) =>
     updateDomain(domainId, d => ({...d,topics:d.topics.map(t => t.id===topicId?fn(t):t)}));
-  const addTopic = domainId => {
-    const title = askName('New topic title');
-    if (!title) return;
-    const id = newHierarchyId('topic');
-    updateDomain(domainId, d => ({...d,topics:[...d.topics,{id,title,lessons:[]}]}));
-    setOpened(o => ({...o,[domainId]:true,[id]:true}));
-  };
-  const renameDomain = domain => {
-    const title=askName('Rename domain',domain.title);
-    if (title) updateDomain(domain.id,d=>({...d,title}));
-  };
-  const renameTopic = (domainId,topic) => {
-    const title=askName('Rename topic',topic.title);
-    if (title) updateTopic(domainId,topic.id,t=>({...t,title}));
+  const addTopic = domainId => setNameEditor({kind:'add-topic',domainId,title:''});
+  const renameDomain = domain => setNameEditor({kind:'rename-domain',domainId:domain.id,title:domain.title});
+  const renameTopic = (domainId,topic) => setNameEditor({kind:'rename-topic',domainId,topicId:topic.id,title:topic.title});
+  const saveName = event => {
+    event.preventDefault();
+    const title=nameEditor?.title.trim().slice(0,180);
+    if (!title) {notify('A title is required');return;}
+    const {kind,domainId,topicId}=nameEditor;
+    if(kind==='add-domain'){
+      const id=newHierarchyId('domain');
+      mutate(old=>[...old,{id,title,topics:[]}]);
+      setOpened(o=>({...o,[id]:true}));
+    }else if(kind==='add-topic'){
+      const id=newHierarchyId('topic');
+      updateDomain(domainId,d=>({...d,topics:[...d.topics,{id,title,lessons:[]}]}));
+      setOpened(o=>({...o,[domainId]:true,[id]:true}));
+    }else if(kind==='rename-domain'){
+      updateDomain(domainId,d=>({...d,title}));
+    }else if(kind==='rename-topic'){
+      updateTopic(domainId,topicId,t=>({...t,title}));
+    }
+    setNameEditor(null);
   };
   const deleteDomain = domain => {
     const count=domain.topics.reduce((n,t)=>n+t.lessons.length,0);
@@ -128,6 +125,12 @@ export default function CourseHierarchyEditor({courseId, availableMedia=[], onPr
       </div>}
     </article>)}</div>
     <p className="hierarchy-note">Saved locally in this browser. Existing question bank, assessments, and legacy modules are preserved. Live learner courses and Supabase synchronization are separate next-stage integrations.</p>
+    {nameEditor&&<Modal title={nameEditor.kind==='add-domain'?'Add domain':nameEditor.kind==='add-topic'?'Add topic':nameEditor.kind==='rename-domain'?'Rename domain':'Rename topic'} onClose={()=>setNameEditor(null)}>
+      <form className="simple-fields" onSubmit={saveName}>
+        <label>{nameEditor.kind.includes('domain')?'Domain title':'Topic title'}<input required autoFocus maxLength={180} value={nameEditor.title} onChange={e=>setNameEditor(old=>({...old,title:e.target.value}))} placeholder="Enter a clear title"/></label>
+        <div className="modal-actions"><button type="button" className="btn btn-secondary" onClick={()=>setNameEditor(null)}>Cancel</button><button className="btn" type="submit">Save</button></div>
+      </form>
+    </Modal>}
     {editor&&<Modal title={editor.lessonId?'Edit lesson':'Add lesson'} onClose={()=>setEditor(null)}>
       <form className="simple-fields" onSubmit={saveLesson}>
         <label>Lesson title<input required maxLength={180} value={form.title} onChange={e=>setForm(f=>({...f,title:e.target.value}))}/></label>
