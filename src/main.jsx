@@ -10,3 +10,4 @@ import './learningPlayer.css';
 
 import './scientificCalculator.css';
 import './calculatorPhysical.css';
+import './contentProtection.css';

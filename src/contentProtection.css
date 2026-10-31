@@ -1,0 +1,105 @@
+/**
+ * Low-friction, browser-only content deterrence.
+ * Never describe as unbreakable screenshot / recording protection.
+ */
+.tc-protected-content{
+ position:relative;
+ isolation:isolate;
+ -webkit-user-select:none;
+ user-select:none;
+ -webkit-touch-callout:none;
+}
+.tc-protected-content :is(input,textarea,select,[contenteditable="true"],[role="textbox"]){
+ -webkit-user-select:text;
+ user-select:text;
+ -webkit-touch-callout:default;
+}
+.tc-protected-content :is(img,video){
+ -webkit-user-drag:none;
+ user-drag:none;
+}
+.tc-watermark-layer{
+ position:absolute;
+ inset:0;
+ z-index:3;
+ display:grid;
+ grid-template-columns:repeat(3,minmax(0,1fr));
+ grid-template-rows:repeat(3,minmax(0,1fr));
+ gap:6px;
+ padding:12px 5px;
+ overflow:hidden;
+ pointer-events:none!important;
+ -webkit-user-select:none;
+ user-select:none;
+ opacity:.095;
+ color:#17334f;
+ border-radius:inherit;
+}
+.tc-watermark-cell{
+ display:flex;
+ align-items:center;
+ justify-content:center;
+ min-width:0;
+ max-width:100%;
+ white-space:nowrap;
+ font:700 clamp(8px,.82vw,11px)/1.1 ui-sans-serif,system-ui,sans-serif;
+ letter-spacing:.06em;
+ transform:rotate(-18deg);
+ pointer-events:none!important;
+}
+.tc-capture-curtain{
+ position:fixed;
+ inset:0;
+ z-index:2147483647;
+ display:flex;
+ justify-content:center;
+ align-items:center;
+ background:#03060b!important;
+ color:#e6edf3;
+ font:700 14px/1.4 ui-sans-serif,system-ui,sans-serif;
+ letter-spacing:.12em;
+ text-align:center;
+ pointer-events:all;
+}
+.tc-capture-curtain span{
+ opacity:.7;
+ padding:18px;
+}
+@media(max-width:700px){
+ .tc-watermark-layer{
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:8px;
+  padding:14px 0;
+  opacity:.085;
+ }
+ .tc-watermark-cell{
+  font-size:9px;
+  letter-spacing:.025em;
+ }
+}
+/* Print/Save as PDF: render protected routes as a dark warning sheet.
+   Print backgrounds are controlled by users/browsers and are not guaranteed. */
+@media print {
+ body:has(.tc-protected-content) #root{
+  visibility:hidden!important;
+ }
+ body:has(.tc-protected-content)::after{
+  content:"TECHNICA — PROTECTED CONTENT. PRINTING DISABLED.";
+  box-sizing:border-box;
+  position:fixed;
+  inset:0;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:2cm;
+  z-index:2147483647;
+  color:#fff!important;
+  background:#03060b!important;
+  font:700 16pt/1.6 sans-serif;
+  text-align:center;
+  letter-spacing:.035em;
+  visibility:visible!important;
+  -webkit-print-color-adjust:exact;
+  print-color-adjust:exact;
+ }
+}

@@ -57,6 +57,9 @@ jobs:
       - name: Physical calculator reference layout regression
         run: npm run test:calculator:physical
 
+      - name: Protected exam and video deterrence contract
+        run: npm run test:content-protection
+
       - name: P1 schema contract (static checks only)
         run: npm run test:p1:schema
 
