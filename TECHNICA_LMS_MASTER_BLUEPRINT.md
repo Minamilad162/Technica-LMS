@@ -3,7 +3,7 @@
 > **Canonical project specification / single source of truth**
 >
 > Project: Technica Consult LMS
-> Version: 1.1.9 (experimental exam focus privacy curtain)
+> Version: 1.1.10 (mobile focus false-blackout fix)
 > Last updated: 2026-10-31 (Africa/Cairo)
 > Repository: https://github.com/Minamilad162/Technica-LMS
 > Target branch: main
@@ -958,3 +958,18 @@ Implementation on isolated [PR #14](https://github.com/Minamilad162/Technica-LMS
 
 ### 2026-10-31 — v1.1.9 experimental capture-focus shield
 - Improved shortcut reaction timing and narrow-scope focus-loss privacy rendering. Confirm limits against MDN Window/Page Visibility and Screen Capture documentation. Do not assert OS screenshot prevention.
+
+
+## 38. Mobile screenshot limitation + calculator keyboard false-blackout correction — 2026-10-31
+
+**User acceptance feedback:** desktop focus/screenshot black-shield works when their screenshot tool steals focus. Mobile OS screenshots still save normal content, and opening/dismissing the phone keyboard or minimizing the floating calculator intermittently triggers an intrusive "PROTECTED LEARNING CONTENT" black screen.
+
+**Root cause:** v1.1.9 treated all \`window.blur\` events in an active question as capture-related. Mobile soft keyboards and native focus transitions can raise blur while the tab remains visible. \`blur\` is not a screenshot signal; the Web platform has no standard callback/pre-capture hook for Android/iPhone hardware screenshots. Browser-only code **cannot guarantee a black image on phone OS screenshots**, with or without a watermark.
+
+**Approved fix:** preserve proven desktop keyboard/focus blackout; on mobile/touch devices **never black out solely on \`window.blur\`**. Limit focus-shield on mobile to a genuinely hidden tab (\`document.visibilityState==='hidden'\`), and always clear on visible/return. Listen to VisualViewport resize to recover from stale mobile shield during software-keyboard transitions. Leave keyboard shortcut heuristics, watermarks, clipboard/print, quiz grading, timer, calculator code and video player unchanged.
+
+**Implementation:** \`isMobileWebContext\`, \`shouldBlackoutForBlur\` and \`shouldBlackoutForVisibility\` pure helpers in \`src/lib/contentProtection.js\`. \`ProtectedContent.jsx\` applies platform-specific distinction while retaining all event cleanup and the body portal shield.
+
+**Regression:** extend \`scripts/test-content-protection.mjs\` for desktop/coarse-pointer/mobile/viewport cases; extend real Chromium QA to desktop 1366 and simulated touch phone widths 375/390/430, including focus on the calculator Math field, keyboard opening/dismissal \`blur\`, VisualViewport resize, minimize/restore, background visibility, desktop focus-loss black screenshot and no JavaScript crashes. Do NOT describe a simulated mobile test as proof of actual phone OS screenshots.
+
+**Risk/tradeoff:** A mobile snipping UI that only blurs the browser (without hiding the tab) will no longer trigger black. This is intentional to avoid blocking legitimate typing. The user's desired all-device black screenshots cannot be achieved in an ordinary public website; first-party backend controls and visible watermarks remain the nonintrusive deterrent.
