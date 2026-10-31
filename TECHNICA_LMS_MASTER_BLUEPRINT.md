@@ -3,7 +3,7 @@
 > **Canonical project specification / single source of truth**
 >
 > Project: Technica Consult LMS
-> Version: 1.1.8 (verified web protection clipboard and print corrections)
+> Version: 1.1.9 (experimental exam focus privacy curtain)
 > Last updated: 2026-10-31 (Africa/Cairo)
 > Repository: https://github.com/Minamilad162/Technica-LMS
 > Target branch: main
@@ -937,3 +937,24 @@ Implementation on isolated [PR #14](https://github.com/Minamilad162/Technica-LMS
 **Capture/recording ceiling:** PrintScreen and system screenshot UI may never send a JavaScript event to the webpage. The existing black curtain is only best-effort if the page receives the specific shortcut. Do not claim screen recording or screenshot prevention. Do not add focus-loss blackout by default: it can obscure legitimate navigation, accessibility and calculator usage without guaranteeing capture prevention.
 
 **Release:** All core calculator/quiz/ASP tests, P1 Postgres smoke, static tests, a fresh Chromium clipboard/video/print test on desktop and simulated mobile must PASS. Do not merge or deploy an untested regression. No Supabase tables, live SSO or Cloudflare deployment modified.
+
+
+## 37. Optional web-only lost-focus exam privacy curtain EXPERIMENT (2026-10-31)
+
+**User need:** The previous screenshot-black prototype did not visibly trigger from actual device screenshots. Printing and clipboard are working and must not be changed. Test the most reasonable browser-only alternative without requiring native apps, while respecting ordinary learner UX.
+
+**Verified browser limits:** A normal website cannot detect OS native screenshot/recording, force captured pixels black, or detect external recorders. `navigator.mediaDevices.getDisplayMedia()` only exposes a user-authorized capture initiated by this site, not third-party screen recorders. Window `blur` and `visibilitychange` mean loss of focus/tab visibility, NOT screenshot detection, and do not fire for many capture methods. An always-on black overlay would make content unreadable by learners, so is unacceptable.
+
+**Experimental implementation** ([review PR #18](https://github.com/Minamilad162/Technica-LMS/pull/18)):
+- Keep the existing Print CSS and real clipboard copy blocking unchanged.
+- Pre-mount a hidden, full-screen dark overlay and toggle `HTMLElement.hidden` immediately in the event handler rather than waiting for React's asynchronous rerender.
+- Listen to both `keydown` AND `keyup` for best-effort PrintScreen/macOS/Windows capture shortcut heuristics, retaining the existing 1250ms release timer.
+- In **active exam and lesson-quiz screens only**, immediately show the overlay when the page receives `window.blur` or `visibilitychange` to hidden; remove it on focus, pageshow or foreground pointer/touch return. This might obscure some snipping interfaces that steal focus before capture, **not guaranteed** and not a substitute for genuine OS control.
+- Exclude lesson-video and reading content from focus-loss shield because clicking external YouTube iframe often transfers focus legitimately; ordinary video playback must not turn black. Watermark and scoped existing controls remain.
+- Real Chromium QA simulates focus loss and takes a browser screenshot **WHILE the curtain is already active**, asserting black pixels; also checks video focus does not hide, restores exam controls, and existing clipboard/print/quiz/learning tests.
+- **Not allowed claim:** test demonstrates conditional overlay rendering, NOT that native `PrintScreen` or OS recording triggers the overlay or that native screenshots are black. Native cross-device field testing remains required; expected on many phones: screenshot still succeeds normally.
+
+**Release:** no Supabase, paid media, Auth or Cloudflare deployment changed. If this focus-loss experiment proves annoying on actual user devices, turn off/revert its exam-only behavior; preserve vetted clipboard, print and watermarks. Avoid excessive polling, animation, camera permission requests, false screenshot-detection claims, or focus-loss warnings that affect normal learning.
+
+### 2026-10-31 — v1.1.9 experimental capture-focus shield
+- Improved shortcut reaction timing and narrow-scope focus-loss privacy rendering. Confirm limits against MDN Window/Page Visibility and Screen Capture documentation. Do not assert OS screenshot prevention.

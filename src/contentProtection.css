@@ -61,6 +61,21 @@
  text-align:center;
  pointer-events:all;
 }
+/* The shield always exists but remains visually inert unless explicitly
+   activated. This allows synchronous blacking-out before a React re-render. */
+.tc-capture-curtain[hidden]{
+ display:none!important;
+}
+.tc-capture-curtain:not([hidden]){
+ display:flex!important;
+ background:#03060b!important;
+}
+/* Returning to the browser should not waste the first tap on a blocked
+   overlay. The focus/pointer listeners remove this shield immediately. */
+.tc-capture-curtain{
+ pointer-events:none!important;
+}
+
 .tc-capture-curtain span{
  opacity:.7;
  padding:18px;

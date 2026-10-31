@@ -61,3 +61,24 @@ Important **current demo insecurity**: `src/data/aspQuestionBank.json` includes 
 The old copy logic intercepted only events bubbling from a node within the protected panel; real keyboard copy sometimes targets the document itself. The old print test checked CSS properties, but did not prove actual blocked printing. The video wrapper watermarked the broad lesson, while the YouTube iframe remained independent and playable/recordable. The black curtain only handles limited screenshot keyboard events delivered to JavaScript; it will **not** appear for many OS-native screenshot tools and cannot affect their output reliably.
 
 The v1.1.8 correction adds a real clipboard selection test, stronger print stylesheet and player-level watermark. Native screenshots, screen recording and external YouTube playback still have hard browser limits and need independent server/DRM controls for improved security.
+
+
+## 37. Optional web-only lost-focus exam privacy curtain EXPERIMENT (2026-10-31)
+
+**User need:** The previous screenshot-black prototype did not visibly trigger from actual device screenshots. Printing and clipboard are working and must not be changed. Test the most reasonable browser-only alternative without requiring native apps, while respecting ordinary learner UX.
+
+**Verified browser limits:** A normal website cannot detect OS native screenshot/recording, force captured pixels black, or detect external recorders. `navigator.mediaDevices.getDisplayMedia()` only exposes a user-authorized capture initiated by this site, not third-party screen recorders. Window `blur` and `visibilitychange` mean loss of focus/tab visibility, NOT screenshot detection, and do not fire for many capture methods. An always-on black overlay would make content unreadable by learners, so is unacceptable.
+
+**Experimental implementation** ([review PR #18](https://github.com/Minamilad162/Technica-LMS/pull/18)):
+- Keep the existing Print CSS and real clipboard copy blocking unchanged.
+- Pre-mount a hidden, full-screen dark overlay and toggle `HTMLElement.hidden` immediately in the event handler rather than waiting for React's asynchronous rerender.
+- Listen to both `keydown` AND `keyup` for best-effort PrintScreen/macOS/Windows capture shortcut heuristics, retaining the existing 1250ms release timer.
+- In **active exam and lesson-quiz screens only**, immediately show the overlay when the page receives `window.blur` or `visibilitychange` to hidden; remove it on focus, pageshow or foreground pointer/touch return. This might obscure some snipping interfaces that steal focus before capture, **not guaranteed** and not a substitute for genuine OS control.
+- Exclude lesson-video and reading content from focus-loss shield because clicking external YouTube iframe often transfers focus legitimately; ordinary video playback must not turn black. Watermark and scoped existing controls remain.
+- Real Chromium QA simulates focus loss and takes a browser screenshot **WHILE the curtain is already active**, asserting black pixels; also checks video focus does not hide, restores exam controls, and existing clipboard/print/quiz/learning tests.
+- **Not allowed claim:** test demonstrates conditional overlay rendering, NOT that native `PrintScreen` or OS recording triggers the overlay or that native screenshots are black. Native cross-device field testing remains required; expected on many phones: screenshot still succeeds normally.
+
+**Release:** no Supabase, paid media, Auth or Cloudflare deployment changed. If this focus-loss experiment proves annoying on actual user devices, turn off/revert its exam-only behavior; preserve vetted clipboard, print and watermarks. Avoid excessive polling, animation, camera permission requests, false screenshot-detection claims, or focus-loss warnings that affect normal learning.
+
+### 2026-10-31 — v1.1.9 experimental capture-focus shield
+- Improved shortcut reaction timing and narrow-scope focus-loss privacy rendering. Confirm limits against MDN Window/Page Visibility and Screen Capture documentation. Do not assert OS screenshot prevention.

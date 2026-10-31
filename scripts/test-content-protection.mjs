@@ -2,11 +2,17 @@ import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import {
  PROTECTION_HOLD_MS,WATERMARK_POSITIONS,formatWatermarkLabel,
- isPotentialCaptureShortcut,isEditableElement,shouldBlockContentEvent,shouldBlockClipboardEvent,selectionTouchesProtected,
+ isPotentialCaptureShortcut,isEditableElement,shouldBlockContentEvent,shouldBlockClipboardEvent,selectionTouchesProtected,shouldFocusShield,
  watermarkIdentity
 }from'../src/lib/contentProtection.js';
 
 assert.ok(PROTECTION_HOLD_MS>=500&&PROTECTION_HOLD_MS<=2500);
+assert.equal(shouldFocusShield('exam-question'),true);
+assert.equal(shouldFocusShield('lesson-quiz'),true);
+for(const kind of ['lesson-video','lesson-material','answer-review','lesson-review']){
+ assert.equal(shouldFocusShield(kind),false,'Video/lesson/review should not be blacked by focus changes');
+}
+
 assert.equal(WATERMARK_POSITIONS,9);
 assert.equal(watermarkIdentity({employeeId:'TC1001',email:'learner@example.com'}),'TC1001');
 assert.equal(watermarkIdentity({id:'demo learner!'}),'demolearner');

@@ -1,8 +1,9 @@
-import React,{useCallback,useEffect,useMemo,useRef,useState}from'react';
+import React,{useEffect,useMemo,useRef,useState}from'react';
+import{createPortal}from'react-dom';
 import {getAuthSession} from '../lib/demoAuth';
 import {
  PROTECTION_HOLD_MS,WATERMARK_POSITIONS,formatWatermarkLabel,
- getContentProtectionSession,isPotentialCaptureShortcut,
+ getContentProtectionSession,isPotentialCaptureShortcut,shouldFocusShield,
  shouldBlockContentEvent,shouldBlockClipboardEvent,selectionTouchesProtected,watermarkIdentity
 }from'../lib/contentProtection';
 
@@ -14,8 +15,9 @@ import {
  */
 let activeProtectedContainers=0;
 export default function ProtectedContent({as:Tag='div',className='',kind='questions',children}){
- const ref=useRef(null),timeout=useRef(null);
- const[covered,setCovered]=useState(false);
+ const ref=useRef(null),timeout=useRef(null),shieldRef=useRef(null);
+ const keyShield=useRef(false),focusShield=useRef(false);
+ const enabledFocusShield=shouldFocusShield(kind);
  const[minute,setMinute]=useState(()=>new Date());
  const[sessionId]=useState(getContentProtectionSession);
  const identity=watermarkIdentity(getAuthSession());
@@ -24,11 +26,25 @@ export default function ProtectedContent({as:Tag='div',className='',kind='questi
   const interval=setInterval(()=>setMinute(new Date()),60000);
   return()=>clearInterval(interval);
  },[]);
- const cloak=useCallback(()=>{
-  setCovered(true);
+ // Change the pre-mounted curtain synchronously; React state commits can
+ // happen too late for a key shortcut. Neither technique guarantees interception.
+ const syncCurtain=()=>{
+  const el=shieldRef.current;
+  if(!el)return;
+  const visible=keyShield.current||focusShield.current;
+  el.hidden=!visible;
+  el.dataset.reason=focusShield.current?'focus-loss':keyShield.current?'keyboard-shortcut':'none';
+ };
+ const cloak=()=>{
+  keyShield.current=true;
+  syncCurtain();
   if(timeout.current)clearTimeout(timeout.current);
-  timeout.current=setTimeout(()=>{setCovered(false);timeout.current=null},PROTECTION_HOLD_MS);
- },[]);
+  timeout.current=setTimeout(()=>{
+   keyShield.current=false;
+   syncCurtain();
+   timeout.current=null;
+  },PROTECTION_HOLD_MS);
+ };
  useEffect(()=>{
   activeProtectedContainers++;
   document.documentElement.classList.add('tc-has-protected-content');
@@ -41,38 +57,79 @@ export default function ProtectedContent({as:Tag='div',className='',kind='questi
     e.stopImmediatePropagation?.();
    }
   };
-  const onKeyDown=e=>{
+  const onCaptureKey=e=>{
    if(isPotentialCaptureShortcut(e)){
-    // Only a delivered key event triggers the visible curtain. OS-native
-    // capture and recording cannot be intercepted by normal websites.
+    // Keydown and keyup are both tried because some browsers only deliver
+    // one. Many OS-native capture tools deliver NEITHER; never claim protection.
     if(e.cancelable)e.preventDefault();
     cloak();
-    return;
    }
+  };
+  const onKeyDown=e=>{
+   onCaptureKey(e);
    if((e.ctrlKey||e.metaKey)&&['c','x'].includes(String(e.key).toLowerCase())&&
       selectionTouchesProtected(window.getSelection(),ref.current)){
     if(e.cancelable)e.preventDefault();
    }
-   // Ctrl/Cmd+P and browser-menu Print use beforeprint / @media print.
-   // Don't flicker the ordinary UI just because the print dialog opened.
+  };
+  const onBlur=()=>{
+   if(!enabledFocusShield)return;
+   focusShield.current=true;
+   syncCurtain();
+  };
+  const onFocus=()=>{
+   focusShield.current=false;
+   syncCurtain();
+  };
+  const onVisibility=()=>{
+   if(!enabledFocusShield)return;
+   focusShield.current=document.visibilityState==='hidden';
+   syncCurtain();
+  };
+  const onReturnPointer=()=>{
+   // Mobile Safari occasionally skips focus when returning to an already
+   // foregrounded tab. A real pointer action restores a legible screen.
+   if(document.visibilityState==='visible'&&focusShield.current){
+    focusShield.current=false;
+    syncCurtain();
+   }
   };
   document.addEventListener('copy',onClipboard,true);
   document.addEventListener('cut',onClipboard,true);
   window.addEventListener('keydown',onKeyDown,true);
+  window.addEventListener('keyup',onCaptureKey,true);
+  if(enabledFocusShield){
+   window.addEventListener('blur',onBlur);
+   window.addEventListener('focus',onFocus);
+   window.addEventListener('pageshow',onFocus);
+   document.addEventListener('visibilitychange',onVisibility);
+   window.addEventListener('pointerdown',onReturnPointer,true);
+   window.addEventListener('touchstart',onReturnPointer,true);
+  }
   window.addEventListener('beforeprint',onBeforePrint);
   window.addEventListener('afterprint',onAfterPrint);
   return()=>{
    document.removeEventListener('copy',onClipboard,true);
    document.removeEventListener('cut',onClipboard,true);
    window.removeEventListener('keydown',onKeyDown,true);
+   window.removeEventListener('keyup',onCaptureKey,true);
+   if(enabledFocusShield){
+    window.removeEventListener('blur',onBlur);
+    window.removeEventListener('focus',onFocus);
+    window.removeEventListener('pageshow',onFocus);
+    document.removeEventListener('visibilitychange',onVisibility);
+    window.removeEventListener('pointerdown',onReturnPointer,true);
+    window.removeEventListener('touchstart',onReturnPointer,true);
+   }
    window.removeEventListener('beforeprint',onBeforePrint);
    window.removeEventListener('afterprint',onAfterPrint);
    document.documentElement.classList.remove('tc-print-in-progress');
    activeProtectedContainers=Math.max(0,activeProtectedContainers-1);
    if(activeProtectedContainers===0)document.documentElement.classList.remove('tc-has-protected-content');
    if(timeout.current)clearTimeout(timeout.current);
+   keyShield.current=false;focusShield.current=false;
   };
- },[cloak]);
+ },[enabledFocusShield]);
  useEffect(()=>{
   const node=ref.current;
   if(!node)return;
@@ -100,8 +157,8 @@ export default function ProtectedContent({as:Tag='div',className='',kind='questi
       <span key={i} className="tc-watermark-cell">{label}</span>)}
    </div>
   </Tag>
-  {covered&&<div className="tc-capture-curtain" data-capture-curtain="keyboard-heuristic" role="status" aria-live="polite">
-    <span>PROTECTED LEARNING CONTENT</span>
-   </div>}
+  {createPortal(<div ref={shieldRef} hidden className="tc-capture-curtain" data-capture-curtain="browser-best-effort" data-reason="none" aria-hidden="true">
+   <span>PROTECTED LEARNING CONTENT</span>
+  </div>,document.body)}
  </>;
 }
