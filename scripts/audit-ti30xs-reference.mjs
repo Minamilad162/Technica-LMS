@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 import{evaluateScientific as calc,formatScientific}from'../src/lib/scientificCalculator.js';
 import{exactScientific,formatWithMode,statsFromLists,applyConstantOperator,makeFunctionTable,recalculateListFormulas}from'../src/lib/scientificCalculatorExtended.js';
 import{seededCalculatorRandom}from'../src/lib/calculatorRandom.js';
+import{finishCalculatorEntry}from'../src/lib/calculatorEntry.js';
 import{createMathDocument,insertMathTemplate,mathFieldIds,updateMathField,serializeMathDocument,removeMathTemplate,mathDocumentDepth}from'../src/lib/mathTemplateEditor.js';
 import{exactRationalExpression,fractionString,formatCalculatorDisplay}from'../src/lib/calculatorPrecision.js';
 const near=(actual,expected,label,tol=1e-10)=>assert.ok(Number.isFinite(actual)&&Math.abs(actual-expected)<=Math.max(1,Math.abs(expected))*tol,label+': '+actual+' != '+expected);
@@ -23,6 +24,10 @@ const vectors=[
 for(const [expression,value]of vectors)close(calc(expression),value,expression);
 close(calc('sin(pi/2)',{angleMode:'RAD'}),1,'Radian sin');
 close(calc('sin(100)',{angleMode:'GRAD'}),1,'Gradian sin');
+same(finishCalculatorEntry('2*(3+4'),'2*(3+4)','TI Enter auto closes pending parentheses');
+same(finishCalculatorEntry('(2+(3+4))'),'(2+(3+4))','Balanced parens preserved');
+assert.throws(()=>finishCalculatorEntry('2*(3+4))'),/Unexpected closing/);checks++;
+assert.throws(()=>finishCalculatorEntry('('.repeat(24)+'1'),/23 maximum/);checks++;
 same(calc('2^3^2',{viewMode:'CLASSIC'}),64,'Classic associativity');
 same(calc('2^3^2',{viewMode:'MATH'}),512,'Textbook associativity');
 same(fractionString(exactRationalExpression('0.1+0.2')),'3/10','Exact decimal rational');
