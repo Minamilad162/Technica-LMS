@@ -27,6 +27,7 @@ try{
     JSON.stringify({id:'demo-learner',name:'Alex Morgan',employeeId:'TC1001',
       email:'alex.demo@technica.example',role:'learner'}));
   });
+  await context.grantPermissions(['clipboard-read','clipboard-write']);
   const page=await context.newPage(),errors=[];
   page.setDefaultTimeout(10000);
   page.on('pageerror',e=>errors.push(String(e)));
@@ -62,6 +63,32 @@ try{
     assert.equal(state[type],true,'Expected protected '+type+' to be prevented');
    assert.equal(state.unprotected,false,'Unprotected workspace should still allow copying');
   });
+  await check(device.name+' actual keyboard copy protects selected question (not outside UI)',async()=>{
+   await page.evaluate(async()=>{
+    await navigator.clipboard.writeText('ORIGINAL-CLIPBOARD');
+    const node=document.querySelector('.question-panel h1');
+    const selection=window.getSelection(),range=document.createRange();
+    range.selectNodeContents(node);selection.removeAllRanges();selection.addRange(range);
+   });
+   await page.keyboard.press('Control+c');
+   const blocked=await page.evaluate(()=>navigator.clipboard.readText());
+   assert.equal(blocked,'ORIGINAL-CLIPBOARD','Question text leaked into native clipboard');
+   // The browser may dispatch copy on document.body instead of selection node.
+   const handled=await page.evaluate(()=>{
+    const e=new Event('copy',{bubbles:true,cancelable:true});
+    document.body.dispatchEvent(e);return e.defaultPrevented;
+   });
+   assert.equal(handled,true,'Document-root native copy should respect question selection');
+   await page.evaluate(()=>{
+    const selection=window.getSelection(),range=document.createRange();
+    range.selectNodeContents(document.querySelector('.quiz-status strong'));
+    selection.removeAllRanges();selection.addRange(range);
+   });
+   await page.keyboard.press('Control+c');
+   const outside=await page.evaluate(()=>navigator.clipboard.readText());
+   assert.notEqual(outside,'ORIGINAL-CLIPBOARD','Copying normal status text must stay allowed');
+   await page.evaluate(()=>window.getSelection().removeAllRanges());
+  });
   await check(device.name+' answer options remain clickable despite watermark',async()=>{
    const answer=page.locator('.answer-option').first();
    await answer.click();
@@ -91,11 +118,17 @@ try{
   await check(device.name+' browser print preview masks protected content',async()=>{
    await page.emulateMedia({media:'print'});
    const snapshot=await page.evaluate(()=>({
-    bodyWarning:getComputedStyle(document.body,'::after').content,
-    rootVisibility:getComputedStyle(document.querySelector('#root')).visibility
+    rootDisplay:getComputedStyle(document.querySelector('#root')).display,
+    warning:getComputedStyle(document.body,'::before').content,
+    active:document.documentElement.classList.contains('tc-has-protected-content')
    }));
-   assert.equal(snapshot.rootVisibility,'hidden');
-   assert.ok(snapshot.bodyWarning.includes('PRINTING DISABLED'),snapshot.bodyWarning);
+   assert.equal(snapshot.rootDisplay,'none','Protected route still included in print output');
+   assert.ok(snapshot.active,'Document must carry print-protection scope');
+   assert.ok(snapshot.warning.includes('PRINTING DISABLED'),snapshot.warning);
+   await page.evaluate(()=>window.dispatchEvent(new Event('beforeprint')));
+   assert.equal(await page.evaluate(()=>document.documentElement.classList.contains('tc-print-in-progress')),true);
+   await page.evaluate(()=>window.dispatchEvent(new Event('afterprint')));
+   assert.equal(await page.evaluate(()=>document.documentElement.classList.contains('tc-print-in-progress')),false);
    await page.emulateMedia({media:'screen'});
   });
   await check(device.name+' video and lesson quiz watermark',async()=>{
@@ -103,6 +136,10 @@ try{
    await page.locator('.learn-lesson-content.tc-protected-content').waitFor();
    assert.equal(await page.locator('.learn-lesson-content .tc-watermark-layer').count(),1);
    assert.ok(await page.locator('.learn-video-container iframe').count()>0);
+   const stamp=page.locator('.learn-video-container .tc-video-stamp');
+   assert.ok(await stamp.isVisible(),'Video needs its own visible watermark over iframe');
+   assert.ok((await stamp.innerText()).includes('TC1001'));
+   assert.equal(await stamp.evaluate(el=>getComputedStyle(el).pointerEvents),'none');
    if(device.touch)await page.locator('.learn-outline-toggle').click();
    await page.locator('.learn-outline-lesson').filter({hasText:'10-question knowledge check'}).first().click();
    await page.locator('.learn-quiz-content.tc-protected-content').waitFor();
