@@ -991,3 +991,19 @@ Implementation on isolated [PR #14](https://github.com/Minamilad162/Technica-LMS
 
 ### 2026-10-31 — v1.1.11 quick practice modes
 - Restored user-referenced fast mode selection on Practice page, with honest gates for modes not yet supported by actual metadata.
+
+
+## 40. Course → Domain → Topic → Lesson Authoring Phase (2026-10-31)
+
+**Approved invariant:** A course has one or more independently ordered domains; each domain contains zero or more topics while drafting, and each topic contains zero or more lessons while drafting. Learners eventually navigate Course → Domain → Topic → Lesson. Admin must not attach lessons directly to a course or domain. Stable IDs and cross-course isolation are mandatory.
+
+**Current stage implementation (DEMO ONLY):** `src/components/CourseHierarchyEditor.jsx` is the primary **Course Builder → Content** authoring surface. It supports adding/renaming/reordering/deleting domains and topics, and adding/editing/reordering/deleting lessons under a topic, with title, type, description and a previously uploaded course-media reference. `src/lib/courseHierarchy.js` validates hierarchy structure and uniqueness, and `store.jsx` persists per-course `courseHierarchies` to existing local browser demo state. No production server writes or dynamic learner player mapping are claimed. Text/Image/Quiz lesson options here are classification metadata; the complete rich editor and end-of-lesson quiz authoring are NOT yet connected.
+
+**Legacy non-destructive rule:** Older browser-local `modules` and `courseModules` are retained unchanged. On first opening a course without a saved new hierarchy, old modules appear as **topics inside a clearly labelled 'Unmapped legacy content' domain**, with original lesson IDs/media refs preserved. DO NOT silently equate legacy PSM headings to official ASP question-bank domain IDs. The original Module → Lesson editor remains in a collapsed `Legacy modules (compatibility)` section for reference and rollback; changes after the new tree has been saved are NOT automatically synchronized. A separately reviewed mapping/migration is required before using this tree as published/learner progress or question classification.
+
+**Database alignment:** Existing `supabase/migrations/202610300001_p1_foundation.sql` already defines `lms_courses`, `lms_domains`, `lms_topics`, `lms_lessons` with proper foreign keys, RLS and explicit grants. A separate optional P2 SQL handoff package adds server-only lesson progress, event log, and structure revision snapshots for **staging after P1**, plus preflight/verification/rollback scripts. Neither P1 nor P2 is deployed to the user database during this stage. Do not run the historical incompatible `001_lms_schema_PROPOSED.sql` on top of P1.
+
+**Regression:** `npm run test:hierarchy` plus `test:authoring`, imported ASP bank, assessment, practice, learning, calculator, content protection and build. No Cloudflare deployment. Any merge follows CI and review.
+
+### 2026-10-31 — v1.1.12 nested learning hierarchy (staged branch)
+- Primary nested authoring is implemented in browser-local demo; production integration, migration and learner routing remain open.
