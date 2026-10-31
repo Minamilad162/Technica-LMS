@@ -111,3 +111,27 @@ Plan versioned *new* migrations, not blind editing/deploying \`001_lms_schema_PR
 ## 6. Audit change log
 
 - 2026-10-30: First code-path and proposal-SQL source review added. Logged P0-F01–P0-F12, explicit confidence limits, proposed P1 role matrix, schema separation, integration/test gates. Documentation only, no source code or DB changed.
+
+
+## 7. CI evidence addendum — 2026-10-30 (updates earlier 'not run' status)
+
+**Earlier Sections 1 and 5 describe the initial source-only review, before CI logs were retrieved. This section is the newer evidence, not a retroactive claim that the local environment executed tests.**
+
+**Verified \`main\` baseline:** GitHub Actions [run #37](https://github.com/Minamilad162/Technica-LMS/actions/runs/40977894570), head \`274bcad06f2ac56e82e85c61b71f382af08d9ab6\`, job \`validate\`, **SUCCESS**. Decoded job logs show:
+- \`node scripts/check-infrastructure.mjs\`: PASS with explicit warnings about missing lockfile and typecheck.
+- \`npm install --no-fund\`: PASS as fallback (not reproducible).
+- \`npm run check\`: PASS.
+- \`npm run verify:bank\`: PASS, **1,625 unique ASP demo questions across five old domains**.
+- Existing regression suites: PASS (selection, images, demo auth, motion, courses, quiz navigation, review, admin, course dialog, authoring, admin bank, lesson media, learner UI and learning player).
+- \`npm run build\`: PASS; Vite emitted bundle size warning, not build failure.
+- \`npm audit --audit-level=high\`: PASS; **0 vulnerabilities found at run time**.
+
+**P0 reproducible-install remediation (review branch, NOT merged):** [Draft PR #6](https://github.com/Minamilad162/Technica-LMS/pull/6), \`chore/p0-reproducible-install-20261030\`:
+1. Used successful CI's npm-generated lockfile to create repository \`package-lock.json\` (lockfileVersion 3; 130 package entries), validated name and package metadata.
+2. Removed a *temporary* diagnostic lockfile export from \`scripts/check-project.mjs\` (restored exactly to original).
+3. Changed CI dependency step from fallback \`npm install\` to mandatory \`npm ci --no-fund\`.
+4. GitHub Actions [run #41](https://github.com/Minamilad162/Technica-LMS/actions/runs/40978913432), head \`4cbf887546d476fc2ed51efc1913d271f72260f0\`, job **SUCCESS**; decoded logs explicitly show \`npm ci --no-fund\` **PASS** (80 packages installed), imported bank **PASS** (1,625), regression suites **PASS**, Vite build **PASS**, audit **0 vulnerabilities**. Subsequent documentation-only changes will trigger one final PR job to reconfirm.
+
+**Unresolved P0 gates:** real-browser/mobile behavior, ASP source workbook content/rights review, genuine type/static checking, future Supabase RLS/GRANT probes, production Auth, secure question engine, and user approval of the P1 schema. These are NOT CI-tested. The project is still a browser-demo and paid-production **NO-GO**.
+
+**Updated verdict:** P0 source audit + CI regression/build evidence **PASS**; overall P0 **PARTIALLY COMPLETE** because the broader UI/data and production-security gates remain. PR #6 is the reversible proposed fix for BUG-013; do not mark it merged until it is.

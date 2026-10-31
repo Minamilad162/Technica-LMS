@@ -30,16 +30,8 @@ jobs:
       - name: Check infrastructure policies
         run: node scripts/check-infrastructure.mjs
 
-      - name: Install dependencies (temporary legacy compatibility)
-        shell: bash
-        run: |
-          if [ -f package-lock.json ]; then
-            echo "Using reproducible npm ci"
-            npm ci --no-fund
-          else
-            echo "::warning::Missing package-lock.json in v1.15 demo. Falling back to npm install temporarily. Production release remains blocked until lockfile is committed and npm ci passes."
-            npm install --no-fund
-          fi
+      - name: Install dependencies reproducibly
+        run: npm ci --no-fund
 
       - name: TypeScript typecheck when the repository has a typecheck script
         shell: bash
