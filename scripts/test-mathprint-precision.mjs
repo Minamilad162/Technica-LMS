@@ -5,7 +5,7 @@ import {exactRationalExpression,exactRationalNumber,fractionString,formatCalcula
 import {recalculateListFormulas,exactScientific,formatWithMode} from '../src/lib/scientificCalculatorExtended.js';
 import{
  createMathDocument,findMathField,insertMathTemplate,mathFieldIds,mathFieldContext,
- updateMathField,serializeMathDocument,mathDocumentDepth
+ updateMathField,serializeMathDocument,mathDocumentDepth,removeMathTemplate
 }from'../src/lib/mathTemplateEditor.js';
 
 const near=(x,y,description)=>assert.ok(Math.abs(x-y)<=Math.max(1,Math.abs(y))*1e-12,description+': '+x+' !== '+y);
@@ -39,6 +39,10 @@ let first=mathFieldIds(doc)[0];
 let add=insertMathTemplate(doc,first,'fraction',0);
 doc=add.doc;
 assert.equal(mathDocumentDepth(doc),1);
+const deleted=removeMathTemplate(doc,add.focusId);
+assert.equal(serializeMathDocument(deleted.doc),'');
+assert.ok(mathFieldIds(deleted.doc).includes(deleted.focusId));
+assert.throws(()=>removeMathTemplate(deleted.doc,deleted.focusId),/No active/);
 const numerator=add.focusId;
 doc=updateMathField(doc,numerator,'1+1');
 let fields=mathFieldIds(doc);
