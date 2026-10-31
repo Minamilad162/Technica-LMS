@@ -53,8 +53,9 @@ export default function ScientificCalculator({context='Quiz'}){
    if(key==='clear'){setExpression('');setResult('0');setError('');return}
    if(key==='history'){setShowHistory(s=>!s);return}
    if(key==='enter'){evaluate();return}
+   if(key==='nCr'||key==='nPr'){setExpression(e=>key+'('+e+',');setError('');return}
    if(key==='store'){try{setMemory(evaluateScientific(expression||String(answer),{angleMode:angle,ans:answer,memory}));setError('')}catch(e){setError(e.message)}return}
-   if(key==='fraction'){setFraction(x=>!x);setResult(formatScientific(answer,{notation,asFraction:!fraction,mixed}));return}
+   if(key==='fraction'){insert('/');return}
    if(key==='mixed'){setFraction(true);setMixed(x=>!x);setResult(formatScientific(answer,{notation,asFraction:true,mixed:!mixed}));return}
    if(second){
      const alt={log:'pow10(',ln:'exp(',sin:'asin(',cos:'acos(',tan:'atan(',sqrt:'cbrt(',square:'sqrt(',fact:'rand()',inv:'abs('};
@@ -138,7 +139,7 @@ export default function ScientificCalculator({context='Quiz'}){
      </div>
      <div className="tc-calc-modebar">
        {['DEG','RAD','GRAD'].map(a=><button key={a} type="button" className={angle===a?'active':''} onClick={()=>setAngle(a)}>{a}</button>)}
-       <span className="tc-calc-mode-separator"/>
+       <span className="tc-calc-mode-separator"/><button type="button" title="Toggle fraction/decimal" onClick={()=>{setFraction(v=>!v);setResult(formatScientific(answer,{notation,asFraction:!fraction,mixed}))}}>f↔d</button>
        {['NORM','SCI','ENG'].map(a=><button key={a} type="button" className={notation===a?'active':''}
         onClick={()=>{setNotation(a);setResult(formatScientific(answer,{notation:a,asFraction:fraction,mixed}))}}>{a}</button>)}
      </div>
