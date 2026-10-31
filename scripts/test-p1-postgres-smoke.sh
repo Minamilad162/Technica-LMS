@@ -94,3 +94,34 @@ psql -X -v ON_ERROR_STOP=1 -q -c "UPDATE public.lms_entitlements SET ends_at=NUL
 psql -X -v ON_ERROR_STOP=1 -q -c "UPDATE public.lms_profiles SET account_status='suspended' WHERE id='00000000-0000-0000-0000-000000000003'"
 assert_count "suspended paid user denied" 0 authenticated 00000000-0000-0000-0000-000000000003 "SELECT count(*) FROM public.lms_lesson_blocks"
 echo "PASS P1 ephemeral PostgreSQL migration + expanded RLS smoke; real Supabase staging still required."
+
+# P2 extension: apply on the same disposable database AFTER all P1 smoke checks.
+psql -X -v ON_ERROR_STOP=1 -q -f supabase/migrations/202610310002_p2_learning_progress.sql
+psql -X -v ON_ERROR_STOP=1 -q <<'SQL'
+INSERT INTO public.lms_lesson_progress(user_id,lesson_id,reading_completed)
+ VALUES('00000000-0000-0000-0000-000000000003',
+        '40000000-0000-0000-0000-000000000001',true);
+INSERT INTO public.lms_lesson_events(idempotency_key,user_id,lesson_id,event_type)
+ VALUES('60000000-0000-0000-0000-000000000001',
+        '00000000-0000-0000-0000-000000000003',
+        '40000000-0000-0000-0000-000000000001','section_viewed');
+INSERT INTO public.lms_course_structure_versions(course_id,revision,snapshot)
+ VALUES('10000000-0000-0000-0000-000000000001',1,'{"domains":[]}');
+SQL
+assert_count "P2 learner reads own progress" 1 authenticated 00000000-0000-0000-0000-000000000003 "SELECT count(*) FROM public.lms_lesson_progress"
+assert_count "P2 other learner cannot read progress" 0 authenticated 00000000-0000-0000-0000-000000000004 "SELECT count(*) FROM public.lms_lesson_progress"
+assert_count "P2 admin reads progress" 1 authenticated 00000000-0000-0000-0000-000000000001 "SELECT count(*) FROM public.lms_lesson_progress"
+assert_count "P2 RLS on all new tables" 3 authenticated 00000000-0000-0000-0000-000000000001 "SELECT count(*) FROM pg_class WHERE oid IN ('public.lms_lesson_progress'::regclass,'public.lms_lesson_events'::regclass,'public.lms_course_structure_versions'::regclass) AND relrowsecurity"
+if query_as authenticated 00000000-0000-0000-0000-000000000003 "INSERT INTO public.lms_lesson_progress(user_id,lesson_id) VALUES('00000000-0000-0000-0000-000000000003','40000000-0000-0000-0000-000000000002')" >/dev/null 2>&1; then
+  echo "FAIL learner can spoof verified progress"; exit 1
+fi
+echo "PASS learner progress writes blocked"
+if query_as authenticated 00000000-0000-0000-0000-000000000001 "SELECT count(*) FROM public.lms_lesson_events" >/dev/null 2>&1; then
+  echo "FAIL raw event log accessible to client"; exit 1
+fi
+echo "PASS P2 event log client access blocked"
+if query_as anon 00000000-0000-0000-0000-000000000000 "SELECT count(*) FROM public.lms_lesson_progress" >/dev/null 2>&1; then
+  echo "FAIL anonymous progress access"; exit 1
+fi
+echo "PASS P2 anonymous progress blocked"
+echo "PASS P2 migration, GRANT, RLS, event/authoring privacy on disposable PostgreSQL."
