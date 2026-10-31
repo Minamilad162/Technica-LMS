@@ -314,3 +314,10 @@
 - Added first-class nested Course → Domain → Topic → Lesson authoring with per-course browser-local storage, stable IDs, add/edit/reorder/delete and optional previously uploaded media references.
 - Preserved previous modules/lessons under an opt-in legacy accordion; initial new tree labels imported old module headings as unmapped legacy topics, not official ASP exam domains.
 - Added `npm run test:hierarchy` and CI check. No production DB, Supabase migration execution or Cloudflare deployment. Existing P1 database migration already has the four-level foreign keys; optional P2 SQL handoff is separate and staging-only.
+
+
+## 2026-10-31 — P3 Supabase staged backend integration
+- Added a physically separate Vite entry for Supabase live builds, excluding demo password/sample ASP answer-bank modules.
+- Integrated real email/password Supabase Auth, profile + role checks, verified admin bootstrap template and database-backed course hierarchy management through P1 RLS.
+- Added plain reading-text blocks, controlled publication state, account recovery and learner entitlement visibility; P2 learning events/progress are still service-only and not written by client.
+- New CI checks: P3 contract test and compiled live-bundle leak audit. Tests cannot substitute for real Supabase JWT/RLS and Cloudflare deployment validation. Existing demo flow remains unchanged.
