@@ -321,3 +321,9 @@
 - Integrated real email/password Supabase Auth, profile + role checks, verified admin bootstrap template and database-backed course hierarchy management through P1 RLS.
 - Added plain reading-text blocks, controlled publication state, account recovery and learner entitlement visibility; P2 learning events/progress are still service-only and not written by client.
 - New CI checks: P3 contract test and compiled live-bundle leak audit. Tests cannot substitute for real Supabase JWT/RLS and Cloudflare deployment validation. Existing demo flow remains unchanged.
+
+
+## 2026-10-31 — P4 secure bank/practice staged
+- Added RLS-protected bank, server-owned practice attempts and immutable scoring snapshots, backend-only answer selection and transaction-safe finish using scoped PostgreSQL RPCs.
+- Live Supabase mode now has Quick 10, Timed Quiz, Build Your Own and Practice by Domain, with resume, server time and feedback gates; original demo and assessment remain unchanged.
+- Added dry-run-first 1625 ASP bank importer (draft/unmapped only), SQL security tests and P4 runbook. No automatic Supabase migration or Cloudflare deployment; Mock/Level Up/official Assessment remain pending.

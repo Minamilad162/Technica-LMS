@@ -22,6 +22,8 @@
     "test:hierarchy": "node scripts/test-course-hierarchy.mjs",
     "test:p3": "node scripts/test-p3-supabase-contract.mjs",
     "test:p3:bundle": "node scripts/test-p3-live-bundle.mjs",
+    "test:p4": "node scripts/test-p4-practice-contract.mjs",
+    "test:p4:bank": "node scripts/import-asp-p4.mjs",
     "test:admin-bank": "node scripts/test-admin-question-bank.mjs",
     "test:lesson-media": "node scripts/test-lesson-media.mjs",
     "test:learner-ui": "node scripts/test-learner-simplification.mjs",

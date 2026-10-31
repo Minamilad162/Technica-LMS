@@ -3,6 +3,7 @@ import {BookOpen,CheckCircle2,ChevronDown,ChevronRight,FileText,GraduationCap,La
 import {getSupabaseClient} from '../lib/supabase';
 import {createCourse,createDomain,createTopic,createLesson,createTextBlock,getCurrentEntitlements,listCourses,loadIdentity,loadStructure,loadTextBlocks,updatePublish,updateTitle} from './lmsApi';
 import './supabaseApp.css';
+import LivePractice from './LivePractice';
 
 let database,configurationError='';
 try { database=getSupabaseClient();if(!database)configurationError='VITE_DATA_MODE must be supabase'; }
@@ -182,7 +183,8 @@ export default function SupabaseApp() {
      </>}
     </section>
    </div>}
-   <p className="live-disclaimer">P3 scope: real Auth + database catalog, hierarchy and text lessons. Question bank, secure exams, grading, paid entitlements, media signing and progress event submission are not enabled in Live Mode.</p>
+   {selected&&identity&&!suspended&&<LivePractice key={session.user.id+selected.id} db={db} user={session.user} course={selected} domains={tree} access={isAdmin||entitlements.some(e=>e.course_id===selected.id&&['paid','manual'].includes(e.entitlement_type))}/>}
+   <p className="live-disclaimer">P4 scope: RLS-governed question bank and server-scored Quick 10, Timed Quiz, Custom and Domain Practice after manual question approval. Reserved Mock, adaptive Level Up, admin Assessment, payments, protected media and learner progress-event writes remain unavailable.</p>
   </main>{editing&&<EditorModal key={editing.kind+editing.id+editing.domainId+editing.topicId} editing={editing} onCancel={()=>{setEditing(null);setEditError('');}} onSave={save} busy={busy} error={editError}/>}
  </div>;
 }
