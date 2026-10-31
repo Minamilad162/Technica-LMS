@@ -1,28 +1,58 @@
 import HDImage from '../components/HDImage';
-import React,{useState} from 'react';
+import React,{useRef,useState} from 'react';
 import {useNavigate} from 'react-router-dom';
-import {Layers3,Check,Clock3,MessageSquare,Database,FileQuestion,Play,ArrowRight,BookOpen,Save,LockKeyhole,SlidersHorizontal} from 'lucide-react';
+import {Layers3,Check,Clock3,MessageSquare,Database,FileQuestion,Play,ArrowRight,BookOpen,Save,LockKeyhole,SlidersHorizontal,Zap,Timer,Target,RotateCcw,TrendingUp,GraduationCap,ChevronDown,Info} from 'lucide-react';
 import {topics,assets,questionPool} from '../data/mock';
 import {courses} from '../data/courseCatalog';
 import {getCourse,getCourseBank,learnerCourses} from '../lib/courseWorkspace';
 import {useDemo} from '../lib/store';
 import {SelectButtons} from '../components/UI';
+import{PRACTICE_MODES,getLastAttemptInsights,presetPracticeSettings}from'../lib/practiceModes';
 
 export default function PracticePage(){
  const navigate=useNavigate();const{state,update,beginPractice,notify}=useDemo();
  const availableCourses=learnerCourses(state);const course=getCourse(state,state.practiceCourseId)||availableCourses[0]||courses[0];
  const [custom,setCustom]=useState('50');
+ const [domainQuick,setDomainQuick]=useState(false);
+ const [quickDomain,setQuickDomain]=useState('');
+ const customizeRef=useRef(null);
+ const modeIcons={quick10:Zap,timed:Timer,domain:Layers3,weakest:Target,missed:RotateCcw,custom:SlidersHorizontal,levelup:TrendingUp,mock:GraduationCap};
  const choiceTopics=course.id==='asp'?topics.filter(t=>course.domainIds.includes(t.id)):[{id:course.domainIds[0],name:'General questions',questions:getCourseBank(state,course.id,questionPool).length,art:'plant',theme:'mint'}];
  const selected=choiceTopics.filter(t=>state.selectedTopics.includes(t.id));
  const available=getCourseBank(state,course.id,questionPool).length;
  const count=state.questionCount==='custom'?Math.max(1,Math.min(50,Number(custom)||50)):Number(state.questionCount)||50;
  const minutes=Math.max(1,Math.min(180,Number(state.customMinutes)||30));
- function setCourse(id){const next=getCourse(state,id);if(!next)return;update({practiceCourseId:id,selectedTopics:[...next.domainIds]})}
+ const insights=getLastAttemptInsights(state.lastResult,course.id,course.domainIds);
+ const hasWeakest=!!insights.weakestDomain;
+ const hasMistakes=insights.wrongIds.length>0;
+ function setCourse(id){const next=getCourse(state,id);if(!next)return;setDomainQuick(false);setQuickDomain('');update({practiceCourseId:id,selectedTopics:[...next.domainIds]})}
  function toggle(id){update({selectedTopics:state.selectedTopics.includes(id)?state.selectedTopics.filter(x=>x!==id):[...state.selectedTopics,id]})}
+ function launchMode(id,domainId){
+  if(!available){notify(course.name+' has no questions yet.');return}
+  const overrides=presetPracticeSettings(id,{courseId:course.id,domainIds:course.domainIds,domainId,insights});
+  if(!overrides){notify('This mode needs eligible questions or completed practice history.');return}
+  if(beginPractice(overrides))navigate('/practice/session');
+ }
+ function chooseMode(id){
+  if(id==='custom'){
+   setDomainQuick(false);
+   customizeRef.current?.scrollIntoView({behavior:'smooth',block:'start'});
+   return;
+  }
+  if(id==='domain'){
+   setDomainQuick(v=>!v);
+   if(!quickDomain||!course.domainIds.includes(quickDomain))setQuickDomain(course.domainIds[0]||'');
+   return;
+  }
+  if(id==='levelup'||id==='mock')return;
+  if(id==='weakest'&&!hasWeakest)return;
+  if(id==='missed'&&!hasMistakes)return;
+  launchMode(id);
+ }
  function begin(){
   if(!available){notify(`${course.name} has no questions yet.`);return}
   if(!selected.length){notify('Select at least one domain in this course.');return}
-  if(beginPractice({practiceCourseId:course.id,selectedTopics:selected.map(t=>t.id),questionCount:count}))navigate('/practice/session');
+  if(beginPractice({practiceCourseId:course.id,selectedTopics:selected.map(t=>t.id),questionCount:count,practiceMode:'custom',practiceModeLabel:'Build Your Own'}))navigate('/practice/session');
  }
  return <div className="practice-page page-enter">
   <h1>Practice your way</h1><p className="page-subtitle">Choose a course, select ASP domains, and customise your practice questions and time. Assessment settings are separate and controlled by the admin.</p>
@@ -30,13 +60,48 @@ export default function PracticePage(){
   <div className="practice-layout"><div className="practice-main">
    <h3 className="step-label">1. Choose your course</h3>
    <div className="course-choice-grid" role="group" aria-label="Choose practice course">{availableCourses.map(c=>{const size=getCourseBank(state,c.id,questionPool).length;return <button key={c.id} type="button" aria-pressed={course.id===c.id} className={`course-choice ${course.id===c.id?'active':''}`} onClick={()=>setCourse(c.id)}><HDImage src={assets[c.art||'plant']} alt="" sizes="180px"/><span className="course-choice-copy"><strong>{c.name}</strong><small>{c.subtitle||c.category||'Course'}</small><span className="course-choice-meta">{size?`${size.toLocaleString()} course questions`:'No questions yet'}</span></span><span className="course-choice-indicator">{size?<Check size={17}/>:<LockKeyhole size={17}/>}</span></button>})}</div>
-   {available>0?<><h3 className="step-label">2. Choose domains within {course.name} <small>(one or more)</small></h3>
+   {available>0?<><section className="practice-quick-select" aria-labelledby="practice-modes-title">
+    <div className="practice-quick-heading">
+     <div><span className="practice-quick-eyebrow"><Zap size={14}/> QUICK SELECT PRACTICE</span>
+      <h2 id="practice-modes-title">Choose how you want to practice</h2>
+      <p>Start instantly with a ready-made mode, or customize every setting below.</p>
+     </div>
+     <span className="practice-quick-count">{available.toLocaleString()} available questions</span>
+    </div>
+    <div className="practice-mode-grid" role="group" aria-label="Quick select practice modes">
+     {PRACTICE_MODES.map(mode=>{
+      const Icon=modeIcons[mode.id];
+      const isUnavailable=mode.status==='planned'||(mode.id==='weakest'&&!hasWeakest)||(mode.id==='missed'&&!hasMistakes);
+      const help=mode.id==='weakest'&&!hasWeakest?'Finish a quiz with incorrect answers to unlock':
+       mode.id==='missed'&&!hasMistakes?'No missed questions in your latest attempt':
+       mode.status==='planned'?'Requires the next preparation stage':mode.description;
+      return <button key={mode.id} type="button" className={'practice-mode-card '+mode.id+(isUnavailable?' is-unavailable':'')+(mode.id==='domain'&&domainQuick?' is-selected':'')}
+       disabled={isUnavailable} aria-disabled={isUnavailable} aria-expanded={mode.id==='domain'?domainQuick:undefined}
+       aria-controls={mode.id==='domain'?'practice-domain-picker':undefined}
+       onClick={()=>chooseMode(mode.id)} title={help}>
+       <span className={'practice-mode-icon '+mode.id}><Icon size={21} strokeWidth={2}/></span>
+       <span className="practice-mode-copy"><strong>{mode.name}</strong><small>{mode.caption}</small><span className="practice-mode-description">{help}</span></span>
+       <span className="practice-mode-action">{isUnavailable?<LockKeyhole size={16} aria-hidden="true"/>:mode.id==='domain'?<ChevronDown size={17} aria-hidden="true"/>:<ArrowRight size={17} aria-hidden="true"/>}</span>
+       {mode.status==='planned'&&<span className="practice-mode-status">Coming later</span>}
+      </button>
+     })}
+    </div>
+    {domainQuick&&<div id="practice-domain-picker" className="practice-quick-domain" role="group" aria-label="Quick domain practice selection">
+      <label htmlFor="practice-quick-domain">Select one domain</label>
+      <select id="practice-quick-domain" value={quickDomain} onChange={e=>setQuickDomain(e.target.value)}>
+       {choiceTopics.map(t=><option key={t.id} value={t.id}>{t.name}</option>)}
+      </select>
+      <button className="btn" onClick={()=>launchMode('domain',quickDomain)} disabled={!quickDomain}><Play size={16}/> Start domain practice</button>
+    </div>}
+    <p className="practice-mode-disclaimer"><Info size={14}/> Level Up needs approved difficulty tags. The 200-question, 5-hour Mock Exam requires its own reserved question bank. Neither starts a regular practice session.</p>
+   </section>
+   <h3 className="step-label">2. Choose domains within {course.name} <small>(one or more)</small></h3>
    <div className="practice-topics">{choiceTopics.map(t=><button key={t.id} type="button" aria-pressed={state.selectedTopics.includes(t.id)} className={`topic-option ${t.theme} ${state.selectedTopics.includes(t.id)?'checked':''}`} onClick={()=>toggle(t.id)}><HDImage src={assets[t.art]} alt="" sizes="(max-width: 740px) 90px, 140px"/><div><b>{t.name}</b><small>{course.id==='asp'?`${t.questions} imported questions`:`${t.questions} course questions`}</small></div><span className="topic-check">{state.selectedTopics.includes(t.id)&&<Check size={13}/>}</span></button>)}</div>
-   <h3 className="step-label options-title">3. Customize practice <small>(learner controlled)</small></h3>
+   <h3 className="step-label options-title" ref={customizeRef}>3. Customize practice <small>(learner controlled)</small></h3>
    <div className="option-list"><div className="option-row"><label><FileQuestion size={17}/>Number of questions</label><div className="option-control"><SelectButtons values={[{value:10,label:'10'},{value:25,label:'25'},{value:50,label:'50'},{value:'custom',label:'Custom'}]} value={state.questionCount} onChange={n=>update({questionCount:n})}/>{state.questionCount==='custom'&&<input className="custom-field" aria-label="Custom practice question count" type="number" min="1" max="50" value={custom} onChange={e=>setCustom(e.target.value)}/>}</div></div>
    <div className="option-row"><label><Clock3 size={17}/>Timing</label><div className="option-control"><SelectButtons values={[{value:'none',label:'No timer'},{value:'whole',label:'Whole test'},{value:'per',label:'60 sec / question'}]} value={state.timerMode} onChange={n=>update({timerMode:n})}/>{state.timerMode==='whole'&&<label className="practice-time-control">Total minutes <input aria-label="Practice duration in minutes" type="number" min="1" max="180" value={state.customMinutes} onChange={e=>update({customMinutes:e.target.value})}/></label>}</div></div>
    <div className="option-row"><label><MessageSquare size={17}/>Answer feedback</label><div className="option-control"><SelectButtons values={[{value:'each',label:'After each question'},{value:'end',label:'At the end'}]} value={state.feedbackMode} onChange={n=>update({feedbackMode:n})}/></div></div>
    <div className="option-row"><label><Database size={17}/>Question pool</label><div className="option-control"><SelectButtons values={[{value:'all',label:'All questions'},{value:'unseen',label:'Unseen'},{value:'mistakes',label:'Previous mistakes'}]} value={state.pool} onChange={n=>update({pool:n})}/></div></div></div></>:<div className="course-empty-panel"><LockKeyhole size={28}/><h3>{course.name} — Coming soon</h3><p>There are no questions in this course yet. You can browse it now; practice will unlock after the admin imports its bank.</p></div>}
-  </div><aside className="practice-summary"><h2>Your practice</h2><p>Settings you control, unlike an assessment.</p><HDImage className="practice-summary-image" sizes="(max-width: 740px) 92vw, 390px" src={assets.practice} alt="Industrial process safety training"/><div className="summary-row"><Layers3 size={18}/><span>Course</span><strong>{course.name}</strong></div><div className="summary-row"><BookOpen size={18}/><span>Domains</span><strong>{selected.length} selected<small>{selected.map(t=>t.name).join(', ')||'Select a domain'}</small></strong></div><div className="summary-row"><FileQuestion size={18}/><span>Questions</span><strong>{count}</strong></div><div className="summary-row"><Clock3 size={18}/><span>Time</span><strong>{state.timerMode==='none'?'Untimed':state.timerMode==='per'?'60 sec / question':`${minutes} min total`}</strong></div><div className="summary-row"><SlidersHorizontal size={18}/><span>Mode</span><strong>Customizable practice</strong></div><button className="btn start-practice" disabled={!available||!selected.length} onClick={begin}><Play size={17} fill="currentColor"/> Start practice <ArrowRight size={17}/></button><div className="summary-note"><Save size={18}/><span><b>Practice settings stay editable</b><small>For official assessments, the administrator sets questions and duration.</small></span></div></aside></div>
+  </div><aside className="practice-summary"><h2>Your practice</h2><p>Settings you control, unlike an assessment.</p><HDImage className="practice-summary-image" sizes="(max-width: 740px) 92vw, 390px" src={assets.practice} alt="Industrial process safety training"/><div className="summary-row"><Layers3 size={18}/><span>Course</span><strong>{course.name}</strong></div><div className="summary-row"><BookOpen size={18}/><span>Domains</span><strong>{selected.length} selected<small>{selected.map(t=>t.name).join(', ')||'Select a domain'}</small></strong></div><div className="summary-row"><FileQuestion size={18}/><span>Questions</span><strong>{count}</strong></div><div className="summary-row"><Clock3 size={18}/><span>Time</span><strong>{state.timerMode==='none'?'Untimed':state.timerMode==='per'?'60 sec / question':`${minutes} min total`}</strong></div><div className="summary-row"><SlidersHorizontal size={18}/><span>Mode</span><strong>Build Your Own</strong></div><button className="btn start-practice" disabled={!available||!selected.length} onClick={begin}><Play size={17} fill="currentColor"/> Start practice <ArrowRight size={17}/></button><div className="summary-note"><Save size={18}/><span><b>Practice settings stay editable</b><small>For official assessments, the administrator sets questions and duration.</small></span></div></aside></div>
  </div>
 }
