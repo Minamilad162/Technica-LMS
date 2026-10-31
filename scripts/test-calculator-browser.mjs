@@ -95,6 +95,15 @@ try{
    assert.notEqual(appearance.fnBg,appearance.numBg,'Function and number key finishes should visibly differ');
    assert.notEqual(appearance.opBg,appearance.fnBg,'Operator and function key finishes should visibly differ');
    assert.ok(appearance.shiftFont>=6.5,'Secondary legends became unreadably small');
+   const rail=await page.locator('.tc-calc-window').evaluate(el=>{
+     const cs=getComputedStyle(el);
+     return {border:cs.borderLeftColor,background:cs.backgroundImage}
+   });
+   const rgb=(rail.border.match(/\d+/g)||[]).slice(0,3).map(Number);
+   assert.equal(rgb.length,3,'Expected readable shell border RGB');
+   assert.ok(Math.max(...rgb)<190,'White/silver side rail still present: '+rail.border);
+   assert.ok(!/rgb\(247, 251, 253\)|rgb\(234, 241, 245\)|rgb\(228, 238, 244\)/.test(rail.background),
+      'Bright white strips remain in shell gradient: '+rail.background);
    if(!device.touch)assert.ok(appearance.width>=380,'Desktop calculator should be slightly larger than 354px original: '+appearance.width);
    else assert.ok(appearance.width>=device.viewport.width-17,'Mobile calculator should use available viewport width');
    await page.locator('.tc-calc-window').screenshot({path:'artifacts/calculator-qa/'+device.name+'.png'});
@@ -113,6 +122,18 @@ try{
    assert.ok(await page.getByText('Data editor · L1 / L2 / L3').isVisible());
    await page.getByRole('button',{name:'Return to calculator keypad'}).click();
   });
+  await check(device.name+' clean LCD and TOOLS math templates outside display',async()=>{
+   const lcd=page.locator('.tc-calc-display');
+   assert.equal(await lcd.locator('.tc-math-template-tools').count(),0,'Math toolbar should not appear in LCD');
+   assert.equal(await lcd.locator('button').count(),0,'No permanent function chips belong inside the LCD');
+   assert.ok(await lcd.locator('input.tc-math-field').count()>=1,'Editable Math input must remain in LCD');
+   await page.getByRole('button',{name:'Open advanced calculator functions'}).click();
+   const menu=page.locator('.tc-calc-menu-panel');
+   await menu.waitFor({state:'visible'});
+   assert.ok(await menu.getByText('Math templates').isVisible());
+   assert.equal(await menu.locator('[data-math-template]').count(),8,'All seven templates and remove-slot should stay available');
+   await page.getByRole('button',{name:'Return to calculator keypad'}).click();
+  });
   await check(device.name+' mathematical input and keyboard ENTER',async()=>{
    const input=page.locator('input.tc-math-field').first();
    await input.fill('2+3*4');
@@ -122,13 +143,27 @@ try{
   });
   await check(device.name+' editable numerator and denominator',async()=>{
    await page.locator('button[data-calc-key="clear"]').click();
-   await page.locator('.tc-math-template-tools button[title^="Insert fraction"]').click();
+   await page.getByRole('button',{name:'Open advanced calculator functions'}).click();
+   await page.locator('[data-math-template="fraction"]').click();
+   assert.equal(await page.locator('.tc-calc-menu-panel').count(),0,'Template insertion must return to keypad');
    const slots=page.locator('.tc-math-fraction input.tc-math-field');
    await slots.nth(0).fill('1');
    await slots.nth(1).fill('2');
    await slots.nth(1).press('Enter');
    const output=await page.locator('.tc-calc-display-result').innerText();
    assert.ok(output.includes('1')&&output.includes('2'), 'Fraction not rendered: '+output);
+  });
+  await check(device.name+' nested template from TOOLS keeps selected numerator',async()=>{
+   await page.locator('button[data-calc-key="clear"]').click();
+   await page.getByRole('button',{name:'Open advanced calculator functions'}).click();
+   await page.locator('[data-math-template="fraction"]').click();
+   await page.getByRole('button',{name:'Open advanced calculator functions'}).click();
+   await page.locator('[data-math-template="squareRoot"]').click();
+   assert.ok(await page.locator('.tc-math-fraction .tc-math-root').isVisible(),'Square root should nest inside selected numerator');
+   await page.locator('.tc-math-root input.tc-math-field').fill('9');
+   await page.locator('.tc-math-fraction > span:nth-child(2) input.tc-math-field').first().fill('3');
+   await page.locator('.tc-math-fraction > span:nth-child(2) input.tc-math-field').first().press('Enter');
+   assert.equal((await page.locator('.tc-calc-display-result').innerText()).trim(),'1');
   });
   await check(device.name+' select quiz answer while calculator open',async()=>{
    const answer=page.locator('.answer-option').first();
