@@ -65,10 +65,11 @@ const inserted=insertMathTemplate(doc,mathFieldIds(doc)[0],'fraction');doc=inser
 let ids=mathFieldIds(doc);doc=updateMathField(doc,ids[1],'2');doc=updateMathField(doc,ids[2],'5');
 same(serializeMathDocument(doc),'((2)/(5))','Textbook fractional template');
 const deleted=removeMathTemplate(doc,ids[1]);same(serializeMathDocument(deleted.doc),'','Template removal');
+let nested=createMathDocument(''),focusId=mathFieldIds(nested)[0];
 for(let n=0;n<4;n++){
- let f=mathFieldIds(doc)[1];const v=insertMathTemplate(doc,f,'squareRoot');doc=v.doc;
+ const v=insertMathTemplate(nested,focusId,'squareRoot');nested=v.doc;focusId=v.focusId;
 }
-same(mathDocumentDepth(doc),4,'Four nested templates');
-assert.throws(()=>insertMathTemplate(doc,mathFieldIds(doc)[2],'fraction'),/Maximum 4/);checks++;
+same(mathDocumentDepth(nested),4,'Four nested templates');
+assert.throws(()=>insertMathTemplate(nested,focusId,'fraction'),/Maximum 4/);checks++;
 console.log('PASS TI reference-guided functional checks:',checks);
 console.log('SCOPE: functional and bounded source checks only; not a hardware/display firmware-equivalence certification.');
