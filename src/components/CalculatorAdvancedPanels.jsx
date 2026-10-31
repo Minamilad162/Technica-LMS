@@ -136,10 +136,10 @@ export function AnglePanel({angle,onError,onUseValue}){
  </div>;
 }
 export function ConstantPanel({answer,angle,memory,variables,onUseValue,onError}){
- const[formula,setFormula]=useState('x+2'),[on,setOn]=useState(false);
+ const[formula,setFormula]=useState('*2+3'),[on,setOn]=useState(false);
  return <div className="tc-calc-data tc-calc-advanced">
   <b>Constant operator · K</b>
-  <p>Set an expression containing x, then apply it repeatedly to the previous answer, for example x+2, x×3 or x^2.</p>
+  <p>Set a K expression (44-character maximum), then apply it to the previous answer, for example *2+3, +2 or x^2. TI K-style operator-first syntax is supported.</p>
   <label>Repeat operation<input value={formula} onChange={e=>{setFormula(e.target.value);setOn(false)}}/></label>
   <div className="tc-calc-tool-actions"><button onClick={()=>safe(()=>{
     applyConstantOperator(answer,formula,{angleMode:angle,ans:answer,memory,variables});setOn(true);
