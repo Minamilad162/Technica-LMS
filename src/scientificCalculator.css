@@ -79,3 +79,52 @@
 @media(prefers-reduced-motion:reduce){.tc-calc-launch{transition:none}}
 
 .tc-calc-lcd-history{height:14px;min-height:14px;overflow:hidden;text-align:right;font:10px ui-monospace,monospace;color:#536f65;white-space:nowrap;text-overflow:ellipsis}
+
+/* On compact phones prioritize digits/operators above the extended scientific row; desktop keeps the full TI-inspired arrangement. */
+@media(max-width:700px){
+.tc-calc-keys .tc-calc-key[data-calc-key="second"]{order:0}
+.tc-calc-keys .tc-calc-key[data-calc-key="mode"]{order:1}
+.tc-calc-keys .tc-calc-key[data-calc-key="delete"]{order:2}
+.tc-calc-keys .tc-calc-key[data-calc-key="clear"]{order:3}
+.tc-calc-keys .tc-calc-key[data-calc-key="history"]{order:4}
+.tc-calc-keys .tc-calc-key[data-calc-key="7"]{order:5}
+.tc-calc-keys .tc-calc-key[data-calc-key="8"]{order:6}
+.tc-calc-keys .tc-calc-key[data-calc-key="9"]{order:7}
+.tc-calc-keys .tc-calc-key[data-calc-key="divide"]{order:8}
+.tc-calc-keys .tc-calc-key[data-calc-key="sqrt"]{order:9}
+.tc-calc-keys .tc-calc-key[data-calc-key="4"]{order:10}
+.tc-calc-keys .tc-calc-key[data-calc-key="5"]{order:11}
+.tc-calc-keys .tc-calc-key[data-calc-key="6"]{order:12}
+.tc-calc-keys .tc-calc-key[data-calc-key="multiply"]{order:13}
+.tc-calc-keys .tc-calc-key[data-calc-key="pow"]{order:14}
+.tc-calc-keys .tc-calc-key[data-calc-key="1"]{order:15}
+.tc-calc-keys .tc-calc-key[data-calc-key="2"]{order:16}
+.tc-calc-keys .tc-calc-key[data-calc-key="3"]{order:17}
+.tc-calc-keys .tc-calc-key[data-calc-key="subtract"]{order:18}
+.tc-calc-keys .tc-calc-key[data-calc-key="square"]{order:19}
+.tc-calc-keys .tc-calc-key[data-calc-key="0"]{order:20}
+.tc-calc-keys .tc-calc-key[data-calc-key="dot"]{order:21}
+.tc-calc-keys .tc-calc-key[data-calc-key="neg"]{order:22}
+.tc-calc-keys .tc-calc-key[data-calc-key="add"]{order:23}
+.tc-calc-keys .tc-calc-key[data-calc-key="enter"]{order:24}
+.tc-calc-keys .tc-calc-key[data-calc-key="sin"]{order:25}
+.tc-calc-keys .tc-calc-key[data-calc-key="cos"]{order:26}
+.tc-calc-keys .tc-calc-key[data-calc-key="tan"]{order:27}
+.tc-calc-keys .tc-calc-key[data-calc-key="pi"]{order:28}
+.tc-calc-keys .tc-calc-key[data-calc-key="percent"]{order:29}
+.tc-calc-keys .tc-calc-key[data-calc-key="log"]{order:30}
+.tc-calc-keys .tc-calc-key[data-calc-key="ln"]{order:31}
+.tc-calc-keys .tc-calc-key[data-calc-key="inv"]{order:32}
+.tc-calc-keys .tc-calc-key[data-calc-key="fact"]{order:33}
+.tc-calc-keys .tc-calc-key[data-calc-key="ans"]{order:34}
+.tc-calc-keys .tc-calc-key[data-calc-key="nCr"]{order:35}
+.tc-calc-keys .tc-calc-key[data-calc-key="nPr"]{order:36}
+.tc-calc-keys .tc-calc-key[data-calc-key="left"]{order:37}
+.tc-calc-keys .tc-calc-key[data-calc-key="right"]{order:38}
+.tc-calc-keys .tc-calc-key[data-calc-key="ee"]{order:39}
+.tc-calc-keys .tc-calc-key[data-calc-key="fraction"]{order:40}
+.tc-calc-keys .tc-calc-key[data-calc-key="mixed"]{order:41}
+.tc-calc-keys .tc-calc-key[data-calc-key="cube"]{order:42}
+.tc-calc-keys .tc-calc-key[data-calc-key="cbrt"]{order:43}
+.tc-calc-keys .tc-calc-key[data-calc-key="store"]{order:44}
+}
