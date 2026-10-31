@@ -77,6 +77,17 @@ const MathTemplateEditor=forwardRef(function MathTemplateEditor({document,onChan
  };
  useImperativeHandle(ref,()=>({
   insertText:append,insertTemplate:makeTemplate,deleteBackward,removeTemplate:dropTemplate,
+  move:(direction)=>{
+   const {fieldId}=location();
+   if(direction==='left')return move(fieldId,-1);
+   if(direction==='right')return move(fieldId,1);
+   const context=mathFieldContext(document,fieldId);
+   if(context?.parentType==='fraction'){
+    if(direction==='up'&&context.field==='denominator')return move(fieldId,-1);
+    if(direction==='down'&&context.field==='numerator')return move(fieldId,1);
+   }
+   return false;
+  },
   focus:()=>{const id=location().fieldId;focusField(id)}
  }),[document]);
  useEffect(()=>{if(!active){const first=mathFieldIds(document)[0];if(first)focusField(first)}},[]);
