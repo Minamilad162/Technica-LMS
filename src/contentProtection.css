@@ -79,27 +79,60 @@
 }
 /* Print/Save as PDF: render protected routes as a dark warning sheet.
    Print backgrounds are controlled by users/browsers and are not guaranteed. */
+/* Keep the blocked print output reliable even when browser print backgrounds
+   are disabled, and avoid depending only on :has() support. */
 @media print {
- body:has(.tc-protected-content) #root{
-  visibility:hidden!important;
- }
- body:has(.tc-protected-content)::after{
-  content:"TECHNICA — PROTECTED CONTENT. PRINTING DISABLED.";
-  box-sizing:border-box;
-  position:fixed;
-  inset:0;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  padding:2cm;
-  z-index:2147483647;
-  color:#fff!important;
-  background:#03060b!important;
-  font:700 16pt/1.6 sans-serif;
-  text-align:center;
+  html.tc-has-protected-content #root{
+    display:none!important;
+    visibility:hidden!important;
+  }
+  html.tc-has-protected-content body{
+    margin:0!important;
+    padding:0!important;
+    background:#fff!important;
+  }
+  html.tc-has-protected-content body::before{
+    content:"TECHNICA — PROTECTED CONTENT — PRINTING DISABLED";
+    display:block!important;
+    position:relative;
+    margin:0 auto;
+    padding:35vh 20px 0;
+    width:100%;
+    box-sizing:border-box;
+    color:#151c28!important;
+    background:#fff!important;
+    font:700 15pt/1.6 Arial,sans-serif;
+    text-align:center;
+    letter-spacing:.04em;
+    visibility:visible!important;
+    -webkit-print-color-adjust:exact;
+    print-color-adjust:exact;
+  }
+}
+/* A visible low-contrast mark over the actual embedded video window as well
+   as the general lesson, without intercepting player buttons or scrubbing. */
+.learn-video-container{
+  position:relative;
+}
+.tc-video-stamp{
+  position:absolute;
+  z-index:5;
+  right:10px;
+  bottom:10px;
+  max-width:calc(100% - 20px);
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+  padding:5px 9px;
+  color:rgba(245,252,255,.86);
+  background:rgba(9,27,38,.29);
+  border:1px solid rgba(255,255,255,.2);
+  border-radius:6px;
+  font:700 10px/1.2 ui-sans-serif,system-ui,sans-serif;
   letter-spacing:.035em;
-  visibility:visible!important;
-  -webkit-print-color-adjust:exact;
-  print-color-adjust:exact;
- }
+  pointer-events:none!important;
+  user-select:none;
+}
+@media(max-width:700px){
+  .tc-video-stamp{font-size:8px;padding:4px 6px;bottom:7px;right:7px}
 }

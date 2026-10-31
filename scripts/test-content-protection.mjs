@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import {
  PROTECTION_HOLD_MS,WATERMARK_POSITIONS,formatWatermarkLabel,
- isPotentialCaptureShortcut,isEditableElement,shouldBlockContentEvent,
+ isPotentialCaptureShortcut,isEditableElement,shouldBlockContentEvent,shouldBlockClipboardEvent,selectionTouchesProtected,
  watermarkIdentity
 }from'../src/lib/contentProtection.js';
 
@@ -33,6 +33,15 @@ assert.equal(shouldBlockContentEvent(element,root),true);
 element.editable=true;
 assert.equal(shouldBlockContentEvent(element,root),false);
 assert.equal(shouldBlockContentEvent({},root),false);
+const node={id:'question'};
+const parent={contains:obj=>obj===node};
+const selection={isCollapsed:false,anchorNode:node,focusNode:node,rangeCount:1,getRangeAt:()=>({intersectsNode:()=>true})};
+assert.equal(selectionTouchesProtected(selection,parent),true);
+assert.equal(selectionTouchesProtected({...selection,isCollapsed:true},parent),false);
+assert.equal(shouldBlockClipboardEvent({target:{}},parent,selection,null),true,'document-level selection event should block');
+assert.equal(shouldBlockClipboardEvent({target:{}},parent,{...selection,isCollapsed:true},null),false);
+assert.equal(shouldBlockClipboardEvent({target:node},parent,{...selection,isCollapsed:true},null),true);
+
 
 const component=readFileSync(new URL('../src/components/ProtectedContent.jsx',import.meta.url),'utf8');
 const css=readFileSync(new URL('../src/contentProtection.css',import.meta.url),'utf8');
@@ -48,10 +57,11 @@ for(const token of ['onCopyCapture','onCutCapture','onDragStartCapture',
 assert.ok(quiz.includes('kind="exam-question"'),'Assessment and Practice questions protected');
 assert.ok(learning.includes("kind='lesson-video'")||learning.includes("'lesson-video'"),'Video lesson wrapper protected');
 assert.ok(learning.includes('kind="lesson-quiz"'),'Learning quiz protected');
+assert.ok(learning.includes('tc-video-stamp'),'Video player should receive visible non-interactive stamp');
 assert.ok(learning.includes('kind="lesson-review"'),'Knowledge review protected');
 assert.ok(review.includes('kind="answer-review"'),'Assessment review protected');
 assert.ok(practiceReview.includes('kind="answer-review"'),'Practice review protected');
-for(const selector of ['@media print','print-color-adjust:exact','tc-watermark-layer','pointer-events:none','tc-capture-curtain']){
+for(const selector of ['@media print','html.tc-has-protected-content #root','tc-video-stamp','print-color-adjust:exact','tc-watermark-layer','pointer-events:none','tc-capture-curtain']){
  assert.ok(css.includes(selector),'CSS should provide '+selector);
 }
 console.log('PASS: scoped capture-key heuristic, non-sensitive watermark, copy/drag/print deterrence, assessment/lesson/review integration.');

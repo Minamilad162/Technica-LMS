@@ -1,3 +1,11 @@
+### 2026-10-31 — Actual-use security pilot debugging (v1.1.8, PR #17)
+
+- Fixed a clipboard event-target hole: native Ctrl+C can target document/body even when text selected inside question; now checks Selection ranges in capture phase and preserves unprotected input copy.
+- Strengthened browser printing behavior to remove protected React root from printed output instead of only using visibility and pseudo-content; screen stays normal outside Print Preview.
+- Added low-opacity Technica learner/session stamp directly over embedded YouTube player without blocking playback controls.
+- Upgraded QA from hand-dispatched synthetic copy events to Playwright real Ctrl+C and clipboard readback, plus print media and YouTube overlay checks.
+- **Not achieved:** blocking actual OS screenshot/recording, turning YouTube into DRM media, stopping DevTools/media URLs or proprietary print CSS bypasses. Never present those as PASS.
+
 ### 2026-10-31 — Web-only learner content protection pilot (v1.1.7)
 
 - Added faint session watermark to practice/assessment questions, learning video/materials, lesson quizzes and post-exam answers.
