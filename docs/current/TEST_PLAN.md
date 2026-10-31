@@ -62,3 +62,11 @@ Command / environment / commit / timestamp / duration / PASS-FAIL-SKIPPED / obse
 - **Manual QA required:** desktop 1280×720 and 1440×900 plus mobile 375/390/430 widths: question and choices readable while calculator open; drag and minimized state; calculator keypad with pointer; text input with physical keyboard; avoid shortcut interception while answering; scroll and safe area on phone; no quiz timer pause or answer state change; review modal stacking; keyboard accessibility/Escape.
 - Compare sampled outputs against an independently verified scientific calculator reference and record any differences. Do not label fully TI-model compatible without full qualification.
 - CI passing does not assert Cloudflare deployment or Supabase production exam security.
+
+## Calculator extended modes and model regression — 2026-10-31
+
+- Run `npm run test:calculator` **and** `npm run test:calculator:extended` (Node), in addition to all existing bank/quiz/learning/DB tests and `npm run build`.
+- Cover signed roots, source input angle modifiers, DMS/rectangular-polar conversion, exact rational/root/π forms, fractional weighted and ordinary 1Var/2Var stats, list formula self-reference prevention, 7 register symbols, K repeated operations and auto/Ask-x table.
+- Verify no input field outside the expression editor is hijacked by global calculator shortcuts; in particular check the 3-list editor, statistics, Ask-x table inputs, dropdowns and answer choices while the calculator is open.
+- Test 375/390/430px touch layout, desktop 1280×720 floating window, keyboard and pointer, free movement of the calculator, question+answer visibility, minimize/close/reopen, persistent state within quiz navigation.
+- Benchmark TI-model calculation parity separately, distinguishing direct numerical formulas from full exact MathPrint/template editing, menus and precision settings. Passing CI is not permission to claim official TI hardware equivalence.
