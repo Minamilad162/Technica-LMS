@@ -21,8 +21,8 @@ INSERT INTO public.lms_questions(course_id,source_id,prompt,options,correct_inde
 SQL
 run_as(){
  local role="$1" uid="$2" statement="$3"
- psql -X -v ON_ERROR_STOP=1 -A -t -c \
- "BEGIN; SET LOCAL ROLE $role; SET LOCAL request.jwt.claim.sub='$uid'; $statement; ROLLBACK;" | tail -n 1
+ psql -X -v ON_ERROR_STOP=1 -q -A -t -c \
+ "BEGIN; SET LOCAL ROLE $role; SET LOCAL request.jwt.claim.sub='$uid'; $statement; COMMIT;" | tail -n 1
 }
 admin=00000000-0000-0000-0000-000000000001
 paid=00000000-0000-0000-0000-000000000003
@@ -69,9 +69,7 @@ leak=$(run_as authenticated "$paid" \
  "SELECT public.lms_p4_attempt_payload('$attempt')::text LIKE '%correctIndex%'")
 [[ "$leak" == f ]] || { echo 'FAIL correctIndex leaked before finish';exit 1; }
 echo 'PASS only sanitized questions before submission'
-reserved=$(run_as authenticated "$paid" \
- "SELECT count(*) FROM public.lms_practice_attempt_items WHERE attempt_id='$attempt' AND question_id IN (SELECT id FROM public.lms_questions WHERE mock_exclusive)")
-# Service-only tables intentionally cannot be read by authenticated: use DB owner.
+# Private tables cannot be read as authenticated; inspect in disposable DB as owner.
 reserved=$(psql -X -v ON_ERROR_STOP=1 -A -t -c \
  "SELECT count(*) FROM public.lms_practice_attempt_items i JOIN public.lms_questions q ON q.id=i.question_id WHERE i.attempt_id='$attempt' AND q.mock_exclusive" | tail -n 1)
 [[ "$reserved" == 0 ]] || { echo 'FAIL reserved mock question selected';exit 1; }
