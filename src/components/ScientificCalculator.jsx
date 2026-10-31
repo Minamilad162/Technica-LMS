@@ -6,6 +6,8 @@ import{exactScientific,formatExactPlain,formatWithMode,freshVariables,makeListSt
 import{VariablePanel,ListPanel,AnglePanel,ConstantPanel}from'./CalculatorAdvancedPanels';
 import MathTemplateEditor from './MathTemplateEditor';
 import{createMathDocument,serializeMathDocument}from'../lib/mathTemplateEditor';
+import{seededCalculatorRandom}from'../lib/calculatorRandom';
+import{finishCalculatorEntry}from'../lib/calculatorEntry';
 
 // Original Technica keypad and calculation code; no third-party calculator emulator.
 const KEYS=[
@@ -57,6 +59,8 @@ export default function ScientificCalculator({context='Quiz'}){
  const[lastExact,setLastExact]=useState(null),[lastCalcExpression,setLastCalcExpression]=useState(''),[percentView,setPercentView]=useState(false);
  const[tableMode,setTableMode]=useState('auto'),[askValues,setAskValues]=useState('1,2,3'),[tableCount,setTableCount]=useState(8);
  const root=useRef(null),textField=useRef(null),drag=useRef(null),mathEditor=useRef(null);
+ const rngRef=useRef(null),[randSeed,setRandSeed]=useState(''),[seeded,setSeeded]=useState(false);
+ const random=useCallback(()=>rngRef.current?rngRef.current():Math.random(),[]);
  const[mathDoc,setMathDoc]=useState(()=>createMathDocument());
  const insert=useCallback(s=>{
    if(viewMode==='MATH'){mathEditor.current?.insertText(s)}
@@ -66,15 +70,15 @@ export default function ScientificCalculator({context='Quiz'}){
  const template=kind=>{if(viewMode==='MATH')mathEditor.current?.insertTemplate(kind);else insert(kind==='fraction'?'/':kind==='power'?'^(':kind==='squareRoot'?'sqrt(':kind==='mixed'?'mixed(':kind==='nthRoot'?'root(':kind==='exp10'?'pow10(':'exp(')};
  const evaluate=useCallback(()=>{
    try{
-     const input=viewMode==='MATH'?serializeMathDocument(mathDoc):expression;
-     const v=evaluateScientific(input,{angleMode:angle,ans:answer,memory,variables,viewMode});
+     const input=finishCalculatorEntry(viewMode==='MATH'?serializeMathDocument(mathDoc):expression);
+     const v=evaluateScientific(input,{angleMode:angle,ans:answer,memory,variables,viewMode,random});
      const exact=exactScientific(v,input);
      const formatted=(showExact&&viewMode==='MATH'&&exact)?formatExactPlain(exact):formatWithMode(v,{notation,fixed:fixed==='FLOAT'?null:Number(fixed),asFraction:fraction,mixed});
      setLastExact(exact);setLastCalcExpression(input);setPercentView(false);
      setAnswer(v);setResult(formatted);setHistory(h=>[{expression:input,value:v},...h].slice(0,12));
      setExpression(formatScientific(v));setMathDoc(createMathDocument(formatScientific(v)));setShowHistory(false);setError('');
    }catch(e){setError(e.message||'Math error')}
- },[expression,mathDoc,angle,answer,memory,variables,notation,fraction,mixed,fixed,showExact,viewMode]);
+ },[expression,mathDoc,angle,answer,memory,variables,notation,fraction,mixed,fixed,showExact,viewMode,random]);
  const press=useCallback(key=>{
    if(key==='second'){setSecond(s=>!s);return}
    if(key==='mode'){setAngle(a=>a==='DEG'?'RAD':a==='RAD'?'GRAD':'DEG');return}
@@ -148,6 +152,7 @@ export default function ScientificCalculator({context='Quiz'}){
    setError('');setAngle('DEG');setNotation('NORM');setFixed('FLOAT');setViewMode('MATH');
    setFraction(false);setMixed(false);setLastExact(null);setLastCalcExpression('');setShowExact(true);
    setPercentView(false);setStatsInput('');setStatsResult(null);setTableRows([]);setTableFormula('x^2');setTableMode('auto');setTab('keys');
+   rngRef.current=null;setRandSeed('');setSeeded(false);
  }
  function makeTable(){
    try{
@@ -221,6 +226,14 @@ export default function ScientificCalculator({context='Quiz'}){
        <div className="tc-calc-memory"><b>M: {formatScientific(memory)}</b>
          <button onClick={()=>setMemory(0)}>MC</button><button onClick={()=>insert('M')}>MR</button>
          <button onClick={()=>{try{const amount=evaluateScientific(expression||String(answer),{angleMode:angle,ans:answer,memory,variables});setMemory(m=>m+amount);setError('')}catch(e){setError(e.message)}}}>M+</button>
+       </div>
+       <div className="tc-calc-random-seed">
+        <label>RAND seed (non-negative integer)
+         <input value={randSeed} inputMode="numeric" onChange={e=>setRandSeed(e.target.value)} placeholder="e.g. 42"/>
+        </label>
+        <button type="button" onClick={()=>{try{const seed=Number(randSeed);rngRef.current=seededCalculatorRandom(seed);setSeeded(true);setError('')}catch(e){setError(e.message)}}}>Set seed</button>
+        <button type="button" onClick={()=>{rngRef.current=null;setSeeded(false);setError('')}}>Unseeded</button>
+        <small>{seeded?'Deterministic seed active':'Unseeded random'} · original Technica sequence, not TI firmware RNG</small>
        </div>
      </div>}
      {tab==='vars'&&<VariablePanel variables={variables} setVariables={setVariables} answer={answer} expression={expression} angle={angle} memory={memory} onInsert={insert} onError={setError}/>}

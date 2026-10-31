@@ -7,12 +7,12 @@ import {exactRationalExpression,exactRationalNumber} from './calculatorPrecision
 const ANGLE={DEG:Math.PI/180,RAD:1,GRAD:Math.PI/200};
 const MAX_LEN=220,MAX_DEPTH=44;
 const finite=(v)=>{if(!Number.isFinite(v))throw Error('Math error');return Object.is(v,-0)?0:v};
-const factorial=(n)=>{if(!Number.isInteger(n)||n<0||n>170)throw Error('Factorial: use an integer from 0 to 170');let r=1;for(let i=2;i<=n;i++)r*=i;return finite(r)};
+const factorial=(n)=>{if(!Number.isInteger(n)||n<0||n>69)throw Error('Factorial: use an integer from 0 to 69');let r=1;for(let i=2;i<=n;i++)r*=i;return finite(r)};
 const choose=(n,r)=>{if(!Number.isInteger(n)||!Number.isInteger(r)||r<0||n<r||n<0||n>170)throw Error('nCr: invalid integers');let z=1;for(let k=1;k<=Math.min(r,n-r);k++)z=z*(n-k+1)/k;return finite(z)};
 const permute=(n,r)=>{if(!Number.isInteger(n)||!Number.isInteger(r)||r<0||n<r||n<0||n>170)throw Error('nPr: invalid integers');let z=1;for(let k=0;k<r;k++)z*=n-k;return finite(z)};
 const clean=(x)=>{if(x<0&&Math.abs(x)<1e-12)return 0;return finite(x)};
 const toRad=(n,mode)=>n*ANGLE[mode],fromRad=(n,mode)=>n/ANGLE[mode];
-const calcFunction=(name,args,mode)=>{
+const calcFunction=(name,args,mode,options={})=>{
  const x=args[0],z=args[1];
  const unary=()=>{if(args.length!==1)throw Error(name+' expects one input')};
  const binary=()=>{if(args.length!==2)throw Error(name+' expects two inputs')};
@@ -56,8 +56,8 @@ const calcFunction=(name,args,mode)=>{
  case 'PtoRx':binary();return x*Math.cos(toRad(z,mode));
  case 'PtoRy':binary();return x*Math.sin(toRad(z,mode));
  case 'mixed':{if(args.length!==3)throw Error('mixed expects whole, numerator, denominator');if(args[2]===0)throw Error('Division by zero');return args[0]+Math.sign(args[0]||1)*args[1]/args[2]}
- case 'rand':if(args.length)throw Error('rand takes no inputs');return Math.random();
- case 'randInt':binary();if(!Number.isInteger(x)||!Number.isInteger(z)||x>z)throw Error('randInt expects two ordered integers');return Math.floor(Math.random()*(z-x+1))+x;
+ case 'rand':if(args.length)throw Error('rand takes no inputs');return (options.random||Math.random)();
+ case 'randInt':binary();if(!Number.isInteger(x)||!Number.isInteger(z)||x>z)throw Error('randInt expects two ordered integers');return Math.floor((options.random||Math.random)()*(z-x+1))+x;
  default:throw Error('Unknown function: '+name);
  }
 };
@@ -96,7 +96,7 @@ export function evaluateScientific(raw,options={}){
       take();const args=[];
       if(peek().type!==')'){do{args.push(parse(0));if(peek().type!==',')break;take()}while(true)}
       if(take().type!==')')throw Error('Expected closing parenthesis');
-      left=calcFunction(name,args,mode);
+      left=calcFunction(name,args,mode,options);
     }else if(name==='pi')left=Math.PI;
     else if(name==='e')left=Math.E;
     else if(name==='Ans')left=Number(options.ans)||0;

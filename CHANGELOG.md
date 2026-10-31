@@ -1,3 +1,13 @@
+### 2026-10-31 — TI-30XS MultiView audit, guidebook vectors and real browser QA
+
+- Audited original Technica scientific calculator against official manufacturer function, error, numeric mode, probability and list documentation; created detailed [audit report](docs/current/TI30XS_CALCULATOR_AUDIT_20261031.md) with tested/partial/missing parity for each major feature.
+- Fixed incorrect factorial upper bound (70–170 rejected), FRQ >99 domain, TI-style K syntax with 44-character limit, list formula reference/length mismatch and automatic closing parentheses on calculator ENTER.
+- Added independently seeded random input and a reproducible generator. Important: it does not mimic the original TI PRNG algorithm.
+- New \`scripts/audit-ti30xs-reference.mjs\` is part of the standard CI, alongside earlier calculator/ASP/SQL/build suites.
+- Replaced source-only UI assumptions with a separate real Chromium browser pipeline: practice, assessment and learning quiz; desktop 1440px drag & keyboard; mobile 375/390/430px touch, calculator keypad, fraction, quiz answer selection/navigation and browser exceptions.
+- Audit found and reproduced a **real mobile answer-click blocker**; repaired the mobile split with in-flow scrollable question pane and bounded calculator, pending newest browser CI proof.
+- This is source-level functionality validation, NOT TI hardware/firmware certification, Safari-device acceptance or a published Cloudflare deployment.
+
 ### 2026-10-31 — Nested math entry, precision, lists and menus (PR #11)
 
 - Added interactive Math-style expression entry templates (up to 4 levels of fraction, mixed fraction, square/n-th root, power, e-power and 10-power) with keyboard and pointer navigation/edit/remove. Existing Classic text input remains available.

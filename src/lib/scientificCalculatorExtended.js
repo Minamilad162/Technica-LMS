@@ -102,10 +102,13 @@ export function parseNumericList(raw){
 export function applyListFormula(lists,column,formula,options={}){
  if(!['L1','L2','L3'].includes(column))throw Error('Unknown list');
  const base=Object.fromEntries(['L1','L2','L3'].map(k=>[k,validateList(lists[k]||[])]));
- const rows=Math.max(0,...Object.values(base).map(x=>x.length));
- if(!rows)throw Error('Add list data before applying a formula');
  if(!formula||formula.length>110)throw Error('Enter a list formula');
- if(new RegExp('\\b'+column+'\\b').test(formula))throw Error('List formula cannot refer to itself');
+ const refs=[...new Set(String(formula).match(/\bL[123]\b/g)||[])];
+ if(!refs.length)throw Error('List formula must reference L1, L2, or L3');
+ if(refs.includes(column))throw Error('List formula cannot refer to itself');
+ const rows=base[refs[0]].length;
+ if(!rows)throw Error('Referenced list is empty');
+ if(refs.some(k=>base[k].length!==rows))throw Error('DIM MISMATCH: referenced lists need equal lengths');
  const values=Array.from({length:rows},(_,i)=>evaluateScientific(formula,{
   ...options,variables:{...options.variables,L1:base.L1[i]??0,L2:base.L2[i]??0,L3:base.L3[i]??0,x:i+1}
  }));
@@ -170,7 +173,7 @@ export function statsFromLists(lists,kind='1var',xKey='L1',yKey='L2',frequencyKe
  }
  if(frequencyKey){
   const freq=validateList(lists[frequencyKey]||[]);
-  if(x.length!==freq.length||freq.some(v=>v<0)||!freq.some(v=>v>0))throw Error('Invalid frequencies');
+  if(x.length!==freq.length||freq.some(v=>v<0||v>99)||!freq.some(v=>v>0))throw Error('Invalid frequencies (0–99 per item)');
   const n=freq.reduce((a,b)=>a+b,0),sum=x.reduce((a,b,i)=>a+b*freq[i],0);
   if(!Number.isFinite(n)||n<=0||n>2000)throw Error('Frequency total must be 0–2000');
   const mean=sum/n,variance=x.reduce((a,b,i)=>a+freq[i]*(b-mean)**2,0)/n;
@@ -201,8 +204,11 @@ export function makeFunctionTable(formula,{mode='auto',start=0,step=1,values=[],
 }
 export function applyConstantOperator(previousValue,expression,opts={}){
  if(!Number.isFinite(previousValue)||!String(expression).trim())throw Error('Enter a constant operation');
- if(!/\bx\b/.test(expression))throw Error('Use x as the previous answer, e.g. x+2');
- return evaluateScientific(expression,{...opts,x:previousValue,variables:{...opts.variables,x:previousValue}});
+ const raw=String(expression).trim();
+ if(raw.length>44)throw Error('K constant must be 44 characters or fewer');
+ const normalized=/^[+*/^]/.test(raw)?'x'+raw:raw;
+ if(!/\bx\b/.test(normalized))throw Error('Use x or an operator-first expression, e.g. x+2 or *2+3');
+ return evaluateScientific(normalized,{...opts,x:previousValue,variables:{...opts.variables,x:previousValue}});
 }
 export function formatWithMode(value,{notation='NORM',fixed=null,asFraction=false,mixed=false}={}){
  if(asFraction)return formatScientific(value,{notation,digits:fixed,asFraction,mixed});

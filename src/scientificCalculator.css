@@ -199,3 +199,58 @@
  .tc-math-hint{font-size:8px}
  .tc-calc-window{max-height:min(62dvh,520px)}
 }
+
+
+/* Calculator Audit FIX: preserve a separate scrollable question workspace while
+   the calculator is open on mobile. The previous fixed overlay intercepted
+   answer taps (confirmed by real Chromium touch emulation). */
+@media(max-width:700px){
+ body:has(.tc-calc-window:not(.tc-calc-minimized)) .quiz-page .quiz-columns{
+   position:fixed;
+   top:clamp(115px,17dvh,162px);
+   left:8px;right:8px;
+   bottom:calc(42dvh + 16px);
+   display:block;
+   overflow-y:auto;
+   overscroll-behavior:contain;
+   -webkit-overflow-scrolling:touch;
+   border-radius:12px;
+   z-index:6;
+ }
+ body:has(.tc-calc-window:not(.tc-calc-minimized)) .quiz-page .question-panel{
+   margin:0 0 8px;
+   padding:15px;
+   border-radius:12px;
+ }
+ body:has(.tc-calc-window:not(.tc-calc-minimized)) .quiz-page .question-panel h1{
+   font-size:19px;
+   margin:12px 0 14px;
+ }
+ body:has(.tc-calc-window:not(.tc-calc-minimized)) .tc-calc-window{
+   left:8px!important;right:8px!important;top:auto!important;
+   bottom:8px!important;max-height:40dvh;
+ }
+ body:has(.tc-calc-window:not(.tc-calc-minimized)) .tc-calc-launch.is-open{
+   display:none;
+ }
+}
+
+
+/* Browser audit iteration 2: keep question workspace IN ordinary document flow.
+   position:fixed inside the page entrance transform created a stacking/viewport
+   containment bug and prevented genuine touch clicks on answers/navigation. */
+@media(max-width:700px){
+ body:has(.tc-calc-window:not(.tc-calc-minimized)) .quiz-page .quiz-columns{
+   position:relative!important;
+   display:block!important;
+   top:auto!important;left:auto!important;right:auto!important;bottom:auto!important;
+   width:100%;height:min(31dvh,265px);min-height:170px;
+   overflow-y:auto!important;overflow-x:hidden;
+   overscroll-behavior:contain;
+   z-index:auto!important;
+ }
+ body:has(.tc-calc-window:not(.tc-calc-minimized)) .quiz-page .question-panel{
+   position:relative;
+   z-index:auto;
+ }
+}
