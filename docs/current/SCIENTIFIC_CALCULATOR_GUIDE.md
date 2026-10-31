@@ -72,3 +72,37 @@ Expanded keypad and result modes:
 **Important:** This is independently implemented functionality inspired by the actual TI-30XS MultiView reference. It is not a licensed TI emulator or a promise of exact TI firmware parity. Not all nested MathPrint templates, display menus, and numeric edge cases are implemented. For official exam compliance, confirm whether the exam permits a browser-based calculator and obtain a separately verified output reference before deployment.
 
 Source: [Official TI-30XS MultiView specifications](https://education.ti.com/en/products/calculators/scientific-calculators/ti-30xs-mv), [official guidebook](https://education.ti.com/en/guidebook/details/en/50BE24C84836434485BD2E8D49374AF7/30x_mv).
+
+
+
+## Structured mathematical input & precision (PR #11, 2026-10-31)
+
+### Entering multi-level math
+
+1. Open the floating Calculator on Practice, Assessment or the Lesson Quiz. Textbook mode is selected by default.
+2. Tap **a/b** to insert a proper fraction template. The caret enters the numerator. Press **ArrowDown** to switch to the denominator; ArrowRight at the last character advances to the next slot.
+3. In any editable slot, tap **√□**, **ⁿ√□**, **xⁿ**, **eˣ**, **10ˣ** or **a b/c**. You can nest up to four template levels, including a fraction inside a square root or exponent. Long math input scrolls horizontally inside the LCD.
+4. Physical keyboard: edit each input slot like a text input; **Ctrl+/** inserts a fraction, **Ctrl+R** inserts a square root, **Enter** calculates, and arrows navigate between slots at their boundaries. Backspace on an empty template slot removes its enclosing template; **✕ slot** removes the active template by button.
+5. Choose **Classic** to switch to linear expression entry. The current Math document is serialized to a safe linear expression, keeping its calculation. Conversely, returning to Textbook from Classic keeps the expression as editable linear content ready for templates.
+
+Incomplete input (such as an empty denominator) produces an error and does not silently calculate. The original TI hardware allows four consecutive template levels; the Technica editor enforces the same bound but provides a web-native horizontally scrolling layout, not the original four-by-16-character LCD.
+
+### Calculation precision and mode rules
+
+- When a formula contains only rational arithmetic (numbers, fractions, parentheses and integer powers), a bounded **BigInt rational evaluator** computes the exact underlying ratio. E.g. \`0.1+0.2\` is precisely 3/10 and \`1/3+1/6\` is 1/2 (the displayed format still follows mode).
+- General math uses the existing JS numerical evaluator; logarithms, trigonometry, irrational roots and statistical calculations are not calculated using arbitrary precision, so there may be small numerical differences versus TI hardware.
+- **FLOAT** displays up to 10 significant digits. **FIX 0–9** sets decimal places for display, without changing the stored result. This matches key displayed-mode concepts; it does **not** emulate TI internal chip/firmware rounding bit-for-bit.
+- In **Textbook** \`2^3^2\` evaluates right-to-left as 512. In **Classic** it evaluates left-to-right as 64. Parentheses make explicit grouping available in either mode.
+- Textbook output still supports exact fractions, simplified supported integer radicals and π multiples. Full symbolic addition/multiplication of arbitrary surds is not implemented; avoid claiming this is a computer algebra system or pixel-identical TI MathPrint engine.
+
+### List editor and TI-style data menus
+
+- The **L1–L3** panel now supports DATA, CLEAR and FORMULA menu groups; lists hold up to 42 numbers. Formulas such as \`L2=L1*2\`, \`L3=L2+10\` update after the source list is saved. Circular references are blocked.
+- Editing a formula-generated list directly clears its formula; explicit **Clear formula** and **Clear ALL formulas** options preserve current numbers while turning off automatic recalculation.
+- Switching tabs and returning to L1–L3 restores previously saved lists rather than displaying blank entries. Full calculator Reset asks before clearing settings, memory, list data and history.
+
+### Verification and remaining certification gates
+
+Run \`npm run test:calculator:mathprint\`, \`npm run test:calculator:extended\`, \`npm run test:calculator\` and all ordinary regression/build/DB checks. **Browser QA remains mandatory**, including touch-only template slots, physical keyboard caret boundaries, answering while calculator open and small-screen accessibility. Compare outputs with an actual TI-30XS MultiView reference before selling exact model equivalence. The tool is independently coded and does not use TI firmware or third-party licensed artwork.
+
+References: [TI Home Screen](https://education.ti.com/html/eguides/scientifics/TI-30XS-MultiView/EN/Content/EG_30XSMV/M_GetStart/GS_Home.HTML), [Order of Operations](https://education.ti.com/html/eguides/scientifics/TI-30XS-MultiView/EN/Content/EG_30XSMV/M_GetStart/GS_OrdOps.HTML), [Fractions](https://education.ti.com/html/eguides/scientifics/TI-30XS-MultiView/EN/Content/EG_30XSMV/M_MathFunc/MF_Frac.HTML), [Data Editor](https://education.ti.com/html/eguides/scientifics/TI-30XS-MultiView/EN/Content/EG_30XSMV/M_MathTools/MT_DataEd.HTML), [Modes](https://education.ti.com/html/eguides/scientifics/TI-30XS-MultiView/EN/Content/EG_30XSMV/M_GetStart/GS_Modes.HTML).
