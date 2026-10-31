@@ -1007,3 +1007,21 @@ Implementation on isolated [PR #14](https://github.com/Minamilad162/Technica-LMS
 
 ### 2026-10-31 — v1.1.12 nested learning hierarchy (staged branch)
 - Primary nested authoring is implemented in browser-local demo; production integration, migration and learner routing remain open.
+
+
+## 41. P3 dedicated Supabase real auth + safe course hierarchy (2026-10-31)
+
+**User-reported migration:** P1 + P2 SQL have been run successfully in a Supabase SQL Editor. No tool in this session independently verified the target project or its actual data/RLS. **No live Supabase credentials or production deployment were configured by the assistant.**
+
+**Secure delivery constraint:** The legacy React demo statically imports a 1,625-question ASP JSON including answer keys. It is unacceptable to merely turn on real authentication while continuing to publish this bundle. `vite.config.js` now selects `src/production/main.jsx` as its distinct app entry when `VITE_DATA_MODE=supabase`; no demo quiz, calculator, answer-bank or local auth module is referenced by that entry. `scripts/test-p3-live-bundle.mjs` scans a compiled production-mode bundle for actual demo prompts/password markers. CI must build both demo and live modes independently; publishing an untested bundle is forbidden.
+
+**P3 implemented:** Supabase email/password Auth, email-signup verification, password-reset flow, profile status and server-issued admin role lookup; RLS-governed public/published catalog and entitled course structure queries; admin-only UI for creating draft Course/Domain/Topic/Lesson, editing titles, publishing course or lesson, and writing plain reading-text lesson blocks via existing P1 foreign keys and policies. All learner/admin privilege decisions ultimately rely on P1 Supabase RLS, not React role checks. No client grants or writes to P2 verified progress, events or snapshots. Trial and paid entitlements are read only; never inserted from browser. See `docs/current/P3_SUPABASE_LIVE_CONNECT_RUNBOOK.md` and `supabase/P3_BOOTSTRAP_FIRST_ADMIN.sql`.
+
+**Mandatory limitations:** This live app is a deliberately limited **catalog/learning-authoring preview**, not a full production LMS. ASP bank, sample course learning player, Quiz Modes, Assessment, level-up, 200-question/300min Mock, payment, media uploading and grade calculation stay in the **demo-only build** until protected backend systems exist. Existing demo code, sample ASP mappings, current calculator, screenshot deterrence and UI remain unchanged. No automatic migration from browser localStorage or auto-classification of old 5 Excel worksheets as official 9 ASP domains. Old `lms_p1` policies remain the sole SQL authority.
+
+**Onboarding:** User must configure the correct separate LMS Supabase project URL and **public** anon key as build variables (never `service_role`), enable Supabase Auth, sign up and verify an actual email, then have trusted DB owner apply the one-off `P3_BOOTSTRAP_FIRST_ADMIN.sql` to that verified account before admin authoring. No bootstrap admin passwords, hard-coded administrator email or plaintext secrets are stored.
+
+**Tests:** `npm run test:p3` for repository/model/security contract; `VITE_DATA_MODE=supabase ... npm run build` + `npm run test:p3:bundle` for no demo bank or demo passwords in compiled output; prior full demo suites, P1+P2 disposable Postgres RLS and browser regression must remain green. Staging device + real Supabase REST/JWT authorization tests, authenticated user journeys and mobile UX still required before real deployment. Do not misreport CI sandbox as a connected production database test.
+
+### 2026-10-31 — P3 secure split-entry Supabase onboarding (staged)
+- Real Supabase Auth/catalog/authoring source created behind explicit VITE_DATA_MODE=supabase; demo remains default and isolated. No actual Supabase credentials or Cloudflare live deployment applied.
