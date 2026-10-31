@@ -1,3 +1,11 @@
+### 2026-10-31 — Web-only learner content protection pilot (v1.1.7)
+
+- Added faint session watermark to practice/assessment questions, learning video/materials, lesson quizzes and post-exam answers.
+- Scoped selection/copy/cut/context menu/drag prevention to protected content, leaving calculator inputs and normal site functions usable.
+- Added a brief black privacy curtain triggered on best-effort keyboard capture shortcuts (PrintScreen etc.), plus dark print-view CSS. No universal screenshot or screen-recording control is implied.
+- Added independent static and Chromium desktop/mobile tests for copy/print, synthetic PrintScreen, watermark and quiz controls.
+- Current demo still exposes 1,625 ASP questions and answers in the frontend plus a public YouTube/PDF; this is *not* production content security. Server-based question delivery and future DRM are separate stages.
+
 ### 2026-10-31 — Calculator unified 3D blue casing and clean LCD (v1.1.6)
 
 - Removed bright white side strips, replacing them with smooth blue molded edges and darker 3D inset shadows. Retained original physical keypad and rounded 384px body.
