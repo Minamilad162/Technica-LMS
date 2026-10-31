@@ -104,8 +104,7 @@ export function evaluateScientific(raw,options={}){
    if(op==='+'||op==='-'){lbp=10;rightBp=11}
    else if(op==='*'||op==='/'){lbp=20;rightBp=21}
    else if(op==='^'){lbp=30;rightBp=30}
-   else if((op==='('||op==='id'||op==='number')&&
-      (op!=='id'||t.value!=='Ans'||true)){lbp=20;rightBp=21;op='*';implicit=true}
+   else if(op==='('||op==='id'||op==='number'){lbp=20;rightBp=21;op='*';implicit=true}
    else break;
    if(lbp<min)break;
    if(!implicit)take();
