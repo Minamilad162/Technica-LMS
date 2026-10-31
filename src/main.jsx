@@ -7,3 +7,5 @@ import './courseWorkspace.css';
 import './questionBankCourses.css';
 
 import './learningPlayer.css';
+
+import './scientificCalculator.css';

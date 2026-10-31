@@ -1,3 +1,12 @@
+### 2026-10-31 — Floating scientific calculator in quiz and assessment routes
+
+- New reusable \`ScientificCalculator\` React component with floating desktop window, draggable header, close/minimize, and compact mobile dock. The question and answer controls remain available while it is open.
+- Added a dedicated safe scientific engine for standard and advanced operations, angle modes, fraction/decimal conversion, scientific notation, memory, history, 1-/2-variable statistics and a function table.
+- Available in Practice, Assessment and the Learning Player 10-question Knowledge Check. No changes to existing bank answers, timer, grading, navigation, user scope, or database.
+- Added \`npm run test:calculator\` into CI and a dedicated user guide. Existing imported 1,625 ASP questions and regression suite are preserved.
+- TI-30XS MultiView image/model is functional inspiration only; this original Technica tool is not a branded/pixel-exact emulator. Exact model parity for specialized notation and fixed modes, manual browser/touch QA, and future 200-question Mock/Adaptive routes remain follow-up gates.
+- Source implementation prepared under PR #9; confirm actual run result and merge status before claiming deployment to main.
+
 ### 2026-10-31 — Latest GitHub main source merge verified
 
 - Integrated P0 + P1 through [PR #8](https://github.com/Minamilad162/Technica-LMS/pull/8) (merge `343a913`) after merging P0 [PR #6](https://github.com/Minamilad162/Technica-LMS/pull/6) (`e742d3b`). Prior P1 draft PR #7 closed as superseded.
