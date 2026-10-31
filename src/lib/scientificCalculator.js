@@ -46,9 +46,9 @@ const calcFunction=(name,args,mode)=>{
  case 'nPr':binary();return permute(x,z);
  case 'root':binary();if(x===0)throw Error('Zero-degree root');if(z<0){if(!Number.isInteger(x)||Math.abs(x)%2!==1)throw Error('Even root of a negative number');return -Math.pow(-z,1/x)}return Math.pow(z,1/x);
  case 'mod':binary();if(z===0)throw Error('Division by zero');return x%z;
- case 'deg':unary();return fromRad(x,mode);
- case 'rad':unary();return x*ANGLE[mode];
- case 'grad':unary();return x*200/Math.PI;
+ case 'deg':unary();return x*ANGLE.DEG/ANGLE[mode];
+ case 'rad':unary();return x/ANGLE[mode];
+ case 'grad':unary();return x*ANGLE.GRAD/ANGLE[mode];
  case 'dms':{if(args.length<1||args.length>3)throw Error('dms expects 1–3 inputs');const deg=x,minutes=args[1]||0,seconds=args[2]||0;if(minutes<0||minutes>=60||seconds<0||seconds>=60)throw Error('Invalid DMS minutes/seconds');return Math.sign(deg||1)*(Math.abs(deg)+minutes/60+seconds/3600)}
  case 'RtoPr':binary();return Math.hypot(x,z);
  case 'RtoPtheta':binary();return fromRad(Math.atan2(z,x),mode);
