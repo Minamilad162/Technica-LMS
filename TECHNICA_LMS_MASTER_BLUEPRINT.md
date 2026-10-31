@@ -3,8 +3,8 @@
 > **Canonical project specification / single source of truth**
 >
 > Project: Technica Consult LMS
-> Version: 1.0.6 (P0 CI evidence and reproducible install PR)
-> Last updated: 2026-10-30 (Africa/Cairo)
+> Version: 1.0.8 (integrated P0 and P1 source release)
+> Last updated: 2026-10-31 (Africa/Cairo)
 > Repository: https://github.com/Minamilad162/Technica-LMS
 > Target branch: main
 > Current inspected source baseline: v1.15.0, commit 8021f604c63c59b2100d944ead86fed149eb1ceb
@@ -535,7 +535,7 @@ Reserve relation to identity, entitlements and courses; later design admin-creat
 | BUG-010 | MEDIUM | OPEN / truthfulness | Pocket Prep screenshot contains community average and concept diagnostics. Do not fabricate benchmarks; compute concept advice only from real scored history. |
 | BUG-011 | MEDIUM | OPEN / definition | “Mark read material finished when user passes through” requires real visible-section/scroll milestone; merely opening lesson must not increment coverage. |
 | BUG-012 | MEDIUM | OPEN / content rights | Review imported question/IP ownership and references before paid publication; never assume external certification question content can be redistributed. |
-| BUG-013 | HIGH | FIX VERIFIED IN DRAFT PR #6 / NOT MERGED | Original main lacked package-lock.json; review branch adds npm-generated lockfile and mandatory npm ci, verified GitHub Actions run #41 (PASS). Main remains unchanged until PR approval/merge. Keep regression guard: CI npm ci, bank checks, build and audit. |
+| BUG-013 | HIGH | FIXED / VERIFIED IN MAIN | PR #6 merged at e742d3b; lockfile committed and npm ci required; GitHub Actions main run #56 passed. |
 | BUG-014 | MEDIUM | OPEN / type safety | Current v1.15 is React JavaScript/JSX with no genuine TypeScript check. Do not fake typecheck or blindly rewrite app; plan incremental migration and gate. |
 | BUG-015 | MEDIUM | GUARDED / UI provenance | Older uploaded September UI guide must not overwrite the more recent October 24 root guide (includes previously approved motion/video/3D references). Archived older source; current root unchanged. |
 | BUG-016 | LOW | FIX IMPLEMENTED / TEST PENDING | Initial infrastructure script rejected valid local untracked .env secrets; updated to use git ls-files for tracked secret detection, preserving secure local development. Runtime script verification remains pending in CI. |
@@ -687,3 +687,52 @@ New auditable report: [docs/current/P0_BASELINE_AUDIT_2026-10-30.md](docs/curren
 - Verified existing CI main run #37 by reading GitHub Actions log, replacing older “not run” limitation where evidence is now available.
 - Generated/validated a lockfile in CI and committed it to a separate review branch with strict npm ci; run #41 passed.
 - Updated BUG-013 to “fix verified in draft PR / not merged”; all other blockers remain. No design, application, database or paid production change.
+
+
+## 24. P1 foundation implementation (DRAFT PR #7) — 2026-10-30
+
+**Branch:** \`feat/p1-secure-foundation-20261030\`; **PR:** [#7](https://github.com/Minamilad162/Technica-LMS/pull/7). **Status: CODE IMPLEMENTED IN REVIEW BRANCH / NOT DEPLOYED / NOT MERGED.**
+
+### Implemented code (not live features)
+- \`supabase/migrations/202610300001_p1_foundation.sql\`: fail-on-conflict new migration for dedicated Technica Supabase *staging*, 11 proposed tables and four-level \`courses → domains → topics → lessons → lesson_blocks\`, role assignments, signup profile trigger, trial/paid/manual course entitlements and limited trial lesson grants, protected media metadata, audit table, authorized helper functions, explicit grants/RLS and server-only privileged data writes.
+- \`scripts/test-p1-foundation.mjs\` + \`package.json\` script + GitHub Actions static contract gate, checking ancestry, trigger and no client-driven admin role, time/status entitlement logic, public vs protected access, RLS/GRANT and absent destructive statements.
+- \`supabase/P1_STAGING_MIGRATION_RUNBOOK.md\`: mandatory staging application checklist, direct REST / JWT RLS positive/negative tests, manual verification queries and rollback.
+- \`supabase/README.md\`: explicit warning that older \`supabase/001_lms_schema_PROPOSED.sql\` must **not** be deployed as it conflicts with approved hierarchy.
+
+### Verification, limits and next gate
+- [GitHub Actions run #45](https://github.com/Minamilad162/Technica-LMS/actions/runs/40979943570) on branch commit \`5c8b2f9428daac43ad068571e3aa6e45d4172ea6\`: **SUCCESS**. Log confirms P1 static schema check PASS (11 tables, course chain, trusted signup, time/entitlement and RLS/GRANT guardrails), 1,625 imported ASP questions PASS, old demo regression suite PASS, Vite build PASS, and \`npm audit --audit-level=high\` found 0 known vulnerabilities at that time.
+- These checks **DO NOT parse or execute PostgreSQL**; the new SQL may require adjustments before deployment. No actual Supabase credentials, migration, RBAC negative test, live payment, protected video, user login or device QA were run.
+- PR #7 is independent of Draft PR #6 (which adds a reproducible npm lockfile). PR #7 still uses main's temporary CI \`npm install\` fallback; typecheck remains pending. Do not misrepresent either as resolved in main.
+- **P1 incomplete:** obtain approved development/staging Supabase project, execute/review migration, verify auth signup trigger and correct data access using separate identities, document Storage policies, build server-protected question/role/grant APIs, and integrate Auth frontend adapters after verified backend.
+- Current legacy React demo, ASP/PSEE question banks, current assessment/practice settings, UI/animations and route behavior are unchanged.
+- Decision status: architecture and UX owner-approved invariants preserved; implementation SQL is **PROPOSED FOR REVIEW**, not a silent approval of every role/permission choice.
+- **Risk registry:** BUG-017 (wrong older hierarchy), BUG-018 (published content not entitlement-checked) and BUG-019 (signup profile path) have draft mitigations in PR #7, but **remain OPEN until staged SQL and direct API tests PASS**.
+
+### 2026-10-30 — v1.0.6 P1 review implementation
+- Added first actual P1 backend migration, test gate, runbook and warning against outdated schema.
+- GitHub Actions static test passed on development branch; database/migrations/front-end production integration remain unexecuted.
+- No merge to main, cloud deployment, database change, uploaded customer material or user-visible UI change.
+
+
+## 25. P1 ephemeral SQL/RLS verification — 2026-10-30
+
+- Added \`scripts/test-p1-postgres-smoke.sh\` and a dedicated GitHub Actions job with a disposable PostgreSQL 16 container. The smoke harness provisions fake Supabase Auth/DB roles and exercises the **actual new migration SQL** (not just text matching).
+- [GitHub Actions run #51](https://github.com/Minamilad162/Technica-LMS/actions/runs/40980401056) at head \`68b66c972d631de7be37d0d9b3e49b945c159d84\`: both \`validate\` and \`p1-postgres-smoke\` jobs **SUCCESS**. Job logs confirm public catalog, unentitled deny, paid read, trial allowlist, admin draft read, no client admin self-grant and anonymous block deny. Later test refinements further cover cross-course isolation, expiry, revoke and suspension; use their final job run as proof.
+- **Important status:** PostgreSQL success is a significant SQL/role-policy test, but mocks Supabase Auth and uses a disposable service. Live Supabase Staging JWT, Auth, Data API, Storage and other modules are NOT tested/deployed. No production claim or merge into main.
+- Updated \`supabase/P1_STAGING_MIGRATION_RUNBOOK.md\` with exact test boundaries. Maintain owner approval gate for applying real database migrations. BUG-017/018/019 still OPEN until real Supabase tests.
+
+### 2026-10-30 — v1.0.7 ephemeral database test
+- Improved P1 test evidence from static source-only checks to actual PostgreSQL 16 migration/RLS test on disposable GitHub runner; no external database used.
+- No user-facing UI, original ASP bank, cloud environment, payment or real video changed.
+
+
+## 26. Integrated GitHub source release — 2026-10-31
+
+- Owner requested the latest Technica LMS source on GitHub main. P0 PR #6 merged as `e742d3b` and verified by main Actions run #56.
+- Integration branch `release/p0-p1-integrated-20261031` combines P0's mandatory npm ci and P1 guarded migration, schema contract test and disposable PostgreSQL security tests. Merge to main only after integration CI passes.
+- Critical operational boundary: **P1 schema added to source; NOT run against Supabase**. React frontend remains v1.15.0 local demo. Real Auth/Storage/payment/DRM/200-question exam unavailable until separately delivered and tested. No production-claims.
+- Preserved all previous decisions: Course → Domain → Topic → Lesson, ASP Mock = 200 reserved questions / 300 minutes (planned), 70% adaptive step (planned), admin-only Question Bank, removed Saved learner screen, and original question IDs.
+- Production gate: real Supabase staging and roles/JWT/RLS/Data API/Storage security smoke, plus app/auth integration and browser acceptance still required.
+
+### 2026-10-31 — v1.0.8 change record
+- Canonical Blueprint combined from both reviewed branches. P0 documented FIXED in main; P1 SQL and tests now form a single versioned source proposal. No actual DB migration performed.

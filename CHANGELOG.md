@@ -1,3 +1,24 @@
+### 2026-10-31 — P0/P1 integrated GitHub source release
+
+- Combined P0 reproducible npm ci and P1 secure PostgreSQL foundation in one source release, preserving existing accepted React UI, imported ASP question bank and demo flows.
+- Database migration SQL is NOT executed on any Supabase project. Browser-auth/paid-access/video/exam features are not production enabled. Real Supabase RLS and Auth staging verification remains mandatory.
+- Previous GitHub Actions: P0 run #56 (main) SUCCESS, P1 run #55 (branch) SUCCESS. Integrated branch CI and main postmerge CI are separate release gates.
+
+### 2026-10-30 — P1 disposable PostgreSQL security smoke (PR #7)
+
+- Added \`scripts/test-p1-postgres-smoke.sh\` and a \`postgres:16\` ephemeral CI job which executes the real P1 migration and verifies RLS with mock anon/authenticated users and sample entitlements.
+- GitHub Actions [run #52](https://github.com/Minamilad162/Technica-LMS/actions/runs/40980524294) verified **both jobs PASS**, including denied anonymous lesson access, course separation, paid/trial gates, expiry/revoke and suspended account. No live Supabase instance was used; final CI head should be checked again.
+- This is only the first backend foundation slice. Production Auth, real Supabase JWT/Data API and Storage tests, frontend integration and 200/300 Mock are not implemented. Existing demo left intact.
+
+### 2026-10-30 — P1 backend foundation draft (PR #7; no DB deployment)
+
+- Added a review-only Supabase SQL migration for Course → Domain → Topic → Lesson hierarchy with strict foreign keys and refusal to overwrite legacy tables.
+- Proposed trusted profile creation on Auth signup, scoped admin/content-author role assignments, published-content access gated by active trial/paid/manual entitlements, trial lesson allowlist and server-only media metadata/audit records.
+- Applied explicit Data API grants and RLS policy declarations to all 11 proposed P1 tables. An old incompatible schema proposal is explicitly marked **do not deploy**.
+- Added a static \`test:p1:schema\` and GitHub Actions gate; full pre-existing demo/ASP tests and Vite build were preserved.
+- Added P1 staging migration/test/rollback runbook. **Static CI PASS does not establish PostgreSQL syntax correctness or live RLS security.** No database was accessed and no app/UX behavior changed.
+- Updated TECHNICA_LMS_MASTER_BLUEPRINT.md; BUG-017/018/019 remain open until staged RLS/auth verification. Reproducible npm-ci lockfile remains separate Draft PR #6.
+
 ### 2026-10-30 — P0 build reproducibility (Draft PR #6, not merged)
 
 - Verified existing \`main\` CI run #37 (2026-10-30, head \`274bcad\`): 1,625 original imported ASP questions, existing demo regression scripts, Vite build, dependency audit all PASS; that run used a warned \`npm install\` fallback.
