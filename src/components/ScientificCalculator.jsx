@@ -93,8 +93,9 @@ export default function ScientificCalculator({context='Quiz'}){
    function onKey(e){
      if(e.altKey||e.metaKey||e.ctrlKey)return;
      const el=e.target;
-     if(el?.closest?.('input,textarea,select,[contenteditable=true]')&&!root.current?.contains(el))return;
-     if(el?.closest?.('button,[role=button]')&&!root.current?.contains(el))return;
+     // Never hijack question controls or auxiliary list/table input and buttons.
+     if(el?.closest?.('input,textarea,select,[contenteditable=true]')&&el!==textField.current)return;
+     if(el?.closest?.('button,[role=button]'))return;
      if(e.key==='Escape'){setOpen(false);return}
      if(e.key==='Enter'||e.key==='='){e.preventDefault();evaluate();return}
      if(el===textField.current)return; // keep selection/caret and native text editing
@@ -132,8 +133,8 @@ export default function ScientificCalculator({context='Quiz'}){
  function makeTable(){
    try{
      const start=Number(tableStart),step=Number(tableStep);
-     if(!Number.isFinite(start)||!Number.isFinite(step)||step===0)throw Error('Enter valid Start and Step');
-     setTableRows(makeFunctionTable(tableFormula,{mode:tableMode,start,step,values:tableMode==='ask'?askValues.split(/[,;\\s]+/).filter(Boolean).map(Number):[],count:tableCount,angleMode:angle,ans:answer,memory,variables}));
+     if(tableMode==='auto'&&(!Number.isFinite(start)||!Number.isFinite(step)||step===0))throw Error('Enter valid Start and Step');
+     setTableRows(makeFunctionTable(tableFormula,{mode:tableMode,start,step,values:tableMode==='ask'?askValues.split(/[,;\s]+/).filter(Boolean).map(Number):[],count:tableCount,angleMode:angle,ans:answer,memory,variables}));
      setError('');
    }catch(e){setError(e.message)}
  }
