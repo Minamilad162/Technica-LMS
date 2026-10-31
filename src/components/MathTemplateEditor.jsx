@@ -7,10 +7,6 @@ import{
 /** Interactive structured textbook input. Templates are bounded four levels and
  * can contain expressions/functions/templates in numerator, radicand and powers.
  * Original Technica UI: no proprietary MathPrint firmware or artwork. */
-const TOOLS=[
- ['fraction','a / b'],['mixed','a b/c'],['squareRoot','√□'],
- ['nthRoot','ⁿ√□'],['power','xⁿ'],['expE','eˣ'],['exp10','10ˣ']
-];
 function TemplateShape({node,renderSeq}){
  switch(node.type){
  case 'fraction':return <span className="tc-math-shape tc-math-fraction"><span>{renderSeq(node.numerator)}</span><span>{renderSeq(node.denominator)}</span></span>;
@@ -115,13 +111,7 @@ const MathTemplateEditor=forwardRef(function MathTemplateEditor({document,onChan
   />:<TemplateShape key={p.id} node={p} renderSeq={renderSeq}/> )}</span>;
  return <div className="tc-math-editor" ref={container}>
    <div className="tc-math-entry-scroll" aria-label="Structured textbook math input">{renderSeq(document)}</div>
-   <div className="tc-math-template-tools" aria-label="Insert math template">
-    {TOOLS.map(([kind,label])=><button type="button" key={kind}
-      onPointerDown={e=>e.preventDefault()} onClick={()=>makeTemplate(kind)}
-      title={'Insert '+kind+' (maximum four nested levels)'}>{label}</button>)}
-    <button type="button" onPointerDown={e=>e.preventDefault()} onClick={dropTemplate} title="Remove active template">✕ slot</button>
-   </div>
-   <div className="tc-math-hint">Arrow keys move between slots · Ctrl+/ fraction · Ctrl+R root · Enter calculate</div>
+   <span className="tc-calc-sr-only">Use TOOLS for fractions, roots and exponents. Arrow keys move between slots. Ctrl+/ fraction, Ctrl+R root, Enter calculate.</span>
  </div>;
 });
 export default MathTemplateEditor;
