@@ -47,6 +47,15 @@ export default function ProtectedContent({as:Tag='div',className='',kind='questi
    if(timeout.current)clearTimeout(timeout.current);
   };
  },[cloak]);
+ useEffect(()=>{
+  const node=ref.current;
+  if(!node)return;
+  const onSelectStart=e=>{
+   if(shouldBlockContentEvent(e.target,node)&&e.cancelable)e.preventDefault();
+  };
+  node.addEventListener('selectstart',onSelectStart,true);
+  return()=>node.removeEventListener('selectstart',onSelectStart,true);
+ },[]);
  const block=e=>{
   if(shouldBlockContentEvent(e.target,ref.current)){
    e.preventDefault();
@@ -58,7 +67,7 @@ export default function ProtectedContent({as:Tag='div',className='',kind='questi
    data-protected-kind={kind} ref={ref}
    onCopyCapture={block} onCutCapture={block}
    onContextMenuCapture={block} onDragStartCapture={block}
-   onSelectStartCapture={block}>
+   >
    {children}
    <div className="tc-watermark-layer" data-watermark={identity} aria-hidden="true">
     {Array.from({length:WATERMARK_POSITIONS},(_,i)=>
