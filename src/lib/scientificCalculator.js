@@ -1,3 +1,4 @@
+import {exactRationalExpression,exactRationalNumber} from './calculatorPrecision.js';
 /**
  * Technica scientific calculator — independent pure-math engine.
  * Do not eval expressions or download a third-party calculator/emulator.
@@ -132,7 +133,9 @@ export function evaluateScientific(raw,options={}){
  }
  const value=parse();
  if(peek().type!=='end')throw Error('Unexpected input near '+String(peek().value||peek().type));
- return clean(value);
+ const exact=exactRationalExpression(expression,{mode:options.viewMode||'MATH'});
+ const accurate=exactRationalNumber(exact);
+ return clean(accurate===null?value:accurate);
 }
 export function toFraction(value,maxDenominator=100000){
  if(!Number.isFinite(value))return null;
