@@ -135,6 +135,7 @@ export default function ScientificCalculator({context='Quiz'}){
         aria-label="Calculator expression" value={expression}
         onChange={e=>{if(e.target.value.length<=220){setExpression(e.target.value);setError('')}}}
         placeholder="Type an expression…" />
+       <div className="tc-calc-lcd-history" aria-label="Previous calculation">{history[0]&&<span>{history[0].expression} = {formatScientific(history[0].value)}</span>}</div>
        <div className="tc-calc-display-result" aria-live="polite">{error?<span className="tc-calc-error">{error}</span>:result}</div>
      </div>
      <div className="tc-calc-modebar">
