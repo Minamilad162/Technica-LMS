@@ -32,6 +32,7 @@ try{
  for(const device of [{name:'desktop',viewport:{width:1440,height:900},touch:false},{name:'mobile375',viewport:{width:375,height:812},touch:true},{name:'mobile390',viewport:{width:390,height:844},touch:true},{name:'mobile430',viewport:{width:430,height:932},touch:true}]){
   const context=await browser.newContext({viewport:device.viewport,hasTouch:device.touch,isMobile:device.touch});
   const page=await context.newPage(),exceptions=[];
+  page.setDefaultTimeout(6500);
   page.on('pageerror',e=>exceptions.push(String(e)));
   await demoLogin(page);
   await check(device.name+' login and start practice',async()=>{
@@ -141,6 +142,7 @@ try{
  }
  const ctx=await browser.newContext({viewport:{width:1280,height:800}});
  const page=await ctx.newPage();
+ page.setDefaultTimeout(6500);
  await demoLogin(page);
  await check('assessment route opens scientific calculator',async()=>{
    await page.goto(ROOT+'/#/assessments',{waitUntil:'domcontentloaded'});
