@@ -54,6 +54,8 @@ const linked=recalculateListFormulas(base);
 same(linked.L2,[2,4,6],'Dependent L2 formula');
 same(linked.L3,[3,5,7],'Dependent L3 formula');
 assert.throws(()=>recalculateListFormulas({...base,formulas:{L1:'L2+1',L2:'L1+1'}}),/Circular/);checks++;
+assert.throws(()=>recalculateListFormulas({...base,L2:[5],formulas:{L3:'L1+L2'}}),/DIM MISMATCH/);checks++;
+assert.throws(()=>recalculateListFormulas({...base,formulas:{L2:'x+1'}}),/must reference/);checks++;
 const one=statsFromLists({L1:[1,2,3],L2:[1,1,1]},'1var','L1','L2','L2');
 close(one.mean,2,'Frequency mean');close(one.sX,1,'Sample SD');close(one.sigmaX,Math.sqrt(2/3),'Population SD');
 assert.throws(()=>statsFromLists({L1:[1,2],L2:[100,1]},'1var','L1','L2','L2'),/0–99/);checks++;
