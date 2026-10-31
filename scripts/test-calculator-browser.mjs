@@ -109,7 +109,7 @@ try{
    assert.ok(await page.locator('.tc-calc-window').isVisible());
   });
   await check(device.name+' question navigation preserves calculator',async()=>{
-   const next=page.locator('.quiz-action-row button').last();
+   const next=device.touch?page.getByRole('button',{name:'Next question while calculator open'}):page.locator('.quiz-action-row button').last();
    await next.click();
    assert.ok(await page.locator('.tc-calc-window').isVisible());
    assert.ok((await page.locator('.quiz-status').innerText()).includes('Question 2'));

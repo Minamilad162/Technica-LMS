@@ -242,3 +242,22 @@
  .tc-calc-window .tc-calc-physical-key[data-calc-kind="fn"]{font-size:9px}
  .tc-calc-window .tc-calc-identity button{padding:2px;font-size:7px}
 }
+
+/* Keep genuine exam navigation available when calculator occupies the mobile
+   lower half; this invokes the existing QuizPage next/jump handlers. */
+.tc-calc-quiz-navigation{display:flex;align-items:center;gap:3px;margin-left:auto;white-space:nowrap;color:#e8f7f4}
+.tc-calc-quiz-navigation button{
+ border:1px solid #9fc4d1;background:#244d67;color:#fff;
+ width:24px;height:23px;min-height:23px;
+ display:grid;place-items:center;font-size:18px;line-height:1;
+ border-radius:7px;cursor:pointer;
+}
+.tc-calc-quiz-navigation button:disabled{opacity:.3;cursor:default}
+.tc-calc-quiz-navigation>span{font-size:9px;font-weight:800}
+.tc-calc-window-header:has(.tc-calc-quiz-navigation) small{margin-left:1px;max-width:54px}
+@media(max-width:700px){
+ .tc-calc-window-header:has(.tc-calc-quiz-navigation) small{display:none}
+ .tc-calc-window-header:has(.tc-calc-quiz-navigation) strong{font-size:9px}
+ .tc-calc-quiz-navigation button{width:24px;min-width:24px}
+ body:has(.tc-calc-window:not(.tc-calc-minimized)) .quiz-page .quiz-action-row{display:none}
+}

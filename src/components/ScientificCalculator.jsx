@@ -44,7 +44,7 @@ function ExactOutput({exact}){
  if(exact.type==='radical')return <span className="tc-exact-radical">{exact.coefficient===1?'':exact.coefficient}<span>√{exact.radicand}</span></span>;
  return exact.value;
 }
-export default function ScientificCalculator({context='Quiz'}){
+export default function ScientificCalculator({context='Quiz',onNext=null,onPrevious=null,canPrevious=false,currentQuestion=null,questionCount=null}){
  const[open,setOpen]=useState(false),[minimized,setMinimized]=useState(false);
  const[expression,setExpression]=useState(''),[result,setResult]=useState('0');
  const[answer,setAnswer]=useState(0),[memory,setMemory]=useState(0),[history,setHistory]=useState([]);
@@ -212,7 +212,13 @@ export default function ScientificCalculator({context='Quiz'}){
    style={coords&&window.innerWidth>700?{left:coords.left,top:coords.top,right:'auto',bottom:'auto'}:undefined}>
    <header className="tc-calc-window-header" onPointerDown={dragStart} onPointerMove={dragMove}
      onPointerUp={()=>drag.current=null} onLostPointerCapture={()=>drag.current=null} title="Drag to move">
-     <Grip size={15}/><strong>TECHNICA <span>SCIENTIFIC</span></strong><small>{context}</small>
+     <Grip size={15}/><strong>TECHNICA <span>SCIENTIFIC</span></strong>
+     {onNext&&<div className="tc-calc-quiz-navigation" role="group" aria-label="Navigate questions while calculator open">
+       <button type="button" onClick={onPrevious} disabled={!canPrevious} aria-label="Previous question while calculator open">‹</button>
+       <span title={context}>{currentQuestion}/{questionCount}</span>
+       <button type="button" onClick={onNext} aria-label="Next question while calculator open">›</button>
+     </div>}
+     <small>{context}</small>
      <button type="button" title={minimized?'Restore':'Minimize'} aria-label={minimized?'Restore calculator':'Minimize calculator'}
       onClick={()=>setMinimized(v=>!v)}><Minus size={15}/></button>
      <button type="button" aria-label="Close calculator" title="Close" onClick={()=>setOpen(false)}><X size={18}/></button>
