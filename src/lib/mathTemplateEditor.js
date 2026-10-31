@@ -84,6 +84,23 @@ export function mathFieldContext(doc,targetId){
  }
  visit(doc);return result;
 }
+export function removeMathTemplate(doc,fieldId){
+ const context=mathFieldContext(doc,fieldId);
+ if(!context?.parentId)throw Error('No active math template to remove');
+ const newField=text('');
+ let removed=false;
+ function walk(node){
+  return {type:'seq',parts:node.parts.flatMap(p=>{
+   if(p.id===context.parentId&&FIELDS[p.type]){removed=true;return [newField]}
+   if(FIELDS[p.type])return [{...p,...Object.fromEntries(FIELDS[p.type].map(k=>[k,walk(p[k])]))}];
+   return [p];
+  })};
+ }
+ const result=walk(doc);
+ if(!removed)throw Error('Math template not found');
+ return {doc:result,focusId:newField.id};
+}
+
 export function serializeMathDocument(doc,{allowIncomplete=false}={}){
  if(!isMathDocument(doc))throw Error('Invalid math document');
  function read(node,level=0){
