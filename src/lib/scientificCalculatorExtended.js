@@ -170,7 +170,7 @@ export function statsFromLists(lists,kind='1var',xKey='L1',yKey='L2',frequencyKe
  }
  if(frequencyKey){
   const freq=validateList(lists[frequencyKey]||[]);
-  if(x.length!==freq.length||freq.some(v=>v<0)||!freq.some(v=>v>0))throw Error('Invalid frequencies');
+  if(x.length!==freq.length||freq.some(v=>v<0||v>99)||!freq.some(v=>v>0))throw Error('Invalid frequencies (0–99 per item)');
   const n=freq.reduce((a,b)=>a+b,0),sum=x.reduce((a,b,i)=>a+b*freq[i],0);
   if(!Number.isFinite(n)||n<=0||n>2000)throw Error('Frequency total must be 0–2000');
   const mean=sum/n,variance=x.reduce((a,b,i)=>a+freq[i]*(b-mean)**2,0)/n;
