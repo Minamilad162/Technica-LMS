@@ -1,5 +1,5 @@
 import React,{useMemo,useState} from 'react';
-import{STORED_VARIABLES,parseNumericList,applyListFormula,statsFromLists,makeListState,convertAngle,dmsToDegrees,formatDMS,rectToPolar,polarToRect,applyConstantOperator}from'../lib/scientificCalculatorExtended';
+import{STORED_VARIABLES,parseNumericList,applyListFormula,statsFromLists,makeListState,recalculateListFormulas,convertAngle,dmsToDegrees,formatDMS,rectToPolar,polarToRect,applyConstantOperator}from'../lib/scientificCalculatorExtended';
 import{evaluateScientific,formatScientific}from'../lib/scientificCalculator';
 
 // Self-contained auxiliary menus for the original Technica scientific calculator.
@@ -27,30 +27,59 @@ export function VariablePanel({variables,setVariables,answer,expression,angle,me
 export function ListPanel({lists,setLists,angle,memory,answer,variables,onError,onInsert}){
  const[target,setTarget]=useState('L3'),[formula,setFormula]=useState('L1+L2');
  const[kind,setKind]=useState('1var'),[frequency,setFrequency]=useState('none'),[result,setResult]=useState(null);
- const [raw,setRaw]=useState({L1:'',L2:'',L3:''});
+ const[menu,setMenu]=useState('DATA');
+ const [raw,setRaw]=useState(()=>Object.fromEntries(['L1','L2','L3'].map(k=>[k,(lists[k]||[]).join(',')])));
  const parsed=useMemo(()=>{try{return Object.fromEntries(['L1','L2','L3'].map(k=>[k,parseNumericList(raw[k])]))}catch{return null}},[raw]);
  function updateRaw(k,v){setRaw(s=>({...s,[k]:v}));setResult(null)}
+ const opts={angleMode:angle,ans:answer,memory,variables};
+ const readCurrent=()=>Object.fromEntries(['L1','L2','L3'].map(k=>[k,parseNumericList(raw[k])]));
  const persist=next=>{setLists(next);setRaw(Object.fromEntries(['L1','L2','L3'].map(k=>[k,(next[k]||[]).join(',')])));setResult(null)};
  return <div className="tc-calc-data tc-calc-advanced">
   <b>Data editor · L1 / L2 / L3</b>
+  <div className="tc-calc-modes" aria-label="Data menu">
+   {['DATA','CLEAR','FORMULA'].map(name=><button type="button" key={name} className={menu===name?'active':''} onClick={()=>setMenu(name)}>{name}</button>)}
+  </div>
   <p>Enter up to 42 numbers in each list. Formulas can use other lists and row number x.</p>
   <div className="tc-calc-list-grid">
    {['L1','L2','L3'].map(k=><label key={k}>{k}<textarea rows="2" value={raw[k]} onChange={e=>updateRaw(k,e.target.value)} placeholder="1, 2, 3" /></label>)}
   </div>
   <div className="tc-calc-tool-actions">
-   <button type="button" onClick={()=>safe(()=>{const next=Object.fromEntries(['L1','L2','L3'].map(k=>[k,parseNumericList(raw[k])]));persist({...next,formulas:lists.formulas||{}})},onError)}>Save lists</button>
+   <button type="button" onClick={()=>safe(()=>{
+     const base=readCurrent(),formulas={...(lists.formulas||{})};
+     // Editing a computed column directly clears its formula.
+     for(const k of ['L1','L2','L3']){
+      const previous=(lists[k]||[]).join(',');
+      if(formulas[k]&&base[k].join(',')!==previous)delete formulas[k];
+     }
+     persist(recalculateListFormulas({...base,formulas},opts));
+    },onError)}>Save lists & update formulas</button>
    <button type="button" onClick={()=>{persist(makeListState());setRaw({L1:'',L2:'',L3:''})}}>Clear all</button>
   </div>
+  {menu==='CLEAR'&&<div className="tc-calc-tool-actions" aria-label="Clear list menu">
+    {['L1','L2','L3'].map(k=><button key={k} type="button" onClick={()=>safe(()=>{
+      const formulas={...(lists.formulas||{})};delete formulas[k];
+      persist(recalculateListFormulas({...lists,[k]:[],formulas},opts))
+    },onError)}>Clear {k}</button>)}
+    <button type="button" onClick={()=>persist(makeListState())}>Clear ALL</button>
+   </div>}
   <div className="tc-calc-divider"/>
   <label>Formula for
-   <select value={target} onChange={e=>setTarget(e.target.value)}>{['L1','L2','L3'].map(k=><option key={k}>{k}</option>)}</select>
+   <select value={target} onChange={e=>{setTarget(e.target.value);setFormula((lists.formulas||{})[e.target.value]||'')}}>{['L1','L2','L3'].map(k=><option key={k}>{k}</option>)}</select>
   </label>
   <label><input value={formula} onChange={e=>setFormula(e.target.value)} placeholder="L1+L2" /></label>
   <button type="button" className="tc-calc-data-submit" onClick={()=>safe(()=>{
-   const base=Object.fromEntries(['L1','L2','L3'].map(k=>[k,parseNumericList(raw[k])]));
-   const next=applyListFormula(base,target,formula,{angleMode:angle,ans:answer,memory,variables});
-   persist({...next,formulas:{...(lists.formulas||{}),[target]:formula}});
+   const base=readCurrent();
+   const formulas={...(lists.formulas||{}),[target]:formula};
+   persist(recalculateListFormulas({...base,formulas},opts));
   },onError)}>Apply formula</button>
+  <div className="tc-calc-tool-actions">
+    <button type="button" onClick={()=>safe(()=>{
+      const base=readCurrent(),formulas={...(lists.formulas||{})};delete formulas[target];
+      persist({...base,formulas});
+      setFormula('');
+    },onError)}>Clear {target} formula</button>
+    <button type="button" onClick={()=>safe(()=>{const base=readCurrent();persist({...base,formulas:{}});setFormula('')},onError)}>Clear ALL formulas</button>
+  </div>
   <div className="tc-calc-divider"/>
   <label>Statistics
    <select value={kind} onChange={e=>setKind(e.target.value)}>
@@ -63,8 +92,8 @@ export function ListPanel({lists,setLists,angle,memory,answer,variables,onError,
    </select>
   </label>}
   <button type="button" className="tc-calc-data-submit" onClick={()=>safe(()=>{
-   const input=Object.fromEntries(['L1','L2','L3'].map(k=>[k,parseNumericList(raw[k])]));
-   persist({...input,formulas:lists.formulas||{}});
+   const input=recalculateListFormulas({...readCurrent(),formulas:lists.formulas||{}},opts);
+   persist(input);
    setResult(statsFromLists(input,kind,'L1','L2',kind==='1var'&&frequency!=='none'?frequency:null));
   },onError)}>Calculate statistics</button>
   {result&&<dl className="tc-calc-output">{Object.entries(result).filter(([,v])=>v!==null).map(([k,v])=><React.Fragment key={k}><dt>{k}</dt>
