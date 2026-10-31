@@ -103,6 +103,7 @@ try{
    await page.locator('.learn-lesson-content.tc-protected-content').waitFor();
    assert.equal(await page.locator('.learn-lesson-content .tc-watermark-layer').count(),1);
    assert.ok(await page.locator('.learn-video-container iframe').count()>0);
+   if(device.touch)await page.locator('.learn-outline-toggle').click();
    await page.locator('.learn-outline-lesson').filter({hasText:'10-question knowledge check'}).first().click();
    await page.locator('.learn-quiz-content.tc-protected-content').waitFor();
    assert.ok(await page.locator('.learn-quiz-options button').count()>1);
