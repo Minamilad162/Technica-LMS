@@ -168,3 +168,34 @@
  .tc-calc-tab button{min-height:32px}
  .tc-calc-display-status{font-size:8px}
 }
+
+
+/* Original structured textbook editor. Nested templates occupy their own editable
+   slots and scroll horizontally rather than shrinking the exam text. */
+.tc-math-editor{color:#20493f;min-height:55px;padding:2px 0 4px}
+.tc-math-entry-scroll{max-height:125px;min-height:45px;display:flex;align-items:center;overflow:auto;scrollbar-width:thin;overscroll-behavior:contain;padding:5px 3px;border-radius:4px;white-space:nowrap}
+.tc-math-sequence{display:inline-flex;align-items:center;vertical-align:middle;gap:1px;white-space:nowrap}
+.tc-calc-display input.tc-math-field{display:inline-block!important;flex:0 0 auto!important;min-width:17px!important;max-width:230px!important;width:auto!important;height:26px!important;min-height:0!important;margin:0!important;padding:1px 2px!important;border:1px solid transparent!important;border-bottom:1px dotted #708e82!important;border-radius:1px!important;background:rgba(255,255,255,.16)!important;box-shadow:none!important;text-align:center!important;font:600 15px/1.15 ui-monospace,Consolas,monospace!important;color:#143b35!important;outline:none!important}
+.tc-calc-display input.tc-math-field:focus{background:#f9fff1!important;border-bottom:2px solid #00817e!important}
+.tc-calc-display input.tc-math-field::placeholder{color:#83a09a}
+.tc-math-shape{display:inline-flex;align-items:center;gap:1px;vertical-align:middle;min-height:27px}
+.tc-math-fraction{display:inline-flex;flex-direction:column;align-items:stretch;justify-content:center;vertical-align:middle;min-width:26px}
+.tc-math-fraction>span{display:flex;justify-content:center;align-items:center;min-height:23px;padding:1px 3px}
+.tc-math-fraction>span:first-child{border-bottom:2px solid #143b35}
+.tc-math-mixed{display:inline-flex;align-items:center;gap:2px}
+.tc-math-root{display:inline-flex;align-items:center;position:relative}
+.tc-math-root>.tc-math-radicand{display:inline-flex;align-items:center;min-height:26px;border-top:2px solid #143b35;padding:2px 3px 0}
+.tc-math-root>sup{align-self:flex-start;font-size:11px}
+.tc-math-power{align-items:flex-start;vertical-align:top;white-space:nowrap}
+.tc-math-power>sup{font-size:11px;line-height:1}
+.tc-math-power>sup>.tc-math-sequence{transform-origin:left center}
+.tc-math-template-tools{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:3px;padding:3px 0}
+.tc-math-template-tools button{border:1px solid #9cbab0;border-radius:4px;padding:5px 0;background:#e8f6ea;color:#164b4a;font-size:11px;font-weight:750;cursor:pointer}
+.tc-math-template-tools button:hover,.tc-math-template-tools button:focus-visible{background:#d0f3e9}
+.tc-math-hint{padding-top:3px;font-size:8px;line-height:1.3;color:#436d65}
+.tc-calc-display:has(.tc-math-editor){min-height:155px}
+@media(max-width:700px){
+ .tc-math-template-tools{grid-template-columns:repeat(4,minmax(0,1fr))}
+ .tc-math-hint{font-size:8px}
+ .tc-calc-window{max-height:min(62dvh,520px)}
+}

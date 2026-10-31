@@ -3,7 +3,7 @@
 > **Canonical project specification / single source of truth**
 >
 > Project: Technica Consult LMS
-> Version: 1.1.1 (extended TI-style calculator operations)
+> Version: 1.1.2 (nested math entry and calculator precision)
 > Last updated: 2026-10-31 (Africa/Cairo)
 > Repository: https://github.com/Minamilad162/Technica-LMS
 > Target branch: main
@@ -795,3 +795,32 @@ New auditable report: [docs/current/P0_BASELINE_AUDIT_2026-10-30.md](docs/curren
 ### 2026-10-31 — v1.1.1 scientific extensions
 - Added independent pure-math modules and React panels, extended math/angle/memory/list/table feature tests; tracked model comparison limitations explicitly.
 - This stage is source code on review branch until CI and owner release gate pass; not a Supabase migration.
+
+
+## 30. Nested textbook math editor, rational precision and dynamic data menus — 2026-10-31
+
+**Owner request:** finish the previously noted gaps in scientific calculator textbook-format entry, list/menu mechanics and precision rather than claiming mere MathPrint-like output is complete.
+
+**Implemented source on [PR #11](https://github.com/Minamilad162/Technica-LMS/pull/11):**
+- \`src/lib/mathTemplateEditor.js\`: original nested expression document tree, field IDs/selection, insertion, slot editing, deletion, safe serialization to the established expression engine and strict maximum **4 nested levels**. Template types include fraction, mixed number, square root, n-th root, exponent, e^x and 10^x.
+- \`src/components/MathTemplateEditor.jsx\`: actual interactive *input* templates within calculator LCD, not just result display. Fields support independent selection/editing, next/previous arrow navigation, numerator↔denominator via Up/Down, keyboard Enter, Ctrl+/ fraction and Ctrl+R radical, pointer keypad integration, slot removal and horizontal scrolling. **CLASSIC** remains linear expression input.
+- \`src/lib/calculatorPrecision.js\`: bounded exact rational arithmetic via \`BigInt\` for rational-only expressions (no \`eval\`), including terminating decimals and fractions; representation converted back for the scientific/trigonometric engine. LCD-style **10 significant digits** in FLOAT, 0–9 fixed decimal digits for FIX, display of NORM/SCI/ENG. Rounding is a separate view concern: underlying trigonometric and irrational computation remains IEEE-754 \`Number\`, not a clone of TI internal arithmetic.
+- Added the model-documented exponent precedence difference: \`2^3^2\` = **512** in Textbook and **64** in CLASSIC. Existing calculator arithmetic and API stay backward compatible in the default mode.
+- \`src/lib/scientificCalculatorExtended.js\`: recalculates dependent list formulas (L1→L2→L3) after source updates, rejects direct/indirect circular formulas, while retaining 42 items per list. \`CalculatorAdvancedPanels.jsx\` adds the CLEAR/FORMULA menu grouping and list/formula management. Full reset now confirms before clearing expression, settings, memory, lists and history.
+- \`scripts/test-mathprint-precision.mjs\`: new deterministic test suite for nested fields, invalid/incomplete templates, max nesting, exact rational fractions, 10-digit outputs, documented power precedence, dependent list recalculation, circular guards and UI source wiring. Must run alongside previous calculator tests, P1 PostgreSQL smoke, ASP 1,625 question integrity, quiz/learning regression and Vite build.
+
+**Official reference behavior used for cross-check (design research, not copied code):**
+- TI official Home Screen: https://education.ti.com/html/eguides/scientifics/TI-30XS-MultiView/EN/Content/EG_30XSMV/M_GetStart/GS_Home.HTML (4-line 16-character hardware display; four template levels).
+- TI official Order of Operations: https://education.ti.com/html/eguides/scientifics/TI-30XS-MultiView/EN/Content/EG_30XSMV/M_GetStart/GS_OrdOps.HTML (MATHPRINT right-assoc ^, CLASSIC left-assoc ^).
+- TI official Data Editor: https://education.ti.com/html/eguides/scientifics/TI-30XS-MultiView/EN/Content/EG_30XSMV/M_MathTools/MT_DataEd.HTML (L1/L2/L3, max 42 and formulas).
+- TI official Modes: https://education.ti.com/html/eguides/scientifics/TI-30XS-MultiView/EN/Content/EG_30XSMV/M_GetStart/GS_Modes.HTML (FLOAT up to 10 display digits and FIX 0–9).
+- TI official Fraction input guide: https://education.ti.com/html/eguides/scientifics/TI-30XS-MultiView/EN/Content/EG_30XSMV/M_MathFunc/MF_Frac.HTML.
+
+**Boundaries / realistic completion criteria:**
+- This is **independent Technica textbook-style input**, not a licensing claim or pixel-identical implementation of the TI proprietary MathPrint system. Native firmware/menu key sequencing, four hardware LCD text rows, some advanced root/π combined symbolic canonicalization and TI internal floating-point error behavior are not identical.
+- Avoid calling it 100% firmware-compatible or a certified exam calculator. Independently validate a full reference output matrix on actual device or manufacturer-approved online reference and perform human browser QA (desktop, mobile touch, physical keyboard, contrast, screen-reader) before promising hardware parity.
+- No SQL or Supabase/Auth/Cloudflare deployment in this feature. No change to quiz score, countdown, question bank/IDs, flags or navigation. The calculator stays present on every *currently built* question page; future official Mock/Adaptive engines require the shared component when constructed.
+
+### 2026-10-31 — v1.1.2 calculator math entry change record
+- Built a functional structured nested-input editor, high-precision rational-only arithmetic, TI-style numeric display and dependent list formula menus; protected existing quiz behavior and data through dedicated CI.
+- Merge/deployment status must be confirmed separately by actual GitHub Actions results and main-branch commit after passing PR gates.

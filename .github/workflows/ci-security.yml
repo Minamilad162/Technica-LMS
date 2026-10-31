@@ -45,6 +45,9 @@ jobs:
       - name: Scientific calculator math and quiz integration
         run: npm run test:calculator
 
+      - name: Structured math entry, exact arithmetic and calculator menu regression
+        run: npm run test:calculator:mathprint
+
       - name: Advanced scientific calculator modes and mathematical regression
         run: npm run test:calculator:extended
 

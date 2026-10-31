@@ -1,6 +1,7 @@
 /* Original Technica extensions for textbook-like exact results, TI-style lists,
    memories, angle tools and constant operator. No vendor firmware/emulation. */
 import {evaluateScientific,formatScientific,toFraction,oneVariableStats,twoVariableStats} from './scientificCalculator.js';
+import {exactRationalExpression,formatCalculatorDisplay} from './calculatorPrecision.js';
 export const STORED_VARIABLES=Object.freeze(['x','y','z','t','a','b','c']);
 export const freshVariables=()=>Object.fromEntries(STORED_VARIABLES.map(k=>[k,0]));
 const finite=v=>{if(!Number.isFinite(v))throw Error('Math error');return Object.is(v,-0)?0:v};
@@ -30,6 +31,12 @@ export function exactScientific(value,expression=''){
  }
  // Rational display is only used for explicit rational input, not all measured decimals.
  if(/[/%]/.test(exp)||/^mixed\(/.test(exp)){
+  const rational=exactRationalExpression(expression);
+  if(rational){
+   const n=Number(rational.n),d=Number(rational.d);
+   if(Number.isSafeInteger(n)&&Number.isSafeInteger(d)&&d>0&&Math.abs(value-n/d)<1e-10)
+     return {type:d===1?'integer':'fraction',numerator:n,denominator:d,value:String(n)};
+  }
   const f=toFraction(value,100000);
   if(f&&Math.abs(value-f.numerator/f.denominator)<1e-10){
    return {type:f.denominator===1?'integer':'fraction',numerator:f.numerator,denominator:f.denominator,value:String(f.numerator)};
@@ -114,6 +121,40 @@ const quantiles=values=>{
  const sorted=[...values].sort((a,b)=>a-b),mid=Math.floor(sorted.length/2);
  return {Q1:halfMedian(sorted.slice(0,mid)),Q3:halfMedian(sorted.slice(sorted.length%2?mid+1:mid))};
 };
+/**
+ * TI-style formula dependency propagation: change L1 recalculates formula-fed L2/L3.
+ * Detect indirect circular references and restore raw independent list values.
+ */
+export function recalculateListFormulas(state,opts={}){
+ const base=Object.fromEntries(['L1','L2','L3'].map(k=>[k, state[k]||[]]));
+ const formulas={...(state.formulas||{})};
+ const done=new Set(),active=new Set();
+ function visit(k){
+  if(done.has(k))return;
+  if(active.has(k))throw Error('Circular list formula');
+  active.add(k);
+  const formula=String(formulas[k]||'').trim();
+  if(formula){
+   for(const other of ['L1','L2','L3']){
+    if(new RegExp('\\b'+other+'\\b').test(formula)&&other!==k)visit(other);
+   }
+   if(new RegExp('\\b'+k+'\\b').test(formula))throw Error('Circular list formula');
+   const result=applyListFormula(base,k,formula,opts);
+   base[k]=result[k];
+  }
+  active.delete(k);done.add(k);
+ }
+ for(const k of ['L1','L2','L3'])visit(k);
+ return {...base,formulas};
+}
+export function updateStoredList(state,key,values,opts={}){
+ if(!['L1','L2','L3'].includes(key))throw Error('Unknown list');
+ validateList(values);
+ const formulas={...(state.formulas||{})};
+ delete formulas[key];
+ return recalculateListFormulas({...state,[key]:[...values],formulas},opts);
+}
+
 export function statsFromLists(lists,kind='1var',xKey='L1',yKey='L2',frequencyKey=null){
  const x=validateList(lists[xKey]||[]);
  if(!x.length)throw Error('Enter data in '+xKey);
@@ -164,5 +205,6 @@ export function applyConstantOperator(previousValue,expression,opts={}){
  return evaluateScientific(expression,{...opts,x:previousValue,variables:{...opts.variables,x:previousValue}});
 }
 export function formatWithMode(value,{notation='NORM',fixed=null,asFraction=false,mixed=false}={}){
- return formatScientific(value,{notation,digits:fixed,asFraction,mixed});
+ if(asFraction)return formatScientific(value,{notation,digits:fixed,asFraction,mixed});
+ return formatCalculatorDisplay(value,{notation,fixed});
 }
