@@ -97,3 +97,11 @@ Command / environment / commit / timestamp / duration / PASS-FAIL-SKIPPED / obse
 - In desktop Chromium and 375/390/430 mobile: assert **zero template buttons in .tc-calc-display**, status/input/result remain, TOOLS shows all seven structured-template actions and Remove slot, click fraction and nested square root via TOOLS and verify evaluation.
 - Verify rounded shell border is blue/dark (not white/silver), computed shell gradient does not reintroduce bright strips, 35 main + 6 upper keys remain and the calculator body does not require scrolling. Screenshot each viewport.
 - Confirm student can still select answers and use next/previous while the calculator is open. No backend/database changes.
+
+
+## Practice quick-select presets (2026-10-31)
+
+- Verify eight mode cards on the Practice setup route and confirm disabled Level Up / Mock until actual course-level reviewed difficulty and exclusive reserved form.
+- Quick 10: 10 questions, untimed, per-question answer feedback. Timed Quiz: 25 questions, 1200-second total timer, delayed answer feedback. Domain picker: 25 selected-domain questions with no crossover.
+- Missed Questions and Weakest Subject only use real latest attempt for same selected course; when there are no wrong answers these cards must be disabled (never fallback to unrelated entire bank). Build Your Own retains learner-selected count/timer/pool/domain inputs; Admin Assessment stays fixed.
+- Run \`npm run test:practice-modes\`, real Chromium desktop/mobile test \`scripts/test-practice-modes-browser.mjs\`, P1/Postgres, old ASP bank/test/calculator/learning and bundle build. Treat PSEE and other unclassified demo courses as lacking protected full-feature quiz metadata.
