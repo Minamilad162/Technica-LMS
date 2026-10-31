@@ -479,7 +479,7 @@
    on 375, 390 and 430px phones; do not create a second scrollbar. */
 @media(max-width:700px){
   .tc-calc-window:not(.tc-calc-minimized){
-    --tc-key-h:clamp(25px,3.45dvh,34px);
+    --tc-key-h:clamp(27px,3.7dvh,36px);
     --tc-key-gap:3px;
     left:5px!important;right:5px!important;
     width:auto;max-width:none;
@@ -501,7 +501,7 @@
   .tc-calc-window .tc-calc-lcd-history{font-size:8px;height:9px;min-height:9px}
   .tc-calc-window .tc-calc-physical-key{border-radius:10px;padding-top:2px}
   .tc-calc-window .tc-calc-physical-key[data-calc-kind="fn"]{font-size:11px}
-  .tc-calc-window .tc-calc-physical-key[data-calc-kind="num"]{font-size:16px}
+  .tc-calc-window .tc-calc-physical-key[data-calc-kind="num"]{font-size:17px}
   .tc-calc-window .tc-calc-physical-key[data-calc-kind="op"]{font-size:17px}
   .tc-calc-physical-key .tc-calc-physical-shift{font-size:7.1px}
   .tc-calc-direction-pad button{font-size:12px}
@@ -514,9 +514,9 @@
   }
 }
 @media(max-width:375px){
- .tc-calc-window:not(.tc-calc-minimized){--tc-key-h:clamp(24px,3.3dvh,29px)}
- .tc-calc-window .tc-calc-physical-key[data-calc-kind="fn"]{font-size:10px}
- .tc-calc-physical-key .tc-calc-physical-shift{font-size:6.8px}
+ .tc-calc-window:not(.tc-calc-minimized){--tc-key-h:clamp(26px,3.6dvh,31px)}
+ .tc-calc-window .tc-calc-physical-key[data-calc-kind="fn"]{font-size:11px}
+ .tc-calc-physical-key .tc-calc-physical-shift{font-size:7.2px}
 }
 @media(max-height:700px) and (min-width:701px){
  .tc-calc-window:not(.tc-calc-minimized){
