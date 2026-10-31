@@ -29,7 +29,7 @@ let browser;
 try{
  await serverReady();
  browser=await chromium.launch({headless:true});
- for(const device of [{name:'desktop',viewport:{width:1440,height:900},touch:false},{name:'mobile',viewport:{width:390,height:844},touch:true}]){
+ for(const device of [{name:'desktop',viewport:{width:1440,height:900},touch:false},{name:'mobile375',viewport:{width:375,height:812},touch:true},{name:'mobile390',viewport:{width:390,height:844},touch:true},{name:'mobile430',viewport:{width:430,height:932},touch:true}]){
   const context=await browser.newContext({viewport:device.viewport,hasTouch:device.touch,isMobile:device.touch});
   const page=await context.newPage(),exceptions=[];
   page.on('pageerror',e=>exceptions.push(String(e)));
@@ -102,6 +102,29 @@ try{
   await check(device.name+' no uncaught browser exceptions',async()=>assert.deepEqual(exceptions,[]));
   await context.close();
  }
+ const ctx=await browser.newContext({viewport:{width:1280,height:800}});
+ const page=await ctx.newPage();
+ await demoLogin(page);
+ await check('assessment route opens scientific calculator',async()=>{
+   await page.goto(ROOT+'/#/assessments',{waitUntil:'domcontentloaded'});
+   await page.locator('.assessment-start-button').waitFor({timeout:12000});
+   await page.locator('label.checkbox-line input[type="checkbox"]').check();
+   assert.equal(await page.locator('.assessment-start-button').isDisabled(),false,'Assessment start unexpectedly disabled');
+   await page.locator('.assessment-start-button').click();
+   await page.locator('.quiz-page').waitFor({timeout:10000});
+   await page.locator('button.tc-calc-launch').click();
+   assert.ok(await page.locator('.tc-calc-window').isVisible());
+   assert.ok(await page.locator('.quiz-status').innerText().then(t=>t.includes('Assessment')));
+ });
+ await check('learning knowledge check opens scientific calculator',async()=>{
+   await page.goto(ROOT+'/#/learning/process-safety-foundations',{waitUntil:'domcontentloaded'});
+   await page.locator('.learn-outline-lesson').filter({hasText:'10-question knowledge check'}).first().click();
+   await page.locator('.learn-quiz-content').waitFor({timeout:10000});
+   await page.locator('button.tc-calc-launch').click();
+   assert.ok(await page.locator('.tc-calc-window').isVisible());
+   assert.ok(await page.locator('.learn-quiz-options button').count()>1);
+ });
+ await ctx.close();
 }finally{
  if(browser)await browser.close();
  vite.kill('SIGTERM');
