@@ -149,7 +149,7 @@ export default function ScientificCalculator({context='Quiz'}){
         <button type="button" key={k} className={tab===k?'active':''} onClick={()=>{setTab(k);setError('')}}>{label}</button>)}
      </nav>
      {tab==='keys'&&<div className="tc-calc-keys" aria-label="Scientific calculator keypad">
-       {KEYS.map(([label,key])=><button type="button" key={key}
+       {KEYS.map(([label,key])=><button type="button" key={key} data-calc-key={key}
         className={['tc-calc-key',NUMBERS.has(key)?'tc-calc-num':'',OPERATIONS.has(key)?'tc-calc-operator':'',
           key==='enter'?'tc-calc-enter':'',['second','mode','delete','clear','history'].includes(key)?'tc-calc-utility':'',
           second&&key==='second'?'tc-calc-2nd-active':''].join(' ')}
