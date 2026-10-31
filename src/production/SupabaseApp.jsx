@@ -21,7 +21,7 @@ function LoginScreen({db}) {
     setNotice(data.session?'Account created. Opening workspace…':'Registration received. Check your email for the confirmation link before signing in.');
     if(!data.session)setMode('login');
    }else if(mode==='reset'){
-    const {error}=await db.auth.resetPasswordForEmail(email.trim());
+    const {error}=await db.auth.resetPasswordForEmail(email.trim(),{redirectTo:window.location.origin+window.location.pathname});
     if(error)throw error;
     setNotice('If an account exists for that address, a password recovery email will be sent. Follow the link to reset it.');
    }else{
@@ -45,6 +45,23 @@ function LoginScreen({db}) {
   </div></section>
  </div>;
 }
+function RecoveryScreen({db,onComplete}) {
+ const [password,setPassword]=useState(''),[confirm,setConfirm]=useState(''),[error,setError]=useState(''),[busy,setBusy]=useState(false);
+ const submit=async e=>{
+  e.preventDefault();setError('');
+  if(password.length<8 || password!==confirm){setError('Enter matching passwords of at least 8 characters.');return;}
+  setBusy(true);try{const {error:issue}=await db.auth.updateUser({password});if(issue)throw issue;onComplete();}
+  catch(e){setError(msg(e));}finally{setBusy(false);}
+ };
+ return <div className="live-login-panel" style={{minHeight:'100dvh'}}>
+  <form className="live-login-form" onSubmit={submit}><span className="live-eyebrow">PASSWORD RECOVERY</span><h2>Choose a new password</h2>
+   <label>New password<input type="password" required autoComplete="new-password" minLength={8} value={password} onChange={e=>setPassword(e.target.value)}/></label>
+   <label>Confirm password<input type="password" required autoComplete="new-password" minLength={8} value={confirm} onChange={e=>setConfirm(e.target.value)}/></label>
+   {error&&<p className="live-error" role="alert">{error}</p>}
+   <button className="live-primary" disabled={busy} type="submit">{busy?'Updating…':'Update password'}</button>
+  </form>
+ </div>;
+}
 function EditorModal({editing,onCancel,onSave,busy,error}) {
  const [value,setValue]=useState(editing.initial||'');
  const [summary,setSummary]=useState('');
@@ -58,7 +75,7 @@ function EditorModal({editing,onCancel,onSave,busy,error}) {
  </div>;
 }
 export default function SupabaseApp() {
- const [session,setSession]=useState(null),[boot,setBoot]=useState(true),[identity,setIdentity]=useState(null);
+ const [session,setSession]=useState(null),[boot,setBoot]=useState(true),[identity,setIdentity]=useState(null),[recovering,setRecovering]=useState(false);
  const [courses,setCourses]=useState([]),[entitlements,setEntitlements]=useState([]),[courseId,setCourseId]=useState(null),[tree,setTree]=useState([]),[lessonId,setLessonId]=useState(null),[blocks,setBlocks]=useState([]);
  const [busy,setBusy]=useState(false),[fetching,setFetching]=useState(false),[error,setError]=useState(''),[notice,setNotice]=useState(''),[editing,setEditing]=useState(null),[editError,setEditError]=useState('');
  const db=database;
@@ -66,7 +83,7 @@ export default function SupabaseApp() {
   if(!db){setBoot(false);return;}
   let active=true;
   db.auth.getSession().then(({data,error})=>{if(active){if(error)setError(msg(error));setSession(data?.session||null);setBoot(false);}}).catch(e=>{if(active){setError(msg(e));setBoot(false);}});
-  const {data:{subscription}}=db.auth.onAuthStateChange((_event,next)=>{if(active){setSession(next);setBoot(false);}});
+  const {data:{subscription}}=db.auth.onAuthStateChange((event,next)=>{if(active){setSession(next);if(event==='PASSWORD_RECOVERY')setRecovering(true);if(event==='SIGNED_OUT')setRecovering(false);setBoot(false);}});
   return()=>{active=false;subscription.unsubscribe();};
  },[db]);
  useEffect(()=>{
@@ -128,6 +145,7 @@ export default function SupabaseApp() {
  };
  if(configurationError)return <section className="live-configuration"><AlertCircle size={27}/><h1>Technica LMS · Supabase configuration required</h1><p>{configurationError}</p><p>Set VITE_DATA_MODE=supabase and supply VITE_SUPABASE_URL + VITE_SUPABASE_ANON_KEY as build-time environment values. Never use the service_role key.</p></section>;
  if(boot)return <div className="live-wait">Loading secure LMS session…</div>;
+ if(recovering&&session)return <RecoveryScreen db={db} onComplete={()=>{setRecovering(false);setNotice('Password updated successfully.');}}/>;
  if(!session)return <LoginScreen db={db}/>;
  return <div className="live-shell">
   <header className="live-top"><div className="live-brand"><img src="/images/technica-logo.webp" alt="Technica Consult"/><strong>TECHNICA CONSULT <span>LMS</span></strong></div><div className="live-top-right"><span className="live-live-pill"><ShieldCheck size={14}/> Supabase</span><small>{session.user.email}</small><button type="button" className="live-secondary" onClick={()=>db.auth.signOut()}><LogOut size={16}/> Sign out</button></div></header>
