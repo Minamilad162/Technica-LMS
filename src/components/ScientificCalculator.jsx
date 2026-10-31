@@ -4,6 +4,8 @@ import{Calculator,Grip,Minus,X,Delete}from'lucide-react';
 import{evaluateScientific,formatScientific,oneVariableStats,twoVariableStats}from'../lib/scientificCalculator';
 import{exactScientific,formatExactPlain,formatWithMode,freshVariables,makeListState,makeFunctionTable}from'../lib/scientificCalculatorExtended';
 import{VariablePanel,ListPanel,AnglePanel,ConstantPanel}from'./CalculatorAdvancedPanels';
+import MathTemplateEditor from './MathTemplateEditor';
+import{createMathDocument,serializeMathDocument}from'../lib/mathTemplateEditor';
 
 // Original Technica keypad and calculation code; no third-party calculator emulator.
 const KEYS=[
@@ -54,29 +56,36 @@ export default function ScientificCalculator({context='Quiz'}){
  const[fixed,setFixed]=useState('FLOAT'),[viewMode,setViewMode]=useState('MATH'),[showExact,setShowExact]=useState(true);
  const[lastExact,setLastExact]=useState(null),[lastCalcExpression,setLastCalcExpression]=useState(''),[percentView,setPercentView]=useState(false);
  const[tableMode,setTableMode]=useState('auto'),[askValues,setAskValues]=useState('1,2,3'),[tableCount,setTableCount]=useState(8);
- const root=useRef(null),textField=useRef(null),drag=useRef(null);
- const insert=useCallback(s=>{setExpression(e=>e.length+s.length<=220?e+s:e);setError('')},[]);
+ const root=useRef(null),textField=useRef(null),drag=useRef(null),mathEditor=useRef(null);
+ const[mathDoc,setMathDoc]=useState(()=>createMathDocument());
+ const insert=useCallback(s=>{
+   if(viewMode==='MATH'){mathEditor.current?.insertText(s)}
+   else setExpression(e=>e.length+s.length<=220?e+s:e);
+   setError('');
+ },[viewMode]);
+ const template=kind=>{if(viewMode==='MATH')mathEditor.current?.insertTemplate(kind);else insert(kind==='fraction'?'/':kind==='power'?'^(':kind==='squareRoot'?'sqrt(':kind==='mixed'?'mixed(':kind==='nthRoot'?'root(':kind==='exp10'?'pow10(':'exp(')};
  const evaluate=useCallback(()=>{
    try{
-     const v=evaluateScientific(expression,{angleMode:angle,ans:answer,memory,variables});
-     const exact=exactScientific(v,expression);
+     const input=viewMode==='MATH'?serializeMathDocument(mathDoc):expression;
+     const v=evaluateScientific(input,{angleMode:angle,ans:answer,memory,variables,viewMode});
+     const exact=exactScientific(v,input);
      const formatted=(showExact&&viewMode==='MATH'&&exact)?formatExactPlain(exact):formatWithMode(v,{notation,fixed:fixed==='FLOAT'?null:Number(fixed),asFraction:fraction,mixed});
-     setLastExact(exact);setLastCalcExpression(expression);setPercentView(false);
-     setAnswer(v);setResult(formatted);setHistory(h=>[{expression,value:v},...h].slice(0,12));
-     setExpression(formatScientific(v));setShowHistory(false);setError('');
+     setLastExact(exact);setLastCalcExpression(input);setPercentView(false);
+     setAnswer(v);setResult(formatted);setHistory(h=>[{expression:input,value:v},...h].slice(0,12));
+     setExpression(formatScientific(v));setMathDoc(createMathDocument(formatScientific(v)));setShowHistory(false);setError('');
    }catch(e){setError(e.message||'Math error')}
- },[expression,angle,answer,memory,variables,notation,fraction,mixed,fixed,showExact,viewMode]);
+ },[expression,mathDoc,angle,answer,memory,variables,notation,fraction,mixed,fixed,showExact,viewMode]);
  const press=useCallback(key=>{
    if(key==='second'){setSecond(s=>!s);return}
    if(key==='mode'){setAngle(a=>a==='DEG'?'RAD':a==='RAD'?'GRAD':'DEG');return}
-   if(key==='delete'){setExpression(e=>e.slice(0,-1));setError('');return}
-   if(key==='clear'){setExpression('');setResult('0');setError('');return}
+   if(key==='delete'){if(viewMode==='MATH')mathEditor.current?.deleteBackward();else setExpression(e=>e.slice(0,-1));setError('');return}
+   if(key==='clear'){setExpression('');setMathDoc(createMathDocument());setResult('0');setError('');return}
    if(key==='history'){setShowHistory(s=>!s);return}
    if(key==='enter'){evaluate();return}
-   if(key==='nCr'||key==='nPr'){setExpression(e=>key+'('+e+',');setError('');return}
+   if(key==='nCr'||key==='nPr'){insert(key+'(');return}
    if(key==='store'){try{setMemory(evaluateScientific(expression||String(answer),{angleMode:angle,ans:answer,memory,variables}));setError('')}catch(e){setError(e.message)}return}
-   if(key==='fraction'){insert('/');return}
-   if(key==='mixed'){setFraction(true);setMixed(x=>!x);setResult(formatScientific(answer,{notation,asFraction:true,mixed:!mixed}));return}
+   if(key==='fraction'){template('fraction');return}
+   if(key==='mixed'){template('mixed');return}
    if(second){
      const alt={log:'pow10(',ln:'exp(',sin:'asin(',cos:'acos(',tan:'atan(',sqrt:'cbrt(',square:'sqrt(',fact:'rand()',inv:'abs('};
      if(alt[key]){insert(alt[key]);setSecond(false);return}
@@ -85,9 +94,11 @@ export default function ScientificCalculator({context='Quiz'}){
      sqrt:'√(',cbrt:'cbrt(',log:'log(',ln:'ln(',sin:'sin(',cos:'cos(',tan:'tan(',
      pi:'π',fact:'!',inv:'^(-1)',left:'(',right:')',percent:'%',ans:'Ans',
      neg:'-',ee:'E',nCr:'nCr(',nPr:'nPr('};
+   if(viewMode==='MATH'&&key==='sqrt'){template('squareRoot');return}
+   if(viewMode==='MATH'&&key==='pow'){template('power');return}
    const value=NUMBERS.has(key)?(key==='dot'?'.':key):dict[key];
    if(value)insert(value);
- },[expression,answer,angle,memory,second,insert,evaluate,fraction,mixed,notation,variables]);
+ },[expression,answer,angle,memory,second,insert,evaluate,fraction,mixed,notation,variables,viewMode]);
  useEffect(()=>{
    if(!open||minimized)return;
    function onKey(e){
@@ -106,7 +117,7 @@ export default function ScientificCalculator({context='Quiz'}){
    }
    document.addEventListener('keydown',onKey);return()=>document.removeEventListener('keydown',onKey);
  },[open,minimized,evaluate,press]);
- useEffect(()=>{if(open&&!minimized&&tab==='keys')textField.current?.focus({preventScroll:true})},[open,minimized,tab]);
+ useEffect(()=>{if(open&&!minimized&&tab==='keys'&&viewMode==='CLASSIC')textField.current?.focus({preventScroll:true})},[open,minimized,tab,viewMode]);
  function dragStart(e){
    if(e.pointerType==='touch'||e.button!==0||window.innerWidth<=700||e.target.closest('button'))return;
    const rect=root.current?.getBoundingClientRect();
@@ -157,11 +168,13 @@ export default function ScientificCalculator({context='Quiz'}){
    {!minimized&&<div className="tc-calc-body">
      <div className="tc-calc-display">
        <div className="tc-calc-display-status"><span>{angle} · {notation} · {fixed==='FLOAT'?'FLOAT':'FIX '+fixed} · {viewMode}</span><span>{second?'2nd · ':''}{memory?'M · ':''}{fraction?'FRAC':''}</span></div>
-       <label className="tc-calc-sr-only" htmlFor="tc-calc-expression">Expression</label>
-       <input ref={textField} id="tc-calc-expression" spellCheck={false} autoComplete="off"
-        aria-label="Calculator expression" value={expression}
-        onChange={e=>{if(e.target.value.length<=220){setExpression(e.target.value);setError('')}}}
-        placeholder="Type an expression…" />
+       {viewMode==='MATH'
+         ?<MathTemplateEditor ref={mathEditor} document={mathDoc} onChange={setMathDoc} onEvaluate={evaluate} onError={setError}/>
+         :<><label className="tc-calc-sr-only" htmlFor="tc-calc-expression">Expression</label>
+           <input ref={textField} id="tc-calc-expression" spellCheck={false} autoComplete="off"
+            aria-label="Calculator expression" value={expression}
+            onChange={e=>{if(e.target.value.length<=220){setExpression(e.target.value);setError('')}}}
+            placeholder="Type an expression…" /></>}
        <div className="tc-calc-lcd-history" aria-label="Previous calculation">{history[0]&&<span>{history[0].expression} = {formatScientific(history[0].value)}</span>}</div>
        <div className="tc-calc-display-result" aria-live="polite">{error?<span className="tc-calc-error">{error}</span>:
     percentView?formatScientific(answer*100)+'%':lastExact&&viewMode==='MATH'&&showExact?<ExactOutput exact={lastExact}/>:result}</div>
@@ -176,8 +189,8 @@ export default function ScientificCalculator({context='Quiz'}){
         onClick={()=>{setNotation(a);setShowExact(false);setResult(formatWithMode(answer,{notation:a,fixed:fixed==='FLOAT'?null:Number(fixed),asFraction:fraction,mixed}))}}>{a}</button>)}
      </div>
      <div className="tc-calc-display-settings">
-       <button type="button" className={viewMode==='MATH'?'active':''} onClick={()=>{setViewMode('MATH');setPercentView(false)}}>Textbook</button>
-       <button type="button" className={viewMode==='CLASSIC'?'active':''} onClick={()=>{setViewMode('CLASSIC');setPercentView(false);setResult(formatWithMode(answer,{notation,fixed:fixed==='FLOAT'?null:Number(fixed),asFraction:fraction,mixed}))}}>Classic</button>
+       <button type="button" className={viewMode==='MATH'?'active':''} onClick={()=>{setMathDoc(createMathDocument(expression));setViewMode('MATH');setPercentView(false)}}>Textbook</button>
+       <button type="button" className={viewMode==='CLASSIC'?'active':''} onClick={()=>{try{setExpression(serializeMathDocument(mathDoc))}catch(e){setError(e.message);return}setViewMode('CLASSIC');setPercentView(false);setResult(formatWithMode(answer,{notation,fixed:fixed==='FLOAT'?null:Number(fixed),asFraction:fraction,mixed}))}}>Classic</button>
        <label>Decimals <select value={fixed} onChange={e=>{setFixed(e.target.value);setShowExact(false);setResult(formatWithMode(answer,{notation,fixed:e.target.value==='FLOAT'?null:Number(e.target.value),asFraction:fraction,mixed}))}}>
         <option value="FLOAT">FLOAT</option>{Array.from({length:10},(_,i)=><option value={String(i)} key={i}>FIX {i}</option>)}
        </select></label>
@@ -230,11 +243,11 @@ export default function ScientificCalculator({context='Quiz'}){
      {showHistory&&<div className="tc-calc-history" aria-label="Calculation history">
        <div><b>Recent calculations</b><button onClick={()=>setHistory([])}>Clear</button></div>
        {!history.length?<p>No calculations yet</p>:history.map((h,i)=>
-        <button type="button" key={i} onClick={()=>{setExpression(h.expression);setShowHistory(false)}} title="Reuse and edit previous expression">
+        <button type="button" key={i} onClick={()=>{setExpression(h.expression);setMathDoc(createMathDocument(h.expression));setShowHistory(false)}} title="Reuse and edit previous expression">
          <small>{h.expression}</small><b>{formatScientific(h.value)} ↵</b></button>)}
      </div>}
      <div className="tc-calc-footer"><span>Independent scientific calculator</span>
-      <button type="button" onClick={()=>{setExpression('');setResult('0');setAnswer(0);setError('');setHistory([]);setSecond(false)}}><Delete size={13}/> Reset</button></div>
+      <button type="button" onClick={()=>{setExpression('');setMathDoc(createMathDocument());setResult('0');setAnswer(0);setError('');setHistory([]);setSecond(false)}}><Delete size={13}/> Reset</button></div>
    </div>}
   </section>}
  </>,document.body);
