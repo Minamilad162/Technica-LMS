@@ -198,6 +198,10 @@ CREATE FUNCTION public.lms_p4_save_answer(p_attempt_id uuid,p_question_id uuid,p
  LANGUAGE plpgsql VOLATILE SECURITY DEFINER SET search_path = '' AS $$
 DECLARE a public.lms_practice_attempts%ROWTYPE;
 DECLARE v_options jsonb;
+DECLARE v_correct_index smallint;
+DECLARE v_explanation text;
+DECLARE v_previous smallint;
+DECLARE v_answered_at timestamptz;
 BEGIN
  IF (SELECT auth.uid()) IS NULL THEN RAISE EXCEPTION 'Authenticated user required'; END IF;
  SELECT * INTO a FROM public.lms_practice_attempts
@@ -206,15 +210,27 @@ BEGIN
  IF NOT public.lms_p4_can_practice(a.course_id) THEN RAISE EXCEPTION 'Course access is not active'; END IF;
  IF a.state<>'in_progress' OR (a.deadline_at IS NOT NULL AND clock_timestamp()>=a.deadline_at) THEN
    RAISE EXCEPTION 'This attempt is closed or time has expired'; END IF;
- SELECT options_snapshot INTO v_options FROM public.lms_practice_attempt_items
+ SELECT options_snapshot,correct_index_snapshot,explanation_snapshot,selected_index,answered_at
+ INTO v_options,v_correct_index,v_explanation,v_previous,v_answered_at
+ FROM public.lms_practice_attempt_items
  WHERE attempt_id=p_attempt_id AND question_id=p_question_id;
  IF v_options IS NULL THEN RAISE EXCEPTION 'Question is not assigned to this attempt'; END IF;
  IF p_selected_index IS NOT NULL AND (p_selected_index<0 OR p_selected_index>=jsonb_array_length(v_options)) THEN
    RAISE EXCEPTION 'Invalid answer option'; END IF;
- UPDATE public.lms_practice_attempt_items
- SET selected_index=p_selected_index,answered_at=clock_timestamp()
- WHERE attempt_id=p_attempt_id AND question_id=p_question_id;
- RETURN jsonb_build_object('saved',true,'serverNow',clock_timestamp());
+ IF a.mode='quick10' AND p_selected_index IS NULL THEN
+   RAISE EXCEPTION 'Quick 10 requires a selected option';
+ END IF;
+ IF a.mode='quick10' AND v_answered_at IS NOT NULL THEN
+   IF v_previous IS DISTINCT FROM p_selected_index THEN RAISE EXCEPTION 'Quick 10 answers cannot be changed after feedback'; END IF;
+ ELSE
+   UPDATE public.lms_practice_attempt_items
+   SET selected_index=p_selected_index,answered_at=clock_timestamp()
+   WHERE attempt_id=p_attempt_id AND question_id=p_question_id;
+ END IF;
+ RETURN jsonb_build_object('saved',true,'serverNow',clock_timestamp())
+   || CASE WHEN a.mode='quick10' THEN jsonb_build_object(
+      'correctIndex',v_correct_index,'explanation',v_explanation)
+      ELSE '{}'::jsonb END;
 END; $$;
 
 CREATE FUNCTION public.lms_p4_finish_practice(p_attempt_id uuid) RETURNS jsonb
