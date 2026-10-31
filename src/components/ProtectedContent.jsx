@@ -4,6 +4,7 @@ import {getAuthSession} from '../lib/demoAuth';
 import {
  PROTECTION_HOLD_MS,WATERMARK_POSITIONS,formatWatermarkLabel,
  getContentProtectionSession,isPotentialCaptureShortcut,shouldFocusShield,
+ isMobileWebContext,shouldBlackoutForBlur,shouldBlackoutForVisibility,
  shouldBlockContentEvent,shouldBlockClipboardEvent,selectionTouchesProtected,watermarkIdentity
 }from'../lib/contentProtection';
 
@@ -72,19 +73,39 @@ export default function ProtectedContent({as:Tag='div',className='',kind='questi
     if(e.cancelable)e.preventDefault();
    }
   };
+  const isMobile=()=>isMobileWebContext({
+   pointerCoarse:window.matchMedia?.('(pointer: coarse)')?.matches===true,
+   touchPoints:navigator.maxTouchPoints||0,
+   viewportWidth:window.innerWidth,
+   userAgent:navigator.userAgent
+  });
   const onBlur=()=>{
-   if(!enabledFocusShield)return;
+   // Mobile keyboard opening/dismissing and focusing calculator controls may
+   // blur the window while the webpage is still fully visible. Never blackout
+   // mobile on blur alone. Desktop retains the proven focus-loss behavior.
+   if(!shouldBlackoutForBlur(kind,isMobile()))return;
    focusShield.current=true;
    syncCurtain();
   };
   const onFocus=()=>{
+   if(document.visibilityState==='hidden')return;
    focusShield.current=false;
    syncCurtain();
   };
   const onVisibility=()=>{
    if(!enabledFocusShield)return;
-   focusShield.current=document.visibilityState==='hidden';
+   // Page Visibility is different from focus. This is privacy on genuine
+   // backgrounding, NOT screenshot detection or prevention on mobile.
+   focusShield.current=shouldBlackoutForVisibility(kind,document.visibilityState);
    syncCurtain();
+  };
+  const onViewportChange=()=>{
+   // A soft keyboard can resize VisualViewport and move focus. Reset only
+   // accidental stale shields while the browser is still in the foreground.
+   if(isMobile()&&document.visibilityState==='visible'&&focusShield.current){
+    focusShield.current=false;
+    syncCurtain();
+   }
   };
   const onReturnPointer=()=>{
    // Mobile Safari occasionally skips focus when returning to an already
@@ -105,6 +126,7 @@ export default function ProtectedContent({as:Tag='div',className='',kind='questi
    document.addEventListener('visibilitychange',onVisibility);
    window.addEventListener('pointerdown',onReturnPointer,true);
    window.addEventListener('touchstart',onReturnPointer,true);
+   window.visualViewport?.addEventListener('resize',onViewportChange);
   }
   window.addEventListener('beforeprint',onBeforePrint);
   window.addEventListener('afterprint',onAfterPrint);
@@ -120,6 +142,7 @@ export default function ProtectedContent({as:Tag='div',className='',kind='questi
     document.removeEventListener('visibilitychange',onVisibility);
     window.removeEventListener('pointerdown',onReturnPointer,true);
     window.removeEventListener('touchstart',onReturnPointer,true);
+    window.visualViewport?.removeEventListener('resize',onViewportChange);
    }
    window.removeEventListener('beforeprint',onBeforePrint);
    window.removeEventListener('afterprint',onAfterPrint);
@@ -129,7 +152,7 @@ export default function ProtectedContent({as:Tag='div',className='',kind='questi
    if(timeout.current)clearTimeout(timeout.current);
    keyShield.current=false;focusShield.current=false;
   };
- },[enabledFocusShield]);
+ },[enabledFocusShield,kind]);
  useEffect(()=>{
   const node=ref.current;
   if(!node)return;
