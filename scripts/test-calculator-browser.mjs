@@ -47,6 +47,43 @@ try{
    assert.ok(await page.locator('.answer-option').count()>1);
    assert.ok(await page.locator('.tc-calc-window').isVisible());
   });
+  await check(device.name+' physical keypad matches reference layout without internal scrolling',async()=>{
+   const keys=page.locator('.tc-calc-main-grid .tc-calc-physical-key');
+   assert.equal(await keys.count(),35,'Expected seven rows of five scientific keys');
+   const top=page.locator('.tc-calc-top-grid .tc-calc-physical-key');
+   assert.equal(await top.count(),6,'Expected six upper functions around arrow pad');
+   assert.ok(await page.locator('.tc-calc-direction-pad').isVisible());
+   const order=await keys.evaluateAll(els=>els.map(el=>el.dataset.calcKey));
+   assert.deepEqual(order.slice(0,5),['ln','fraction','ee','table','clear']);
+   assert.deepEqual(order.slice(15,20),['square','7','8','9','subtract']);
+   assert.deepEqual(order.slice(30,35),['on','0','dot','neg','enter']);
+   const geometry=await page.locator('.tc-calc-body').evaluate(el=>({
+     height:el.getBoundingClientRect().height,
+     viewport:el.closest('.tc-calc-window').getBoundingClientRect().height,
+     screen:window.innerHeight,clientHeight:el.clientHeight,scrollHeight:el.scrollHeight,
+     keyHeight:el.querySelector('.tc-calc-keys').getBoundingClientRect().height,
+     bodyBottom:el.getBoundingClientRect().bottom,
+     winBottom:el.closest('.tc-calc-window').getBoundingClientRect().bottom
+   }));
+   assert.ok(geometry.scrollHeight-geometry.clientHeight<=4,'Calculator requires body scrolling: '+JSON.stringify(geometry));
+   assert.ok(geometry.winBottom<=geometry.screen+2,'Calculator extends below visible viewport: '+JSON.stringify(geometry));
+   const last=await page.locator('.tc-calc-main-grid [data-calc-key="enter"]').boundingBox();
+   const win=await page.locator('.tc-calc-window').boundingBox();
+   assert.ok(last.y+last.height<=win.y+win.height-2,'Last row clipped behind shell');
+  });
+  await check(device.name+' 2nd function layer and real menu controls',async()=>{
+   await page.locator('.tc-calc-top-grid [data-calc-key="second"]').click();
+   assert.ok(await page.locator('.tc-calc-top-grid [data-calc-key="second"]').getAttribute('aria-pressed')==='true');
+   await page.locator('.tc-calc-top-grid [data-calc-key="prb"]').click();
+   assert.ok(await page.locator('.tc-calc-menu-title').innerText().then(x=>x.includes('Angle')));
+   await page.getByRole('button',{name:'Return to calculator keypad'}).click();
+   await page.locator('.tc-calc-top-grid [data-calc-key="mode"]').click();
+   assert.ok(await page.locator('.tc-calc-display-settings').isVisible());
+   await page.getByRole('button',{name:'Return to calculator keypad'}).click();
+   await page.locator('.tc-calc-top-grid [data-calc-key="data"]').click();
+   assert.ok(await page.getByText('Data editor · L1 / L2 / L3').isVisible());
+   await page.getByRole('button',{name:'Return to calculator keypad'}).click();
+  });
   await check(device.name+' mathematical input and keyboard ENTER',async()=>{
    const input=page.locator('input.tc-math-field').first();
    await input.fill('2+3*4');
