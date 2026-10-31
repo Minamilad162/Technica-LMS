@@ -1,7 +1,7 @@
 import React,{forwardRef,useEffect,useImperativeHandle,useRef,useState}from'react';
 import{
  createMathDocument,findMathField,insertMathTemplate,mathFieldIds,mathFieldContext,
- serializeMathDocument,updateMathField
+ serializeMathDocument,updateMathField,removeMathTemplate
 }from'../lib/mathTemplateEditor';
 
 /** Interactive structured textbook input. Templates are bounded four levels and
@@ -57,9 +57,14 @@ const MathTemplateEditor=forwardRef(function MathTemplateEditor({document,onChan
   try{const next=insertMathTemplate(document,fieldId,kind,start,end);commit(next.doc,{fieldId:next.focusId,index:0});onError?.('')}
   catch(e){onError?.(e.message)}
  };
+ const dropTemplate=()=>{
+  try{const {doc,focusId}=removeMathTemplate(document,location().fieldId);commit(doc,{fieldId:focusId,index:0});onError?.('')}
+  catch(e){onError?.(e.message)}
+ };
  const deleteBackward=()=>{
    const {fieldId,start,end}=location(),found=findMathField(document,fieldId);
    if(!found)return;
+   if(start===0&&end===0&&!found.field.value&&mathFieldContext(document,fieldId)?.parentId){dropTemplate();return}
    const begin=start===end?Math.max(0,start-1):start;
    const value=found.field.value.slice(0,begin)+found.field.value.slice(end);
    try{commit(updateMathField(document,fieldId,value),{fieldId,index:begin});onError?.('')}
@@ -71,7 +76,7 @@ const MathTemplateEditor=forwardRef(function MathTemplateEditor({document,onChan
   focusField(next,direction>0?0:(findMathField(document,next)?.field.value.length||0));return true;
  };
  useImperativeHandle(ref,()=>({
-  insertText:append,insertTemplate:makeTemplate,deleteBackward,
+  insertText:append,insertTemplate:makeTemplate,deleteBackward,removeTemplate:dropTemplate,
   focus:()=>{const id=location().fieldId;focusField(id)}
  }),[document]);
  useEffect(()=>{if(!active){const first=mathFieldIds(document)[0];if(first)focusField(first)}},[]);
@@ -103,6 +108,7 @@ const MathTemplateEditor=forwardRef(function MathTemplateEditor({document,onChan
     {TOOLS.map(([kind,label])=><button type="button" key={kind}
       onPointerDown={e=>e.preventDefault()} onClick={()=>makeTemplate(kind)}
       title={'Insert '+kind+' (maximum four nested levels)'}>{label}</button>)}
+    <button type="button" onPointerDown={e=>e.preventDefault()} onClick={dropTemplate} title="Remove active template">✕ slot</button>
    </div>
    <div className="tc-math-hint">Arrow keys move between slots · Ctrl+/ fraction · Ctrl+R root · Enter calculate</div>
  </div>;
