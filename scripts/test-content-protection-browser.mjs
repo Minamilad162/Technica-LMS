@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import {spawn} from 'node:child_process';
+import {spawn,spawnSync} from 'node:child_process';
 import {setTimeout as sleep} from 'node:timers/promises';
 import {chromium} from 'playwright';
 const ROOT='http://127.0.0.1:4175';
@@ -129,6 +129,13 @@ try{
    assert.equal(await page.evaluate(()=>document.documentElement.classList.contains('tc-print-in-progress')),true);
    await page.evaluate(()=>window.dispatchEvent(new Event('afterprint')));
    assert.equal(await page.evaluate(()=>document.documentElement.classList.contains('tc-print-in-progress')),false);
+   // Exercise the actual Chromium print-to-PDF path, not merely CSS values.
+   const protectedQuestion=(await page.locator('.question-panel h1').innerText()).trim().slice(0,28);
+   const pdf=await page.pdf({format:'A4',printBackground:true});
+   const extracted=spawnSync('pdftotext',['-','-'],{input:pdf,encoding:'utf8'});
+   assert.equal(extracted.status,0,'pdftotext must be available for print audit: '+(extracted.stderr||''));
+   assert.ok(extracted.stdout.includes('PROTECTED CONTENT'),'Printed PDF missing blocked-content notice');
+   assert.ok(!extracted.stdout.includes(protectedQuestion),'Actual printable PDF leaked question text');
    await page.emulateMedia({media:'screen'});
   });
   await check(device.name+' video and lesson quiz watermark',async()=>{
