@@ -1,4 +1,5 @@
 import React,{useEffect,useMemo,useRef,useState}from'react';
+import{createPortal}from'react-dom';
 import {getAuthSession} from '../lib/demoAuth';
 import {
  PROTECTION_HOLD_MS,WATERMARK_POSITIONS,formatWatermarkLabel,
@@ -156,8 +157,8 @@ export default function ProtectedContent({as:Tag='div',className='',kind='questi
       <span key={i} className="tc-watermark-cell">{label}</span>)}
    </div>
   </Tag>
-  <div ref={shieldRef} hidden className="tc-capture-curtain" data-capture-curtain="browser-best-effort" data-reason="none" aria-hidden="true">
+  {createPortal(<div ref={shieldRef} hidden className="tc-capture-curtain" data-capture-curtain="browser-best-effort" data-reason="none" aria-hidden="true">
    <span>PROTECTED LEARNING CONTENT</span>
-  </div>
+  </div>,document.body)}
  </>;
 }
