@@ -1,3 +1,10 @@
+### 2026-10-31 — Screenshot focus-loss privacy experiment (v1.1.9, PR #18)
+
+- Pre-mount and synchronously toggle the black privacy overlay on best-effort capture keyboard keydown/keyup, reducing React rerender latency.
+- Blackout only active quiz/assessment question screens when browser loses focus or becomes hidden; clear on focus/pageshow/return pointer. Exclude external video players from focus-based blackout to avoid playback interruption.
+- Added physical browser screenshot-under-overlay tests and restored-state checks. These validate the CONDITIONAL overlay only, **not** real native screenshot detection or OS screen-record prevention.
+- Existing verified clipboard and print behavior unchanged. No Supabase/Cloudflare deployment.
+
 ### 2026-10-31 — Actual-use security pilot debugging (v1.1.8, PR #17)
 
 - Fixed a clipboard event-target hole: native Ctrl+C can target document/body even when text selected inside question; now checks Selection ranges in capture phase and preserves unprotected input copy.
