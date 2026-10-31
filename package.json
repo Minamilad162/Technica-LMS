@@ -20,6 +20,8 @@
     "test:course-dialog": "node scripts/test-course-dialog.mjs",
     "test:authoring": "node scripts/test-course-authoring.mjs",
     "test:hierarchy": "node scripts/test-course-hierarchy.mjs",
+    "test:p3": "node scripts/test-p3-supabase-contract.mjs",
+    "test:p3:bundle": "node scripts/test-p3-live-bundle.mjs",
     "test:admin-bank": "node scripts/test-admin-question-bank.mjs",
     "test:lesson-media": "node scripts/test-lesson-media.mjs",
     "test:learner-ui": "node scripts/test-learner-simplification.mjs",
