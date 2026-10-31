@@ -234,3 +234,23 @@
    display:none;
  }
 }
+
+
+/* Browser audit iteration 2: keep question workspace IN ordinary document flow.
+   position:fixed inside the page entrance transform created a stacking/viewport
+   containment bug and prevented genuine touch clicks on answers/navigation. */
+@media(max-width:700px){
+ body:has(.tc-calc-window:not(.tc-calc-minimized)) .quiz-page .quiz-columns{
+   position:relative!important;
+   display:block!important;
+   top:auto!important;left:auto!important;right:auto!important;bottom:auto!important;
+   width:100%;height:min(31dvh,265px);min-height:170px;
+   overflow-y:auto!important;overflow-x:hidden;
+   overscroll-behavior:contain;
+   z-index:auto!important;
+ }
+ body:has(.tc-calc-window:not(.tc-calc-minimized)) .quiz-page .question-panel{
+   position:relative;
+   z-index:auto;
+ }
+}
