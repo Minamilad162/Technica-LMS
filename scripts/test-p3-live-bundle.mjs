@@ -14,5 +14,7 @@ assert(bundle.includes('LIVE DATABASE MODE'),'production Supabase entry was not 
 assert(!bundle.includes('Demo@1234'),'demo credentials included in live bundle');
 assert(!bundle.includes('AdminDemo@1234'),'demo administrator credentials included in live bundle');
 assert(!bundle.includes(sample.slice(0,45)),'ASP answer bank prompt leaked in live bundle');
-assert(!bundle.includes('Quick 10'),'demo practice flow present in the live bundle');
+// P4 intentionally adds SECURE Quick 10 to live mode; the old text-based
+// practice exclusion must not reject it. Bank fixture and demo credential
+// absence checks above continue to guarantee isolation.
 console.log('PASS P3 live bundle security isolation:',files.length,'compiled files inspected; demo credentials / ASP fixture absent.');
