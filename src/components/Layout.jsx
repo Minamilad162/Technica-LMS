@@ -1,7 +1,7 @@
 import React,{useState} from 'react';
 import{NavLink,useLocation,useNavigate}from'react-router-dom';
 import{Home,BookOpen,NotebookTabs,GraduationCap,TriangleAlert,Bookmark,ChartNoAxesColumn,Users,Settings,HelpCircle,BookMarked,Database,Files,ClipboardCheck,Trophy,Search,Bell,ChevronDown,LogOut,Menu,X,LibraryBig,FileQuestion,BookOpenText,PanelLeftClose,ClipboardList,MoreHorizontal,UserRound,LayoutDashboard,ShieldCheck,ArrowRight,RotateCcw}from'lucide-react';
-import{logoutDemo,getAuthSession}from'../lib/demoAuth';
+import{signOutPortal,getAuthSession}from'../lib/portalAuth';
 import{useDemo}from'../lib/store';import{Avatar,DemoToast}from'./UI';
 const learnerItems=[['/home','Home',Home],['/my-learning','My learning',BookOpen],['/practice','Practice',NotebookTabs],['/assessments','Assessments',ClipboardCheck],['/results','Assessment review',TriangleAlert]];
 const adminItems=[['/analytics','Overview',Home],['/learners','Learners',Users],['/builder','Course Builder',BookOpenText],['/question-bank','Question Bank',FileQuestion],['/assessments','Exams',ClipboardCheck],['/reports','Reports',ChartNoAxesColumn],['/courses','Courses',BookOpen],['/practice','Practices',NotebookTabs]];
