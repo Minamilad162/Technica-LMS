@@ -84,10 +84,10 @@ function EditorModal({editing,onCancel,onSave,busy,error}) {
   </form>
  </div>;
 }
-export default function SupabaseApp({secureReviewEntry=false}) {
+export default function SupabaseApp({secureReviewEntry=false,reviewerOnly=false}) {
  const [session,setSession]=useState(null),[boot,setBoot]=useState(true),[identity,setIdentity]=useState(null),[recovering,setRecovering]=useState(false);
  const [courses,setCourses]=useState([]),[entitlements,setEntitlements]=useState([]),[courseId,setCourseId]=useState(null),[tree,setTree]=useState([]),[lessonId,setLessonId]=useState(null),[blocks,setBlocks]=useState([]);
- const [adminSection,setAdminSection]=useState(secureReviewEntry?'review':'courses'),[loadedStructureFor,setLoadedStructureFor]=useState(null);
+ const [reviewExpanded,setReviewExpanded]=useState(false),[loadedStructureFor,setLoadedStructureFor]=useState(null);
  const [busy,setBusy]=useState(false),[fetching,setFetching]=useState(false),[error,setError]=useState(''),[notice,setNotice]=useState(''),[editing,setEditing]=useState(null),[editError,setEditError]=useState('');
  const {db,configurationError}=useMemo(()=>initializeConnection(secureReviewEntry),[secureReviewEntry]);
  useEffect(()=>{
@@ -98,7 +98,7 @@ export default function SupabaseApp({secureReviewEntry=false}) {
   return()=>{active=false;subscription.unsubscribe();};
  },[db]);
  useEffect(()=>{
-  if(!db||!session?.user){setIdentity(null);setCourses([]);setTree([]);setEntitlements([]);setAdminSection(secureReviewEntry?'review':'courses');setLoadedStructureFor(null);return;}
+  if(!db||!session?.user){setIdentity(null);setCourses([]);setTree([]);setEntitlements([]);setReviewExpanded(false);setLoadedStructureFor(null);return;}
   let active=true;setFetching(true);setError('');
   Promise.all([loadIdentity(db,session.user),listCourses(db),getCurrentEntitlements(db,session.user.id)])
    .then(([user,items,access])=>{if(active){setIdentity(user);setCourses(items);setEntitlements(access);setCourseId(old=>items.some(c=>c.id===old)?old:(items[0]?.id||null));}})
@@ -109,6 +109,8 @@ export default function SupabaseApp({secureReviewEntry=false}) {
  const isAdmin=identity?.isAdmin===true;
  const selected=courses.find(c=>c.id===courseId);
  const aspCourse=courses.find(c=>c.slug==='asp');
+ useEffect(()=>{if(reviewerOnly&&aspCourse?.id&&courseId!==aspCourse.id)setCourseId(aspCourse.id);},[reviewerOnly,aspCourse?.id,courseId]);
+ useEffect(()=>{setReviewExpanded(false);},[selected?.id]);
  const entitled=isAdmin||includes(entitlements,courseId);
  const suspended=identity?.profile?.account_status==='suspended';
  useEffect(()=>{
@@ -164,36 +166,40 @@ export default function SupabaseApp({secureReviewEntry=false}) {
  if(boot)return <div className="live-wait">Loading secure LMS session…</div>;
  if(recovering&&session)return <RecoveryScreen db={db} onComplete={()=>{setRecovering(false);setNotice('Password updated successfully.');}}/>;
  if(!session)return <LoginScreen db={db}/>;
+ if(reviewerOnly)return <div className="live-review-embed-root">
+   <div className="live-review-embed-toolbar">
+     <div><span className="live-eyebrow">SECURE ADMIN · SUPABASE</span><strong>ASP question review</strong></div>
+     <div className="live-review-embed-account"><small>{session.user.email}</small><button type="button" className="live-secondary" onClick={()=>db.auth.signOut()}><LogOut size={15}/> Sign out</button></div>
+   </div>
+   {error&&<p className="live-error" role="alert"><AlertCircle size={17}/>{error}</p>}
+   {suspended?<div className="live-empty" role="alert"><LockKeyhole size={23}/><strong>Account suspended</strong><p>Contact the LMS administrator.</p></div>:
+    !identity?<div className="live-empty" role="status">Verifying your Supabase account…</div>:
+    !isAdmin?<div className="live-empty" role="alert"><LockKeyhole size={24}/><h3>Verified administrator required</h3><p>Your Supabase account is not assigned an active LMS Admin role. Demo Admin accounts cannot review live questions.</p></div>:
+    !aspCourse?<div className="live-empty" role="status"><BookOpen size={23}/><h3>ASP course not found</h3><p>Create the genuine ASP course with slug asp in Supabase before starting reviews.</p></div>:
+    selected?.id!==aspCourse.id||loadedStructureFor!==aspCourse.id?
+      <div className="live-empty" role="status"><RefreshCw size={23}/><h3>Preparing ASP course review…</h3><p>Loading the official domain catalog.</p></div>:
+      <AdminQuestionReview db={db} course={aspCourse} domains={tree} onDomainsSeeded={refresh}/>}
+ </div>;
  return <div className="live-shell">
   <header className="live-top"><div className="live-brand"><img src="/images/technica-logo.webp" alt="Technica Consult"/><strong>TECHNICA CONSULT <span>LMS</span></strong></div><div className="live-top-right"><span className="live-live-pill"><ShieldCheck size={14}/> Supabase</span><small>{session.user.email}</small><button type="button" className="live-secondary" onClick={()=>db.auth.signOut()}><LogOut size={16}/> Sign out</button></div></header>
   <main className="live-main">
-   <div className="live-main-heading"><div><span className="live-eyebrow">COURSE PLATFORM · SECURE DATABASE</span><h1>{isAdmin&&adminSection==='review'?'ASP Question Review':isAdmin?'Course management':'Learning library'}</h1><p>{isAdmin&&adminSection==='review'?'Classify ASP questions, verify answers and rights, and keep drafts private until release.':isAdmin?'Manage live course metadata and learning structure.':'Explore published courses you can access.'}</p></div><button type="button" className="live-secondary" onClick={refresh} disabled={fetching}><RefreshCw size={16}/> Refresh</button></div>
-   {isAdmin&&!suspended&&<nav className="live-admin-navigation" aria-label="Admin menu">
-     <span className="live-admin-nav-label">ADMIN MENU</span>
-     <button type="button" aria-current={adminSection==='courses'?'page':undefined}
-       className={adminSection==='courses'?'active':''} onClick={()=>setAdminSection('courses')}><BookOpen size={17}/> Courses & Builder</button>
-     <button type="button" aria-current={adminSection==='review'?'page':undefined}
-       className={adminSection==='review'?'active':''} onClick={()=>{if(aspCourse)setCourseId(aspCourse.id);setAdminSection('review');}}><BookOpenCheck size={17}/> ASP Question Review</button>
-    </nav>}
+   <div className="live-main-heading"><div><span className="live-eyebrow">COURSE PLATFORM · SECURE DATABASE</span><h1>{isAdmin?'Course management':'Learning library'}</h1><p>{isAdmin?'Manage course content and review ASP questions inside the ASP course card.':'Explore published courses you can access.'}</p></div><button type="button" className="live-secondary" onClick={refresh} disabled={fetching}><RefreshCw size={16}/> Refresh</button></div>
     {error&&<p className="live-error" role="alert"><AlertCircle size={18}/>{error}</p>}
    {notice&&<p className="live-notice" role="status"><CheckCircle2 size={17}/>{notice}</p>}
    {suspended?<div className="live-empty"><LockKeyhole size={24}/><b>Account suspended</b><p>Contact the LMS administrator.</p></div>:!identity?<div className="live-empty">Loading profile…</div>:
-   isAdmin&&adminSection==='review'?(
-     !aspCourse?<div className="live-empty" role="status"><BookOpen size={24}/><h3>ASP course not found</h3><p>Create the ASP course with the slug "asp" from Courses & Builder before opening its review queue. No questions are changed.</p>
-      <button className="live-secondary" type="button" onClick={()=>setAdminSection('courses')}>Open Courses & Builder</button></div>:
-     selected?.id!==aspCourse.id||loadedStructureFor!==aspCourse.id?
-      <div className="live-empty" role="status"><RefreshCw size={24}/><h3>Preparing ASP review workspace…</h3><p>Loading the ASP course and official domain catalog.</p></div>:
-      <AdminQuestionReview key={aspCourse.id} db={db} course={aspCourse} domains={tree} onDomainsSeeded={refresh}/>
-    ):
-    <div className="live-columns">
+   <div className="live-columns">
     <section className="live-list"><div className="live-list-top"><h2>Courses <span>{courses.length}</span></h2>{isAdmin&&<button className="live-icon-create" type="button" onClick={()=>setEditing({kind:'course',label:'Create course'})}><Plus size={17}/> New</button>}</div>
       {courses.map(c=><button type="button" key={c.id} onClick={()=>setCourseId(c.id)} className={`live-course ${selected?.id===c.id?'active':''}`}><BookOpen size={19}/><span><b>{c.title}</b><small>{c.publication_state==='published'?'Published':'Draft'} · {c.slug}</small></span>{!(isAdmin||includes(entitlements,c.id))&&<LockKeyhole size={15}/>}</button>)}
       {!courses.length&&<p className="live-empty">No courses found. {isAdmin?'Create the first course.':'Published courses will appear here.'}</p>}
     </section>
     <section className="live-workspace">
      {!selected?<div className="live-empty">Choose a course from the list.</div>:<>
-      <div className="live-course-head"><div><span className="live-eyebrow">COURSE</span><h2>{selected.title}</h2><p>{selected.summary||'No summary provided.'}</p></div><div className="live-head-actions">{isAdmin&&<><button type="button" className="live-secondary" onClick={()=>setEditing({kind:'rename',table:'lms_courses',id:selected.id,initial:selected.title,label:'Rename course'})}><Pencil size={15}/> Rename</button><button type="button" className="live-secondary" disabled={busy} onClick={()=>togglePublish('lms_courses',selected.id,selected.publication_state)}>{selected.publication_state==='published'?'Unpublish':'Publish'}</button></>}</div></div>
-      {!entitled?<div className="live-empty"><LockKeyhole size={24}/><h3>Course access required</h3><p>You can view the catalog, but your account does not have an active enrollment for this course.</p></div>:<>
+      <div className="live-course-head"><div><span className="live-eyebrow">COURSE</span><h2>{selected.title}</h2><p>{selected.summary||'No summary provided.'}</p></div><div className="live-head-actions">{isAdmin&&selected.slug==='asp'&&<button type="button" className="live-secondary" aria-expanded={reviewExpanded} onClick={()=>setReviewExpanded(v=>!v)}><BookOpenCheck size={16}/>{reviewExpanded?'Close question review':'Review questions'}</button>}{isAdmin&&<><button type="button" className="live-secondary" onClick={()=>setEditing({kind:'rename',table:'lms_courses',id:selected.id,initial:selected.title,label:'Rename course'})}><Pencil size={15}/> Rename</button><button type="button" className="live-secondary" disabled={busy} onClick={()=>togglePublish('lms_courses',selected.id,selected.publication_state)}>{selected.publication_state==='published'?'Unpublish':'Publish'}</button></>}</div></div>
+      {isAdmin&&selected.slug==='asp'&&reviewExpanded?(
+         loadedStructureFor!==selected.id?
+         <div className="live-empty" role="status">Loading secure ASP domain data…</div>:
+         <AdminQuestionReview db={db} course={selected} domains={tree} onDomainsSeeded={refresh}/>
+        ):!entitled?<div className="live-empty"><LockKeyhole size={24}/><h3>Course access required</h3><p>You can view the catalog, but your account does not have an active enrollment for this course.</p></div>:<>
        <div className="live-section-heading"><h3><Layers3 size={18}/> Domains · Topics · Lessons</h3>{isAdmin&&<button className="live-icon-create" onClick={()=>setEditing({kind:'domain',courseId:selected.id,label:'Add domain'})}><Plus size={16}/> Domain</button>}</div>
        {fetching&&<p className="live-muted">Refreshing structure…</p>}
        {tree.map((domain,di)=><div className="live-domain" key={domain.id}>
@@ -213,7 +219,7 @@ export default function SupabaseApp({secureReviewEntry=false}) {
      </>}
     </section>
    </div>}
-   {(adminSection==='courses'||!isAdmin)&&selected&&identity&&!suspended&&<LivePractice key={session.user.id+selected.id} db={db} user={session.user} course={selected} domains={tree} access={isAdmin||entitlements.some(e=>e.course_id===selected.id&&['paid','manual'].includes(e.entitlement_type))}/>}
+   {selected&&identity&&!suspended&&!(isAdmin&&reviewExpanded&&selected.slug==='asp')&&<LivePractice key={session.user.id+selected.id} db={db} user={session.user} course={selected} domains={tree} access={isAdmin||entitlements.some(e=>e.course_id===selected.id&&['paid','manual'].includes(e.entitlement_type))}/>}
    
    <p className="live-disclaimer">P6A admin ASP bank review is private and does not publish questions. P4 scope: RLS-governed question bank and server-scored Quick 10, Timed Quiz, Custom and Domain Practice after manual question approval. Reserved Mock, adaptive Level Up, admin Assessment, payments, protected media and learner progress-event writes remain unavailable.</p>
   </main>{editing&&<EditorModal key={editing.kind+editing.id+editing.domainId+editing.topicId} editing={editing} onCancel={()=>{setEditing(null);setEditError('');}} onSave={save} busy={busy} error={editError}/>}
