@@ -159,24 +159,30 @@ try{
    }
    assert.ok(await page.locator('.question-panel h1').isVisible());
   });
-  await check(device.name+' true background visibility still masks protected questions',async()=>{
-   const curtain=page.locator('.tc-capture-curtain');
+  await check(device.name+' hidden tab closes fullscreen questions and returns to setup',async()=>{
    try{
     await page.evaluate(()=>{
-      Object.defineProperty(document,'visibilityState',{configurable:true,value:'hidden'});
-      document.dispatchEvent(new Event('visibilitychange'));
+     Object.defineProperty(document,'visibilityState',{configurable:true,value:'hidden'});
+     document.dispatchEvent(new Event('visibilitychange'));
     });
-    await curtain.waitFor({state:'visible'});
-    assert.equal(await curtain.getAttribute('data-reason'),'focus-loss');
+    await page.waitForURL(url=>url.hash==='#/practice');
+    assert.equal(await page.locator('.question-panel h1').count(),0);
+    const state=await page.evaluate(()=>JSON.parse(localStorage.getItem('technica-lms-demo-v1-asp5')));
+    assert.equal(state.practiceSession,null,'Hidden-tab exit must discard pending question session');
    }finally{
     await page.evaluate(()=>{
-      Object.defineProperty(document,'visibilityState',{configurable:true,value:'visible'});
-      document.dispatchEvent(new Event('visibilitychange'));
-      delete document.visibilityState;
-      window.dispatchEvent(new Event('focus'));
+     Object.defineProperty(document,'visibilityState',{configurable:true,value:'visible'});
+     document.dispatchEvent(new Event('visibilitychange'));
+     delete document.visibilityState;
+     window.dispatchEvent(new Event('focus'));
     });
    }
-   await curtain.waitFor({state:'hidden'});
+   await page.waitForFunction(()=>document.fullscreenElement===null);
+  });
+  await check(device.name+' restart practice requires fresh fullscreen',async()=>{
+   await page.locator('.start-practice').click();
+   await page.locator('.question-panel h1').waitFor();
+   assert.equal(await page.evaluate(()=>!!document.fullscreenElement),true);
   });
   await check(device.name+' PrintScreen keyup fallback shows a temporary black shield',async()=>{
    await page.evaluate(()=>window.dispatchEvent(new KeyboardEvent('keyup',{key:'PrintScreen',code:'PrintScreen',bubbles:true,cancelable:true})));
@@ -209,6 +215,10 @@ try{
    await page.emulateMedia({media:'screen'});
   });
   await check(device.name+' video and lesson quiz watermark',async()=>{
+   if(await page.evaluate(()=>!!document.fullscreenElement)){
+    await page.evaluate(()=>document.exitFullscreen());
+    await page.waitForURL(url=>url.hash==='#/practice');
+   }
    await page.goto(ROOT+'/#/learning/process-safety-foundations',{waitUntil:'domcontentloaded'});
    await page.locator('.learn-lesson-content.tc-protected-content').waitFor();
    assert.equal(await page.locator('.learn-lesson-content .tc-watermark-layer').count(),1);
