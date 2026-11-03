@@ -7,6 +7,7 @@ assert(existsSync(htmlPath),'Default Cloudflare build must contain /asp-review.h
 const html=readFileSync(htmlPath,'utf8');
 assert(html.includes('ASP Question Review'),'The real review page title must be included');
 assert(!html.includes('/src/main.jsx'),'Standalone review must never use browser-local Demo entry');
+assert(!html.includes('src/production/main.jsx'),'Standalone review uses dedicated secure entry, not pathname-heuristic entry');
 assert(!html.includes('aspQuestionBank.json'),'Standalone review must not inline historic ASP questions');
 const entryScripts=[...html.matchAll(/<script[^>]+src="([^"]+\.js)"/g)].map(x=>x[1]);
 assert(entryScripts.length>0,'Compiled review HTML must link its JS runtime');
