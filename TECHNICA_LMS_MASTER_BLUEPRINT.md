@@ -1053,3 +1053,5 @@ Implementation on isolated [PR #14](https://github.com/Minamilad162/Technica-LMS
 
 ### Change history — 2026-11-03 (P5)
 - Added native fullscreen entry and auto-exit, live watermark parity and restricted server abandonment. P1/P2/P4 unaffected; P5 migration deliberately manual.
+
+**P5 scope extension — Lesson self-check:** The final 10-question Lesson Quiz in the Demo Learning Player now also requests native fullscreen on user selection/Next, closes and reverts to the last lesson on fullscreen loss, preserves completed lesson progress, and requests fresh fullscreen for retakes. P5 browser QA exercises this path. This does not introduce secure production grading for demo lesson quizzes.
