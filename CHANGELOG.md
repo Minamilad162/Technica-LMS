@@ -1,3 +1,11 @@
+
+### 2026-11-03 — P4/P5 source-to-staging verification kit (read-only)
+
+- Added one catalog-only SQL SELECT `supabase/P4_P5_VERIFY_ALL_READ_ONLY.sql` to detect **MISSING / FAIL / PASS** for P1/P2 prerequisites and P4/P5 schema, RPC grants, indexes, trigger and abandonment redaction source guard without reading any user/question rows.
+- Added `docs/current/P4_P5_STAGING_VERIFICATION_GATE.md` with environment validation, safe SQL Editor procedure, real Supabase JWT and physical-browser test plan, staged migration approval gate and rollback.
+- Added a disposable PostgreSQL CI execution of the audit to validate SQL query behavior when P1/P2/P4/P5 fixture schema is present.
+- **Not performed:** connecting to the real Technica Supabase project, executing P4/P5 SQL on it, touching production, deploying Cloudflare, changing practice/assessment user behavior or declaring paid production readiness. Source CI results do not certify live Supabase.
+
 ### 2026-10-31 — Practice quick-select modes (v1.1.11)
 
 - Added original Technica light-theme quick mode grid referencing previously supplied Pocket Prep conceptual screenshots: Quick 10, Timed Quiz, Practice by Domain, Weakest Subject, Missed Questions, Build Your Own, Level Up and Mock Exam.

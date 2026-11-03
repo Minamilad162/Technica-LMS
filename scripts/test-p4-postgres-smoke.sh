@@ -3,6 +3,16 @@
 set -euo pipefail
 export PGHOST=localhost PGPORT=5432 PGUSER=postgres PGDATABASE=postgres PGPASSWORD=postgres
 
+# The read-only audit must remain runnable even BEFORE P4/P5 are installed.
+pre_audit=$(psql -X -v ON_ERROR_STOP=1 -A -t -f supabase/P4_P5_VERIFY_ALL_READ_ONLY.sql)
+if ! printf '%s\n' "$pre_audit" | grep -Fq 'P4|table:lms_questions|MISSING|'; then
+ echo 'FAIL unified read-only audit did not report missing P4 schema'; exit 1
+fi
+if ! printf '%s\n' "$pre_audit" | grep -Fq 'P5|rpc:lms_p5_abandon_practice(uuid)|MISSING|'; then
+ echo 'FAIL unified read-only audit did not report missing P5 RPC'; exit 1
+fi
+echo 'PASS unified read-only audit safely detects absent P4/P5'
+
 psql -X -v ON_ERROR_STOP=1 -q -f supabase/migrations/202610310003_p4_secure_practice.sql
 psql -X -v ON_ERROR_STOP=1 -q <<'SQL'
 UPDATE public.lms_profiles SET account_status='active' WHERE id='00000000-0000-0000-0000-000000000003';
