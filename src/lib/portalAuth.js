@@ -2,8 +2,8 @@
 // No Demo credentials or browser-local role selection can mint an account.
 // The legacy course/quiz pages are still LOCAL previews and are not a paid
 // server-protected question bank; their role checks are only UI guards.
-import {getSupabaseClient} from './supabase';
-import {loadIdentity} from '../production/lmsApi';
+import {getSupabaseClient} from './supabase.js';
+import {loadIdentity} from '../production/lmsApi.js';
 
 let trustedAccount=null;
 function client(){return getSupabaseClient({secureReviewEntry:true});}
