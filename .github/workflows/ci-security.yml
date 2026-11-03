@@ -71,6 +71,9 @@ jobs:
           npm run test:p4
           npm run test:p4:bank
 
+      - name: P5 native fullscreen and exit policy contracts
+        run: npm run test:p5
+
       - name: Protected exam and video deterrence contract
         run: npm run test:content-protection
 
@@ -138,5 +141,8 @@ jobs:
         run: bash scripts/test-p1-postgres-smoke.sh
       - name: P4 secure question/attempt transactional and privilege smoke
         run: bash scripts/test-p4-postgres-smoke.sh
+      - name: P5 fullscreen exit seals and redacts backend question attempts
+        run: bash scripts/test-p5-postgres-smoke.sh
+
       - name: Test scope disclosure
         run: echo "Ephemeral local PostgreSQL smoke only; live Supabase Auth, Storage, Data API and device tests still pending."

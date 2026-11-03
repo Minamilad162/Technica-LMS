@@ -1,6 +1,9 @@
 import React,{useEffect,useMemo,useRef,useState} from 'react';
 import {BookOpen,Check,ChevronLeft,ChevronRight,Clock3,Flag,LockKeyhole,PlayCircle,RefreshCw,ShieldCheck,Target,TriangleAlert} from 'lucide-react';
-import {answerSecurePractice,finishSecurePractice,getSecurePractice,practiceSessionKey,safeRemainingSeconds,startSecurePractice} from './practiceApi';
+import {abandonSecurePractice,answerSecurePractice,finishSecurePractice,practiceSessionKey,safeRemainingSeconds,startSecurePractice} from './practiceApi';
+import {requestQuestionFullscreen,isFullscreenActive,fullscreenStartError,leaveQuestionFullscreen} from '../lib/questionFullscreen';
+import {useQuestionFullscreenGuard} from '../lib/useQuestionFullscreenGuard';
+import LiveProtectedContent from './LiveProtectedContent';
 import './livePractice.css';
 
 const PRESETS=[
@@ -22,7 +25,38 @@ export default function LivePractice({db,user,course,domains=[],access}) {
  const [attempt,setAttempt]=useState(null),[selected,setSelected]=useState(0),[feedback,setFeedback]=useState({});
  const [busy,setBusy]=useState(false),[error,setError]=useState(''),[notice,setNotice]=useState(''),[clock,setClock]=useState(Date.now());
  const processing=useRef(false);
+ const containerRef=useRef(null);
+ const closingRef=useRef(false);
  const storageKey=useMemo(()=>practiceSessionKey(user.id,course.id),[user.id,course.id]);
+ const sealAttempt=async id=>{
+  closingRef.current=true;
+  setAttempt(null);
+  setFeedback({});
+  setSelected(0);
+  localStorage.removeItem(storageKey);
+  localStorage.removeItem(storageKey+':pending');
+  if(!id)return;
+  const closingKey=storageKey+':closing';
+  localStorage.setItem(closingKey,id);
+  try{
+   await abandonSecurePractice(db,id);
+   localStorage.removeItem(closingKey);
+  }catch{
+   // Never restore questions simply because the network failed.
+   // Retry closure on next connection; server cannot prove OS fullscreen.
+   setNotice('Questions are closed. Server closure is pending connection recovery.');
+  }
+ };
+ const {leaveIntentionally}=useQuestionFullscreenGuard({
+  active:!!attempt,
+  targetRef:containerRef,
+  onUnexpectedExit:()=>{
+   const id=attempt?.attemptId;
+   void sealAttempt(id);
+   void leaveQuestionFullscreen(document);
+   setNotice('Fullscreen exited. You have been returned to the practice setup.');
+  }
+ });
  const current=attempt?.questions?.[selected]||null;
  const finished=attempt?.state!=='in_progress'&&!!attempt;
  const remaining=safeRemainingSeconds(attempt,clock);
@@ -30,17 +64,22 @@ export default function LivePractice({db,user,course,domains=[],access}) {
  const eligible=access;
 
  useEffect(()=>{
-  setAttempt(null);setSelected(0);setFeedback({});setError('');setNotice('');
+  setAttempt(null);setSelected(0);setFeedback({});setError('');setNotice('');closingRef.current=false;
   if(!eligible)return;
-  let active=true;
   let saved;
   try{saved=JSON.parse(localStorage.getItem(storageKey)||'null');}catch{}
-  if(saved?.attemptId){
-   getSecurePractice(db,saved.attemptId).then(data=>{
-    if(active){setAttempt({...data,observedAtEpoch:Date.now()});setSelected(0);}
-   }).catch(()=>{if(active){localStorage.removeItem(storageKey);setAttempt(null);}});
+  const closingKey=storageKey+':closing';
+  const unfinished=localStorage.getItem(closingKey)||saved?.attemptId;
+  if(unfinished){
+   // Reloading a fullscreen exam implicitly exits fullscreen. Do NOT resume
+   // its questions without new permission; seal it instead.
+   localStorage.removeItem(storageKey);
+   localStorage.removeItem(storageKey+':pending');
+   localStorage.setItem(closingKey,unfinished);
+   setNotice('Previous question session closed after leaving fullscreen or reloading the page.');
+   void abandonSecurePractice(db,unfinished).then(()=>localStorage.removeItem(closingKey))
+     .catch(()=>setNotice('Questions closed locally. Server closure will retry when connected.'));
   }
-  return()=>{active=false;};
  },[db,storageKey,eligible]);
 
  useEffect(()=>{
@@ -54,8 +93,10 @@ export default function LivePractice({db,user,course,domains=[],access}) {
   processing.current=true;setBusy(true);setError('');
   try{
    const next=await finishSecurePractice(db,attempt.attemptId);
-   setAttempt({...next,observedAtEpoch:Date.now()});
-   setNotice('The score was calculated and saved securely in the database.');
+   if(!closingRef.current&&isFullscreenActive(document,containerRef.current)){
+    setAttempt({...next,observedAtEpoch:Date.now()});
+    setNotice('The score was calculated and saved securely in the database.');
+   }
   }catch(e){setError(errorText(e));}
   finally{processing.current=false;setBusy(false);}
  };
@@ -76,6 +117,9 @@ export default function LivePractice({db,user,course,domains=[],access}) {
    setError('Select a course domain first.');setBusy(false);processing.current=false;return;
   }
   try{
+   const full=await requestQuestionFullscreen(containerRef.current);
+   if(!full.ok){setError(fullscreenStartError(full));return;}
+   closingRef.current=false;
    // Keep the same request UUID across retries, so a transient network failure
    // cannot accidentally start a duplicate attempt.
    const pendingKey=storageKey+':pending';
@@ -85,10 +129,21 @@ export default function LivePractice({db,user,course,domains=[],access}) {
      courseId:course.id,mode,count:total,durationSeconds:time,
      domainId:mode==='domain'?domainId:null,requestId
    });
+   if(!isFullscreenActive(document,containerRef.current)){
+    void sealAttempt(next.attemptId);
+    setNotice('Fullscreen was closed while preparing questions. Returned to setup.');
+    return;
+   }
+   if(next.state==='abandoned'){
+    localStorage.removeItem(pendingKey);
+    setError('This attempt was already closed after fullscreen exit. Start a new practice session.');
+    void leaveQuestionFullscreen(document);
+    return;
+   }
    localStorage.setItem(storageKey,JSON.stringify({attemptId:next.attemptId}));
    localStorage.removeItem(pendingKey);
    setAttempt({...next,observedAtEpoch:Date.now()});setSelected(0);setFeedback({});
-  }catch(e){setError(errorText(e));}
+  }catch(e){setError(errorText(e));void leaveQuestionFullscreen(document);}
   finally{setBusy(false);processing.current=false;}
  };
 
@@ -98,23 +153,26 @@ export default function LivePractice({db,user,course,domains=[],access}) {
   processing.current=true;setBusy(true);setError('');
   try{
    const reply=await answerSecurePractice(db,attempt.attemptId,current.id,optionIndex);
-   setAttempt(previous=>({
+   if(closingRef.current||!isFullscreenActive(document,containerRef.current))return;
+   setAttempt(previous=>previous?({
      ...previous,
      questions:previous.questions.map(q=>q.id===current.id?{...q,selectedIndex:optionIndex}:q)
-   }));
+   }):null);
    if(reply.correctIndex!==undefined)
     setFeedback(old=>({...old,[current.id]:{correctIndex:reply.correctIndex,explanation:reply.explanation}}));
   }catch(e){setError(errorText(e));}
   finally{setBusy(false);processing.current=false;}
  };
  const startOver=()=>{
+  void leaveIntentionally();
+  closingRef.current=true;
   localStorage.removeItem(storageKey);localStorage.removeItem(storageKey+':pending');
   setAttempt(null);setSelected(0);setFeedback({});setError('');setNotice('');
  };
  const answered=attempt?.questions?.filter(q=>q.selectedIndex!==null&&q.selectedIndex!==undefined).length||0;
  const revealed=finished?current:feedback[current?.id];
- return <div className="live-practice" aria-label="Secure practice engine">
-  <div className="live-practice-top"><div><span className="live-eyebrow">P4 · SERVER-GRADED PRACTICE</span><h3><ShieldCheck size={21}/> Secure Practice Center</h3><p>Questions are selected and scored in Supabase; correct answers are not sent before feedback or final submission.</p></div></div>
+ return <div ref={containerRef} className="live-practice" aria-label="Secure practice engine">
+  <div className="live-practice-top"><div><span className="live-eyebrow">P5 · FULLSCREEN PROTECTED PRACTICE</span><h3><ShieldCheck size={21}/> Secure Practice Center</h3><p>Questions are selected and scored in Supabase. Exiting fullscreen closes this attempt and returns to the course setup.</p></div>{attempt&&<button type="button" className="live-secondary" onClick={()=>{void sealAttempt(attempt.attemptId);void leaveIntentionally();}}>Leave questions</button>}</div>
   {!eligible?<div className="live-empty"><LockKeyhole size={22}/><b>Practice requires paid or manually granted course access</b><p>Trial lesson access alone does not unlock the full question bank.</p></div>:!attempt?<>
    <div className="live-mode-grid">{PRESETS.map(p=><button key={p.id} className={'live-mode-card '+(mode===p.id?'chosen':'')} onClick={()=>setMode(p.id)} type="button"><strong>{p.title}</strong><span>{p.desc}</span>{mode===p.id&&<Check size={17}/>}</button>)}</div>
    {['custom','domain'].includes(mode)&&<div className="live-practice-controls">
@@ -130,7 +188,7 @@ export default function LivePractice({db,user,course,domains=[],access}) {
      {remaining!==null&&<span><Clock3 size={16}/>{formatTime(remaining)} remaining</span>}
      {finished&&<strong>{attempt.scorePercent}% · {attempt.correctCount}/{attempt.questionCount} correct</strong>}
    </div>
-   {current&&<div className="live-question">
+   {current&&<LiveProtectedContent as="div" className="live-question" kind="exam-question" identity={{id:user.id}}>
      <div className="live-question-label">QUESTION {selected+1} OF {attempt.questions.length}</div>
      <h4>{current.prompt}</h4>
      <div className="live-answer-list">{current.options.map((option,index)=>{
@@ -143,7 +201,7 @@ export default function LivePractice({db,user,course,domains=[],access}) {
        </button>;
      })}</div>
      {typeof revealed?.correctIndex==='number'&&<div className="live-practice-feedback"><b>{current.selectedIndex===revealed.correctIndex?'Correct answer':'Answer review'}</b><p>{revealed.explanation||'No explanation provided.'}</p></div>}
-   </div>}
+   </LiveProtectedContent>}
    <div className="live-question-nav">
      <button type="button" className="live-secondary" disabled={selected===0} onClick={()=>setSelected(v=>Math.max(0,v-1))}><ChevronLeft size={16}/> Previous</button>
      <div className="live-dots">{attempt.questions.map((q,i)=><button type="button" key={q.id} aria-label={'Question '+(i+1)} className={(selected===i?'active ':'')+(q.selectedIndex!==null&&q.selectedIndex!==undefined?'answered':'')} onClick={()=>setSelected(i)}>{i+1}</button>)}</div>

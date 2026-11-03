@@ -32,3 +32,41 @@
 .live-dots button.answered{border-color:#42a391;background:#ecf9f5}
 .live-dots button.active{background:#158477;border-color:#158477;color:white}
 @media(max-width:650px){.live-practice{padding:12px;border-radius:13px}.live-mode-grid{grid-template-columns:1fr}.live-mode-card{min-height:82px}.live-question{padding:12px}.live-question h4{font-size:16px}.live-question-nav{display:grid;grid-template-columns:1fr 1fr}.live-dots{grid-column:1/-1;grid-row:2}.live-attempt-bar{gap:6px}.live-practice>.live-primary{width:100%}}
+/* P5: only the live Practice workspace fills the screen, not the admin/catalog.
+   Browser chrome can be removed only when native Element Fullscreen is supported. */
+.live-practice:fullscreen,
+.live-practice:-webkit-full-screen{
+ width:100vw!important;
+ height:100dvh!important;
+ max-height:100dvh;
+ max-width:none!important;
+ margin:0!important;
+ padding:clamp(13px,3vw,35px)!important;
+ border-radius:0!important;
+ border:0!important;
+ background:#f7fbfa!important;
+ overflow-y:auto!important;
+ overscroll-behavior:contain;
+ align-content:start;
+}
+.live-practice:fullscreen .live-question,
+.live-practice:-webkit-full-screen .live-question{
+ max-width:1050px;
+ width:100%;
+ margin-inline:auto;
+ background:#fff;
+}
+.live-practice:fullscreen .tc-watermark-layer,
+.live-practice:-webkit-full-screen .tc-watermark-layer{
+ opacity:.15;
+}
+.live-practice:fullscreen .live-practice-top,
+.live-practice:fullscreen .live-attempt-bar,
+.live-practice:fullscreen .live-question-nav{
+ width:100%;
+ max-width:1100px;
+ margin-inline:auto;
+}
+.live-practice .tc-capture-curtain{
+ z-index:2147483647;
+}

@@ -1039,3 +1039,19 @@ Implementation on isolated [PR #14](https://github.com/Minamilad162/Technica-LMS
 
 ### 2026-10-31 — P4 secure Practice Center staged
 - Backend selection, scoring, eligibility and mock-pool exclusions enforced in PostgreSQL. No new P4 tables applied to a live Supabase target automatically, and no existing demo modes or imported ASP keys changed.
+
+
+## 43. P5 protected fullscreen question sessions — 2026-11-03
+
+**Owner request:** Open question Practice / Assessment in true fullscreen; if user exits fullscreen, leave questions completely and return to the previous page. Strengthen anti-copy/print tracking and watermark in Supabase Live. Preserve existing layouts/calculator and all approved ASP/P4 rules.
+
+**Implemented in source (not deployed):** All Demo Practice modes and admin-configured Assessment now request native fullscreen from the real Start-button gesture before starting any question session. Browser API denial or unsupported iPhone WebKit fails closed and reports a compatibility message. Question routes check the native fullscreen element and use fullscreenchange, visibilitychange, explicit Exit and hash-route listeners to discard an unfinished Demo session, then navigate back to the corresponding setup. Legitimate submission/timer expiry releases fullscreen intentionally, preserving historical result navigation and no regression to score/time/ASP 200/300 or calculator logic. Repeated Start is guarded against duplicate requests. This is a UI policy and cannot prevent screenshots or recordings by Windows, other software or another camera.
+
+**Live P4:** New independent LiveProtectedContent (no demo login import) adds authenticated-user-ID + session + UTC-minute repeated overlay and scoped copy/print deterrence; fullscreen uses the live-practice DOM element so learners see only the question workspace. Its exit guard closes questions locally, navigates back to the course's practice setup and invokes authenticated PostgreSQL RPC lms_p5_abandon_practice. Reloading a live question page does NOT restore questions outside fullscreen; it retries abandonment. Additive migration 202611030001_p5_fullscreen_attempt_exit.sql creates a state='abandoned' and redacts abandoned question snapshots from P4 payload and finish RPCs, checks real auth.uid ownership and preserves RLS. Never claim server-side proof of actual fullscreen/recording: browser events are client controlled and failed network calls can delay the database update.
+
+**Acceptance:** Real native Chrome desktop start/exit Esc, explicit Exit, tab hidden, route and refresh, demo results and calculator; isolated production bundle without ASP answer-bank or demo credentials; P5 disposable Postgres no cross-user abandon or result leak; real JWT/Supabase device QA still pending. iPhone full interactive element fullscreen unsupported—require a supported browser/device until native/PWA solution is approved. No new Mock/Level Up, video DRM or OS screenshot prevention. See docs/current/P5_FULLSCREEN_QUESTION_SECURITY_RUNBOOK.md and supabase/P5_VERIFY_READ_ONLY.sql. **Source CI is not production deploy.**
+
+### Change history — 2026-11-03 (P5)
+- Added native fullscreen entry and auto-exit, live watermark parity and restricted server abandonment. P1/P2/P4 unaffected; P5 migration deliberately manual.
+
+**P5 scope extension — Lesson self-check:** The final 10-question Lesson Quiz in the Demo Learning Player now also requests native fullscreen on user selection/Next, closes and reverts to the last lesson on fullscreen loss, preserves completed lesson progress, and requests fresh fullscreen for retakes. P5 browser QA exercises this path. This does not introduce secure production grading for demo lesson quizzes.

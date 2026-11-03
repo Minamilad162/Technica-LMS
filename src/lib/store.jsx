@@ -85,6 +85,18 @@ export function DemoProvider({children}) {
  function answer(kind,id,index){const key=kind==='practice'?'practiceSession':'assessmentSession';setState(s=>({...s,[key]:{...s[key],answers:{...s[key]?.answers,[id]:index}}}))}
  function jump(kind,id){const key=kind==='practice'?'practiceSession':'assessmentSession';setState(s=>{const session=s[key];if(!session)return s;const count=session.questionSet?.length||0;if(!Number.isInteger(id)||id<1||id>count)return s;return {...s,[key]:{...session,visitedQuestions:markQuestionLeft(session.visitedQuestions||[],session.current,count),current:id,questionStartedAt:Date.now()}}})}
  function flag(kind,id){const key=kind==='practice'?'practiceSession':'assessmentSession';setState(s=>{const current=s[key]||{}, flags=current.flags||[];return {...s,[key]:{...current,flags:flags.includes(id)?flags.filter(x=>x!==id):[...flags,id]}}})}
+ function abortSession(kind){
+  if(kind!=='practice'&&kind!=='assessment')return;
+  const key=kind==='practice'?'practiceSession':'assessmentSession';
+  // Exiting fullscreen discards only the active unsent answers. It does not
+  // change a graded result, assessment history, other courses or calculator.
+  setState(current=>{
+   const active=current[key];
+   if(!active||active.submitted)return current;
+   return {...current,[key]:null};
+  });
+  notify('You left fullscreen. The question session was closed.');
+ }
  function submit(kind){
   const key=kind==='practice'?'practiceSession':'assessmentSession';const s=state[key];if(!s)return;
   const questions=s.questionSet||assessmentQuestions;
@@ -161,7 +173,7 @@ export function DemoProvider({children}) {
  function editLesson(courseId,moduleId,id,lesson){mutateModules(courseId,arr=>arr.map(m=>m.id===moduleId?{...m,lessons:m.lessons.map(l=>l.id===id?{...l,...lesson}:l)}:m));notify('Lesson updated')}
  function deleteLesson(courseId,moduleId,id){mutateModules(courseId,arr=>arr.map(m=>m.id===moduleId?{...m,lessons:m.lessons.filter(l=>l.id!==id)}:m));notify('Lesson removed')}
  function moveLesson(courseId,moduleId,id,direction){mutateModules(courseId,arr=>arr.map(m=>{if(m.id!==moduleId)return m;const result=[...m.lessons],i=result.findIndex(l=>l.id===id),j=i+direction;if(i>=0&&j>=0&&j<result.length)[result[i],result[j]]=[result[j],result[i]];return {...m,lessons:result}}))}
- const value=useMemo(()=>({state,update,notify,toast,beginAssessment,beginPractice,answer,jump,flag,submit,updateAssessmentSettings,createAdminCourse,editAdminCourse,addCourseMedia,deleteCourseMedia,addQuestion,importQuestions,saveCourseHierarchy,addModule,editModule,deleteModule,toggleModule,addLesson,editLesson,deleteLesson,moveLesson,reset:()=>{setState(initial);notify('Demo data reset')} }),[state,toast]);
+ const value=useMemo(()=>({state,update,notify,toast,beginAssessment,beginPractice,answer,jump,flag,submit,abortSession,updateAssessmentSettings,createAdminCourse,editAdminCourse,addCourseMedia,deleteCourseMedia,addQuestion,importQuestions,saveCourseHierarchy,addModule,editModule,deleteModule,toggleModule,addLesson,editLesson,deleteLesson,moveLesson,reset:()=>{setState(initial);notify('Demo data reset')} }),[state,toast]);
  return <Context.Provider value={value}>{children}</Context.Provider>
 }
 export function useDemo(){return useContext(Context)}

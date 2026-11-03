@@ -151,3 +151,9 @@
 @media(max-width:700px){
   .tc-video-stamp{font-size:8px;padding:4px 6px;bottom:7px;right:7px}
 }
+
+/* Synchronous privacy cover between native fullscreenchange and React route transition.
+   This is a brief visual deterrent only; it does not block OS capture. */
+html.tc-quiz-exit-lock :is(.quiz-page,.live-practice .live-question,.live-practice .live-question-nav,.learn-quiz-content){
+ visibility:hidden!important;
+}
