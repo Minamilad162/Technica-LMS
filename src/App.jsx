@@ -1,6 +1,5 @@
 import React,{useEffect,useState}from'react';import{Routes,Route,Navigate,useLocation}from'react-router-dom';
 import Layout from './components/Layout';
-import ASPReviewLiveNotice from './pages/ASPReviewLiveNotice';
 import {useDemo} from './lib/store';
 import MotionSystem from './components/MotionSystem';
 import AuthPage,{DemoPolicyPage} from './pages/AuthPage';
