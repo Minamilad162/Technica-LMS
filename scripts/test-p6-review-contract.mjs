@@ -42,10 +42,19 @@ assert.ok(!shell.includes('isAdmin&&selected?.slug===\'asp\'&&!suspended&&<Admin
 const demoMenu=read('src/components/Layout.jsx');
 const demoRoutes=read('src/App.jsx');
 const demoGate=read('src/pages/ASPReviewLiveNotice.jsx');
-assert.ok(demoMenu.includes("['/asp-review','ASP Review (Live)'"),'Demo admin menu must disclose the Live-only destination');
+assert.ok(demoMenu.includes("['/asp-review','ASP Question Review'"),'Deployed admin menu must expose the actual reviewer');
 assert.ok(demoRoutes.includes('path="/asp-review" element={<AdminOnly>'),'Demo notice route must remain admin gated');
-assert.ok(demoGate.includes('Demo questions and simulated admin roles cannot approve live content.'));
+assert.ok(demoGate.includes("window.location.replace(secureUrl)"),'Admin menu should open the functional secure entry directly');
 assert.ok(!demoGate.includes("from '../production/"),'Demo notice must never import the production reviewer or protected RPCs');
 
+const reviewHtml=read('asp-review.html');
+const vite=read('vite.config.js');
+const supabaseClient=read('src/lib/supabase.js');
+assert.ok(reviewHtml.includes('/src/production/main.jsx'), 'Standalone secure review must use the isolated Live entry');
+assert.ok(!reviewHtml.includes('/src/main.jsx'), 'No unprotected Demo app in secure review HTML');
+assert.ok(vite.includes("aspReview:resolve(process.cwd(),'asp-review.html')"), 'Default build must emit the secure reviewer alongside existing site');
+assert.ok(vite.includes("build:live?undefined:"), 'Full Live bundle must remain single entry and exclude Demo answer bank');
+assert.ok(supabaseClient.includes("!secureReviewEntry"), 'Secure review entry may initialize Supabase without switching Demo app auth mode');
+assert.ok(shell.includes("standaloneReviewPage?'review':'courses'"), 'Standalone review must open its real admin page by default');
 assert.ok(shell.includes('<AdminQuestionReview'));
 console.log('PASS P6A isolated secure admin review contract: no auto-approval, nine official domains, no browser direct bank read.');

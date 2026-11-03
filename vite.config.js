@@ -1,5 +1,6 @@
 import {defineConfig,loadEnv} from 'vite';
 import react from '@vitejs/plugin-react';
+import {resolve} from 'node:path';
 
 // An isolated HTML entrypoint is mandatory: simply hiding demo routes still
 // ships the bundled ASP answer JSON to every public visitor. Never do that.
@@ -21,6 +22,17 @@ export default defineConfig(({mode})=>{
         }
       }]:[])
     ],
+    // Existing public demo stays intact; its admin menu links to a separate,
+    // genuinely authenticated Supabase reviewer at /asp-review.html.
+    // Live production builds remain single-entry and do NOT bundle demo answer keys.
+    build:live?undefined:{
+      rollupOptions:{
+        input:{
+          main:resolve(process.cwd(),'index.html'),
+          aspReview:resolve(process.cwd(),'asp-review.html')
+        }
+      }
+    },
     base:'./'
   };
 });

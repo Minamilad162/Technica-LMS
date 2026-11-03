@@ -99,6 +99,9 @@ jobs:
       - name: Production build
         run: npm run build
 
+      - name: Verify existing published build includes real isolated ASP reviewer page
+        run: npm run test:review:entry
+
       - name: Build isolated Supabase bundle and prove demo question answers are absent
         env:
           VITE_DATA_MODE: supabase
