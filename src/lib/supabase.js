@@ -17,4 +17,4 @@ export function getSupabaseClient({secureReviewEntry=false}={}) {
   if (!client) client=createClient(url,key,{auth:{persistSession:true,autoRefreshToken:true}});
   return client;
 }
-export const isDemoMode = import.meta.env.VITE_DATA_MODE !== 'supabase';
+export const isDemoMode = import.meta.env?.VITE_DATA_MODE !== 'supabase';
