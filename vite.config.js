@@ -6,6 +6,12 @@ import {resolve} from 'node:path';
 // ships the bundled ASP answer JSON to every public visitor. Never do that.
 export default defineConfig(({mode})=>{
   const env=loadEnv(mode,process.cwd(),'VITE_');
+  // Reviewer is also present in the default site. Fail Cloudflare Worker
+  // BUILDS when its public Supabase configuration was not injected, rather
+  // than silently deploying a broken 'configuration required' screen.
+  if(process.env.WORKERS_CI==='1'&&(!env.VITE_SUPABASE_URL||!env.VITE_SUPABASE_ANON_KEY)){
+    throw new Error('[Technica LMS] Missing public Supabase BUILD variables: VITE_SUPABASE_URL and/or VITE_SUPABASE_ANON_KEY. Configure Worker Settings > Builds > Build variables and secrets. No values are printed.');
+  }
   const live=env.VITE_DATA_MODE==='supabase';
   return {
     // Compile the Cloudflare Git commit marker into the browser so stale
