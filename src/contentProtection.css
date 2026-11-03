@@ -154,6 +154,6 @@
 
 /* Synchronous privacy cover between native fullscreenchange and React route transition.
    This is a brief visual deterrent only; it does not block OS capture. */
-html.tc-quiz-exit-lock :is(.quiz-page,.live-practice .live-question,.live-practice .live-question-nav){
+html.tc-quiz-exit-lock :is(.quiz-page,.live-practice .live-question,.live-practice .live-question-nav,.learn-quiz-content){
  visibility:hidden!important;
 }
