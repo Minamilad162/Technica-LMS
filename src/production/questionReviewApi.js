@@ -5,6 +5,14 @@ async function call(db,name,args){
  if(error)throw new Error(error.message||'ASP review request failed');
  return data;
 }
+// The P6A reviewer needs only domain metadata, NOT lesson/topic trees or
+// learner entitlements. Avoid unrelated RLS failures blocking ASP review.
+export async function fetchAspReviewDomains(db,courseId){
+ const {data,error}=await db.from('lms_domains').select('id,slug,title,position')
+  .eq('course_id',courseId).order('position',{ascending:true});
+ if(error)throw new Error(error.message||'ASP review domain catalog request failed');
+ return data||[];
+}
 export function fetchAspReviewPage(db,courseId,{filter='unreviewed',limit=20,offset=0}={}){
  return call(db,'lms_p6_list_questions',{
    p_course_id:courseId,p_filter:filter,p_limit:limit,p_offset:offset
