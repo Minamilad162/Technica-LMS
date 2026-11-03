@@ -7,12 +7,25 @@ import{getUnansweredQuestionIds}from'../lib/quizNavigation';
 import{Modal,MiniProgress}from'../components/UI';
 import ScientificCalculator from '../components/ScientificCalculator';
 import ProtectedContent from '../components/ProtectedContent';
+import {useQuestionFullscreenGuard} from '../lib/useQuestionFullscreenGuard';
+import {isFullscreenActive,leaveQuestionFullscreen} from '../lib/questionFullscreen';
 
 export default function QuizPage({kind='assessment'}){
  const isPractice=kind==='practice';
- const{state,answer,jump,flag,submit,notify}=useDemo();
+ const{state,answer,jump,flag,submit,abortSession,notify}=useDemo();
  const navigate=useNavigate();
  const session=isPractice?state.practiceSession:state.assessmentSession;
+ const setupPath=isPractice?'/practice':'/assessments';
+ const active=!!session&&!session.submitted;
+ const {leaveIntentionally}=useQuestionFullscreenGuard({
+  active,
+  onUnexpectedExit:()=>{
+   // The learner must not continue viewing a question outside true fullscreen.
+   abortSession(kind);
+   void leaveQuestionFullscreen(document);
+   navigate(setupPath,{replace:true,state:{exitReason:'fullscreen'}});
+  }
+ });
  const questions=session?.questionSet||(isPractice?assessmentQuestions.slice(0,25):assessmentQuestions);
  const count=questions.length;
  const[showReview,setShowReview]=useState(false);
@@ -43,17 +56,20 @@ export default function QuizPage({kind='assessment'}){
   if(remaining===0&&session&&!session.submitted){
    // Time expiry is an automatic submission; learner-driven submission always receives the warning first.
    if(timerMode==='per'&&current<count){setRemaining(null);jump(kind,current+1)}
-   else{submit(kind);navigate(isPractice?'/practice/results':'/results')}
+   else{void leaveIntentionally();submit(kind);navigate(isPractice?'/practice/results':'/results')}
   }
  },[remaining,session?.current,timerMode]);
 
  if(!session||session.submitted)return <div className="empty-state"><h2>No active session</h2><p>Start a new {isPractice?'practice test':'assessment'} to answer questions.</p><button className="btn" onClick={()=>navigate(isPractice?'/practice':'/assessments')}>Go to setup <ArrowRight size={17}/></button></div>;
 
+ if(!isFullscreenActive(document)){
+  return <div className="empty-state" role="status"><h2>Protected fullscreen required</h2><p>This question session is closing because fullscreen is not active.</p></div>;
+ }
  function openReview(){
   if(unansweredIds.length)setShowAllUnanswered(true);
   setShowReview(true);setShowNav(false);
  }
- function doSubmit(){submit(kind);setShowReview(false);navigate('/results')}
+ function doSubmit(){void leaveIntentionally();submit(kind);setShowReview(false);navigate(isPractice?'/practice/results':'/results')}
  function next(){if(current===count)openReview();else jump(kind,current+1)}
  function goToQuestion(id){jump(kind,id);setShowNav(false)}
  function reviewMissing(id=unansweredIds[0]){if(id)goToQuestion(id);setShowReview(false)}
