@@ -333,3 +333,5 @@
 - Demo Practice and Assessment now request real native fullscreen at Start; Esc, native fullscreen exit, browser hidden and explicit Exit discard unsent sessions and return to setup.
 - Supabase live Practice enters fullscreen for question workspace, watermarks authenticated user ID and browser session, and applies scoped copy/print deterrence. P5 SQL seals abandoned attempts without exposing their question/answer snapshots; no unsafe automatic resume on refresh.
 - Added controlled P5 migration, read-only verification, disposable PostgreSQL negative tests, fullscreen browser regression and rollout runbook. No screenshot/recording guarantee, iPhone native element fullscreen not supported consistently, no production deploy.
+
+- Applied P5 fullscreen requirement to the demo lesson's final 10-question knowledge check as well, returning to previous lesson when exiting and preserving prior lesson progress.
