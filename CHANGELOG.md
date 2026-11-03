@@ -1,4 +1,11 @@
 
+### 2026-11-03 — Show real ASP Review on the published Technica LMS menu
+
+- The published/default Vite build now emits `index.html` plus a separate real `asp-review.html` based on the isolated Supabase Live entry; original Demo Practice/Calculator are preserved.
+- Demo admin sidebar/mobile More **ASP Question Review** now redirects to the actual secure page, not an explanatory placeholder. The secure page requires genuine Supabase Auth, verified active admin role and P6A server RPC authorizations; no simulated/demo role grants access.
+- Cloudflare must receive the two public Supabase build variables even when `VITE_DATA_MODE=demo`. The dedicated full `VITE_DATA_MODE=supabase` build remains single-entry, with protected answer-bank bundle checks.
+- Added multi-entry output smoke and admin-menu contracts. **Not performed:** Cloudflare deployment verification, P6A migration execution, ASP importer/review, actual JWT/authorization tests or production publication.
+
 
 ### 2026-11-03 — P6A review menu discoverability and Demo/Live clarity
 
