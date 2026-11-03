@@ -26,6 +26,7 @@
     "test:p5": "node scripts/test-p5-fullscreen-contract.mjs",
     "test:p6": "node scripts/test-p6-review-contract.mjs",
     "test:review:entry": "node scripts/test-review-deployment-entry.mjs",
+    "test:review:connection": "node scripts/test-review-connection-diagnostics.mjs",
     "test:p4:bank": "node scripts/import-asp-p4.mjs",
     "test:admin-bank": "node scripts/test-admin-question-bank.mjs",
     "test:lesson-media": "node scripts/test-lesson-media.mjs",
