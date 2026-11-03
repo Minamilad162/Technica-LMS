@@ -46,11 +46,24 @@
 @media(max-width:900px){.live-columns{grid-template-columns:1fr}.live-list{display:flex;gap:8px;flex-wrap:wrap}.live-list-top{width:100%}.live-course{width:auto;max-width:260px;flex:1 1 185px}}
 @media(max-width:650px){.live-login{grid-template-columns:1fr}.live-login-story{padding:32px 25px}.live-login-story img{width:140px;height:48px;margin:0 0 8px}.live-login-story h1{font-size:27px;margin:15px 0}.live-login-story p{font-size:12px;margin:0}.live-login-story>div{display:none}.live-login-panel{padding:15px}.live-login-form{padding:20px}.live-top{align-items:flex-start;padding:13px 15px;flex-wrap:wrap}.live-top-right{width:100%;justify-content:space-between;gap:7px}.live-top-right small{font-size:11px}.live-main{padding:15px}.live-main-heading{align-items:start}.live-main-heading .live-secondary{font-size:0}.live-main-heading .live-secondary svg{width:18px}.live-list,.live-workspace{padding:13px}.live-course-head{flex-direction:column}.live-domain-head,.live-topic-head{padding:11px;align-items:flex-start}.live-lesson{padding:9px}.live-actions button{padding:7px}}
 
-/* Live admin navigation: reviewed ASP bank is a real destination, not a page footer. */
-.live-admin-navigation{display:flex;align-items:center;gap:9px;flex-wrap:wrap;background:#fff;border:1px solid #dce9e9;padding:11px 14px;border-radius:14px;margin-bottom:20px;box-shadow:0 8px 24px #143a4009}
-.live-admin-nav-label{font-size:10px;letter-spacing:.12em;font-weight:850;color:#758e95;margin-right:8px}
-.live-admin-navigation button{display:inline-flex;align-items:center;gap:9px;padding:10px 14px;border-radius:10px;border:1px solid transparent;background:transparent;color:#3e6069;font-size:13px;font-weight:730;min-height:42px}
-.live-admin-navigation button:hover{background:#f0f8f6;color:#177d72}
-.live-admin-navigation button.active{background:#e6f6f1;color:#127b6c;border-color:#c1e4d9;box-shadow:inset 0 -2px #2b9c84}
-.live-admin-navigation button:focus-visible{outline:3px solid #6ac5b4;outline-offset:2px}
-@media(max-width:650px){.live-admin-navigation{padding:10px;gap:6px}.live-admin-nav-label{width:100%;margin:2px 4px}.live-admin-navigation button{justify-content:center;flex:1 1 155px;text-align:center;padding:10px 8px;font-size:12px}}
+
+
+/* P6A within the selected ASP course card — no separate Admin navigation tab. */
+.live-review-embed-root{padding:14px;min-width:0;background:#fff;color:#254650}
+.live-review-embed-toolbar{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:6px 6px 14px;border-bottom:1px solid #e1ede9;margin-bottom:12px;flex-wrap:wrap}
+.live-review-embed-toolbar>div:first-child{display:grid;gap:5px}
+.live-review-embed-toolbar strong{font-size:17px;letter-spacing:-.03em}
+.live-review-embed-account{display:flex;align-items:center;flex-wrap:wrap;gap:12px}
+.live-review-embed-account small{color:#708991;overflow-wrap:anywhere;font-size:11px}
+.live-review-embed-root .live-review-workspace{margin:0;padding:15px;border:0;border-radius:10px;box-shadow:none}
+.live-review-embed-root .live-review-metrics{grid-template-columns:repeat(3,minmax(0,1fr))}
+.tc-review-embedded body,.tc-review-embedded #root{min-height:0;background:#fff}
+.tc-review-embedded .live-login,.tc-review-embedded .live-shell{min-height:0}
+.tc-review-embedded .live-login{grid-template-columns:minmax(0,1fr) minmax(270px,1.25fr);border:1px solid #dfebe9;border-radius:14px;overflow:hidden}
+.tc-review-embedded .live-login-story{padding:26px}
+.tc-review-embedded .live-login-story h1{font-size:clamp(22px,3vw,32px);margin:14px 0}
+.tc-review-embedded .live-login-panel{padding:16px}
+.tc-review-embedded .live-login-form{box-shadow:none}
+.tc-review-embedded .live-configuration,.tc-review-embedded .live-wait{min-height:0;padding:28px 18px}
+@media(max-width:900px){.live-review-embed-root .live-review-metrics{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:650px){.tc-review-embedded .live-login{grid-template-columns:1fr}.tc-review-embedded .live-login-story{padding:16px}.tc-review-embedded .live-login-story h1{font-size:22px}.tc-review-embedded .live-login-story p{font-size:12px}.live-review-embed-root{padding:7px}.live-review-embed-toolbar{padding:8px}.live-review-embed-root .live-review-workspace{padding:8px}.live-review-embed-root .live-review-metrics{grid-template-columns:repeat(2,minmax(0,1fr))}}
