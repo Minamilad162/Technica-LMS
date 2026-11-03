@@ -1,6 +1,6 @@
 import React,{useEffect,useMemo,useRef,useState}from'react';
 import{createPortal}from'react-dom';
-import {getAuthSession} from '../lib/demoAuth';
+import {getAuthSession} from '../lib/portalAuth';
 import {
  PROTECTION_HOLD_MS,WATERMARK_POSITIONS,formatWatermarkLabel,
  getContentProtectionSession,isPotentialCaptureShortcut,shouldFocusShield,
