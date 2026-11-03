@@ -6,6 +6,7 @@ import './supabaseApp.css';
 import LivePractice from './LivePractice';
 import AdminQuestionReview from './AdminQuestionReview';
 import ReviewConnectionDiagnostics from './ReviewConnectionDiagnostics';
+import {fetchAspReviewDomains} from './questionReviewApi';
 
 // The secure review's separate entry passes secureReviewEntry=true explicitly.
 // The URL is intentionally NOT used for authentication bootstrap: rewrites and
@@ -102,12 +103,27 @@ export default function SupabaseApp({secureReviewEntry=false,reviewerOnly=false}
  useEffect(()=>{
   if(!db||!session?.user){setIdentity(null);setCourses([]);setTree([]);setEntitlements([]);setReviewExpanded(false);setLoadedStructureFor(null);return;}
   let active=true;setFetching(true);setError('');
-  Promise.all([loadIdentity(db,session.user),listCourses(db),getCurrentEntitlements(db,session.user.id)])
-   .then(([user,items,access])=>{if(active){setIdentity(user);setCourses(items);setEntitlements(access);setCourseId(old=>items.some(c=>c.id===old)?old:(items[0]?.id||null));}})
-   .catch(e=>{if(active)setError(msg(e));})
-   .finally(()=>{if(active)setFetching(false);});
+  const load=async()=>{
+   try{
+    if(reviewerOnly){
+     // Review needs verified identity and ASP course only. Entitlements and
+     // lesson/topic RLS are unrelated to this trusted administrator workflow.
+     const user=await loadIdentity(db,session.user);
+     if(!active)return;
+     setIdentity(user);
+     if(!user.isAdmin)return;
+     const items=await listCourses(db);
+     if(active){setCourses(items);setEntitlements([]);setCourseId(old=>items.some(c=>c.id===old)?old:(items[0]?.id||null));}
+    }else{
+     const [user,items,access]=await Promise.all([loadIdentity(db,session.user),listCourses(db),getCurrentEntitlements(db,session.user.id)]);
+     if(active){setIdentity(user);setCourses(items);setEntitlements(access);setCourseId(old=>items.some(c=>c.id===old)?old:(items[0]?.id||null));}
+    }
+   }catch(e){if(active)setError(msg(e));}
+   finally{if(active)setFetching(false);}
+  };
+  void load();
   return()=>{active=false;};
- },[db,session?.user?.id]);
+ },[db,session?.user?.id,reviewerOnly]);
  const isAdmin=identity?.isAdmin===true;
  const selected=courses.find(c=>c.id===courseId);
  const aspCourse=courses.find(c=>c.slug==='asp');
@@ -118,9 +134,9 @@ export default function SupabaseApp({secureReviewEntry=false,reviewerOnly=false}
  useEffect(()=>{
   if(!db||!selected||!identity||suspended||!entitled){setTree([]);setLoadedStructureFor(null);setLessonId(null);setBlocks([]);return;}
   let active=true;setFetching(true);setTree([]);setLoadedStructureFor(null);
-  loadStructure(db,selected.id).then(rows=>{if(active){setTree(rows);setLoadedStructureFor(selected.id);setLessonId(null);setBlocks([]);}}).catch(e=>{if(active)setError(msg(e));}).finally(()=>{if(active)setFetching(false);});
+  (reviewerOnly?fetchAspReviewDomains(db,selected.id):loadStructure(db,selected.id)).then(rows=>{if(active){setTree(rows);setLoadedStructureFor(selected.id);setLessonId(null);setBlocks([]);}}).catch(e=>{if(active)setError(msg(e));}).finally(()=>{if(active)setFetching(false);});
   return()=>{active=false;};
- },[db,selected?.id,identity?.isAdmin,identity?.profile?.account_status,entitled]);
+ },[db,selected?.id,identity?.isAdmin,identity?.profile?.account_status,entitled,reviewerOnly]);
  useEffect(()=>{
   if(!db||!lessonId){setBlocks([]);return;}
   let active=true;
@@ -130,6 +146,13 @@ export default function SupabaseApp({secureReviewEntry=false,reviewerOnly=false}
  const refresh=async()=>{
   if(!db||!session?.user)return;setFetching(true);setError('');
   try{
+   if(reviewerOnly){
+    const items=await listCourses(db);
+    setCourses(items);setEntitlements([]);
+    const asp=items.find(c=>c.slug==='asp');
+    if(asp&&isAdmin){setCourseId(asp.id);setTree(await fetchAspReviewDomains(db,asp.id));setLoadedStructureFor(asp.id);}
+    return;
+   }
    const [items,access]=await Promise.all([listCourses(db),getCurrentEntitlements(db,session.user.id)]);
    setCourses(items);setEntitlements(access);
    if(selected&&items.some(c=>c.id===selected.id)&&(isAdmin||includes(access,selected.id))){
@@ -179,7 +202,7 @@ export default function SupabaseApp({secureReviewEntry=false,reviewerOnly=false}
    {suspended?<div className="live-empty" role="alert"><LockKeyhole size={23}/><strong>Account suspended</strong><p>Contact the LMS administrator.</p></div>:
     !identity?<div className="live-empty" role={error&&!fetching?'alert':'status'}>{error&&!fetching?'Supabase account or LMS tables could not be verified. Open Check database connection above to identify the failed stage.':'Verifying your Supabase account…'}</div>:
     !isAdmin?<div className="live-empty" role="alert"><LockKeyhole size={24}/><h3>Verified administrator required</h3><p>Your Supabase account is not assigned an active LMS Admin role. Demo Admin accounts cannot review live questions.</p></div>:
-    !aspCourse?<div className="live-empty" role="status"><BookOpen size={23}/><h3>ASP course not found</h3><p>Create the genuine ASP course with slug asp in Supabase before starting reviews.</p></div>:
+    !aspCourse?<div className="live-empty" role={error&&!fetching?'alert':'status'}><BookOpen size={23}/><h3>{fetching?'Checking ASP course catalog…':error?'ASP course catalog could not load':'ASP course not found'}</h3><p>{error?'Open Check database connection above to identify permissions and catalog problems.':'Create the genuine ASP course with slug asp in Supabase before starting reviews.'}</p></div>:
     selected?.id!==aspCourse.id||loadedStructureFor!==aspCourse.id?
       <div className="live-empty" role="status"><RefreshCw size={23}/><h3>Preparing ASP course review…</h3><p>Loading the official domain catalog.</p></div>:
       <AdminQuestionReview db={db} course={aspCourse} domains={tree} onDomainsSeeded={refresh}/>}
