@@ -30,3 +30,14 @@ The source importer validates 1,625 old-demo ASP records, but their five workshe
 Frontend rollback by reverting the feature commit/build; do not drop tables if reviewer decisions have already been captured. The migration is additive and stores reviewer data separately from original P4 question records. A staging rollback requires a verified backup and an approved migration plan, never ad-hoc destructive SQL.
 
 **Production release status: NO-GO** until owner-approved P6A migration, real JWT tests, reviewed ASP source rights, 200 exclusive Mock reservations and safe release workflow are complete.
+
+
+## Where to find the P6A screen in the menu (2026-11-03 fix)
+
+**Live build (functional UI only after P6A SQL):** Sign into a Supabase-connected Technica LMS build as a verified active `admin`, and select **Admin Menu → ASP Question Review**. The menu always appears for authenticated admins even if another course was selected; the page selects the `asp` course automatically. If ASP doesn't exist, the page explains the missing course. Imported bank records still require separate draft importer and SME verification.
+
+**Demo build (visibility/discoverability):** Sign into the existing browser-local Demo admin workspace and locate **ASP Review (Live)** in the sidebar (or mobile **More** menu). This opens an admin-only explanation of the **separate Live build**; it never calls protected database APIs. The regular Demo `Question Bank` remains unchanged. The Demo and Live builds cannot be merged into one public frontend because the Demo bundles unprotected historical ASP answer keys.
+
+**Why the user might not see it yet:** Merely pushing to GitHub doesn't guarantee a Cloudflare deployment; verify the target build's commit and `VITE_DATA_MODE`, refresh after it is deployed, and confirm an actual admin role. The Live admin menu requires `VITE_DATA_MODE=supabase` plus public Supabase build variables. P6A SQL must be installed through the owner-approved process before the review RPCs work; do not run migrations just to make a menu appear.
+
+**No schema changes in this navigation fix.** A passing source CI cannot certify deployed access, user role or runtime API authorization.
