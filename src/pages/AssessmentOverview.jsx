@@ -1,5 +1,6 @@
 import HDImage from '../components/HDImage';
-import React,{useState} from 'react';
+import React,{useRef,useState} from 'react';
+import {requestQuestionFullscreen,leaveQuestionFullscreen,fullscreenStartError} from '../lib/questionFullscreen';
 import {useNavigate} from 'react-router-dom';
 import {ArrowRight,ArrowLeft,BarChart3,Clock3,Target,Check,LockKeyhole,ShieldCheck,PlayCircle} from 'lucide-react';
 import {assets,questionPool} from '../data/mock';
@@ -13,16 +14,24 @@ export default function AssessmentOverview(){
  const navigate=useNavigate();
  const {beginAssessment,notify,state,update}=useDemo();
  const [accepted,setAccepted]=useState(false);
+ const startingRef=useRef(false);
  const availableCourses=learnerCourses(state);const course=getCourse(state,state.assessmentCourseId)||availableCourses[0]||courses[0];
  const settings=assessmentSettings(course.id,state.courseAssessmentSettings,course);
  const size=getCourseBank(state,course.id,questionPool).length;
  const ready=!!size&&settings.enabled&&settings.domainIds.length>0&&size>=settings.questionCount;
  // Assessment starts are unlimited. The number and time are still administered per course.
  const allowed=ready&&state.role!=='admin';
- function start(){
+ async function start(){
+  if(startingRef.current)return;
   if(!ready){notify(`${course.name} is not ready for assessment.`);return}
   if(!accepted){notify('Please read and accept the assessment instructions');return}
-  if(beginAssessment(course.id))navigate('/assessments/take');
+  startingRef.current=true;
+  try{
+   const result=await requestQuestionFullscreen(document.documentElement);
+   if(!result.ok){notify(fullscreenStartError(result));return;}
+   if(beginAssessment(course.id))navigate('/assessments/take');
+   else await leaveQuestionFullscreen(document);
+  }finally{startingRef.current=false;}
  }
  return <div className="assessment-overview page-enter">
   <Breadcrumb items={['Assessments','Choose course']}/>
