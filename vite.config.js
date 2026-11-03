@@ -8,6 +8,12 @@ export default defineConfig(({mode})=>{
   const env=loadEnv(mode,process.cwd(),'VITE_');
   const live=env.VITE_DATA_MODE==='supabase';
   return {
+    // Compile the Cloudflare Git commit marker into the browser so stale
+    // deployments can be diagnosed without exposing any environment values.
+    define:{
+      __TECHNICA_BUILD_SHA__:JSON.stringify(
+        (process.env.WORKERS_CI_COMMIT_SHA||process.env.GITHUB_SHA||'local').slice(0,12))
+    },
     plugins:[
       react(),
       ...(live?[{
