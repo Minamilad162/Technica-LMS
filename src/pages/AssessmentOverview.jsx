@@ -69,6 +69,7 @@ export default function AssessmentOverview(){
       ['One correct answer per question.','You may flag and revisit unanswered questions.'],
       ['Your time limit is fixed.','The countdown begins when the assessment starts.'],
       ['Course rules are set by your admin.','Question count and pass mark cannot be customised.'],
+      ['Fullscreen is required.','Exiting fullscreen ends the attempt and returns to course assessment setup.'],
       ['Review before submission.','Unanswered questions are marked when you choose Review and submit.']
      ].map(([a,b],i)=><div className="instruction" key={a}><span>{i+1}</span><div><b>{a}</b><small>{b}</small></div></div>)}</div>
      <label className="checkbox-line"><input type="checkbox" checked={accepted} onChange={e=>setAccepted(e.target.checked)}/><span>I have read the assessment instructions.</span></label>
