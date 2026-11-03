@@ -1,4 +1,11 @@
 
+### 2026-11-04 — Fix persistent ASP review Supabase configuration false-negative
+
+- Replaced exact `window.location.pathname` detection with the explicit isolated `reviewMain.jsx` entrypoint, which always initializes actual Supabase Auth for ASP Review irrespective of route rewriting or aliases.
+- Added safe public build-configuration present/missing diagnostics; no publishable key is printed to the user or console.
+- CI now builds the existing published site with harmless public Supabase fixture variables and verifies they are compiled into browser JavaScript, while preserving the separate full Live build and its no-Demo-answer-bank security scan.
+- **No changes to DB/RLS/Question Bank, no Cloudflare deploy executed**; external production configuration and real JWT role checks still require validation.
+
 ### 2026-11-03 — Show real ASP Review on the published Technica LMS menu
 
 - The published/default Vite build now emits `index.html` plus a separate real `asp-review.html` based on the isolated Supabase Live entry; original Demo Practice/Calculator are preserved.
