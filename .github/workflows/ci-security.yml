@@ -96,10 +96,17 @@ jobs:
             npm run "$name"
           done
 
-      - name: Production build
+      - name: Production build (public Supabase injection fixture)
+        env:
+          VITE_SUPABASE_URL: https://ci-placeholder.supabase.co
+          VITE_SUPABASE_ANON_KEY: ci-placeholder-public-key
         run: npm run build
 
-      - name: Verify existing published build includes real isolated ASP reviewer page
+      - name: Verify real reviewer HTML and public build-time config
+        env:
+          REVIEW_EXPECT_PUBLIC_BUILD_VARS: '1'
+          VITE_SUPABASE_URL: https://ci-placeholder.supabase.co
+          VITE_SUPABASE_ANON_KEY: ci-placeholder-public-key
         run: npm run test:review:entry
 
       - name: Build isolated Supabase bundle and prove demo question answers are absent
