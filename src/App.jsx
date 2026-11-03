@@ -1,5 +1,6 @@
 import React,{useEffect,useState}from'react';import{Routes,Route,Navigate,useLocation}from'react-router-dom';
 import Layout from './components/Layout';
+import ASPReviewLiveNotice from './pages/ASPReviewLiveNotice';
 import {useDemo} from './lib/store';
 import MotionSystem from './components/MotionSystem';
 import AuthPage,{DemoPolicyPage} from './pages/AuthPage';
@@ -36,5 +37,6 @@ export default function App(){const l=useLocation();const[auth,setAuth]=useState
  <Route path="/practice/results" element={<RoutePage><PracticeResultsPage/></RoutePage>}/>
  <Route path="/learners" element={<AdminOnly><RoutePage><LearnersPage/></RoutePage></AdminOnly>}/>
  <Route path="/question-bank" element={<AdminOnly><RoutePage><QuestionBankPage/></RoutePage></AdminOnly>}/>
+ <Route path="/asp-review" element={<AdminOnly><RoutePage><ASPReviewLiveNotice/></RoutePage></AdminOnly>}/>
  <Route path="*" element={<Navigate to="/home" replace/>}/>
  </Routes>}
