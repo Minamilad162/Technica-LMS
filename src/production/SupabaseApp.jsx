@@ -5,6 +5,7 @@ import {createCourse,createDomain,createTopic,createLesson,createTextBlock,getCu
 import './supabaseApp.css';
 import LivePractice from './LivePractice';
 import AdminQuestionReview from './AdminQuestionReview';
+import ReviewConnectionDiagnostics from './ReviewConnectionDiagnostics';
 
 // The secure review's separate entry passes secureReviewEntry=true explicitly.
 // The URL is intentionally NOT used for authentication bootstrap: rewrites and
@@ -20,7 +21,7 @@ function initializeConnection(secureReviewEntry){
 const msg=e=>e?.message||'Operation failed. Please try again.';
 const includes=(rows,id)=>rows.some(x=>x.course_id===id);
 
-function LoginScreen({db}) {
+function LoginScreen({db,reviewerOnly=false}) {
  const [mode,setMode]=useState('login'),[email,setEmail]=useState(''),[password,setPassword]=useState(''),[name,setName]=useState(''),[busy,setBusy]=useState(false),[error,setError]=useState(''),[notice,setNotice]=useState('');
  const submit=async e=>{
   e.preventDefault();setError('');setNotice('');setBusy(true);
@@ -52,6 +53,7 @@ function LoginScreen({db}) {
     <button className="live-primary" type="submit" disabled={busy}>{busy?'Please wait…':mode==='register'?'Create account':mode==='reset'?'Send recovery email':'Sign in'}</button>
    </form>
    <div className="live-auth-links"><button type="button" onClick={()=>{setMode(mode==='login'?'register':'login');setError('');setNotice('');}}>{mode==='login'?'Create account':'Back to sign in'}</button><button type="button" onClick={()=>{setMode('reset');setError('');setNotice('');}}>Forgot password?</button></div>
+   {reviewerOnly&&<ReviewConnectionDiagnostics db={db}/>}
   </div></section>
  </div>;
 }
@@ -162,18 +164,20 @@ export default function SupabaseApp({secureReviewEntry=false,reviewerOnly=false}
     <p>{configurationError}</p>
     <p>Public build-variable check: <strong>VITE_SUPABASE_URL {import.meta.env.VITE_SUPABASE_URL?'✓ present':'✗ missing'}</strong> · <strong>VITE_SUPABASE_ANON_KEY {import.meta.env.VITE_SUPABASE_ANON_KEY?'✓ present':'✗ missing'}</strong>.</p>
     <p>Add the two public values in Cloudflare Worker → Settings → Builds → Build variables and secrets. Save and trigger a fresh build from GitHub; runtime Worker variables are not injected into the browser JavaScript. Never add the service_role key.</p>
+    <p>Deployed build: <code>{typeof __TECHNICA_BUILD_SHA__==='string'?__TECHNICA_BUILD_SHA__:'not tagged'}</code>. Verify it matches your latest GitHub commit.</p>
    </section>;
  if(boot)return <div className="live-wait">Loading secure LMS session…</div>;
  if(recovering&&session)return <RecoveryScreen db={db} onComplete={()=>{setRecovering(false);setNotice('Password updated successfully.');}}/>;
- if(!session)return <LoginScreen db={db}/>;
+ if(!session)return <LoginScreen db={db} reviewerOnly={reviewerOnly}/>;
  if(reviewerOnly)return <div className="live-review-embed-root">
    <div className="live-review-embed-toolbar">
      <div><span className="live-eyebrow">SECURE ADMIN · SUPABASE</span><strong>ASP question review</strong></div>
      <div className="live-review-embed-account"><small>{session.user.email}</small><button type="button" className="live-secondary" onClick={()=>db.auth.signOut()}><LogOut size={15}/> Sign out</button></div>
    </div>
    {error&&<p className="live-error" role="alert"><AlertCircle size={17}/>{error}</p>}
+   <ReviewConnectionDiagnostics db={db} session={session} identity={identity} course={aspCourse} identityError={error}/>
    {suspended?<div className="live-empty" role="alert"><LockKeyhole size={23}/><strong>Account suspended</strong><p>Contact the LMS administrator.</p></div>:
-    !identity?<div className="live-empty" role="status">Verifying your Supabase account…</div>:
+    !identity?<div className="live-empty" role={error&&!fetching?'alert':'status'}>{error&&!fetching?'Supabase account or LMS tables could not be verified. Open Check database connection above to identify the failed stage.':'Verifying your Supabase account…'}</div>:
     !isAdmin?<div className="live-empty" role="alert"><LockKeyhole size={24}/><h3>Verified administrator required</h3><p>Your Supabase account is not assigned an active LMS Admin role. Demo Admin accounts cannot review live questions.</p></div>:
     !aspCourse?<div className="live-empty" role="status"><BookOpen size={23}/><h3>ASP course not found</h3><p>Create the genuine ASP course with slug asp in Supabase before starting reviews.</p></div>:
     selected?.id!==aspCourse.id||loadedStructureFor!==aspCourse.id?
