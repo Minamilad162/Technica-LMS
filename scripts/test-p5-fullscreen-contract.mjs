@@ -24,6 +24,7 @@ assert.match(fullscreenStartError({reason:'denied'}),/Fullscreen permission/);
 const code=path=>readFileSync(path,'utf8');
 const practice=code('src/pages/PracticePage.jsx');
 const assessment=code('src/pages/AssessmentOverview.jsx');
+const learning=code('src/pages/LearningPage.jsx');
 const quiz=code('src/pages/QuizPage.jsx');
 const store=code('src/lib/store.jsx');
 const hook=code('src/lib/useQuestionFullscreenGuard.js');
@@ -33,6 +34,10 @@ const api=code('src/production/practiceApi.js');
 const sql=code('supabase/migrations/202611030001_p5_fullscreen_attempt_exit.sql');
 assert(practice.includes('requestQuestionFullscreen(document.documentElement)'));
 assert(assessment.includes('requestQuestionFullscreen(document.documentElement)'));
+assert(learning.includes('requestQuestionFullscreen(document.documentElement)'));
+assert(learning.includes('useQuestionFullscreenGuard'));
+assert(learning.includes('demoLessonList[demoLessonList.length-1].id'));
+
 assert(quiz.includes('useQuestionFullscreenGuard')&&quiz.includes('abortSession(kind)'));
 assert(quiz.includes('isFullscreenActive(document)'));
 assert(store.includes('function abortSession(kind)'));
