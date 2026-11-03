@@ -3,7 +3,7 @@ import {spawn} from 'node:child_process';
 import {setTimeout as sleep} from 'node:timers/promises';
 import {chromium} from 'playwright';
 const ROOT='http://127.0.0.1:4191';
-const server=spawn('node',['node_modules/vite/bin/vite.js','--host','127.0.0.1','--port','4191','--strictPort'],{stdio:['ignore','pipe','pipe']});
+const server=spawn('node',['node_modules/vite/bin/vite.js','--host','127.0.0.1','--port','4191','--strictPort'],{stdio:['ignore','pipe','pipe'],env:{...process.env,VITE_LOCAL_QA_DEMO:'1'}});
 let logs='';
 for(const stream of [server.stdout,server.stderr])stream.on('data',b=>logs+=String(b).slice(-900));
 async function waitReady(){
