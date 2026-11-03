@@ -1,3 +1,10 @@
+### 2026-11-04 — Diagnose and unblock real ASP Supabase connection
+
+- Removed unnecessary learner entitlement and topic/lesson read dependencies from the isolated secure ASP reviewer, which could previously block review due to unrelated RLS.
+- Added **Check database connection** inside ASP review (before/after actual Supabase Auth) to isolate build variables, Data API, active profile, Admin assignment, ASP catalog and P6A RPC. Read-only calls, permission-gated, no secrets or question answers.
+- Show meaningful failure instead of indefinite account/catalog loading. Include compiled Cloudflare build revision marker; Worker Builds now fails early if essential public `VITE_` variables are missing.
+- Added SQL Editor catalog-only `P6A_VERIFY_READ_ONLY.sql` and CI assertions for Admin/no-Admin isolation, missing RPC, missing bank and no answer exposure.
+- **Not performed:** Cloudflare deployment, actual production DB reads or writes, SQL migrations or P3 Admin bootstrap, bank import/approval.
 
 ### 2026-11-04 — ASP Review belongs inside Question Bank → ASP course card
 

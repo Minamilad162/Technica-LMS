@@ -77,3 +77,20 @@ The owner's final UI decision **supersedes** previous instructions that placed P
 The `/asp-review.html` file still exists **internally** to keep the real Auth/answer-key request path in a separate Vite bundle from the public legacy Demo. It isn't a menu destination. The outdated `#/asp-review` hash route redirects to `#/question-bank?course=asp&review=1` for old bookmarks. Nothing in the iframe bypasses server authorization; only layout height is shared with its same-origin parent window. A user without the required Supabase Admin assignment sees a permission message.
 
 **Operational gates unchanged:** Cloudflare Build variables must contain public `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY`, the P6A migration must be installed in the correct verified project, and real Auth/JWT/device tests must pass. The initial 1,625-question Demo file is not a secret and is not automatically imported, vetted, reserved or approved for production. Code merging does not prove the current deployed site updated.
+
+
+## Database still unreadable from ASP Review? (2026-11-04)
+
+The public Supabase connection values can be correct while **Auth/role/RPC** is still missing, and the old P6A reviewer could also fail on unrelated entitlement or topic/lesson table RLS. The secure reviewer now loads profile, verified Admin, courses and only ASP domains; it must not require learner entitlements or lessons. No RLS policy was weakened.
+
+On the published Technica site open **Admin → Question Bank → ASP → Review & classify → Check database connection**, then use its stages:
+- **Build configuration FAIL:** Cloudflare Worker **Settings → Builds → Build variables and secrets** needs the exact public `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY`, saved **before a fresh build**. Other `NEXT_PUBLIC_*` variables do not substitute for these. The page shows a compiled build revision to detect a stale Worker; Cloudflare build logs show missing variable names only.
+- **Data API FAIL:** confirm URL and publishable/anon key belong to the **same dedicated Technica Supabase project** and that browser network/CORS allow its API. No private credentials belong in browser or chat.
+- **Auth PENDING:** sign in with a real account under **Supabase Authentication → Users**. The historic Demo Admin is not a Supabase account and does not authorize P6A.
+- **Profile FAIL:** ensure the signed-in user's `public.lms_profiles` row was provisioned by P1 signup trigger/approved bootstrap; audit P1 RLS. Never auto-create an Admin from browser.
+- **Admin FAIL:** verify `public.lms_role_assignments` has an active `admin` role for that verified account, not only Demo admin role. Existing `supabase/P3_BOOTSTRAP_FIRST_ADMIN.sql` is a manually reviewed, privileged action that requires explicit owner approval, correct account and environment.
+- **ASP course FAIL:** add/verify the actual course in Supabase with exact `slug='asp'`; the browser-local demo ASP tile does not create this DB row.
+- **P6A FAIL:** run the separate **read-only** `supabase/P6A_VERIFY_READ_ONLY.sql` in the confirmed dedicated Technica SQL Editor. If metadata indicates `MISSING`, the P6A schema/RPC migration is not yet applied; installation is a separate, owner-approved staged operation with backup. `42501` means access denied, **not** permission to GRANT browser access.
+- **P6A PASS, 0 questions:** working database access, but real bank is empty. The old Demo 1,625 questions were not automatically imported. Use the existing dry-run importer and separate human review/Mock reservation release gates, not a public Demo bank fallback.
+
+The diagnostics only perform `HEAD lms_courses`, `auth.getUser`, own profile/role reads and **aggregate-only** `lms_p6_bank_summary` after authenticated Admin verification. They do not modify production, send passwords, expose source answer keys or bypass RLS. If a real role/JWT check fails, do not treat a green GitHub Actions/Postgres fixture as proof of live access.

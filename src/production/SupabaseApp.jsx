@@ -5,6 +5,8 @@ import {createCourse,createDomain,createTopic,createLesson,createTextBlock,getCu
 import './supabaseApp.css';
 import LivePractice from './LivePractice';
 import AdminQuestionReview from './AdminQuestionReview';
+import ReviewConnectionDiagnostics from './ReviewConnectionDiagnostics';
+import {fetchAspReviewDomains} from './questionReviewApi';
 
 // The secure review's separate entry passes secureReviewEntry=true explicitly.
 // The URL is intentionally NOT used for authentication bootstrap: rewrites and
@@ -20,7 +22,7 @@ function initializeConnection(secureReviewEntry){
 const msg=e=>e?.message||'Operation failed. Please try again.';
 const includes=(rows,id)=>rows.some(x=>x.course_id===id);
 
-function LoginScreen({db}) {
+function LoginScreen({db,reviewerOnly=false}) {
  const [mode,setMode]=useState('login'),[email,setEmail]=useState(''),[password,setPassword]=useState(''),[name,setName]=useState(''),[busy,setBusy]=useState(false),[error,setError]=useState(''),[notice,setNotice]=useState('');
  const submit=async e=>{
   e.preventDefault();setError('');setNotice('');setBusy(true);
@@ -52,6 +54,7 @@ function LoginScreen({db}) {
     <button className="live-primary" type="submit" disabled={busy}>{busy?'Please wait…':mode==='register'?'Create account':mode==='reset'?'Send recovery email':'Sign in'}</button>
    </form>
    <div className="live-auth-links"><button type="button" onClick={()=>{setMode(mode==='login'?'register':'login');setError('');setNotice('');}}>{mode==='login'?'Create account':'Back to sign in'}</button><button type="button" onClick={()=>{setMode('reset');setError('');setNotice('');}}>Forgot password?</button></div>
+   {reviewerOnly&&<ReviewConnectionDiagnostics db={db}/>}
   </div></section>
  </div>;
 }
@@ -100,12 +103,27 @@ export default function SupabaseApp({secureReviewEntry=false,reviewerOnly=false}
  useEffect(()=>{
   if(!db||!session?.user){setIdentity(null);setCourses([]);setTree([]);setEntitlements([]);setReviewExpanded(false);setLoadedStructureFor(null);return;}
   let active=true;setFetching(true);setError('');
-  Promise.all([loadIdentity(db,session.user),listCourses(db),getCurrentEntitlements(db,session.user.id)])
-   .then(([user,items,access])=>{if(active){setIdentity(user);setCourses(items);setEntitlements(access);setCourseId(old=>items.some(c=>c.id===old)?old:(items[0]?.id||null));}})
-   .catch(e=>{if(active)setError(msg(e));})
-   .finally(()=>{if(active)setFetching(false);});
+  const load=async()=>{
+   try{
+    if(reviewerOnly){
+     // Review needs verified identity and ASP course only. Entitlements and
+     // lesson/topic RLS are unrelated to this trusted administrator workflow.
+     const user=await loadIdentity(db,session.user);
+     if(!active)return;
+     setIdentity(user);
+     if(!user.isAdmin)return;
+     const items=await listCourses(db);
+     if(active){setCourses(items);setEntitlements([]);setCourseId(old=>items.some(c=>c.id===old)?old:(items[0]?.id||null));}
+    }else{
+     const [user,items,access]=await Promise.all([loadIdentity(db,session.user),listCourses(db),getCurrentEntitlements(db,session.user.id)]);
+     if(active){setIdentity(user);setCourses(items);setEntitlements(access);setCourseId(old=>items.some(c=>c.id===old)?old:(items[0]?.id||null));}
+    }
+   }catch(e){if(active)setError(msg(e));}
+   finally{if(active)setFetching(false);}
+  };
+  void load();
   return()=>{active=false;};
- },[db,session?.user?.id]);
+ },[db,session?.user?.id,reviewerOnly]);
  const isAdmin=identity?.isAdmin===true;
  const selected=courses.find(c=>c.id===courseId);
  const aspCourse=courses.find(c=>c.slug==='asp');
@@ -116,9 +134,9 @@ export default function SupabaseApp({secureReviewEntry=false,reviewerOnly=false}
  useEffect(()=>{
   if(!db||!selected||!identity||suspended||!entitled){setTree([]);setLoadedStructureFor(null);setLessonId(null);setBlocks([]);return;}
   let active=true;setFetching(true);setTree([]);setLoadedStructureFor(null);
-  loadStructure(db,selected.id).then(rows=>{if(active){setTree(rows);setLoadedStructureFor(selected.id);setLessonId(null);setBlocks([]);}}).catch(e=>{if(active)setError(msg(e));}).finally(()=>{if(active)setFetching(false);});
+  (reviewerOnly?fetchAspReviewDomains(db,selected.id):loadStructure(db,selected.id)).then(rows=>{if(active){setTree(rows);setLoadedStructureFor(selected.id);setLessonId(null);setBlocks([]);}}).catch(e=>{if(active)setError(msg(e));}).finally(()=>{if(active)setFetching(false);});
   return()=>{active=false;};
- },[db,selected?.id,identity?.isAdmin,identity?.profile?.account_status,entitled]);
+ },[db,selected?.id,identity?.isAdmin,identity?.profile?.account_status,entitled,reviewerOnly]);
  useEffect(()=>{
   if(!db||!lessonId){setBlocks([]);return;}
   let active=true;
@@ -128,6 +146,13 @@ export default function SupabaseApp({secureReviewEntry=false,reviewerOnly=false}
  const refresh=async()=>{
   if(!db||!session?.user)return;setFetching(true);setError('');
   try{
+   if(reviewerOnly){
+    const items=await listCourses(db);
+    setCourses(items);setEntitlements([]);
+    const asp=items.find(c=>c.slug==='asp');
+    if(asp&&isAdmin){setCourseId(asp.id);setTree(await fetchAspReviewDomains(db,asp.id));setLoadedStructureFor(asp.id);}
+    return;
+   }
    const [items,access]=await Promise.all([listCourses(db),getCurrentEntitlements(db,session.user.id)]);
    setCourses(items);setEntitlements(access);
    if(selected&&items.some(c=>c.id===selected.id)&&(isAdmin||includes(access,selected.id))){
@@ -162,20 +187,22 @@ export default function SupabaseApp({secureReviewEntry=false,reviewerOnly=false}
     <p>{configurationError}</p>
     <p>Public build-variable check: <strong>VITE_SUPABASE_URL {import.meta.env.VITE_SUPABASE_URL?'✓ present':'✗ missing'}</strong> · <strong>VITE_SUPABASE_ANON_KEY {import.meta.env.VITE_SUPABASE_ANON_KEY?'✓ present':'✗ missing'}</strong>.</p>
     <p>Add the two public values in Cloudflare Worker → Settings → Builds → Build variables and secrets. Save and trigger a fresh build from GitHub; runtime Worker variables are not injected into the browser JavaScript. Never add the service_role key.</p>
+    <p>Deployed build: <code>{typeof __TECHNICA_BUILD_SHA__==='string'?__TECHNICA_BUILD_SHA__:'not tagged'}</code>. Verify it matches your latest GitHub commit.</p>
    </section>;
  if(boot)return <div className="live-wait">Loading secure LMS session…</div>;
  if(recovering&&session)return <RecoveryScreen db={db} onComplete={()=>{setRecovering(false);setNotice('Password updated successfully.');}}/>;
- if(!session)return <LoginScreen db={db}/>;
+ if(!session)return <LoginScreen db={db} reviewerOnly={reviewerOnly}/>;
  if(reviewerOnly)return <div className="live-review-embed-root">
    <div className="live-review-embed-toolbar">
      <div><span className="live-eyebrow">SECURE ADMIN · SUPABASE</span><strong>ASP question review</strong></div>
      <div className="live-review-embed-account"><small>{session.user.email}</small><button type="button" className="live-secondary" onClick={()=>db.auth.signOut()}><LogOut size={15}/> Sign out</button></div>
    </div>
    {error&&<p className="live-error" role="alert"><AlertCircle size={17}/>{error}</p>}
+   <ReviewConnectionDiagnostics db={db} session={session} identity={identity} course={aspCourse} identityError={error}/>
    {suspended?<div className="live-empty" role="alert"><LockKeyhole size={23}/><strong>Account suspended</strong><p>Contact the LMS administrator.</p></div>:
-    !identity?<div className="live-empty" role="status">Verifying your Supabase account…</div>:
+    !identity?<div className="live-empty" role={error&&!fetching?'alert':'status'}>{error&&!fetching?'Supabase account or LMS tables could not be verified. Open Check database connection above to identify the failed stage.':'Verifying your Supabase account…'}</div>:
     !isAdmin?<div className="live-empty" role="alert"><LockKeyhole size={24}/><h3>Verified administrator required</h3><p>Your Supabase account is not assigned an active LMS Admin role. Demo Admin accounts cannot review live questions.</p></div>:
-    !aspCourse?<div className="live-empty" role="status"><BookOpen size={23}/><h3>ASP course not found</h3><p>Create the genuine ASP course with slug asp in Supabase before starting reviews.</p></div>:
+    !aspCourse?<div className="live-empty" role={error&&!fetching?'alert':'status'}><BookOpen size={23}/><h3>{fetching?'Checking ASP course catalog…':error?'ASP course catalog could not load':'ASP course not found'}</h3><p>{error?'Open Check database connection above to identify permissions and catalog problems.':'Create the genuine ASP course with slug asp in Supabase before starting reviews.'}</p></div>:
     selected?.id!==aspCourse.id||loadedStructureFor!==aspCourse.id?
       <div className="live-empty" role="status"><RefreshCw size={23}/><h3>Preparing ASP course review…</h3><p>Loading the official domain catalog.</p></div>:
       <AdminQuestionReview db={db} course={aspCourse} domains={tree} onDomainsSeeded={refresh}/>}

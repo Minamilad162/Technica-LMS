@@ -77,6 +77,9 @@ jobs:
       - name: P6A ASP question review security contracts
         run: npm run test:p6
 
+      - name: Review connection diagnostics (no secrets, no role bypass)
+        run: npm run test:review:connection
+
       - name: Protected exam and video deterrence contract
         run: npm run test:content-protection
 
