@@ -70,3 +70,18 @@ if run_as authenticated "$admin" "SELECT public.lms_p6_review_question((SELECT i
 fi
 echo 'PASS review remains separate and cannot publish or mutate active P4 source questions'
 echo 'PASS P6A ASP review queue on disposable Postgres; live Supabase/JWT/device remain pending'
+
+
+# The SQL Editor diagnostic must also PASS against disposable P1/P2/P4/P5/P6.
+# This is a catalog-only SELECT, never a live Supabase command.
+connection_report=$(psql -X -v ON_ERROR_STOP=1 -A -t -f supabase/P6A_VERIFY_READ_ONLY.sql)
+if printf '%s\n' "$connection_report" | grep -Eq '\|(MISSING|FAIL)\|'; then
+ echo 'FAIL P6A read-only SQL Editor footprint check on disposable PostgreSQL'
+ printf '%s\n' "$connection_report"
+ exit 1
+fi
+if ! printf '%s\n' "$connection_report" | grep -Fq 'P6A|rpc:lms_p6_bank_summary(uuid)|PASS|'; then
+ echo 'FAIL P6A review RPC not confirmed by read-only footprint'
+ exit 1
+fi
+echo 'PASS P6A read-only SQL Editor footprint on disposable PostgreSQL'
