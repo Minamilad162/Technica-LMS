@@ -20,6 +20,8 @@ export function useQuestionFullscreenGuard({active,targetRef,onUnexpectedExit}) 
   const quit=reason=>{
    if(intentionalRef.current||exitingRef.current)return;
    exitingRef.current=true;
+   // Hide question pixels synchronously before React completes navigation.
+   doc.documentElement.classList.add('tc-quiz-exit-lock');
    onExitRef.current?.(reason);
   };
   const check=()=>{if(!isFullscreenActive(doc,target))quit('fullscreen-exit');};
@@ -39,6 +41,7 @@ export function useQuestionFullscreenGuard({active,targetRef,onUnexpectedExit}) 
    doc.removeEventListener('visibilitychange',hidden);
    window.removeEventListener('hashchange',locationChanged);
    window.removeEventListener('technica-quiz-leave',userExit);
+   doc.documentElement.classList.remove('tc-quiz-exit-lock');
   };
  },[active,targetRef]);
  const leaveIntentionally=()=>{
