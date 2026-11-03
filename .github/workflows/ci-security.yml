@@ -74,6 +74,9 @@ jobs:
       - name: P5 native fullscreen and exit policy contracts
         run: npm run test:p5
 
+      - name: P6A ASP question review security contracts
+        run: npm run test:p6
+
       - name: Protected exam and video deterrence contract
         run: npm run test:content-protection
 
@@ -143,6 +146,9 @@ jobs:
         run: bash scripts/test-p4-postgres-smoke.sh
       - name: P5 fullscreen exit seals and redacts backend question attempts
         run: bash scripts/test-p5-postgres-smoke.sh
+
+      - name: P6A ASP nine-domain human review and admin privilege smoke
+        run: bash scripts/test-p6-postgres-smoke.sh
 
       - name: Test scope disclosure
         run: echo "Ephemeral local PostgreSQL smoke only; live Supabase Auth, Storage, Data API and device tests still pending."
