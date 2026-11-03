@@ -1,5 +1,5 @@
 import React,{useEffect,useMemo,useState} from 'react';
-import {BookOpen,CheckCircle2,ChevronDown,ChevronRight,FileText,GraduationCap,Layers3,LockKeyhole,LogOut,Plus,RefreshCw,ShieldCheck,UserRound,AlertCircle,Pencil} from 'lucide-react';
+import {BookOpen,CheckCircle2,ChevronDown,ChevronRight,FileText,GraduationCap,Layers3,LockKeyhole,LogOut,Plus,RefreshCw,ShieldCheck,UserRound,AlertCircle,Pencil,BookOpenCheck} from 'lucide-react';
 import {getSupabaseClient} from '../lib/supabase';
 import {createCourse,createDomain,createTopic,createLesson,createTextBlock,getCurrentEntitlements,listCourses,loadIdentity,loadStructure,loadTextBlocks,updatePublish,updateTitle} from './lmsApi';
 import './supabaseApp.css';
@@ -79,6 +79,7 @@ function EditorModal({editing,onCancel,onSave,busy,error}) {
 export default function SupabaseApp() {
  const [session,setSession]=useState(null),[boot,setBoot]=useState(true),[identity,setIdentity]=useState(null),[recovering,setRecovering]=useState(false);
  const [courses,setCourses]=useState([]),[entitlements,setEntitlements]=useState([]),[courseId,setCourseId]=useState(null),[tree,setTree]=useState([]),[lessonId,setLessonId]=useState(null),[blocks,setBlocks]=useState([]);
+ const [adminSection,setAdminSection]=useState('courses'),[loadedStructureFor,setLoadedStructureFor]=useState(null);
  const [busy,setBusy]=useState(false),[fetching,setFetching]=useState(false),[error,setError]=useState(''),[notice,setNotice]=useState(''),[editing,setEditing]=useState(null),[editError,setEditError]=useState('');
  const db=database;
  useEffect(()=>{
@@ -89,7 +90,7 @@ export default function SupabaseApp() {
   return()=>{active=false;subscription.unsubscribe();};
  },[db]);
  useEffect(()=>{
-  if(!db||!session?.user){setIdentity(null);setCourses([]);setTree([]);setEntitlements([]);return;}
+  if(!db||!session?.user){setIdentity(null);setCourses([]);setTree([]);setEntitlements([]);setAdminSection('courses');setLoadedStructureFor(null);return;}
   let active=true;setFetching(true);setError('');
   Promise.all([loadIdentity(db,session.user),listCourses(db),getCurrentEntitlements(db,session.user.id)])
    .then(([user,items,access])=>{if(active){setIdentity(user);setCourses(items);setEntitlements(access);setCourseId(old=>items.some(c=>c.id===old)?old:(items[0]?.id||null));}})
@@ -99,12 +100,13 @@ export default function SupabaseApp() {
  },[db,session?.user?.id]);
  const isAdmin=identity?.isAdmin===true;
  const selected=courses.find(c=>c.id===courseId);
+ const aspCourse=courses.find(c=>c.slug==='asp');
  const entitled=isAdmin||includes(entitlements,courseId);
  const suspended=identity?.profile?.account_status==='suspended';
  useEffect(()=>{
-  if(!db||!selected||!identity||suspended||!entitled){setTree([]);setLessonId(null);setBlocks([]);return;}
-  let active=true;setFetching(true);
-  loadStructure(db,selected.id).then(rows=>{if(active){setTree(rows);setLessonId(null);setBlocks([]);}}).catch(e=>{if(active)setError(msg(e));}).finally(()=>{if(active)setFetching(false);});
+  if(!db||!selected||!identity||suspended||!entitled){setTree([]);setLoadedStructureFor(null);setLessonId(null);setBlocks([]);return;}
+  let active=true;setFetching(true);setTree([]);setLoadedStructureFor(null);
+  loadStructure(db,selected.id).then(rows=>{if(active){setTree(rows);setLoadedStructureFor(selected.id);setLessonId(null);setBlocks([]);}}).catch(e=>{if(active)setError(msg(e));}).finally(()=>{if(active)setFetching(false);});
   return()=>{active=false;};
  },[db,selected?.id,identity?.isAdmin,identity?.profile?.account_status,entitled]);
  useEffect(()=>{
@@ -119,7 +121,7 @@ export default function SupabaseApp() {
    const [items,access]=await Promise.all([listCourses(db),getCurrentEntitlements(db,session.user.id)]);
    setCourses(items);setEntitlements(access);
    if(selected&&items.some(c=>c.id===selected.id)&&(isAdmin||includes(access,selected.id))){
-    setTree(await loadStructure(db,selected.id));
+    setTree(await loadStructure(db,selected.id));setLoadedStructureFor(selected.id);
     if(lessonId)setBlocks(await loadTextBlocks(db,lessonId));
    }
   }catch(e){setError(msg(e));}finally{setFetching(false);}
@@ -152,11 +154,25 @@ export default function SupabaseApp() {
  return <div className="live-shell">
   <header className="live-top"><div className="live-brand"><img src="/images/technica-logo.webp" alt="Technica Consult"/><strong>TECHNICA CONSULT <span>LMS</span></strong></div><div className="live-top-right"><span className="live-live-pill"><ShieldCheck size={14}/> Supabase</span><small>{session.user.email}</small><button type="button" className="live-secondary" onClick={()=>db.auth.signOut()}><LogOut size={16}/> Sign out</button></div></header>
   <main className="live-main">
-   <div className="live-main-heading"><div><span className="live-eyebrow">COURSE PLATFORM · SECURE DATABASE</span><h1>{isAdmin?'Course management':'Learning library'}</h1><p>{isAdmin?'Manage live course metadata and learning structure.':'Explore published courses you can access.'}</p></div><button type="button" className="live-secondary" onClick={refresh} disabled={fetching}><RefreshCw size={16}/> Refresh</button></div>
-   {error&&<p className="live-error" role="alert"><AlertCircle size={18}/>{error}</p>}
+   <div className="live-main-heading"><div><span className="live-eyebrow">COURSE PLATFORM · SECURE DATABASE</span><h1>{isAdmin&&adminSection==='review'?'ASP Question Review':isAdmin?'Course management':'Learning library'}</h1><p>{isAdmin?'Manage live course metadata and learning structure.':'Explore published courses you can access.'}</p></div><button type="button" className="live-secondary" onClick={refresh} disabled={fetching}><RefreshCw size={16}/> Refresh</button></div>
+   {isAdmin&&!suspended&&<nav className="live-admin-navigation" aria-label="Admin menu">
+     <span className="live-admin-nav-label">ADMIN MENU</span>
+     <button type="button" aria-current={adminSection==='courses'?'page':undefined}
+       className={adminSection==='courses'?'active':''} onClick={()=>setAdminSection('courses')}><BookOpen size={17}/> Courses & Builder</button>
+     <button type="button" aria-current={adminSection==='review'?'page':undefined}
+       className={adminSection==='review'?'active':''} onClick={()=>{if(aspCourse)setCourseId(aspCourse.id);setAdminSection('review');}}><BookOpenCheck size={17}/> ASP Question Review</button>
+    </nav>}
+    {error&&<p className="live-error" role="alert"><AlertCircle size={18}/>{error}</p>}
    {notice&&<p className="live-notice" role="status"><CheckCircle2 size={17}/>{notice}</p>}
    {suspended?<div className="live-empty"><LockKeyhole size={24}/><b>Account suspended</b><p>Contact the LMS administrator.</p></div>:!identity?<div className="live-empty">Loading profile…</div>:
-   <div className="live-columns">
+   isAdmin&&adminSection==='review'?(
+     !aspCourse?<div className="live-empty" role="status"><BookOpen size={24}/><h3>ASP course not found</h3><p>Create the ASP course with the slug "asp" from Courses & Builder before opening its review queue. No questions are changed.</p>
+      <button className="live-secondary" type="button" onClick={()=>setAdminSection('courses')}>Open Courses & Builder</button></div>:
+     selected?.id!==aspCourse.id||loadedStructureFor!==aspCourse.id?
+      <div className="live-empty" role="status"><RefreshCw size={24}/><h3>Preparing ASP review workspace…</h3><p>Loading the ASP course and official domain catalog.</p></div>:
+      <AdminQuestionReview key={aspCourse.id} db={db} course={aspCourse} domains={tree} onDomainsSeeded={refresh}/>
+    ):
+    <div className="live-columns">
     <section className="live-list"><div className="live-list-top"><h2>Courses <span>{courses.length}</span></h2>{isAdmin&&<button className="live-icon-create" type="button" onClick={()=>setEditing({kind:'course',label:'Create course'})}><Plus size={17}/> New</button>}</div>
       {courses.map(c=><button type="button" key={c.id} onClick={()=>setCourseId(c.id)} className={`live-course ${selected?.id===c.id?'active':''}`}><BookOpen size={19}/><span><b>{c.title}</b><small>{c.publication_state==='published'?'Published':'Draft'} · {c.slug}</small></span>{!(isAdmin||includes(entitlements,c.id))&&<LockKeyhole size={15}/>}</button>)}
       {!courses.length&&<p className="live-empty">No courses found. {isAdmin?'Create the first course.':'Published courses will appear here.'}</p>}
@@ -184,8 +200,8 @@ export default function SupabaseApp() {
      </>}
     </section>
    </div>}
-   {selected&&identity&&!suspended&&<LivePractice key={session.user.id+selected.id} db={db} user={session.user} course={selected} domains={tree} access={isAdmin||entitlements.some(e=>e.course_id===selected.id&&['paid','manual'].includes(e.entitlement_type))}/>}
-   {isAdmin&&selected?.slug==='asp'&&!suspended&&<AdminQuestionReview key={selected.id} db={db} course={selected} domains={tree} onDomainsSeeded={refresh}/>}
+   {(adminSection==='courses'||!isAdmin)&&selected&&identity&&!suspended&&<LivePractice key={session.user.id+selected.id} db={db} user={session.user} course={selected} domains={tree} access={isAdmin||entitlements.some(e=>e.course_id===selected.id&&['paid','manual'].includes(e.entitlement_type))}/>}
+   
    <p className="live-disclaimer">P6A admin ASP bank review is private and does not publish questions. P4 scope: RLS-governed question bank and server-scored Quick 10, Timed Quiz, Custom and Domain Practice after manual question approval. Reserved Mock, adaptive Level Up, admin Assessment, payments, protected media and learner progress-event writes remain unavailable.</p>
   </main>{editing&&<EditorModal key={editing.kind+editing.id+editing.domainId+editing.topicId} editing={editing} onCancel={()=>{setEditing(null);setEditError('');}} onSave={save} busy={busy} error={editError}/>}
  </div>;
