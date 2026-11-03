@@ -239,6 +239,11 @@ try{
    assert.ok(await page.locator('.learn-quiz-options button').count()>1);
    await page.locator('.learn-quiz-options button').first().click();
    assert.equal(await page.locator('.learn-quiz-options button.selected').count(),1);
+   assert.equal(await page.evaluate(()=>!!document.fullscreenElement),true,'Lesson quiz must also enter native fullscreen');
+   await page.evaluate(()=>document.exitFullscreen());
+   await page.locator('.learn-lesson-content.tc-protected-content').waitFor();
+   assert.equal(await page.locator('.learn-quiz-content').count(),0,'Leaving fullscreen must return to previous lesson');
+
   });
   await check(device.name+' no JavaScript crashes',async()=>assert.deepEqual(errors,[]));
   await context.close();
