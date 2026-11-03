@@ -46,3 +46,22 @@ old=$(run_as authenticated "$paid"  "SELECT public.lms_p4_start_practice('$cours
 [[ "$old" == abandoned ]] || { echo 'FAIL retry resurrects abandoned session';exit 1; }
 echo 'PASS abandoned idempotent start cannot be resurrected'
 echo 'PASS P5 fullscreen-exit SQL data privacy on disposable Postgres; real Supabase device/JWT remains pending'
+
+
+# Validate the unified READ-ONLY catalog checker on ephemeral P1/P2/P4/P5 PostgreSQL.
+# This validates query syntax and expected schema fingerprint, NOT live Supabase.
+audit_output=$(psql -X -v ON_ERROR_STOP=1 -A -t -f supabase/P4_P5_VERIFY_ALL_READ_ONLY.sql)
+if printf '%s\n' "$audit_output" | grep -Eq '\|(FAIL|MISSING)\|'; then
+ echo "FAIL unified P4/P5 read-only catalog audit on disposable Postgres"
+ printf '%s\n' "$audit_output"
+ exit 1
+fi
+if ! printf '%s\n' "$audit_output" | grep -Fq 'P5|payload:abandoned_snapshot_redaction|PASS|'; then
+ echo "FAIL P5 abandonment redaction fingerprint not verified"
+ exit 1
+fi
+if ! printf '%s\n' "$audit_output" | grep -Fq 'P4|rpc:lms_p4_start_practice(uuid,text,integer,uuid,uuid,integer)|PASS|'; then
+ echo "FAIL P4 authenticated practice RPC not verified"
+ exit 1
+fi
+echo 'PASS unified P1/P2/P4/P5 READ-ONLY SQL audit against disposable Postgres'
