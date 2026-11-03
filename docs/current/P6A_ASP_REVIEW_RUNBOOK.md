@@ -53,3 +53,14 @@ The owner's uploaded Technica site is actively published but, without an explici
 - P6A migration still needs an independently authorized installation and real JWT admin QA. The protected queue doesn't automatically import or approve questions. If it reports the P6A RPC missing, inspect the database/version instead of auto-running migrations.
 - **Security limitation:** The original Demo page still includes its historical 1,625-question demo bank in its public bundle. This rollout does not make the whole Demo paid-content secure. Full paid launch must use the separate `VITE_DATA_MODE=supabase` build (only isolated live index). The new reviewer page itself must not import the Demo answer bank.
 - Code push is not proof that Cloudflare deployed a commit; verify build output, production environment values and actual domain after release. CI checks both normal build (`test:review:entry`) and isolated full-Live build (`test:p3:bundle`). 
+
+
+## Persistent Supabase configuration error after menu rollout (2026-11-04)
+
+If `/asp-review.html` displayed `Secure Supabase connection is required` after retrying deployment, the previous source used an exact pathname comparison. This was a **false-negative possibility even with correct Cloudflare keys**, not proof that secrets are absent. The reviewed source fix uses a dedicated `reviewMain.jsx` entry with an explicit `secureReviewEntry` prop, independent of the URL path.
+
+After deploying the new commit, if there is a real missing-configuration problem, the page now lists public **variable names only**, with `present` or `missing` for `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY`; it never prints keys.
+
+**Worker Builds settings**: In Cloudflare Workers & Pages → technica-lms → Settings → Builds → **Build variables and secrets**, verify the two public variables are saved there and assigned for production. Build vars are available to `npm run build`, unlike runtime-only Worker variables. A fresh build from the updated `main` commit is required. For this project, source default `VITE_DATA_MODE=demo` preserves all current Practice and calculator functions while producing the extra standalone `asp-review.html` secure review entry; do not flip to `supabase` solely to solve this route error.
+
+When keys are present and source fix deployed but authentication still fails, check actual Supabase project URL, public key, Auth Site URL/redirect allowlist, role binding, and installed P6A RPCs separately. Never put `service_role` credentials in the browser, screenshot or chat. CI fixture verification is not a real Cloudflare deployment or JWT acceptance test.
