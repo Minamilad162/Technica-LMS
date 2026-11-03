@@ -8,6 +8,7 @@ import {getCourse,getCourseBank,learnerCourses} from '../lib/courseWorkspace';
 import {useDemo} from '../lib/store';
 import {SelectButtons} from '../components/UI';
 import{PRACTICE_MODES,getLastAttemptInsights,presetPracticeSettings}from'../lib/practiceModes';
+import {requestQuestionFullscreen,leaveQuestionFullscreen,fullscreenStartError} from '../lib/questionFullscreen';
 
 export default function PracticePage(){
  const navigate=useNavigate();const{state,update,beginPractice,notify}=useDemo();
@@ -16,6 +17,17 @@ export default function PracticePage(){
  const [domainQuick,setDomainQuick]=useState(false);
  const [quickDomain,setQuickDomain]=useState('');
  const customizeRef=useRef(null);
+ const startingRef=useRef(false);
+ async function startProtectedSession(overrides){
+  if(startingRef.current)return;
+  startingRef.current=true;
+  try{
+   const result=await requestQuestionFullscreen(document.documentElement);
+   if(!result.ok){notify(fullscreenStartError(result));return;}
+   if(beginPractice(overrides))navigate('/practice/session');
+   else await leaveQuestionFullscreen(document);
+  }finally{startingRef.current=false;}
+ }
  const modeIcons={quick10:Zap,timed:Timer,domain:Layers3,weakest:Target,missed:RotateCcw,custom:SlidersHorizontal,levelup:TrendingUp,mock:GraduationCap};
  const choiceTopics=course.id==='asp'?topics.filter(t=>course.domainIds.includes(t.id)):[{id:course.domainIds[0],name:'General questions',questions:getCourseBank(state,course.id,questionPool).length,art:'plant',theme:'mint'}];
  const selected=choiceTopics.filter(t=>state.selectedTopics.includes(t.id));
@@ -31,7 +43,7 @@ export default function PracticePage(){
   if(!available){notify(course.name+' has no questions yet.');return}
   const overrides=presetPracticeSettings(id,{courseId:course.id,domainIds:course.domainIds,domainId,insights});
   if(!overrides){notify('This mode needs eligible questions or completed practice history.');return}
-  if(beginPractice(overrides))navigate('/practice/session');
+  void startProtectedSession(overrides);
  }
  function chooseMode(id){
   if(id==='custom'){
@@ -52,7 +64,7 @@ export default function PracticePage(){
  function begin(){
   if(!available){notify(`${course.name} has no questions yet.`);return}
   if(!selected.length){notify('Select at least one domain in this course.');return}
-  if(beginPractice({practiceCourseId:course.id,selectedTopics:selected.map(t=>t.id),questionCount:count,practiceMode:'custom',practiceModeLabel:'Build Your Own'}))navigate('/practice/session');
+  void startProtectedSession({practiceCourseId:course.id,selectedTopics:selected.map(t=>t.id),questionCount:count,practiceMode:'custom',practiceModeLabel:'Build Your Own'});
  }
  return <div className="practice-page page-enter">
   <h1>Practice your way</h1><p className="page-subtitle">Choose a course, select ASP domains, and customise your practice questions and time. Assessment settings are separate and controlled by the admin.</p>
