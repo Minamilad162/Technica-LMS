@@ -29,7 +29,8 @@ export function useQuestionFullscreenGuard({active,targetRef,onUnexpectedExit}) 
   doc.addEventListener('fullscreenchange',check);
   doc.addEventListener('visibilitychange',hidden);
   window.addEventListener('hashchange',locationChanged);
-  window.addEventListener('pagehide',()=>{}); // no unload trap: users retain control
+  const userExit=()=>quit('exit-button');
+  window.addEventListener('technica-quiz-leave',userExit);
   // Direct navigation/reload of an old question URL must not expose content
   // without a fresh user-initiated fullscreen permission.
   check();
@@ -37,6 +38,7 @@ export function useQuestionFullscreenGuard({active,targetRef,onUnexpectedExit}) 
    doc.removeEventListener('fullscreenchange',check);
    doc.removeEventListener('visibilitychange',hidden);
    window.removeEventListener('hashchange',locationChanged);
+   window.removeEventListener('technica-quiz-leave',userExit);
   };
  },[active,targetRef]);
  const leaveIntentionally=()=>{
