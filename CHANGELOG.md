@@ -1,4 +1,13 @@
 
+### 2026-11-04 — ASP Review belongs inside Question Bank → ASP course card
+
+- Removed standalone ASP reviewer item from the Demo admin menu; expanded ASP card now hosts **Review & classify**, displaying the real protected Supabase reviewer inside that card without navigating away.
+- Preserved old `#/asp-review` bookmarks as admin-guarded redirects to the in-card view; all other courses, Demo bank browsing, search and pagination remain available.
+- The secure `asp-review.html` bundle is an internal same-origin frame only. Real Auth admin privilege and P6A RPC still control all question/answer access, with safe same-origin resize messaging and compact iframe login UI.
+- Full Supabase Live also shows **Review questions** as an expandable section within the ASP course workspace, not a separate Admin tab.
+- **Not performed:** Supabase SQL/Cloudflare deployment, real JWT role integration or ASP bank approval. No Mock reservation or publication. Legacy Practice/Calculator security remains unchanged.
+
+
 ### 2026-11-04 — Fix persistent ASP review Supabase configuration false-negative
 
 - Replaced exact `window.location.pathname` detection with the explicit isolated `reviewMain.jsx` entrypoint, which always initializes actual Supabase Auth for ASP Review irrespective of route rewriting or aliases.

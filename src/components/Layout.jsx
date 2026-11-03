@@ -4,7 +4,7 @@ import{Home,BookOpen,NotebookTabs,GraduationCap,TriangleAlert,Bookmark,ChartNoAx
 import{logoutDemo,getAuthSession}from'../lib/demoAuth';
 import{useDemo}from'../lib/store';import{Avatar,DemoToast}from'./UI';
 const learnerItems=[['/home','Home',Home],['/my-learning','My learning',BookOpen],['/practice','Practice',NotebookTabs],['/assessments','Assessments',ClipboardCheck],['/results','Assessment review',TriangleAlert]];
-const adminItems=[['/analytics','Overview',Home],['/learners','Learners',Users],['/builder','Course Builder',BookOpenText],['/question-bank','Question Bank',FileQuestion],['/asp-review','ASP Question Review',ClipboardList],['/assessments','Exams',ClipboardCheck],['/reports','Reports',ChartNoAxesColumn],['/courses','Courses',BookOpen],['/practice','Practices',NotebookTabs]];
+const adminItems=[['/analytics','Overview',Home],['/learners','Learners',Users],['/builder','Course Builder',BookOpenText],['/question-bank','Question Bank',FileQuestion],['/assessments','Exams',ClipboardCheck],['/reports','Reports',ChartNoAxesColumn],['/courses','Courses',BookOpen],['/practice','Practices',NotebookTabs]];
 function Brand(){return <div className="brand" aria-label="Technica Consult LMS"><img className="brand-logo" src="/images/technica-logo.webp" alt="Technica Consult logo" width="40" height="30" decoding="async"/><span className="brand-name">TECHNICA CONSULT</span><span className="brand-lms">LMS</span></div>}
 export default function Layout({children,standalone=false,onLogout}){
  const{state,update,notify,reset}=useDemo();const navigate=useNavigate();const location=useLocation();

@@ -33,3 +33,8 @@ When explicitly building the FULL secure Supabase app with `VITE_DATA_MODE=supab
 - Record CI run URL, smoke test verdict, deployment ID, remaining risks in CHANGELOG and Blueprint.
 
 See .github/workflows/ci-security.yml and docs/current/RELEASE_SECURITY_CHECKLIST.md.
+
+
+## ASP review navigation update (2026-11-04)
+
+Current UI contract: `Admin → Question Bank → ASP course tile → Review & classify`. This expands the card and renders the secure `asp-review.html` **inside a same-origin iframe**. No separate ASP Review admin-menu tab. In a full Supabase-only build, the ASP course header contains an inline **Review questions** action. Both require real Supabase Admin credentials and protected P6A RPC privileges; Demo Admin credentials do not authorize reviewer access. The public Supabase build variables documented above remain necessary. Cloudflare `asp-review.html` is a required internal asset, *not* a standalone visible navigation section. No schema migration and no automatic deploy are part of this UI change.
