@@ -80,6 +80,9 @@ jobs:
       - name: Review connection diagnostics (no secrets, no role bypass)
         run: npm run test:review:connection
 
+      - name: Mandatory real email-password portal authentication contract
+        run: npm run test:auth:portal
+
       - name: Protected exam and video deterrence contract
         run: npm run test:content-protection
 
