@@ -4,6 +4,7 @@ import {getSupabaseClient} from '../lib/supabase';
 import {createCourse,createDomain,createTopic,createLesson,createTextBlock,getCurrentEntitlements,listCourses,loadIdentity,loadStructure,loadTextBlocks,updatePublish,updateTitle} from './lmsApi';
 import './supabaseApp.css';
 import LivePractice from './LivePractice';
+import AdminQuestionReview from './AdminQuestionReview';
 
 let database,configurationError='';
 try { database=getSupabaseClient();if(!database)configurationError='VITE_DATA_MODE must be supabase'; }
@@ -184,7 +185,8 @@ export default function SupabaseApp() {
     </section>
    </div>}
    {selected&&identity&&!suspended&&<LivePractice key={session.user.id+selected.id} db={db} user={session.user} course={selected} domains={tree} access={isAdmin||entitlements.some(e=>e.course_id===selected.id&&['paid','manual'].includes(e.entitlement_type))}/>}
-   <p className="live-disclaimer">P4 scope: RLS-governed question bank and server-scored Quick 10, Timed Quiz, Custom and Domain Practice after manual question approval. Reserved Mock, adaptive Level Up, admin Assessment, payments, protected media and learner progress-event writes remain unavailable.</p>
+   {isAdmin&&selected?.slug==='asp'&&!suspended&&<AdminQuestionReview key={selected.id} db={db} course={selected} domains={tree} onDomainsSeeded={refresh}/>}
+   <p className="live-disclaimer">P6A admin ASP bank review is private and does not publish questions. P4 scope: RLS-governed question bank and server-scored Quick 10, Timed Quiz, Custom and Domain Practice after manual question approval. Reserved Mock, adaptive Level Up, admin Assessment, payments, protected media and learner progress-event writes remain unavailable.</p>
   </main>{editing&&<EditorModal key={editing.kind+editing.id+editing.domainId+editing.topicId} editing={editing} onCancel={()=>{setEditing(null);setEditError('');}} onSave={save} busy={busy} error={editError}/>}
  </div>;
 }
