@@ -1055,3 +1055,16 @@ Implementation on isolated [PR #14](https://github.com/Minamilad162/Technica-LMS
 - Added native fullscreen entry and auto-exit, live watermark parity and restricted server abandonment. P1/P2/P4 unaffected; P5 migration deliberately manual.
 
 **P5 scope extension — Lesson self-check:** The final 10-question Lesson Quiz in the Demo Learning Player now also requests native fullscreen on user selection/Next, closes and reverts to the last lesson on fullscreen loss, preserves completed lesson progress, and requests fresh fullscreen for retakes. P5 browser QA exercises this path. This does not introduce secure production grading for demo lesson quizzes.
+
+
+## 44. P4/P5 non-destructive staging verification kit — 2026-11-03
+
+**Owner-directed gate:** Inspect whether P4/P5 SQL was applied to the *dedicated Technica LMS* Supabase project, with absolutely no changes to production. This is a source-code and deployment-evidence audit, **not** approval to run migrations.
+
+**Evidence at time of writing:** P1/P2 reported applied by owner; actual project ref and JWT/API results were never independently confirmed. P4/P5 migrations and their GitHub Actions disposable-PostgreSQL tests exist in repository source; no independent evidence that P4/P5 migrations are installed in real Supabase. Actual Supabase status remains **UNKNOWN / NOT VERIFIED**. Do not label these migrations deployed from CI or repository contents alone.
+
+**Additive verification tooling:** `supabase/P4_P5_VERIFY_ALL_READ_ONLY.sql` runs as a single SELECT and reports P1/P2 prerequisites, P4 private-table RLS and browser GRANT boundaries, protected RPC metadata, trigger and index footprints, P5 abandoned-state constraint, and the P5 payload-redaction source marker. It returns `PASS`, `FAIL`, `MISSING`, or `REVIEW` with no questions, answer keys, private user rows or secrets. It is designed to return `MISSING` safely if P4/P5 are absent. `docs/current/P4_P5_STAGING_VERIFICATION_GATE.md` records environment confirmation, safe execution, staged migration decision tree, full JWT/device QA and NO-GO rules. The disposable Postgres P5 smoke now exercises this **read-only** audit after P1–P5 SQL fixtures; that does not query live Supabase.
+
+**No regression / scope:** Existing P4/P5 SQL migration files, fixed ASP bank/question keys, approval requirements, 200 Mock exclusives / 300 minutes, 70% adaptive logic, legacy demo/UI, P5 fullscreen behavior, calculator, frontend bundles, Supabase environments and Cloudflare deployment are **unchanged**. No production or staging database was modified by this commit.
+
+**Release gate:** A catalog PASS is not sufficient: real Supabase Auth JWT cases, direct Data API denials, abandoned-attempt redaction, offline/refresh behavior and supported physical browsers must pass in authorized STAGING. Actual iPhone WebKit fullscreen limitations, operating-system recording and camera capture remain unresolved. No paid production release based on this step alone. Rollback: revert this additive query/documentation/test patch; no database rollback needed.
