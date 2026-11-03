@@ -6,7 +6,7 @@ import HDImage from '../components/HDImage';
 import {assets,questionPool} from '../data/mock';
 import {courses} from '../data/courseCatalog';
 import {getCourse} from '../lib/courseWorkspace';
-import {getAuthSession} from '../lib/demoAuth';
+import {getAuthSession} from '../lib/portalAuth';
 import {assessmentHistoryForUser,groupAssessmentHistory,DEMO_LEARNER_ID} from '../lib/assessmentHistory';
 import {useDemo,calculateResult} from '../lib/store';
 import {Breadcrumb} from '../components/UI';
