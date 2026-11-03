@@ -1,4 +1,13 @@
 
+
+### 2026-11-03 — P6A protected ASP question-review workspace (source only)
+
+- Added a new additive, manually deployed P6A migration with RLS-private reviewer decisions, verified-admin-only RPCs for paginated ASP bank review, official nine-domain setup and readiness aggregate; draft questions never become learner-visible through review actions.
+- Added an ASP admin reviewer panel in Supabase Live with original question, answer/explanation, official domain and difficulty, human answer/rights confirmation and audit trail. No browser direct raw question-bank query.
+- Added `npm run test:p6`, disposable PostgreSQL negative tests and a staging installation/verification guide.
+- **Not completed:** Supabase P6A migration deployment, real JWT/device checks, draft importer apply, SME/rights review, reserving 200 Mock-exclusive items, publishing questions, Cloudflare deploy or any production database modification.
+- Preserved legacy Demo/Practice, existing ASP IDs and answer keys, fixed Admin Assessment, calculator, P4 answer privacy and P5 fullscreen.
+
 ### 2026-11-03 — P4/P5 source-to-staging verification kit (read-only)
 
 - Added one catalog-only SQL SELECT `supabase/P4_P5_VERIFY_ALL_READ_ONLY.sql` to detect **MISSING / FAIL / PASS** for P1/P2 prerequisites and P4/P5 schema, RPC grants, indexes, trigger and abandonment redaction source guard without reading any user/question rows.
