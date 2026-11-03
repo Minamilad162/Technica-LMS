@@ -83,7 +83,7 @@ export async function diagnoseReviewConnection(db,{build={},session=null,identit
   if(error){checks.push(check('p6a','fail',describeDbError(error)));return checks;}
   const count=Number(data?.total||0);
   checks.push(check('p6a','pass','P6A protected review RPC responded. '+(count===0?'The real ASP question bank has 0 imported questions; source Demo questions are not imported automatically.':'ASP review records are accessible.')));
- }catch(error){checks.push(check('p6a','fail',describeDbError(error));}
+ }catch(error){checks.push(check('p6a','fail',describeDbError(error)));}
  if(identityError&&!checks.some(x=>x.status==='fail')){
   checks.push(check('ui','warn','A separate LMS loading request failed. Reopen the card to refresh the current session.'));
  }
