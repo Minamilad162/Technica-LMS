@@ -327,3 +327,9 @@
 - Added RLS-protected bank, server-owned practice attempts and immutable scoring snapshots, backend-only answer selection and transaction-safe finish using scoped PostgreSQL RPCs.
 - Live Supabase mode now has Quick 10, Timed Quiz, Build Your Own and Practice by Domain, with resume, server time and feedback gates; original demo and assessment remain unchanged.
 - Added dry-run-first 1625 ASP bank importer (draft/unmapped only), SQL security tests and P4 runbook. No automatic Supabase migration or Cloudflare deployment; Mock/Level Up/official Assessment remain pending.
+
+
+## 2026-11-03 — P5 Fullscreen question security
+- Demo Practice and Assessment now request real native fullscreen at Start; Esc, native fullscreen exit, browser hidden and explicit Exit discard unsent sessions and return to setup.
+- Supabase live Practice enters fullscreen for question workspace, watermarks authenticated user ID and browser session, and applies scoped copy/print deterrence. P5 SQL seals abandoned attempts without exposing their question/answer snapshots; no unsafe automatic resume on refresh.
+- Added controlled P5 migration, read-only verification, disposable PostgreSQL negative tests, fullscreen browser regression and rollout runbook. No screenshot/recording guarantee, iPhone native element fullscreen not supported consistently, no production deploy.
