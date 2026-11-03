@@ -49,7 +49,8 @@ assert.ok(!demoMenu.includes("['/asp-review'"),'Separate Demo ASP review menu it
 assert.ok(demoRoutes.includes('path="/asp-review" element={<AdminOnly><Navigate to="/question-bank?course=asp&review=1" replace/>'), 'Legacy bookmarked URL must redirect inside Admin Question Bank');
 assert.ok(bankPage.includes('c.id===\'asp\'&&<button'),'Only ASP course cards may expose reviewer control');
 assert.ok(bankPage.includes('Review & classify'),'Review action must exist inside ASP card');
-assert.ok(bankPage.includes('reviewOpen&&<div id="asp-review-inside-card"'),'Secure viewer must be embedded in the selected ASP course card');
+assert.ok(bankPage.includes('c.id===\'asp\'&&reviewOpen&&<div id="asp-review-inside-card"'),'Secure viewer must be structurally inside the ASP course card');
+assert.ok(bankPage.includes("review-expanded"),'Expanded reviewer should span the Question Bank card grid');
 assert.ok(bankPage.includes('!reviewOpen&&<>'),'Old Demo Question Bank must remain accessible outside review mode');
 assert.ok(secureFrame.includes('<iframe'),'Reviewer must be embedded in the ASP course card');
 assert.ok(secureFrame.includes("e.origin!==window.location.origin"),'Frame resize requires trusted origin');
