@@ -6,8 +6,11 @@ import './supabaseApp.css';
 import LivePractice from './LivePractice';
 import AdminQuestionReview from './AdminQuestionReview';
 
+// The independent secure review page is emitted with the existing published
+// build and must never import the browser-local demo account or ASP bank.
+const standaloneReviewPage=typeof window!=='undefined'&&window.location.pathname.split('/').pop()==='asp-review.html';
 let database,configurationError='';
-try { database=getSupabaseClient();if(!database)configurationError='VITE_DATA_MODE must be supabase'; }
+try { database=getSupabaseClient({secureReviewEntry:standaloneReviewPage});if(!database)configurationError='Secure Supabase connection is required'; }
 catch(e){ configurationError=e.message; }
 const msg=e=>e?.message||'Operation failed. Please try again.';
 const includes=(rows,id)=>rows.some(x=>x.course_id===id);
@@ -79,7 +82,7 @@ function EditorModal({editing,onCancel,onSave,busy,error}) {
 export default function SupabaseApp() {
  const [session,setSession]=useState(null),[boot,setBoot]=useState(true),[identity,setIdentity]=useState(null),[recovering,setRecovering]=useState(false);
  const [courses,setCourses]=useState([]),[entitlements,setEntitlements]=useState([]),[courseId,setCourseId]=useState(null),[tree,setTree]=useState([]),[lessonId,setLessonId]=useState(null),[blocks,setBlocks]=useState([]);
- const [adminSection,setAdminSection]=useState('courses'),[loadedStructureFor,setLoadedStructureFor]=useState(null);
+ const [adminSection,setAdminSection]=useState(standaloneReviewPage?'review':'courses'),[loadedStructureFor,setLoadedStructureFor]=useState(null);
  const [busy,setBusy]=useState(false),[fetching,setFetching]=useState(false),[error,setError]=useState(''),[notice,setNotice]=useState(''),[editing,setEditing]=useState(null),[editError,setEditError]=useState('');
  const db=database;
  useEffect(()=>{
@@ -90,7 +93,7 @@ export default function SupabaseApp() {
   return()=>{active=false;subscription.unsubscribe();};
  },[db]);
  useEffect(()=>{
-  if(!db||!session?.user){setIdentity(null);setCourses([]);setTree([]);setEntitlements([]);setAdminSection('courses');setLoadedStructureFor(null);return;}
+  if(!db||!session?.user){setIdentity(null);setCourses([]);setTree([]);setEntitlements([]);setAdminSection(standaloneReviewPage?'review':'courses');setLoadedStructureFor(null);return;}
   let active=true;setFetching(true);setError('');
   Promise.all([loadIdentity(db,session.user),listCourses(db),getCurrentEntitlements(db,session.user.id)])
    .then(([user,items,access])=>{if(active){setIdentity(user);setCourses(items);setEntitlements(access);setCourseId(old=>items.some(c=>c.id===old)?old:(items[0]?.id||null));}})
@@ -147,7 +150,7 @@ export default function SupabaseApp() {
    setNotice('Publication state updated.');await refresh();
   }catch(e){setError(msg(e));}finally{setBusy(false);}
  };
- if(configurationError)return <section className="live-configuration"><AlertCircle size={27}/><h1>Technica LMS · Supabase configuration required</h1><p>{configurationError}</p><p>Set VITE_DATA_MODE=supabase and supply VITE_SUPABASE_URL + VITE_SUPABASE_ANON_KEY as build-time environment values. Never use the service_role key.</p></section>;
+ if(configurationError)return <section className="live-configuration"><AlertCircle size={27}/><h1>Technica LMS · Supabase configuration required</h1><p>{configurationError}</p><p>This secure review page requires VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY (public/publishable key only) in your Cloudflare Pages build environment. A regular Live build additionally uses VITE_DATA_MODE=supabase. Never use a service-role key in the browser.</p></section>;
  if(boot)return <div className="live-wait">Loading secure LMS session…</div>;
  if(recovering&&session)return <RecoveryScreen db={db} onComplete={()=>{setRecovering(false);setNotice('Password updated successfully.');}}/>;
  if(!session)return <LoginScreen db={db}/>;
