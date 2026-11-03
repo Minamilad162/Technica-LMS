@@ -22,7 +22,7 @@ assert.ok(sql.includes("v_question.approval_state<>'draft'"));
 assert.ok(sql.includes('reviewed_domain_id'));
 assert.ok(!sql.includes("UPDATE public.lms_questions SET approval_state"));
 assert.ok(!sql.includes("SET approval_state='approved'"));
-assert.ok(sql.includes("p6a_"),'Expected isolated extension naming');
+assert.ok(sql.includes('lms_p6_review_question'),'Expected isolated P6 review RPC');
 assert.ok(api.includes("db.rpc(name,args)"));
 assert.ok(!api.includes("db.from('lms_questions')"));
 assert.ok(!api.includes('SUPABASE_SERVICE_ROLE_KEY'));
