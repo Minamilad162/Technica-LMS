@@ -5,7 +5,7 @@ import {aspCourse,findCourse} from '../data/courseCatalog';
 import {assessmentSettings,prepareAssessment,canPracticeCourse} from './courseAssessment';
 import {markQuestionLeft} from './quizNavigation';
 import {archiveAssessment,DEMO_LEARNER_ID} from './assessmentHistory';
-import {getAuthSession} from './demoAuth';
+import {getAuthSession} from './portalAuth';
 import {allAdminCourses,createCourseId,validateCourse} from './adminCourses';
 import {getCourse,getCourseBank,courseDomainId,getCourseModules} from './courseWorkspace';
 import {getCourseHierarchy,validateCourseHierarchy} from './courseHierarchy';
