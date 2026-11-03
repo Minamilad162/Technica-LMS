@@ -42,14 +42,14 @@ export default function QuestionBankPage() {
       <div className="bank-course-head"><strong>Courses</strong><span>Select a course to inspect its questions</span></div>
       <div className="bank-course-selector">
         <button type="button" className={`bank-course-option ${validCourse==='all'?'active':''}`} aria-pressed={validCourse==='all'} onClick={()=>setCourseFilter('all')}><span className="bank-course-icon"><GraduationCap size={19}/></span><span className="bank-course-detail"><b>All courses</b><small>All question banks</small></span><strong className="bank-course-total">{totalBank.toLocaleString()}</strong></button>
-        {courseBanks.map(c=><div key={c.id} className={`bank-course-tile ${validCourse===c.id?'active':''}`}>
+        {courseBanks.map(c=><div key={c.id} className={`bank-course-tile ${validCourse===c.id?'active':''} ${c.id==='asp'&&reviewOpen?'review-expanded':''}`}>
           <button type="button" className={`bank-course-option ${validCourse===c.id?'active':''}`} aria-pressed={validCourse===c.id} onClick={()=>setCourseFilter(c.id)}><span className="bank-course-icon"><BookOpen size={19}/></span><span className="bank-course-detail"><b>{c.name}</b><small>{c.id==='psee'?'Demo questions · Draft':c.status==='published'?'Published':c.status==='scheduled'?'Scheduled':'Draft'}</small></span><strong className="bank-course-total">{c.bank.length.toLocaleString()}</strong></button>
           {c.id==='asp'&&<button type="button" className="bank-review-card-trigger" onClick={toggleReview} aria-expanded={reviewOpen} aria-controls="asp-review-inside-card">
             <ClipboardCheck size={17}/>{reviewOpen?'Close question review':'Review & classify'}{reviewOpen?<ChevronUp size={15}/>:<ChevronDown size={15}/>}
           </button>}
+          {c.id==='asp'&&reviewOpen&&<div id="asp-review-inside-card"><SecureAspReviewPanel onClose={()=>setCourseFilter('asp')}/></div>}
         </div>)}
       </div>
-      {reviewOpen&&<div id="asp-review-inside-card"><SecureAspReviewPanel onClose={()=>setCourseFilter('asp')}/></div>}
       {validCourse==='psee'&&<p className="bank-demo-disclaimer" role="note">PSEE questions are fictional demo content for previewing this feature—not a validated learner assessment or part of the ASP Excel workbook.</p>}
     </section>
     {!reviewOpen&&<><div className="saved-head"><div className="table-search"><Search size={17}/><input placeholder="Search questions, answers or topics..." aria-label="Search questions" value={search} onChange={e=>{setSearch(e.target.value);setPage(1)}}/></div><button className="btn btn-secondary" onClick={openBuilder}>Open Course Builder <ArrowRight size={16}/></button></div>
