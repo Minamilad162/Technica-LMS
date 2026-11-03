@@ -2,6 +2,21 @@
 
 Deployment target: Cloudflare Pages, build output dist, GitHub main. Current app is a browser-local React/Vite demo; deploy only as a clearly labeled preview until production backend/entitlement controls are validated.
 
+## ASP Question Review on the EXISTING published site (2026-11-03)
+
+The ordinary `npm run build` now builds TWO independent HTML entrypoints in `dist`: `index.html` (existing published Technica UI and demo assessments, no regressions) plus `asp-review.html` (real Supabase Auth / verified Admin / P6A reviewer). The admin sidebar **ASP Question Review** opens the real `/asp-review.html` page directly, not an explainer. A regular non-admin cannot approve or read question answers: the P6A RPC authorizes the actual Supabase Auth JWT.
+
+Cloudflare Pages must provide these **PUBLIC** build variables in the actual Production environment, even if `VITE_DATA_MODE=demo`:
+
+```dotenv
+VITE_SUPABASE_URL=https://YOUR_TECHNICA_PROJECT_REF.supabase.co
+VITE_SUPABASE_ANON_KEY=YOUR_PUBLIC_PUBLISHABLE_OR_ANON_KEY
+```
+
+Never add `SUPABASE_SERVICE_ROLE_KEY` in Vite/Cloudflare browser variables. The project needs the owner-approved P6A migration, a genuine verified admin and a course with `slug='asp'` before the review queue can load. Missing config shows a specific configuration screen; source changes cannot silently populate Cloudflare settings. **No Cloudflare deployment, migration execution or runtime role check is performed by the GitHub merge.**
+
+When explicitly building the FULL secure Supabase app with `VITE_DATA_MODE=supabase`, Vite still emits only its separate `index.html` Live entry (not the browser-local Demo or its 1,625 historic answer keys). This preserves the security isolation and the existing standalone P3 Live bundle scan.
+
 ## Existing demo build
 - Node 22 and npm.
 - Current source lacks package-lock.json so npm ci cannot yet be used; temporary npm install works in a connected environment but is NOT reproducible.
