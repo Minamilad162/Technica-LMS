@@ -50,11 +50,14 @@ assert.ok(!demoGate.includes("from '../production/"),'Demo notice must never imp
 const reviewHtml=read('asp-review.html');
 const vite=read('vite.config.js');
 const supabaseClient=read('src/lib/supabase.js');
-assert.ok(reviewHtml.includes('/src/production/main.jsx'), 'Standalone secure review must use the isolated Live entry');
+assert.ok(reviewHtml.includes('/src/production/reviewMain.jsx'), 'Standalone secure review must use its explicit dedicated entry');
+assert.ok(read('src/production/reviewMain.jsx').includes('<SupabaseApp secureReviewEntry={true}/>'), 'Standalone review must opt into Supabase by entry rather than URL');
 assert.ok(!reviewHtml.includes('/src/main.jsx'), 'No unprotected Demo app in secure review HTML');
 assert.ok(vite.includes("aspReview:resolve(process.cwd(),'asp-review.html')"), 'Default build must emit the secure reviewer alongside existing site');
 assert.ok(vite.includes("build:live?undefined:"), 'Full Live bundle must remain single entry and exclude Demo answer bank');
 assert.ok(supabaseClient.includes("!secureReviewEntry"), 'Secure review entry may initialize Supabase without switching Demo app auth mode');
-assert.ok(shell.includes("standaloneReviewPage?'review':'courses'"), 'Standalone review must open its real admin page by default');
+assert.ok(shell.includes("secureReviewEntry?'review':'courses'"), 'Standalone review must open its real admin page by default');
+assert.ok(!shell.includes("window.location.pathname.split('/').pop()==='asp-review.html'"), 'Supabase activation must not rely on exact browser pathname');
+assert.ok(shell.includes('initializeConnection(secureReviewEntry)'), 'Review entry explicitly initializes Supabase');
 assert.ok(shell.includes('<AdminQuestionReview'));
 console.log('PASS P6A isolated secure admin review contract: no auto-approval, nine official domains, no browser direct bank read.');

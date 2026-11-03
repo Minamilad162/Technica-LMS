@@ -6,12 +6,17 @@ import './supabaseApp.css';
 import LivePractice from './LivePractice';
 import AdminQuestionReview from './AdminQuestionReview';
 
-// The independent secure review page is emitted with the existing published
-// build and must never import the browser-local demo account or ASP bank.
-const standaloneReviewPage=typeof window!=='undefined'&&window.location.pathname.split('/').pop()==='asp-review.html';
-let database,configurationError='';
-try { database=getSupabaseClient({secureReviewEntry:standaloneReviewPage});if(!database)configurationError='Secure Supabase connection is required'; }
-catch(e){ configurationError=e.message; }
+// The secure review's separate entry passes secureReviewEntry=true explicitly.
+// The URL is intentionally NOT used for authentication bootstrap: rewrites and
+// aliases can serve this same HTML under other paths.
+function initializeConnection(secureReviewEntry){
+ try {
+  const db=getSupabaseClient({secureReviewEntry});
+  return {db,configurationError:db?'': 'Secure Supabase connection is required'};
+ } catch(error){
+  return {db:null,configurationError:error?.message||'Supabase configuration is invalid'};
+ }
+}
 const msg=e=>e?.message||'Operation failed. Please try again.';
 const includes=(rows,id)=>rows.some(x=>x.course_id===id);
 
@@ -79,12 +84,12 @@ function EditorModal({editing,onCancel,onSave,busy,error}) {
   </form>
  </div>;
 }
-export default function SupabaseApp() {
+export default function SupabaseApp({secureReviewEntry=false}) {
  const [session,setSession]=useState(null),[boot,setBoot]=useState(true),[identity,setIdentity]=useState(null),[recovering,setRecovering]=useState(false);
  const [courses,setCourses]=useState([]),[entitlements,setEntitlements]=useState([]),[courseId,setCourseId]=useState(null),[tree,setTree]=useState([]),[lessonId,setLessonId]=useState(null),[blocks,setBlocks]=useState([]);
- const [adminSection,setAdminSection]=useState(standaloneReviewPage?'review':'courses'),[loadedStructureFor,setLoadedStructureFor]=useState(null);
+ const [adminSection,setAdminSection]=useState(secureReviewEntry?'review':'courses'),[loadedStructureFor,setLoadedStructureFor]=useState(null);
  const [busy,setBusy]=useState(false),[fetching,setFetching]=useState(false),[error,setError]=useState(''),[notice,setNotice]=useState(''),[editing,setEditing]=useState(null),[editError,setEditError]=useState('');
- const db=database;
+ const {db,configurationError}=useMemo(()=>initializeConnection(secureReviewEntry),[secureReviewEntry]);
  useEffect(()=>{
   if(!db){setBoot(false);return;}
   let active=true;
@@ -93,7 +98,7 @@ export default function SupabaseApp() {
   return()=>{active=false;subscription.unsubscribe();};
  },[db]);
  useEffect(()=>{
-  if(!db||!session?.user){setIdentity(null);setCourses([]);setTree([]);setEntitlements([]);setAdminSection(standaloneReviewPage?'review':'courses');setLoadedStructureFor(null);return;}
+  if(!db||!session?.user){setIdentity(null);setCourses([]);setTree([]);setEntitlements([]);setAdminSection(secureReviewEntry?'review':'courses');setLoadedStructureFor(null);return;}
   let active=true;setFetching(true);setError('');
   Promise.all([loadIdentity(db,session.user),listCourses(db),getCurrentEntitlements(db,session.user.id)])
    .then(([user,items,access])=>{if(active){setIdentity(user);setCourses(items);setEntitlements(access);setCourseId(old=>items.some(c=>c.id===old)?old:(items[0]?.id||null));}})
@@ -150,7 +155,12 @@ export default function SupabaseApp() {
    setNotice('Publication state updated.');await refresh();
   }catch(e){setError(msg(e));}finally{setBusy(false);}
  };
- if(configurationError)return <section className="live-configuration"><AlertCircle size={27}/><h1>Technica LMS · Supabase configuration required</h1><p>{configurationError}</p><p>This secure review page requires VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY (public/publishable key only) in your Cloudflare Pages build environment. A regular Live build additionally uses VITE_DATA_MODE=supabase. Never use a service-role key in the browser.</p></section>;
+ if(configurationError)return <section className="live-configuration" role="alert"><AlertCircle size={27}/>
+    <h1>Technica LMS · Supabase configuration required</h1>
+    <p>{configurationError}</p>
+    <p>Public build-variable check: <strong>VITE_SUPABASE_URL {import.meta.env.VITE_SUPABASE_URL?'✓ present':'✗ missing'}</strong> · <strong>VITE_SUPABASE_ANON_KEY {import.meta.env.VITE_SUPABASE_ANON_KEY?'✓ present':'✗ missing'}</strong>.</p>
+    <p>Add the two public values in Cloudflare Worker → Settings → Builds → Build variables and secrets. Save and trigger a fresh build from GitHub; runtime Worker variables are not injected into the browser JavaScript. Never add the service_role key.</p>
+   </section>;
  if(boot)return <div className="live-wait">Loading secure LMS session…</div>;
  if(recovering&&session)return <RecoveryScreen db={db} onComplete={()=>{setRecovering(false);setNotice('Password updated successfully.');}}/>;
  if(!session)return <LoginScreen db={db}/>;
