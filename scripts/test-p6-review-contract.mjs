@@ -50,7 +50,8 @@ assert.ok(!demoGate.includes("from '../production/"),'Demo notice must never imp
 const reviewHtml=read('asp-review.html');
 const vite=read('vite.config.js');
 const supabaseClient=read('src/lib/supabase.js');
-assert.ok(reviewHtml.includes('/src/production/main.jsx'), 'Standalone secure review must use the isolated Live entry');
+assert.ok(reviewHtml.includes('/src/production/reviewMain.jsx'), 'Standalone secure review must use its explicit dedicated entry');
+assert.ok(read('src/production/reviewMain.jsx').includes('<SupabaseApp secureReviewEntry={true}/>'), 'Standalone review must opt into Supabase by entry rather than URL');
 assert.ok(!reviewHtml.includes('/src/main.jsx'), 'No unprotected Demo app in secure review HTML');
 assert.ok(vite.includes("aspReview:resolve(process.cwd(),'asp-review.html')"), 'Default build must emit the secure reviewer alongside existing site');
 assert.ok(vite.includes("build:live?undefined:"), 'Full Live bundle must remain single entry and exclude Demo answer bank');
