@@ -1,0 +1,18 @@
+.live-conn-panel{margin:14px 0;border:1px solid #d9e8eb;border-radius:12px;background:#fff;overflow:hidden;color:#2d515b}
+.live-conn-toggle{width:100%;border:0;background:#f5fafa;display:flex;align-items:center;gap:10px;padding:12px 14px;text-align:left;color:#24646a;font-size:13px;font-weight:750}
+.live-conn-toggle span{flex:1}.live-conn-toggle strong{font-size:11px;color:#a0443b;background:#fff1ef;padding:4px 7px;border-radius:20px}
+.live-conn-toggle:focus-visible{outline:2px solid #168a82;outline-offset:-3px}
+.live-conn-details{padding:13px 15px;display:grid;gap:10px}
+.live-conn-explain,.live-conn-progress{font-size:11px;line-height:1.55;margin:0;color:#647d84;overflow-wrap:anywhere}
+.live-conn-explain code{font-size:11px;color:#295a66;background:#edf5f4;padding:2px 5px;border-radius:5px}
+.live-conn-progress{display:flex;gap:7px;align-items:center}
+.live-conn-step{display:flex;gap:10px;align-items:flex-start;padding:9px 0;border-top:1px solid #edf2f3}
+.live-conn-state{flex-shrink:0;display:flex;color:#c28b26}
+.live-conn-state.state-pass{color:#228669}
+.live-conn-state.state-fail{color:#a8463d}
+.live-conn-step>div:last-child{flex:1;min-width:0}
+.live-conn-step strong{display:block;font-size:12px;color:#244f56;line-height:1.4}
+.live-conn-step p{font-size:11px;color:#5f7982;line-height:1.65;margin:3px 0 0;overflow-wrap:anywhere}
+.live-conn-actions{display:flex;align-items:center;flex-wrap:wrap;gap:9px;padding-top:8px;border-top:1px solid #edf2f3}
+.live-conn-actions span{font-size:10px;color:#82979b}
+@media(max-width:650px){.live-conn-details{padding:9px}.live-conn-toggle{padding:11px}.live-conn-step{gap:8px}}
