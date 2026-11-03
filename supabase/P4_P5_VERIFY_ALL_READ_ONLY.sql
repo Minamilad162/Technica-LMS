@@ -140,10 +140,10 @@ checks AS (
  UNION ALL
  SELECT 'P5','payload:abandoned_snapshot_redaction',
   CASE WHEN p.definition IS NULL THEN 'MISSING'
-   WHEN pg_catalog.position('IF a.state=''abandoned'' THEN' IN p.definition)=0 THEN 'FAIL'
+   WHEN pg_catalog.strpos(p.definition,'IF a.state=''abandoned'' THEN')=0 THEN 'FAIL'
    ELSE 'PASS' END,
   CASE WHEN p.definition IS NULL THEN 'Attempt payload RPC absent'
-   WHEN pg_catalog.position('IF a.state=''abandoned'' THEN' IN p.definition)=0
+   WHEN pg_catalog.strpos(p.definition,'IF a.state=''abandoned'' THEN')=0
      THEN 'P5 redaction guard not found in function definition'
    ELSE 'P5 source guard is installed; functional JWT tests are STILL required' END
  FROM p5_payload p
