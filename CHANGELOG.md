@@ -1,5 +1,13 @@
 
 
+### 2026-11-03 — P6A review menu discoverability and Demo/Live clarity
+
+- Added prominent authenticated-admin `ASP Question Review` navigation in Supabase Live and moved the ASP review panel out of the ASP course footer into its own workspace. Selecting review automatically targets the ASP course; missing ASP is explained.
+- Added `ASP Review (Live)` in the legacy Demo admin sidebar/mobile More menu as an honest admin-only information screen; **not a live reviewer**. No Demo state or credentials can approve real bank questions.
+- Preserved secure server authorization, P6A draft-only approvals, legacy Question Bank, learner menu and all existing Practice, Fullscreen and calculator behaviors.
+- GitHub source changes **do not** imply Cloudflare rebuilt/deployed Live, and do not apply P6A SQL to Supabase. The actual deployment mode must be confirmed separately.
+
+
 ### 2026-11-03 — P6A protected ASP question-review workspace (source only)
 
 - Added a new additive, manually deployed P6A migration with RLS-private reviewer decisions, verified-admin-only RPCs for paginated ASP bank review, official nine-domain setup and readiness aggregate; draft questions never become learner-visible through review actions.
