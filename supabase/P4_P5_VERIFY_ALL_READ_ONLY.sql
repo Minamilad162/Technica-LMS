@@ -96,13 +96,21 @@ checks AS (
  SELECT r.phase,'rpc:'||r.signature,
   CASE WHEN r.oid IS NULL THEN 'MISSING'
     WHEN r.prosecdef IS DISTINCT FROM r.definer_expected THEN 'FAIL'
-    WHEN NOT COALESCE(r.proconfig @> ARRAY['search_path=']::text[],false) THEN 'FAIL'
+    WHEN NOT EXISTS (
+      SELECT 1 FROM pg_catalog.unnest(COALESCE(r.proconfig,ARRAY[]::text[])) cfg(setting)
+      WHERE cfg.setting LIKE 'search_path=%'
+        AND pg_catalog.btrim(pg_catalog.split_part(cfg.setting,'=',2),'"')=''
+    ) THEN 'FAIL'
     WHEN COALESCE(r.anon_execute,true) THEN 'FAIL'
     WHEN r.auth_execute IS DISTINCT FROM r.auth_expected THEN 'FAIL'
     ELSE 'PASS' END,
   CASE WHEN r.oid IS NULL THEN 'RPC absent'
     WHEN r.prosecdef IS DISTINCT FROM r.definer_expected THEN 'Unexpected SECURITY DEFINER setting'
-    WHEN NOT COALESCE(r.proconfig @> ARRAY['search_path=']::text[],false)
+    WHEN NOT EXISTS (
+      SELECT 1 FROM pg_catalog.unnest(COALESCE(r.proconfig,ARRAY[]::text[])) cfg(setting)
+      WHERE cfg.setting LIKE 'search_path=%'
+        AND pg_catalog.btrim(pg_catalog.split_part(cfg.setting,'=',2),'"')=''
+    )
       THEN 'Function must fix its search_path to empty'
     WHEN COALESCE(r.anon_execute,true) THEN 'Anonymous or PUBLIC EXECUTE privilege detected'
     WHEN r.auth_execute IS DISTINCT FROM r.auth_expected THEN 'Wrong authenticated EXECUTE grant'
