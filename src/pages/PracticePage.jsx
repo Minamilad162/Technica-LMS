@@ -67,7 +67,7 @@ export default function PracticePage(){
   void startProtectedSession({practiceCourseId:course.id,selectedTopics:selected.map(t=>t.id),questionCount:count,practiceMode:'custom',practiceModeLabel:'Build Your Own'});
  }
  return <div className="practice-page page-enter">
-  <h1>Practice your way</h1><p className="page-subtitle">Choose a course, select ASP domains, and customise your practice questions and time. Assessment settings are separate and controlled by the admin.</p>
+  <h1>Practice your way</h1><p className="page-subtitle">Choose a course, select ASP domains, and customise your practice questions and time. Assessment settings are separate and controlled by the admin. Fullscreen is required when you start; exiting fullscreen closes the current unsent questions.</p>
   <div className="steps"><div className="step current"><span>1</span><b>Select course</b></div><div className="step-line"/><div className="step"><span>2</span><b>Customize</b></div><div className="step-line"/><div className="step"><span>3</span><b>Practice</b></div></div>
   <div className="practice-layout"><div className="practice-main">
    <h3 className="step-label">1. Choose your course</h3>
