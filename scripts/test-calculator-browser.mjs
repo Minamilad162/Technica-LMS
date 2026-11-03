@@ -7,7 +7,7 @@ import {setTimeout as sleep} from 'node:timers/promises';
 import {chromium} from 'playwright';
 const ROOT='http://127.0.0.1:4173';
 mkdirSync('artifacts/calculator-qa',{recursive:true});
-const vite=spawn('node',['node_modules/vite/bin/vite.js','--host','127.0.0.1','--port','4173','--strictPort'],{stdio:['ignore','pipe','pipe'],env:{...process.env}});
+const vite=spawn('node',['node_modules/vite/bin/vite.js','--host','127.0.0.1','--port','4173','--strictPort'],{stdio:['ignore','pipe','pipe'],env:{...process.env,VITE_LOCAL_QA_DEMO:'1'}});
 let logs='';
 for(const stream of [vite.stdout,vite.stderr])stream.on('data',chunk=>{logs+=String(chunk).slice(-1500)});
 async function serverReady(){
