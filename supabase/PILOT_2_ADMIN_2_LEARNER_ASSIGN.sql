@@ -41,13 +41,13 @@ BEGIN
        spec.email NOT LIKE '%@%' THEN
       RAISE EXCEPTION 'Replace placeholder email for % before running this SQL',spec.full_name;
     END IF;
-    SELECT count(*),max(id),max(email_confirmed_at)
-       INTO count_matching,target_user_id,target_verified
-    FROM auth.users
-    WHERE lower(email)=lower(spec.email);
+    SELECT count(*) INTO count_matching
+    FROM auth.users WHERE lower(email)=lower(spec.email);
     IF count_matching<>1 THEN
       RAISE EXCEPTION 'Expected one existing Supabase Auth user for %, found %',spec.email,count_matching;
     END IF;
+    SELECT id,email_confirmed_at INTO target_user_id,target_verified
+      FROM auth.users WHERE lower(email)=lower(spec.email);
     IF target_verified IS NULL THEN
       RAISE EXCEPTION 'Email must be verified first: %',spec.email;
     END IF;
