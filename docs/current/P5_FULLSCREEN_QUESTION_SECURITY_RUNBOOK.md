@@ -36,3 +36,6 @@ CI: npm run test:p5, disposable PostgreSQL P1/P2/P4/P5 RLS/abandonment, P3 live 
 
 ## Rollback
 Rollback frontend to previous main build through Cloudflare only after backup/sign-off. Leave additive P5 schema and recorded attempted exits in database unless approved data migration. Do not drop attempt tables or reimport ASP records.
+
+## Lesson knowledge check
+The Demo Learning Player's final 10-question self-check is also included. Clicking its item or Next lesson now requests native fullscreen; leaving fullscreen cancels only the unfinished self-check and returns to the last reading/video lesson, retaining previously completed lessons and scores. Submitting answers intentionally exits fullscreen before showing the normal review; Retake re-enters from a user click. Unsupported iPhone browsers fail closed instead of presenting unprotected questions.
