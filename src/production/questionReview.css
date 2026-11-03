@@ -1,0 +1,35 @@
+.live-review-workspace{margin-top:24px;padding:24px;border:1px solid #dce8ea;border-radius:18px;background:white;box-shadow:0 14px 48px #214a5210}
+.live-review-head{display:flex;justify-content:space-between;align-items:flex-start;gap:16px}
+.live-review-head h2{display:flex;gap:10px;align-items:center;margin:8px 0;font-size:23px;color:#174851;letter-spacing:-.035em}
+.live-review-head p{margin:0;color:#6f8289;font-size:13px;line-height:1.65}
+.live-review-metrics{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:10px;margin:22px 0}
+.live-review-metric{background:#f5faf9;border:1px solid #e0efed;border-radius:13px;display:grid;gap:10px;padding:13px}
+.live-review-metric span{font-size:11px;font-weight:650;color:#657e85}.live-review-metric strong{font-size:24px;color:#155a61}
+.live-review-alert{display:flex;gap:11px;align-items:flex-start;background:#f0f8f4;border:1px solid #d7eae0;border-radius:11px;padding:12px 14px;font-size:12px;line-height:1.65;color:#276557}
+.live-review-alert svg{flex-shrink:0}.live-review-domains{display:flex;justify-content:space-between;align-items:center;gap:15px;padding:15px 0}
+.live-review-domains>div{display:grid;gap:5px}.live-review-domains small{color:#7a8e93;font-size:12px}
+.live-review-controls{display:flex;align-items:end;justify-content:space-between;gap:15px;margin:20px 0 12px}
+.live-review-controls label,.live-review-field{display:grid;gap:7px;font-size:12px;font-weight:750;color:#34555c}.live-review-controls>span{font-size:12px;color:#7a9197}
+.live-review-controls select,.live-review-field select,.live-review-field textarea{background:#fff;width:100%;border:1px solid #d8e7e9;border-radius:9px;color:#254d57;padding:10px 12px;outline:none}
+.live-review-controls select:focus,.live-review-field select:focus,.live-review-field textarea:focus{border-color:#219c8a;box-shadow:0 0 0 3px #219c8a20}
+.live-review-grid{display:grid;grid-template-columns:minmax(265px,390px) minmax(0,1fr);gap:15px;align-items:start}
+.live-review-list,.live-review-detail{min-width:0;border:1px solid #e0eaed;border-radius:14px;overflow:hidden}
+.live-review-list{background:#fafdfe}.live-review-row{display:grid;width:100%;gap:8px;text-align:left;border:0;border-bottom:1px solid #e9f0f1;padding:12px 14px;background:transparent;color:#365962}
+.live-review-row:hover{background:#f0f8f5}.live-review-row.selected{background:#e9f6f2;box-shadow:inset 3px 0 #1b9281}
+.live-review-row>span:first-child{display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px;font-size:12px}.live-review-row small{font-size:10px;color:#83979b}
+.live-review-preview{font-size:12px;line-height:1.55;white-space:normal;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+.live-review-row em{font-size:10px;color:#227a70;font-weight:750;font-style:normal}
+.live-review-pagination{padding:13px;display:flex;justify-content:space-between;align-items:center;gap:8px}.live-review-pagination span{font-size:11px;color:#829299}
+.live-review-detail{padding:20px;background:white}.live-review-choose{min-height:280px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;color:#728a91;gap:10px}.live-review-choose strong{color:#355c60}.live-review-choose p{font-size:12px;max-width:260px;line-height:1.6}
+.live-review-detail form{display:grid;gap:15px}.live-review-detail-title{display:flex;justify-content:space-between;gap:15px;font-size:12px;color:#6b8990}.live-review-detail-title span{color:#177e71;font-weight:800}
+.live-review-detail h3{font-size:17px;line-height:1.6;margin:0;color:#254954;white-space:pre-wrap;overflow-wrap:anywhere}
+.live-review-options{display:grid;gap:7px}.live-review-options>div{display:flex;align-items:flex-start;gap:12px;border:1px solid #dfe9ec;border-radius:10px;padding:11px;font-size:12px;color:#3b5962;line-height:1.6}
+.live-review-options>div.correct{background:#edf9f2;border-color:#bfded0}.live-review-options strong{color:#1a7772}.live-review-options>div span{flex:1;white-space:pre-wrap;overflow-wrap:anywhere}
+.live-review-options b{color:#27745e;flex-shrink:0;font-size:10px}.live-review-reference{margin:0;font-size:12px;color:#5c7178;line-height:1.6;white-space:pre-wrap;overflow-wrap:anywhere}
+.live-review-check{display:flex;align-items:flex-start;gap:10px;color:#375964;font-size:12px;line-height:1.6}
+.live-review-check input{margin-top:4px;accent-color:#148778}.live-review-hint{display:flex;align-items:flex-start;gap:8px;margin:0;color:#7a8d94;font-size:11px;line-height:1.5}
+.live-review-hint svg{flex-shrink:0}.live-review-detail form>.live-primary{justify-self:start}
+@media(max-width:1080px){.live-review-metrics{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media(max-width:760px){.live-review-grid{grid-template-columns:1fr}.live-review-metrics{grid-template-columns:repeat(2,minmax(0,1fr))}.live-review-workspace{padding:14px}.live-review-head,.live-review-domains{flex-wrap:wrap}.live-review-detail{padding:14px}}
+@media(max-width:400px){.live-review-options>div{flex-wrap:wrap}.live-review-options b{width:100%}}
+@media(prefers-reduced-motion:reduce){.live-review-row{scroll-behavior:auto}}
