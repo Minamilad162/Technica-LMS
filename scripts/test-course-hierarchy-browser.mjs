@@ -4,7 +4,7 @@ import {setTimeout as sleep} from 'node:timers/promises';
 import {chromium} from 'playwright';
 
 const ROOT='http://127.0.0.1:4182';
-const server=spawn('node',['node_modules/vite/bin/vite.js','--host','127.0.0.1','--port','4182','--strictPort'],{stdio:['ignore','pipe','pipe']});
+const server=spawn('node',['node_modules/vite/bin/vite.js','--host','127.0.0.1','--port','4182','--strictPort'],{stdio:['ignore','pipe','pipe'],env:{...process.env,VITE_LOCAL_QA_DEMO:'1'}});
 let output='';
 for(const stream of [server.stdout,server.stderr]) stream.on('data',b=>{output+=String(b).slice(-1500);});
 async function ready(){for(let n=0;n<90;n++){try{if((await fetch(ROOT)).ok)return}catch{}if(server.exitCode!==null)throw Error('Vite stopped: '+output);await sleep(250);}throw Error('Vite startup timeout: '+output);}

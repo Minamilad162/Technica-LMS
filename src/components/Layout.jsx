@@ -1,7 +1,7 @@
 import React,{useState} from 'react';
 import{NavLink,useLocation,useNavigate}from'react-router-dom';
 import{Home,BookOpen,NotebookTabs,GraduationCap,TriangleAlert,Bookmark,ChartNoAxesColumn,Users,Settings,HelpCircle,BookMarked,Database,Files,ClipboardCheck,Trophy,Search,Bell,ChevronDown,LogOut,Menu,X,LibraryBig,FileQuestion,BookOpenText,PanelLeftClose,ClipboardList,MoreHorizontal,UserRound,LayoutDashboard,ShieldCheck,ArrowRight,RotateCcw}from'lucide-react';
-import{logoutDemo,getAuthSession}from'../lib/demoAuth';
+import{signOutPortal,getAuthSession}from'../lib/portalAuth';
 import{useDemo}from'../lib/store';import{Avatar,DemoToast}from'./UI';
 const learnerItems=[['/home','Home',Home],['/my-learning','My learning',BookOpen],['/practice','Practice',NotebookTabs],['/assessments','Assessments',ClipboardCheck],['/results','Assessment review',TriangleAlert]];
 const adminItems=[['/analytics','Overview',Home],['/learners','Learners',Users],['/builder','Course Builder',BookOpenText],['/question-bank','Question Bank',FileQuestion],['/assessments','Exams',ClipboardCheck],['/reports','Reports',ChartNoAxesColumn],['/courses','Courses',BookOpen],['/practice','Practices',NotebookTabs]];
@@ -11,7 +11,7 @@ export default function Layout({children,standalone=false,onLogout}){
  const[showSearch,setShowSearch]=useState(false);const[search,setSearch]=useState('');const[showNotifs,setShowNotifs]=useState(false);const[showAccount,setShowAccount]=useState(false);const[showMobileMore,setShowMobileMore]=useState(false);const[sideOpen,setSideOpen]=useState(false);
  const adminSession=getAuthSession()?.role==='admin';const isAdmin=adminSession&&state.role==='admin';const items=isAdmin?adminItems:learnerItems;
  const termTargets=[{name:'ASP Course',path:'/practice',kind:'Course'},{name:'PSM Foundations',path:'/my-learning',kind:'Course'},{name:'Management of Change',path:'/practice',kind:'Topic'},{name:'Process Hazard Analysis',path:'/practice',kind:'Topic'},{name:'Practice tests',path:'/practice',kind:'Practice'},{name:'Learning overview',path:'/analytics',kind:'Reports'},{name:'Course builder',path:'/builder',kind:'Admin'},{name:'Courses',path:'/courses',kind:'Admin'},{name:'Assessment',path:'/assessments',kind:'Exam'},{name:'Results review',path:'/results',kind:'Assessment'}].filter(x=>(isAdmin||x.kind!=='Admin')&&x.name.toLowerCase().includes(search.toLowerCase()));
- const signOut=()=>{logoutDemo();onLogout?.();setShowAccount(false);setShowMobileMore(false);navigate('/login',{replace:true})};
+ const signOut=async()=>{setShowAccount(false);setShowMobileMore(false);try{await signOutPortal();}finally{onLogout?.();navigate('/login',{replace:true});}};
  const nav=(path)=>{navigate(path);setSideOpen(false);setShowMobileMore(false);setShowSearch(false);window.scrollTo(0,0)};
  const menuItems=isAdmin?[['/analytics','Overview',Home],['/learners','Learners',Users],['/courses','Courses',BookOpen],['/practice','Practice',NotebookTabs]]:[['/home','Home',Home],['/my-learning','Learn',BookOpen],['/practice','Practice',NotebookTabs],['/assessments','Assess',ClipboardCheck]];
  return <div className={`app-shell ${standalone?'standalone':''}`}>

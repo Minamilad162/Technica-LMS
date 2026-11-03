@@ -85,3 +85,35 @@ if ! printf '%s\n' "$connection_report" | grep -Fq 'P6A|rpc:lms_p6_bank_summary(
  exit 1
 fi
 echo 'PASS P6A read-only SQL Editor footprint on disposable PostgreSQL'
+
+
+# Test the actual FOUR pilot account-role SQL on the SAME disposable PostgreSQL.
+# Supabase Auth itself is not mocked for passwords; only its user metadata
+# (with four verified identities) and Technica P1 role constraints are tested.
+psql -X -v ON_ERROR_STOP=1 -q <<'SQL'
+ALTER TABLE auth.users
+  ADD COLUMN email text,
+  ADD COLUMN email_confirmed_at timestamptz;
+INSERT INTO auth.users(id,raw_user_meta_data,email,email_confirmed_at) VALUES
+ ('77777777-0000-0000-0000-000000000001','{}','qa-admin-1@pilot.invalid',now()),
+ ('77777777-0000-0000-0000-000000000002','{}','qa-admin-2@pilot.invalid',now()),
+ ('77777777-0000-0000-0000-000000000003','{}','qa-learner-1@pilot.invalid',now()),
+ ('77777777-0000-0000-0000-000000000004','{}','qa-learner-2@pilot.invalid',now());
+SQL
+pilot_sql=$(mktemp)
+trap 'rm -f "$pilot_sql"' EXIT
+sed -e 's/admin1@replace-me.invalid/qa-admin-1@pilot.invalid/g' \
+    -e 's/admin2@replace-me.invalid/qa-admin-2@pilot.invalid/g' \
+    -e 's/learner1@replace-me.invalid/qa-learner-1@pilot.invalid/g' \
+    -e 's/learner2@replace-me.invalid/qa-learner-2@pilot.invalid/g' \
+  supabase/PILOT_2_ADMIN_2_LEARNER_ASSIGN.sql > "$pilot_sql"
+psql -X -v ON_ERROR_STOP=1 -q -f "$pilot_sql"
+psql -X -v ON_ERROR_STOP=1 -q -f "$pilot_sql"
+admins=$(psql -X -v ON_ERROR_STOP=1 -A -t -c \
+ "SELECT count(*) FROM public.lms_role_assignments a JOIN auth.users u ON u.id=a.user_id WHERE u.email LIKE 'qa-admin-%@pilot.invalid' AND a.role='admin' AND a.revoked_at IS NULL")
+learners=$(psql -X -v ON_ERROR_STOP=1 -A -t -c \
+ "SELECT count(*) FROM public.lms_profiles p JOIN auth.users u ON u.id=p.id WHERE u.email LIKE 'qa-learner-%@pilot.invalid' AND p.account_status='active' AND NOT EXISTS(SELECT 1 FROM public.lms_role_assignments a WHERE a.user_id=u.id AND a.revoked_at IS NULL)")
+[[ "$admins" == 2 && "$learners" == 2 ]] || {
+ echo "FAIL four-account pilot expected exactly 2 Admin + 2 Learner, got $admins/$learners";exit 1;
+}
+echo 'PASS four-user owner-run SQL: two verified Admin, two nonprivileged Learners; idempotent on disposable PostgreSQL'

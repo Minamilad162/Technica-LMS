@@ -1,3 +1,10 @@
+### 2026-11-04 — Real email/password login and guarded four-pilot-account provisioning
+
+- Removed `Login as Learner` / `Login as Admin` one-click actions and visible sample credentials from the default Technica LMS Login page. Email and password are now required for real Supabase Auth.
+- Added verified server-checked portal session for default React routes, active Admin/Learner role mapping and Supabase sign-out. Disabled the public `/signup` pilot entry. No ability to self-grant Admin via browser.
+- Added owner-run `supabase/PILOT_2_ADMIN_2_LEARNER_ASSIGN.sql` for **two verified existing Supabase Auth admins + two learners**, without writing credentials, changing `auth.users` or creating fake learner role assignments.
+- Added `docs/current/FOUR_PILOT_SUPABASE_ACCOUNTS_RUNBOOK.md` and CI login/SQL contract.
+- **Not performed:** real Supabase Auth user creation, account approval/SQL execution, Cloudflare deployment, device JWT sign-in tests or paid course publication. The original Demo Question Bank still remains public browser content and is NOT deemed secure paid question storage.
 ### 2026-11-04 — Diagnose and unblock real ASP Supabase connection
 
 - Removed unnecessary learner entitlement and topic/lesson read dependencies from the isolated secure ASP reviewer, which could previously block review due to unrelated RLS.

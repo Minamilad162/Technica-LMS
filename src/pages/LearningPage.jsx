@@ -6,7 +6,7 @@ import {requestQuestionFullscreen,fullscreenStartError,leaveQuestionFullscreen} 
 import {useQuestionFullscreenGuard} from '../lib/useQuestionFullscreenGuard';
 import {Link,useNavigate} from 'react-router-dom';
 import {ArrowLeft,ArrowRight,BookOpen,Check,CheckCircle2,ChevronDown,ChevronRight,ClipboardCheck,Clock3,Download,ExternalLink,FileText,GraduationCap,Layers3,LockKeyhole,Play,RefreshCcw,ShieldCheck,Sparkles,Target,Video} from 'lucide-react';
-import {getAuthSession} from '../lib/demoAuth';
+import {getAuthSession} from '../lib/portalAuth';
 import {learningDemo,learningQuiz,demoLessonList,learningProgressKey,normaliseLearningProgress,learningCompletion} from '../data/learningDemo';
 
 function getProgress(){try{return normaliseLearningProgress(JSON.parse(localStorage.getItem(learningProgressKey(getAuthSession()?.id))))}catch{return normaliseLearningProgress(null)}}

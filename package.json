@@ -12,6 +12,7 @@
     "test:selection": "node scripts/test-random-domain.mjs",
     "verify:images": "node scripts/verify-image-assets.mjs",
     "test:auth": "node scripts/test-demo-auth.mjs",
+    "test:auth:portal": "node scripts/test-live-portal-login.mjs",
     "test:motion": "node scripts/test-motion.mjs",
     "test:courses": "node scripts/test-course-model.mjs",
     "test:quiz-navigation": "node scripts/test-quiz-navigation.mjs",
