@@ -6,6 +6,10 @@ on:
     paths:
       - 'src/pages/PracticePage.jsx'
       - 'src/pages/QuizPage.jsx'
+      - 'src/pages/AssessmentOverview.jsx'
+      - 'src/lib/questionFullscreen.js'
+      - 'src/lib/useQuestionFullscreenGuard.js'
+      - 'scripts/test-fullscreen-question-browser.mjs'
       - 'src/lib/practiceModes.js'
       - 'src/lib/store.jsx'
       - 'src/practiceModes.css'
@@ -33,5 +37,7 @@ jobs:
         run: npx playwright install --with-deps chromium
       - name: Verify responsive preset flows in real browser
         run: node scripts/test-practice-modes-browser.mjs
+      - name: Native fullscreen entry and exit browser regression
+        run: node scripts/test-fullscreen-question-browser.mjs
       - name: Demo-only note
         run: echo "Tested quick mode buttons and client-only quiz flows. Level Up and reserved Mock remain disabled until real approved metadata/backend."
