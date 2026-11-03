@@ -6,8 +6,19 @@ import {getSupabaseClient} from './supabase.js';
 import {loadIdentity} from '../production/lmsApi.js';
 
 let trustedAccount=null;
+// Opt-in for EXISTING real-browser regression tests on Vite DEV SERVER ONLY.
+// Never enabled in compiled production, even if a Cloudflare variable is set.
+// Does not add a login button, credentials, or backend authorization shortcut.
+const browserQaMode=Boolean(import.meta.env?.DEV&&import.meta.env?.VITE_LOCAL_QA_DEMO==='1');
+function readQaAccount(){
+ if(!browserQaMode||typeof sessionStorage==='undefined')return null;
+ try{
+  const parsed=JSON.parse(sessionStorage.getItem('technica-lms-demo-auth-session-v1')||'null');
+  return parsed?.id&&parsed?.name&&['admin','learner'].includes(parsed.role)?parsed:null;
+ }catch{return null;}
+}
 function client(){return getSupabaseClient({secureReviewEntry:true});}
-export function getAuthSession(){return trustedAccount;}
+export function getAuthSession(){return browserQaMode?readQaAccount():trustedAccount;}
 export function clearTrustedPortalAccount(){trustedAccount=null;}
 export async function verifyPortalAccount(db,identityLoader=loadIdentity){
  const {data,error}=await db.auth.getUser();
@@ -21,6 +32,7 @@ export async function verifyPortalAccount(db,identityLoader=loadIdentity){
  return account;
 }
 export async function restorePortalAccount(){
+ if(browserQaMode)return readQaAccount();
  const db=client();
  try {
   const {data,error}=await db.auth.getSession();
@@ -52,10 +64,12 @@ export async function requestPasswordReset(email){
 }
 export async function signOutPortal(){
  trustedAccount=null;
+ if(browserQaMode){sessionStorage.removeItem('technica-lms-demo-auth-session-v1');return;}
  try {const db=client();await db.auth.signOut();}
  finally{trustedAccount=null;}
 }
 export function subscribeToPortalAuth(callback){
+ if(browserQaMode)return ()=>{};
  const db=client();
  const {data}=db.auth.onAuthStateChange(event=>{
   if(event==='SIGNED_OUT'){trustedAccount=null;callback?.();}
