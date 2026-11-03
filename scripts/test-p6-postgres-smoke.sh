@@ -62,7 +62,7 @@ selected=$(run_as authenticated "$admin" \
 [[ "$selected" == 1 ]] || { echo "FAIL ready filter count: $selected";exit 1; }
 current=$(psql -X -v ON_ERROR_STOP=1 -A -t -c \
  "SELECT approval_state||'|'||mock_exclusive||'|'||coalesce(domain_id::text,'NULL')||'|'||difficulty FROM public.lms_questions WHERE id='$draft'")
-[[ "$current" == 'draft|f|NULL|unclassified' ]] || {
+[[ "$current" == 'draft|false|NULL|unclassified' ]] || {
  echo "FAIL review unexpectedly published or remapped source question: $current";exit 1;
 }
 if run_as authenticated "$admin" "SELECT public.lms_p6_review_question((SELECT id FROM public.lms_questions WHERE source_id='P4-1'),'$domain','low',true,true,'Already live')" >/dev/null 2>&1; then
