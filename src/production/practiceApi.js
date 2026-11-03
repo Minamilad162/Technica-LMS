@@ -16,6 +16,8 @@ export const answerSecurePractice=(db,attemptId,questionId,selectedIndex)=>
   rpc(db,'lms_p4_save_answer',{p_attempt_id:attemptId,p_question_id:questionId,p_selected_index:selectedIndex});
 export const finishSecurePractice=(db,attemptId)=>
   rpc(db,'lms_p4_finish_practice',{p_attempt_id:attemptId});
+export const abandonSecurePractice=(db,attemptId)=>
+  rpc(db,'lms_p5_abandon_practice',{p_attempt_id:attemptId});
 
 export function safeRemainingSeconds(attempt,clock=Date.now()) {
   if(!attempt?.deadlineAt)return null;
