@@ -64,3 +64,16 @@ After deploying the new commit, if there is a real missing-configuration problem
 **Worker Builds settings**: In Cloudflare Workers & Pages → technica-lms → Settings → Builds → **Build variables and secrets**, verify the two public variables are saved there and assigned for production. Build vars are available to `npm run build`, unlike runtime-only Worker variables. A fresh build from the updated `main` commit is required. For this project, source default `VITE_DATA_MODE=demo` preserves all current Practice and calculator functions while producing the extra standalone `asp-review.html` secure review entry; do not flip to `supabase` solely to solve this route error.
 
 When keys are present and source fix deployed but authentication still fails, check actual Supabase project URL, public key, Auth Site URL/redirect allowlist, role binding, and installed P6A RPCs separately. Never put `service_role` credentials in the browser, screenshot or chat. CI fixture verification is not a real Cloudflare deployment or JWT acceptance test.
+
+
+## Current UI location — course-card integration (2026-11-04)
+
+The owner's final UI decision **supersedes** previous instructions that placed P6A in a standalone Admin tab.
+
+**Published/default Technica interface:** Sign into Admin → **Question Bank**, select the **ASP** course tile, click **Review & classify** inside that tile. The ASP tile expands in place and embeds an independent, authenticated Supabase reviewer. Login inside this embedded panel using a **verified real Supabase Admin** account; Demo admin credentials cannot grant P6A access. Close review to restore the original Question Bank browsing/search/pagination.
+
+**Full Supabase Live interface:** Select the ASP course card in Course Management and click **Review questions** inside that course header. The existing protected `AdminQuestionReview` renders inline. No separate Admin review tab remains.
+
+The `/asp-review.html` file still exists **internally** to keep the real Auth/answer-key request path in a separate Vite bundle from the public legacy Demo. It isn't a menu destination. The outdated `#/asp-review` hash route redirects to `#/question-bank?course=asp&review=1` for old bookmarks. Nothing in the iframe bypasses server authorization; only layout height is shared with its same-origin parent window. A user without the required Supabase Admin assignment sees a permission message.
+
+**Operational gates unchanged:** Cloudflare Build variables must contain public `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY`, the P6A migration must be installed in the correct verified project, and real Auth/JWT/device tests must pass. The initial 1,625-question Demo file is not a secret and is not automatically imported, vetted, reserved or approved for production. Code merging does not prove the current deployed site updated.
