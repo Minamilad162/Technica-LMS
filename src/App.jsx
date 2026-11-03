@@ -36,6 +36,6 @@ export default function App(){const l=useLocation();const[auth,setAuth]=useState
  <Route path="/practice/results" element={<RoutePage><PracticeResultsPage/></RoutePage>}/>
  <Route path="/learners" element={<AdminOnly><RoutePage><LearnersPage/></RoutePage></AdminOnly>}/>
  <Route path="/question-bank" element={<AdminOnly><RoutePage><QuestionBankPage/></RoutePage></AdminOnly>}/>
- <Route path="/asp-review" element={<AdminOnly><RoutePage><ASPReviewLiveNotice/></RoutePage></AdminOnly>}/>
+ <Route path="/asp-review" element={<AdminOnly><Navigate to="/question-bank?course=asp&review=1" replace/></AdminOnly>}/>
  <Route path="*" element={<Navigate to="/home" replace/>}/>
  </Routes>}
