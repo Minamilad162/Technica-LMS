@@ -41,3 +41,15 @@ Frontend rollback by reverting the feature commit/build; do not drop tables if r
 **Why the user might not see it yet:** Merely pushing to GitHub doesn't guarantee a Cloudflare deployment; verify the target build's commit and `VITE_DATA_MODE`, refresh after it is deployed, and confirm an actual admin role. The Live admin menu requires `VITE_DATA_MODE=supabase` plus public Supabase build variables. P6A SQL must be installed through the owner-approved process before the review RPCs work; do not run migrations just to make a menu appear.
 
 **No schema changes in this navigation fix.** A passing source CI cannot certify deployed access, user role or runtime API authorization.
+
+
+## Published-site direct ASP review link (2026-11-03 correction)
+
+The owner's uploaded Technica site is actively published but, without an explicit `VITE_DATA_MODE=supabase`, Vite previously emitted the browser-local Demo only. The prior `ASP Review (Live)` item merely explained the separate mode. This is corrected **without replacing or breaking existing Demo features**:
+
+- A normal `npm run build` outputs both `dist/index.html` (current site) and `dist/asp-review.html` (secure independent Supabase live reviewer entry). Site admin menu **ASP Question Review** opens `/asp-review.html` directly. No separate Cloudflare application is needed.
+- On `/asp-review.html`, sign in using a **genuine verified Supabase Auth admin**, not the Demo account. The page opens the real P6A queue by default. This route uses a public/publishable Supabase key and P6A SECURITY DEFINER RPCs, with RLS and server-side admin role checks.
+- Set `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` in Cloudflare Pages **Production build variables**, even if `VITE_DATA_MODE=demo`. Absence results in a clear configuration screen rather than pretending the database is connected. Never expose the service-role key.
+- P6A migration still needs an independently authorized installation and real JWT admin QA. The protected queue doesn't automatically import or approve questions. If it reports the P6A RPC missing, inspect the database/version instead of auto-running migrations.
+- **Security limitation:** The original Demo page still includes its historical 1,625-question demo bank in its public bundle. This rollout does not make the whole Demo paid-content secure. Full paid launch must use the separate `VITE_DATA_MODE=supabase` build (only isolated live index). The new reviewer page itself must not import the Demo answer bank.
+- Code push is not proof that Cloudflare deployed a commit; verify build output, production environment values and actual domain after release. CI checks both normal build (`test:review:entry`) and isolated full-Live build (`test:p3:bundle`). 
