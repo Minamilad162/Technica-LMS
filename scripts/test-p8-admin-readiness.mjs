@@ -4,22 +4,25 @@ import {ADMIN_ADAPTIVE_COUNTS,fetchAdminAdaptiveReadiness,normalizeAdaptiveReadi
  from '../src/production/adminAdaptiveReadiness.js';
 
 const read=p=>readFileSync(new URL('../'+p,import.meta.url),'utf8');
-assert.deepEqual([...ADMIN_ADAPTIVE_COUNTS],[10,25,50]);
+assert.deepEqual([...ADMIN_ADAPTIVE_COUNTS],[10,25,30,50]);
 const rpcCalls=[];
 const db={rpc:async (name,args)=>{
  rpcCalls.push({name,args});
  const count=args.p_count;
  return {data:{
   ready:count<=25,low:25,medium:30,high:40,requiredPerTier:count,
-  checkpoint:count===10?3:count===25?5:10,thresholdPercent:70
+  checkpoint:count===10?3:count===25?8:count===30?10:16,
+  mediumCheckpoint:count===10?3:count===25?8:count===30?10:17,
+  thresholdPercent:70,policyVersion:'thirds-v1'
  },error:null};
 }};
 const rows=await fetchAdminAdaptiveReadiness(db,'verified-course-id','verified-domain-id');
-assert.deepEqual(rows.map(r=>r.ready),[true,true,false]);
-assert.deepEqual(rows.map(r=>r.checkpoint),[3,5,10]);
+assert.deepEqual(rows.map(r=>r.ready),[true,true,false,false]);
+assert.deepEqual(rows.map(r=>r.checkpoint),[3,8,10,16]);
+assert.deepEqual(rows.map(r=>r.mediumCheckpoint),[3,8,10,17]);
 assert.equal(rows[0].low,25);
 assert.equal(rows[2].high,40);
-assert.equal(rpcCalls.length,3);
+assert.equal(rpcCalls.length,4);
 for(const [i,call] of rpcCalls.entries()){
  assert.equal(call.name,'lms_p8_levelup_readiness');
  assert.deepEqual(call.args,{p_course_id:'verified-course-id',
@@ -27,17 +30,26 @@ for(const [i,call] of rpcCalls.entries()){
 }
 await assert.rejects(()=>fetchAdminAdaptiveReadiness({rpc:async()=>({data:null,error:{message:'No P8 RPC'}})},'course'),/No P8 RPC/);
 assert.throws(()=>normalizeAdaptiveReadiness({
- ready:true,low:9,medium:10,high:10,checkpoint:3,requiredPerTier:10,thresholdPercent:70
+ ready:true,low:9,medium:10,high:10,checkpoint:3,requiredPerTier:10,thresholdPercent:70,mediumCheckpoint:3,policyVersion:'thirds-v1'
 },10),/failed validation/,'Do not trust false Ready even if returned by backend');
 assert.throws(()=>normalizeAdaptiveReadiness({
- ready:true,low:10,medium:10,high:10,checkpoint:5,requiredPerTier:10,thresholdPercent:70
+ ready:true,low:10,medium:10,high:10,checkpoint:5,requiredPerTier:10,thresholdPercent:70,mediumCheckpoint:3,policyVersion:'thirds-v1'
 },10),/failed validation/,'Checkpoint cannot silently change');
 assert.throws(()=>normalizeAdaptiveReadiness({
- ready:true,low:10,medium:10,high:10,checkpoint:3,requiredPerTier:10,thresholdPercent:75
+ ready:true,low:10,medium:10,high:10,checkpoint:3,requiredPerTier:10,thresholdPercent:75,mediumCheckpoint:3,policyVersion:'thirds-v1'
 },10),/failed validation/,'70% policy must stay locked');
 assert.throws(()=>normalizeAdaptiveReadiness({
- ready:true,low:10,medium:-1,high:10,checkpoint:3,requiredPerTier:10,thresholdPercent:70
+ ready:true,low:10,medium:-1,high:10,checkpoint:3,requiredPerTier:10,thresholdPercent:70,mediumCheckpoint:3,policyVersion:'thirds-v1'
 },10),/failed validation/,'Corrupted or unverified counts never pass');
+
+assert.throws(()=>normalizeAdaptiveReadiness({
+ ready:true,low:10,medium:10,high:10,checkpoint:3,requiredPerTier:10,
+ mediumCheckpoint:3,thresholdPercent:70,policyVersion:'old-20percent'
+},10),/failed validation/,'Legacy policy cannot be marked ready after update');
+assert.throws(()=>normalizeAdaptiveReadiness({
+ ready:true,low:30,medium:30,high:30,checkpoint:10,requiredPerTier:30,
+ mediumCheckpoint:9,thresholdPercent:70,policyVersion:'thirds-v1'
+},30),/failed validation/,'Medium minimum must be 10 of 30');
 
 const component=read('src/production/AdminAdaptiveReadiness.jsx');
 const admin=read('src/production/AdminQuestionReview.jsx');
@@ -54,4 +66,4 @@ assert(!api.includes("db.from('lms_questions')"),'No direct browser bank queries
 assert(!component.includes('service_role'),'Browser must not contain a service role key');
 assert(sql.includes("approval_state='approved'")&&sql.includes('NOT mock_exclusive'),
  'P8 readiness must restrict to approved non-Mock bank');
-console.log('PASS P8c: protected admin read-only ASP tier readiness and 10/25/50 fail-closed server payload validation.');
+console.log('PASS P8d Admin: four 10/25/30/50 lengths, 30=10+10 tier gates, legacy policy fail-closed, protected bank-only RPC.');
