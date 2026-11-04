@@ -125,3 +125,40 @@ if query_as anon 00000000-0000-0000-0000-000000000000 "SELECT count(*) FROM publ
 fi
 echo "PASS P2 anonymous progress blocked"
 echo "PASS P2 migration, GRANT, RLS, event/authoring privacy on disposable PostgreSQL."
+
+
+# P7: Real Course Builder P1-authorized write chain, staged in disposable PG only.
+# No SQL or production data changes are performed by this CI job.
+psql -X -v ON_ERROR_STOP=1 -q <<'SQL'
+BEGIN;
+SET LOCAL ROLE authenticated;
+SET LOCAL request.jwt.claim.sub='00000000-0000-0000-0000-000000000001';
+INSERT INTO public.lms_courses(id,slug,title,summary,publication_state)
+ VALUES('71000000-0000-0000-0000-000000000001','p7-test-draft','P7 Test Draft','Created by authorized Admin','draft');
+INSERT INTO public.lms_domains(id,course_id,slug,title,position)
+ VALUES('72000000-0000-0000-0000-000000000001','71000000-0000-0000-0000-000000000001','main-domain','Main Domain',0);
+INSERT INTO public.lms_topics(id,domain_id,slug,title,position)
+ VALUES('73000000-0000-0000-0000-000000000001','72000000-0000-0000-0000-000000000001','first-topic','First Topic',0);
+INSERT INTO public.lms_lessons(id,topic_id,slug,title,position,publication_state)
+ VALUES('74000000-0000-0000-0000-000000000001','73000000-0000-0000-0000-000000000001','first-lesson','First Lesson',0,'draft');
+INSERT INTO public.lms_lesson_blocks(id,lesson_id,block_type,payload,position)
+ VALUES('75000000-0000-0000-0000-000000000001','74000000-0000-0000-0000-000000000001','text','{"body":"A safe reading paragraph"}',0);
+UPDATE public.lms_topics SET title='Renamed by Admin'
+ WHERE id='73000000-0000-0000-0000-000000000001';
+COMMIT;
+SQL
+assert_count "P7 admin-created draft has complete Course-Domain-Topic-Lesson chain" 1 authenticated 00000000-0000-0000-0000-000000000001 "SELECT count(*) FROM public.lms_courses c JOIN public.lms_domains d ON d.course_id=c.id JOIN public.lms_topics t ON t.domain_id=d.id JOIN public.lms_lessons l ON l.topic_id=t.id JOIN public.lms_lesson_blocks b ON b.lesson_id=l.id WHERE c.slug='p7-test-draft' AND t.title='Renamed by Admin' AND c.publication_state='draft' AND l.publication_state='draft'"
+assert_count "P7 unauthorized learner cannot view draft" 0 authenticated 00000000-0000-0000-0000-000000000002 "SELECT count(*) FROM public.lms_courses WHERE slug='p7-test-draft'"
+if query_as authenticated 00000000-0000-0000-0000-000000000002 \
+ "INSERT INTO public.lms_courses(slug,title) VALUES('p7-learner-injected','Forbidden learner edit')" >/dev/null 2>&1; then
+ echo 'FAIL P7 learner can create live course';exit 1
+fi
+if query_as authenticated 00000000-0000-0000-0000-000000000002 \
+ "UPDATE public.lms_topics SET title='Hijacked' WHERE id='73000000-0000-0000-0000-000000000001'" >/dev/null 2>&1; then
+ echo 'FAIL P7 learner can edit live course hierarchy';exit 1
+fi
+if query_as anon 00000000-0000-0000-0000-000000000000 \
+ "SELECT count(*) FROM public.lms_lesson_blocks WHERE lesson_id='74000000-0000-0000-0000-000000000001'" >/dev/null 2>&1; then
+ echo 'FAIL P7 anonymous can directly read draft lesson blocks';exit 1
+fi
+echo 'PASS P7 admin write chain and read isolation on disposable P1 PostgreSQL only'
