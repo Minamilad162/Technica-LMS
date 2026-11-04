@@ -3,6 +3,8 @@ import {BookOpenCheck,CheckCircle2,ChevronLeft,ChevronRight,ClipboardCheck,LockK
 import {ASP11_PREFIX,REVIEW_FILTERS,REVIEW_PAGE_SIZE,fetchAspReviewPage,fetchAspReviewSummary,prepareAsp11Domains,saveAspReview} from './questionReviewApi';
 import AdminAdaptiveReadiness from './AdminAdaptiveReadiness.jsx';
 import AspReleasePreflight from './AspReleasePreflight.jsx';
+import AspMockReservation from './AspMockReservation.jsx';
+import {approveAspPracticeQuestion} from './aspBankReleaseApi.js';
 import './questionReview.css';
 
 const errorText=e=>e?.message||'Review request failed.';
@@ -15,9 +17,28 @@ export default function AdminQuestionReview({db,course,domains=[],onDomainsSeede
  const [selectedId,setSelectedId]=useState(null),[form,setForm]=useState(blank);
  const [loading,setLoading]=useState(false),[saving,setSaving]=useState(false);
  const [error,setError]=useState(''),[notice,setNotice]=useState('');
+ const [mockSelected,setMockSelected]=useState([]),[approving,setApproving]=useState(false);
  const official=useMemo(()=>domains.filter(d=>ASP11_PREFIX.test(d.slug)).sort((a,b)=>a.slug.localeCompare(b.slug)),[domains]);
  const selected=(result.items||[]).find(q=>q.id===selectedId);
  const reload=()=>setRevision(n=>n+1);
+ const toggleMockSelection=id=>setMockSelected(current=>{
+  if(current.includes(id))return current.filter(x=>x!==id);
+  if(current.length>=200){setError('Choose exactly 200 unique questions; remove an item before adding another.');return current;}
+  setError('');return [...current,id];
+ });
+ const approveSelected=async()=>{
+  if(!selected||selected.approval_state!=='draft'||selected.mock_exclusive
+    ||selected.review_state!=='ready'||approving)return;
+  if(!window.confirm('Approve this ONE independently reviewed ASP question for live Practice? The 200 Mock-exclusive questions must already be reserved, and you must not be the original reviewer.'))return;
+  setError('');setNotice('');setApproving(true);
+  try{
+   const r=await approveAspPracticeQuestion(db,selected.id);
+   setNotice('Approved ONE ASP Practice question with audited independent review. Difficulty: '+r.difficulty+'.');
+   setMockSelected(items=>items.filter(id=>id!==selected.id));
+   setSelectedId(null);reload();
+  }catch(e){setError(errorText(e));}
+  finally{setApproving(false);}
+ };
  useEffect(()=>{
   if(!course?.id)return;
   let active=true;setLoading(true);setError('');
@@ -32,7 +53,7 @@ export default function AdminQuestionReview({db,course,domains=[],onDomainsSeede
    .finally(()=>{if(active)setLoading(false);});
   return()=>{active=false;};
  },[db,course?.id,page,filter,revision]);
- useEffect(()=>{setSelectedId(null);setPage(0);setResult({total:0,items:[]});setSummary(null);setNotice('');},[course?.id]);
+ useEffect(()=>{setSelectedId(null);setPage(0);setResult({total:0,items:[]});setSummary(null);setNotice('');setMockSelected([]);},[course?.id]);
  useEffect(()=>{
   if(!selected){setForm(blank());return;}
   setForm({
@@ -79,6 +100,8 @@ export default function AdminQuestionReview({db,course,domains=[],onDomainsSeede
   <div className="live-review-alert"><ShieldCheck size={20}/><span><strong>No automatic publishing.</strong> Verify the answer, usage rights, correct ASP11 domain and educational difficulty. The separate Mock reservation and release stages come later.</span></div>
   <AdminAdaptiveReadiness db={db} course={course} domains={official}/>
   <AspReleasePreflight db={db} course={course}/>
+  <AspMockReservation db={db} course={course} ids={mockSelected}
+    onReserved={()=>{setMockSelected([]);setSelectedId(null);reload();}}/>
   {official.length!==9&&<div className="live-review-domains"><div><strong>Official ASP11 taxonomy</strong>
    <small>{official.length} / 9 official domains available. Legacy workbook names are not a trusted mapping.</small></div>
    <button className="live-secondary" type="button" onClick={prepare} disabled={saving}>Add official 9 domains</button></div>}
@@ -90,12 +113,20 @@ export default function AdminQuestionReview({db,course,domains=[],onDomainsSeede
    </select></label><span>{loading?'Loading…':String(result.total||0)+' questions'}</span></div>
   <div className="live-review-grid">
    <div className="live-review-list" role="list" aria-label="ASP question queue">
-    {(result.items||[]).map(q=><button role="listitem" type="button" key={q.id}
-     className={'live-review-row '+(selectedId===q.id?'selected':'')} onClick={()=>setSelectedId(q.id)}>
+    {(result.items||[]).map(q=><React.Fragment key={q.id}>
+     <button role="listitem" type="button"
+      className={'live-review-row '+(selectedId===q.id?'selected':'')} onClick={()=>setSelectedId(q.id)}>
       <span><strong>{q.source_id}</strong><small>Legacy group: {q.legacy_group||'—'}</small></span>
       <span className="live-review-preview">{q.prompt}</span>
-      <em>{q.review_state==='ready'?'Reviewed':q.approval_state==='approved'?'Approved':q.mock_exclusive?'Mock reserved':'Draft'}</em>
-     </button>)}
+      <em>{q.mock_exclusive?'Mock reserved':q.approval_state==='approved'?'Approved':q.review_state==='ready'?'Reviewed':'Draft'}</em>
+     </button>
+     {filter==='ready'&&q.approval_state==='draft'&&!q.mock_exclusive&&
+      <label className="p9b-select-row">
+       <input type="checkbox" checked={mockSelected.includes(q.id)}
+        onChange={()=>toggleMockSelection(q.id)} disabled={saving||approving}/>
+       Select this reviewed question for the 200-item Mock form
+      </label>}
+    </React.Fragment>)}
     {!loading&&!(result.items||[]).length&&<div className="live-empty">No items here. Import verified ASP records as DRAFT using the separate secure admin importer first.</div>}
     <div className="live-review-pagination">
      <button type="button" disabled={page===0||loading} className="live-secondary" onClick={()=>{setPage(n=>n-1);setSelectedId(null);}}><ChevronLeft size={16}/> Previous</button>
@@ -131,6 +162,13 @@ export default function AdminQuestionReview({db,course,domains=[],onDomainsSeede
       <label className="live-review-field">Reviewer notes<textarea rows={3} maxLength={2000} value={form.notes} onChange={e=>setForm(v=>({...v,notes:e.target.value}))} disabled={selected.approval_state!=='draft'||selected.mock_exclusive} placeholder="Content corrections, evidence and rationale…"/></label>
       <p className="live-review-hint"><LockKeyhole size={15}/> Private audited decision. Learner visibility never changes here.</p>
       <button type="submit" className="live-primary" disabled={saving||loading||selected.approval_state!=='draft'||selected.mock_exclusive}>{saving?'Saving…':'Save human review'}</button>
+      {selected.approval_state==='draft'&&selected.review_state==='ready'&&!selected.mock_exclusive&&
+       <button type="button" className="live-secondary p9b-approve-button"
+        disabled={saving||loading||approving}
+        onClick={approveSelected}><LockKeyhole size={16}/>
+        {approving?'Approving…':'Approve ONE for Practice (independent Admin)'}
+       </button>}
+      {selected.review_state==='ready'&&<p className="live-review-hint">Practice approval is blocked on the server until exactly 200 reviewed Mock questions are reserved. The approving Admin must differ from the original reviewer.</p>}
      </form>}
    </div>
   </div>
