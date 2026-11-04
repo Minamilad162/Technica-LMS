@@ -36,6 +36,17 @@ export default function AssessmentOverview(){
  return <div className="assessment-overview page-enter">
   <Breadcrumb items={['Assessments','Choose course']}/>
   <h1>Course assessments</h1>
+  <section className="white-panel" style={{padding:'19px 22px',marginBottom:18,border:'1px solid #d8e8e4',borderRadius:16,background:'#f4fbf8'}} aria-label="Official ASP Mock Exam">
+   <div style={{display:'flex',gap:16,justifyContent:'space-between',alignItems:'center',flexWrap:'wrap'}}>
+    <div><span style={{fontSize:11,fontWeight:800,color:'#148174',letterSpacing:'.06em'}}>OFFICIAL LIVE MOCK · SEPARATE FROM PRACTICE</span>
+     <h3 style={{margin:'7px 0'}}>ASP Mock — 200 questions · 5 hours</h3>
+     <p style={{margin:0,fontSize:13,color:'#607e7d'}}>Protected Supabase question form, autosave, flags, server timer and grading. Available only when 200 exclusive reviewed items are reserved and P10 is installed.</p>
+    </div>
+    <button type="button" className="btn" onClick={()=>navigate('/assessments/mock/live')}>
+     Open Official Mock <ArrowRight size={17}/>
+    </button>
+   </div>
+  </section>
   <p className="page-subtitle">Select the course you want to be assessed on. The question count, duration and pass mark are set by the admin. You can retake the assessment whenever you need.</p>
   <section className="white-panel assessment-config-panel" aria-label="Choose assessment course">
    <div className="assessment-config-heading"><div><h3>Choose your course</h3><p>Only courses with a published question bank can be started.</p></div><span className="assessment-random-badge"><ShieldCheck size={15}/> Admin-configured exam</span></div>
