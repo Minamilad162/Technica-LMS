@@ -11,7 +11,7 @@ const env={
  P12_STAGING_PROJECT_REF:STAGE,
  P12_PRODUCTION_PROJECT_REF:PROD,
  P12_STAGING_URL:'https://'+STAGE+'.supabase.co',
- P12_STAGING_ANON_KEY:'ci-anon-public-fixture',
+ P12_STAGING_ANON_KEY:'sb_publishable_synthetic_qa',
  P12_STAGING_ENABLED:'YES_READ_ONLY',
 };
 for(const role of ['admin','paid','trial','outsider']){
@@ -28,6 +28,8 @@ for(const [override,args] of [
  [{P12_STAGING_URL:'https://'+PROD+'.supabase.co'},flag],
  [{P12_STAGING_ENABLED:'NO'},flag],
  [{P12_STAGING_ANON_KEY:''},flag],
+ [{P12_STAGING_ANON_KEY:'sb_secret_not_allowed_for_QA'},flag],
+ [{P12_STAGING_ANON_KEY:'not_a_public_key'},flag],
  [{P12_PRODUCTION_PROJECT_REF:''},flag],
  [{P12_STAGING_TRIAL_EMAIL:env.P12_STAGING_PAID_EMAIL},flag],
  [{P12_STAGING_PAID_PASSWORD:'short'},flag],
@@ -52,6 +54,7 @@ function makeClient(role,{mockReady=true}={}){
    const q={
     select(_cols,options){reads++;head=options?.head===true;return this;},
     eq(k,v){filters.set(k,v);return this;},
+    is(k,v){filters.set(k,v);return this;},
     in(k,v){filters.set(k,v);return this;},
     async maybeSingle(){
      if(table==='lms_profiles')return {data:{account_status:'active'},error:null};
@@ -113,7 +116,7 @@ assert.equal(stagingEvidenceSummary(full).passed,19,JSON.stringify(full.checks.f
 assert.equal(stagingEvidenceSummary(full).blocked,0);
 assert.equal(writes,0);
 assert(reads>15);
-assert(!JSON.stringify(full).includes('ci-anon-public-fixture'));
+assert(!JSON.stringify(full).includes('sb_publishable_synthetic_qa'));
 assert(!JSON.stringify(full).includes('admin@staging'));
 assert(!JSON.stringify(full).includes(accounts.paid));
 const text=copyStagingEvidence(full);
