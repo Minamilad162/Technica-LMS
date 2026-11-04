@@ -2,37 +2,12 @@ import React,{useEffect,useState} from 'react';
 import {useNavigate,useParams} from 'react-router-dom';
 import {AlertCircle,ArrowLeft,ArrowRight,BookOpen,CheckCircle2,ChevronDown,ChevronRight,FileText,GraduationCap,Layers3,LockKeyhole,RefreshCw,ShieldCheck} from 'lucide-react';
 import {getSupabaseClient} from '../lib/supabase.js';
-import {loadIdentity,listCourses,getCurrentEntitlements,loadStructure,loadTextBlocks} from './lmsApi.js';
+import {loadStructure,loadTextBlocks} from './lmsApi.js';
+import {fetchLiveLearningCatalog,mayReadLiveCourse,progressForLesson} from './liveLearningApi.js';
 import './liveLearning.css';
 
 // P8 read-only learner portal. Actual course visibility, trial lesson access
 // and draft privacy remain enforced by Supabase P1/P2 RLS, not local flags.
-export async function fetchLiveLearningCatalog(db){
- const {data,error}=await db.auth.getUser();
- if(error||!data?.user?.id)throw new Error('Sign in to Technica LMS to view your learning library.');
- const user=data.user;
- const identity=await loadIdentity(db,user);
- if(identity.profile?.account_status!=='active')throw new Error('Your LMS account is not active.');
- const [courses,entitlements]=await Promise.all([listCourses(db),getCurrentEntitlements(db,user.id)]);
- // Read-only verified progress. Never infer completion from opening a lesson.
- let progress=[],progressError='';
- try{
-  const response=await db.from('lms_lesson_progress')
-   .select('lesson_id,reading_completed,video_completed,quiz_passed,lesson_completed_at,last_activity_at')
-   .eq('user_id',user.id);
-  if(response.error)throw response.error;
-  progress=response.data||[];
- }catch(e){progressError='Verified progress is unavailable; no completion is assumed.';}
- return {user,identity,courses,entitlements,progress,progressError};
-}
-export function mayReadLiveCourse(catalog,course){
- if(!catalog||!course)return false;
- return catalog.identity.isAdmin||
-  catalog.entitlements.some(e=>e.course_id===course.id&&e.status==='active');
-}
-export function progressForLesson(progress,lessonId){
- return (progress||[]).find(row=>row.lesson_id===lessonId)||null;
-}
 function useLiveLearningCatalog(){
  const [revision,setRevision]=useState(0);
  const [state,setState]=useState({loading:true,data:null,error:''});
