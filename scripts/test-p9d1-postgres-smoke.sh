@@ -42,9 +42,6 @@ expected_prompt_hash=$(python3 -c \
  echo 'FAIL P9D1 normalized prompt SHA256 disagrees with Python';exit 1
 }
 # All 3 expected digest columns must have 64 hex characters for EVERY row.
-bad=$(printf '%s\n' "$result" | awk -F'|' \
- 'NF!=9 || $4 !~ /^[0-9a-f]{64}$/ || $5 !~ /^[0-9a-f]{64}$/ || $6 !~ /^[0-9a-f]{64}$/ {n++} END {print n+0}')
-# mawk/awk interval regex support differs, so verify via Python as well.
 bad=$(printf '%s\n' "$result" | python3 -c '
 import re,sys
 rows=sys.stdin.read().splitlines()
