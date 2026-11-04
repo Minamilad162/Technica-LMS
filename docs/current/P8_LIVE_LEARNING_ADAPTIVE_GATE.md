@@ -39,3 +39,16 @@ P8 **source and disposable test SQL only**. No Supabase production migration, co
 - No production data was altered by this GitHub change. Roll back UI by reverting this PR. If P8 is later applied to staging/production under authorization, rollback is a separately planned database migration/recovery decision; **never drop P8 state/table with active attempts**.
 - Still missing: full P2 server-side verified lesson event ingestion, secure media/DRM, protected paid assessment variants and separate ASP Mock, analytics, billing.
 - Paid public release remains **NO-GO**: old demo practice still embeds historic ASP answers in the main browser bundle. Auth alone does not protect those frontend assets.
+
+
+## P8b — Follow-up after owner reports applying the migration (2026-11-04)
+
+**Reported, not independently verified:** P8 migration was manually run by owner in Supabase. Do not assume existing ASP questions are approved/classified; do not re-run the P8 migration, since it intentionally rejects a repeat install.
+
+1. In the **confirmed dedicated Technica Supabase project**, open SQL Editor and run `supabase/P8_VERIFY_READ_ONLY.sql`. This is entirely **SELECT-only** and contains no answer keys, user data, updates or grants. It returns four result tables: verified P8/P4/P5 RPCs, private-state RLS, course-level 10/25/50 readiness and domain-level readiness.
+2. Send only the results (no credentials). `P8_RPC` and `P8_PRIVATE_TABLE` must show **PASS**; `P8_COURSE_READINESS` for slug `asp` must have actual eligible Low, Medium and High counts. For N=10/25/50, **each tier count must be at least N**. If `ready_10=false`, Level Up correctly stays disabled while the question bank undergoes individual human review, rights checks and a separately approved publication step. Do not auto-publish/auto-label records merely to make the UI look ready.
+3. The main Practice page now allows clicking Level Up, opening the protected `/practice/live?mode=levelup&course=asp` automatically. Secure Practice checks the P8 RPC with a **real signed-in account**; the admin can test if the ASP course exists, an enrolled Learner needs paid/manual active access and published course. Optional Domain filter may lack adequate pool even if the whole course is ready.
+4. Use the new 10 / 25 / 50 session selector. Recheck readiness for every changed count/domain (stale answers cannot enable Start). A successful start releases **one question**; wrong answers remain at tier until cumulative ≥70% after the proportional checkpoint. Never reveal raw answer keys during the session. Formal Mock Exam stays separate.
+5. Cloudflare needs a fresh build of the merged source commit with public `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY`; no service role in browser. A passing GitHub Actions run or successful SQL Editor query alone does NOT prove Cloudflare deployed the new source, browser Auth JWT works, or a learner is entitled. Validate in staging before real users.
+
+This P8b source patch does **not** apply P8 again or modify the real database. Reverting P8b front-end source does not roll back owner-run P8 SQL.
