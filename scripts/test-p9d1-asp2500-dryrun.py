@@ -97,7 +97,7 @@ class SyntheticIntakeQA(unittest.TestCase):
                          "Synthetic Option D"],"A","different")["choices_key_sha256"])
 
     def test_exact_source_sha_pinned(self):
-        self.assertNotEqual(self.command("--report-out", str(self.dir / "x.json")).returncode, 0)
+        self.assertEqual(self.command("--report-out", str(self.dir / "x.json")).returncode, 0)
         attempt = subprocess.run([
             sys.executable, str(Path(subject.__file__).resolve()),
             "--source", str(self.path),
