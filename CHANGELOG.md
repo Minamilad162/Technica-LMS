@@ -1,3 +1,11 @@
+### 2026-11-04 — P8e: fixed 70%-of-ORIGINAL tier, not expanding denominator
+
+- Corrected owner clarification: for 30-question adaptive Practice, each initial stage base is 10 items and the correct-answer target is **7 total correct**; after 6/10 Low, one extra correct Q11 yields 7/11 and promotes Q12 to Medium. Additional wrong questions do not raise the 7-correct requirement. Medium uses the identical fixed-target rule. Always stop at chosen N, hide tier transitions and reserve Mock/Assessment behavior.
+- New **staged, unexecuted** P8e SQL migration adds nullable per-attempt promotion policy; NEW sessions use fixed-base 70% correct, while existing P8/P8d in-flight sessions retain their prior rule and state. No bank/roles/learner answers modified by this code change.
+- Live and Admin readiness require policy version `thirds-fixed-correct-v2`, verified fixed correct targets and original Low/Medium bases. Old backend responses fail closed. Owner-run SELECT-only SQL audit added.
+- Disposable PostgreSQL and Node regression test 6/10→7/11, additional wrong Q11→7/12, Medium 6/10→7/11, no duplicates and cap 30; full legacy suites remain mandatory.
+- No actual Supabase migration executed, no Cloudflare deployment, no question import or approval. Real signed JWT and content readiness remain pending.
+
 ### 2026-11-04 — P8d: Exact one-third adaptive Level Up gates in Practice
 
 - Corrected the original P8 20%-of-N early-promotion policy to the owner's **balanced thirds**: N=30 has 10 Low + 10 Medium + 10 High if the learner clears each tier; N=10→3/3/4, N=25→8/8/9, N=50→16/17/17.
