@@ -83,6 +83,9 @@ jobs:
       - name: P9A read-only ASP release governance preflight contract
         run: npm run test:p9a
 
+      - name: P9B explicitly reserved 200 ASP Mock + independent per-question Practice approval contract
+        run: npm run test:p9b
+
       - name: P5 native fullscreen and exit policy contracts
         run: npm run test:p5
 
@@ -183,6 +186,9 @@ jobs:
 
       - name: P9A ASP governance preflight — no DB writes and strict Admin-only access
         run: bash scripts/test-p9a-postgres-smoke.sh
+
+      - name: P9B transactional 200-question Mock and two-Admin approval on disposable PostgreSQL
+        run: bash scripts/test-p9b-postgres-smoke.sh
 
       - name: Test scope disclosure
         run: echo "Ephemeral local PostgreSQL smoke only; live Supabase Auth, Storage, Data API and device tests still pending."
