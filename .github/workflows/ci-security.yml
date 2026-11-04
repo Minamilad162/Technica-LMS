@@ -101,6 +101,9 @@ jobs:
       - name: P11 learner-owned course, domain and topic verified progress analytics contract
         run: npm run test:p11
 
+      - name: P12 read-only Admin release diagnostics, NO-GO and zero-mutation contract
+        run: npm run test:p12
+
       - name: P5 native fullscreen and exit policy contracts
         run: npm run test:p5
 
