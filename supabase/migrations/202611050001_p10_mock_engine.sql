@@ -119,6 +119,37 @@ BEGIN
   'questions',v_questions);
 END; $$;
 
+-- Learner-only readiness; aggregate counts and no private source IDs/keys.
+-- A valid reserved form is necessary but does not mean the engine is live
+-- until this separate P10 migration has been expressly installed in staging.
+CREATE FUNCTION public.lms_p10_mock_readiness(p_course_id uuid)
+ RETURNS jsonb LANGUAGE plpgsql STABLE SECURITY DEFINER SET search_path='' AS $
+DECLARE v_form uuid; v_count integer:=0; v_total integer:=0;
+BEGIN
+ IF (SELECT auth.uid()) IS NULL OR NOT public.lms_p4_can_practice(p_course_id)
+ THEN RAISE EXCEPTION 'Course access inactive'; END IF;
+ IF NOT EXISTS(SELECT 1 FROM public.lms_courses
+ WHERE id=p_course_id AND slug='asp')
+ THEN RAISE EXCEPTION 'ASP course required'; END IF;
+ SELECT id INTO v_form FROM public.lms_p9b_mock_forms
+ WHERE course_id=p_course_id AND form_version=1 AND state='reserved';
+ IF v_form IS NOT NULL THEN
+  SELECT count(*) INTO v_count
+  FROM public.lms_p9b_mock_items i
+  JOIN public.lms_questions q ON q.id=i.question_id
+  WHERE i.form_id=v_form AND q.course_id=p_course_id
+    AND q.mock_exclusive AND q.approval_state='draft'
+    AND NOT EXISTS(SELECT 1 FROM public.lms_practice_attempt_items ai
+      WHERE ai.question_id=q.id);
+ END IF;
+ SELECT count(*) INTO v_total FROM public.lms_questions
+ WHERE course_id=p_course_id AND mock_exclusive;
+ RETURN jsonb_build_object('ready',v_form IS NOT NULL AND
+   v_count=200 AND v_total=200,
+   'verifiedReserved',v_count,'totalExclusiveFlags',v_total,
+   'required',200,'durationSeconds',18000,'engineVersion','p10-mock-v1');
+END; $;
+
 -- Idempotent start: lock learner profile across tabs.
 -- Form must be genuinely reserved, immutable, exactly 200 unique DRAFT
 -- Mock-exclusive IDs; no LIVE/Practice question pool can silently substitute.
@@ -234,6 +265,7 @@ DECLARE sig text;
 BEGIN
  FOREACH sig IN ARRAY ARRAY[
   'lms_p10_finalize(uuid,boolean)',
+  'lms_p10_mock_readiness(uuid)',
   'lms_p10_mock_payload(uuid)',
   'lms_p10_start_mock(uuid,uuid)',
   'lms_p10_save_mock(uuid,uuid,integer,boolean)',
@@ -244,6 +276,7 @@ BEGIN
   EXECUTE format('GRANT EXECUTE ON FUNCTION public.%s TO service_role',sig);
  END LOOP;
  FOREACH sig IN ARRAY ARRAY[
+  'lms_p10_mock_readiness(uuid)',
   'lms_p10_mock_payload(uuid)',
   'lms_p10_start_mock(uuid,uuid)',
   'lms_p10_save_mock(uuid,uuid,integer,boolean)',
