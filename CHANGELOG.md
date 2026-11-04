@@ -1,3 +1,9 @@
+### 2026-11-04 — P9C.1: concise SELECT-only ASP bank decision report
+
+- Added `supabase/P9C_DECISION_SUMMARY_READ_ONLY.sql`, a single owner-run SELECT for the confirmed Technica project with P9B already installed. The report distinguishes real ASP question counts from the **historical 1,625** reference, human rights/answer review from technical approval, N30 Level Up approved Low/Medium/High pool counts, and 200 Mock-exclusive flags from a genuinely populated immutable Mock form. The formal 200-question/300-minute Mock engine is always displayed as NOT_IMPLEMENTED; source-only readiness never asserts real deployment.
+- Added a strict one-SELECT privacy/no-mutation Node contract test and disposable PostgreSQL post-P9B test with protected table fingerprints before/after report generation. Older full P9C audits stay supported when P9B is absent.
+- This source-only increment does not run SQL against Production, import/review/approve/reserve any question, modify P8e fixed 7-of-10 policy, install migrations or deploy Cloudflare. Owner-run real Results CSV is needed before making data-specific remediation decisions.
+
 ### 2026-11-04 — P9C: SELECT-only real ASP bank inventory and readiness audit
 
 - Added a schema-only, single-SELECT preflight usable on the confirmed Technica Supabase project; separately identifies P4/P6A core prerequisites, installed P8e fixed-correct policy and **optional** P9A/P9B governance. Absent P9B does not break the inventory audit.
