@@ -47,6 +47,7 @@ const source=readFileSync(new URL('../src/lib/store.jsx',import.meta.url),'utf8'
 const css=readFileSync(new URL('../src/practiceModes.css',import.meta.url),'utf8');
 assert.ok(page.includes('PRACTICE_MODES.map('));
 assert.ok(page.includes('practice-domain-picker'));
+assert.ok(page.includes("navigate('/practice/live?mode=levelup&course='"),'Level Up quick select must open secure backend with requested course');
 assert.ok(source.includes('practiceModeLabel:setup.practiceModeLabel'));
 assert.ok(css.includes('@media(max-width:740px)'));
 console.log('PASS practice quick mode presets, real course/domain mistake selection and disabled adaptive/mock gate');
