@@ -101,7 +101,7 @@ export default function AdminQuestionReview({db,course,domains=[],onDomainsSeede
   <AdminAdaptiveReadiness db={db} course={course} domains={official}/>
   <AspReleasePreflight db={db} course={course}/>
   <AspMockReservation db={db} course={course} ids={mockSelected}
-    onReserved={()=>{setMockSelected([]);setSelectedId(null);reload();}}/>
+    onReserved={()=>{setMockSelected([]);setSelectedId(null);setNotice('Exactly 200 reviewed ASP question IDs were reserved in Mock Form v1; no Mock exam was activated.');reload();}}/>
   {official.length!==9&&<div className="live-review-domains"><div><strong>Official ASP11 taxonomy</strong>
    <small>{official.length} / 9 official domains available. Legacy workbook names are not a trusted mapping.</small></div>
    <button className="live-secondary" type="button" onClick={prepare} disabled={saving}>Add official 9 domains</button></div>}
