@@ -1,0 +1,34 @@
+/* Transition to live Supabase authoring, preserving the Technica light/teal UI. */
+.live-authoring-container{min-width:0;max-width:100%;color:#223e4b}
+.live-authoring-banner{display:flex;gap:9px;align-items:center;padding:12px 15px;background:#effaf6;color:#216e65;border:1px solid #d2ebe2;border-radius:12px;font-size:12px;margin:12px 0 19px;line-height:1.55}
+.live-authoring-banner svg{flex-shrink:0}
+.live-authoring-heading-actions{display:flex;align-items:center;gap:9px;flex-wrap:wrap}
+.live-authoring-alert,.live-authoring-success{display:flex;gap:9px;align-items:center;line-height:1.55;padding:11px 13px;border-radius:9px;margin:10px 0;font-size:13px;overflow-wrap:anywhere}
+.live-authoring-alert{background:#fff5f1;color:#9b3e32;border:1px solid #f2d3ca}
+.live-authoring-success{background:#eaf9f2;color:#1c745c;border:1px solid #cceadc}
+.live-authoring-state{display:grid;justify-items:center;text-align:center;gap:12px;background:#fff;border:1px solid #e1eaf0;border-radius:17px;margin:28px auto;padding:45px 22px;max-width:670px}
+.live-authoring-state svg{color:#158c7f}
+.live-authoring-state h2{font-size:21px;margin:0;color:#214250}
+.live-authoring-state p{color:#617a85;font-size:14px;line-height:1.6;margin:0}
+.live-authoring-secondary{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin:22px 0;padding:14px 17px;border:1px dashed #d2e2e5;border-radius:12px;background:#fafcfd}
+.live-authoring-secondary p{margin:0;font-size:12px;color:#6d828a;line-height:1.5}
+.live-authoring-footnote{display:block;font-size:11px;color:#7d939a;margin:12px 0 0}
+.live-authoring-builder-header{display:flex;flex-wrap:wrap;align-items:center;gap:15px}
+.live-authoring-builder-header .builder-name{flex:1;min-width:200px}
+.live-authoring-builder-icon{width:80px;height:75px;display:grid;place-items:center;flex-shrink:0;background:linear-gradient(135deg,#def7ec,#e7f8fb);color:#17887c;border-radius:15px}
+.live-authoring-course-selector{display:flex;flex-wrap:wrap;align-items:center;gap:11px;padding:13px 15px;border:1px solid #e2eaf0;background:#fff;border-radius:12px;margin-bottom:16px}
+.live-authoring-course-selector label{font-size:12px;font-weight:750;color:#486674}
+.live-authoring-course-selector select{min-width:min(100%,280px);flex:1;max-width:480px;background:#fff;color:#20414d;border:1px solid #cbdde1;border-radius:8px;font-size:13px;padding:10px 12px}
+.live-authoring-course-selector select:focus-visible{outline:2px solid #129185}
+.live-authoring-lesson{flex-wrap:wrap}
+.live-authoring-lesson-title{background:transparent;border:0;text-align:left;padding:0;cursor:pointer}
+.live-authoring-lesson-title:focus-visible{outline:2px solid #128b80;border-radius:4px}
+.live-authoring-reading{flex-basis:100%;padding:13px 15px;margin:4px 5px 6px 37px;border:1px solid #e2edf0;border-radius:10px;background:#f8fbfb;font-size:13px;line-height:1.55;overflow-wrap:anywhere}
+.live-authoring-reading p{margin:8px 0;color:#385d65;white-space:pre-wrap}
+.live-authoring-reading small{color:#7a8d97}
+.live-authoring-reading-top{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:9px}
+.live-authoring-reading-top b{font-size:13px;color:#205a54}
+.live-authoring-reading-top .btn{font-size:12px}
+.live-authoring-container .modal .simple-fields textarea{min-height:94px}
+.live-authoring-container .admin-course-count{font-size:11px}
+@media(max-width:720px){.live-authoring-builder-header{align-items:flex-start}.live-authoring-builder-icon{width:52px;height:52px}.live-authoring-heading-actions{width:100%}.live-authoring-heading-actions .btn{flex:1}.live-authoring-course-selector{align-items:stretch;flex-direction:column}.live-authoring-course-selector select{max-width:100%;width:100%}.live-authoring-course-selector>.btn{width:100%}.live-authoring-reading{margin:4px 1px;padding:11px}.live-authoring-secondary .btn{width:100%}}
