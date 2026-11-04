@@ -69,7 +69,7 @@ assert(!live.includes('nextAdaptiveTier'),'Client cannot grade or pick next diff
 assert(route.includes('<LiveLearningLibrary/>')&&route.includes('<LiveLearningCourse/>'),'Default learning must be real Supabase');
 assert(route.includes('<LivePracticePortal/>'),'Secure Practice link must route into server engine');
 assert(portal.includes('mayReadLiveCourse')&&portal.includes("['paid','manual']"),'Only authorized learning and paid/manual Practice');
-assert(learning.includes('lms_lesson_progress'),'Learner completion must be verified P2 DB records');
+assert(read('src/production/liveLearningApi.js').includes('lms_lesson_progress'),'Learner completion must be verified P2 DB records');
 assert(!learning.includes("update({reading_completed:true}"),'No browser-synthesized progress');
 assert(!learning.includes('localStorage'),'Live learner library must not read demo/browser progress');
 console.log('PASS P8 proportional adaptive 10/25/50 checkpoints and 70% monotone tiers; secured next-question RPC contract; real, RLS-gated learner library.');
