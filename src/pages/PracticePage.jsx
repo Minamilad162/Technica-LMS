@@ -56,7 +56,8 @@ export default function PracticePage(){
    if(!quickDomain||!course.domainIds.includes(quickDomain))setQuickDomain(course.domainIds[0]||'');
    return;
   }
-  if(id==='levelup'||id==='mock')return;
+  if(id==='levelup'){navigate('/practice/live?mode=levelup&course='+encodeURIComponent(course.id));return;}
+  if(id==='mock')return;
   if(id==='weakest'&&!hasWeakest)return;
   if(id==='missed'&&!hasMistakes)return;
   launchMode(id);
