@@ -1,3 +1,11 @@
+### 2026-11-05 — P11 learner-owned verified Progress & Analytics (SOURCE ONLY)
+
+- Built authenticated Supabase `/my-progress` for real enrolled learners, separate from existing Demo/Admin analytics. Learner sidebar access, course selection, official Course→Domain→Topic→Lesson verified completion, per-domain answer accuracy, Practice and Mock separately, and latest ten graded attempts. Missing RPC/backend displays an explicit unavailable state, never fake 78% or 100-user sample statistics.
+- Added `202611050002_p11_learner_progress_analytics.sql`, a single STABLE read-only Auth JWT owner-scoped RPC. Access requires active profile and P1 course access; trial lesson counts honor `lms_p1_can_view_lesson` so restricted content is not exposed. Private answer snapshots stay on server, direct browser ACL not expanded.
+- Differentiates **answer accuracy correct/answered** from **exam score correct/assigned**. Counts only finished/expired P4 (including Level Up) and P10 Mock; excludes active and abandoned. Unknown values shown as unavailable. Topic question accuracy is explicitly unavailable until an actual question→topic schema exists; lesson completion is never inferred from opening a lesson.
+- Added `npm run test:p11` with fail-closed synthetic API contracts and `test-p11-postgres-smoke.sh` after P10 synthetic fixtures with cross-user/course/Trial/suspended role denial, metrics, no data mutations and proprietary source/answer secrecy. `docs/current/P11_LEARNER_PROGRESS_AND_ANALYTICS.md`, Logic Registry LMS-033/034 and Blueprint §65 updated.
+- No Production Supabase migration, actual user-data queries, question-bank import, paid activation, staging deploy or Cloudflare Production release.
+
 ### 2026-11-05 — ASP Question Bank engineering freeze and P10 official Mock engine source
 
 - Owner directed conclusion of recurring ASP question-bank phases and immediate move to next LMS module. **Engineering source bank is FROZEN** on the private 2,500/9 candidate with P9D1 offline optional reconciliation tool; the 1,625/five-group historical Demo remains untouched. This is **NOT** a claim of actual import, rights/answer validation, or Production publication.

@@ -10,7 +10,8 @@ import LiveCoursesPage from './production/LiveCoursesPage';
 import LiveCourseBuilder from './production/LiveCourseBuilder';
 import {LiveLearningLibrary,LiveLearningCourse} from './production/LiveLearning';
 import LivePracticePortal from './production/LivePracticePortal';
-import LiveMockPortal from './production/LiveMockPortal';import AssessmentOverview from './pages/AssessmentOverview';import ResultsPage from './pages/ResultsPage';import PracticeResultsPage from './pages/PracticeResultsPage';import LearnersPage from './pages/LearnersPage';import QuestionBankPage from './pages/QuestionBankPage';import CoursesPage from './pages/CoursesPage';
+import LiveMockPortal from './production/LiveMockPortal';
+import LiveLearnerProgress from './production/LiveLearnerProgress';import AssessmentOverview from './pages/AssessmentOverview';import ResultsPage from './pages/ResultsPage';import PracticeResultsPage from './pages/PracticeResultsPage';import LearnersPage from './pages/LearnersPage';import QuestionBankPage from './pages/QuestionBankPage';import CoursesPage from './pages/CoursesPage';
 // Local-only QA retains the accepted Demo authoring browser regression suite.
 // In the normal deployed site, Courses/Builder default to genuine Supabase.
 // Explicit "legacyPreview=1" shows the historic unsynced authoring tools.
@@ -52,6 +53,7 @@ export default function App(){
  <Route path="/" element={<Navigate to="/home" replace/>}/>
  <Route path="/home" element={<RoutePage><HomePage/></RoutePage>}/>
  <Route path="/my-learning" element={<RoutePage>{legacyPreview?<LegacyPreviewWarning><LearningLibrary/></LegacyPreviewWarning>:<LiveLearningLibrary/>}</RoutePage>}/>
+ <Route path="/my-progress" element={<RoutePage><LiveLearnerProgress/></RoutePage>}/>
  <Route path="/learning/course/:courseId" element={<RoutePage><LiveLearningCourse/></RoutePage>}/>
  <Route path="/learning/process-safety-foundations" element={<RoutePage><LegacyPreviewWarning><LearningPlayer/></LegacyPreviewWarning></RoutePage>}/>
  <Route path="/practice" element={<RoutePage><PracticePage/></RoutePage>}/>
