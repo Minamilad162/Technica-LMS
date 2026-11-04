@@ -15,6 +15,7 @@ BEGIN
  OR to_regclass('public.lms_p6_question_reviews') IS NULL
  OR to_regprocedure('public.lms_p1_can_view_structure(uuid)') IS NULL
  OR to_regprocedure('public.lms_p1_actor_is_admin()') IS NULL
+ OR to_regprocedure('public.lms_p1_can_view_lesson(uuid)') IS NULL
  THEN RAISE EXCEPTION 'P11 requires P1/P2/P4/P6A/P10 in authorized Technica staging'; END IF;
  IF to_regprocedure('public.lms_p11_my_progress(uuid)') IS NOT NULL
  THEN RAISE EXCEPTION 'P11 already installed; do not overwrite or rerun'; END IF;
@@ -59,7 +60,8 @@ BEGIN
   JOIN visible_topics t ON t.id=l.topic_id
   LEFT JOIN public.lms_lesson_progress p
     ON p.lesson_id=l.id AND p.user_id=v_user
-  WHERE v_admin OR l.publication_state='published'
+  WHERE v_admin OR (l.publication_state='published'
+    AND public.lms_p1_can_view_lesson(l.id))
  ),
  lesson_totals AS (
   SELECT count(*)::integer AS total_lessons,
