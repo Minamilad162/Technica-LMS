@@ -22,8 +22,9 @@ assert.throws(()=>adaptiveCheckpoint(0));
 assert.throws(()=>adaptiveCheckpoint(51));
 for(const size of [10,25,30,50]){
  const check=adaptiveCheckpoint(size),pass=Math.ceil(check*0.7);
+ const middle=adaptiveMediumCheckpoint(size),middlePass=Math.ceil(middle*0.7);
  assert.equal(nextAdaptiveTier('low',pass,check,size),'medium','Low promotes at 70%');
- assert.equal(nextAdaptiveTier('medium',pass,check,size),'high','Medium promotes at 70%');
+ assert.equal(nextAdaptiveTier('medium',middlePass,middle,size),'high','Medium promotes at 70% after its OWN minimum');
  assert.equal(nextAdaptiveTier('high',check,check,size),'high','High never exceeds High');
  assert.equal(nextAdaptiveTier('low',pass-1,check,size),'low','Below 70% remains Low');
  assert.equal(nextAdaptiveTier('low',pass,check-1,size),'low','Cannot promote before proportional checkpoint');
