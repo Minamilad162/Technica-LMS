@@ -69,3 +69,8 @@ Important limitation: SHA256 matching supports deterministic **exact normalized 
 ## 5. Go/no-go
 
 This phase can be **source/CI-ready** even while real comparison is **PENDING**. The actual DB fingerprint CSV must come from the owner's separate read-only SQL Editor run; there is no authenticated Supabase integration in the current connected tools and no production data should be guessed from GitHub. If `P9D1` reports conflicts, collect only aggregate summary and decide separate manual remediation. Do not use a service-role key or enable an `--apply` mode without a newly reviewed staged migration, backup and explicit owner authorization.
+
+
+## Additional PostgreSQL verification
+
+`scripts/test-p9d1-postgres-smoke.sh` is executed ONLY on GitHub's disposable PostgreSQL after P9B synthetic fixtures. It runs the exact SELECT-only fingerprint export SQL, verifies the output row count matches existing synthetic ASP question count, matches a known synthetic question's prompt SHA256 against Python's normalization and verifies every exported hash is 64 lowercase hexadecimal characters. Protected question/review/attempt/audit fingerprints must be unchanged before and after. No user's real workbook or database content is present in GitHub CI.
