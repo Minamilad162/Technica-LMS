@@ -11,7 +11,7 @@ const PRESETS=[
  {id:'timed25',title:'Timed Quiz',desc:'25 questions · 20 minutes · feedback at the end',count:25,time:1200},
  {id:'custom',title:'Build Your Own',desc:'Choose 1–50 questions · optional total timer',count:10,time:0},
  {id:'domain',title:'Practice by Domain',desc:'Choose a verified course domain · feedback at the end',count:10,time:0},
- {id:'levelup',title:'Level Up · Adaptive',desc:'1–50 questions · 70% to progress · proportional checkpoints',count:10,time:0}
+ {id:'levelup',title:'Level Up · Adaptive',desc:'1–50 questions · balanced stages · 70% to progress',count:10,time:0}
 ];
 const formatTime=seconds=>{
  const n=Math.max(0,Math.floor(seconds||0));
@@ -210,7 +210,7 @@ export default function LivePractice({db,user,course,domains=[],access,defaultMo
    </div>}
    {mode==='levelup'&&<div className="live-adaptive-count-picks" role="group" aria-label="Adaptive session length">
     <span>Quick session length</span>
-    {[10,25,50].map(n=><button type="button" key={n} onClick={()=>setCount(n)} aria-pressed={Number(count)===n} className={Number(count)===n?'selected':''}>
+    {[10,25,30,50].map(n=><button type="button" key={n} onClick={()=>setCount(n)} aria-pressed={Number(count)===n} className={Number(count)===n?'selected':''}>
       {n} questions
       {readiness&&!readinessBusy&&<small>{[readiness.low,readiness.medium,readiness.high].every(v=>Number(v)>=n)?'Bank ready':'Needs reviewed bank'}</small>}
     </button>)}
@@ -219,7 +219,7 @@ export default function LivePractice({db,user,course,domains=[],access,defaultMo
     {readinessBusy?'Checking approved difficulty tiers…':
      readinessError?'Adaptive mode unavailable: '+readinessError:
      !readiness?'Choose a session length; the server will check its three tiers.':
-     readiness.ready?'Ready: '+readiness.checkpoint+' questions per checkpoint; 70% within the current tier to advance. Next questions are chosen by the server.':
+     readiness.ready?'Ready: '+readiness.checkpoint+' Low and '+readiness.mediumCheckpoint+' Medium minimum questions, at least 70% correct in each stage. Questions adapt silently; total always stops at '+count+'.':
       'Not ready: need '+readiness.requiredPerTier+' approved, non-Mock questions in EACH tier. Available Low '+readiness.low+', Medium '+readiness.medium+', High '+readiness.high+'.'}
    </div>:<p className="live-practice-note"><TriangleAlert size={16}/> The exclusive 200-question Mock Exam is a separate locked 5-hour workflow. Level Up requires reviewed difficulty tags and the P8 server migration.</p>}
    <button className="live-primary" disabled={busy||!eligible||(mode==='levelup'&&(!readyForCurrent||readinessBusy))} onClick={begin} type="button"><PlayCircle size={17}/>{busy?'Preparing your questions…':'Start practice'}</button>
