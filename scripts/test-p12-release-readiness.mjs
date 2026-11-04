@@ -85,7 +85,6 @@ assert.equal(opCounts.write,0);
 const ui=source('src/production/LiveReleaseReadiness.jsx');
 assert(ui.includes('checkReleaseReadiness'));
 assert(ui.includes('NO-GO'));
-assert(ui.includes('Copied')===false || ui.includes('Copied')); // UI doesn't certify go-live.
 assert(!ui.includes("from '../data/mock'"));
 const app=source('src/App.jsx');
 const layout=source('src/components/Layout.jsx');
