@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import {adaptiveCheckpoint,adaptivePasses,nextAdaptiveTier} from '../src/production/adaptivePolicy.js';
-import {progressForLesson,mayReadLiveCourse} from '../src/production/LiveLearning.jsx';
+import {progressForLesson,mayReadLiveCourse} from '../src/production/liveLearningApi.js';
 
 const read=p=>readFileSync(new URL('../'+p,import.meta.url),'utf8');
 for(const [size,checkpoint] of [[1,1],[2,2],[5,3],[10,3],[15,3],[20,4],[25,5],[30,6],[50,10]]){
