@@ -3,6 +3,7 @@ import {useNavigate} from 'react-router-dom';
 import {Activity,AlertTriangle,ArrowLeft,CheckCircle2,ChevronDown,ChevronUp,ClipboardList,Clock3,Copy,LockKeyhole,RefreshCw,ShieldCheck,XCircle} from 'lucide-react';
 import {getSupabaseClient} from '../lib/supabase.js';
 import {checkReleaseReadiness,releaseReportText,summarizeReleaseReadiness} from './releaseReadiness.js';
+import StagingQaEvidencePanel from './StagingQaEvidencePanel.jsx';
 import './liveLearning.css';
 import './releaseReadiness.css';
 
@@ -83,6 +84,7 @@ export default function LiveReleaseReadiness(){
      </div>;
     })}
    </section>)}</div>}
+  <StagingQaEvidencePanel/>
   <footer className="p12-footer">
    <ClipboardList size={17}/> Read-only runtime status, not a production certification. Detailed staging QA, evidence, content-rights review, rollback and explicit launch authorization remain separate mandatory release gates.
   </footer>
