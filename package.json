@@ -49,7 +49,8 @@
     "test:p9c": "node scripts/test-p9c-audit-contract.mjs",
     "test:p9c:decision": "node scripts/test-p9c-decision-summary.mjs",
     "test:p9d1": "python3 scripts/test-p9d1-asp2500-dryrun.py",
-    "test:p10": "node scripts/test-p10-mock-contract.mjs"
+    "test:p10": "node scripts/test-p10-mock-contract.mjs",
+    "test:p11": "node scripts/test-p11-learner-analytics.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.58.0",
