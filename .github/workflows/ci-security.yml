@@ -91,6 +91,9 @@ jobs:
 
       - name: P9C concise owner decision summary read-only contract
         run: npm run test:p9c:decision
+      
+      - name: P9D.1 private 2500-question offline source and snapshot-diff security tests
+        run: npm run test:p9d1
 
       - name: P5 native fullscreen and exit policy contracts
         run: npm run test:p5
