@@ -45,3 +45,5 @@ Every new calculation, denominator, filter, question selection, time policy, ent
 
 
 | LMS-022 | After user-run P8 migration, verify RPCs/grants and per-course/domain approved Low/Medium/High question counts with SELECT-only SQL. Level Up quick card navigates to live JWT-gated P8, preflight scoped to current N/domain; no stale success or Demo fallback. | `supabase/P8_VERIFY_READ_ONLY.sql` in disposable PG and owner-confirmed Supabase SQL Editor; Practice/Chromium source contract. | SOURCE IMPLEMENTED / LIVE VERIFICATION REQUIRED |
+
+| LMS-023 | P9A bank release preflight is Admin-only/read-only; review READY does not mean P4 approved; exactly 200 Mock-exclusive flags alone do not prove a versioned Mock form; never publish/approve automatically. | `lms_p9a_release_preflight` staged protected aggregate RPC; no bank writes; role-denial/zero-mutation PostgreSQL smoke and fail-closed browser adapter; real STAGING JWT verification pending. | P9A SOURCE / STAGING REQUIRED |
