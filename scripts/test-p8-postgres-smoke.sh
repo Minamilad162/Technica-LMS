@@ -160,3 +160,23 @@ n=$(run_as authenticated "$paid" \
 [[ "$n" == 0 ]] || { echo 'FAIL abandoned adaptive payload exposed snapshot';exit 1; }
 echo 'PASS P5 abandonment privacy preserved for P8 adaptive'
 echo 'PASS P8 server progression and isolation on disposable PostgreSQL; production untouched'
+
+
+# Validate the owner-run read-only post-migration footprint and readiness
+# query against the disposable P8 database (NOT production Supabase).
+readiness_report=$(psql -X -v ON_ERROR_STOP=1 -A -t -f supabase/P8_VERIFY_READ_ONLY.sql)
+if printf '%s\n' "$readiness_report" | grep -Eq '\|(MISSING|FAIL_[A-Z_]+)(\||$)'; then
+ echo 'FAIL P8 read-only SQL Editor audit on disposable PostgreSQL'
+ printf '%s\n' "$readiness_report"
+ exit 1
+fi
+if ! printf '%s\n' "$readiness_report" | grep -Fq 'P8_RPC|lms_p8_start_levelup(uuid,integer,uuid,uuid,integer)|PASS'; then
+ echo 'FAIL P8 start RPC not confirmed by post-migration read-only audit';exit 1
+fi
+if ! printf '%s\n' "$readiness_report" | grep -Fq 'P8_PRIVATE_TABLE|lms_practice_adaptive_state|PASS'; then
+ echo 'FAIL P8 private table was not confirmed by post-migration read-only audit';exit 1
+fi
+if ! printf '%s\n' "$readiness_report" | grep -Fq 'P8_COURSE_READINESS|asp|'; then
+ echo 'FAIL P8 ASP bank pool not present in post-migration readiness output';exit 1
+fi
+echo 'PASS P8 read-only catalog, private RLS and eligible ASP pool audit on ephemeral PostgreSQL'
