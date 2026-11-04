@@ -85,6 +85,20 @@ export default function LivePractice({db,user,course,domains=[],access}) {
  },[db,storageKey,eligible]);
 
  useEffect(()=>{
+  // Never guess protected bank readiness using bundled question assets.
+  if(mode!=='levelup'||!eligible||attempt){setReadiness(null);setReadinessError('');setReadinessBusy(false);return;}
+  const desired=Number(count);
+  if(!Number.isInteger(desired)||desired<1||desired>50){setReadiness(null);return;}
+  let active=true;setReadiness(null);setReadinessError('');setReadinessBusy(true);
+  const timer=setTimeout(()=>{
+   getAdaptiveReadiness(db,course.id,desired,domainId||null)
+    .then(value=>{if(active)setReadiness(value);})
+    .catch(e=>{if(active)setReadinessError(errorText(e));})
+    .finally(()=>{if(active)setReadinessBusy(false);});
+  },200);
+  return()=>{active=false;clearTimeout(timer);};
+ },[db,course.id,mode,count,domainId,eligible,attempt?.attemptId]);
+ useEffect(()=>{
   if(!attempt||finished||remaining===null)return;
   const ticker=setInterval(()=>setClock(Date.now()),1000);
   return()=>clearInterval(ticker);
@@ -128,10 +142,10 @@ export default function LivePractice({db,user,course,domains=[],access}) {
    const pendingKey=storageKey+':pending';
    let requestId=localStorage.getItem(pendingKey);
    if(!requestId){requestId=crypto.randomUUID();localStorage.setItem(pendingKey,requestId);}
-   const next=await startSecurePractice(db,{
-     courseId:course.id,mode,count:total,durationSeconds:time,
-     domainId:mode==='domain'?domainId:null,requestId
-   });
+   const request={courseId:course.id,mode,count:total,durationSeconds:time,
+     domainId:mode==='domain'||mode==='levelup'?(domainId||null):null,requestId};
+   const next=mode==='levelup'?await startAdaptivePractice(db,request):
+     await startSecurePractice(db,request);
    if(!isFullscreenActive(document,containerRef.current)){
     void sealAttempt(next.attemptId);
     setNotice('Fullscreen was closed while preparing questions. Returned to setup.');
@@ -156,14 +170,23 @@ export default function LivePractice({db,user,course,domains=[],access}) {
   if(attempt.mode==='levelup'&&current.selectedIndex!==null&&current.selectedIndex!==undefined)return;
   processing.current=true;setBusy(true);setError('');
   try{
-   const reply=await answerSecurePractice(db,attempt.attemptId,current.id,optionIndex);
+   const reply=attempt.mode==='levelup'
+    ?await answerAdaptivePractice(db,attempt.attemptId,current.id,optionIndex)
+    :await answerSecurePractice(db,attempt.attemptId,current.id,optionIndex);
    if(closingRef.current||!isFullscreenActive(document,containerRef.current))return;
-   setAttempt(previous=>previous?({
+   if(attempt.mode==='levelup'){
+    // Only the server grades, determines tier and assigns the next question.
+    // Never show correctIndex, explanation or live tier before submission.
+    setAttempt({...reply,observedAtEpoch:Date.now()});
+    setSelected(Math.max(0,(reply.questions?.length||1)-1));
+   }else{
+    setAttempt(previous=>previous?({
      ...previous,
      questions:previous.questions.map(q=>q.id===current.id?{...q,selectedIndex:optionIndex}:q)
-   }):null);
-   if(reply.correctIndex!==undefined)
-    setFeedback(old=>({...old,[current.id]:{correctIndex:reply.correctIndex,explanation:reply.explanation}}));
+    }):null);
+    if(reply.correctIndex!==undefined)
+     setFeedback(old=>({...old,[current.id]:{correctIndex:reply.correctIndex,explanation:reply.explanation}}));
+   }
   }catch(e){setError(errorText(e));}
   finally{setBusy(false);processing.current=false;}
  };
@@ -184,7 +207,13 @@ export default function LivePractice({db,user,course,domains=[],access}) {
       {['custom','levelup'].includes(mode)&&<label>Time limit (minutes; 0 = untimed)<input type="number" min={0} max={180} value={minutes} onChange={e=>setMinutes(e.target.value)}/></label>}
       {['domain','levelup'].includes(mode)&&<label>Domain<select value={domainId} onChange={e=>setDomainId(e.target.value)}><option value="">{mode==='levelup'?'All course domains':'Choose domain'}</option>{domains.map(d=><option key={d.id} value={d.id}>{d.title}</option>)}</select></label>}
    </div>}
-   <p className="live-practice-note"><TriangleAlert size={16}/> Mock Exam and Level Up are intentionally unavailable until approved reserved questions and difficulty classifications exist.</p>
+   {mode==='levelup'?<div className="live-practice-note" role="status"><Target size={16}/>
+    {readinessBusy?'Checking approved difficulty tiers…':
+     readinessError?'Adaptive mode unavailable: '+readinessError:
+     !readiness?'Choose a session length; the server will check its three tiers.':
+     readiness.ready?'Ready: '+readiness.checkpoint+' questions per checkpoint; 70% within the current tier to advance. Next questions are chosen by the server.':
+      'Not ready: need '+readiness.requiredPerTier+' approved, non-Mock questions in EACH tier. Available Low '+readiness.low+', Medium '+readiness.medium+', High '+readiness.high+'.'}
+   </div>:<p className="live-practice-note"><TriangleAlert size={16}/> The exclusive 200-question Mock Exam is a separate locked 5-hour workflow. Level Up requires reviewed difficulty tags and the P8 server migration.</p>}
    <button className="live-primary" disabled={busy||!eligible||(mode==='levelup'&&(!readiness?.ready||readinessBusy))} onClick={begin} type="button"><PlayCircle size={17}/>{busy?'Preparing your questions…':'Start practice'}</button>
   </>:<>
    <div className="live-attempt-bar"><b>{finished?'Review your result':(attempt.mode==='quick10'?'Quick 10':attempt.mode==='timed25'?'Timed Quiz':attempt.mode==='levelup'?'Level Up · Adaptive':'Custom Practice')}</b>
