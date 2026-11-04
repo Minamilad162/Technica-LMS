@@ -149,9 +149,11 @@ for(const banned of ['.insert(','.upsert(','.update(','.delete(','service_role_k
  assert(!scripts.includes(banned),'Staging QA includes write method '+banned);
 assert(scripts.includes('P12_PRODUCTION_PROJECT_REF'));
 assert(scripts.includes('YES_READ_ONLY'));
+assert(scripts.includes(".is('revoked_at',null)"));
 const ui=file('src/production/StagingQaEvidencePanel.jsx');
 const page=file('src/production/LiveReleaseReadiness.jsx');
 assert(page.includes('<StagingQaEvidencePanel/>'));
+assert(page.includes("rows.some(x=>x.id==='admin'&&x.status==='pass')"));
 assert(ui.includes('file.text()')&&ui.includes('validateStagingEvidence'));
 assert(!ui.includes('db.from(')&&!ui.includes('fetch('));
 const workflow=file('.github/workflows/ci-security.yml');
