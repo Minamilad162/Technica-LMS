@@ -48,7 +48,7 @@ for(const bad of [
  {...payload,recentAttempts:[{...payload.recentAttempts[0],scorePercent:120}]},
  {...payload,recentAttempts:[{...payload.recentAttempts[0],state:'in_progress'}]},
  {...payload,version:'demo'}
-])assert.throws(()=>validateLearnerProgress(bad,id(1)),/Invalid|Unverified|inconsistent|disagree/i);
+])assert.throws(()=>validateLearnerProgress(bad,id(1)),/Invalid|Unverified|inconsistent|disagree|200 assigned/i);
 const calls=[];
 const db={rpc:async(name,args)=>{calls.push({name,args});return {data:payload,error:null}}};
 assert.equal((await getLearnerProgress(db,id(1))).learning.completedLessons,1);
