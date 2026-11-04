@@ -38,3 +38,7 @@ Every new calculation, denominator, filter, question selection, time policy, ent
 
 
 | LMS-019 | P7 Live Admin authoring: default Admin Courses/Builder use real Supabase P1 Course→Domain→Topic→Lesson IDs; Create/Save requires verified Admin, new Course/Lesson as Draft, no auto-delete/publish/Demo import or local-storage fallback. | P7 source and disposable PostgreSQL Admin writes/learner denial, followed by real Supabase JWT/Cloudflare staging acceptance. | P7 SOURCE / STAGING REQUIRED |
+
+
+| LMS-020 | Adaptive Level Up: selected N=1–50 questions; tier checkpoint min(N,max(3,ceil(.20N))); at current tier (Low→Medium→High), cumulative correct/answered ≥70% after checkpoint promotes once, otherwise remains. At perfect accuracy N=10→3/3/4, N=25→5/5/15, N=50→10/10/30. No client-driven grading, tier skipping or demotion. | Source policy + P8 staged protected RPC; disposable PostgreSQL thresholds/recovery, same-tier pool guarantee, Mock exclusion; actual Supabase staging and production migration pending. | P8 STAGED |
+| LMS-021 | My Learning uses P1 authorized catalog and Course→Domain→Topic→Lesson tree and reads verified P2 progress only; opening lessons does not mark completed; no local Demo fallback. | Source contract and RLS staging acceptance; P2 progress ingestion still pending. | P8 SOURCE / STAGING REQUIRED |
