@@ -4,7 +4,7 @@
 
 ## Delivered feature
 
-**Admin → Release Readiness → Staging Integration Evidence** is a compact, responsive panel within the existing Admin route `/release-readiness`. It accepts an aggregated local JSON result using a browser File input; it validates the strict `p12-staging-qa-v1` schema and fixed **19** QA cases, lists Pass/Blocked/Pending, and allows copying only approved summary information. **No file is uploaded to a database, browser storage, Cloudflare, GitHub or any external endpoint.** Importing evidence does not validate the evidence file's origin or authorize go-live. The surrounding Release Readiness verdict remains **NO-GO** unconditionally.
+**Admin → Release Readiness → Staging Integration Evidence** is a compact, responsive panel within the existing Admin route `/release-readiness`. It accepts an aggregated local JSON result using a browser File input **only after the Admin's real Supabase JWT/role verification passes**; it validates the strict `p12-staging-qa-v1` schema and fixed **19** QA cases, lists Pass/Blocked/Pending, and allows copying only approved summary information. **No file is uploaded to a database, browser storage, Cloudflare, GitHub or any external endpoint.** Importing evidence does not validate the evidence file's origin or authorize go-live. The surrounding Release Readiness verdict remains **NO-GO** unconditionally.
 
 ## Real staging API smoke (explicit owner-run only)
 
@@ -22,7 +22,7 @@ The script refuses to initiate network requests unless ALL of these are supplied
 - `P12_STAGING_PROJECT_REF`: 20-character Supabase project reference.
 - `P12_PRODUCTION_PROJECT_REF`: **known and different** 20-character Production project reference; refusing the same reference prevents obvious accidental Production access.
 - `P12_STAGING_URL`: EXACT `https://<P12_STAGING_PROJECT_REF>.supabase.co` — no aliases, URLs ending in other domains or HTTP.
-- `P12_STAGING_ANON_KEY`: public key only (never `service_role`).
+- `P12_STAGING_ANON_KEY`: **public `sb_publishable_...` key or legacy JWT with `role=anon` only**. Reject any `sb_secret`, Service Role JWT or malformed unknown key.
 - `P12_STAGING_ENABLED=YES_READ_ONLY` AND `--confirm-staging-ref=<P12_STAGING_PROJECT_REF>`.
 - `P12_STAGING_{ADMIN,PAID,TRIAL,OUTSIDER}_{EMAIL,PASSWORD}`: four distinct existing staging logins with passwords (at least eight chars). Store in **private local shell/secret manager**, never in a committed `.env`, shell screenshots, chats or CI logs.
 
