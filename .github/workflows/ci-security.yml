@@ -72,6 +72,9 @@ jobs:
       - name: P8 proportional Adaptive Level Up and verified Learner catalog contracts
         run: npm run test:adaptive:live
 
+      - name: P8c read-only Admin bank readiness and fail-closed 10/25/50 checks
+        run: npm run test:adaptive:admin
+
       - name: P4 secure practice model and ASP draft import contract
         run: |
           npm run test:p4

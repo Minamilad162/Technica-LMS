@@ -1,3 +1,10 @@
+### 2026-11-04 — P8c: Read-only Admin Level Up bank readiness
+
+- Added **Level Up bank readiness** inside the real Admin ASP Question Review card, with an optional ASP11 domain filter and explicit read-only **Check real bank**.
+- Queries the existing protected P8 readiness RPC with a genuine authenticated Admin session for 10/25/50 questions. Shows eligible Low/Medium/High counts and exact readiness per length; preserves the official 70% / proportional checkpoint rule.
+- Rejects missing, contradictory, partial or untrusted RPC readiness responses; changes of course/domain invalidate prior results. No direct question table queries, answer keys, service role keys, bank approval/classification or database writes.
+- New `test:adaptive:admin` added to CI; existing Practice/Calculator/Mock, P4/P5/P6A protections remain unchanged. Real Supabase question pool counts, Cloudflare deployment and actual JWT/browser sign-off are **not** verified by this source change.
+
 ### 2026-11-04 — P8b: Post-migration read-only audit and Level Up activation
 
 - Owner reported manual installation of P8 on their Supabase database; **live installation and bank counts still unverified by assistant**.

@@ -33,3 +33,22 @@
 @media(max-width:760px){.live-review-grid{grid-template-columns:1fr}.live-review-metrics{grid-template-columns:repeat(2,minmax(0,1fr))}.live-review-workspace{padding:14px}.live-review-head,.live-review-domains{flex-wrap:wrap}.live-review-detail{padding:14px}}
 @media(max-width:400px){.live-review-options>div{flex-wrap:wrap}.live-review-options b{width:100%}}
 @media(prefers-reduced-motion:reduce){.live-review-row{scroll-behavior:auto}}
+
+/* P8c: Read-only difficulty pool audit inside protected ASP review. */
+.live-adaptive-review{margin:14px 0 22px;padding:16px;background:#f7fbfc;border:1px solid #dfecee;border-radius:13px}
+.live-adaptive-review-head{display:flex;align-items:flex-start;justify-content:space-between;gap:16px}
+.live-adaptive-review-head h3{display:flex;align-items:center;gap:8px;margin:0 0 7px;font-size:16px;color:#174e58}
+.live-adaptive-review-head p{margin:0;font-size:12px;color:#5e7a83;line-height:1.6;max-width:660px}
+.live-adaptive-review-head .live-secondary{white-space:nowrap;flex-shrink:0}
+.live-adaptive-review-domain{display:grid;gap:6px;margin-top:14px;max-width:360px;font-size:12px;font-weight:700;color:#315965}
+.live-adaptive-review-domain select{width:100%;padding:9px 12px;border:1px solid #d7e6e8;border-radius:9px;background:white;color:#254d57}
+.live-adaptive-review-pools{display:flex;align-items:center;gap:10px 16px;flex-wrap:wrap;margin:16px 0 10px;font-size:12px;color:#4e707a}
+.live-adaptive-review-pools strong{font-size:13px;color:#194f57}
+.live-adaptive-review-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.live-adaptive-review-result{min-width:0;display:grid;gap:6px;background:#fff;border:1px solid #e1edef;border-radius:11px;padding:12px}
+.live-adaptive-review-result b{font-size:12px;color:#375966}
+.live-adaptive-review-result strong{font-size:15px}.live-adaptive-review-result strong.ready{color:#15785e}.live-adaptive-review-result strong.blocked{color:#ae6841}
+.live-adaptive-review-result small{font-size:11px;line-height:1.45;color:#67818a}
+.live-adaptive-review-status,.live-adaptive-review-footnote{font-size:11px;line-height:1.65;color:#6b838b;margin:12px 0 0}
+.live-adaptive-review .live-error{display:flex;align-items:flex-start;gap:8px;margin-top:12px;overflow-wrap:anywhere}
+@media(max-width:760px){.live-adaptive-review-head{flex-wrap:wrap}.live-adaptive-review-grid{grid-template-columns:1fr}.live-adaptive-review{padding:12px}}
