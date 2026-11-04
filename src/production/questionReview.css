@@ -56,3 +56,19 @@
 /* P8d: 4 Admin readiness lengths (10, 25, 30, 50). */
 .live-adaptive-review-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
 @media(max-width:760px){.live-adaptive-review-grid{grid-template-columns:1fr}}
+
+/* P9B: reservation/approval controls remain subordinate to the existing
+   English-first responsive ASP reviewer; never introduce a new main menu. */
+.p9b-reservation{display:grid;gap:12px;width:100%;min-width:0}
+.p9b-reservation h3{display:flex;align-items:center;gap:8px;margin:0}
+.p9b-reservation p{margin:0;line-height:1.55}
+.p9b-progress,.p9b-check{display:flex;flex-wrap:wrap;align-items:center;gap:8px 16px}
+.p9b-progress span,.p9b-check span{color:var(--text-muted,#5c687a);font-size:.87rem}
+.p9b-check{display:grid;gap:4px}
+.p9b-confirm{display:flex;align-items:end;gap:12px;flex-wrap:wrap}
+.p9b-confirm label{display:grid;gap:6px;flex:1;min-width:220px;font-size:.85rem}
+.p9b-confirm input{width:100%;min-width:0;border:1px solid #cbd5e1;border-radius:9px;padding:9px 12px;font:inherit}
+.p9b-select-row{display:flex;align-items:center;gap:8px;padding:5px 12px 11px;border-bottom:1px solid #e9edf5;font-size:.8rem;color:var(--text-muted,#576780)}
+.p9b-select-row input{width:17px;height:17px;accent-color:#2176bf}
+.p9b-approve-button{margin-top:12px;display:flex;align-items:center;gap:8px}
+@media(max-width:680px){.p9b-confirm{align-items:stretch;flex-direction:column}.p9b-confirm label,.p9b-confirm button{width:100%}}

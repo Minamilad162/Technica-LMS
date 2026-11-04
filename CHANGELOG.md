@@ -1,3 +1,11 @@
+### 2026-11-04 — P9B: Controlled 200-question ASP Mock reservation & independent Practice approval
+
+- Added an **unexecuted, guarded** P9B Supabase migration for a private immutable 200-item versioned ASP Mock form, secure Admin-only preflight, transactional exact-200 reservation and audited per-question Practice approval by an **independent second Admin**. Unverified answers, usage rights, unofficial domains, drafts previously used in Practice, duplicated IDs and orphan prior Mock flags are rejected. No question is released automatically.
+- The existing ASP Question Review workspace now supports selecting reviewed draft question IDs across pages, validating a proposed 200-item reservation, and requiring explicit double confirmation. Practice approval is one reviewed question per click and fails closed until the Mock is reserved; no new main menu or mock engine is activated.
+- P8e fixed 70%-of-original-tier Adaptive Practice behavior, questions/keys, hierarchy, legacy demo, other Practice modes, user roles and existing question/attempt data are unchanged by this source commit.
+- CI includes P9B Node contract and disposable PostgreSQL negative security tests, including independent Admin approval, no unreserve/form mutation, 200 unique immutable Mock ID positions, ACL and no live bank writes. The detailed runbook is `docs/current/P9B_MOCK_RESERVATION_AND_APPROVAL.md`.
+- **NOT DONE:** actual Supabase/Production migration or data mutation, real ASP 1,625-row import/SME rights verification, manual 200-item selection, actual Practice approval, Cloudflare deploy, full 200/300 Mock engine, paid launch. Never execute against production without a distinct owner approval.
+
 ### 2026-11-04 — P8e: fixed 70%-of-ORIGINAL tier, not expanding denominator
 
 - Corrected owner clarification: for 30-question adaptive Practice, each initial stage base is 10 items and the correct-answer target is **7 total correct**; after 6/10 Low, one extra correct Q11 yields 7/11 and promotes Q12 to Medium. Additional wrong questions do not raise the 7-correct requirement. Medium uses the identical fixed-target rule. Always stop at chosen N, hide tier transitions and reserve Mock/Assessment behavior.
