@@ -35,11 +35,11 @@ BEGIN
     q.domain_id,q.course_id,r.review_state,r.answer_checked,r.rights_checked,
     r.difficulty AS reviewed_difficulty,r.reviewed_domain_id,
     d.slug AS reviewed_slug,
-    (r.review_state='ready' AND r.answer_checked IS TRUE
+    coalesce((r.review_state='ready' AND r.answer_checked IS TRUE
       AND r.rights_checked IS TRUE
       AND r.difficulty IN ('low','medium','high')
       AND d.course_id=q.course_id AND d.slug ~ '^asp11-0[1-9]$'
-      AND r.reviewed_by IS NOT NULL AND r.reviewed_at IS NOT NULL) AS vetted
+      AND r.reviewed_by IS NOT NULL AND r.reviewed_at IS NOT NULL),false) AS vetted
   FROM public.lms_questions q
   LEFT JOIN public.lms_p6_question_reviews r ON r.question_id=q.id
   LEFT JOIN public.lms_domains d ON d.id=r.reviewed_domain_id
