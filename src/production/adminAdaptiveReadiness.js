@@ -1,10 +1,10 @@
 // P8c: verified Admin-only read-only pool diagnostics via the SAME P8
 // SECURITY DEFINER readiness RPC used by learners. Never browser-query the
 // protected question table and never infer approval from P6A review status.
-import {adaptiveCheckpoint} from './adaptivePolicy.js';
+import {adaptiveCheckpoint,adaptiveMediumCheckpoint,ADAPTIVE_POLICY_VERSION} from './adaptivePolicy.js';
 import {getAdaptiveReadiness} from './practiceApi.js';
 
-export const ADMIN_ADAPTIVE_COUNTS=Object.freeze([10,25,50]);
+export const ADMIN_ADAPTIVE_COUNTS=Object.freeze([10,25,30,50]);
 
 export function normalizeAdaptiveReadiness(payload,count){
  const n=Number(count);
@@ -16,12 +16,15 @@ export function normalizeAdaptiveReadiness(payload,count){
     ||payload.requiredPerTier!==n
     ||payload.thresholdPercent!==70
     ||payload.checkpoint!==adaptiveCheckpoint(n)
+    ||payload.mediumCheckpoint!==adaptiveMediumCheckpoint(n)
+    ||payload.policyVersion!==ADAPTIVE_POLICY_VERSION
     ||typeof payload.ready!=='boolean'
     ||payload.ready!==values.every(value=>value>=n))
   throw new Error('Level Up readiness response failed validation; do not start a session.');
  // Return a deliberately whitelisted shape: never pass through question text,
  // answers, JWT, user information or unknown future RPC fields.
- return {count:n,low,medium,high,ready:payload.ready,checkpoint:payload.checkpoint};
+ return {count:n,low,medium,high,ready:payload.ready,
+  checkpoint:payload.checkpoint,mediumCheckpoint:payload.mediumCheckpoint};
 }
 
 export async function fetchAdminAdaptiveReadiness(db,courseId,domainId=null){
