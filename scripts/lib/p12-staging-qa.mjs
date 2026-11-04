@@ -84,7 +84,6 @@ export async function runStagingQa(clients,{generatedAt=new Date().toISOString()
   state[role]={id:user.id,profile};
   if(!active(profile))return mark('blocked','Staging account is not an active LMS profile.');
   if(role==='admin'){
-   const roles=await listRows(db,'lms_role_assignments','role','user_id',null);
    // Query only roles for the current identity; absence must not count.
    const own=await listRows(db,'lms_role_assignments','role',['user_id',user.id]);
    if(!own.some(r=>r.role==='admin'))return mark('blocked','Real staging Admin role is missing or revoked.');
@@ -108,7 +107,6 @@ export async function runStagingQa(clients,{generatedAt=new Date().toISOString()
  });
  await run('stage-asp-hierarchy',async()=>{
   if(!course)return pending('Published staging ASP course is missing.');
-  const domains=await listRows(clients.paid,'lms_domains','id','course_id',null).catch(()=>null);
   // Query the actual ASP course, not an unscoped domain tree.
   const d=await listRows(clients.paid,'lms_domains','id',['course_id',course.id]);
   if(!d.length)return block('No ASP domains visible to the paid account.');
