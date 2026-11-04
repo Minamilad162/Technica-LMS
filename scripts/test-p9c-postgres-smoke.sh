@@ -93,4 +93,28 @@ else
  fi
  echo 'PASS P9C POST-P9B: 200 flags and immutable form detected, no Mock engine inferred'
 fi
+if [[ "$phase" == post ]];then
+ decision_before=$(fingerprint)
+ decision=$(psql -X -v ON_ERROR_STOP=1 -A -t -F '|' \\
+  -f supabase/P9C_DECISION_SUMMARY_READ_ONLY.sql)
+ decision_after=$(fingerprint)
+ [[ "$decision_before" == "$decision_after" ]] || {
+  echo 'FAIL P9C decision summary altered protected source rows';exit 1
+ }
+ for expected in \\
+  '01_BANK|Actual ASP questions|' \\
+  '02_QUALITY|Approved Practice governance gaps|' \\
+  '03_DOMAINS|Official ASP11 domains|9|9|COUNT_OK|' \\
+  '04_PRACTICE|Approved Low question pool|' \\
+  '04_PRACTICE|Rights-reviewed Low pool|' \\
+  '05_MOCK|Actual versioned Mock forms|1|1|FORM_EXISTS|' \\
+  '05_MOCK|Items inside Mock form|200|200|FORM_ITEMS_ONLY|' \\
+  '05_MOCK|Mock-exclusive source flags|200|200|FLAGS_ONLY|' \\
+  '06_RELEASE|Formal Mock exam engine active|0|1|NOT_IMPLEMENTED|';do
+  if ! printf '%s\\n' "$decision" | grep -Fq "$expected";then
+   echo "FAIL P9C concise decision status missing: $expected";exit 1
+  fi
+ done
+ echo 'PASS P9C concise decision: real schema, Mock form 200 vs no engine, rights-reviewed Practice counts, zero data changes'
+fi
 echo 'PASS P9C private bank fingerprint unchanged after catalog/count-only reports'
