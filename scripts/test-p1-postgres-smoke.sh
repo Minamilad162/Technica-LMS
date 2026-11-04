@@ -153,10 +153,10 @@ if query_as authenticated 00000000-0000-0000-0000-000000000002 \
  "INSERT INTO public.lms_courses(slug,title) VALUES('p7-learner-injected','Forbidden learner edit')" >/dev/null 2>&1; then
  echo 'FAIL P7 learner can create live course';exit 1
 fi
-if query_as authenticated 00000000-0000-0000-0000-000000000002 \
- "UPDATE public.lms_topics SET title='Hijacked' WHERE id='73000000-0000-0000-0000-000000000001'" >/dev/null 2>&1; then
- echo 'FAIL P7 learner can edit live course hierarchy';exit 1
-fi
+# PostgreSQL RLS can deny UPDATE by returning 0 affected rows without error.
+# Assert the actual RETURNING row count, not only the process exit code.
+assert_count "P7 learner update affects zero hierarchy rows (RLS)" 0 authenticated 00000000-0000-0000-0000-000000000002 "WITH changed AS (UPDATE public.lms_topics SET title='Hijacked' WHERE id='73000000-0000-0000-0000-000000000001' RETURNING id) SELECT count(*) FROM changed"
+assert_count "P7 original Admin title still intact" 1 authenticated 00000000-0000-0000-0000-000000000001 "SELECT count(*) FROM public.lms_topics WHERE id='73000000-0000-0000-0000-000000000001' AND title='Renamed by Admin'"
 if query_as anon 00000000-0000-0000-0000-000000000000 \
  "SELECT count(*) FROM public.lms_lesson_blocks WHERE lesson_id='74000000-0000-0000-0000-000000000001'" >/dev/null 2>&1; then
  echo 'FAIL P7 anonymous can directly read draft lesson blocks';exit 1
