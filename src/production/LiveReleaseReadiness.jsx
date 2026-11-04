@@ -84,7 +84,7 @@ export default function LiveReleaseReadiness(){
      </div>;
     })}
    </section>)}</div>}
-  <StagingQaEvidencePanel/>
+  {rows.some(x=>x.id==='admin'&&x.status==='pass')&&<StagingQaEvidencePanel/>}
   <footer className="p12-footer">
    <ClipboardList size={17}/> Read-only runtime status, not a production certification. Detailed staging QA, evidence, content-rights review, rollback and explicit launch authorization remain separate mandatory release gates.
   </footer>
