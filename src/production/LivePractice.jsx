@@ -1,6 +1,6 @@
 import React,{useEffect,useMemo,useRef,useState} from 'react';
 import {BookOpen,Check,ChevronLeft,ChevronRight,Clock3,Flag,LockKeyhole,PlayCircle,RefreshCw,ShieldCheck,Target,TriangleAlert} from 'lucide-react';
-import {abandonSecurePractice,answerSecurePractice,finishSecurePractice,practiceSessionKey,safeRemainingSeconds,startSecurePractice} from './practiceApi';
+import {abandonSecurePractice,answerSecurePractice,answerAdaptivePractice,finishSecurePractice,getAdaptiveReadiness,practiceSessionKey,safeRemainingSeconds,startSecurePractice,startAdaptivePractice} from './practiceApi';
 import {requestQuestionFullscreen,isFullscreenActive,fullscreenStartError,leaveQuestionFullscreen} from '../lib/questionFullscreen';
 import {useQuestionFullscreenGuard} from '../lib/useQuestionFullscreenGuard';
 import LiveProtectedContent from './LiveProtectedContent';
@@ -10,7 +10,8 @@ const PRESETS=[
  {id:'quick10',title:'Quick 10',desc:'10 random questions · immediate feedback',count:10,time:0},
  {id:'timed25',title:'Timed Quiz',desc:'25 questions · 20 minutes · feedback at the end',count:25,time:1200},
  {id:'custom',title:'Build Your Own',desc:'Choose 1–50 questions · optional total timer',count:10,time:0},
- {id:'domain',title:'Practice by Domain',desc:'Choose a verified course domain · feedback at the end',count:10,time:0}
+ {id:'domain',title:'Practice by Domain',desc:'Choose a verified course domain · feedback at the end',count:10,time:0},
+ {id:'levelup',title:'Level Up · Adaptive',desc:'1–50 questions · 70% to progress · proportional checkpoints',count:10,time:0}
 ];
 const formatTime=seconds=>{
  const n=Math.max(0,Math.floor(seconds||0));
@@ -24,6 +25,7 @@ export default function LivePractice({db,user,course,domains=[],access}) {
  const [mode,setMode]=useState('quick10'),[count,setCount]=useState(10),[minutes,setMinutes]=useState(0),[domainId,setDomainId]=useState('');
  const [attempt,setAttempt]=useState(null),[selected,setSelected]=useState(0),[feedback,setFeedback]=useState({});
  const [busy,setBusy]=useState(false),[error,setError]=useState(''),[notice,setNotice]=useState(''),[clock,setClock]=useState(Date.now());
+ const [readiness,setReadiness]=useState(null),[readinessBusy,setReadinessBusy]=useState(false),[readinessError,setReadinessError]=useState('');
  const processing=useRef(false);
  const containerRef=useRef(null);
  const closingRef=useRef(false);
@@ -83,6 +85,20 @@ export default function LivePractice({db,user,course,domains=[],access}) {
  },[db,storageKey,eligible]);
 
  useEffect(()=>{
+  // Never guess protected bank readiness using bundled question assets.
+  if(mode!=='levelup'||!eligible||attempt){setReadiness(null);setReadinessError('');setReadinessBusy(false);return;}
+  const desired=Number(count);
+  if(!Number.isInteger(desired)||desired<1||desired>50){setReadiness(null);return;}
+  let active=true;setReadiness(null);setReadinessError('');setReadinessBusy(true);
+  const timer=setTimeout(()=>{
+   getAdaptiveReadiness(db,course.id,desired,domainId||null)
+    .then(value=>{if(active)setReadiness(value);})
+    .catch(e=>{if(active)setReadinessError(errorText(e));})
+    .finally(()=>{if(active)setReadinessBusy(false);});
+  },200);
+  return()=>{active=false;clearTimeout(timer);};
+ },[db,course.id,mode,count,domainId,eligible,attempt?.attemptId]);
+ useEffect(()=>{
   if(!attempt||finished||remaining===null)return;
   const ticker=setInterval(()=>setClock(Date.now()),1000);
   return()=>clearInterval(ticker);
@@ -108,11 +124,12 @@ export default function LivePractice({db,user,course,domains=[],access}) {
   if(processing.current)return;
   processing.current=true;setBusy(true);setError('');setNotice('');
   const chosen=PRESETS.find(p=>p.id===mode);
-  const total=chosen.id==='custom'||chosen.id==='domain'?Number(count):chosen.count;
-  const time=chosen.id==='custom'?Number(minutes)*60:chosen.time;
+  const total=['custom','domain','levelup'].includes(chosen.id)?Number(count):chosen.count;
+  const time=['custom','levelup'].includes(chosen.id)?Number(minutes)*60:chosen.time;
   if(!Number.isInteger(total)||total<1||total>50||!Number.isInteger(time)||time<0||time>10800){
    setError('Choose 1–50 questions and a valid total timer of 0–180 minutes.');setBusy(false);processing.current=false;return;
   }
+  if(mode==='levelup'&&!readiness?.ready){setError(readinessError||'Adaptive practice requires reviewed Low, Medium and High questions plus P8 server setup.');setBusy(false);processing.current=false;return;}
   if(mode==='domain'&&!domainId){
    setError('Select a course domain first.');setBusy(false);processing.current=false;return;
   }
@@ -125,10 +142,10 @@ export default function LivePractice({db,user,course,domains=[],access}) {
    const pendingKey=storageKey+':pending';
    let requestId=localStorage.getItem(pendingKey);
    if(!requestId){requestId=crypto.randomUUID();localStorage.setItem(pendingKey,requestId);}
-   const next=await startSecurePractice(db,{
-     courseId:course.id,mode,count:total,durationSeconds:time,
-     domainId:mode==='domain'?domainId:null,requestId
-   });
+   const request={courseId:course.id,mode,count:total,durationSeconds:time,
+     domainId:mode==='domain'||mode==='levelup'?(domainId||null):null,requestId};
+   const next=mode==='levelup'?await startAdaptivePractice(db,request):
+     await startSecurePractice(db,request);
    if(!isFullscreenActive(document,containerRef.current)){
     void sealAttempt(next.attemptId);
     setNotice('Fullscreen was closed while preparing questions. Returned to setup.');
@@ -150,16 +167,26 @@ export default function LivePractice({db,user,course,domains=[],access}) {
  const answer=async(optionIndex)=>{
   if(!current||finished||busy||processing.current||remaining===0)return;
   if(attempt.mode==='quick10'&&feedback[current.id])return;
+  if(attempt.mode==='levelup'&&current.selectedIndex!==null&&current.selectedIndex!==undefined)return;
   processing.current=true;setBusy(true);setError('');
   try{
-   const reply=await answerSecurePractice(db,attempt.attemptId,current.id,optionIndex);
+   const reply=attempt.mode==='levelup'
+    ?await answerAdaptivePractice(db,attempt.attemptId,current.id,optionIndex)
+    :await answerSecurePractice(db,attempt.attemptId,current.id,optionIndex);
    if(closingRef.current||!isFullscreenActive(document,containerRef.current))return;
-   setAttempt(previous=>previous?({
+   if(attempt.mode==='levelup'){
+    // Only the server grades, determines tier and assigns the next question.
+    // Never show correctIndex, explanation or live tier before submission.
+    setAttempt({...reply,observedAtEpoch:Date.now()});
+    setSelected(Math.max(0,(reply.questions?.length||1)-1));
+   }else{
+    setAttempt(previous=>previous?({
      ...previous,
      questions:previous.questions.map(q=>q.id===current.id?{...q,selectedIndex:optionIndex}:q)
-   }):null);
-   if(reply.correctIndex!==undefined)
-    setFeedback(old=>({...old,[current.id]:{correctIndex:reply.correctIndex,explanation:reply.explanation}}));
+    }):null);
+    if(reply.correctIndex!==undefined)
+     setFeedback(old=>({...old,[current.id]:{correctIndex:reply.correctIndex,explanation:reply.explanation}}));
+   }
   }catch(e){setError(errorText(e));}
   finally{setBusy(false);processing.current=false;}
  };
@@ -175,27 +202,33 @@ export default function LivePractice({db,user,course,domains=[],access}) {
   <div className="live-practice-top"><div><span className="live-eyebrow">P5 · FULLSCREEN PROTECTED PRACTICE</span><h3><ShieldCheck size={21}/> Secure Practice Center</h3><p>Questions are selected and scored in Supabase. Exiting fullscreen closes this attempt and returns to the course setup.</p></div>{attempt&&<button type="button" className="live-secondary" onClick={()=>{void sealAttempt(attempt.attemptId);void leaveIntentionally();}}>Leave questions</button>}</div>
   {!eligible?<div className="live-empty"><LockKeyhole size={22}/><b>Practice requires paid or manually granted course access</b><p>Trial lesson access alone does not unlock the full question bank.</p></div>:!attempt?<>
    <div className="live-mode-grid">{PRESETS.map(p=><button key={p.id} className={'live-mode-card '+(mode===p.id?'chosen':'')} onClick={()=>setMode(p.id)} type="button"><strong>{p.title}</strong><span>{p.desc}</span>{mode===p.id&&<Check size={17}/>}</button>)}</div>
-   {['custom','domain'].includes(mode)&&<div className="live-practice-controls">
+   {['custom','domain','levelup'].includes(mode)&&<div className="live-practice-controls">
       <label>Number of questions<input type="number" min={1} max={50} value={count} onChange={e=>setCount(e.target.value)}/></label>
-      {mode==='custom'&&<label>Time limit (minutes; 0 = untimed)<input type="number" min={0} max={180} value={minutes} onChange={e=>setMinutes(e.target.value)}/></label>}
-      {mode==='domain'&&<label>Domain<select value={domainId} onChange={e=>setDomainId(e.target.value)}><option value="">Choose domain</option>{domains.map(d=><option key={d.id} value={d.id}>{d.title}</option>)}</select></label>}
+      {['custom','levelup'].includes(mode)&&<label>Time limit (minutes; 0 = untimed)<input type="number" min={0} max={180} value={minutes} onChange={e=>setMinutes(e.target.value)}/></label>}
+      {['domain','levelup'].includes(mode)&&<label>Domain<select value={domainId} onChange={e=>setDomainId(e.target.value)}><option value="">{mode==='levelup'?'All course domains':'Choose domain'}</option>{domains.map(d=><option key={d.id} value={d.id}>{d.title}</option>)}</select></label>}
    </div>}
-   <p className="live-practice-note"><TriangleAlert size={16}/> Mock Exam and Level Up are intentionally unavailable until approved reserved questions and difficulty classifications exist.</p>
-   <button className="live-primary" disabled={busy||!eligible} onClick={begin} type="button"><PlayCircle size={17}/>{busy?'Preparing your questions…':'Start practice'}</button>
+   {mode==='levelup'?<div className="live-practice-note" role="status"><Target size={16}/>
+    {readinessBusy?'Checking approved difficulty tiers…':
+     readinessError?'Adaptive mode unavailable: '+readinessError:
+     !readiness?'Choose a session length; the server will check its three tiers.':
+     readiness.ready?'Ready: '+readiness.checkpoint+' questions per checkpoint; 70% within the current tier to advance. Next questions are chosen by the server.':
+      'Not ready: need '+readiness.requiredPerTier+' approved, non-Mock questions in EACH tier. Available Low '+readiness.low+', Medium '+readiness.medium+', High '+readiness.high+'.'}
+   </div>:<p className="live-practice-note"><TriangleAlert size={16}/> The exclusive 200-question Mock Exam is a separate locked 5-hour workflow. Level Up requires reviewed difficulty tags and the P8 server migration.</p>}
+   <button className="live-primary" disabled={busy||!eligible||(mode==='levelup'&&(!readiness?.ready||readinessBusy))} onClick={begin} type="button"><PlayCircle size={17}/>{busy?'Preparing your questions…':'Start practice'}</button>
   </>:<>
-   <div className="live-attempt-bar"><b>{finished?'Review your result':(attempt.mode==='quick10'?'Quick 10':attempt.mode==='timed25'?'Timed Quiz':'Custom Practice')}</b>
+   <div className="live-attempt-bar"><b>{finished?'Review your result':(attempt.mode==='quick10'?'Quick 10':attempt.mode==='timed25'?'Timed Quiz':attempt.mode==='levelup'?'Level Up · Adaptive':'Custom Practice')}</b>
      <span><Target size={16}/>{answered} / {attempt.questionCount} answered</span>
      {remaining!==null&&<span><Clock3 size={16}/>{formatTime(remaining)} remaining</span>}
      {finished&&<strong>{attempt.scorePercent}% · {attempt.correctCount}/{attempt.questionCount} correct</strong>}
    </div>
    {current&&<LiveProtectedContent as="div" className="live-question" kind="exam-question" identity={{id:user.id}}>
-     <div className="live-question-label">QUESTION {selected+1} OF {attempt.questions.length}</div>
+     <div className="live-question-label">QUESTION {selected+1} OF {attempt.questionCount}</div>
      <h4>{current.prompt}</h4>
      <div className="live-answer-list">{current.options.map((option,index)=>{
        const chosen=current.selectedIndex===index;
        const correct=typeof revealed?.correctIndex==='number'&&revealed.correctIndex===index;
        const incorrect=chosen&&typeof revealed?.correctIndex==='number'&&!correct;
-       return <button type="button" key={index} disabled={finished||busy||remaining===0||(attempt.mode==='quick10'&&!!feedback[current.id])}
+       return <button type="button" key={index} disabled={finished||busy||remaining===0||(attempt.mode==='quick10'&&!!feedback[current.id])||(attempt.mode==='levelup'&&current.selectedIndex!==null&&current.selectedIndex!==undefined)}
          onClick={()=>answer(index)} className={'live-answer '+(chosen?'chosen ':'')+(correct?'correct ':'')+(incorrect?'incorrect':'')}>
          <b>{String.fromCharCode(65+index)}</b><span>{String(option)}</span>{correct&&<Check size={17}/>}
        </button>;
@@ -207,7 +240,7 @@ export default function LivePractice({db,user,course,domains=[],access}) {
      <div className="live-dots">{attempt.questions.map((q,i)=><button type="button" key={q.id} aria-label={'Question '+(i+1)} className={(selected===i?'active ':'')+(q.selectedIndex!==null&&q.selectedIndex!==undefined?'answered':'')} onClick={()=>setSelected(i)}>{i+1}</button>)}</div>
      <button type="button" className="live-secondary" disabled={selected>=attempt.questions.length-1} onClick={()=>setSelected(v=>Math.min(attempt.questions.length-1,v+1))}>Next <ChevronRight size={16}/></button>
    </div>
-   {finished?<button className="live-primary" onClick={startOver}>New practice session</button>:<button className="live-primary" type="button" disabled={busy} onClick={finish}>Finish & calculate score</button>}
+   {finished?<button className="live-primary" onClick={startOver}>New practice session</button>:<button className="live-primary" type="button" disabled={busy||(attempt.mode==='levelup'&&answered<attempt.questionCount&&remaining!==0)} onClick={finish}>{attempt.mode==='levelup'&&answered<attempt.questionCount?'Answer all adaptive questions to finish':'Finish & calculate score'}</button>}
   </>}
   {error&&<p className="live-error" role="alert"><TriangleAlert size={17}/>{error}</p>}
   {notice&&<p className="live-notice" role="status">{notice}</p>}

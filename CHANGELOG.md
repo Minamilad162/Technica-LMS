@@ -1,3 +1,11 @@
+### 2026-11-04 — P8: Real learner courses + proportional Level Up engine (staged)
+
+- Default **My Learning** now reads Supabase catalog, entitlements, authorized Course→Domain→Topic→Lesson and P2 read-only verified progress. No fake completion or direct P2 writes. Original learning demo remains available with a clear Legacy Preview label.
+- Added **Secure Practice** route from old Practice Center; existing Demo Practice, Calculator, Quick 10/Timed/Custom/Domain and fullscreen behavior preserved.
+- Staged server-graded Level Up for 1–50 questions, tier checkpoint **max(3,ceil(N×20%)) capped to N**: 10→3, 25→5, 50→10. Cumulative tier accuracy ≥70% advances Low→Medium→High, with recovery possible. Server assigns only one next question after a locked and immutable saved answer.
+- Protected P8 migration (NOT installed) demands ≥N approved non-Mock items **per** Low/Medium/High tier and excludes Draft/Unclassified/Mock-exclusive; P4 API bypass and premature finish blocked, P5 abandonment retained. Adaptive mode is disabled until real reviewed bank and owner-approved migration are ready.
+- CI adds `npm run test:adaptive:live` and disposable PostgreSQL P8 progression/security test. **No production data, migrations or Cloudflare deployment touched.** Original 200-question 5h Mock stays fixed and exclusive.
+
 ### 2026-11-04 — P7: Live Supabase Courses and Course Builder (staged)
 
 - Default authenticated Admin Courses now reads the real lms_courses catalog and creates Draft courses or updates title/summary via existing P1 RLS, never LocalStorage.

@@ -14,6 +14,7 @@
     "test:auth": "node scripts/test-demo-auth.mjs",
     "test:auth:portal": "node scripts/test-live-portal-login.mjs",
     "test:authoring:live": "node scripts/test-live-authoring-contract.mjs",
+    "test:adaptive:live": "node scripts/test-p8-adaptive-learning.mjs",
     "test:motion": "node scripts/test-motion.mjs",
     "test:courses": "node scripts/test-course-model.mjs",
     "test:quiz-navigation": "node scripts/test-quiz-navigation.mjs",

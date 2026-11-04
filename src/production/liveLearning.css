@@ -1,0 +1,39 @@
+.live-learning{width:100%;max-width:1190px;margin:0 auto;padding:24px 22px 48px;color:#244653;min-width:0}
+.live-learning-header{margin-bottom:20px}
+.live-learning-header h1{font-size:clamp(28px,3vw,42px);letter-spacing:-.035em;margin:6px 0;color:#1a3e49}
+.live-learning-header>p{font-size:14px;color:#67808a;max-width:720px;line-height:1.7}
+.live-learning-security{display:flex;align-items:center;gap:8px;padding:12px 15px;border:1px solid #cce6dc;border-radius:12px;background:#ecf9f4;color:#257a67;font-size:12px;margin:18px 0}
+.live-learning-security svg{flex:none}
+.live-learning-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,305px),1fr));gap:17px;align-items:stretch}
+.live-learning-card{padding:22px;border:1px solid #d9e8e9;border-radius:17px;background:#fff;box-shadow:0 10px 24px #173b410b;display:flex;flex-direction:column;gap:13px}
+.live-learning-card-icon{display:grid;place-items:center;width:48px;height:48px;border-radius:14px;color:#16877b;background:#e5f6f0}
+.live-learning-card h2{font-size:21px;margin:5px 0 8px;color:#234650}
+.live-learning-card p{font-size:13px;line-height:1.65;color:#657f88;min-height:42px}
+.live-learning-card small{font-size:11px;color:#88989e;overflow-wrap:anywhere}
+.live-learning-card-state{font-size:10px;letter-spacing:.09em;color:#23836f;font-weight:800}
+.live-learning-card-footer{display:flex;flex-wrap:wrap;gap:12px;justify-content:space-between;align-items:center;border-top:1px solid #e5eeee;padding-top:14px;margin-top:auto}
+.live-learning-card-footer>span{display:flex;gap:5px;align-items:center;color:#63818c;font-size:12px}
+.live-learning-card-footer>.btn{font-size:12px}
+.live-learning-empty{display:grid;justify-items:center;text-align:center;gap:10px;border:1px dashed #c9dce1;border-radius:14px;background:#fff;padding:28px;color:#5a7985;margin:14px 0;line-height:1.65}
+.live-learning-empty b{font-size:17px;color:#29535c}
+.live-learning-empty p{font-size:13px;margin:0;max-width:570px}
+.live-learning-empty svg{color:#438c81}
+.live-learning-note{padding:11px 14px;background:#f4f8fa;border-radius:9px;font-size:12px;color:#697f8b;line-height:1.65;margin:13px 0}
+.live-learning-footer{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin:25px 0;border:1px dashed #dbe9ec;padding:13px 15px;border-radius:12px;color:#81939a;font-size:12px}
+.live-learning-breadcrumb{display:flex;align-items:center;gap:9px;color:#7d919b;font-size:12px;margin-bottom:16px}
+.live-learning-breadcrumb button{display:flex;align-items:center;gap:5px;border:0;background:none;color:#197f74;font-weight:700}
+.live-learning-metrics{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:17px 0}
+.live-learning-metrics span{display:flex;gap:7px;align-items:center;color:#28776b;font-size:12px;border:1px solid #cde5df;border-radius:999px;padding:7px 11px;background:#f1faf7}
+.live-learning-domains{display:grid;gap:15px}
+.live-learning-domain{background:#fff;border:1px solid #d8e7e8;border-radius:16px;overflow:hidden}
+.live-learning-domain>h2{background:#eaf8f4;color:#276b62;margin:0;padding:16px 19px;font-size:17px}
+.live-learning-topic{padding:12px 17px;border-top:1px solid #e8eff1}
+.live-learning-topic h3{font-size:14px;margin:7px 0 13px;color:#385c68}
+.live-learning-lesson{border-top:1px solid #edf2f3}
+.live-learning-lesson>button{width:100%;display:flex;gap:10px;align-items:center;padding:13px 5px;border:0;background:white;color:#376b71;text-align:left}
+.live-learning-lesson>button span{flex:1;font-size:13px;font-weight:700}
+.live-learning-lesson>button:focus-visible{outline:2px solid #20958b}
+.live-learning-lesson-text{margin:3px 3px 13px 28px;border-radius:10px;background:#f6fafb;border:1px solid #e0edef;padding:14px 16px;white-space:pre-wrap;overflow-wrap:anywhere}
+.live-learning-lesson-text p{font-size:13px;color:#365763;line-height:1.85;margin:8px 0}
+.live-learning-lesson-text small{font-size:11px;color:#7e9298}
+@media(max-width:680px){.live-learning{padding:16px 12px 32px}.live-learning-card{padding:16px}.live-learning-card-footer>.btn{width:100%}.live-learning-domain>h2{padding:13px;font-size:15px}.live-learning-topic{padding:10px}.live-learning-lesson-text{margin-left:12px}}
