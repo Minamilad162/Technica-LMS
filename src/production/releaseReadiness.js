@@ -55,9 +55,9 @@ export function releaseReportText(rows){
  'No production deployment or data mutation was performed.',
  ].join('\n');
 }
-const safeBuild={url:import.meta.env.VITE_SUPABASE_URL||'',
- publicKey:import.meta.env.VITE_SUPABASE_ANON_KEY||'',
- mode:import.meta.env.VITE_DATA_MODE||''};
+const safeBuild={url:import.meta.env?.VITE_SUPABASE_URL||'',
+ publicKey:import.meta.env?.VITE_SUPABASE_ANON_KEY||'',
+ mode:import.meta.env?.VITE_DATA_MODE||''};
 function buildCheck(build){
  try{
   const u=new URL(build.url);
