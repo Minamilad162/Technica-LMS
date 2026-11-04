@@ -8,7 +8,8 @@ import HomePage from './pages/HomePage';import LearningPlayer,{LearningLibrary} 
 import AnalyticsPage from './pages/AnalyticsPage';import BuilderPage from './pages/BuilderPage';
 import LiveCoursesPage from './production/LiveCoursesPage';
 import LiveCourseBuilder from './production/LiveCourseBuilder';
-import {LiveLearningLibrary,LiveLearningCourse} from './production/LiveLearning';import AssessmentOverview from './pages/AssessmentOverview';import ResultsPage from './pages/ResultsPage';import PracticeResultsPage from './pages/PracticeResultsPage';import LearnersPage from './pages/LearnersPage';import QuestionBankPage from './pages/QuestionBankPage';import CoursesPage from './pages/CoursesPage';
+import {LiveLearningLibrary,LiveLearningCourse} from './production/LiveLearning';
+import LivePracticePortal from './production/LivePracticePortal';import AssessmentOverview from './pages/AssessmentOverview';import ResultsPage from './pages/ResultsPage';import PracticeResultsPage from './pages/PracticeResultsPage';import LearnersPage from './pages/LearnersPage';import QuestionBankPage from './pages/QuestionBankPage';import CoursesPage from './pages/CoursesPage';
 // Local-only QA retains the accepted Demo authoring browser regression suite.
 // In the normal deployed site, Courses/Builder default to genuine Supabase.
 // Explicit "legacyPreview=1" shows the historic unsynced authoring tools.
