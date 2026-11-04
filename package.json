@@ -45,7 +45,8 @@
     "test:practice-modes": "node scripts/test-practice-modes.mjs",
     "test:adaptive:admin": "node scripts/test-p8-admin-readiness.mjs",
     "test:p9a": "node scripts/test-p9a-release-preflight.mjs",
-    "test:p9b": "node scripts/test-p9b-controlled-release.mjs"
+    "test:p9b": "node scripts/test-p9b-controlled-release.mjs",
+    "test:p9c": "node scripts/test-p9c-audit-contract.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.58.0",
