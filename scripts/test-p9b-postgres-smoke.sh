@@ -139,7 +139,8 @@ stats=$(psql -X -v ON_ERROR_STOP=1 -A -t -c \
  WHERE i.form_id='$form'")
 [[ "$stats" == '200|200|200' ]] || { echo "FAIL form count/flags: $stats";exit 1; }
 positions=$(psql -X -v ON_ERROR_STOP=1 -A -t -c \
- "SELECT (min(position)=1 AND max(position)=200 AND count(DISTINCT position)=200)
+ "SELECT CASE WHEN min(position)=1 AND max(position)=200
+  AND count(DISTINCT position)=200 THEN 'true' ELSE 'false' END
   FROM public.lms_p9b_mock_items WHERE form_id='$form'")
 [[ "$positions" == true ]] || { echo 'FAIL immutable 200 ordered positions';exit 1; }
 if run_as authenticated "$admin" \
