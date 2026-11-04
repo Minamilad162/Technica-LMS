@@ -7,7 +7,8 @@ import {getAuthSession,restorePortalAccount,subscribeToPortalAuth} from './lib/p
 import HomePage from './pages/HomePage';import LearningPlayer,{LearningLibrary} from './pages/LearningPage';import PracticePage from './pages/PracticePage';import QuizPage from './pages/QuizPage';
 import AnalyticsPage from './pages/AnalyticsPage';import BuilderPage from './pages/BuilderPage';
 import LiveCoursesPage from './production/LiveCoursesPage';
-import LiveCourseBuilder from './production/LiveCourseBuilder';import AssessmentOverview from './pages/AssessmentOverview';import ResultsPage from './pages/ResultsPage';import PracticeResultsPage from './pages/PracticeResultsPage';import LearnersPage from './pages/LearnersPage';import QuestionBankPage from './pages/QuestionBankPage';import CoursesPage from './pages/CoursesPage';
+import LiveCourseBuilder from './production/LiveCourseBuilder';
+import {LiveLearningLibrary,LiveLearningCourse} from './production/LiveLearning';import AssessmentOverview from './pages/AssessmentOverview';import ResultsPage from './pages/ResultsPage';import PracticeResultsPage from './pages/PracticeResultsPage';import LearnersPage from './pages/LearnersPage';import QuestionBankPage from './pages/QuestionBankPage';import CoursesPage from './pages/CoursesPage';
 // Local-only QA retains the accepted Demo authoring browser regression suite.
 // In the normal deployed site, Courses/Builder default to genuine Supabase.
 // Explicit "legacyPreview=1" shows the historic unsynced authoring tools.
@@ -48,8 +49,9 @@ export default function App(){
  <Route path="/signup" element={<Navigate to="/home" replace/>}/>
  <Route path="/" element={<Navigate to="/home" replace/>}/>
  <Route path="/home" element={<RoutePage><HomePage/></RoutePage>}/>
- <Route path="/my-learning" element={<RoutePage><LearningLibrary/></RoutePage>}/>
- <Route path="/learning/process-safety-foundations" element={<RoutePage><LearningPlayer/></RoutePage>}/>
+ <Route path="/my-learning" element={<RoutePage>{legacyPreview?<LegacyPreviewWarning><LearningLibrary/></LegacyPreviewWarning>:<LiveLearningLibrary/>}</RoutePage>}/>
+ <Route path="/learning/course/:courseId" element={<RoutePage><LiveLearningCourse/></RoutePage>}/>
+ <Route path="/learning/process-safety-foundations" element={<RoutePage><LegacyPreviewWarning><LearningPlayer/></LegacyPreviewWarning></RoutePage>}/>
  <Route path="/practice" element={<RoutePage><PracticePage/></RoutePage>}/>
  <Route path="/practice/session" element={<RoutePage standalone><QuizPage kind="practice"/></RoutePage>}/>
  <Route path="/analytics" element={<AdminOnly><RoutePage><AnalyticsPage/></RoutePage></AdminOnly>}/>
