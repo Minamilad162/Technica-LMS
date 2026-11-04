@@ -1,15 +1,17 @@
 /**
- * Future-production integration point. The demo deliberately never connects to Supabase.
- * Use `getSupabaseClient()` from a repository only after implementing authentication,
- * role-based access policies and the data mapping in /supabase/schema.sql.
+ * Shared public-key Supabase client for genuine login, P6A review and P7
+ * Course/Domain/Topic/Lesson authoring within the existing Technica site.
+ * The rest of the historical learner/demo bank still requires migration.
+ * This client is NOT privileged: real JWT, active Admin and P1 RLS/RPC gates
+ * govern every operation. Never place a service_role key in VITE_ variables.
  */
 import { createClient } from '@supabase/supabase-js';
 let client;
 export function getSupabaseClient({secureReviewEntry=false}={}) {
-  // Only the isolated /asp-review.html entry may activate true Supabase Auth
-  // while the existing public Vite build remains in Demo mode. This is a UI
-  // routing rule, NEVER an authorization bypass: P6A RPCs enforce live JWT
-  // active-admin role at the database. Demo roles/tokens are ignored.
+  // The secureReviewEntry flag opts independent P6A review and P7 authoring
+  // into real Supabase Auth, even while other default routes remain Demo.
+  // This is a client-initialization gate, NOT a permission bypass: P1 RLS,
+  // server-verified Auth/Admin role and P6A RPC permissions still apply.
   if (import.meta.env.VITE_DATA_MODE !== 'supabase' && !secureReviewEntry) return null;
   const url=import.meta.env.VITE_SUPABASE_URL;
   const key=import.meta.env.VITE_SUPABASE_ANON_KEY;
