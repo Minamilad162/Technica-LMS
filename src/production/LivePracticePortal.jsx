@@ -2,7 +2,7 @@ import React,{useEffect,useState} from 'react';
 import {useNavigate} from 'react-router-dom';
 import {ArrowLeft,BookOpen,LockKeyhole,RefreshCw,ShieldCheck,TriangleAlert} from 'lucide-react';
 import {getSupabaseClient} from '../lib/supabase.js';
-import {fetchLiveLearningCatalog,mayReadLiveCourse} from './LiveLearning';
+import {fetchLiveLearningCatalog,mayReadLiveCourse} from './liveLearningApi.js';
 import {loadStructure} from './lmsApi.js';
 import LivePractice from './LivePractice';
 import './liveLearning.css';
