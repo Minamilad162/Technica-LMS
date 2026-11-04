@@ -80,6 +80,9 @@ jobs:
           npm run test:p4
           npm run test:p4:bank
 
+      - name: P9A read-only ASP release governance preflight contract
+        run: npm run test:p9a
+
       - name: P5 native fullscreen and exit policy contracts
         run: npm run test:p5
 
@@ -177,6 +180,9 @@ jobs:
 
       - name: P8 server-graded adaptive Level Up — 10/25/50 question staging smoke
         run: bash scripts/test-p8-postgres-smoke.sh
+
+      - name: P9A ASP governance preflight — no DB writes and strict Admin-only access
+        run: bash scripts/test-p9a-postgres-smoke.sh
 
       - name: Test scope disclosure
         run: echo "Ephemeral local PostgreSQL smoke only; live Supabase Auth, Storage, Data API and device tests still pending."
