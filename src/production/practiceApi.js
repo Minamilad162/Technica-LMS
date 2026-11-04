@@ -1,4 +1,4 @@
-import {ADAPTIVE_POLICY_VERSION,adaptiveCheckpoint,adaptiveMediumCheckpoint} from './adaptivePolicy.js';
+import {ADAPTIVE_POLICY_VERSION,adaptiveCheckpoint,adaptiveMediumCheckpoint,adaptiveRequiredCorrect} from './adaptivePolicy.js';
 // RLS-gated, SECURITY DEFINER RPC: never exposes a complete answer bank.
 // User identity comes from Supabase Auth JWT, not user input.
 async function rpc(db,name,args) {
@@ -22,15 +22,17 @@ export function validateAdaptiveReadiness(payload,count){
  if(!Number.isInteger(n)||n<1||n>50||!payload||typeof payload!=='object')
   throw new Error('Invalid adaptive readiness request.');
  const {low,medium,high,ready,requiredPerTier,checkpoint,mediumCheckpoint,
-  thresholdPercent,policyVersion}=payload;
+  lowRequiredCorrect,mediumRequiredCorrect,thresholdPercent,policyVersion}=payload;
  if(![low,medium,high].every(value=>Number.isSafeInteger(value)&&value>=0)
    ||typeof ready!=='boolean'||requiredPerTier!==n
    ||checkpoint!==adaptiveCheckpoint(n)||mediumCheckpoint!==adaptiveMediumCheckpoint(n)
+   ||lowRequiredCorrect!==adaptiveRequiredCorrect(checkpoint)
+   ||mediumRequiredCorrect!==adaptiveRequiredCorrect(mediumCheckpoint)
    ||thresholdPercent!==70||policyVersion!==ADAPTIVE_POLICY_VERSION
    ||ready!==[low,medium,high].every(value=>value>=n))
-  throw new Error('Level Up server policy is outdated or bank readiness is inconsistent. Confirm P8d staging migration before new sessions.');
+  throw new Error('Level Up server policy is outdated or bank readiness is inconsistent. Confirm the separately approved P8e fixed-correct migration before new sessions.');
  return {low,medium,high,ready,requiredPerTier:n,checkpoint,mediumCheckpoint,
-  thresholdPercent:70,policyVersion:ADAPTIVE_POLICY_VERSION};
+  lowRequiredCorrect,mediumRequiredCorrect,thresholdPercent:70,policyVersion:ADAPTIVE_POLICY_VERSION};
 }
 export const getAdaptiveReadiness=async(db,courseId,count,domainId=null)=>
  validateAdaptiveReadiness(await rpc(db,'lms_p8_levelup_readiness',{
