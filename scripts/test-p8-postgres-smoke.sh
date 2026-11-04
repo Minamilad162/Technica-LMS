@@ -319,3 +319,20 @@ if ! printf '%s\n' "$readiness_report" | grep -Fq 'P8_COURSE_READINESS|asp|'; th
  echo 'FAIL P8 ASP bank pool not present in post-migration readiness output';exit 1
 fi
 echo 'PASS P8 read-only catalog, private RLS and eligible ASP pool audit on ephemeral PostgreSQL'
+# The owner-run P8d SQL Editor audit itself must be SELECT-only and PASS.
+p8d_report=$(psql -X -v ON_ERROR_STOP=1 -A -t -f supabase/P8D_VERIFY_READ_ONLY.sql)
+if printf '%s\n' "$p8d_report" | grep -Eq '\\|(FAIL|FAIL_[A-Z_]+|MISSING)(\\||$)'; then
+ echo 'FAIL P8d SELECT-only SQL Editor audit against disposable PostgreSQL'
+ printf '%s\n' "$p8d_report";exit 1
+fi
+if ! printf '%s\n' "$p8d_report" | grep -Fq 'P8D_POLICY|30|10|10|10|PASS'; then
+ echo 'FAIL P8d 30-question audit did not verify 10/10/10';exit 1
+fi
+if ! printf '%s\n' "$p8d_report" | grep -Fq 'P8D_STATE_COLUMN|lms_practice_adaptive_state.medium_checkpoint_size|PASS'; then
+ echo 'FAIL P8d in-flight-safe nullable state column audit';exit 1
+fi
+if ! printf '%s\n' "$p8d_report" | grep -Fq 'P8D_HELPER_PERMISSIONS|lms_p8_medium_checkpoint(integer)|PASS'; then
+ echo 'FAIL P8d helper is exposed to the browser';exit 1
+fi
+echo 'PASS P8d SELECT-only policy, in-flight schema, private helper and bank inventory on disposable PostgreSQL'
+
