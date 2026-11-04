@@ -1,3 +1,11 @@
+### 2026-11-04 — P8b: Post-migration read-only audit and Level Up activation
+
+- Owner reported manual installation of P8 on their Supabase database; **live installation and bank counts still unverified by assistant**.
+- New `supabase/P8_VERIFY_READ_ONLY.sql` validates P8/P4/P5 RPC security and protected adaptive state plus per-course/per-domain reviewed Low/Medium/High pools (ready 10/25/50, max safe N), with no writes, question text, answers or personal data.
+- Main Practice Center's **Level Up** card now navigates to real `/practice/live?mode=levelup&course=<slug>` instead of being inert. Preserved old Demo practice controls and disabled reserved Mock.
+- Secure Practice resolves the real course slug, preselects Level Up, displays 10/25/50 readiness examples, and rejects stale preflight after changing N/domain. Server continues to enforce P8 readiness and authorization.
+- Disposable PostgreSQL and Chromium smoke/contract expanded. No production SQL, no question classification/approval, no Cloudflare deploy executed by this code change.
+
 ### 2026-11-04 — P8: Real learner courses + proportional Level Up engine (staged)
 
 - Default **My Learning** now reads Supabase catalog, entitlements, authorized Course→Domain→Topic→Lesson and P2 read-only verified progress. No fake completion or direct P2 writes. Original learning demo remains available with a clear Legacy Preview label.

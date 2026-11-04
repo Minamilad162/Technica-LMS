@@ -68,6 +68,10 @@ assert(live.includes("readiness?.ready"),'No start before verified 3-tier readin
 assert(!live.includes('nextAdaptiveTier'),'Client cannot grade or pick next difficulty');
 assert(route.includes('<LiveLearningLibrary/>')&&route.includes('<LiveLearningCourse/>'),'Default learning must be real Supabase');
 assert(route.includes('<LivePracticePortal/>'),'Secure Practice link must route into server engine');
+assert(read('src/production/LivePracticePortal.jsx').includes('defaultMode={requestedMode}'),'Deep link must choose real Level Up mode');
+assert(read('src/pages/PracticePage.jsx').includes('mode=levelup&course='),'Quick Level Up must navigate to secure P8 course');
+assert(read('src/lib/practiceModes.js').includes("icon:'TrendingUp',status:'server'"),'Level Up must be selectable but never run the demo bank');
+assert(read('supabase/P8_VERIFY_READ_ONLY.sql').includes('P8_COURSE_READINESS'),'Owner-run post migration audit must be present');
 assert(portal.includes('mayReadLiveCourse')&&portal.includes("['paid','manual']"),'Only authorized learning and paid/manual Practice');
 assert(read('src/production/liveLearningApi.js').includes('lms_lesson_progress'),'Learner completion must be verified P2 DB records');
 assert(!learning.includes("update({reading_completed:true}"),'No browser-synthesized progress');

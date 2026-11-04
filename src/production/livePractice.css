@@ -70,3 +70,12 @@
 .live-practice .tc-capture-curtain{
  z-index:2147483647;
 }
+
+
+.live-adaptive-count-picks{display:flex;align-items:center;flex-wrap:wrap;gap:9px;padding:12px 14px;background:#f7fbfb;border:1px solid #e1ecee;border-radius:12px}
+.live-adaptive-count-picks>span{font-size:12px;font-weight:700;color:#476b73;margin-right:5px}
+.live-adaptive-count-picks button{display:grid;gap:3px;justify-items:start;text-align:left;background:#fff;color:#2d5962;border:1px solid #cedfe2;border-radius:9px;padding:9px 12px;font-size:12px;font-weight:750;min-width:113px}
+.live-adaptive-count-picks button.selected{background:#e9f8f2;border-color:#299e85;box-shadow:0 0 0 1px #83d1bd}
+.live-adaptive-count-picks button:focus-visible{outline:2px solid #1b987e;outline-offset:2px}
+.live-adaptive-count-picks small{font-size:10px;font-weight:500;color:#6e8388;line-height:1.3}
+@media(max-width:650px){.live-adaptive-count-picks>span{width:100%}.live-adaptive-count-picks button{flex:1;min-width:95px}}

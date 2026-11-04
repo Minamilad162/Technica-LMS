@@ -21,8 +21,8 @@ const formatTime=seconds=>{
 };
 const errorText=e=>e?.message||'Practice request failed';
 
-export default function LivePractice({db,user,course,domains=[],access}) {
- const [mode,setMode]=useState('quick10'),[count,setCount]=useState(10),[minutes,setMinutes]=useState(0),[domainId,setDomainId]=useState('');
+export default function LivePractice({db,user,course,domains=[],access,defaultMode='quick10'}) {
+ const [mode,setMode]=useState(defaultMode),[count,setCount]=useState(10),[minutes,setMinutes]=useState(0),[domainId,setDomainId]=useState('');
  const [attempt,setAttempt]=useState(null),[selected,setSelected]=useState(0),[feedback,setFeedback]=useState({});
  const [busy,setBusy]=useState(false),[error,setError]=useState(''),[notice,setNotice]=useState(''),[clock,setClock]=useState(Date.now());
  const [readiness,setReadiness]=useState(null),[readinessBusy,setReadinessBusy]=useState(false),[readinessError,setReadinessError]=useState('');
@@ -64,6 +64,7 @@ export default function LivePractice({db,user,course,domains=[],access}) {
  const remaining=safeRemainingSeconds(attempt,clock);
  const preset=PRESETS.find(p=>p.id===mode);
  const eligible=access;
+ const readyForCurrent=Boolean(readiness?.ready&&readiness.requestedCount===Number(count)&&readiness.requestedDomainId===(domainId||null));
 
  useEffect(()=>{
   setAttempt(null);setSelected(0);setFeedback({});setError('');setNotice('');closingRef.current=false;
@@ -92,7 +93,7 @@ export default function LivePractice({db,user,course,domains=[],access}) {
   let active=true;setReadiness(null);setReadinessError('');setReadinessBusy(true);
   const timer=setTimeout(()=>{
    getAdaptiveReadiness(db,course.id,desired,domainId||null)
-    .then(value=>{if(active)setReadiness(value);})
+    .then(value=>{if(active)setReadiness({...value,requestedCount:desired,requestedDomainId:domainId||null});})
     .catch(e=>{if(active)setReadinessError(errorText(e));})
     .finally(()=>{if(active)setReadinessBusy(false);});
   },200);
@@ -129,7 +130,7 @@ export default function LivePractice({db,user,course,domains=[],access}) {
   if(!Number.isInteger(total)||total<1||total>50||!Number.isInteger(time)||time<0||time>10800){
    setError('Choose 1–50 questions and a valid total timer of 0–180 minutes.');setBusy(false);processing.current=false;return;
   }
-  if(mode==='levelup'&&!readiness?.ready){setError(readinessError||'Adaptive practice requires reviewed Low, Medium and High questions plus P8 server setup.');setBusy(false);processing.current=false;return;}
+  if(mode==='levelup'&&!readyForCurrent){setError(readinessError||'Adaptive practice requires an up-to-date successful bank readiness check for this course and question count.');setBusy(false);processing.current=false;return;}
   if(mode==='domain'&&!domainId){
    setError('Select a course domain first.');setBusy(false);processing.current=false;return;
   }
@@ -207,6 +208,13 @@ export default function LivePractice({db,user,course,domains=[],access}) {
       {['custom','levelup'].includes(mode)&&<label>Time limit (minutes; 0 = untimed)<input type="number" min={0} max={180} value={minutes} onChange={e=>setMinutes(e.target.value)}/></label>}
       {['domain','levelup'].includes(mode)&&<label>Domain<select value={domainId} onChange={e=>setDomainId(e.target.value)}><option value="">{mode==='levelup'?'All course domains':'Choose domain'}</option>{domains.map(d=><option key={d.id} value={d.id}>{d.title}</option>)}</select></label>}
    </div>}
+   {mode==='levelup'&&<div className="live-adaptive-count-picks" role="group" aria-label="Adaptive session length">
+    <span>Quick session length</span>
+    {[10,25,50].map(n=><button type="button" key={n} onClick={()=>setCount(n)} aria-pressed={Number(count)===n} className={Number(count)===n?'selected':''}>
+      {n} questions
+      {readiness&&!readinessBusy&&<small>{[readiness.low,readiness.medium,readiness.high].every(v=>Number(v)>=n)?'Bank ready':'Needs reviewed bank'}</small>}
+    </button>)}
+   </div>}
    {mode==='levelup'?<div className="live-practice-note" role="status"><Target size={16}/>
     {readinessBusy?'Checking approved difficulty tiers…':
      readinessError?'Adaptive mode unavailable: '+readinessError:
@@ -214,7 +222,7 @@ export default function LivePractice({db,user,course,domains=[],access}) {
      readiness.ready?'Ready: '+readiness.checkpoint+' questions per checkpoint; 70% within the current tier to advance. Next questions are chosen by the server.':
       'Not ready: need '+readiness.requiredPerTier+' approved, non-Mock questions in EACH tier. Available Low '+readiness.low+', Medium '+readiness.medium+', High '+readiness.high+'.'}
    </div>:<p className="live-practice-note"><TriangleAlert size={16}/> The exclusive 200-question Mock Exam is a separate locked 5-hour workflow. Level Up requires reviewed difficulty tags and the P8 server migration.</p>}
-   <button className="live-primary" disabled={busy||!eligible||(mode==='levelup'&&(!readiness?.ready||readinessBusy))} onClick={begin} type="button"><PlayCircle size={17}/>{busy?'Preparing your questions…':'Start practice'}</button>
+   <button className="live-primary" disabled={busy||!eligible||(mode==='levelup'&&(!readyForCurrent||readinessBusy))} onClick={begin} type="button"><PlayCircle size={17}/>{busy?'Preparing your questions…':'Start practice'}</button>
   </>:<>
    <div className="live-attempt-bar"><b>{finished?'Review your result':(attempt.mode==='quick10'?'Quick 10':attempt.mode==='timed25'?'Timed Quiz':attempt.mode==='levelup'?'Level Up · Adaptive':'Custom Practice')}</b>
      <span><Target size={16}/>{answered} / {attempt.questionCount} answered</span>

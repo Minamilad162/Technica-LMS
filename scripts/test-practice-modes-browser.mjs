@@ -40,7 +40,7 @@ try{
     assert.equal(await cards.count(),8);
     const names=await cards.locator('.practice-mode-copy strong').allInnerTexts();
     assert.deepEqual(names,['Quick 10','Timed Quiz','Practice by Domain','Weakest Subject','Missed Questions','Build Your Own','Level Up','Mock Exam']);
-    assert.equal(await page.locator('.practice-mode-card.levelup').isDisabled(),true);
+    assert.equal(await page.locator('.practice-mode-card.levelup').isDisabled(),false,'Level Up links to real Supabase readiness; the server still gates attempts');
     assert.equal(await page.locator('.practice-mode-card.mock').isDisabled(),true);
     assert.equal(await page.locator('.practice-mode-card.weakest').isDisabled(),true);
     assert.equal(await page.locator('.practice-mode-card.missed').isDisabled(),true);

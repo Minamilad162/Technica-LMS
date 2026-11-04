@@ -10,7 +10,7 @@ export const PRACTICE_MODES=Object.freeze([
  {id:'weakest',name:'Weakest Subject',caption:'From your last attempt',description:'Focus on the domain with your lowest recorded accuracy.',icon:'Target',status:'history'},
  {id:'missed',name:'Missed Questions',caption:'Review your mistakes',description:'Retry incorrect answers from your latest completed attempt.',icon:'RotateCcw',status:'history'},
  {id:'custom',name:'Build Your Own',caption:'Fully customizable',description:'Choose your domains, question count, timing and feedback.',icon:'SlidersHorizontal',status:'ready'},
- {id:'levelup',name:'Level Up',caption:'Adaptive · 70% to advance',description:'Requires reviewed Low, Medium and High question labels.',icon:'TrendingUp',status:'planned'},
+ {id:'levelup',name:'Level Up',caption:'Adaptive · 70% to advance',description:'Real Supabase practice · increasing difficulty with proportional checkpoints.',icon:'TrendingUp',status:'server'},
  {id:'mock',name:'Mock Exam',caption:'200 questions · 5 hours',description:'Requires a separate admin-reserved, locked mock exam.',icon:'GraduationCap',status:'planned'}
 ]);
 export function getLastAttemptInsights(result,courseId,domainIds=[]){
