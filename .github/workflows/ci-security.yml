@@ -104,6 +104,9 @@ jobs:
       - name: P12 read-only Admin release diagnostics, NO-GO and zero-mutation contract
         run: npm run test:p12
 
+      - name: P12.2 staging 19-scenario QA/roles/NO-GO proof using synthetic clients (no real keys)
+        run: npm run test:p12:staging
+
       - name: P5 native fullscreen and exit policy contracts
         run: npm run test:p5
 

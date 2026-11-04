@@ -1,0 +1,30 @@
+.p12-evidence{background:#fff;border:1px solid #dfeaec;border-radius:16px;padding:20px;margin:20px 0}
+.p12-evidence-heading{display:flex;align-items:center;justify-content:space-between;gap:20px;flex-wrap:wrap}
+.p12-evidence-heading>div{flex:1;min-width:260px}
+.p12-evidence-heading h2{display:flex;align-items:center;gap:9px;color:#24515a;font-size:19px;margin:7px 0}
+.p12-evidence-heading p{margin:3px 0 12px;color:#69858b;font-size:12px;line-height:1.6}
+.p12-evidence-guard{margin:12px 0;background:#faf6ec;border:1px solid #e8d9bb;border-radius:9px;padding:10px 12px;
+display:flex;gap:9px;font-size:12px;color:#896e3e;line-height:1.6}
+.p12-evidence-guard svg{flex:none}
+.p12-evidence-empty{border:1px dashed #d7e5e6;border-radius:12px;padding:26px;display:grid;justify-items:center;text-align:center;gap:9px;color:#5a7880}
+.p12-evidence-empty b{font-size:14px;color:#325e64}
+.p12-evidence-empty p{font-size:12px;max-width:650px;line-height:1.65}
+.p12-evidence-empty code{background:#eef7f5;border-radius:6px;padding:2px 6px}
+.p12-evidence-info,.p12-evidence-error{font-size:12px;padding:10px 12px;border-radius:9px;margin:10px 0}
+.p12-evidence-info{background:#edf7f4;color:#236d5f}
+.p12-evidence-error{display:flex;align-items:center;gap:8px;background:#fff0e8;color:#9f513d}
+.p12-evidence-summary{display:grid;grid-template-columns:2fr repeat(4,1fr);gap:8px}
+.p12-evidence-summary>div{padding:11px;background:#f8fbfb;border:1px solid #e4eeee;border-radius:10px;display:grid;gap:5px}
+.p12-evidence-summary small{font-size:10px;color:#739094}
+.p12-evidence-summary b{color:#235e61;font-size:14px}
+.p12-evidence-toolbar{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:15px 0;color:#758b90;font-size:11px}
+.p12-evidence-scenarios{max-height:380px;overflow:auto;border:1px solid #e4eded;border-radius:11px}
+.p12-evidence-check{padding:10px;display:flex;align-items:flex-start;gap:9px;border-bottom:1px solid #edf2f3}
+.p12-evidence-check:last-child{border-bottom:0}
+.p12-evidence-check svg{flex:none;margin-top:3px}
+.p12-evidence-check>div{flex:1;min-width:0}
+.p12-evidence-check b{font-size:12px;color:#315960}
+.p12-evidence-check p{color:#698087;margin:5px 0 0;font-size:11px;line-height:1.55}
+@media(max-width:650px){.p12-evidence{padding:12px}.p12-evidence-summary{grid-template-columns:repeat(2,1fr)}
+.p12-evidence-summary>div:first-child{grid-column:span 2}
+.p12-evidence-toolbar{flex-wrap:wrap}.p12-evidence-check .p12-status{max-width:64px}}
