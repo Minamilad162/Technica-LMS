@@ -6,6 +6,7 @@ import {fetchLiveLearningCatalog,mayReadLiveCourse} from './LiveLearning';
 import {loadStructure} from './lmsApi.js';
 import LivePractice from './LivePractice';
 import './liveLearning.css';
+import './liveAuthoring.css';
 import './livePractice.css';
 
 // Transitional secure Practice access for the DEFAULT Technica LMS app.
