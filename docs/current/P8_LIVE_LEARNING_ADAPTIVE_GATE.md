@@ -1,4 +1,7 @@
-# P8 — Real learner library + proportional Adaptive Level Up (staged)
+# P8 — Real learner library + historical 20%-checkpoint Adaptive Level Up (staged)
+
+> **SUPERSEDED FOR NEW PRACTICE SESSIONS BY P8d (2026-11-04).** This file documents the original P8 rollout and post-migration follow-up; the owner subsequently locked balanced **one-third** thresholds. Current acceptance is N=30 → 10 Low / 10 Medium / 10 High in a perfect run, ≥70% cumulative within tier, more same-tier questions on failure, exact chosen N cap, hidden tier, Practice ONLY. See [P8d policy](./P8D_ADAPTIVE_THIRDS_POLICY.md) and the separately staged `supabase/migrations/202611040003_p8d_adaptive_thirds.sql`. Original P8 is NOT to be reinstalled or run twice.
+
 
 Date: 2026-11-04. Scope: user approved continuing Technica LMS backend integration and explicitly required questions to become harder as correct answers accumulate, **proportional to selected Practice/test length**.
 
