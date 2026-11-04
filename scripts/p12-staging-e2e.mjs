@@ -8,6 +8,15 @@ import {mkdir,writeFile} from 'node:fs/promises';
 import {resolve} from 'node:path';
 import {runStagingQa} from './lib/p12-staging-qa.mjs';
 
+function onlyPublicKey(key){
+ if(key.startsWith('sb_publishable_')&&key.length>16)return true;
+ try{
+  const parts=key.split('.');
+  if(parts.length!==3)return false;
+  const data=JSON.parse(Buffer.from(parts[1],'base64url').toString('utf8'));
+  return data?.role==='anon';
+ }catch{return false;}
+}
 export function stagingConfiguration(env,argv=[]){
  const ref=String(env.P12_STAGING_PROJECT_REF||'');
  const production=String(env.P12_PRODUCTION_PROJECT_REF||'');
@@ -19,7 +28,7 @@ export function stagingConfiguration(env,argv=[]){
  // of the user's known Production target in a purported staging QA command.
  if(!/^[a-z0-9]{20}$/.test(ref)||!/^[a-z0-9]{20}$/.test(production)
   ||production===ref||url!==`https://${ref}.supabase.co`
-  ||!key||allowed!=='YES_READ_ONLY'||confirmation!==ref)
+  ||!onlyPublicKey(key)||allowed!=='YES_READ_ONLY'||confirmation!==ref)
    throw Error('P12 STAGING GUARD: explicit different staging/production refs, exact HTTPS URL, public key and CLI confirmation required. No requests sent.');
  const credentials={};
  const emailSeen=new Set();
