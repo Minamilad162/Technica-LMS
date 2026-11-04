@@ -1,3 +1,11 @@
+### 2026-11-05 — ASP Question Bank engineering freeze and P10 official Mock engine source
+
+- Owner directed conclusion of recurring ASP question-bank phases and immediate move to next LMS module. **Engineering source bank is FROZEN** on the private 2,500/9 candidate with P9D1 offline optional reconciliation tool; the 1,625/five-group historical Demo remains untouched. This is **NOT** a claim of actual import, rights/answer validation, or Production publication.
+- Added P10 staged SQL-only secure official ASP Mock engine: EXACTLY 200 versioned P9B exclusive Draft items, exactly 300 server-authoritative minutes, authenticated paid/manual course access or verified Admin, idempotent start, private answer snapshots, per-question answer/flag autosave, expiry/submit/server grading, fullscreen exit seal, fully private DB tables, no answer keys during exam or after finish. No changes to P4/P8e Practice.
+- Added a genuine separate Supabase Auth ASP Mock route from existing Assessments page, a native-fullscreen 200-question exam UI with navigator, flags, answer save, countdown, submit confirmation and score, and a fail-closed 200-item readiness check. It cannot use Demo fallback or start on an unreserved bank.
+- Added P10 Node contract and disposable PostgreSQL negative security tests plus canonical `docs/current/ASP_BANK_ENGINEERING_FREEZE_P10_HANDOFF.md`, Blueprint §64, Logic Registry LMS-031/032.
+- **Release gates:** no real Supabase P10 SQL installation, no real ASP candidate source import/SME approval/rights attestation/200 Mock reservation, no mobile/browser live acceptance and no production launch performed by this source PR.
+
 ### 2026-11-04 — P9D.1 SQL export smoke acceptance
 
 - The private fingerprint export SELECT is now executed against ephemeral PostgreSQL P9B fixtures (not only statically inspected). CI checks output row count, canonical source SHA256 normalized text interoperability with the Python importer, all three 64-character hash fields and zero protected bank/review/attempt/audit mutations. No actual Supabase data or secrets are accessed.

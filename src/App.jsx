@@ -9,7 +9,8 @@ import AnalyticsPage from './pages/AnalyticsPage';import BuilderPage from './pag
 import LiveCoursesPage from './production/LiveCoursesPage';
 import LiveCourseBuilder from './production/LiveCourseBuilder';
 import {LiveLearningLibrary,LiveLearningCourse} from './production/LiveLearning';
-import LivePracticePortal from './production/LivePracticePortal';import AssessmentOverview from './pages/AssessmentOverview';import ResultsPage from './pages/ResultsPage';import PracticeResultsPage from './pages/PracticeResultsPage';import LearnersPage from './pages/LearnersPage';import QuestionBankPage from './pages/QuestionBankPage';import CoursesPage from './pages/CoursesPage';
+import LivePracticePortal from './production/LivePracticePortal';
+import LiveMockPortal from './production/LiveMockPortal';import AssessmentOverview from './pages/AssessmentOverview';import ResultsPage from './pages/ResultsPage';import PracticeResultsPage from './pages/PracticeResultsPage';import LearnersPage from './pages/LearnersPage';import QuestionBankPage from './pages/QuestionBankPage';import CoursesPage from './pages/CoursesPage';
 // Local-only QA retains the accepted Demo authoring browser regression suite.
 // In the normal deployed site, Courses/Builder default to genuine Supabase.
 // Explicit "legacyPreview=1" shows the historic unsynced authoring tools.
@@ -61,6 +62,7 @@ export default function App(){
  <Route path="/courses" element={<AdminOnly><RoutePage>{legacyPreview?(legacyBrowserQa?<CoursesPage/>:<LegacyPreviewWarning><CoursesPage/></LegacyPreviewWarning>):<LiveCoursesPage/>}</RoutePage></AdminOnly>}/>
  <Route path="/reports" element={<AdminOnly><RoutePage><AnalyticsPage/></RoutePage></AdminOnly>}/>
  <Route path="/assessments" element={<RoutePage><AssessmentOverview/></RoutePage>}/>
+ <Route path="/assessments/mock/live" element={<RoutePage standalone><LiveMockPortal/></RoutePage>}/>
  <Route path="/assessments/take" element={<RoutePage standalone><QuizPage kind="assessment"/></RoutePage>}/>
  <Route path="/results" element={<RoutePage><ResultsPage/></RoutePage>}/>
  <Route path="/practice/results" element={<RoutePage><PracticeResultsPage/></RoutePage>}/>

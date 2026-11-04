@@ -1,0 +1,38 @@
+/* Official ASP Mock. Reuses protected Practice visual language; P10 isolated. */
+.live-mock{--mock-ink:#1c3d46;gap:18px}
+.live-mock-setup{display:grid;gap:20px}
+.live-mock-stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:11px}
+.live-mock-stats>div{background:#f2f9f7;border:1px solid #dae9e7;border-radius:13px;
+ display:flex;flex-direction:column;gap:5px;padding:17px;color:var(--mock-ink)}
+.live-mock-stats b{font-size:24px;letter-spacing:-.04em}
+.live-mock-stats span{font-size:12px;color:#58777c}
+.live-mock-accept{display:flex;align-items:flex-start;gap:10px;padding:13px 15px;background:#f9fbfb;
+ border:1px solid #dce9eb;border-radius:10px;font-size:13px;line-height:1.65;color:#476a70}
+.live-mock-accept input{margin-top:4px;accent-color:#1c8d7e;min-width:17px;min-height:17px}
+.live-mock-actions{display:flex;gap:10px;margin-top:14px;flex-wrap:wrap}
+.live-mock-dots{max-height:184px;overflow:auto;border:1px solid #dce7e9;border-radius:12px;
+ padding:11px;display:grid;grid-template-columns:repeat(auto-fill,minmax(40px,1fr));gap:7px}
+.live-mock-dots button{height:35px;min-width:0;border-radius:8px;background:#fff;
+ border:1px solid #dce5e7;color:#4f6e75;font-weight:700;font-size:11px}
+.live-mock-dots button.answered{background:#ebf8f1;border-color:#57ab8d}
+.live-mock-dots button.flagged{box-shadow:inset 0 -3px 0 #de9a3d}
+.live-mock-dots button.current{background:#187c74;color:#fff;border-color:#187c74}
+.live-mock-result{padding:28px;background:#f0faf6;border:1px solid #cce9dc;
+ border-radius:14px;text-align:center;display:grid;justify-items:center;gap:11px}
+.live-mock-result h3,.live-mock-result p{margin:0}
+.live-mock-result svg{color:#23947e}
+.live-mock-submit{justify-self:end}
+.live-mock:fullscreen,.live-mock:-webkit-full-screen{max-width:none;width:100vw;
+ height:100dvh;max-height:100dvh;overflow-y:auto;padding:20px 30px;
+ background:#f7fbfa;border:0;border-radius:0;margin:0}
+.live-mock:fullscreen .live-question,.live-mock:fullscreen .live-mock-dots,
+.live-mock:fullscreen .live-practice-top,.live-mock:fullscreen .live-attempt-bar{
+ width:100%;max-width:1080px;margin-inline:auto}
+@media(max-width:650px){
+ .live-mock-stats{grid-template-columns:repeat(3,minmax(0,1fr))}
+ .live-mock-stats>div{padding:12px 8px}
+ .live-mock-stats b{font-size:18px}
+ .live-mock-stats span{font-size:10px}
+ .live-mock:fullscreen{padding:12px}
+ .live-mock-submit{justify-self:stretch;width:100%}
+}
