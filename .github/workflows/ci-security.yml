@@ -98,6 +98,9 @@ jobs:
       - name: P10 protected 200-question 300-minute official Mock engine contract
         run: npm run test:p10
 
+      - name: P11 learner-owned course, domain and topic verified progress analytics contract
+        run: npm run test:p11
+
       - name: P5 native fullscreen and exit policy contracts
         run: npm run test:p5
 
@@ -213,6 +216,9 @@ jobs:
 
       - name: P10 200x300 official Mock ACL, score, flags, deadline and fullscreen sealing on disposable PostgreSQL
         run: bash scripts/test-p10-postgres-smoke.sh
+
+      - name: P11 secure P2 Practice and Mock Analytics on disposable PostgreSQL
+        run: bash scripts/test-p11-postgres-smoke.sh
 
       - name: Test scope disclosure
         run: echo "Ephemeral local PostgreSQL smoke only; live Supabase Auth, Storage, Data API and device tests still pending."
