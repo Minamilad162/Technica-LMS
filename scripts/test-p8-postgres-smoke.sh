@@ -321,7 +321,7 @@ fi
 echo 'PASS P8 read-only catalog, private RLS and eligible ASP pool audit on ephemeral PostgreSQL'
 # The owner-run P8d SQL Editor audit itself must be SELECT-only and PASS.
 p8d_report=$(psql -X -v ON_ERROR_STOP=1 -A -t -f supabase/P8D_VERIFY_READ_ONLY.sql)
-if printf '%s\n' "$p8d_report" | grep -Eq '\\|(FAIL|FAIL_[A-Z_]+|MISSING)(\\||$)'; then
+if printf '%s\n' "$p8d_report" | grep -Eq '\|(FAIL|FAIL_[A-Z_]+|MISSING)(\||$)'; then
  echo 'FAIL P8d SELECT-only SQL Editor audit against disposable PostgreSQL'
  printf '%s\n' "$p8d_report";exit 1
 fi
