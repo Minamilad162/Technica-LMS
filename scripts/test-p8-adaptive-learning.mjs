@@ -120,7 +120,8 @@ for(const marker of [
  "SECURITY DEFINER SET search_path=''"
 ])assert(delta.includes(marker),'P8d third-based backend missing: '+marker);
 assert(!delta.includes('UPDATE public.lms_questions'),'P8d must never reclassify existing bank');
-assert(!delta.includes('UPDATE public.lms_practice_adaptive_state'),'P8d must preserve active sessions');
+assert(delta.includes("coalesce(s.medium_checkpoint_size,s.checkpoint_size)"),
+ 'Old stored tier gate must be preserved; actual in-flight rows are checked in disposable PostgreSQL');
 assert(!delta.includes('INSERT INTO public.lms_questions'),'P8d must never import bank');
 assert(delta.includes("s.medium_checkpoint_size,s.checkpoint_size"),
  'In-flight attempts without medium checkpoint must keep their original P8 gate');
