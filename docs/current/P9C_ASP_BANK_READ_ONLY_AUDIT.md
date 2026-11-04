@@ -43,3 +43,14 @@ The **Level Up invariant remains P8e**: e.g. N30 ideal 10 Low/10 Medium/10 High;
 ## Next controlled work after audit
 
 Reconcile actual source import counts, crosswalk 5 legacy groups to 9 official ASP11 domains with a qualified SME, inspect real rights/answer/reference evidence, curate exactly 200 genuinely reviewed unused source IDs for Mock, run P9B in specifically authorized staging (if appropriate), then separately approve eligible Practice questions with an independent Admin. P10 200-question/300-minute Mock engine is distinct and future. No production DDL/DML, migration, import, publishing, reservation, learner role changes or Cloudflare deploy is included in P9C.
+
+
+## P9C.1 — Concise owner decision summary (source follow-up)
+
+The owner-provided attachment currently contains the **SQL text** of P9C, not actual rows from Supabase `Results`. No actual ASP production bank counts can be inferred from that attachment or from GitHub CI fixture results. The screenshot confirms P8e and P9B functions are present; P9A is optional and missing. Verify all five `CORE_REQUIRED` rows are PRESENT before any bank query.
+
+To make reviewing the real results easier, run **`supabase/P9C_DECISION_SUMMARY_READ_ONLY.sql`** after the core preflight, specifically when the P9B private forms and items are **PRESENT** (confirmed in the owner's screenshot). It is a ONE-SELECT, zero-write, count-only decision table grouped into real import/status, vetted rights/answers, nine ASP11 domains, Low/Medium/High 30-question pool, and actual exact-200 Mock form. This owner-facing file is a summary of the comprehensive P9C inventory, NOT a replacement for detailed source/right checks or the separate `P9B_VERIFY_READ_ONLY.sql` ACL audit.
+
+The output has `area, check_name, actual, required, status, meaning`. A potential reviewed candidate count of 200 is only `CANDIDATES_ONLY`, a real 200-item form is `FORM_ITEMS_ONLY`, and even if all counts pass, the formal 200-question / 300-minute Mock attempt engine remains `NOT_IMPLEMENTED`. The 1,625 historical question-bank figure is a **reference**, not a required or assumed real import total. P8e Level Up still requires a conservative 30 approved, non-exclusive Low, Medium and High items for N30 and **7 correct of the original 10** to advance on each tier; no variable denominator.
+
+Running this SQL yourself in the confirmed Technica project reads data but **does not change any production data**. Export the Results table as CSV or provide only aggregate rows, with no question content, user records, answer keys or secrets. GitHub Actions tests only synthetic temporary PostgreSQL and cannot certify actual Supabase row counts. If P9B tables are missing, do not execute this new query; instead use the original comprehensive P9C report, which gracefully handles missing P9B.
