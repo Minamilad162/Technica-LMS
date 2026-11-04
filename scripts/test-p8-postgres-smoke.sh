@@ -28,17 +28,49 @@ INSERT INTO public.lms_questions(course_id,source_id,prompt,options,correct_inde
  ('10000000-0000-0000-0000-000000000001','P8-DRAFT-LOW','Unapproved low sample?', '["A","B"]',0,'low','draft',false);
 SQL
 
-for n in 10 25 50; do
- checkpoint=$(( (n + 4)/5 ))
- (( checkpoint < 3 )) && checkpoint=3
+# Install P8d on disposable PostgreSQL, preserving an in-progress P8 attempt.
+# This specifically proves the owner-approved future migration won't silently
+# change the logic for anyone already midway through a Practice session.
+legacyreq=81234567-0000-0000-0000-000000000004
+legacy=$(run_as authenticated "$paid" \
+ "SELECT public.lms_p8_start_levelup('$course',30,'$legacyreq',NULL,0)->>'attemptId'")
+legacycp=$(psql -X -v ON_ERROR_STOP=1 -A -t -c \
+ "SELECT checkpoint_size FROM public.lms_practice_adaptive_state WHERE attempt_id='$legacy'")
+[[ "$legacycp" == 6 ]] || { echo "FAIL legacy 20% gate not captured before delta: $legacycp";exit 1; }
+psql -X -v ON_ERROR_STOP=1 -q -f supabase/migrations/202611040003_p8d_adaptive_thirds.sql
+legacycheck=$(psql -X -v ON_ERROR_STOP=1 -A -t -c \
+ "SELECT checkpoint_size||'|'||coalesce(medium_checkpoint_size::text,'NULL') FROM public.lms_practice_adaptive_state WHERE attempt_id='$legacy'")
+[[ "$legacycheck" == '6|NULL' ]] || { echo "FAIL changed in-flight legacy checkpoint $legacycheck";exit 1; }
+for i in $(seq 0 5);do
+ id=$(run_as authenticated "$paid" \
+  "SELECT public.lms_p4_attempt_payload('$legacy')->'questions'->$i->>'id'")
+ run_as authenticated "$paid" "SELECT public.lms_p8_answer_levelup('$legacy','$id',0)" >/dev/null
+done
+legacytier=$(psql -X -v ON_ERROR_STOP=1 -A -t -c \
+ "SELECT tier FROM public.lms_practice_adaptive_state WHERE attempt_id='$legacy'")
+[[ "$legacytier" == medium ]] || { echo 'FAIL legacy 6-answer promotion changed midway';exit 1; }
+run_as authenticated "$paid" "SELECT public.lms_p5_abandon_practice('$legacy')" >/dev/null
+echo 'PASS old in-progress P8 session retains original stored 20% threshold after P8d delta'
+
+for n in 10 25 30 50; do
+ checkpoint=$(( n / 3 ))
+ (( checkpoint < 1 )) && checkpoint=1
+ medium_checkpoint=$(( (n - checkpoint) / 2 ))
+ (( medium_checkpoint < 1 )) && medium_checkpoint=1
  ready=$(run_as authenticated "$paid" \
   "SELECT public.lms_p8_levelup_readiness('$course',$n,NULL)->>'ready'")
  [[ "$ready" == true ]] || { echo "FAIL P8 not ready for $n questions";exit 1; }
  actual=$(run_as authenticated "$paid" \
   "SELECT public.lms_p8_levelup_readiness('$course',$n,NULL)->>'checkpoint'")
- [[ "$actual" == "$checkpoint" ]] || { echo "FAIL proportional checkpoint for $n: $actual";exit 1; }
+ [[ "$actual" == "$checkpoint" ]] || { echo "FAIL one-third Low gate for $n: $actual";exit 1; }
+ middle=$(run_as authenticated "$paid" \
+  "SELECT public.lms_p8_levelup_readiness('$course',$n,NULL)->>'mediumCheckpoint'")
+ [[ "$middle" == "$medium_checkpoint" ]] || { echo "FAIL one-third Medium gate for $n: $middle";exit 1; }
+ policy=$(run_as authenticated "$paid" \
+  "SELECT public.lms_p8_levelup_readiness('$course',$n,NULL)->>'policyVersion'")
+ [[ "$policy" == 'thirds-v1' ]] || { echo "FAIL P8d server version for $n: $policy";exit 1; }
 done
-echo 'PASS 10/25/50 proportional 20% checkpoints and server-approved readiness'
+echo 'PASS balanced third checkpoints for 10/25/30/50 and 70% server gating'
 
 # No anonymous, unentitled or trial can inspect tier counts or start sessions.
 if run_as anon 00000000-0000-0000-0000-000000000000 \
@@ -150,6 +182,113 @@ stage=$(psql -X -v ON_ERROR_STOP=1 -A -t -c \
  "SELECT tier FROM public.lms_practice_adaptive_state WHERE attempt_id='$attempt25'")
 [[ "$stage" == medium ]] || { echo 'FAIL cumulative 70% recovery not promoted';exit 1; }
 echo 'PASS 25-question session remains Low below 70% and promotes after cumulative recovery'
+
+# P8d user-locked acceptance: N=30 => 10 LOW, 10 MEDIUM, 10 HIGH
+# on an error-free run; 7/10 required at EACH stage; never leak tier mid-run.
+req30=81234567-0000-0000-0000-000000000030
+a30=$(run_as authenticated "$paid" \
+ "SELECT public.lms_p8_start_levelup('$course',30,'$req30',NULL,0)->>'attemptId'")
+newgates=$(psql -X -v ON_ERROR_STOP=1 -A -t -c \
+ "SELECT checkpoint_size||'|'||medium_checkpoint_size FROM public.lms_practice_adaptive_state WHERE attempt_id='$a30'")
+[[ "$newgates" == '10|10' ]] || { echo "FAIL 30-question stored gates $newgates";exit 1; }
+for i in $(seq 0 29); do
+ id=$(run_as authenticated "$paid" \
+  "SELECT public.lms_p4_attempt_payload('$a30')->'questions'->$i->>'id'")
+ [[ "$id" =~ ^[a-f0-9-]{36}$ ]] || { echo "FAIL missing new question $i";exit 1; }
+ run_as authenticated "$paid" "SELECT public.lms_p8_answer_levelup('$a30','$id',0)" >/dev/null
+ case "$i" in
+  8) expected=low;;
+  9) expected=medium;;
+  18) expected=medium;;
+  19|29) expected=high;;
+  *) expected='';;
+ esac
+ if [[ -n "$expected" ]];then
+  tier=$(psql -X -v ON_ERROR_STOP=1 -A -t -c \
+   "SELECT tier FROM public.lms_practice_adaptive_state WHERE attempt_id='$a30'")
+  [[ "$tier" == "$expected" ]] || { echo "FAIL stage at question $((i+1)) wanted $expected got $tier";exit 1; }
+ fi
+done
+dist30=$(psql -X -v ON_ERROR_STOP=1 -A -t -c \
+ "SELECT count(*) FILTER(WHERE q.difficulty='low')||'|'||
+ count(*) FILTER(WHERE q.difficulty='medium')||'|'||
+ count(*) FILTER(WHERE q.difficulty='high')
+ FROM public.lms_practice_attempt_items i JOIN public.lms_questions q ON q.id=i.question_id
+ WHERE i.attempt_id='$a30'")
+[[ "$dist30" == '10|10|10' ]] || { echo "FAIL ideal 30-question stage distribution $dist30";exit 1; }
+total30=$(run_as authenticated "$paid" \
+ "SELECT jsonb_array_length(public.lms_p4_attempt_payload('$a30')->'questions')")
+[[ "$total30" == 30 ]] || { echo "FAIL completed 30 session had $total30 questions";exit 1; }
+if run_as authenticated "$paid" \
+ "SELECT public.lms_p8_answer_levelup('$a30',\
+ (SELECT question_id FROM public.lms_practice_attempt_items WHERE attempt_id='$a30' AND position=30),0)" >/dev/null 2>&1; then
+ # An identical-answer retry of question 30 is allowed (idempotent), but it
+ # MUST NOT change the question count; check separately instead of failing.
+ :;
+fi
+total30again=$(run_as authenticated "$paid" \
+ "SELECT jsonb_array_length(public.lms_p4_attempt_payload('$a30')->'questions')")
+[[ "$total30again" == 30 ]] || { echo 'FAIL adaptive exceeded chosen 30 questions';exit 1; }
+score30=$(run_as authenticated "$paid" \
+ "SELECT public.lms_p4_finish_practice('$a30')->>'scorePercent'")
+[[ "$score30" == 100.00 ]] || { echo "FAIL perfect 30 score $score30";exit 1; }
+echo 'PASS 30 perfect questions split 10/10/10, server-only promotion, cap and score'
+
+# Recovery: 6/10 LOW => stay LOW, then +4 correct => 10/14 = 71.4%
+# => MEDIUM. After 7/10 MEDIUM => HIGH. Exactly 30 questions total:
+# 14 LOW + 10 MEDIUM + 6 HIGH, all new unique items.
+reqrecover=81234567-0000-0000-0000-000000000031
+rec=$(run_as authenticated "$paid" \
+ "SELECT public.lms_p8_start_levelup('$course',30,'$reqrecover',NULL,0)->>'attemptId'")
+for i in $(seq 0 29); do
+ id=$(run_as authenticated "$paid" \
+  "SELECT public.lms_p4_attempt_payload('$rec')->'questions'->$i->>'id'")
+ if (( i < 6 )); then pick=0
+ elif (( i < 10 )); then pick=1
+ elif (( i < 14 )); then pick=0
+ elif (( i < 21 )); then pick=0
+ elif (( i < 24 )); then pick=1
+ else pick=0; fi
+ run_as authenticated "$paid" "SELECT public.lms_p8_answer_levelup('$rec','$id',$pick)" >/dev/null
+ case "$i" in
+  9|12) expected=low;;
+  13|22) expected=medium;;
+  23|29) expected=high;;
+  *) expected='';;
+ esac
+ if [[ -n "$expected" ]]; then
+  tier=$(psql -X -v ON_ERROR_STOP=1 -A -t -c \
+   "SELECT tier FROM public.lms_practice_adaptive_state WHERE attempt_id='$rec'")
+  [[ "$tier" == "$expected" ]] || { echo "FAIL recovery at question $((i+1)): $tier vs $expected";exit 1; }
+ fi
+done
+distribution=$(psql -X -v ON_ERROR_STOP=1 -A -t -c \
+ "SELECT count(*) FILTER(WHERE q.difficulty='low')||'|'||
+ count(*) FILTER(WHERE q.difficulty='medium')||'|'||
+ count(*) FILTER(WHERE q.difficulty='high')
+ FROM public.lms_practice_attempt_items i JOIN public.lms_questions q ON q.id=i.question_id
+ WHERE i.attempt_id='$rec'")
+[[ "$distribution" == '14|10|6' ]] || { echo "FAIL recovered 30 question split $distribution";exit 1; }
+unique=$(psql -X -v ON_ERROR_STOP=1 -A -t -c \
+ "SELECT count(DISTINCT question_id) FROM public.lms_practice_attempt_items WHERE attempt_id='$rec'")
+[[ "$unique" == 30 ]] || { echo 'FAIL duplicate question in 30 recovery run';exit 1; }
+run_as authenticated "$paid" "SELECT public.lms_p4_finish_practice('$rec')" >/dev/null
+echo 'PASS 6/10 remains Low, cumulative 10/14 Low promotes, Medium 7/10 promotes; 30 cap and unique items'
+
+# Even after 30 wrong answers, never force a promotion just to fit quotas.
+reqalllow=81234567-0000-0000-0000-000000000032
+alllow=$(run_as authenticated "$paid" \
+ "SELECT public.lms_p8_start_levelup('$course',30,'$reqalllow',NULL,0)->>'attemptId'")
+for i in $(seq 0 29); do
+ id=$(run_as authenticated "$paid" \
+  "SELECT public.lms_p4_attempt_payload('$alllow')->'questions'->$i->>'id'")
+ run_as authenticated "$paid" "SELECT public.lms_p8_answer_levelup('$alllow','$id',1)" >/dev/null
+done
+stilllow=$(psql -X -v ON_ERROR_STOP=1 -A -t -c \
+ "SELECT tier||'|'||answered_count FROM public.lms_practice_adaptive_state WHERE attempt_id='$alllow'")
+[[ "$stilllow" == 'low|30' ]] || { echo "FAIL should stop at 30 LOW questions: $stilllow";exit 1; }
+run_as authenticated "$paid" "SELECT public.lms_p4_finish_practice('$alllow')" >/dev/null
+echo 'PASS failed Level Up stays Low for all 30 attempts then stops without forcing Hard'
 
 # Abandoned P8 answers/snapshots must be redacted by existing P5.
 closed=$(run_as authenticated "$paid" \
