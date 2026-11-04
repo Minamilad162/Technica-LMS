@@ -439,5 +439,20 @@ if run_as authenticated "$paid" \
  echo 'FAIL Learner can read internal fixed-correct state';exit 1
 fi
 echo 'PASS P8e new policy is server-only, old attempts unchanged, no browser privilege expansion'
+p8e_report=$(psql -X -v ON_ERROR_STOP=1 -A -t -f supabase/P8E_VERIFY_READ_ONLY.sql)
+if printf '%s\n' "$p8e_report" | grep -Eq '\|(FAIL|MISSING)(\||$)';then
+ echo 'FAIL P8e read-only SQL audit in disposable Postgres';printf '%s\n' "$p8e_report";exit 1
+fi
+for required in \
+ 'P8E_FIXED_TARGET|30|10|10|7|7|PASS' \
+ 'P8E_PRIVATE_VERSION_COLUMN|lms_practice_adaptive_state.promotion_policy|PASS' \
+ 'P8E_SERVER_PROMOTION|lms_p8_answer_levelup|PASS' \
+ 'P8E_NEW_SESSIONS|fixed-correct policy version|PASS'; do
+ if ! printf '%s\n' "$p8e_report" | grep -Fq "$required";then
+  echo "FAIL P8e audit missing $required";printf '%s\n' "$p8e_report";exit 1
+ fi
+done
+echo 'PASS P8e SELECT-only SQL audit: N30 baseline 10+10, fixed 7+7 correct, RLS and versioned RPCs'
+
 
 
