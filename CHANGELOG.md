@@ -1,3 +1,11 @@
+### 2026-11-04 — P7: Live Supabase Courses and Course Builder (staged)
+
+- Default authenticated Admin Courses now reads the real lms_courses catalog and creates Draft courses or updates title/summary via existing P1 RLS, never LocalStorage.
+- Default Admin Course Builder loads Course→Domain→Topic→Lesson via database UUIDs, saves explicit add/rename actions and reading paragraphs, then refetches. Real missing ASP course displays an honest empty state; no Demo fallback.
+- Existing local-only Courses/Builder, question files, media/assessment tools and accepted UI remain available via clearly labeled ?legacyPreview=1. Existing Vite DEV browser QA uses VITE_LOCAL_QA_DEMO=1 plus DEV check only.
+- Added real Admin Course and Builder pages, scoped validated authoring API, live role verification hook and responsive CSS; source and disposable PostgreSQL Admin/learner RLS tests.
+- Deliberately excluded automatic publication, deletion, migration and permission grants. No production Supabase/Cloudflare action performed. Learner content/progress and paid course launch still pending.
+
 ### 2026-11-04 — Real email/password login and guarded four-pilot-account provisioning
 
 - Removed `Login as Learner` / `Login as Admin` one-click actions and visible sample credentials from the default Technica LMS Login page. Email and password are now required for real Supabase Auth.
