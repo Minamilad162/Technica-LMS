@@ -1,3 +1,7 @@
+### 2026-11-04 — P9D.1 SQL export smoke acceptance
+
+- The private fingerprint export SELECT is now executed against ephemeral PostgreSQL P9B fixtures (not only statically inspected). CI checks output row count, canonical source SHA256 normalized text interoperability with the Python importer, all three 64-character hash fields and zero protected bank/review/attempt/audit mutations. No actual Supabase data or secrets are accessed.
+
 ### 2026-11-04 — P9D.1: private ASP2500 local dry-run importer and offline fingerprint reconciliation
 
 - Added `scripts/asp2500_dryrun.py`, an offline-only Python standard-library XLSX reader pinned to owner-uploaded source SHA256 and nine exact worksheets (250/625/200/300/250/300/175/275/125 = **2,500**). Validates header, question, four answer options, A-D keyed answer, explanation, unique normalized prompts, size/formula safety; generates stable provisional hash-based IDs WITHOUT publishing proprietary question contents.
