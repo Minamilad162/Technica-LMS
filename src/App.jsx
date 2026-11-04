@@ -54,6 +54,7 @@ export default function App(){
  <Route path="/learning/course/:courseId" element={<RoutePage><LiveLearningCourse/></RoutePage>}/>
  <Route path="/learning/process-safety-foundations" element={<RoutePage><LegacyPreviewWarning><LearningPlayer/></LegacyPreviewWarning></RoutePage>}/>
  <Route path="/practice" element={<RoutePage><PracticePage/></RoutePage>}/>
+ <Route path="/practice/live" element={<RoutePage standalone><LivePracticePortal/></RoutePage>}/>
  <Route path="/practice/session" element={<RoutePage standalone><QuizPage kind="practice"/></RoutePage>}/>
  <Route path="/analytics" element={<AdminOnly><RoutePage><AnalyticsPage/></RoutePage></AdminOnly>}/>
  <Route path="/builder" element={<AdminOnly><RoutePage>{legacyPreview?(legacyBrowserQa?<BuilderPage/>:<LegacyPreviewWarning><BuilderPage/></LegacyPreviewWarning>):<LiveCourseBuilder/>}</RoutePage></AdminOnly>}/>
