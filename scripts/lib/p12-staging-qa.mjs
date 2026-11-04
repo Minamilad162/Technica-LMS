@@ -81,12 +81,16 @@ export async function runStagingQa(clients,{generatedAt=new Date().toISOString()
   const user=data.user;
   const profile=await selectOne(db,'lms_profiles',{
    columns:'account_status',equals:{id:user.id}});
+  if(Object.entries(state).some(([other,v])=>other!==role&&v.id===user.id))
+   return mark('blocked','Two staging roles resolved to one LMS identity; use isolated test accounts.');
   state[role]={id:user.id,profile};
   if(!active(profile))return mark('blocked','Staging account is not an active LMS profile.');
   if(role==='admin'){
-   // Query only roles for the current identity; absence must not count.
-   const own=await listRows(db,'lms_role_assignments','role',['user_id',user.id]);
-   if(!own.some(r=>r.role==='admin'))return mark('blocked','Real staging Admin role is missing or revoked.');
+   // Check explicitly unrevoked Admin assignment, never just historical roles.
+   const {data:own,error:roleError}=await db.from('lms_role_assignments').select('role')
+    .eq('user_id',user.id).is('revoked_at',null);
+   if(roleError||!(own||[]).some(r=>r.role==='admin'))
+    return mark('blocked','Active unrevoked staging Admin role is missing.');
   }
   return mark('pass','Active dedicated staging account verified through signed Supabase JWT and P1 profile.');
  }
