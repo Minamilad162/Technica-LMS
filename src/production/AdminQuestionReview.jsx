@@ -2,6 +2,7 @@ import React,{useEffect,useMemo,useState} from 'react';
 import {BookOpenCheck,CheckCircle2,ChevronLeft,ChevronRight,ClipboardCheck,LockKeyhole,RefreshCw,ShieldCheck} from 'lucide-react';
 import {ASP11_PREFIX,REVIEW_FILTERS,REVIEW_PAGE_SIZE,fetchAspReviewPage,fetchAspReviewSummary,prepareAsp11Domains,saveAspReview} from './questionReviewApi';
 import AdminAdaptiveReadiness from './AdminAdaptiveReadiness.jsx';
+import AspReleasePreflight from './AspReleasePreflight.jsx';
 import './questionReview.css';
 
 const errorText=e=>e?.message||'Review request failed.';
@@ -77,6 +78,7 @@ export default function AdminQuestionReview({db,course,domains=[],onDomainsSeede
   ].map(([label,value])=><div className="live-review-metric" key={label}><span>{label}</span><strong>{Number.isFinite(value)?value.toLocaleString():'—'}</strong></div>)}</div>
   <div className="live-review-alert"><ShieldCheck size={20}/><span><strong>No automatic publishing.</strong> Verify the answer, usage rights, correct ASP11 domain and educational difficulty. The separate Mock reservation and release stages come later.</span></div>
   <AdminAdaptiveReadiness db={db} course={course} domains={official}/>
+  <AspReleasePreflight db={db} course={course}/>
   {official.length!==9&&<div className="live-review-domains"><div><strong>Official ASP11 taxonomy</strong>
    <small>{official.length} / 9 official domains available. Legacy workbook names are not a trusted mapping.</small></div>
    <button className="live-secondary" type="button" onClick={prepare} disabled={saving}>Add official 9 domains</button></div>}
