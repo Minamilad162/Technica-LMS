@@ -172,5 +172,8 @@ jobs:
       - name: P6A ASP nine-domain human review and admin privilege smoke
         run: bash scripts/test-p6-postgres-smoke.sh
 
+      - name: P8 server-graded adaptive Level Up — 10/25/50 question staging smoke
+        run: bash scripts/test-p8-postgres-smoke.sh
+
       - name: Test scope disclosure
         run: echo "Ephemeral local PostgreSQL smoke only; live Supabase Auth, Storage, Data API and device tests still pending."
