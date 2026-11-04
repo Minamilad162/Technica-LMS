@@ -23,3 +23,7 @@ private/
 **/*.p9d1.private.csv
 ASP_Question_Bank_2500*.xlsx
 ASP_2500_Review_and_Quality_Audit.xlsx
+
+# P12.2 real Staging sanitized run artifacts (kept local, outside public Git)
+.p12-staging-qa/
+**/*.p12-staging-qa.json
