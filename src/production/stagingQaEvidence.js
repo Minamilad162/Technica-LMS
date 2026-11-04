@@ -25,7 +25,7 @@ export const P12_SCENARIOS=Object.freeze([
 ]);
 const statuses=new Set(['pass','blocked','pending']);
 const allowed=new Map(P12_SCENARIOS.map(x=>[x.id,x]));
-const secretPattern=/\b(?:eyJ[A-Za-z0-9_-]{30,}|sk_[A-Za-z0-9_-]{15,}|service[_-]?role|Bearer\s+[A-Za-z0-9_.-]+|@[^\s.]+\.[a-z]{2,}|https?:\/\/)\b/i;
+const secretPattern=/(?:eyJ[A-Za-z0-9_-]{18,}|sk_[A-Za-z0-9_-]{10,}|service[_-]?role|Bearer\\s+[A-Za-z0-9_.-]+|[\\w.+-]+@[\\w.-]+\\.[A-Za-z]{2,}|https?:\\/\\/|[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12})/i;
 export function validateStagingEvidence(input){
  const data=typeof input==='string'?JSON.parse(input):input;
  if(!data||typeof data!=='object'||data.version!==P12_STAGING_VERSION||
