@@ -1,3 +1,11 @@
+### 2026-11-04 — P9C: SELECT-only real ASP bank inventory and readiness audit
+
+- Added a schema-only, single-SELECT preflight usable on the confirmed Technica Supabase project; separately identifies P4/P6A core prerequisites, installed P8e fixed-correct policy and **optional** P9A/P9B governance. Absent P9B does not break the inventory audit.
+- Added a comprehensive single-SELECT ASP bank report: actual source/approval/draft/archived counts vs **1,625 historical reference only**, unique IDs/duplicate prompts, P6A human-reviewed answers/rights/difficulty, missing reference/explanation, official ASP11 domain completeness, P4/P8e approved non-Mock runtime vs strict governance-verified counts, potential Mock 200 candidates/flags and 9×3 domain/tier readiness with conservative N30 bank thresholds.
+- Both SQL files return aggregate counts/statuses ONLY; no question prompts, choices, answer keys, source UUIDs, notes, emails or learner data and **zero DDL/DML/role changes**. They do not import, map, approve, reserve, activate Mock or silently change the approved P8e 7-of-original-10 Level Up rule.
+- CI adds `npm run test:p9c` and disposable PostgreSQL P9C read-only pre-/post-P9B runs that verify exact schema handling, expected 27 domain/tier combinations, 200 Mock-flag reporting after the fixture, and unchanged protected table fingerprints.
+- Owner-use instructions: `docs/current/P9C_ASP_BANK_READ_ONLY_AUDIT.md`. **Not done:** live Supabase audit execution/data retrieval, manual SME source/rights checks, actual Mock reservation, production migration, Cloudflare deployment or paid production activation.
+
 ### 2026-11-04 — P9B: Controlled 200-question ASP Mock reservation & independent Practice approval
 
 - Added an **unexecuted, guarded** P9B Supabase migration for a private immutable 200-item versioned ASP Mock form, secure Admin-only preflight, transactional exact-200 reservation and audited per-question Practice approval by an **independent second Admin**. Unverified answers, usage rights, unofficial domains, drafts previously used in Practice, duplicated IDs and orphan prior Mock flags are rejected. No question is released automatically.
