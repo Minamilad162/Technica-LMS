@@ -66,6 +66,9 @@ jobs:
       - name: Supabase production-mode repository / identity contracts
         run: npm run test:p3
 
+      - name: P7 live Course Builder and hierarchy contract
+        run: npm run test:authoring:live
+
       - name: P4 secure practice model and ASP draft import contract
         run: |
           npm run test:p4

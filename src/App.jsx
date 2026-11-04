@@ -5,11 +5,19 @@ import MotionSystem from './components/MotionSystem';
 import AuthPage,{DemoPolicyPage} from './pages/AuthPage';
 import {getAuthSession,restorePortalAccount,subscribeToPortalAuth} from './lib/portalAuth';
 import HomePage from './pages/HomePage';import LearningPlayer,{LearningLibrary} from './pages/LearningPage';import PracticePage from './pages/PracticePage';import QuizPage from './pages/QuizPage';
-import AnalyticsPage from './pages/AnalyticsPage';import BuilderPage from './pages/BuilderPage';import AssessmentOverview from './pages/AssessmentOverview';import ResultsPage from './pages/ResultsPage';import PracticeResultsPage from './pages/PracticeResultsPage';import LearnersPage from './pages/LearnersPage';import QuestionBankPage from './pages/QuestionBankPage';import CoursesPage from './pages/CoursesPage';
+import AnalyticsPage from './pages/AnalyticsPage';import BuilderPage from './pages/BuilderPage';
+import LiveCoursesPage from './production/LiveCoursesPage';
+import LiveCourseBuilder from './production/LiveCourseBuilder';import AssessmentOverview from './pages/AssessmentOverview';import ResultsPage from './pages/ResultsPage';import PracticeResultsPage from './pages/PracticeResultsPage';import LearnersPage from './pages/LearnersPage';import QuestionBankPage from './pages/QuestionBankPage';import CoursesPage from './pages/CoursesPage';
+// Local-only QA retains the accepted Demo authoring browser regression suite.
+// In the normal deployed site, Courses/Builder default to genuine Supabase.
+// Explicit "legacyPreview=1" shows the historic unsynced authoring tools.
+const legacyBrowserQa=import.meta.env.DEV&&import.meta.env.VITE_LOCAL_QA_DEMO==='1';
+function LegacyPreviewWarning({children}){return <><section role="note" style={{margin:'16px 24px',padding:12,border:'1px solid #e5d5ae',borderRadius:10,background:'#fff9e8',fontSize:12,color:'#745a29'}}><strong>Local Demo preview only.</strong> Changes here are saved in this browser, NOT Supabase. Return to <a href="#/courses">Live Courses</a> or <a href="#/builder">Live Course Builder</a> to edit the database.</section>{children}</>;}
 function AdminOnly({children}){const {state}=useDemo();return getAuthSession()?.role==='admin'&&state.role==='admin'?children:<Navigate to='/home' replace/>}
 function RoutePage({children,standalone=false}){return <><MotionSystem/><Layout standalone={standalone} onLogout={()=>{window.dispatchEvent(new Event('technica-demo-logout'))}}>{children}</Layout></>}
 export default function App(){
  const l=useLocation(),{update}=useDemo();
+ const legacyPreview=legacyBrowserQa||new URLSearchParams(l.search).get('legacyPreview')==='1';
  const [auth,setAuth]=useState(null),[authLoading,setAuthLoading]=useState(true),[authError,setAuthError]=useState('');
  useEffect(()=>{window.scrollTo({top:0,behavior:'instant'})},[l.pathname]);
  useEffect(()=>{
@@ -45,8 +53,8 @@ export default function App(){
  <Route path="/practice" element={<RoutePage><PracticePage/></RoutePage>}/>
  <Route path="/practice/session" element={<RoutePage standalone><QuizPage kind="practice"/></RoutePage>}/>
  <Route path="/analytics" element={<AdminOnly><RoutePage><AnalyticsPage/></RoutePage></AdminOnly>}/>
- <Route path="/builder" element={<AdminOnly><RoutePage><BuilderPage/></RoutePage></AdminOnly>}/>
- <Route path="/courses" element={<AdminOnly><RoutePage><CoursesPage/></RoutePage></AdminOnly>}/>
+ <Route path="/builder" element={<AdminOnly><RoutePage>{legacyPreview?(legacyBrowserQa?<BuilderPage/>:<LegacyPreviewWarning><BuilderPage/></LegacyPreviewWarning>):<LiveCourseBuilder/>}</RoutePage></AdminOnly>}/>
+ <Route path="/courses" element={<AdminOnly><RoutePage>{legacyPreview?(legacyBrowserQa?<CoursesPage/>:<LegacyPreviewWarning><CoursesPage/></LegacyPreviewWarning>):<LiveCoursesPage/>}</RoutePage></AdminOnly>}/>
  <Route path="/reports" element={<AdminOnly><RoutePage><AnalyticsPage/></RoutePage></AdminOnly>}/>
  <Route path="/assessments" element={<RoutePage><AssessmentOverview/></RoutePage>}/>
  <Route path="/assessments/take" element={<RoutePage standalone><QuizPage kind="assessment"/></RoutePage>}/>
