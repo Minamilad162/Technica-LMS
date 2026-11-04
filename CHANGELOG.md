@@ -1,3 +1,11 @@
+### 2026-11-04 — P9A: Protected ASP bank release preflight (read-only)
+
+- Introduced an authenticated Admin-only P9A preflight RPC in a staged, unexecuted migration. It reports genuine ASP11 human-reviewed candidate counts, Low/Medium/High classifications, 200-Mock-reservation shortfall, nine-domain completion and conditions blocking release.
+- Added a compact **Bank release preflight** section INSIDE existing ASP Question Review, with manual Check action and no approval, import, mapping, mock reservation or publication controls. Never exposes source prompts, correct answers or user data through preflight.
+- Client verifies the response is read-only, bound to the intended ASP course and always release-blocked; rejects contradictory counts or unexpected domain metadata.
+- CI runs Node policy regression and disposable PostgreSQL Admin/learner/anonymous permission checks and verifies preflight does not change real question or review rows.
+- **Still pending:** explicit owner-approved migration to an identified staging project, actual verified JWT/Cloudflare runtime QA, human ASP11 mapping, 200-versioned Mock reservation, separate controlled publishing and paid-production readiness. Production database was not accessed or changed.
+
 ### 2026-11-04 — P8c: Read-only Admin Level Up bank readiness
 
 - Added **Level Up bank readiness** inside the real Admin ASP Question Review card, with an optional ASP11 domain filter and explicit read-only **Check real bank**.
