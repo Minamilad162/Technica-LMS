@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import {adaptiveCheckpoint,adaptiveMediumCheckpoint,adaptiveTierTargets,adaptivePasses,nextAdaptiveTier,ADAPTIVE_POLICY_VERSION} from '../src/production/adaptivePolicy.js';
 import {progressForLesson,mayReadLiveCourse} from '../src/production/liveLearningApi.js';
+import {getAdaptiveReadiness} from '../src/production/practiceApi.js';
 
 const read=p=>readFileSync(new URL('../'+p,import.meta.url),'utf8');
 for(const [size,low,medium,high] of [
@@ -43,6 +44,31 @@ assert.equal(nextAdaptiveTier('medium',13,17,50),'high','Medium 13/17 passes 70%
 assert.equal(adaptivePasses(0,0,3),false);
 assert.equal(adaptivePasses(10,9,3),false);
 assert.throws(()=>nextAdaptiveTier('superhard',1,1,10));
+
+const serverReady={ready:true,low:30,medium:35,high:50,
+ requiredPerTier:30,checkpoint:10,mediumCheckpoint:10,thresholdPercent:70,
+ policyVersion:'thirds-v1'};
+const authDB={rpc:async(name,args)=>{
+ assert.equal(name,'lms_p8_levelup_readiness');
+ assert.equal(args.p_count,30);
+ return {data:serverReady,error:null};
+}};
+const validated=await getAdaptiveReadiness(authDB,'real-asp',30,null);
+assert.equal(validated.checkpoint,10);
+assert.equal(validated.mediumCheckpoint,10);
+assert.equal(validated.ready,true);
+await assert.rejects(()=>getAdaptiveReadiness({rpc:async()=>({
+ data:{...serverReady,policyVersion:'p8-20pct',checkpoint:6,mediumCheckpoint:6},
+ error:null})},'real-asp',30),/outdated/,'Old 20% RPC must fail closed');
+await assert.rejects(()=>getAdaptiveReadiness({rpc:async()=>({
+ data:{...serverReady,ready:true,low:9},error:null
+})},'real-asp',30),/outdated/,'Insufficient real pool must fail closed');
+await assert.rejects(()=>getAdaptiveReadiness({rpc:async()=>({
+ data:{...serverReady,mediumCheckpoint:9},error:null
+})},'real-asp',30),/outdated/,'Server Medium gate cannot silently change');
+await assert.rejects(()=>getAdaptiveReadiness({rpc:async()=>({
+ data:{...serverReady,thresholdPercent:60},error:null
+})},'real-asp',30),/outdated/,'70% cannot be weakened');
 
 const course={id:'real-course-uuid'},catalog={
  identity:{isAdmin:false},entitlements:[{course_id:'real-course-uuid',status:'active'}]
