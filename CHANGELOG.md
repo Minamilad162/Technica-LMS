@@ -1,3 +1,11 @@
+### 2026-11-04 — ASP 2,500-question private candidate workbook received (metadata intake only)
+
+- Audited the uploaded private 9-sheet workbook `ASP_Question_Bank_2500_Simplified (1).xlsx`: exactly **2,500** questions distributed **250/625/200/300/250/300/175/275/125**. Every question, 4 options, A-D answer key and explanation present; zero normalized exact duplicate prompts and zero duplicate options detected. This validates structure **only**, not scientific answer accuracy, copyright ownership or permission to distribute.
+- No standalone difficulty, question-specific independent citations, Topic, Lesson, source ID, licensing/rights evidence or SME review/approval columns. Sheet-to-ASP11 mapping is tentative and must be verified. All items remain an **unapproved external candidate**, not actual Supabase rows.
+- Historical `scripts/import-asp-p4.mjs` hard-rejects any bank other than **1,625 / FIVE legacy groups**. Do not overwrite the public/demo bundled bank, leak correct answers into Vite assets or execute a migration/import. A new **private backend-only, dry-run-first** reconciliation/importer is needed after explicit owner authorization.
+- Source SHA256 and detailed metadata-only custody notes in `docs/current/ASP2500_CANDIDATE_SOURCE_INTAKE.md`. A separate private 11-sheet `ASP_2500_Review_and_Quality_Audit.xlsx` (nine original sheets plus Audit and SME Review Queue) was generated in the conversation; it is **not committed** to the public repository.
+- No Supabase Production/Cloudflare writes, no question publication, no 200-item Mock reservation, and no change to the locked P8e adaptive 7-correct-of-original-10 rule.
+
 ### 2026-11-04 — P9C.1: concise SELECT-only ASP bank decision report
 
 - Added `supabase/P9C_DECISION_SUMMARY_READ_ONLY.sql`, a single owner-run SELECT for the confirmed Technica project with P9B already installed. The report distinguishes real ASP question counts from the **historical 1,625** reference, human rights/answer review from technical approval, N30 Level Up approved Low/Medium/High pool counts, and 200 Mock-exclusive flags from a genuinely populated immutable Mock form. The formal 200-question/300-minute Mock engine is always displayed as NOT_IMPLEMENTED; source-only readiness never asserts real deployment.
