@@ -123,7 +123,7 @@ END; $$;
 -- A valid reserved form is necessary but does not mean the engine is live
 -- until this separate P10 migration has been expressly installed in staging.
 CREATE FUNCTION public.lms_p10_mock_readiness(p_course_id uuid)
- RETURNS jsonb LANGUAGE plpgsql STABLE SECURITY DEFINER SET search_path='' AS $
+ RETURNS jsonb LANGUAGE plpgsql STABLE SECURITY DEFINER SET search_path='' AS $$
 DECLARE v_form uuid; v_count integer:=0; v_total integer:=0;
 BEGIN
  IF (SELECT auth.uid()) IS NULL OR NOT public.lms_p4_can_practice(p_course_id)
@@ -148,7 +148,7 @@ BEGIN
    v_count=200 AND v_total=200,
    'verifiedReserved',v_count,'totalExclusiveFlags',v_total,
    'required',200,'durationSeconds',18000,'engineVersion','p10-mock-v1');
-END; $;
+END; $$;
 
 -- Idempotent start: lock learner profile across tabs.
 -- Form must be genuinely reserved, immutable, exactly 200 unique DRAFT
