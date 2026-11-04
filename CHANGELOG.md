@@ -1,3 +1,11 @@
+### 2026-11-04 — P8d: Exact one-third adaptive Level Up gates in Practice
+
+- Corrected the original P8 20%-of-N early-promotion policy to the owner's **balanced thirds**: N=30 has 10 Low + 10 Medium + 10 High if the learner clears each tier; N=10→3/3/4, N=25→8/8/9, N=50→16/17/17.
+- After the tier's minimum answers, grade cumulative correct/answered on the **server**, promoting at ≥70% only. A failed tier keeps consuming fresh questions of the same difficulty, with re-evaluation after every answer; the session stops at exactly the chosen N even if no promotion occurred. Current tier/transition remains invisible during the attempt.
+- Added separate nullable Medium gate to private P8 state, new P8d policy-version readiness, and a guarded **owner-run staging-only migration**. Existing in-progress P8 sessions retain their historical stored checkpoint; no bank or learner rows, mock, non-adaptive practice or production data are altered by this source update.
+- Added the 30-question preset/diagnostic, strict client refusal of old 20%-gate readiness, SELECT-only `P8D_VERIFY_READ_ONLY.sql`, and disposable PostgreSQL/Node coverage for 7/10 vs 6/10, 10/14 recovery, 30/30 cap, uninterrupted old attempts and answer/bank isolation.
+- This PR does not apply the P8d migration to live Supabase or deploy Cloudflare. Real 30-question Level Up remains blocked until dedicated staging migration authorization, approved pool counts and signed account testing.
+
 ### 2026-11-04 — P9A: Protected ASP bank release preflight (read-only)
 
 - Introduced an authenticated Admin-only P9A preflight RPC in a staged, unexecuted migration. It reports genuine ASP11 human-reviewed candidate counts, Low/Medium/High classifications, 200-Mock-reservation shortfall, nine-domain completion and conditions blocking release.
