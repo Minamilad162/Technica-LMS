@@ -21,8 +21,8 @@ const formatTime=seconds=>{
 };
 const errorText=e=>e?.message||'Practice request failed';
 
-export default function LivePractice({db,user,course,domains=[],access}) {
- const [mode,setMode]=useState('quick10'),[count,setCount]=useState(10),[minutes,setMinutes]=useState(0),[domainId,setDomainId]=useState('');
+export default function LivePractice({db,user,course,domains=[],access,defaultMode='quick10'}) {
+ const [mode,setMode]=useState(defaultMode),[count,setCount]=useState(10),[minutes,setMinutes]=useState(0),[domainId,setDomainId]=useState('');
  const [attempt,setAttempt]=useState(null),[selected,setSelected]=useState(0),[feedback,setFeedback]=useState({});
  const [busy,setBusy]=useState(false),[error,setError]=useState(''),[notice,setNotice]=useState(''),[clock,setClock]=useState(Date.now());
  const [readiness,setReadiness]=useState(null),[readinessBusy,setReadinessBusy]=useState(false),[readinessError,setReadinessError]=useState('');
