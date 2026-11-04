@@ -6,6 +6,8 @@ const bank=JSON.parse(readFileSync(new URL('../src/data/aspQuestionBank.json',im
 const domains=['domain1','domain2','domain3','domain4','domain5'];
 const params={courseId:'asp',domainIds:domains,insights:{wrongIds:['D1-0001','D1-0002'],weakestDomain:'domain1'}};
 assert.deepEqual(PRACTICE_MODES.map(m=>m.id),['quick10','timed','domain','weakest','missed','custom','levelup','mock']);
+assert.equal(PRACTICE_MODES.find(m=>m.id==='levelup').status,'server','Level Up must route into protected Supabase, never local Demo grading');
+assert.equal(PRACTICE_MODES.find(m=>m.id==='mock').status,'planned','Reserved Mock remains disabled');
 const quick=presetPracticeSettings('quick10',params);
 assert.equal(quick.questionCount,10);assert.equal(quick.timerMode,'none');assert.equal(quick.feedbackMode,'each');
 const timed=presetPracticeSettings('timed',params);
