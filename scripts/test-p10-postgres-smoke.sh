@@ -106,9 +106,11 @@ echo 'PASS P10 200 private questions, no key leaks, idempotent start/submit, fla
 second_data=$(run_as authenticated "$paid" "SELECT public.lms_p10_start_mock('$course','$rid2')")
 second_attempt=$(printf '%s' "$second_data" | python3 -c 'import json,sys;print(json.load(sys.stdin)["attemptId"])')
 # Test time expiry using fixture-only clock adjustment; preserve exact 300m.
-psql -X -v ON_ERROR_STOP=1 -q -c "UPDATE public.lms_p10_mock_attempts
- SET started_at=clock_timestamp()-interval '301 minutes',
- deadline_at=clock_timestamp()-interval '1 minute' WHERE id='$second_attempt'"
+psql -X -v ON_ERROR_STOP=1 -q -c "WITH exact_tick AS (SELECT clock_timestamp() AS stamp)
+ UPDATE public.lms_p10_mock_attempts a
+ SET started_at=exact_tick.stamp-interval '301 minutes',
+ deadline_at=exact_tick.stamp-interval '1 minute'
+ FROM exact_tick WHERE a.id='$second_attempt'"
 expired=$(run_as authenticated "$paid" "SELECT public.lms_p10_mock_payload('$second_attempt')")
 echo "$expired" | python3 -c '
 import json,sys
