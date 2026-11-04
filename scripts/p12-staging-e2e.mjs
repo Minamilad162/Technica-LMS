@@ -18,7 +18,7 @@ export function stagingConfiguration(env,argv=[]){
  // Requiring BOTH known, distinct project references prevents accidental reuse
  // of the user's known Production target in a purported staging QA command.
  if(!/^[a-z0-9]{20}$/.test(ref)||!/^[a-z0-9]{20}$/.test(production)
-  ||production===ref||url!==\`https://\${ref}.supabase.co\`
+  ||production===ref||url!==`https://${ref}.supabase.co`
   ||!key||allowed!=='YES_READ_ONLY'||confirmation!==ref)
    throw Error('P12 STAGING GUARD: explicit different staging/production refs, exact HTTPS URL, public key and CLI confirmation required. No requests sent.');
  const credentials={};
