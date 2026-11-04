@@ -205,5 +205,8 @@ jobs:
       - name: P9C zero-write ASP bank audit AFTER P9B fixture reservation
         run: bash scripts/test-p9c-postgres-smoke.sh post
 
+      - name: P9D.1 private ASP fingerprint SELECT and SHA256 normalization on disposable PostgreSQL
+        run: bash scripts/test-p9d1-postgres-smoke.sh
+
       - name: Test scope disclosure
         run: echo "Ephemeral local PostgreSQL smoke only; live Supabase Auth, Storage, Data API and device tests still pending."
