@@ -1,3 +1,12 @@
+### 2026-11-05 — P12.1 real Supabase Admin Release Readiness & QA dashboard (SOURCE ONLY)
+
+- New `/release-readiness` Admin page integrates one-way read-only, authenticated Supabase checks for correct public HTTPS config, verified live Admin, actual ASP catalog, Course→Domain→Topic→Lesson structure, P2 own-progress table, P4 Practice entitlement, P6A protected ASP aggregate inventory, P8e Level Up 30-question readiness, P10 genuine exclusive 200 Mock form, and P11 own-analytics report. NO table mutations, approval, content import or public answer data.
+- Runtime checks require actual Supabase active Admin JWT; historical Demo Admin UI role is NOT treated as database authorization. No protected P6/P8/P10/P11 calls if genuine Admin check fails. No public URL/key/JWT/user identifier/question content in results.
+- Seven additional manual gates stay explicitly PENDING and default verdict permanently **NO-GO**, regardless of browser runtime check success: content rights+SME, real staging signed sessions, protected media, payments/refunds/trials, device/browser QA, capacity/recovery, backup/rollback and owner sign-off.
+- Strict `npm run test:p12` mocked read-only contract (0 DB writes, no protected reads without Admin, safe aggregate report and never-GO) added to CI. Existing P10/P11 source-only and synthetic PostgreSQL tests preserved.
+- Updated current release security checklist to avoid stale `NOT IMPLEMENTED` claims for source-complete P10/P11 while expressly not claiming any live deployment. Docs `P12_PRODUCTION_READINESS_AND_QA.md`; Blueprint §66; Logic Registry LMS-035.
+- No Supabase Staging/Production migration, authentication/roles/data changes, real questions, payment events, Cloudflare release or real-device inspection.
+
 ### 2026-11-05 — P11 learner-owned verified Progress & Analytics (SOURCE ONLY)
 
 - Built authenticated Supabase `/my-progress` for real enrolled learners, separate from existing Demo/Admin analytics. Learner sidebar access, course selection, official Course→Domain→Topic→Lesson verified completion, per-domain answer accuracy, Practice and Mock separately, and latest ten graded attempts. Missing RPC/backend displays an explicit unavailable state, never fake 78% or 100-user sample statistics.
