@@ -89,6 +89,9 @@ jobs:
       - name: P9C strict SELECT-only ASP bank audit contract
         run: npm run test:p9c
 
+      - name: P9C concise owner decision summary read-only contract
+        run: npm run test:p9c:decision
+
       - name: P5 native fullscreen and exit policy contracts
         run: npm run test:p5
 
