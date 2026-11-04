@@ -171,9 +171,9 @@ BEGIN
  v_tier:=s.tier;
  -- Cumulative within this stage; recoveries after early mistakes count.
  IF v_tier<>'high'
-    AND v_tier_attempted>=CASE
+    AND v_tier_attempted >= (CASE
       WHEN v_tier='medium' THEN coalesce(s.medium_checkpoint_size,s.checkpoint_size)
-      ELSE s.checkpoint_size END
+      ELSE s.checkpoint_size END)
     AND v_tier_correct*10>=v_tier_attempted*7 THEN
   v_tier:=CASE WHEN v_tier='low' THEN 'medium' ELSE 'high' END;
   v_tier_attempted:=0;
