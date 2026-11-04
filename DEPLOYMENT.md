@@ -38,3 +38,8 @@ See .github/workflows/ci-security.yml and docs/current/RELEASE_SECURITY_CHECKLIS
 ## ASP review navigation update (2026-11-04)
 
 Current UI contract: `Admin → Question Bank → ASP course tile → Review & classify`. This expands the card and renders the secure `asp-review.html` **inside a same-origin iframe**. No separate ASP Review admin-menu tab. In a full Supabase-only build, the ASP course header contains an inline **Review questions** action. Both require real Supabase Admin credentials and protected P6A RPC privileges; Demo Admin credentials do not authorize reviewer access. The public Supabase build variables documented above remain necessary. Cloudflare `asp-review.html` is a required internal asset, *not* a standalone visible navigation section. No schema migration and no automatic deploy are part of this UI change.
+
+
+## P7 amendment: default Admin Courses & Builder use real Supabase (2026-11-04)
+
+The historical statement that the default build is Demo remains true for many learner/practice/media modules, but is superseded for Admin /courses and /builder. These routes now use actual P1 Supabase tables, verified Auth Admin role and explicit Draft CRUD. A real /builder?courseId=<uuid> selects a genuine course UUID, and the asp slug can be mapped to an existing database ASP course. Existing browser-only authoring remains available via ?legacyPreview=1 with an explicit warning; Production should not confuse these with server writes. Vite QA uses a strict import.meta.env.DEV-only fixture, never Production Auth bypass. Cloudflare must still supply the two public VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY variables as BUILD variables. See docs/current/P7_LIVE_COURSE_BUILDER_GATE.md. No new SQL migration or production action was performed.
