@@ -201,3 +201,20 @@ exclusive=$(psql -X -v ON_ERROR_STOP=1 -A -t -c \
  WHERE q.approval_state='approved' OR NOT q.mock_exclusive")
 [[ "$exclusive" == 0 ]] || { echo 'FAIL Mock reservation leaked into learner Practice eligibility';exit 1; }
 echo 'PASS P8e untouched, 200 Mock-exclusives non-Practice and real question pool remains owner-gated'
+
+# Owner-run P9B diagnostic is READ ONLY; verify it on disposable source data.
+audit_report=$(psql -X -v ON_ERROR_STOP=1 -A -t -f supabase/P9B_VERIFY_READ_ONLY.sql)
+if printf '%s\n' "$audit_report" | grep -Eq '\|(MISSING|FAIL_[A-Z_]+|FAIL)(\||$)';then
+ echo 'FAIL P9B SELECT-only schema and Mock bank audit'
+ printf '%s\n' "$audit_report";exit 1
+fi
+for expected in \
+ 'P9B_PRIVATE_ACL|lms_p9b_mock_forms|PASS' \
+ 'P9B_PRIVATE_ACL|lms_p9b_mock_items|PASS' \
+ 'P9B_ADMIN_RPC|lms_p9b_reserve_mock(uuid,uuid[],text)|PASS' \
+ 'P9B_FORM_INVENTORY|asp|1|200|200|READY_FORM_ONLY';do
+ if ! printf '%s\n' "$audit_report" | grep -Fq "$expected";then
+  echo "FAIL P9B SELECT-only audit missing $expected";printf '%s\n' "$audit_report";exit 1
+ fi
+done
+echo 'PASS P9B read-only audit: private RPCs and exact Mock form on disposable PG'
