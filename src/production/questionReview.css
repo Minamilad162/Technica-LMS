@@ -52,3 +52,7 @@
 .live-adaptive-review-status,.live-adaptive-review-footnote{font-size:11px;line-height:1.65;color:#6b838b;margin:12px 0 0}
 .live-adaptive-review .live-error{display:flex;align-items:flex-start;gap:8px;margin-top:12px;overflow-wrap:anywhere}
 @media(max-width:760px){.live-adaptive-review-head{flex-wrap:wrap}.live-adaptive-review-grid{grid-template-columns:1fr}.live-adaptive-review{padding:12px}}
+
+/* P8d: 4 Admin readiness lengths (10, 25, 30, 50). */
+.live-adaptive-review-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+@media(max-width:760px){.live-adaptive-review-grid{grid-template-columns:1fr}}

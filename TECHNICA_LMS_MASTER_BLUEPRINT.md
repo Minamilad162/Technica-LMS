@@ -4,7 +4,7 @@
 >
 > Project: Technica Consult LMS
 > Version: 1.1.11 (Practice Center quick mode selection)
-> Last updated: 2026-10-31 (Africa/Cairo)
+> Last updated: 2026-11-04 (Africa/Cairo), P8d adaptive policy correction
 > Repository: https://github.com/Minamilad162/Technica-LMS
 > Target branch: main
 > Current inspected source baseline: v1.15.0, commit 8021f604c63c59b2100d944ead86fed149eb1ceb
@@ -23,7 +23,7 @@
 4. **Site UI is English** with an extensible translation architecture for later Arabic.
 5. **Content:** Admin-authored, rich lessons (headings, formatting/approved colors, text, images, PDF, video); quizzes set by admin (e.g., 10 or 20 questions); progress recorded per learner.
 6. **Practice:** Quick 10, timed/custom options, adaptive Level Up, Weakest Subject, Missed Questions and question review. User chooses question count, time mode, difficulty preference, answer reveal timing and eligible question-history pools as permitted for each mode.
-7. **Adaptive logic:** Hidden Low → Medium → High; promotion after **at least 70% correct** in the current difficulty stage. Failing to reach threshold retains the stage, subject to the attempt's question limit and available eligible bank. Difficulty labels/stage transitions are not shown during the active adaptive test.
+7. **Adaptive logic (P8d CURRENT):** ONLY in Level Up Practice, chosen N is ideally balanced into Low / Medium / High thirds (**N=30 → 10 / 10 / 10**). Promotion requires the minimum answered in the current tier (10 for Low/Medium at N=30) **AND ≥70% cumulative correct within that tier**. If below 70%, keep drawing unique SAME-tier questions, updating cumulative correct/answered after every answer. NEVER extend beyond N; difficulty labels/transitions are not shown while solving. For other N, split into balanced thirds; see §57. Historical 20% checkpoints in §53–55 are SUPERSEDED for new sessions by §57.
 8. **ASP Mock Exam:** **200 exclusive, admin-reserved questions**, **300 minutes exactly (5 hours)**, admin-defined form, fixed timing and protected delivery. Reserved questions are completely excluded from learning quizzes, Quick 10, custom practice, adaptive practice, diagnostics, trial demos and any other exam/form unless an admin explicitly unreserves them. One learner's mock answers do not unlock them for other modes.
 9. **Mock time supersedes 5h30:** The official BCSP ASP exam time is 5 hours; 5h30 belongs to the separately listed CSP exam. The initial mock is 200 questions / 5h, not a 5h30 assessment.
 10. **Calculator:** Floating/dockable scientific calculator available in question flows, functionally inspired by TI-30XS MultiView. Implement our own licensed-safe appearance/engine; do not copy TI logos/artwork/software without permission.
@@ -515,9 +515,11 @@ Reserve relation to identity, entitlements and courses; later design admin-creat
 | DEC-010 | 2026-10-28 | LOCKED | Preserve approved light responsive UI and existing v1.14 Saved removal |
 | DEC-011 | 2026-10-28 | LOCKED | Master Markdown read/update on every project change; errors/fixes tracked permanently |
 | DEC-012 | 2026-10-28 | LOCKED | Use Pocket Prep screenshots as UX ideas, original Technica implementation |
-| DEC-013 | 2026-10-28 | PROPOSED | Stage minimum answered = 10 for reliable adaptive 70% check; calibrate short sessions |
+| DEC-013 | 2026-10-28 | SUPERSEDED BY DEC-016 | Historical proposal: fixed minimum 10 answers in each tier; current user-approved P8d instead proportionally divides selected N into near-equal thirds. |
 | DEC-014 | 2026-10-28 | PROPOSED | Server-side Supabase domain model, signed streamed video and PSP vendor selection |
 | DEC-015 | 2026-10-28 | LOCKED | Owner-supplied infrastructure, evidence-first audit, and UI reference governance are repo-integrated; existing newer root UI guide remains authoritative; maintain tests, docs, and prior accepted behavior. |
+| DEC-016 | 2026-11-04 | LOCKED / SUPERSEDES P8 20% CHECKPOINT | Adaptive Level Up only in Secure Practice: selected N balanced thirds; 30 -> 10 Low, 10 Medium, 10 High in perfect journey. Promotion after own-tier minimum and >=70% cumulative correct; if below keep same tier, never exceed N, silently advance without learner level labels. |
+| DEC-017 | 2026-11-04 | LOCKED | New P8d sessions use persisted Low/Medium checkpoints; existing P8 in-flight sessions retain their original stored 20% threshold without migration changes. No real database updates until separate user-approved staged rollout. |
 
 ## 16. Error, conflict & regression prevention register
 
@@ -546,6 +548,8 @@ Reserve relation to identity, entitlements and courses; later design admin-creat
 | BUG-020 | MEDIUM | OPEN / verification gap | P0 2026-10-30 used connected GitHub source inspection only; direct git checkout failed due DNS, and npm/CI/browser/Supabase live tests not independently verified. Record runtime evidence before marking any phase PASS. |
 
 Add new BUG rows immediately when an issue is discovered, include reproduction, root cause, fix, commit, proof and regression-test identifier. Never erase bugs after fixing; change status to FIXED / VERIFIED.
+
+| BUG-021 | HIGH | FIX IN P8D SOURCE / LIVE MIGRATION PENDING | Legacy P8 20% checkpoint promoted 30-question Level Up after 6 Low instead of the owner-required 10; it could produce 6/6/18 rather than 10/10/10 perfect. P8d uses balanced one-third Low/Medium persisted gates, >=70% cumulative per-tier recovery, and exact N cap. Disposable Node/PG tests and P8d SELECT-only live audit prevent regression. Old active sessions remain unchanged; production acceptance pending. |
 
 ## 17. Test and release checklist
 
@@ -1220,3 +1224,18 @@ Implementation on isolated [PR #14](https://github.com/Minamilad162/Technica-LMS
 **Tests and release proof:** New `test:p9a` Node regression checks identity/course binding, fail-closed contradictions, non-Mock review and rights gates, missing RPC and no client direct bank read. Disposable `test-p9a-postgres-smoke.sh` runs after P8 in CI, verifies learner/anon denial, real Admin aggregate-only response and database record fingerprints unchanged across migration/RPC. Existing P1–P8, ASP integrity, Demo UI, Calculator and protected live bundle gates stay mandatory. `docs/current/P9A_ASP_RELEASE_PREFLIGHT_GATE.md` defines owner-only Staging installation and JWT acceptance (not executed). CI success does not mean real Supabase or Cloudflare deployment verified.
 
 **Next required stage:** reconcile actual ASP imported 1,625 source rows and official ASP11 mapping/provenance; approve individual sources with rights; select **exactly 200 reviewed stable Mock question IDs** in versioned audited reservation before any general release; create a separately authorized Admin approval RPC/UI and real JWT/access tests. Full 200/300 Mock engine, protected media, verified learner events, analytics and billing still pending. Paid production remains **NO-GO**. Rollback source/UI/CI without deleting real questions or the owner-run P8 migration.
+
+
+## 57. P8d — User-locked adaptive thirds and cumulative 70% ONLY in Practice (2026-11-04)
+
+**Decision and defect:** The owner clarified and LOCKED the Level Up logic with an exact **30-question example**. The original P8/P8b/P8c implementation used a minimum checkpoint equal to about **20% of N** (N=30 allowed progression after only 6 Low questions), which is **not** the required logic. The historical details in §6 and §§53–55 are retained for audit history but SUPERSEDED BY THIS SECTION. DEC-016/DEC-017 and LMS-024 are the current authority.
+
+**Current contract:** User selects any N=1..50 only from Secure **Practice → Level Up**, NOT from regular Practice modes, Admin Assessment or exclusive ASP Mock 200/300. Ideal balanced stage quotas are Low = max(1,floor(N/3)); Medium = max(1,floor((N-Low)/2)) for N>Low; High is the remaining number. N=10 -> 3/3/4, N=25 -> 8/8/9, **N=30 -> 10/10/10**, N=50 -> 16/17/17. Each initial Low→Medium or Medium→High promotion requires at least its OWN minimum count answered in that tier AND **cumulative correct*10 >= tier_attempted*7**. Below 70%, the server draws ANOTHER approved, non-exclusive question at the SAME tier and recalculates the numerator/denominator after every answer. Once promoted, start next tier counters fresh, never demote or skip stages. Stop at exactly chosen N answered (or existing server-authoritative deadline), regardless of the tier reached. 70% is not an official passing mark.
+
+**Worked 30-question example:** all correct gives Low Q1–10, Medium Q11–20, High Q21–30. If after 10 Low questions only 6 are correct, remain Low. Four later correct answers progressively result in 7/11, 8/12, 9/13, 10/14 (>=70%), so **Q15 first Medium**. Seven correct from 10 Medium Q15–24 promotes to High Q25–30; total **14 Low + 10 Medium + 6 High = 30**. If Low never reaches 70% by Q30, terminate at 30 without advancing. No difficulty indicator, promotion banner or client-side tier selection during the session.
+
+**Database source delta:** `supabase/migrations/202611040003_p8d_adaptive_thirds.sql` is a guarded, separately owner-run staging migration ONLY after original P8. A new NULLABLE `lms_practice_adaptive_state.medium_checkpoint_size` safely lets in-flight P8 sessions keep their old `checkpoint_size` for both tiers; NEW sessions persist Low/Medium balanced gates. The delta revises only P8 checkpoint, readiness, start and ordered answer RPCs, with no P4 generic Practice, Admin Assessment, Mock, P6A review, question bank, learner role, approval or data mutation. Correct answer counters remain private server-owned state behind real JWT and RLS. `lms_p8_levelup_readiness` now announces `policyVersion='thirds-v1'` plus Low `checkpoint`, `mediumCheckpoint`, 70% threshold and N-per-tier eligible approved non-Mock counts. The browser FAILS CLOSED if old P8 20% SQL remains installed. The question-pool preflight still demands N approved non-Mock per tier (not merely 10 for N=30), ensuring never running out while remaining Low.
+
+**UI:** Add 30 preset to learner's 1–50 Level Up Practice setup and Admin's secure readiness panel; no live tier indicator, answer key, high/medium notification or adaptive change to non-Level Up modes. `src/production/adaptivePolicy.js` specifies the testable arithmetic but **SQL remains the grading authority**. The old historical Demo assessment remains unaffected. Test and design contract is in `docs/current/P8D_ADAPTIVE_THIRDS_POLICY.md`.
+
+**Verification and limitations:** `npm run test:adaptive:live` and `npm run test:adaptive:admin` cover 10/25/30/50, threshold 6/10 vs 7/10, 9/13 vs 10/14, 70% Medium, client rejection of old RPC, no public stage marking, and server-only progression. `scripts/test-p8-postgres-smoke.sh` uses **disposable PostgreSQL only** to seed synthetic approved test questions, run P8 then P8d, demonstrate existing in-flight checkpoint preservation, server-side 30 perfect 10/10/10, recovery 14/10/6, and all-Low 30-question stop, uniqueness, row ACL and non-Mock delivery. `supabase/P8D_VERIFY_READ_ONLY.sql` is SELECT-only and checks actual installed one-third functions, private medium checkpoint, bank counts and helper permissions. All P1/P9A/Calculator/Practice/demo+live build tests stay mandatory. GitHub success is source/ephemeral DB evidence, **NOT actual Supabase migration, data readiness, JWT browser acceptance or Cloudflare deployment**. The owner reported manually applying original P8 in a database earlier; DO NOT rerun it. Production database remains untouched and paid release remains NO-GO until separately authorized staging/live verification.
