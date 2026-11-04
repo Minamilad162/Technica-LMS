@@ -42,7 +42,8 @@
     "test:calculator:ti-audit": "node scripts/audit-ti30xs-reference.mjs",
     "test:calculator:physical": "node scripts/test-calculator-physical-layout.mjs",
     "test:content-protection": "node scripts/test-content-protection.mjs",
-    "test:practice-modes": "node scripts/test-practice-modes.mjs"
+    "test:practice-modes": "node scripts/test-practice-modes.mjs",
+    "test:adaptive:admin": "node scripts/test-p8-admin-readiness.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.58.0",
