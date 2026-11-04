@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
-import {adaptiveCheckpoint,adaptiveMediumCheckpoint,adaptiveTierTargets,adaptivePasses,nextAdaptiveTier,ADAPTIVE_POLICY_VERSION} from '../src/production/adaptivePolicy.js';
+import {adaptiveCheckpoint,adaptiveMediumCheckpoint,adaptiveTierTargets,adaptivePasses,adaptiveRequiredCorrect,nextAdaptiveTier,ADAPTIVE_POLICY_VERSION} from '../src/production/adaptivePolicy.js';
 import {progressForLesson,mayReadLiveCourse} from '../src/production/liveLearningApi.js';
 import {getAdaptiveReadiness} from '../src/production/practiceApi.js';
 
@@ -17,7 +17,10 @@ for(const [size,low,medium,high] of [
   'Medium checkpoint for '+size);
  assert.equal(low+medium+high,size,'Exactly N questions in ideal session');
 }
-assert.equal(ADAPTIVE_POLICY_VERSION,'thirds-v1');
+assert.equal(ADAPTIVE_POLICY_VERSION,'thirds-fixed-correct-v2');
+assert.equal(adaptiveRequiredCorrect(10),7);
+assert.equal(adaptiveRequiredCorrect(8),6);
+assert.equal(adaptiveRequiredCorrect(17),12);
 assert.throws(()=>adaptiveCheckpoint(0));
 assert.throws(()=>adaptiveCheckpoint(51));
 for(const size of [10,25,30,50]){
@@ -29,26 +32,33 @@ for(const size of [10,25,30,50]){
  assert.equal(nextAdaptiveTier('low',pass-1,check,size),'low','Below 70% remains Low');
  assert.equal(nextAdaptiveTier('low',pass,check-1,size),'low','Cannot promote before proportional checkpoint');
 }
-assert.equal(nextAdaptiveTier('low',6,10,25),'low');
+assert.equal(nextAdaptiveTier('low',5,10,25),'low');
+assert.equal(nextAdaptiveTier('low',6,10,25),'medium','6 correct unlocks base-8 tier even after ten tries');
 assert.equal(nextAdaptiveTier('low',7,10,25),'medium');
-assert.equal(nextAdaptiveTier('low',21,30,50),'medium','Cumulative recovery after mistakes must allow promotion');
-assert.equal(nextAdaptiveTier('low',20,30,50),'low');
+assert.equal(nextAdaptiveTier('low',12,30,50),'medium','12 correct meets 70% of base 16, extra questions do not raise target');
+assert.equal(nextAdaptiveTier('low',11,30,50),'low');
 assert.equal(nextAdaptiveTier('low',6,10,30),'low','6/10 Low must stay Low');
 assert.equal(nextAdaptiveTier('low',7,10,30),'medium','7/10 Low promotes only after ten');
 assert.equal(nextAdaptiveTier('low',7,9,30),'low','Even 7/9 cannot skip first 10');
-assert.equal(nextAdaptiveTier('low',9,13,30),'low','9/13 = 69.23% stays Low');
-assert.equal(nextAdaptiveTier('low',10,14,30),'medium','10/14 recovery promotes after extras');
+assert.equal(nextAdaptiveTier('low',6,11,30),'low','6 correct is still less than fixed 7 target');
+assert.equal(nextAdaptiveTier('low',7,11,30),'medium','6/10 plus one correct => promote at 7/11');
+assert.equal(nextAdaptiveTier('low',7,12,30),'medium','Extra wrong attempts never raise the original 7-correct target');
+assert.equal(nextAdaptiveTier('low',10,14,30),'medium','Additional correct answers also qualify');
 assert.equal(nextAdaptiveTier('medium',6,10,30),'medium','6/10 Medium stays Medium');
 assert.equal(nextAdaptiveTier('medium',7,10,30),'high','7/10 Medium promotes to High');
+assert.equal(nextAdaptiveTier('medium',7,11,30),'high','6/10 Medium plus one correct promotes to High');
+assert.equal(nextAdaptiveTier('medium',7,9,30),'medium','No promotion before ten Medium questions');
 assert.equal(nextAdaptiveTier('medium',12,16,50),'medium','Medium gate for 50 is 17');
 assert.equal(nextAdaptiveTier('medium',13,17,50),'high','Medium 13/17 passes 70%');
+assert.equal(adaptivePasses(7,11,10),true,'Denominator locked to original ten');
+assert.equal(adaptivePasses(6,11,10),false);
 assert.equal(adaptivePasses(0,0,3),false);
 assert.equal(adaptivePasses(10,9,3),false);
 assert.throws(()=>nextAdaptiveTier('superhard',1,1,10));
 
 const serverReady={ready:true,low:30,medium:35,high:50,
  requiredPerTier:30,checkpoint:10,mediumCheckpoint:10,thresholdPercent:70,
- policyVersion:'thirds-v1'};
+ policyVersion:'thirds-fixed-correct-v2',lowRequiredCorrect:7,mediumRequiredCorrect:7};
 const authDB={rpc:async(name,args)=>{
  assert.equal(name,'lms_p8_levelup_readiness');
  assert.equal(args.p_count,30);
@@ -58,8 +68,10 @@ const validated=await getAdaptiveReadiness(authDB,'real-asp',30,null);
 assert.equal(validated.checkpoint,10);
 assert.equal(validated.mediumCheckpoint,10);
 assert.equal(validated.ready,true);
+assert.equal(validated.lowRequiredCorrect,7);
+assert.equal(validated.mediumRequiredCorrect,7);
 await assert.rejects(()=>getAdaptiveReadiness({rpc:async()=>({
- data:{...serverReady,policyVersion:'p8-20pct',checkpoint:6,mediumCheckpoint:6},
+ data:{...serverReady,policyVersion:'thirds-v1',checkpoint:6,mediumCheckpoint:6},
  error:null})},'real-asp',30),/outdated/,'Old 20% RPC must fail closed');
 await assert.rejects(()=>getAdaptiveReadiness({rpc:async()=>({
  data:{...serverReady,ready:true,low:9},error:null
@@ -70,6 +82,30 @@ await assert.rejects(()=>getAdaptiveReadiness({rpc:async()=>({
 await assert.rejects(()=>getAdaptiveReadiness({rpc:async()=>({
  data:{...serverReady,thresholdPercent:60},error:null
 })},'real-asp',30),/outdated/,'70% cannot be weakened');
+await assert.rejects(()=>getAdaptiveReadiness({rpc:async()=>({
+ data:{...serverReady,lowRequiredCorrect:8},error:null
+})},'real-asp',30),/outdated/,'Correct-answer target cannot increase with extras');
+
+const fixedSql=read('supabase/migrations/202611040004_p8e_fixed_correct_target.sql');
+for(const marker of [
+ "ADD COLUMN promotion_policy text NULL",
+ "s.promotion_policy='thirds-fixed-correct-v2'",
+ "s.promotion_policy IS NULL",
+ "v_tier_correct*10 >= (CASE",
+ "ELSE s.checkpoint_size END)*7",
+ "v_tier_correct*10>=v_tier_attempted*7",
+ "'policyVersion','thirds-fixed-correct-v2'",
+ "'lowRequiredCorrect'",
+ "'mediumRequiredCorrect'",
+ "IF v_answered<a.question_count",
+ "AND NOT x.mock_exclusive",
+ "i.position <> s.answered_count+1",
+ "SECURITY DEFINER SET search_path=''"
+])assert(fixedSql.includes(marker),'P8e fixed-base server promotion contract missing: '+marker);
+assert(!/UPDATE public\\.lms_questions|INSERT INTO public\\.lms_questions|DELETE FROM public\\.lms_questions/.test(fixedSql),
+ 'P8e must not modify ASP question bank content');
+assert(!fixedSql.includes('UPDATE public.lms_practice_adaptive_state SET promotion_policy'),
+ 'P8e must not change promotion rules of in-flight attempts');
 
 const course={id:'real-course-uuid'},catalog={
  identity:{isAdmin:false},entitlements:[{course_id:'real-course-uuid',status:'active'}]
@@ -141,4 +177,4 @@ assert(portal.includes('mayReadLiveCourse')&&portal.includes("['paid','manual']"
 assert(read('src/production/liveLearningApi.js').includes('lms_lesson_progress'),'Learner completion must be verified P2 DB records');
 assert(!learning.includes("update({reading_completed:true}"),'No browser-synthesized progress');
 assert(!learning.includes('localStorage'),'Live learner library must not read demo/browser progress');
-console.log('PASS P8d balanced thirds including 30=10/10/10, 7/10 promotions, cumulative recovery, secured server-only progression and in-flight policy preservation.');
+console.log('PASS P8e fixed 70% of ORIGINAL tier (7/10 then 7/11), protected server-only 30-question Practice and old-session preservation contract.');

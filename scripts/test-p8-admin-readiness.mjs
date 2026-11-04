@@ -13,13 +13,17 @@ const db={rpc:async (name,args)=>{
   ready:count<=25,low:25,medium:30,high:40,requiredPerTier:count,
   checkpoint:count===10?3:count===25?8:count===30?10:16,
   mediumCheckpoint:count===10?3:count===25?8:count===30?10:17,
-  thresholdPercent:70,policyVersion:'thirds-v1'
+  thresholdPercent:70,policyVersion:'thirds-fixed-correct-v2',
+  lowRequiredCorrect:count===10?3:count===25?6:count===30?7:12,
+  mediumRequiredCorrect:count===10?3:count===25?6:count===30?7:12
  },error:null};
 }};
 const rows=await fetchAdminAdaptiveReadiness(db,'verified-course-id','verified-domain-id');
 assert.deepEqual(rows.map(r=>r.ready),[true,true,false,false]);
 assert.deepEqual(rows.map(r=>r.checkpoint),[3,8,10,16]);
 assert.deepEqual(rows.map(r=>r.mediumCheckpoint),[3,8,10,17]);
+assert.deepEqual(rows.map(r=>r.lowRequiredCorrect),[3,6,7,12]);
+assert.deepEqual(rows.map(r=>r.mediumRequiredCorrect),[3,6,7,12]);
 assert.equal(rows[0].low,25);
 assert.equal(rows[2].high,40);
 assert.equal(rpcCalls.length,4);
@@ -30,26 +34,32 @@ for(const [i,call] of rpcCalls.entries()){
 }
 await assert.rejects(()=>fetchAdminAdaptiveReadiness({rpc:async()=>({data:null,error:{message:'No P8 RPC'}})},'course'),/No P8 RPC/);
 assert.throws(()=>normalizeAdaptiveReadiness({
- ready:true,low:9,medium:10,high:10,checkpoint:3,requiredPerTier:10,thresholdPercent:70,mediumCheckpoint:3,policyVersion:'thirds-v1'
+ ready:true,low:9,medium:10,high:10,checkpoint:3,requiredPerTier:10,thresholdPercent:70,mediumCheckpoint:3,policyVersion:'thirds-fixed-correct-v2',lowRequiredCorrect:3,mediumRequiredCorrect:3
 },10),/failed validation/,'Do not trust false Ready even if returned by backend');
 assert.throws(()=>normalizeAdaptiveReadiness({
- ready:true,low:10,medium:10,high:10,checkpoint:5,requiredPerTier:10,thresholdPercent:70,mediumCheckpoint:3,policyVersion:'thirds-v1'
+ ready:true,low:10,medium:10,high:10,checkpoint:5,requiredPerTier:10,thresholdPercent:70,mediumCheckpoint:3,policyVersion:'thirds-fixed-correct-v2',lowRequiredCorrect:3,mediumRequiredCorrect:3
 },10),/failed validation/,'Checkpoint cannot silently change');
 assert.throws(()=>normalizeAdaptiveReadiness({
- ready:true,low:10,medium:10,high:10,checkpoint:3,requiredPerTier:10,thresholdPercent:75,mediumCheckpoint:3,policyVersion:'thirds-v1'
+ ready:true,low:10,medium:10,high:10,checkpoint:3,requiredPerTier:10,thresholdPercent:75,mediumCheckpoint:3,policyVersion:'thirds-fixed-correct-v2',lowRequiredCorrect:3,mediumRequiredCorrect:3
 },10),/failed validation/,'70% policy must stay locked');
 assert.throws(()=>normalizeAdaptiveReadiness({
- ready:true,low:10,medium:-1,high:10,checkpoint:3,requiredPerTier:10,thresholdPercent:70,mediumCheckpoint:3,policyVersion:'thirds-v1'
+ ready:true,low:10,medium:-1,high:10,checkpoint:3,requiredPerTier:10,thresholdPercent:70,mediumCheckpoint:3,policyVersion:'thirds-fixed-correct-v2',lowRequiredCorrect:3,mediumRequiredCorrect:3
 },10),/failed validation/,'Corrupted or unverified counts never pass');
 
 assert.throws(()=>normalizeAdaptiveReadiness({
  ready:true,low:10,medium:10,high:10,checkpoint:3,requiredPerTier:10,
- mediumCheckpoint:3,thresholdPercent:70,policyVersion:'old-20percent'
+ mediumCheckpoint:3,thresholdPercent:70,policyVersion:'thirds-v1',lowRequiredCorrect:3,mediumRequiredCorrect:3
 },10),/failed validation/,'Legacy policy cannot be marked ready after update');
 assert.throws(()=>normalizeAdaptiveReadiness({
  ready:true,low:30,medium:30,high:30,checkpoint:10,requiredPerTier:30,
- mediumCheckpoint:9,thresholdPercent:70,policyVersion:'thirds-v1'
+ mediumCheckpoint:9,thresholdPercent:70,policyVersion:'thirds-fixed-correct-v2',lowRequiredCorrect:7,mediumRequiredCorrect:7
 },30),/failed validation/,'Medium minimum must be 10 of 30');
+
+assert.throws(()=>normalizeAdaptiveReadiness({
+ ready:true,low:30,medium:30,high:30,checkpoint:10,mediumCheckpoint:10,
+ requiredPerTier:30,thresholdPercent:70,policyVersion:'thirds-fixed-correct-v2',
+ lowRequiredCorrect:8,mediumRequiredCorrect:7
+},30),/failed validation/,'N30 must require 7 correct regardless of later denominator');
 
 const component=read('src/production/AdminAdaptiveReadiness.jsx');
 const admin=read('src/production/AdminQuestionReview.jsx');
@@ -66,4 +76,4 @@ assert(!api.includes("db.from('lms_questions')"),'No direct browser bank queries
 assert(!component.includes('service_role'),'Browser must not contain a service role key');
 assert(sql.includes("approval_state='approved'")&&sql.includes('NOT mock_exclusive'),
  'P8 readiness must restrict to approved non-Mock bank');
-console.log('PASS P8d Admin: four 10/25/30/50 lengths, 30=10+10 tier gates, legacy policy fail-closed, protected bank-only RPC.');
+console.log('PASS P8e Admin: fixed required-correct thresholds of 3/6/7/12, N30 7-of-10, legacy policy fail-closed.');

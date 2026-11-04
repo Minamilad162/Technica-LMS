@@ -45,7 +45,7 @@ export default function AdminAdaptiveReadiness({db,course,domains=[]}){
    <b>{r.count} questions</b>
    <strong className={r.ready?'ready':'blocked'}>{r.ready?'Ready':'Not ready'}</strong>
    <small>{r.ready?'Server pool verified':'Needs '+r.count+' per tier'}</small>
-   <small>Low {r.checkpoint} · Medium {r.mediumCheckpoint} minimum · 70% to advance</small>
+   <small>Low {r.lowRequiredCorrect}/{r.checkpoint} correct · Medium {r.mediumRequiredCorrect}/{r.mediumCheckpoint} correct · fixed targets</small>
   </div>)}</div>
   <p className="live-adaptive-review-footnote">Counts are read-only snapshots. Starting practice rechecks permissions and eligibility on the server. No question is approved, classified or published by this panel.</p></>}
   {!rows&&!busy&&!error&&<p className="live-adaptive-review-status">Choose a pool and check the real database. No readiness is assumed before the server responds.</p>}

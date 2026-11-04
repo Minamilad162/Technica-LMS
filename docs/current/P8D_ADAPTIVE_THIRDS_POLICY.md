@@ -1,4 +1,6 @@
-# P8d — Owner-confirmed Adaptive Level Up, ONLY in Practice (2026-11-04)
+# P8d — HISTORICAL baseline: balanced thirds, formerly expanding denominator
+
+> **SUPERSEDED by P8e for NEW attempts (2026-11-04).** P8d correctly defines the 30-question 10/10/10 *base*, but incorrectly required 70% of a growing denominator after extra questions. The owner clarified: after 6 correct among 10 Low questions, ONE new correct answer gives 7/11 and must promote to Medium. Required correct stays **7 = ceil(10×70%)**, regardless of extra attempts. See [P8e fixed-target policy](./P8E_FIXED_CORRECT_PROMOTION.md) and the new separately staged P8e SQL delta. Retain this file as historical migration/compatibility evidence.
 
 ## Locked product behavior (supersedes old 20%-checkpoint P8/P8b/P8c descriptions)
 

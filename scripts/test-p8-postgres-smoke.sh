@@ -336,3 +336,123 @@ if ! printf '%s\n' "$p8d_report" | grep -Fq 'P8D_HELPER_PERMISSIONS|lms_p8_mediu
 fi
 echo 'PASS P8d SELECT-only policy, in-flight schema, private helper and bank inventory on disposable PostgreSQL'
 
+# --- P8e: fixed 70% of ORIGINAL ten answered, not expanding denominator ---
+# Create an in-flight P8d session before the migration so the new version
+# cannot rewrite the rules of a learner who is already answering.
+old_req=81234567-0000-0000-0000-000000000041
+old_id=$(run_as authenticated "$paid" \
+ "SELECT public.lms_p8_start_levelup('$course',30,'$old_req',NULL,0)->>'attemptId'")
+for i in $(seq 0 9); do
+ qid=$(run_as authenticated "$paid" \
+  "SELECT public.lms_p4_attempt_payload('$old_id')->'questions'->$i->>'id'")
+ if (( i < 6 )); then choice=0; else choice=1; fi
+ run_as authenticated "$paid" "SELECT public.lms_p8_answer_levelup('$old_id','$qid',$choice)" >/dev/null
+done
+old_tier=$(psql -X -v ON_ERROR_STOP=1 -A -t -c \
+ "SELECT tier FROM public.lms_practice_adaptive_state WHERE attempt_id='$old_id'")
+[[ "$old_tier" == low ]] || { echo 'FAIL P8d old session should stay Low at 6/10'; exit 1; }
+psql -X -v ON_ERROR_STOP=1 -q -f supabase/migrations/202611040004_p8e_fixed_correct_target.sql
+old_policy=$(psql -X -v ON_ERROR_STOP=1 -A -t -c \
+ "SELECT coalesce(promotion_policy,'NULL') FROM public.lms_practice_adaptive_state WHERE attempt_id='$old_id'")
+[[ "$old_policy" == NULL ]] || { echo "FAIL P8e changed active session's policy: $old_policy";exit 1; }
+for i in $(seq 10 13); do
+ qid=$(run_as authenticated "$paid" \
+  "SELECT public.lms_p4_attempt_payload('$old_id')->'questions'->$i->>'id'")
+ run_as authenticated "$paid" "SELECT public.lms_p8_answer_levelup('$old_id','$qid',0)" >/dev/null
+ tier=$(psql -X -v ON_ERROR_STOP=1 -A -t -c \
+  "SELECT tier FROM public.lms_practice_adaptive_state WHERE attempt_id='$old_id'")
+ if (( i < 13 )); then
+  [[ "$tier" == low ]] || { echo "FAIL prior P8d attempt promoted prematurely at $((i+1))";exit 1; }
+ else
+  [[ "$tier" == medium ]] || { echo 'FAIL prior P8d attempt lost original cumulative rule';exit 1; }
+ fi
+done
+run_as authenticated "$paid" "SELECT public.lms_p5_abandon_practice('$old_id')" >/dev/null
+echo 'PASS P8e migration retains existing P8d attempt behavior (6/10 + four correct for 10/14)'
+
+# NEW session: exactly 30, fixed 7 correct out of the first 10 Low
+# even if extra question changes the cumulative denominator to 11.
+fixed_req=81234567-0000-0000-0000-000000000042
+fixed_id=$(run_as authenticated "$paid" \
+ "SELECT public.lms_p8_start_levelup('$course',30,'$fixed_req',NULL,0)->>'attemptId'")
+policy=$(psql -X -v ON_ERROR_STOP=1 -A -t -c \
+ "SELECT promotion_policy||'|'||checkpoint_size||'|'||medium_checkpoint_size
+  FROM public.lms_practice_adaptive_state WHERE attempt_id='$fixed_id'")
+[[ "$policy" == 'thirds-fixed-correct-v2|10|10' ]] || { echo "FAIL wrong fixed policy: $policy";exit 1; }
+for i in $(seq 0 29); do
+ qid=$(run_as authenticated "$paid" \
+  "SELECT public.lms_p4_attempt_payload('$fixed_id')->'questions'->$i->>'id'")
+ [[ "$qid" =~ ^[0-9a-f-]{36}$ ]] || { echo "FAIL missing question $((i+1))";exit 1; }
+ # Q1..Q10 Low: six right, four wrong. Q11 right -> SEVENTH Low.
+ # Q12..Q21 Medium: six right, four wrong. Q22 right -> SEVENTH Medium.
+ if (( i < 6 || i==10 || (i>=11 && i<17) || i==21 || i>=22 )); then choice=0
+ else choice=1; fi
+ run_as authenticated "$paid" "SELECT public.lms_p8_answer_levelup('$fixed_id','$qid',$choice)" >/dev/null
+ case "$i" in
+  9) expected=low;; 10) expected=medium;;
+  20) expected=medium;; 21|29) expected=high;;
+  *) expected='';;
+ esac
+ if [[ -n "$expected" ]]; then
+  tier=$(psql -X -v ON_ERROR_STOP=1 -A -t -c \
+   "SELECT tier FROM public.lms_practice_adaptive_state WHERE attempt_id='$fixed_id'")
+  [[ "$tier" == "$expected" ]] || { echo "FAIL at Q$((i+1)): wanted $expected got $tier"; exit 1; }
+ fi
+done
+split=$(psql -X -v ON_ERROR_STOP=1 -A -t -c \
+ "SELECT count(*) FILTER(WHERE q.difficulty='low')||'|'||
+ count(*) FILTER(WHERE q.difficulty='medium')||'|'||
+ count(*) FILTER(WHERE q.difficulty='high')
+ FROM public.lms_practice_attempt_items i JOIN public.lms_questions q
+ ON i.question_id=q.id WHERE i.attempt_id='$fixed_id'")
+[[ "$split" == '11|11|8' ]] || { echo "FAIL fixed correct split: $split";exit 1; }
+unique=$(psql -X -v ON_ERROR_STOP=1 -A -t -c \
+ "SELECT count(DISTINCT question_id) FROM public.lms_practice_attempt_items
+ WHERE attempt_id='$fixed_id'")
+[[ "$unique" == 30 ]] || { echo 'FAIL P8e repeated or added questions beyond 30';exit 1; }
+run_as authenticated "$paid" "SELECT public.lms_p4_finish_practice('$fixed_id')" >/dev/null
+echo 'PASS N30 P8e Low 6/10 + Q11 right promotes, Medium 6/10 + Q22 right promotes; 11/11/8, no duplicates'
+
+# Additional wrong Low at Q11 does NOT increase the target: Q12 right
+# is still the seventh correct, and Q13 must be Medium.
+recover_req=81234567-0000-0000-0000-000000000043
+recover=$(run_as authenticated "$paid" \
+ "SELECT public.lms_p8_start_levelup('$course',30,'$recover_req',NULL,0)->>'attemptId'")
+for i in $(seq 0 11); do
+ qid=$(run_as authenticated "$paid" \
+  "SELECT public.lms_p4_attempt_payload('$recover')->'questions'->$i->>'id'")
+ if (( i < 6 || i==11 ));then choice=0;else choice=1;fi
+ run_as authenticated "$paid" "SELECT public.lms_p8_answer_levelup('$recover','$qid',$choice)" >/dev/null
+ if (( i == 10 || i == 11 )); then
+  tier=$(psql -X -v ON_ERROR_STOP=1 -A -t -c \
+   "SELECT tier FROM public.lms_practice_adaptive_state WHERE attempt_id='$recover'")
+  if (( i == 10 ));then expected=low;else expected=medium;fi
+  [[ "$tier" == "$expected" ]] || { echo "FAIL fixed target 7/12 recovery, expected $expected got $tier";exit 1; }
+ fi
+done
+run_as authenticated "$paid" "SELECT public.lms_p5_abandon_practice('$recover')" >/dev/null
+echo 'PASS 6/10 + wrong Q11 + correct Q12 = 7/12 promotes; denominator NEVER raises fixed target'
+
+# Protected state remains unreachable through ordinary browser privileges.
+if run_as authenticated "$paid" \
+ "SELECT promotion_policy FROM public.lms_practice_adaptive_state LIMIT 1" >/dev/null 2>&1; then
+ echo 'FAIL Learner can read internal fixed-correct state';exit 1
+fi
+echo 'PASS P8e new policy is server-only, old attempts unchanged, no browser privilege expansion'
+p8e_report=$(psql -X -v ON_ERROR_STOP=1 -A -t -f supabase/P8E_VERIFY_READ_ONLY.sql)
+if printf '%s\n' "$p8e_report" | grep -Eq '\|(FAIL|MISSING)(\||$)';then
+ echo 'FAIL P8e read-only SQL audit in disposable Postgres';printf '%s\n' "$p8e_report";exit 1
+fi
+for required in \
+ 'P8E_FIXED_TARGET|30|10|10|7|7|PASS' \
+ 'P8E_PRIVATE_VERSION_COLUMN|lms_practice_adaptive_state.promotion_policy|PASS' \
+ 'P8E_SERVER_PROMOTION|lms_p8_answer_levelup|PASS' \
+ 'P8E_NEW_SESSIONS|fixed-correct policy version|PASS'; do
+ if ! printf '%s\n' "$p8e_report" | grep -Fq "$required";then
+  echo "FAIL P8e audit missing $required";printf '%s\n' "$p8e_report";exit 1
+ fi
+done
+echo 'PASS P8e SELECT-only SQL audit: N30 baseline 10+10, fixed 7+7 correct, RLS and versioned RPCs'
+
+
+
