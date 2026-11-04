@@ -22,7 +22,7 @@ for(const snippet of [
  "WHERE slug='asp'","'asp11-01'","'asp11-09'",
  "r.answer_checked IS TRUE AND r.rights_checked IS TRUE",
  "r.review_state='ready'","NOT i.mock_exclusive",
- "q.approval_state='approved'","q.mock_exclusive",
+ "approval_state='approved'","q.mock_exclusive",
  "NOT i.used_in_practice","distinct_source_id",
  "'REFERENCE_ONLY'","'01_SOURCE'","'02_STATUS'","'03_REVIEW'",
  "'04_CONTENT'","'05_ASP11'","'06_PRACTICE'","'07_MOCK'",
