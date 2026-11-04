@@ -38,7 +38,7 @@ for(const bad of [
  {...payload,correctCount:200},
  {...payload,state:'submitted',questions:[]},
  {...payload,state:'abandoned',questions:[],correctCount:4}
-])assert.throws(()=>validateMockPayload(bad),/invalid|graded|leak|answer|closed/i);
+])assert.throws(()=>validateMockPayload(bad),/invalid|graded|grade|leak|answer|closed/i);
 const completed={...payload,state:'submitted',questions:[],answeredCount:2,
  correctCount:1,scorePercent:0.5};
 assert.equal(validateMockPayload(completed).scorePercent,0.5);
