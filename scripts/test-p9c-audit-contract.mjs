@@ -52,6 +52,6 @@ assert(ci.includes('scripts/test-p9c-postgres-smoke.sh pre'),'P9C must run befor
 assert(ci.includes('scripts/test-p9c-postgres-smoke.sh post'),'P9C must run after P9B fixture');
 const blueprint=read('TECHNICA_LMS_MASTER_BLUEPRINT.md');
 const logic=read('docs/current/LOGIC_REGISTRY.md');
-assert(blueprint.includes('## 60. P9C — Read-only ASP bank audit'));
+assert(blueprint.includes('## 60. P9C — Read-only ASP bank and prerequisite audit'));
 assert(logic.includes('LMS-027'));
 console.log('PASS P9C: SELECT-only core schema discovery; safe P9B-optional ASP review/domain/tiers/Mock diagnostics; no private outputs or writes; pre/post PostgreSQL fingerprint assertions.');
