@@ -219,7 +219,7 @@ export default function LivePractice({db,user,course,domains=[],access,defaultMo
     {readinessBusy?'Checking approved difficulty tiers…':
      readinessError?'Adaptive mode unavailable: '+readinessError:
      !readiness?'Choose a session length; the server will check its three tiers.':
-     readiness.ready?'Ready: '+readiness.checkpoint+' Low and '+readiness.mediumCheckpoint+' Medium minimum questions, at least 70% correct in each stage. Questions adapt silently; total always stops at '+count+'.':
+     readiness.ready?'Ready: after '+readiness.checkpoint+' initial Low questions, '+readiness.lowRequiredCorrect+' correct answers unlock the next stage; Medium needs '+readiness.mediumRequiredCorrect+' correct of its original '+readiness.mediumCheckpoint+'. Extra questions do not raise these targets. Questions adapt silently; total stops at '+count+'.':
       'Not ready: need '+readiness.requiredPerTier+' approved, non-Mock questions in EACH tier. Available Low '+readiness.low+', Medium '+readiness.medium+', High '+readiness.high+'.'}
    </div>:<p className="live-practice-note"><TriangleAlert size={16}/> The exclusive 200-question Mock Exam is a separate locked 5-hour workflow. Level Up requires reviewed difficulty tags and the P8 server migration.</p>}
    <button className="live-primary" disabled={busy||!eligible||(mode==='levelup'&&(!readyForCurrent||readinessBusy))} onClick={begin} type="button"><PlayCircle size={17}/>{busy?'Preparing your questions…':'Start practice'}</button>
