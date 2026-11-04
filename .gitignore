@@ -16,3 +16,10 @@ dist/
 *.zip
 # Do not ignore the safe placeholder environment spec
 !.env.example
+
+# P9D.1: PRIVATE ASP XLSX and any derived source/snapshot/row comparison
+private/
+**/*.p9d1.snapshot.csv
+**/*.p9d1.private.csv
+ASP_Question_Bank_2500*.xlsx
+ASP_2500_Review_and_Quality_Audit.xlsx
