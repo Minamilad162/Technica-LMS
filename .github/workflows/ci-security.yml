@@ -86,6 +86,9 @@ jobs:
       - name: P9B explicitly reserved 200 ASP Mock + independent per-question Practice approval contract
         run: npm run test:p9b
 
+      - name: P9C strict SELECT-only ASP bank audit contract
+        run: npm run test:p9c
+
       - name: P5 native fullscreen and exit policy contracts
         run: npm run test:p5
 
@@ -187,8 +190,14 @@ jobs:
       - name: P9A ASP governance preflight — no DB writes and strict Admin-only access
         run: bash scripts/test-p9a-postgres-smoke.sh
 
+      - name: P9C zero-write real-schema ASP bank audit BEFORE optional P9B install
+        run: bash scripts/test-p9c-postgres-smoke.sh pre
+
       - name: P9B transactional 200-question Mock and two-Admin approval on disposable PostgreSQL
         run: bash scripts/test-p9b-postgres-smoke.sh
+
+      - name: P9C zero-write ASP bank audit AFTER P9B fixture reservation
+        run: bash scripts/test-p9c-postgres-smoke.sh post
 
       - name: Test scope disclosure
         run: echo "Ephemeral local PostgreSQL smoke only; live Supabase Auth, Storage, Data API and device tests still pending."
