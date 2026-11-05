@@ -158,6 +158,47 @@ BEGIN
     ORDER BY c.title),'[]'::jsonb) FROM public.lms_courses c
     WHERE EXISTS(SELECT 1 FROM public.lms_entitlements e
       WHERE e.user_id=p.id AND e.course_id=c.id)),
+  'lessonProgressTotal',(SELECT count(*)::integer FROM public.lms_lesson_progress lp
+    WHERE lp.user_id=p.id),
+  'lessonProgress',(SELECT coalesce(jsonb_agg(jsonb_build_object(
+      'courseTitle',x.course_title,'domainTitle',x.domain_title,
+      'topicTitle',x.topic_title,'lessonTitle',x.lesson_title,
+      'readingCompleted',x.reading_completed,'videoCompleted',x.video_completed,
+      'quizPassed',x.quiz_passed,'completedAt',x.lesson_completed_at,
+      'lastActivityAt',x.last_activity_at)
+      ORDER BY x.last_activity_at DESC),'[]'::jsonb)
+    FROM (
+      SELECT c.title AS course_title,d.title AS domain_title,
+        t.title AS topic_title,l.title AS lesson_title,
+        lp.reading_completed,lp.video_completed,lp.quiz_passed,
+        lp.lesson_completed_at,lp.last_activity_at
+      FROM public.lms_lesson_progress lp
+      JOIN public.lms_lessons l ON l.id=lp.lesson_id
+      JOIN public.lms_topics t ON t.id=l.topic_id
+      JOIN public.lms_domains d ON d.id=t.domain_id
+      JOIN public.lms_courses c ON c.id=d.course_id
+      WHERE lp.user_id=p.id
+      ORDER BY lp.last_activity_at DESC LIMIT 100
+    ) x),
+  'recentAssessments',(SELECT coalesce(jsonb_agg(jsonb_build_object(
+     'courseTitle',z.course_title,'mode',z.mode,'state',z.state,
+     'questionCount',z.question_count,'correctCount',z.correct_count,
+     'scorePercent',z.score_percent,'submittedAt',z.submitted_at)
+     ORDER BY z.submitted_at DESC),'[]'::jsonb)
+    FROM (
+     SELECT c.title AS course_title,a.mode,a.state,a.question_count,
+       a.correct_count,a.score_percent,a.submitted_at
+     FROM public.lms_practice_attempts a
+     JOIN public.lms_courses c ON c.id=a.course_id
+     WHERE a.user_id=p.id AND a.state IN ('submitted','expired')
+     UNION ALL
+     SELECT c.title AS course_title,'asp_mock_200'::text,a.state,a.question_count,
+       a.correct_count,a.score_percent,a.submitted_at
+     FROM public.lms_p10_mock_attempts a
+     JOIN public.lms_courses c ON c.id=a.course_id
+     WHERE a.user_id=p.id AND a.state IN ('submitted','expired')
+     ORDER BY submitted_at DESC NULLS LAST LIMIT 10
+    ) z),
   'practice',jsonb_build_object(
     'completed',(SELECT count(*)::integer FROM public.lms_practice_attempts
       WHERE user_id=p.id AND state IN ('submitted','expired')),
