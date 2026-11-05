@@ -44,6 +44,11 @@ const detail={
  entitlements:[{courseId:uuid(10),courseTitle:'ASP',type:'paid',status:'active',
   startsAt:now,endsAt:null,amountPaid:null,currency:null,paymentRecorded:false}],
  courseProgress:[{courseId:uuid(10),courseTitle:'ASP',lessonsCompleted:7,practiceCompleted:4,mockCompleted:1}],
+ lessonProgressTotal:1,
+ lessonProgress:[{courseTitle:'ASP',domainTitle:'Domain',topicTitle:'Topic',lessonTitle:'Lesson',
+  readingCompleted:true,videoCompleted:true,quizPassed:true,completedAt:now,lastActivityAt:now}],
+ recentAssessments:[{courseTitle:'ASP',mode:'quick10',state:'submitted',
+  questionCount:10,correctCount:7,scorePercent:70,submittedAt:now}],
  practice:{completed:4,lastScore:75,latestAt:now},
  mock:{completed:1,lastScore:68,latestAt:now},
  revenueAvailable:false
@@ -55,6 +60,9 @@ for(const x of [
  {...detail,revenueAvailable:true},
  {...detail,courseProgress:[{...detail.courseProgress[0],lessonsCompleted:-1}]},
  {...detail,mock:{...detail.mock,lastScore:125}},
+ {...detail,lessonProgressTotal:0},
+ {...detail,lessonProgress:[{...detail.lessonProgress[0],lastActivityAt:null}]},
+ {...detail,recentAssessments:[{...detail.recentAssessments[0],correctCount:99}]},
  {...detail,profile:{...detail.profile,id:uuid(2)}}
 ])assert.throws(()=>verifyUserDetail(x,uuid(1)),/Invalid|Unverified/i);
 
