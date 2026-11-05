@@ -1,3 +1,13 @@
+### 2026-11-05 — P13 unified Admin Tools, authentic dashboard, Mock curation and learner plans
+
+- Consolidated scattered Admin actions into one premium **Admin Tools** entry with six responsive sub-tabs: Dashboard, Courses, Question Bank, Exams & Mock, Users & Plans, System Tools. Existing old deep links remain for bookmarks, with no previous approved learner behavior removed.
+- Implemented in BOTH application paths: `src/App.jsx` Demo HashRouter and **actual deployed Supabase live entry** `src/production/SupabaseApp.jsx`. The latter opens Admin Tools by default for authenticated real Admin (legacy course workspace still reachable), avoiding a Demo-only cosmetic solution.
+- New real Supabase **P13 Admin-only read-only RPCs** for dynamic system KPIs, six-month verified registrations/Practice/Mock trends, active enrollment/course figures, paginated real learner directory and individual plan/progress/assessment detail. No trial/paid plan payment amounts or revenue fabricated: current P1 Entitlements are not a financial ledger.
+- Reused existing P6A human question review; added dedicated secure 200-item Mock selection UI with persisted selection across pages, read-only P9B preflight and explicit irreversible protected server reservation. Reserve exactly 200 reviewed Draft ASP11 items, excluding them from Practice by existing immutability guards, never bulk auto-publish.
+- Retained Technica palette and typography, improved polish using responsive cards, KPI/chart transitions, hover effects, softly animated hero and `prefers-reduced-motion` compliance; no new UI framework, chart SDK or licensed media.
+- Added `npm run test:p13` and disposable `test-p13-postgres-smoke.sh` post-P11 with Admin/anon/paid/trial negative role checks, no existing DB row mutations and privacy checks; runbook `P13_UNIFIED_ADMIN_TOOLS.md`, Blueprint §68, Logic Registry LMS-037/038, DEC-031.
+- P13 SQL is staged **source only**; no actual Staging or Production migration installed, no real learner financial data inferred, no production question or Mock reservation executed.
+
 ### 2026-11-05 — P12.2 authenticated Staging API QA and local-only evidence viewer (SOURCE ONLY)
 
 - New deliberately opt-in `npm run qa:staging:read` validates **both distinct Staging and Production project references**, exact HTTPS staging URL, public anon key, four separately seeded Admin/Paid/Trial/Outsider accounts and explicit CLI acknowledgement before any remote login/read. Auth signin itself can generate auth audit events; all LMS table/RPC operations remain read-only with no attempts, question/source import, approvals, entitlements or grading writes.
