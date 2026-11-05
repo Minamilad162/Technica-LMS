@@ -74,6 +74,10 @@ assert "password" not in json.dumps(x)
 assert "correctIndex" not in json.dumps(x)
 assert all(i["amountPaid"] is None and i["currency"] is None and i["paymentRecorded"] is False for i in x["entitlements"])
 assert x["practice"]["completed"]>=0 and x["mock"]["completed"]>=0
+assert isinstance(x["lessonProgressTotal"],int) and isinstance(x["lessonProgress"],list)
+assert isinstance(x["recentAssessments"],list) and len(x["recentAssessments"])<=10
+assert len(x["lessonProgress"])<=100
+assert all("correct_index" not in json.dumps(x) and "options" not in json.dumps(x) for _ in (1,))
 '
 if run_as authenticated "$admin" "SELECT public.lms_p13_admin_user_detail('99999999-9999-9999-9999-999999999999')" >/dev/null 2>&1;then
  echo 'FAIL P13 nonexistent learner metadata accessible';exit 1
