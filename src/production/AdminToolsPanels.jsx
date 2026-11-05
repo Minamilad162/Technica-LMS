@@ -287,6 +287,21 @@ export function AdminUsersPanel({db}){
        {!detail.courseProgress.length&&<p>No enrolled course progress yet.</p>}</div>
       <div className="at-user-assessments"><div><Target size={17}/><b>{detail.practice.completed}</b><span>Practice · last {pct(detail.practice.lastScore)}</span></div>
        <div><ClipboardCheck size={17}/><b>{detail.mock.completed}</b><span>Mock · last {pct(detail.mock.lastScore)}</span></div></div>
+      <h4>Lesson-by-lesson progress <small>({detail.lessonProgressTotal} recorded)</small></h4>
+      <div className="at-detail-history">{detail.lessonProgress.map((l,i)=><div className="at-lesson-progress" key={i}>
+        <div><b>{l.lessonTitle}</b><small>{l.courseTitle} / {l.domainTitle} / {l.topicTitle}</small></div>
+        <span className={l.completedAt?'done':'partial'}>{l.completedAt?'Completed':'In progress'}</span>
+        <small>{l.readingCompleted?'Reading ✓':'Reading —'} · {l.videoCompleted?'Video ✓':'Video —'} · {l.quizPassed?'Quiz ✓':'Quiz —'}</small>
+       </div>)}
+       {!detail.lessonProgress.length&&<p className="at-empty">No verified lesson activity yet.</p>}
+      </div>
+      <h4>Recent assessment results</h4>
+      <div className="at-detail-history">{detail.recentAssessments.map((a,i)=><div className="at-attempt-row" key={i}>
+       <div><b>{a.mode==='asp_mock_200'?'Official Mock':a.mode}</b><small>{a.courseTitle} · {day(a.submittedAt)}</small></div>
+       <strong>{a.correctCount} / {a.questionCount}</strong><em>{pct(a.scorePercent)}</em>
+      </div>)}
+       {!detail.recentAssessments.length&&<p className="at-empty">No submitted or expired assessments recorded.</p>}
+      </div>
       <p className="at-disclaimer"><Wallet size={15}/> No transaction ledger is installed, so amount paid, currency and payment status cannot be verified from entitlements alone.</p>
      </>}
    </section>
