@@ -147,3 +147,13 @@
  .at-tab{font-size:11px}.at-candidate em{display:none}
  .at-plan dl{grid-template-columns:1fr 1fr}}
 @media(prefers-reduced-motion:reduce){.admin-tools-workspace *{animation:none!important;transition:none!important}}
+
+/* Detailed individual P2 lesson and P4/P10 attempt history; real records only. */
+.at-detail-history{max-height:310px;overflow:auto;display:grid;gap:7px}
+.at-lesson-progress,.at-attempt-row{display:flex;align-items:center;gap:11px;flex-wrap:wrap;background:#fafdfc;border:1px solid #e7f0f0;border-radius:9px;padding:10px 11px;font-size:11px}
+.at-lesson-progress>div,.at-attempt-row>div{flex:1;min-width:170px;display:grid;gap:4px}
+.at-lesson-progress b,.at-attempt-row b{color:#365f67;font-size:12px}
+.at-lesson-progress small,.at-attempt-row small{color:#80999e;font-size:10px;line-height:1.5}
+.at-lesson-progress>span{border-radius:20px;padding:5px 8px;background:#fff7e8;color:#a17d3b;font-weight:750;font-size:10px}
+.at-lesson-progress>span.done{background:#e7f7ed;color:#218269}
+.at-attempt-row strong{color:#1a7e74}.at-attempt-row em{color:#5b7f86;font-style:normal;font-weight:800}
