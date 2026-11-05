@@ -91,7 +91,7 @@ const layout=source('src/components/Layout.jsx');
 assert(app.includes('path="/release-readiness"'));
 assert(app.includes('<AdminOnly><RoutePage><LiveReleaseReadiness/>'));
 assert(layout.includes("['/admin-tools','Admin Tools'"), 'Unified Admin Tools navigation must expose P12 System Tools');
-assert(read('src/production/AdminToolsWorkspace.jsx').includes('AdminSystemPanel'), 'P12 release checks must remain accessible inside unified Admin Tools');
+assert(source('src/production/AdminToolsWorkspace.jsx').includes('AdminSystemPanel'), 'P12 release checks must remain accessible inside unified Admin Tools');
 const workflow=source('.github/workflows/ci-security.yml');
 assert(workflow.includes('npm run test:p12'));
 const master=source('TECHNICA_LMS_MASTER_BLUEPRINT.md');
