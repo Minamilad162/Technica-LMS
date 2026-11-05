@@ -11,6 +11,7 @@ import LiveCourseBuilder from './production/LiveCourseBuilder';
 import {LiveLearningLibrary,LiveLearningCourse} from './production/LiveLearning';
 import LivePracticePortal from './production/LivePracticePortal';
 import LiveMockPortal from './production/LiveMockPortal';
+import AdminToolsPortal from './production/AdminToolsPortal';
 import LiveLearnerProgress from './production/LiveLearnerProgress';
 import LiveReleaseReadiness from './production/LiveReleaseReadiness';import AssessmentOverview from './pages/AssessmentOverview';import ResultsPage from './pages/ResultsPage';import PracticeResultsPage from './pages/PracticeResultsPage';import LearnersPage from './pages/LearnersPage';import QuestionBankPage from './pages/QuestionBankPage';import CoursesPage from './pages/CoursesPage';
 // Local-only QA retains the accepted Demo authoring browser regression suite.
@@ -60,6 +61,7 @@ export default function App(){
  <Route path="/practice" element={<RoutePage><PracticePage/></RoutePage>}/>
  <Route path="/practice/live" element={<RoutePage standalone><LivePracticePortal/></RoutePage>}/>
  <Route path="/practice/session" element={<RoutePage standalone><QuizPage kind="practice"/></RoutePage>}/>
+ <Route path="/admin-tools" element={<AdminOnly><RoutePage><AdminToolsPortal/></RoutePage></AdminOnly>}/>
  <Route path="/analytics" element={<AdminOnly><RoutePage><AnalyticsPage/></RoutePage></AdminOnly>}/>
  <Route path="/builder" element={<AdminOnly><RoutePage>{legacyPreview?(legacyBrowserQa?<BuilderPage/>:<LegacyPreviewWarning><BuilderPage/></LegacyPreviewWarning>):<LiveCourseBuilder/>}</RoutePage></AdminOnly>}/>
  <Route path="/courses" element={<AdminOnly><RoutePage>{legacyPreview?(legacyBrowserQa?<CoursesPage/>:<LegacyPreviewWarning><CoursesPage/></LegacyPreviewWarning>):<LiveCoursesPage/>}</RoutePage></AdminOnly>}/>

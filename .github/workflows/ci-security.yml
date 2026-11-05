@@ -107,6 +107,9 @@ jobs:
       - name: P12.2 staging 19-scenario QA/roles/NO-GO proof using synthetic clients (no real keys)
         run: npm run test:p12:staging
 
+      - name: P13 unified Admin Tools routes, dynamic analytics and exclusive Mock UI contracts
+        run: npm run test:p13
+
       - name: P5 native fullscreen and exit policy contracts
         run: npm run test:p5
 
@@ -225,6 +228,9 @@ jobs:
 
       - name: P11 secure P2 Practice and Mock Analytics on disposable PostgreSQL
         run: bash scripts/test-p11-postgres-smoke.sh
+
+      - name: P13 real-schema Admin KPI and learner profiles protected read-only on disposable PostgreSQL
+        run: bash scripts/test-p13-postgres-smoke.sh
 
       - name: Test scope disclosure
         run: echo "Ephemeral local PostgreSQL smoke only; live Supabase Auth, Storage, Data API and device tests still pending."
