@@ -57,7 +57,9 @@ export function verifyUserDetail(x,uid){
    x.profile.id!==uid||!uuid.test(uid||'')||typeof x.profile.name!=='string'||
    !['active','suspended'].includes(x.profile.status)||!validDate(x.profile.joinedAt)||
    !Array.isArray(x.entitlements)||!Array.isArray(x.courseProgress)||
-   !x.practice||!x.mock||x.revenueAvailable!==false)
+   !Array.isArray(x.lessonProgress)||!Array.isArray(x.recentAssessments)||
+   !count(x.lessonProgressTotal)||x.lessonProgress.length>100||
+   x.recentAssessments.length>10||!x.practice||!x.mock||x.revenueAvailable!==false)
   throw Error('Invalid protected learner detail.');
  for(const e of x.entitlements){
   if(!uuid.test(e.courseId||'')||typeof e.courseTitle!=='string'||
@@ -72,6 +74,22 @@ export function verifyUserDetail(x,uid){
     !['lessonsCompleted','practiceCompleted','mockCompleted'].every(k=>count(c[k])))
    throw Error('Invalid course progress row.');
  }
+ for(const l of x.lessonProgress){
+  if(!['courseTitle','domainTitle','topicTitle','lessonTitle'].every(k=>typeof l[k]==='string')||
+   !['readingCompleted','videoCompleted','quizPassed'].every(k=>typeof l[k]==='boolean')||
+   !(l.completedAt===null||validDate(l.completedAt))||!validDate(l.lastActivityAt))
+   throw Error('Invalid protected lesson history.');
+ }
+ for(const a of x.recentAssessments){
+  if(typeof a.courseTitle!=='string'||!['submitted','expired'].includes(a.state)||
+   typeof a.mode!=='string'||!count(a.questionCount)||!count(a.correctCount)||
+   a.correctCount>a.questionCount||!(a.scorePercent===null||
+     (typeof a.scorePercent==='number'&&a.scorePercent>=0&&a.scorePercent<=100))||
+   !(a.submittedAt===null||validDate(a.submittedAt)))
+   throw Error('Invalid learner assessment records.');
+ }
+ if(x.lessonProgress.length>x.lessonProgressTotal)
+  throw Error('Invalid lesson progress count.');
  for(const m of [x.practice,x.mock]){
   if(!count(m.completed)||!(m.lastScore===null||
     (typeof m.lastScore==='number'&&m.lastScore>=0&&m.lastScore<=100))||
