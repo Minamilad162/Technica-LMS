@@ -22,7 +22,9 @@ assert.match(app,/getAuthSession\(\)\?\.role==='admin'/,'Guard must use authenti
 const nav=read('src/components/Layout.jsx');
 const learner=nav.match(/const learnerItems=\[(.*?)\];/s)?.[1]||'';
 assert(!learner.includes('/question-bank'),'Question bank must not appear in learner menu');
-assert(nav.includes("['/question-bank','Question Bank',FileQuestion]"),'Question bank must remain in admin menu');
+assert(nav.includes("['/admin-tools','Admin Tools',LayoutDashboard]"),'Question bank must be accessible from unified Admin Tools');
+assert(read('src/production/AdminToolsWorkspace.jsx').includes("id:'questions'"),'Protected Question Bank sub-tab must be preserved');
+assert(app.includes('path="/question-bank"'),'Legacy admin-protected question bank deep link must still exist');
 assert(nav.includes('adminSession&&<button'),'Learners cannot promote themselves to admin from account menu');
 const saved=read('src/pages/QuestionBankPage.jsx');
 assert(saved.includes('bank-course-selector')&&saved.includes('All courses'));
