@@ -53,6 +53,7 @@
     "test:p11": "node scripts/test-p11-learner-analytics.mjs",
     "test:p12": "node scripts/test-p12-release-readiness.mjs",
     "test:p12:staging": "node scripts/test-p12-staging-qa.mjs",
+    "test:p13": "node scripts/test-p13-admin-tools.mjs",
     "qa:staging:read": "node scripts/p12-staging-e2e.mjs"
   },
   "dependencies": {
