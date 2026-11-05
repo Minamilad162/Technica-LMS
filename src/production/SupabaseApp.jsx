@@ -5,6 +5,7 @@ import {createCourse,createDomain,createTopic,createLesson,createTextBlock,getCu
 import './supabaseApp.css';
 import LivePractice from './LivePractice';
 import AdminQuestionReview from './AdminQuestionReview';
+import AdminToolsWorkspace from './AdminToolsWorkspace.jsx';
 import ReviewConnectionDiagnostics from './ReviewConnectionDiagnostics';
 import {fetchAspReviewDomains} from './questionReviewApi';
 
@@ -91,6 +92,7 @@ export default function SupabaseApp({secureReviewEntry=false,reviewerOnly=false}
  const [session,setSession]=useState(null),[boot,setBoot]=useState(true),[identity,setIdentity]=useState(null),[recovering,setRecovering]=useState(false);
  const [courses,setCourses]=useState([]),[entitlements,setEntitlements]=useState([]),[courseId,setCourseId]=useState(null),[tree,setTree]=useState([]),[lessonId,setLessonId]=useState(null),[blocks,setBlocks]=useState([]);
  const [reviewExpanded,setReviewExpanded]=useState(false),[loadedStructureFor,setLoadedStructureFor]=useState(null);
+ const [adminToolsOpen,setAdminToolsOpen]=useState(true);
  const [busy,setBusy]=useState(false),[fetching,setFetching]=useState(false),[error,setError]=useState(''),[notice,setNotice]=useState(''),[editing,setEditing]=useState(null),[editError,setEditError]=useState('');
  const {db,configurationError}=useMemo(()=>initializeConnection(secureReviewEntry),[secureReviewEntry]);
  useEffect(()=>{
@@ -208,8 +210,8 @@ export default function SupabaseApp({secureReviewEntry=false,reviewerOnly=false}
       <AdminQuestionReview db={db} course={aspCourse} domains={tree} onDomainsSeeded={refresh}/>}
  </div>;
  return <div className="live-shell">
-  <header className="live-top"><div className="live-brand"><img src="/images/technica-logo.webp" alt="Technica Consult"/><strong>TECHNICA CONSULT <span>LMS</span></strong></div><div className="live-top-right"><span className="live-live-pill"><ShieldCheck size={14}/> Supabase</span><small>{session.user.email}</small><button type="button" className="live-secondary" onClick={()=>db.auth.signOut()}><LogOut size={16}/> Sign out</button></div></header>
-  <main className="live-main">
+  <header className="live-top"><div className="live-brand"><img src="/images/technica-logo.webp" alt="Technica Consult"/><strong>TECHNICA CONSULT <span>LMS</span></strong></div><div className="live-top-right"><span className="live-live-pill"><ShieldCheck size={14}/> Supabase</span>{isAdmin&&<button type="button" className="live-secondary" onClick={()=>setAdminToolsOpen(v=>!v)}>{adminToolsOpen?<><BookOpen size={16}/> Course workspace</>:<><ShieldCheck size={16}/> Admin Tools</>}</button>}<small>{session.user.email}</small><button type="button" className="live-secondary" onClick={()=>db.auth.signOut()}><LogOut size={16}/> Sign out</button></div></header>
+  <main className="live-main">{isAdmin&&adminToolsOpen?<AdminToolsWorkspace db={db} onExit={()=>setAdminToolsOpen(false)}/>:<>
    <div className="live-main-heading"><div><span className="live-eyebrow">COURSE PLATFORM · SECURE DATABASE</span><h1>{isAdmin?'Course management':'Learning library'}</h1><p>{isAdmin?'Manage course content and review ASP questions inside the ASP course card.':'Explore published courses you can access.'}</p></div><button type="button" className="live-secondary" onClick={refresh} disabled={fetching}><RefreshCw size={16}/> Refresh</button></div>
     {error&&<p className="live-error" role="alert"><AlertCircle size={18}/>{error}</p>}
    {notice&&<p className="live-notice" role="status"><CheckCircle2 size={17}/>{notice}</p>}
@@ -249,6 +251,6 @@ export default function SupabaseApp({secureReviewEntry=false,reviewerOnly=false}
    {selected&&identity&&!suspended&&!(isAdmin&&reviewExpanded&&selected.slug==='asp')&&<LivePractice key={session.user.id+selected.id} db={db} user={session.user} course={selected} domains={tree} access={isAdmin||entitlements.some(e=>e.course_id===selected.id&&['paid','manual'].includes(e.entitlement_type))}/>}
    
    <p className="live-disclaimer">P6A admin ASP bank review is private and does not publish questions. P4 scope: RLS-governed question bank and server-scored Quick 10, Timed Quiz, Custom and Domain Practice after manual question approval. Reserved Mock, adaptive Level Up, admin Assessment, payments, protected media and learner progress-event writes remain unavailable.</p>
-  </main>{editing&&<EditorModal key={editing.kind+editing.id+editing.domainId+editing.topicId} editing={editing} onCancel={()=>{setEditing(null);setEditError('');}} onSave={save} busy={busy} error={editError}/>}
+  </>}</main>{editing&&<EditorModal key={editing.kind+editing.id+editing.domainId+editing.topicId} editing={editing} onCancel={()=>{setEditing(null);setEditError('');}} onSave={save} busy={busy} error={editError}/>}
  </div>;
 }
