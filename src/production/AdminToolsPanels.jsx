@@ -272,7 +272,7 @@ export function AdminUsersPanel({db}){
    <section className="at-surface at-user-detail">
     {!selected?<div className="at-empty"><Users size={24}/> Select a learner to view their subscriptions, progress and exam results.</div>:
      detailError?<p className="at-error">{detailError}</p>:
-     !detail?<p className="at-empty">Loading this user's authorized record…</p>:<>
+     (!detail||detail.profile.id!==selected.id)?<p className="at-empty">Loading this user's authorized record…</p>:<>
       <div className="at-section-title"><div><span className="at-eyebrow">MEMBER PROFILE</span><h3>{detail.profile.name}</h3>
        <p>Joined {day(detail.profile.joinedAt)} · {detail.profile.status}</p></div></div>
       <h4>Plans &amp; enrollment</h4>
