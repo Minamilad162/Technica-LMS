@@ -33,12 +33,84 @@ export async function verifyFileHeader(file,kind){
    throw Error('File does not have a WebM header.');
  }
 }
+// Deliberately do not surface raw Edge/storage messages: they can contain
+// private filenames, object paths, signed URLs or session information.
+// Admin UX receives a stable code + stage + public HTTP status only.
+export class LessonMediaUploadError extends Error {
+ constructor(code,stage,message,status=null){
+  super(message);
+  this.name='LessonMediaUploadError';
+  this.code=code;this.stage=stage;this.status=status;
+ }
+}
+const failed=(code,stage,message,status=null)=>
+ new LessonMediaUploadError(code,stage,message,status);
+const operationStage={
+ 'init-upload':'Authorizing Admin upload',
+ 'finish-upload':'Finalizing private file',
+ 'view':'Authorizing private playback'
+};
+function safeHttpStatus(err){
+ const value=err?.context?.status??err?.status??err?.statusCode;
+ const numeric=Number(value);
+ return Number.isInteger(numeric)&&numeric>=400&&numeric<=599?numeric:null;
+}
 async function mediaRpc(db,body){
- if(!db?.functions?.invoke)throw Error('A real authenticated Supabase connection is required.');
- const {data,error}=await db.functions.invoke(P14_FUNCTION,{body});
- if(error||!data||data.error)
-  throw Error('Secure media service unavailable or access denied. Check P14 Staging migration, Edge deployment and account permissions.');
- return data;
+ const stage=operationStage[body.action]||'Private media request';
+ if(!db?.functions?.invoke)
+  throw failed('P14_NO_CONNECTION',stage,'A real authenticated Supabase connection is required.');
+ let data,error;
+ try{({data,error}=await db.functions.invoke(P14_FUNCTION,{body}));}
+ catch{throw failed('P14_EDGE_UNREACHABLE',stage,
+  'Cannot reach the secure media Edge Function. Check network, deployment and allowed site origin.');}
+ if(!error&&data&&!data.error)return data;
+ const status=safeHttpStatus(error);
+ if(status===401)throw failed('P14_EDGE_401',stage,
+  'Your Supabase login token was rejected. Sign out and sign in again; check Edge JWT configuration.',status);
+ if(status===403)throw failed('P14_EDGE_403',stage,
+  'Secure media access denied. Verify your active Admin role and allowed site origin.',status);
+ if(status===404)throw failed('P14_EDGE_404',stage,
+  'Secure upload endpoint or selected Lesson not found. Verify technica-lesson-media is deployed to the same Supabase project.',status);
+ if(status===413)throw failed('P14_EDGE_413',stage,
+  'The request exceeded a server size limit.',status);
+ if(status>=500)throw failed('P14_EDGE_5XX',stage,
+  'Secure media service failed. Inspect Supabase Edge Function logs and configuration.',status);
+ if(status===400)throw failed('P14_EDGE_400',stage,
+  'Secure upload validation or finalization failed. Check file type, actual Storage metadata and Edge Function logs.',status);
+ if(status)throw failed('P14_EDGE_HTTP',stage,
+  'Secure media access denied or service unavailable. Check Supabase Edge Function Invocations.',status);
+ throw failed('P14_EDGE_NETWORK',stage,
+  'Secure media service unavailable or access denied. Check Edge deployment, site origin/CORS, network and account permissions.');
+}
+const SAFE_FILE_ERRORS=new Set([
+ 'Choose a PDF (max 20 MB) or MP4/WebM video (max 50 MB).',
+ 'File is not a valid PDF.',
+ 'File does not have an MP4 header.',
+ 'File does not have a WebM header.',
+ 'Select a saved Lesson.',
+ 'Invalid signed upload response.',
+ 'Upload was not confirmed by the secure lesson service.'
+]);
+export function formatLessonMediaUploadError(err){
+ if(err instanceof LessonMediaUploadError){
+  const status=err.status?' HTTP '+err.status:'';
+  return err.message+' (Code: '+err.code+status+'; step: '+err.stage+').';
+ }
+ if(SAFE_FILE_ERRORS.has(err?.message))return err.message;
+ return 'Secure upload stopped due to an unexpected error (Code: P14_UNEXPECTED). Check Supabase Edge Function and Storage logs.';
+}
+function signedUploadError(error){
+ const status=safeHttpStatus(error);
+ if(status===413) return failed('P14_STORAGE_413','Uploading to private Storage',
+  'Video exceeds the Supabase global or bucket upload limit. Try a smaller MP4; do not make the bucket public.',status);
+ if(status===401||status===403)return failed('P14_STORAGE_DENIED','Uploading to private Storage',
+  'Signed upload authorization rejected. Check token expiry, private bucket and Storage settings.',status);
+ if(status===404)return failed('P14_STORAGE_MISSING','Uploading to private Storage',
+  'Private lesson Storage bucket is unavailable in the connected Supabase project.',status);
+ if(status===400)return failed('P14_STORAGE_400','Uploading to private Storage',
+  'Supabase Storage rejected the file. Check actual MIME type, file size and bucket restrictions.',status);
+ return failed('P14_STORAGE_UPLOAD','Uploading to private Storage',
+  'Signed upload to private Storage failed. Check network, upload limit and Storage logs.',status);
 }
 export async function uploadLessonMedia(db,lessonId,file,kind,onStage=()=>{}){
  if(!isLessonId(lessonId))throw Error('Select a saved Lesson.');
@@ -54,7 +126,7 @@ export async function uploadLessonMedia(db,lessonId,file,kind,onStage=()=>{}){
  onStage('Uploading to private Storage…');
  const {error:storageError}=await db.storage.from(LESSON_BUCKET)
   .uploadToSignedUrl(begin.path,begin.token,file,{contentType:v.mime,upsert:false});
- if(storageError)throw Error('Private media upload failed. The file was not attached to the Lesson.');
+ if(storageError)throw signedUploadError(storageError);
  onStage('Verifying the file and attaching it to the Lesson…');
  const done=await mediaRpc(db,{action:'finish-upload',intentId:begin.intentId});
  if(!isLessonId(done.blockId)||done.kind!==kind)
