@@ -167,7 +167,7 @@ assert(live.includes("await answerAdaptivePractice"),'Answer and progression mus
 assert(live.includes('setSelected(Math.max(0,(reply.questions?.length||1)-1))'),'Advance to new server-assigned item');
 assert(live.includes("readiness?.ready"),'No start before verified 3-tier readiness');
 assert(!live.includes('nextAdaptiveTier'),'Client cannot grade or pick next difficulty');
-assert(route.includes('<LiveLearningLibrary/>')&&route.includes('<LiveLearningCourse/>'),'Default learning must be real Supabase');
+assert(route.includes('<LiveLearnerPortal initialScreen="learning"/>')&&route.includes('<LiveLearningCourse/>'),'Default learner library must use real Supabase P15 and preserve secure deep-linked courses');
 assert(route.includes('<LivePracticePortal/>'),'Secure Practice link must route into server engine');
 assert(read('src/production/LivePracticePortal.jsx').includes('defaultMode={requestedMode}'),'Deep link must choose real Level Up mode');
 assert(read('src/pages/PracticePage.jsx').includes('mode=levelup&course='),'Quick Level Up must navigate to secure P8 course');
