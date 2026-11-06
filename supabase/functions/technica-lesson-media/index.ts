@@ -119,7 +119,17 @@ Deno.serve(async(req)=>{
   const {data:allowed,error:grantError}=await db.rpc('lms_p1_can_view_lesson',{
     p_lesson_id:body.lessonId
   });
-  if(grantError||allowed!==true)return failure(403,'Lesson access denied',origin);
+  // P15 permits ONLY the active, explicitly enabled first published Intro.
+  // Fail closed if P15 is absent or its RPC rejects. Paid/Trial keep P1.
+  let previewAllowed=false;
+  if(!grantError&&allowed!==true){
+    const {data:intro,error:introError}=await db.rpc('lms_p15_can_preview_lesson',{
+      p_lesson_id:body.lessonId
+    });
+    previewAllowed=!introError&&intro===true;
+  }
+  if(grantError||(allowed!==true&&!previewAllowed))
+    return failure(403,'Lesson access denied',origin);
   // Read the actual block with the user's RLS, never trust an assetId from client.
   const {data:block,error:blockError}=await db.from('lms_lesson_blocks')
    .select('id,lesson_id,block_type,payload')

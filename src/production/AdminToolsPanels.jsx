@@ -6,6 +6,8 @@ import {getAdminOverview,getAdminUsers,getAdminUserDetail,getAdminMockCandidates
 import {getMockReadiness} from './mockApi.js';
 import AdminQuestionReview from './AdminQuestionReview.jsx';
 import {LessonMediaUploadModal,SecureLessonContent} from './SecureLessonMedia.jsx';
+import {fetchAdminFreeIntro,setAdminFreeIntro,setAdminPublished} from './learnerJourneyApi.js';
+import {verifiedLiveAdmin} from './liveAuthoringApi.js';
 
 const pct=n=>n===null||n===undefined?'—':Number(n).toFixed(1).replace(/\.0$/,'')+'%';
 const day=s=>s?new Date(s).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'}):'Not set';
@@ -81,6 +83,7 @@ export function AdminCoursesPanel({db}){
  const [loading,setLoading]=useState(true),[error,setError]=useState(''),[notice,setNotice]=useState('');
  const [revision,setRevision]=useState(0),[editing,setEditing]=useState(null),[busy,setBusy]=useState(false),[open,setOpen]=useState({});
  const [mediaEditing,setMediaEditing]=useState(null),[previewLesson,setPreviewLesson]=useState(null);
+ const [introEnabled,setIntroEnabled]=useState(null),[introError,setIntroError]=useState('');
  useEffect(()=>{let live=true;setLoading(true);setError('');
   liveCourses(db).then(list=>{if(live){setCourses(list);setCourse(current=>list.some(x=>x.id===current)?current:list[0]?.id||'');}})
    .catch(e=>{if(live)setError(err(e));}).finally(()=>{if(live)setLoading(false);});
@@ -91,6 +94,37 @@ export function AdminCoursesPanel({db}){
   .catch(e=>{if(live)setError(err(e));});return()=>{live=false;};
  },[db,course,revision]);
  const chosen=courses.find(x=>x.id===course);
+ useEffect(()=>{
+  if(!course){setIntroEnabled(null);setIntroError('');return;}
+  let live=true;setIntroEnabled(null);setIntroError('');
+  fetchAdminFreeIntro(db,course).then(x=>{if(live)setIntroEnabled(x);})
+   .catch(()=>{if(live)setIntroError('Free Intro management requires the P15 Staging migration.');});
+  return()=>{live=false;};
+ },[db,course,revision]);
+ const publish=async(table,id,state)=>{
+  if(busy)return;
+  const label=table==='lms_courses'?'Course':'Lesson';
+  if(state==='published'&&!window.confirm('Publish this '+label+' for learners? This makes its title visible in the published catalog.'))return;
+  setBusy(true);setError('');setNotice('');
+  try{
+   await verifiedLiveAdmin(db);
+   await setAdminPublished(db,table,id,state);
+   setNotice(label+' '+(state==='published'?'published':'returned to Draft')+' successfully.');
+   setRevision(x=>x+1);
+  }catch(x){setError(err(x));}finally{setBusy(false);}
+ };
+ const changeIntro=async()=>{
+  if(busy||introEnabled===null)return;
+  if(!introEnabled&&!window.confirm('Allow every active signed-in learner to read the FIRST published lesson for free? This includes its protected PDF/video.'))return;
+  setBusy(true);setError('');setNotice('');
+  try{
+   await verifiedLiveAdmin(db);
+   const result=await setAdminFreeIntro(db,course,!introEnabled);
+   setIntroEnabled(result);
+   setNotice(result?'Free Intro enabled for the verified first published Lesson.':'Free Intro disabled.');
+   setRevision(x=>x+1);
+  }catch(x){setError(err(x));}finally{setBusy(false);}
+ };
  const start=(kind,parentId='',initial='')=>{setEditing({kind,parentId,title:initial,summary:'',position:0});setError('');setNotice('');};
  async function submit(e){
   e.preventDefault();if(busy||!editing?.title.trim())return;
@@ -127,7 +161,15 @@ export function AdminCoursesPanel({db}){
    </div>
    <section className="at-surface at-hierarchy">
     {!chosen?empty:<><div className="at-section-title"><div><span className="at-eyebrow">{chosen.publication_state}</span><h3>{chosen.title}</h3><p>{chosen.summary||'No summary yet.'}</p></div>
-     <button className="at-outline" onClick={()=>start('domain')}><Plus size={15}/> Domain</button></div>
+     <div className="at-publication-controls"><button className="at-outline" disabled={busy}
+      onClick={()=>publish('lms_courses',chosen.id,chosen.publication_state==='published'?'draft':'published')}>
+      {chosen.publication_state==='published'?'Unpublish course':'Publish course'}</button>
+      <button className="at-outline" disabled={busy||introEnabled===null||chosen.publication_state!=='published'}
+       onClick={changeIntro}>{introEnabled?'Disable Free Intro':'Enable Free Intro'}</button>
+      <button className="at-outline" onClick={()=>start('domain')}><Plus size={15}/> Domain</button></div></div>
+     {introError&&<p className="at-error" role="status">{introError}</p>}
+     <p className="at-intro-note">Free Intro is opt-in: publish Course and first Lesson, then enable preview.
+      Only the approved first Lesson becomes free; the remaining media stays server-locked.</p>
      {tree.map(d=><div className="at-tree" key={d.id}><div className="at-tree-item">
        <button aria-expanded={open[d.id]!==false} onClick={()=>setOpen(v=>({...v,[d.id]:v[d.id]===false?true:false}))}><Layers size={17}/><b>{d.title}</b><ChevronDown size={15}/></button>
        <button className="at-icon" title="Rename domain" aria-label={'Rename '+d.title} onClick={()=>start('rename','lms_domains:'+d.id,d.title)}>Edit</button>
@@ -139,6 +181,9 @@ export function AdminCoursesPanel({db}){
         {open[t.id]!==false&&(t.lessons||[]).map(l=><div key={l.id}>
          <div className="at-lesson"><span><BookOpen size={14}/>{l.title}</span>
           <span className="slm-media-editor-actions">
+           <button type="button" disabled={busy} onClick={()=>publish('lms_lessons',l.id,
+            l.publication_state==='published'?'draft':'published')}>
+            {l.publication_state==='published'?'Unpublish Lesson':'Publish Lesson'}</button>
            <button type="button" onClick={()=>setMediaEditing({lessonId:l.id,lessonTitle:l.title,kind:'pdf'})}><FileText size={14}/> + PDF</button>
            <button type="button" onClick={()=>setMediaEditing({lessonId:l.id,lessonTitle:l.title,kind:'video'})}><Video size={14}/> + Video</button>
            <button type="button" onClick={()=>start('reading',l.id)}>+ Text</button>
