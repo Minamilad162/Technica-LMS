@@ -1,6 +1,6 @@
 # P14 — Secure PDF & Video Lessons (Admin Tools → Courses)
 
-**Environment status: GitHub SOURCE + disposable CI only.** P14 has NOT been installed on the user's actual Supabase Staging/Production project, no real file has been uploaded, and no live deployment was authorized. Owner requested uploadable video/PDF per Lesson and strong anti-download/capture protections, preserving the course hierarchy and existing legacy reading content.
+**Environment status:** GitHub SOURCE + disposable CI proven. The user reported three P14 SQL objects as present on their Supabase, but that target's environment, migration ledger, grants, Edge function deployment, real uploads and account-isolation were NOT independently checked. Do NOT replay installed P14; do not treat user SQL existence checks as successful live media verification. Owner requested uploadable video/PDF per Lesson and strong anti-download/capture protections, preserving the course hierarchy and existing legacy reading content.
 
 ## User workflow
 
@@ -31,3 +31,7 @@ PDF/video are *not* plaintext browser bundle assets, do not get a public bucket 
 `npm run test:p14` uses synthetic file signature, invalid type, mocked private upload/ACL and viewer-code tests. `scripts/test-p14-postgres-smoke.sh` extends GitHub's disposable P1–P13 PostgreSQL fixture with emulated Storage `buckets/objects`, checks private bucket, no anon/authenticated intent or finalizer access, atomic finalize, file metadata mismatch and immutable/no-duplicate behavior, and original P1 RLS cross-user lesson isolation. These tests **cannot** certify real Supabase Storage edge, Safari/Android screenshot behavior, real DRM or live deployment. The existing P5 question/Mock protection (watermarks, fullscreen/exit) remains unaffected.
 
 **Master Blueprint:** §69 / DEC-032. **Logic Registry:** LMS-039 and LMS-040. **Status:** source/CI only, Staging and Production not installed, screenshot/recording deterrence only.
+
+## P14.1 optional free stronger PDF viewer
+
+A separate additive P14.1 source stage adds `+ Secure PDF` (locally prepare JPEG pages with Poppler, Admin uploads only numbered pages, client displays short-lived signed images). This differs from the original standard PDF iframe and does NOT require changing or deleting prior PDF blocks. Requires NEW staging-only migration, updated existing Edge function and a fresh private page bucket. See `docs/current/P14_1_FREE_PDF_DELIVERY.md`. Neither legacy nor P14.1 prevents native screenshots or recording. Free AES-HLS video is **not** implemented yet; standard direct MP4/WebM remains available.

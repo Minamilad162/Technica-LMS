@@ -6,6 +6,7 @@ import {getAdminOverview,getAdminUsers,getAdminUserDetail,getAdminMockCandidates
 import {getMockReadiness} from './mockApi.js';
 import AdminQuestionReview from './AdminQuestionReview.jsx';
 import {LessonMediaUploadModal,SecureLessonContent} from './SecureLessonMedia.jsx';
+import {ProtectedPdfUploadModal} from './ProtectedPdfPages.jsx';
 
 const pct=n=>n===null||n===undefined?'—':Number(n).toFixed(1).replace(/\.0$/,'')+'%';
 const day=s=>s?new Date(s).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'}):'Not set';
@@ -81,6 +82,7 @@ export function AdminCoursesPanel({db}){
  const [loading,setLoading]=useState(true),[error,setError]=useState(''),[notice,setNotice]=useState('');
  const [revision,setRevision]=useState(0),[editing,setEditing]=useState(null),[busy,setBusy]=useState(false),[open,setOpen]=useState({});
  const [mediaEditing,setMediaEditing]=useState(null),[previewLesson,setPreviewLesson]=useState(null);
+ const [protectedPdfEditing,setProtectedPdfEditing]=useState(null);
  useEffect(()=>{let live=true;setLoading(true);setError('');
   liveCourses(db).then(list=>{if(live){setCourses(list);setCourse(current=>list.some(x=>x.id===current)?current:list[0]?.id||'');}})
    .catch(e=>{if(live)setError(err(e));}).finally(()=>{if(live)setLoading(false);});
@@ -139,7 +141,8 @@ export function AdminCoursesPanel({db}){
         {open[t.id]!==false&&(t.lessons||[]).map(l=><div key={l.id}>
          <div className="at-lesson"><span><BookOpen size={14}/>{l.title}</span>
           <span className="slm-media-editor-actions">
-           <button type="button" onClick={()=>setMediaEditing({lessonId:l.id,lessonTitle:l.title,kind:'pdf'})}><FileText size={14}/> + PDF</button>
+           <button type="button" onClick={()=>setProtectedPdfEditing({lessonId:l.id,lessonTitle:l.title})}><LockKeyhole size={14}/> + Secure PDF</button>
+           <button type="button" title="Legacy PDF viewer — less secure" onClick={()=>setMediaEditing({lessonId:l.id,lessonTitle:l.title,kind:'pdf'})}><FileText size={14}/> + PDF (standard)</button>
            <button type="button" onClick={()=>setMediaEditing({lessonId:l.id,lessonTitle:l.title,kind:'video'})}><Video size={14}/> + Video</button>
            <button type="button" onClick={()=>start('reading',l.id)}>+ Text</button>
            <button type="button" onClick={()=>setPreviewLesson(x=>x===l.id?null:l.id)}>
@@ -156,6 +159,10 @@ export function AdminCoursesPanel({db}){
     </>}
    </section>
   </div>
+  {protectedPdfEditing&&<ProtectedPdfUploadModal db={db}
+    lessonId={protectedPdfEditing.lessonId} lessonTitle={protectedPdfEditing.lessonTitle}
+    onClose={()=>setProtectedPdfEditing(null)}
+    onDone={()=>{setNotice('Protected PDF pages attached without distributing the original PDF.');setRevision(n=>n+1);setPreviewLesson(protectedPdfEditing.lessonId);}}/>}
   {mediaEditing&&<LessonMediaUploadModal db={db} lessonId={mediaEditing.lessonId}
     lessonTitle={mediaEditing.lessonTitle} kind={mediaEditing.kind}
     onClose={()=>setMediaEditing(null)}

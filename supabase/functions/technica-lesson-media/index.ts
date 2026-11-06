@@ -5,6 +5,9 @@
 import {createClient} from 'npm:@supabase/supabase-js@2';
 
 const BUCKET='technica-private-lessons';
+const PAGE_BUCKET='technica-private-lesson-pages';
+const PAGE_MAX=80;
+const PAGE_BYTES=2097152;
 const READ_SECONDS=120;
 const PDF_LIMIT=20*1024*1024;
 const VIDEO_LIMIT=50*1024*1024;
@@ -113,6 +116,93 @@ Deno.serve(async(req)=>{
   if(finalError||!result?.blockId)return failure(400,'Storage file was not verified or finalized',origin);
   return response(200,{blockId:result.blockId,kind:result.kind,title:result.title},origin);
  }
+
+ // P14.1: a PDF may be published as separately signed JPEG pages. No raw PDF
+ // exists in this bucket; filenames/paths are never sent to learners.
+ if(action==='init-pdf-pages'){
+  if(!await isAdmin(db))return failure(403,'Admin required',origin);
+  const {lessonId,title,pageSizes}=body;
+  if(!okUuid(lessonId)||typeof title!=='string'||title.trim().length<1
+   ||title.length>160||/[\\/\x00-\x1f]/.test(title)
+   ||!Array.isArray(pageSizes)||pageSizes.length<1||pageSizes.length>PAGE_MAX
+   ||pageSizes.some(n=>!Number.isSafeInteger(n)||n<1||n>PAGE_BYTES)
+   ||pageSizes.reduce((a,n)=>a+n,0)>50*1024*1024)
+   return failure(400,'Invalid PDF page package',origin);
+  const courseId=await lessonCourse(lessonId);
+  if(!courseId)return failure(404,'Lesson unavailable',origin);
+  const packageId=crypto.randomUUID();
+  const prefix=courseId+'/'+lessonId+'/'+packageId;
+  const {error:e}=await admin.from('lms_p141_pdf_packages').insert({
+   id:packageId,created_by:user.id,course_id:courseId,lesson_id:lessonId,
+   title:title.trim(),page_count:pageSizes.length,expected_page_sizes:pageSizes,
+   object_prefix:prefix,status:'pending'
+  });
+  if(e)return failure(503,'Page package authorization unavailable',origin);
+  return response(200,{packageId,pageCount:pageSizes.length},origin);
+ }
+ if(action==='sign-pdf-page-upload'){
+  if(!await isAdmin(db))return failure(403,'Admin required',origin);
+  if(!okUuid(body.packageId)||!Number.isInteger(body.pageIndex))
+   return failure(400,'Invalid page upload request',origin);
+  const {data:p,error:e}=await admin.from('lms_p141_pdf_packages')
+   .select('created_by,status,expires_at,object_prefix,page_count,lesson_id')
+   .eq('id',body.packageId).maybeSingle();
+  if(e||!p||p.created_by!==user.id||p.status!=='pending'
+   ||Date.parse(p.expires_at)<=Date.now()
+   ||body.pageIndex<1||body.pageIndex>p.page_count
+   ||!await lessonCourse(p.lesson_id))
+   return failure(403,'Page package unavailable',origin);
+  const path=p.object_prefix+'/'+String(body.pageIndex).padStart(4,'0')+'.jpg';
+  const {data:signed,error:signError}=await admin.storage.from(PAGE_BUCKET)
+   .createSignedUploadUrl(path,{upsert:false});
+  if(signError||!signed?.token)return failure(503,'Private page upload unavailable',origin);
+  return response(200,{bucket:PAGE_BUCKET,path,token:signed.token},origin);
+ }
+ if(action==='finish-pdf-pages'){
+  if(!await isAdmin(db)||!okUuid(body.packageId))
+   return failure(403,'Admin authorization required',origin);
+  const {data:p,error:e}=await admin.from('lms_p141_pdf_packages')
+   .select('created_by,status,expires_at,lesson_id')
+   .eq('id',body.packageId).maybeSingle();
+  if(e||!p||p.created_by!==user.id||p.status!=='pending'
+    ||Date.parse(p.expires_at)<=Date.now()
+    ||!await lessonCourse(p.lesson_id))
+   return failure(403,'Page package not active',origin);
+  const {data:result,error:finalError}=await admin.rpc('lms_p141_finalize_pdf_pages',{
+   p_package_id:body.packageId
+  });
+  if(finalError||!result?.blockId)return failure(400,'Uploaded pages not verified',origin);
+  return response(200,result,origin);
+ }
+ if(action==='view-pdf-page'){
+  if(!okUuid(body.lessonId)||!okUuid(body.blockId)
+    ||!Number.isInteger(body.pageIndex)||body.pageIndex<1)
+   return failure(400,'Invalid page request',origin);
+  const {data:allowed,error:grantError}=await db.rpc('lms_p1_can_view_lesson',{
+   p_lesson_id:body.lessonId
+  });
+  if(grantError||allowed!==true)return failure(403,'Lesson access denied',origin);
+  const {data:block,error:blockError}=await db.from('lms_lesson_blocks')
+   .select('id,block_type,payload').eq('id',body.blockId)
+   .eq('lesson_id',body.lessonId).maybeSingle();
+  if(blockError||!block||block.block_type!=='pdf'
+    ||block.payload?.protectedPages!==true)
+   return failure(404,'Private PDF pages not accessible',origin);
+  const {data:p,error:packageError}=await admin.from('lms_p141_pdf_packages')
+   .select('status,page_count,course_id,object_prefix,lesson_id')
+   .eq('block_id',body.blockId).eq('lesson_id',body.lessonId).maybeSingle();
+  if(packageError||!p||p.status!=='finalized'
+    ||p.course_id!==await lessonCourse(body.lessonId)
+    ||body.pageIndex>p.page_count||block.payload.pageCount!==p.page_count)
+   return failure(403,'PDF page authorization unavailable',origin);
+  const path=p.object_prefix+'/'+String(body.pageIndex).padStart(4,'0')+'.jpg';
+  const {data:signed,error:signError}=await admin.storage.from(PAGE_BUCKET)
+   .createSignedUrl(path,45);
+  if(signError||!signed?.signedUrl)return failure(503,'Page unavailable',origin);
+  return response(200,{url:signed.signedUrl,pageIndex:body.pageIndex,
+   pageCount:p.page_count,expiresIn:45},origin);
+ }
+
  if(action==='view'){
   if(!okUuid(body.lessonId)||!okUuid(body.blockId))
    return failure(400,'Invalid lesson media',origin);
