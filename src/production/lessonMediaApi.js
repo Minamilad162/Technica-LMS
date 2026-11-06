@@ -47,7 +47,8 @@ export async function uploadLessonMedia(db,lessonId,file,kind,onStage=()=>{}){
  onStage('Requesting protected Admin upload…');
  const begin=await mediaRpc(db,{action:'init-upload',lessonId,...v});
  if(begin.bucket!==LESSON_BUCKET||begin.kind!==kind||
-    !isLessonId(begin.intentId)||!begin.path?.startsWith('/')&&typeof begin.path!=='string'||
+    !isLessonId(begin.intentId)||typeof begin.path!=='string'||
+    !/^[0-9a-f-]{36}\/[0-9a-f-]{36}\/[0-9a-f-]{36}\.(pdf|mp4|webm)$/.test(begin.path)||
     typeof begin.token!=='string'||!begin.token)
   throw Error('Invalid signed upload response.');
  onStage('Uploading to private Storage…');
