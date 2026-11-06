@@ -2,7 +2,8 @@ import React,{useEffect,useState} from 'react';
 import {useNavigate,useParams} from 'react-router-dom';
 import {AlertCircle,ArrowLeft,ArrowRight,BookOpen,CheckCircle2,ChevronDown,ChevronRight,FileText,GraduationCap,Layers3,LockKeyhole,RefreshCw,ShieldCheck} from 'lucide-react';
 import {getSupabaseClient} from '../lib/supabase.js';
-import {loadStructure,loadTextBlocks} from './lmsApi.js';
+import {loadStructure} from './lmsApi.js';
+import {SecureLessonContent} from './SecureLessonMedia.jsx';
 import {fetchLiveLearningCatalog,mayReadLiveCourse,progressForLesson} from './liveLearningApi.js';
 import './liveLearning.css';
 
@@ -58,7 +59,7 @@ export function LiveLearningCourse(){
  const navigate=useNavigate(),{courseId}=useParams();
  const {loading,data,error,refresh}=useLiveLearningCatalog();
  const [tree,setTree]=useState([]),[treeLoading,setTreeLoading]=useState(false),[treeError,setTreeError]=useState('');
- const [lessonId,setLessonId]=useState(null),[blocks,setBlocks]=useState([]),[blockError,setBlockError]=useState('');
+ const [lessonId,setLessonId]=useState(null);
  const course=data?.courses.find(c=>c.id===courseId||c.slug===courseId);
  const access=mayReadLiveCourse(data,course);
  useEffect(()=>{
@@ -70,14 +71,6 @@ export function LiveLearningCourse(){
    .finally(()=>{if(alive)setTreeLoading(false);});
   return()=>{alive=false;};
  },[data,course?.id,access]);
- useEffect(()=>{
-  if(!lessonId){setBlocks([]);setBlockError('');return;}
-  let alive=true;setBlocks([]);setBlockError('');
-  const db=getSupabaseClient({secureReviewEntry:true});
-  loadTextBlocks(db,lessonId).then(rows=>{if(alive)setBlocks(rows);})
-   .catch(e=>{if(alive)setBlockError(e.message||'Unable to load authorized lesson content.');});
-  return()=>{alive=false;};
- },[lessonId]);
  const counts=getCounts(tree);
  const completed=tree.reduce((n,d)=>n+d.topics.reduce((a,t)=>a+t.lessons.filter(l=>Boolean(progressForLesson(data?.progress,l.id)?.lesson_completed_at)).length,0),0);
  return <main className="live-learning page-enter">
@@ -101,9 +94,9 @@ export function LiveLearningCourse(){
           {done?<CheckCircle2 size={18}/>:<FileText size={18}/>}<span>{di+1}.{ti+1}.{li+1} · {lesson.title}</span>{current?<ChevronDown size={17}/>:<ChevronRight size={17}/>}
          </button>
          {current&&<div className="live-learning-lesson-text">
-           {blockError&&<p role="alert">{blockError}</p>}
-           {blocks.length?blocks.map(b=><p key={b.id}>{String(b.payload?.body||b.payload?.text||'')}</p>):!blockError&&<p>No authorized reading text available for this lesson yet.</p>}
-           <small>{done?'Verified completed in database':'Reading only · completion requires the server-side progress workflow'}</small>
+           <SecureLessonContent db={getSupabaseClient({secureReviewEntry:true})}
+            lessonId={lesson.id} viewerId={data?.user?.id?.slice(0,8)||'LEARNER'}/>
+           <small>{done?'Verified completed in database':'Viewing a PDF/video alone does not mark a Lesson complete; the P2 verified progress workflow applies.'}</small>
          </div>}
         </div>;
        })}
