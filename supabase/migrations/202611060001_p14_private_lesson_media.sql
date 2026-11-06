@@ -53,7 +53,7 @@ GRANT SELECT,INSERT,UPDATE ON public.lms_p14_media_upload_intents TO service_rol
 -- It rechecks actual storage metadata and locks the intent to prevent
 -- duplicate media assets / lesson blocks under concurrent finalize requests.
 CREATE FUNCTION public.lms_p14_finalize_media(p_intent_id uuid)
-RETURNS jsonb LANGUAGE plpgsql SECURITY DEFINER SET search_path='' AS $
+RETURNS jsonb LANGUAGE plpgsql SECURITY DEFINER SET search_path='' AS $p14$
 DECLARE i public.lms_p14_media_upload_intents%ROWTYPE;
  v_metadata jsonb;v_size_text text;v_mime text;v_asset_id uuid;v_block_id uuid;v_position integer;
 BEGIN
@@ -66,7 +66,7 @@ BEGIN
  IF v_metadata IS NULL THEN RAISE EXCEPTION 'P14 uploaded private object not found'; END IF;
  v_size_text=v_metadata->>'size';
  v_mime=lower(coalesce(v_metadata->>'mimetype',v_metadata->>'contentType',''));
- IF v_size_text IS NULL OR v_size_text !~ '^[0-9]{1,12}
+ IF v_size_text IS NULL OR v_size_text !~ '^[0-9]{1,12}$'
  OR v_size_text::bigint<>i.expected_bytes OR v_mime<>i.expected_mime
  THEN RAISE EXCEPTION 'P14 actual storage bytes or MIME mismatch'; END IF;
  IF EXISTS(SELECT 1 FROM public.lms_media_assets WHERE private_object_path=i.object_path)
@@ -82,7 +82,7 @@ BEGIN
  finalized_at=now(),asset_id=v_asset_id WHERE id=i.id;
  RETURN jsonb_build_object('assetId',v_asset_id,'blockId',v_block_id,
    'kind',i.kind,'title',i.display_name);
-END; $;
+END; $p14$;
 REVOKE ALL ON FUNCTION public.lms_p14_finalize_media(uuid) FROM PUBLIC,anon,authenticated;
 GRANT EXECUTE ON FUNCTION public.lms_p14_finalize_media(uuid) TO service_role;
 COMMIT;
