@@ -1,7 +1,8 @@
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import {LESSON_BUCKET,P14_FUNCTION,validateLessonUpload,verifyFileHeader,
- uploadLessonMedia,authorizeLessonMedia,loadLessonContent} from '../src/production/lessonMediaApi.js';
+ uploadLessonMedia,authorizeLessonMedia,loadLessonContent,
+ LessonMediaUploadError,formatLessonMediaUploadError} from '../src/production/lessonMediaApi.js';
 const read=p=>readFileSync(new URL('../'+p,import.meta.url),'utf8');
 const courseId='10000000-0000-0000-0000-000000000001';
 const lessonId='40000000-0000-0000-0000-000000000001';
@@ -77,6 +78,34 @@ await assert.rejects(()=>authorizeLessonMedia(db,lessonId,blocks[0]),/access den
 errorOn='init-upload';
 await assert.rejects(()=>uploadLessonMedia(db,lessonId,pdf,'pdf'),/access denied/);
 
+
+const checkUploadError=async(error,expectedCode)=>{
+ const mock={functions:{invoke:async()=>({data:null,error})}};
+ await assert.rejects(()=>uploadLessonMedia(mock,lessonId,mp4,'video'),
+  e=>e instanceof LessonMediaUploadError&&e.code===expectedCode&&
+  e.stage==='Authorizing Admin upload');
+};
+for(const [status,code] of [[401,'P14_EDGE_401'],[403,'P14_EDGE_403'],
+ [404,'P14_EDGE_404'],[413,'P14_EDGE_413'],[500,'P14_EDGE_5XX'],
+ [400,'P14_EDGE_400']])
+ await checkUploadError({context:{status},message:'private token SHOULD_NOT_SHOW'},code);
+await checkUploadError({name:'FunctionsFetchError',message:'network failed'},'P14_EDGE_NETWORK');
+for(const [statusCode,code] of [['413','P14_STORAGE_413'],['403','P14_STORAGE_DENIED'],
+ ['404','P14_STORAGE_MISSING'],['400','P14_STORAGE_400']]){
+ const storageMock={functions:{invoke:async(_name,{body})=>({data:{
+   kind:'video',intentId,bucket:LESSON_BUCKET,
+   path:courseId+'/'+lessonId+'/'+intentId+'.mp4',token:'secret',
+ },error:null})},
+ storage:{from:()=>({uploadToSignedUrl:async()=>({error:{
+  statusCode,message:'token=DO_NOT_EXPOSE'}})})}};
+ await assert.rejects(()=>uploadLessonMedia(storageMock,lessonId,mp4,'video'),
+  e=>e instanceof LessonMediaUploadError&&e.code===code&&
+  !formatLessonMediaUploadError(e).includes('DO_NOT_EXPOSE'));
+}
+assert(!formatLessonMediaUploadError(new Error('signedUrl=https://private?token=SECRET')).includes('SECRET'));
+assert(formatLessonMediaUploadError(new LessonMediaUploadError('P14_EDGE_404','Authorizing Admin upload',
+ 'Secure endpoint not found',404)).includes('P14_EDGE_404'));
+
 const edge=read('supabase/functions/technica-lesson-media/index.ts');
 const sql=read('supabase/migrations/202611060001_p14_private_lesson_media.sql');
 const cfg=read('supabase/config.toml');
@@ -108,6 +137,10 @@ const admin=read('src/production/AdminToolsPanels.jsx');
 const learner=read('src/production/LiveLearning.jsx');
 const portal=read('src/production/SupabaseApp.jsx');
 const view=read('src/production/SecureLessonMedia.jsx');
+assert(view.includes('formatLessonMediaUploadError(err)'));
+assert(!view.includes('Secure upload could not be completed. Verify the file'));
+assert(view.includes('Last upload step:'));
+
 assert(admin.includes('+ PDF')&&admin.includes('+ Video')&&admin.includes('LessonMediaUploadModal'));
 assert(admin.includes('SecureLessonContent'));
 assert(learner.includes('<SecureLessonContent'));

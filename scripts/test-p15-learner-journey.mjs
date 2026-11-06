@@ -97,5 +97,15 @@ for(const menu of ['/course-catalog','/my-learning','/practice','/my-practice'])
 assert(bridge.includes('db.auth.getUser()'),'Router bridge must verify real signed Supabase user');
 assert(bridge.includes('LiveLearnerWorkspace')&&bridge.includes('embedded'));
 assert(ui.includes('embedded=false,initialScreen='));
+const liveClient=read('src/lib/supabase.js');
+const buildConfig=read('vite.config.js');
+assert(liveClient.includes('VITE_SUPABASE_PUBLISHABLE_KEY||import.meta.env.VITE_SUPABASE_ANON_KEY'));
+assert(buildConfig.includes('!env.VITE_SUPABASE_PUBLISHABLE_KEY&&!env.VITE_SUPABASE_ANON_KEY'));
+assert(edge.includes("injectedDefaultKey('SUPABASE_PUBLISHABLE_KEYS','sb_publishable_')"));
+assert(edge.includes("injectedDefaultKey('SUPABASE_SECRET_KEYS','sb_secret_')"));
+assert(edge.indexOf("injectedDefaultKey('SUPABASE_PUBLISHABLE_KEYS'") <
+  edge.indexOf("Deno.env.get('SUPABASE_ANON_KEY')"),'Prefer new publishable keys over deprecated anon keys');
+assert(edge.indexOf("injectedDefaultKey('SUPABASE_SECRET_KEYS'") <
+  edge.indexOf("Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')"),'Prefer new secret keys over legacy service-role keys');
 assert(read('TECHNICA_LMS_MASTER_BLUEPRINT.md').includes('## 72. P15'));
 console.log('PASS P15: published-only outline, explicit free intro, private media path, paid/manual gate, local-only simulated UI checkout and learner navigation.');

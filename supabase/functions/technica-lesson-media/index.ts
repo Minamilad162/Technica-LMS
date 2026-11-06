@@ -16,8 +16,22 @@ const uuid=/^[\da-f]{8}-[\da-f]{4}-[\da-f]{4}-[\da-f]{4}-[\da-f]{12}$/i;
 const configuredOrigins=(Deno.env.get('TECHNICA_MEDIA_ALLOWED_ORIGINS')||'')
  .split(',').map(x=>x.trim()).filter(x=>/^https:\/\/[^/]+$/.test(x)||/^http:\/\/localhost:\d+$/.test(x));
 const supabaseUrl=Deno.env.get('SUPABASE_URL')||'';
-const publicKey=Deno.env.get('SUPABASE_ANON_KEY')||Deno.env.get('SUPABASE_PUBLISHABLE_KEY')||'';
-const serverKey=Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')||Deno.env.get('SUPABASE_SECRET_KEY')||'';
+// Hosted Supabase now injects named-key JSON dictionaries. Prefer those over
+// legacy JWT-style anon/service_role keys; otherwise @supabase/server gateway
+// may reject our internal Auth/Storage requests with INVALID_API_KEY.
+const injectedDefaultKey=(envName,prefix)=>{
+ try {
+  const keys=JSON.parse(Deno.env.get(envName)||'{}');
+  const value=keys?.default;
+  return typeof value==='string'&&value.startsWith(prefix)?value:'';
+ }catch{return '';}
+};
+const publicKey=injectedDefaultKey('SUPABASE_PUBLISHABLE_KEYS','sb_publishable_')
+ ||Deno.env.get('SUPABASE_PUBLISHABLE_KEY')
+ ||Deno.env.get('SUPABASE_ANON_KEY')||'';
+const serverKey=injectedDefaultKey('SUPABASE_SECRET_KEYS','sb_secret_')
+ ||Deno.env.get('SUPABASE_SECRET_KEY')
+ ||Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')||'';
 const admin=serverKey&&supabaseUrl?createClient(supabaseUrl,serverKey,
  {auth:{persistSession:false,autoRefreshToken:false}}):null;
 const headers=(origin)=>({
