@@ -1,6 +1,7 @@
 import React,{useCallback,useEffect,useRef,useState} from 'react';
 import {AlertTriangle,FileText,FileUp,LockKeyhole,Play,ShieldCheck,UploadCloud,Video,X} from 'lucide-react';
 import {authorizeLessonMedia,loadLessonContent,uploadLessonMedia} from './lessonMediaApi.js';
+import {ProtectedPdfPages} from './ProtectedPdfPages.jsx';
 import './secureLessonMedia.css';
 
 export function LessonMediaUploadModal({db,lessonId,lessonTitle='',kind,onClose,onDone}){
@@ -49,10 +50,15 @@ export function LessonMediaUploadModal({db,lessonId,lessonTitle='',kind,onClose,
 
 function Watermark({viewer}){
  const [time,setTime]=useState(()=>new Date());
+ const [sessionTag]=useState(()=>{
+  const bytes=new Uint8Array(4);
+  if(typeof crypto!=='undefined'&&crypto.getRandomValues)crypto.getRandomValues(bytes);
+  return Array.from(bytes,n=>n.toString(16).padStart(2,'0')).join('').toUpperCase();
+ });
  useEffect(()=>{const id=setInterval(()=>setTime(new Date()),30000);return()=>clearInterval(id);},[]);
- const label='TECHNICA • '+(viewer||'VERIFIED USER')+' • '+time.toISOString().slice(0,16).replace('T',' ')+' UTC';
+ const label='TECHNICA • '+(viewer||'VERIFIED USER')+' • '+sessionTag+' • '+time.toISOString().slice(0,16).replace('T',' ')+' UTC';
  return <div className="slm-watermark" aria-hidden="true">
-  {Array.from({length:12},(_,i)=><span key={i}>{label}</span>)}</div>;
+  {Array.from({length:12},(_,i)=><span key={i} style={{translate: ((i%3)-1)*(time.getUTCMinutes()%4)*4+'px '+((i%4)-1)*3+'px'}}>{label}</span>)}</div>;
 }
 
 function ProtectedMediaFrame({db,lessonId,block,viewerId}){
@@ -60,6 +66,7 @@ function ProtectedMediaFrame({db,lessonId,block,viewerId}){
  const [cycle,setCycle]=useState(0),[fresh,setFresh]=useState(false);
  const video=useRef(null),clock=useRef(0),wasPlaying=useRef(false);
  const isVideo=block.block_type==='video';
+ const protectedPdf=!isVideo&&block.payload?.protectedPages===true;
  useEffect(()=>{
   const change=()=>{setHidden(document.hidden);setCycle(n=>n+1);};
   document.addEventListener('visibilitychange',change);
@@ -73,12 +80,12 @@ function ProtectedMediaFrame({db,lessonId,block,viewerId}){
  useEffect(()=>{
   let active=true;
   setUrl('');setProblem('');setFresh(false);
-  if(hidden)return;
+  if(hidden||protectedPdf)return;
   authorizeLessonMedia(db,lessonId,block).then(data=>{
    if(active){setUrl(data.url);setFresh(true);}
   }).catch(()=>{if(active)setProblem('Private media access unavailable. Verify your active entitlement or reconnect.');});
   return()=>{active=false;};
- },[db,lessonId,block.id,isVideo,cycle,hidden]);
+ },[db,lessonId,block.id,isVideo,protectedPdf,cycle,hidden]);
  const preserve=()=>{
   if(!video.current)return;
   clock.current=video.current.currentTime;
@@ -90,11 +97,12 @@ function ProtectedMediaFrame({db,lessonId,block,viewerId}){
    if(wasPlaying.current)video.current.play().catch(()=>{});
   }
  };
- return <div className="slm-frame-wrap"
+ return <div className={"slm-frame-wrap"+(protectedPdf?" slm-frame-pages":"")}
   onContextMenu={e=>e.preventDefault()} onCopy={e=>e.preventDefault()}
   onDragStart={e=>e.preventDefault()}
   onKeyDown={e=>{if((e.ctrlKey||e.metaKey)&&['p','s','c'].includes(e.key.toLowerCase()))e.preventDefault();}}>
   {hidden?<p className="slm-locked"><LockKeyhole size={18}/> Content concealed while this tab is not active.</p>:
+   protectedPdf?<ProtectedPdfPages db={db} lessonId={lessonId} block={block}/>:
    problem?<p className="slm-error"><AlertTriangle size={16}/>{problem} <button type="button" onClick={()=>setCycle(n=>n+1)}>Retry</button></p>:
    !url?<p className="slm-locked"><LockKeyhole size={16}/> Verifying access to private {block.block_type}…</p>:
    isVideo?<video ref={video} key={url} src={url} controls playsInline preload="metadata"

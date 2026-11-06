@@ -37,3 +37,17 @@
 @media print{.slm-lesson-content,.slm-frame-wrap,.slm-upload-modal{display:none!important}}
 @media(max-width:650px){.slm-upload-modal{padding:17px}.slm-watermark{grid-template-columns:repeat(2,1fr)}.slm-frame-wrap{aspect-ratio:4/3}}
 @media(prefers-reduced-motion:reduce){.slm-*{animation:none!important;transition:none!important}}
+
+/* P14.1 original-PDF-free page images; navigation stays usable below watermark. */
+.slm-pdf-title,.slm-pdf-picker{display:grid;gap:7px;font-size:12px;color:#386d69;font-weight:650}
+.slm-pdf-title input,.slm-pdf-picker input{width:100%;min-width:0;box-sizing:border-box;border:1px solid #cde5e2;border-radius:9px;padding:10px;font:inherit}
+.slm-pdf-picker{background:#f2fbf8;border:1px dashed #a5d9d1;border-radius:12px;padding:13px}
+.slm-frame-pages{aspect-ratio:3/4;min-height:460px;max-height:82vh}
+.slm-pdf-pages{display:flex;flex-direction:column;width:100%;height:100%;background:#19363c;min-height:0}
+.slm-pdf-page-image{display:grid;place-items:center;flex:1;min-height:0;overflow:hidden;background:#f5f7f7}
+.slm-pdf-page-image img{height:100%;width:100%;max-height:100%;object-fit:contain;pointer-events:none}
+.slm-pdf-page-image .slm-locked{margin:12px}
+.slm-pdf-controls{position:relative;z-index:5;display:flex;align-items:center;justify-content:center;gap:12px;padding:8px 12px;background:#19363c;color:#effffa;font-size:12px}
+.slm-pdf-controls button{display:grid;place-items:center;border:1px solid #52757c;border-radius:8px;background:#294c54;color:#fff;min-width:36px;min-height:34px;cursor:pointer}
+.slm-pdf-controls button:disabled{opacity:.3;cursor:not-allowed}
+@media(max-width:650px){.slm-frame-pages{aspect-ratio:3/4;min-height:350px;max-height:70vh}}

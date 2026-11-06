@@ -82,5 +82,7 @@ export async function loadLessonContent(db,lessonId){
  if(error)throw Error('Lesson access denied or content unavailable.');
  return (data||[]).filter(x=>['text','heading','pdf','video'].includes(x.block_type))
   .map(x=>({...x,payload:x.block_type==='pdf'||x.block_type==='video'?
-   {title:String(x.payload?.title||x.block_type.toUpperCase()).slice(0,160)}:x.payload}));
+   {title:String(x.payload?.title||x.block_type.toUpperCase()).slice(0,160),
+    ...(x.block_type==='pdf'&&x.payload?.protectedPages===true?
+     {protectedPages:true,pageCount:Number(x.payload.pageCount)||0}:{})}:x.payload}));
 }
