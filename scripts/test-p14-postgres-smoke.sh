@@ -73,7 +73,7 @@ if psql -X -v ON_ERROR_STOP=1 -q -c "SELECT public.lms_p14_finalize_media(
  echo 'FAIL P14 accepted incorrect actual Storage bytes';exit 1
 fi
 psql -X -v ON_ERROR_STOP=1 -q -c "
- UPDATE storage.objects SET metadata='{"size":22,"mimetype":"application/pdf"}'::jsonb
+ UPDATE storage.objects SET metadata=jsonb_build_object('size',22,'mimetype','application/pdf')
  WHERE bucket_id='technica-private-lessons'"
 receipt=$(psql -X -v ON_ERROR_STOP=1 -q -A -t -c "BEGIN;
  SET LOCAL ROLE service_role;
