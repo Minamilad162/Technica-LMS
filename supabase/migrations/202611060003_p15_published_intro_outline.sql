@@ -102,7 +102,7 @@ REVOKE ALL ON FUNCTION public.lms_p15_admin_intro_enabled(uuid) FROM PUBLIC,anon
 GRANT EXECUTE ON FUNCTION public.lms_p15_admin_intro_enabled(uuid) TO authenticated,service_role;
 
 CREATE FUNCTION public.lms_p15_set_intro(p_course_id uuid,p_enabled boolean)
-RETURNS boolean LANGUAGE plpgsql SECURITY DEFINER SET search_path='' AS $
+RETURNS boolean LANGUAGE plpgsql SECURITY DEFINER SET search_path='' AS $$
 DECLARE v_first uuid;
 BEGIN
  IF NOT public.lms_p1_actor_is_admin() OR p_course_id IS NULL OR p_enabled IS NULL

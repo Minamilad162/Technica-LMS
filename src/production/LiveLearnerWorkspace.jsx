@@ -45,7 +45,7 @@ export default function LiveLearnerWorkspace({db,user,onSignOut}){
   [selectedId,setSelectedId]=useState(''),[outline,setOutline]=useState([]),
   [outlineLoading,setOutlineLoading]=useState(false),[outlineError,setOutlineError]=useState(''),
   [activeLesson,setActiveLesson]=useState(null),[checkout,setCheckout]=useState(null),
-  [demoRevision,setDemoRevision]=useState(0),[practiceId,setPracticeId]=useState(''),
+  [demoRevision,setDemoRevision]=useState(0),[practiceId,setPracticeId]=useState(''),[historyId,setHistoryId]=useState(''),
   [practiceTree,setPracticeTree]=useState([]),[practiceError,setPracticeError]=useState(''),
   [report,setReport]=useState(null),[reportError,setReportError]=useState(''),[reportLoading,setReportLoading]=useState(false);
  const refresh=()=>setRevision(x=>x+1);
@@ -54,6 +54,8 @@ export default function LiveLearnerWorkspace({db,user,onSignOut}){
   fetchP15Catalog(db,user).then(x=>{if(live){setCatalog(x);
     setSelectedId(old=>x.courses.some(c=>c.id===old)?old:'');
     setPracticeId(old=>x.courses.some(c=>c.id===old&&isFullCourseEnrolled(x.entitlements,c.id))?
+     old:(x.courses.find(c=>isFullCourseEnrolled(x.entitlements,c.id))?.id||''));
+    setHistoryId(old=>x.courses.some(c=>c.id===old&&isFullCourseEnrolled(x.entitlements,c.id))?
      old:(x.courses.find(c=>isFullCourseEnrolled(x.entitlements,c.id))?.id||''));}})
    .catch(e=>{if(live){setCatalog(null);setError(e.message||'Course catalog unavailable.');}})
    .finally(()=>{if(live)setLoading(false);});
@@ -65,7 +67,7 @@ export default function LiveLearnerWorkspace({db,user,onSignOut}){
  const chosen=catalog?.courses.find(c=>c.id===selectedId);
  const full=chosen&&isFullCourseEnrolled(catalog?.entitlements,chosen.id);
  const demoChosen=chosen&&localCheckoutEnabled()&&hasLocalDemoCheckout(user.id,chosen.id)&&!full;
- const allowedLesson=lesson=>!!full||lesson.isFreeIntro;
+ const allowedLesson=lesson=>!!full||lesson.isFreeIntro||!!demoChosen;
  useEffect(()=>{
   if(!chosen){setOutline([]);setActiveLesson(null);setOutlineError('');return;}
   let live=true;setOutlineLoading(true);setOutline([]);setActiveLesson(null);setOutlineError('');
@@ -82,13 +84,13 @@ export default function LiveLearnerWorkspace({db,user,onSignOut}){
   return()=>{live=false;};
  },[screen,db,practiceId,revision]);
  useEffect(()=>{
-  if(screen!=='history'||!enrolled[0]){setReport(null);setReportError('');return;}
+  if(screen!=='history'||!enrolled.some(c=>c.id===historyId)){setReport(null);setReportError('');return;}
   let live=true;setReportLoading(true);setReport(null);setReportError('');
-  getLearnerProgress(db,enrolled[0].id).then(x=>{if(live)setReport(x);})
+  getLearnerProgress(db,historyId).then(x=>{if(live)setReport(x);})
    .catch(()=>{if(live)setReportError('Verified Practice history requires the P11 backend. No demo scores are shown.');})
    .finally(()=>{if(live)setReportLoading(false);});
   return()=>{live=false;};
- },[screen,db,enrolled[0]?.id,revision]);
+ },[screen,db,historyId,enrolled.length,revision]);
  const openCourse=id=>{setSelectedId(id);setActiveLesson(null);setScreen('course');};
  const go=page=>{setScreen(page);setActiveLesson(null);if(page!=='course')setSelectedId('');};
  const onDemoCheckout=digits=>{
@@ -167,10 +169,15 @@ export default function LiveLearnerWorkspace({db,user,onSignOut}){
          <button type="button" aria-expanded={expanded} onClick={()=>{if(unlocked)setActiveLesson(v=>v===l.id?'':l.id);else setActiveLesson(null);}}>
           {unlocked?<PlayCircle size={18}/>:<LockKeyhole size={18}/>}
           <span><strong>{di+1}.{ti+1}.{li+1} · {l.title}</strong>
-           <small>{l.isFreeIntro?'FREE INTRO':unlocked?'AVAILABLE':'LOCKED · ENROLL TO VIEW'}</small></span>
+           <small>{l.isFreeIntro?'FREE INTRO':unlocked?(demoChosen?'LOCAL DEMO PREVIEW':'AVAILABLE'):'LOCKED · ENROLL TO VIEW'}</small></span>
           {unlocked?(expanded?<ChevronDown size={17}/>:<ChevronRight size={17}/>):null}</button>
-         {expanded&&unlocked&&<div className="lj-lesson-content"><SecureLessonContent
-          db={db} lessonId={l.id} viewerId={user.id.slice(0,8)}/>
+         {expanded&&unlocked&&<div className="lj-lesson-content">
+          {full||l.isFreeIntro?<SecureLessonContent
+           db={db} lessonId={l.id} viewerId={user.id.slice(0,8)}/>:
+           <div className="lj-demo-banner" role="status">
+            Local checkout simulation: lesson navigation is unlocked here, but the actual PDF/video and content are NOT fetched.
+            Real signed-in paid/manual enrollment is required to access protected lessons.
+           </div>}
           <small>Lesson completion is recorded by the verified P2 workflow, not simply by opening a video.</small>
          </div>}
         </div>;
@@ -190,6 +197,8 @@ export default function LiveLearnerWorkspace({db,user,onSignOut}){
      </>}
    </div>:
    <div className="lj-history"><h2>My Practice History</h2>
+    {!!enrolled.length&&<label className="lj-picker">Course<select value={historyId} onChange={e=>setHistoryId(e.target.value)}>
+      {enrolled.map(c=><option value={c.id} key={c.id}>{c.title}</option>)}</select></label>}
     {!enrolled.length?<div className="lj-empty">Your practice history appears here after real enrollment and graded sessions.</div>:
      reportLoading?<div className="lj-empty" role="status">Loading your verified results…</div>:
      reportError?<div className="lj-empty" role="alert">{reportError}</div>:

@@ -72,6 +72,10 @@ assert(!api.includes("db.from('lms_entitlements').insert"));
 assert(ui.includes('FREE INTRO')&&ui.includes('LOCKED · ENROLL TO VIEW'));
 for(const label of ['Courses','My Learning','Practice','My Practice'])assert(ui.includes(label));
 assert(ui.includes('SecureLessonContent')&&ui.includes('LivePractice'));
+assert(ui.includes('Local checkout simulation: lesson navigation is unlocked here'));
+assert(ui.includes('full||l.isFreeIntro?<SecureLessonContent'));
+assert(ui.includes('historyId'));
+
 assert(ui.includes('No payment processor is called')||ui.includes('No payment processor'));
 assert(portal.includes('LiveLearnerWorkspace db={db}'));
 assert(admin.includes('Publish course')&&admin.includes('Publish Lesson')&&admin.includes('Enable Free Intro'));

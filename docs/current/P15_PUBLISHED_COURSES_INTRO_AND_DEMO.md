@@ -37,3 +37,5 @@ Do NOT reapply P1/P14. Existing Supabase screenshot/video limitations, P4/P5 Pra
 - `npm run test:p15` covers outline validation, paid/manual entitlement gates, client-side local simulation exclusion, admin commands, source security.
 - `scripts/test-p15-postgres-smoke.sh` runs only after existing disposable PostgreSQL P14 chain: no new data mutations on migration, Admin-only Intro enable, outsider sees only one Intro, paid content stays locked, suspended denied, draft/unpublish/reorder fail closed, anon/learner SQL privilege denial.
 - Successful code tests are NOT evidence of real Supabase/Cloudflare functionality or payment processing.
+
+**Local demo navigation:** After entering fake digits in local-only checkout, all published Lesson titles become *clickable demonstration placeholders* and the Course appears in My Learning. No private Lesson content, signed PDF/video URL, graded Practice or Mock is fetched without a genuine paid/manual entitlement. My Practice can select among the learner's actually enrolled courses.
