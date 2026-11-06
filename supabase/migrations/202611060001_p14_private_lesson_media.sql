@@ -49,4 +49,40 @@ GRANT SELECT,INSERT,UPDATE ON public.lms_p14_media_upload_intents TO service_rol
 -- only via server-authorized short-lived signed READ token.
 -- All tokens are bearer capabilities: short-lived, non-DRM, not a promise
 -- against screen capture, OS recording, camera filming or network extraction.
+-- Atomic finalization is callable ONLY by the Edge service role.
+-- It rechecks actual storage metadata and locks the intent to prevent
+-- duplicate media assets / lesson blocks under concurrent finalize requests.
+CREATE FUNCTION public.lms_p14_finalize_media(p_intent_id uuid)
+RETURNS jsonb LANGUAGE plpgsql SECURITY DEFINER SET search_path='' AS $
+DECLARE i public.lms_p14_media_upload_intents%ROWTYPE;
+ v_metadata jsonb;v_size_text text;v_mime text;v_asset_id uuid;v_block_id uuid;v_position integer;
+BEGIN
+ SELECT * INTO i FROM public.lms_p14_media_upload_intents
+ WHERE id=p_intent_id FOR UPDATE;
+ IF NOT FOUND OR i.status<>'pending' OR i.expires_at<=now()
+ THEN RAISE EXCEPTION 'P14 upload intent missing, expired or already finalized'; END IF;
+ SELECT o.metadata INTO v_metadata FROM storage.objects o
+ WHERE o.bucket_id='technica-private-lessons' AND o.name=i.object_path;
+ IF v_metadata IS NULL THEN RAISE EXCEPTION 'P14 uploaded private object not found'; END IF;
+ v_size_text=v_metadata->>'size';
+ v_mime=lower(coalesce(v_metadata->>'mimetype',v_metadata->>'contentType',''));
+ IF v_size_text IS NULL OR v_size_text !~ '^[0-9]{1,12}
+ OR v_size_text::bigint<>i.expected_bytes OR v_mime<>i.expected_mime
+ THEN RAISE EXCEPTION 'P14 actual storage bytes or MIME mismatch'; END IF;
+ IF EXISTS(SELECT 1 FROM public.lms_media_assets WHERE private_object_path=i.object_path)
+ THEN RAISE EXCEPTION 'P14 object path already registered'; END IF;
+ INSERT INTO public.lms_media_assets(course_id,kind,private_object_path,mime_type)
+ VALUES(i.course_id,i.kind,i.object_path,i.expected_mime) RETURNING id INTO v_asset_id;
+ SELECT coalesce(max(position)+1,0) INTO v_position FROM public.lms_lesson_blocks
+ WHERE lesson_id=i.lesson_id;
+ INSERT INTO public.lms_lesson_blocks(lesson_id,block_type,payload,position)
+ VALUES(i.lesson_id,i.kind,jsonb_build_object('assetId',v_asset_id,'title',i.display_name),v_position)
+ RETURNING id INTO v_block_id;
+ UPDATE public.lms_p14_media_upload_intents SET status='finalized',
+ finalized_at=now(),asset_id=v_asset_id WHERE id=i.id;
+ RETURN jsonb_build_object('assetId',v_asset_id,'blockId',v_block_id,
+   'kind',i.kind,'title',i.display_name);
+END; $;
+REVOKE ALL ON FUNCTION public.lms_p14_finalize_media(uuid) FROM PUBLIC,anon,authenticated;
+GRANT EXECUTE ON FUNCTION public.lms_p14_finalize_media(uuid) TO service_role;
 COMMIT;
