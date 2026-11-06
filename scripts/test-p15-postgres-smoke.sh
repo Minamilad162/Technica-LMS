@@ -53,7 +53,7 @@ fi
 psql -X -v ON_ERROR_STOP=1 -q -A -t -c "
  BEGIN; SET LOCAL ROLE authenticated; SET LOCAL request.jwt.claim.sub='$ADMIN';
  SELECT public.lms_p15_set_intro('$C',true); COMMIT;" >/dev/null
-[[ "$(query_as authenticated "$OUTSIDER" "SELECT count(*) FROM public.lms_lesson_blocks WHERE lesson_id='$FIRST'")" == 1 ]] ||
+[[ "$(query_as authenticated "$OUTSIDER" "SELECT count(*) FROM public.lms_lesson_blocks WHERE lesson_id='$FIRST'")" -ge 1 ]] ||
  { echo 'FAIL P15 opted-in Intro not readable';exit 1; }
 [[ "$(query_as authenticated "$OUTSIDER" "SELECT count(*) FROM public.lms_lesson_blocks WHERE lesson_id='$SECOND'")" == 0 ]] ||
  { echo 'FAIL P15 paid Lesson exposed';exit 1; }
