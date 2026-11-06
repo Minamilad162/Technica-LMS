@@ -88,7 +88,8 @@ Deno.serve(async(req)=>{
   const title=fileName.replace(/[<>]/g,'').slice(0,160);
   const {error:insertError}=await admin.from('lms_p14_media_upload_intents').insert({
    id,created_by:user.id,course_id:courseId,lesson_id:lessonId,
-   kind,expected_mime:mime,expected_bytes:size,object_path:path,display_name:title
+   kind,expected_mime:mime,expected_bytes:size,object_path:path,display_name:title,
+   status:'pending'
   });
   if(insertError)return failure(503,'Private upload authorization unavailable',origin);
   const {data:signed,error:signError}=await admin.storage.from(BUCKET)
