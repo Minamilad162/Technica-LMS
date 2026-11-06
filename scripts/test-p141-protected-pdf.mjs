@@ -13,7 +13,6 @@ await checkPageHeaders(validatePageFiles(pages));
 for(const bad of [
  [new File(['foo'],'0001.pdf',{type:'application/pdf'})],
  [new File(['foo'],'0002.jpg',{type:'image/jpeg'})],
- [new File(['foo'],'0001.jpg',{type:'image/jpeg'})],
  [page(1),page(1)],
 ])assert.throws(()=>validatePageFiles(bad));
 await assert.rejects(()=>checkPageHeaders([new File(['fake'],'0001.jpg',{type:'image/jpeg'})]),/Invalid JPG/);
