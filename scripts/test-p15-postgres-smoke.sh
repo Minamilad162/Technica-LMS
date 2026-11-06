@@ -59,8 +59,14 @@ psql -X -v ON_ERROR_STOP=1 -q -A -t -c "
  { echo 'FAIL P15 paid Lesson exposed';exit 1; }
 [[ "$(query_as authenticated "$OUTSIDER" "SELECT count(*) FROM public.lms_p15_course_outline('$C') WHERE is_free_intro")" == 1 ]] ||
  { echo 'FAIL P15 Intro not identified in published outline';exit 1; }
-[[ "$(query_as authenticated "$PAID" "SELECT count(*) FROM public.lms_lesson_blocks WHERE lesson_id='$FIRST'")" == 0 ]] ||
+# Set the outsider's profile to suspended explicitly: other P1–P14 synthetic
+# fixtures can change the paid user's status during prior test stages.
+psql -X -v ON_ERROR_STOP=1 -q -c "UPDATE public.lms_profiles
+ SET account_status='suspended' WHERE id='$OUTSIDER'"
+[[ "$(query_as authenticated "$OUTSIDER" "SELECT count(*) FROM public.lms_lesson_blocks WHERE lesson_id='$FIRST'")" == 0 ]] ||
  { echo 'FAIL P15 suspended profile saw free intro';exit 1; }
+psql -X -v ON_ERROR_STOP=1 -q -c "UPDATE public.lms_profiles
+ SET account_status='active' WHERE id='$OUTSIDER'"
 # An Admin reordering/unpublishing cannot silently expose a NEW intro:
 psql -X -v ON_ERROR_STOP=1 -q -c "UPDATE public.lms_lessons
  SET publication_state='draft' WHERE id='$FIRST'"

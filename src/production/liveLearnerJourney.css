@@ -66,3 +66,11 @@
 @media(max-width:850px){.lj-layout{grid-template-columns:1fr;gap:18px}.lj-nav{position:static;display:flex;flex-wrap:wrap;gap:7px;padding:9px}.lj-nav-label,.lj-nav-note{display:none}.lj-nav>button{flex:1 1 auto;padding:10px;font-size:12px}}
 @media(max-width:590px){.lj-top{padding:10px 13px}.lj-account>span,.lj-account small{display:none}.lj-layout{padding:14px 12px}.lj-logo b{font-size:11px}.lj-nav>button{flex:1 1 44%;justify-content:center;gap:6px}.lj-heading{align-items:start}.lj-heading>.lj-quiet{padding:9px;font-size:0}.lj-heading>.lj-quiet svg{width:18px}.lj-card{padding:17px}.lj-domain h2{font-size:14px;padding:12px}.lj-topic{padding:10px}.lj-lesson-content{margin-left:10px}.lj-history-stats{grid-template-columns:1fr}.lj-history-list>div{grid-template-columns:1fr 1fr}.lj-history-list>div strong{grid-column:1/-1}.lj-course-lock{width:100%}}
 @media(prefers-reduced-motion:reduce){.lj-shell *{scroll-behavior:auto!important;animation:none!important;transition:none!important}}
+
+/* Existing /#/ ReactRouter embeds the same secure P15 learner workspace inside
+   the accepted Layout sidebar. Hide its duplicate header/nav in that case. */
+.lj-shell.lj-embedded{background:transparent;min-height:0}
+.lj-embedded .lj-top,.lj-embedded .lj-nav{display:none}
+.lj-embedded .lj-layout{display:grid;grid-template-columns:minmax(0,1fr);max-width:none;padding:0;gap:0}
+.lj-embedded .lj-main{padding:0;max-width:none}
+@media(max-width:850px){.lj-embedded .lj-layout{grid-template-columns:minmax(0,1fr)}}

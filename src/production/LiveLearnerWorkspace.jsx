@@ -39,8 +39,8 @@ function DemoCheckout({course,onClose,onSuccess}){
     <button className="lj-primary" type="submit">Simulate only <ArrowRight size={17}/></button></div>
   </form></div>;
 }
-export default function LiveLearnerWorkspace({db,user,onSignOut}){
- const [screen,setScreen]=useState('courses'),[catalog,setCatalog]=useState(null),
+export default function LiveLearnerWorkspace({db,user,onSignOut,embedded=false,initialScreen='courses'}){
+ const [screen,setScreen]=useState(initialScreen),[catalog,setCatalog]=useState(null),
   [loading,setLoading]=useState(true),[error,setError]=useState(''),[revision,setRevision]=useState(0),
   [selectedId,setSelectedId]=useState(''),[outline,setOutline]=useState([]),
   [outlineLoading,setOutlineLoading]=useState(false),[outlineError,setOutlineError]=useState(''),
@@ -100,7 +100,7 @@ export default function LiveLearnerWorkspace({db,user,onSignOut}){
  const screenTitle=screen==='courses'?'Explore Courses':screen==='learning'?'My Learning':
   screen==='course'?(chosen?.title||'Course Outline'):
   screen==='practice'?'Practice Center':'My Practice';
- return <div className="lj-shell">
+ return <div className={"lj-shell"+(embedded?" lj-embedded":"")}>
   <header className="lj-top"><div className="lj-logo"><img alt="Technica Consult" src="/images/technica-logo.webp"/>
    <b>TECHNICA CONSULT <span>LMS</span></b></div><div className="lj-account">
     <span><ShieldCheck size={14}/> Secure learning</span><small>{user.email}</small>

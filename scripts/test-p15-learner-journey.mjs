@@ -79,5 +79,23 @@ assert(ui.includes('historyId'));
 assert(ui.includes('No payment processor is called')||ui.includes('No payment processor'));
 assert(portal.includes('LiveLearnerWorkspace db={db}'));
 assert(admin.includes('Publish course')&&admin.includes('Publish Lesson')&&admin.includes('Enable Free Intro'));
+// Both real Supabase standalone and currently deployed /#/ router shell must
+// expose the SAME protected learner journeys; keep admin-only /courses intact.
+const app=read('src/App.jsx');
+const layout=read('src/components/Layout.jsx');
+const bridge=read('src/production/LiveLearnerPortal.jsx');
+for(const route of ['/course-catalog','/my-learning','/my-practice','/practice'])
+ assert(app.includes('path="'+route+'"'),'P15 route missing: '+route);
+assert(app.includes("LiveLearnerPortal initialScreen=\"courses\""));
+assert(app.includes("LiveLearnerPortal initialScreen=\"learning\""));
+assert(app.includes("LiveLearnerPortal initialScreen=\"history\""));
+assert(app.includes("LiveLearnerPortal initialScreen=\"practice\""));
+assert(app.includes("legacyPreview?<LegacyPreviewWarning><PracticePage"));
+assert(app.includes('path="/courses" element={<AdminOnly>'));
+for(const menu of ['/course-catalog','/my-learning','/practice','/my-practice'])
+ assert(layout.includes(menu),'P15 learner menu missing '+menu);
+assert(bridge.includes('db.auth.getUser()'),'Router bridge must verify real signed Supabase user');
+assert(bridge.includes('LiveLearnerWorkspace')&&bridge.includes('embedded'));
+assert(ui.includes('embedded=false,initialScreen='));
 assert(read('TECHNICA_LMS_MASTER_BLUEPRINT.md').includes('## 72. P15'));
 console.log('PASS P15: published-only outline, explicit free intro, private media path, paid/manual gate, local-only simulated UI checkout and learner navigation.');
