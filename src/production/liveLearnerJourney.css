@@ -1,0 +1,76 @@
+/* P15 learner information architecture · retains Technica palette and mobile sizes */
+.lj-shell{min-height:100dvh;background:#f3f8fa;color:#244653;font-family:Inter,ui-sans-serif,system-ui,sans-serif}
+.lj-shell *{box-sizing:border-box}
+.lj-top{display:flex;justify-content:space-between;align-items:center;gap:20px;background:#fff;border-bottom:1px solid #dce9ec;padding:14px clamp(16px,3vw,54px);min-height:73px}
+.lj-logo,.lj-account{display:flex;align-items:center;gap:12px}.lj-logo img{width:43px;height:39px;object-fit:contain}.lj-logo b{font-size:14px;letter-spacing:.01em}.lj-logo b span{color:#0f968a}
+.lj-account>span{display:flex;align-items:center;gap:6px;color:#167e70;background:#eaf8f4;border-radius:999px;padding:7px 10px;font-size:11px;font-weight:700}
+.lj-account small{color:#6e8088;font-size:12px}.lj-account button{display:flex;align-items:center;gap:6px;border:1px solid #d7e5e7;border-radius:9px;padding:9px 12px;background:white;color:#37616b;font-size:12px}
+.lj-layout{max-width:1480px;display:grid;grid-template-columns:minmax(195px,240px) minmax(0,1fr);gap:26px;margin:0 auto;padding:27px clamp(15px,3vw,46px)}
+.lj-nav{align-self:start;display:grid;gap:5px;padding:16px 12px;background:#fff;border:1px solid #dae7e9;border-radius:17px;box-shadow:0 12px 32px #173b4109;position:sticky;top:17px}
+.lj-nav-label{font-size:10px;font-weight:800;color:#84999d;padding:11px 12px 5px;letter-spacing:.12em}
+.lj-nav>button{display:flex;align-items:center;gap:11px;border:1px solid transparent;border-radius:11px;padding:13px;text-align:left;background:transparent;color:#4b7279;font-size:13px;font-weight:700}
+.lj-nav>button.active,.lj-nav>button[aria-current=page]{color:#11786b;background:#eaf8f4;border-color:#cfeae1}
+.lj-nav>button:focus-visible,.lj-shell button:focus-visible{outline:2px solid #1d998e;outline-offset:2px}
+.lj-nav-note{border-top:1px solid #ecf1f2;padding:15px 10px 6px;color:#789096;font-size:11px;line-height:1.6}
+.lj-nav-note svg{vertical-align:middle;color:#118e80;margin-right:5px}
+.lj-main{min-width:0;padding:4px 0 35px}
+.lj-heading{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:25px}
+.lj-heading h1{color:#184750;font-size:clamp(26px,3.3vw,38px);letter-spacing:-.045em;margin:7px 0 5px}
+.lj-heading p{max-width:690px;color:#69838b;font-size:13px;line-height:1.7;margin:0}
+.lj-eyebrow{font-size:10px;font-weight:850;color:#109083;letter-spacing:.15em}
+.lj-quiet,.lj-primary{display:inline-flex;align-items:center;gap:8px;justify-content:center;border-radius:10px;padding:10px 13px;font-size:12px;font-weight:750;cursor:pointer}
+.lj-quiet{border:1px solid #d5e5e7;background:#fff;color:#2b6870}
+.lj-primary{background:linear-gradient(105deg,#137d78,#1caca0);border:0;color:#fff}
+.lj-error{background:#fff0ed;border:1px solid #f3d0c6;border-radius:10px;color:#a0443d;padding:12px 14px;font-size:12px;line-height:1.6}
+.lj-empty{display:grid;place-items:center;justify-items:center;gap:12px;text-align:center;padding:37px 22px;background:#fff;border:1px dashed #ccddde;border-radius:17px;color:#6a858c;line-height:1.7;font-size:13px;grid-column:1/-1}
+.lj-empty b{font-size:16px;color:#315b62}.lj-empty p{margin:0;max-width:480px}
+.lj-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));gap:17px}
+.lj-card{display:flex;flex-direction:column;gap:16px;border:1px solid #dcebed;background:#fff;border-radius:18px;padding:22px;box-shadow:0 10px 34px #173b410a}
+.lj-card-symbol{display:grid;place-items:center;width:50px;height:50px;background:#e7f7f3;color:#118d7e;border-radius:14px}
+.lj-kicker{font-size:10px;letter-spacing:.1em;color:#118c7a;font-weight:850}
+.lj-card h2{font-size:21px;margin:7px 0;color:#244c55}.lj-card p{font-size:13px;line-height:1.7;color:#6f858d;margin:0}
+.lj-card-foot{display:flex;align-items:center;justify-content:space-between;gap:10px;border-top:1px solid #e6eff0;margin-top:auto;padding-top:17px;flex-wrap:wrap}
+.lj-card-foot>span{display:flex;align-items:center;gap:5px;color:#628587;font-size:11px}
+.lj-course,.lj-practice,.lj-history{display:grid;gap:16px}
+.lj-course-actions{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+.lj-course-lock{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:9px 12px;border:1px solid #d8e8e8;border-radius:10px;background:#fff;color:#557479;font-size:12px}
+.lj-course-lock>span{color:#758c90;font-size:11px}
+.lj-enrolled{display:flex;align-items:center;gap:7px;color:#197f6e;font-size:13px;font-weight:800}
+.lj-demo-banner{background:#fff5df;border:1px solid #eed9ac;border-radius:11px;color:#8b6622;font-size:12px;line-height:1.6;padding:12px 15px;margin:0}
+.lj-domains{display:grid;gap:15px}.lj-domain{background:#fff;border:1px solid #dce9e9;border-radius:16px;overflow:hidden}
+.lj-domain h2{display:flex;align-items:center;gap:9px;background:#eaf8f4;color:#246c62;font-size:16px;padding:15px 18px;margin:0}
+.lj-topic{padding:14px 17px;border-top:1px solid #edf2f2}.lj-topic h3{font-size:13px;color:#41626d;margin:5px 0 10px}
+.lj-lesson{border-top:1px solid #eff2f4}.lj-lesson>button{display:flex;align-items:center;gap:11px;width:100%;border:0;background:#fff;text-align:left;color:#27585e;padding:13px 10px;cursor:pointer}
+.lj-lesson>button>span{display:grid;gap:4px;flex:1}.lj-lesson strong{font-size:13px}.lj-lesson small{font-size:10px;color:#138c7f;letter-spacing:.07em;font-weight:800}
+.lj-lesson.locked>button{cursor:default;color:#8a989e}.lj-lesson.locked small{color:#9da9ac}
+.lj-lesson-content{border-radius:12px;border:1px solid #e0ecee;background:#f7fbfc;padding:14px;margin:0 7px 13px 34px}.lj-lesson-content>small{display:block;font-size:11px;color:#789096;margin-top:12px}
+.lj-section-head{padding:20px;background:#fff;border:1px solid #dce9ed;border-radius:14px}
+.lj-section-head h2,.lj-history h2{font-size:18px;margin:0 0 8px}.lj-section-head p{font-size:12px;line-height:1.6;color:#6e8890;margin:0}
+.lj-picker{display:grid;gap:7px;font-size:12px;font-weight:700;color:#346c70}.lj-picker select{padding:11px;border:1px solid #d1e1e4;border-radius:11px;max-width:520px;background:white;color:#265864}
+.lj-practice>.live-practice{width:100%;min-width:0}
+.lj-history-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.lj-history-stats>div{display:grid;gap:8px;background:white;padding:22px;border-radius:14px;border:1px solid #dce9ed}
+.lj-history-stats small{font-size:12px;color:#71868f}.lj-history-stats strong{font-size:26px;color:#207d73}
+.lj-history-list{background:#fff;border:1px solid #dfe9eb;border-radius:13px;overflow:hidden}
+.lj-history-list>div{display:grid;grid-template-columns:1fr 130px 150px;gap:10px;align-items:center;padding:13px 17px;border-bottom:1px solid #ecf1f2;font-size:12px}
+.lj-history-list>div span{color:#768b91}.lj-history-list>p{padding:15px;font-size:13px}
+.lj-muted{font-size:11px;color:#7e9196}
+.lj-shade{position:fixed;inset:0;z-index:1500;display:grid;place-items:center;padding:17px;background:#072b3ba6;backdrop-filter:blur(4px)}
+.lj-checkout{display:grid;gap:17px;max-width:480px;width:100%;max-height:90dvh;overflow:auto;background:#fff;border-radius:18px;padding:24px;box-shadow:0 30px 60px #14313638}
+.lj-checkout-head{display:flex;gap:15px;justify-content:space-between;align-items:start}
+.lj-checkout-head small{color:#0e9486;font-size:10px;font-weight:850;letter-spacing:.1em}.lj-checkout-head h2{font-size:22px;margin:6px 0}
+.lj-checkout-head button{border:0;background:none;color:#628089}.lj-checkout>p{color:#5b7d83;font-size:12px;line-height:1.7;margin:0}
+.lj-checkout .lj-security{background:#fff7e8;border:1px solid #ecdab7;border-radius:11px;padding:11px;color:#8a6c39}
+.lj-checkout label{display:grid;gap:8px;font-size:12px;color:#38656e;font-weight:700}.lj-checkout input{border:1px solid #cbdfe2;border-radius:10px;padding:13px}
+.lj-checkout-actions{display:flex;gap:10px;justify-content:flex-end}
+@media(max-width:850px){.lj-layout{grid-template-columns:1fr;gap:18px}.lj-nav{position:static;display:flex;flex-wrap:wrap;gap:7px;padding:9px}.lj-nav-label,.lj-nav-note{display:none}.lj-nav>button{flex:1 1 auto;padding:10px;font-size:12px}}
+@media(max-width:590px){.lj-top{padding:10px 13px}.lj-account>span,.lj-account small{display:none}.lj-layout{padding:14px 12px}.lj-logo b{font-size:11px}.lj-nav>button{flex:1 1 44%;justify-content:center;gap:6px}.lj-heading{align-items:start}.lj-heading>.lj-quiet{padding:9px;font-size:0}.lj-heading>.lj-quiet svg{width:18px}.lj-card{padding:17px}.lj-domain h2{font-size:14px;padding:12px}.lj-topic{padding:10px}.lj-lesson-content{margin-left:10px}.lj-history-stats{grid-template-columns:1fr}.lj-history-list>div{grid-template-columns:1fr 1fr}.lj-history-list>div strong{grid-column:1/-1}.lj-course-lock{width:100%}}
+@media(prefers-reduced-motion:reduce){.lj-shell *{scroll-behavior:auto!important;animation:none!important;transition:none!important}}
+
+/* Existing /#/ ReactRouter embeds the same secure P15 learner workspace inside
+   the accepted Layout sidebar. Hide its duplicate header/nav in that case. */
+.lj-shell.lj-embedded{background:transparent;min-height:0}
+.lj-embedded .lj-top,.lj-embedded .lj-nav{display:none}
+.lj-embedded .lj-layout{display:grid;grid-template-columns:minmax(0,1fr);max-width:none;padding:0;gap:0}
+.lj-embedded .lj-main{padding:0;max-width:none}
+@media(max-width:850px){.lj-embedded .lj-layout{grid-template-columns:minmax(0,1fr)}}

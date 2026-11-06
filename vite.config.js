@@ -9,8 +9,8 @@ export default defineConfig(({mode})=>{
   // Reviewer is also present in the default site. Fail Cloudflare Worker
   // BUILDS when its public Supabase configuration was not injected, rather
   // than silently deploying a broken 'configuration required' screen.
-  if(process.env.WORKERS_CI==='1'&&(!env.VITE_SUPABASE_URL||!env.VITE_SUPABASE_ANON_KEY)){
-    throw new Error('[Technica LMS] Missing public Supabase BUILD variables: VITE_SUPABASE_URL and/or VITE_SUPABASE_ANON_KEY. Configure Worker Settings > Builds > Build variables and secrets. No values are printed.');
+  if(process.env.WORKERS_CI==='1'&&(!env.VITE_SUPABASE_URL||(!env.VITE_SUPABASE_PUBLISHABLE_KEY&&!env.VITE_SUPABASE_ANON_KEY))){
+    throw new Error('[Technica LMS] Missing public Supabase BUILD variables: VITE_SUPABASE_URL and a publishable API key (VITE_SUPABASE_PUBLISHABLE_KEY or VITE_SUPABASE_ANON_KEY). Configure Worker Settings > Builds > Build variables and secrets. No values are printed.');
   }
   const live=env.VITE_DATA_MODE==='supabase';
   return {

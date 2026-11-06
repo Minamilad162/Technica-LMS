@@ -1,6 +1,6 @@
 import React,{useCallback,useEffect,useRef,useState} from 'react';
 import {AlertTriangle,FileText,FileUp,LockKeyhole,Play,ShieldCheck,UploadCloud,Video,X} from 'lucide-react';
-import {authorizeLessonMedia,loadLessonContent,uploadLessonMedia} from './lessonMediaApi.js';
+import {authorizeLessonMedia,loadLessonContent,uploadLessonMedia,formatLessonMediaUploadError} from './lessonMediaApi.js';
 import './secureLessonMedia.css';
 
 export function LessonMediaUploadModal({db,lessonId,lessonTitle='',kind,onClose,onDone}){
@@ -17,7 +17,7 @@ export function LessonMediaUploadModal({db,lessonId,lessonTitle='',kind,onClose,
    setStage('Private media attached successfully.');
    onDone?.(receipt);
    onClose?.();
-  }catch{setError('Secure upload could not be completed. Verify the file, Admin account, Staging migration and Edge Function deployment. No Lesson media was published.');}
+  }catch(err){setError(formatLessonMediaUploadError(err));}
   finally{setBusy(false);}
  }
  return <div className="slm-modal-shade" role="presentation"
@@ -40,7 +40,7 @@ export function LessonMediaUploadModal({db,lessonId,lessonTitle='',kind,onClose,
    </div>
    <p className="slm-truth">Browser restrictions and watermarks discourage copying, but screenshots, recording and network extraction cannot be fully prevented without supported DRM/secure rendering.</p>
    {error&&<p className="slm-error" role="alert"><AlertTriangle size={16}/>{error}</p>}
-   {stage&&<p className="slm-stage" role="status">{stage}</p>}
+   {stage&&<p className="slm-stage" role="status">Last upload step: {stage}</p>}
    <div className="slm-actions"><button type="button" className="at-outline" disabled={busy} onClick={onClose}>Cancel</button>
     <button type="submit" className="at-primary" disabled={!file||busy}><UploadCloud size={16}/>{busy?'Securing file…':'Upload & attach'}</button></div>
   </form>

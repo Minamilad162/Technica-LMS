@@ -7,6 +7,7 @@ import LivePractice from './LivePractice';
 import AdminQuestionReview from './AdminQuestionReview';
 import AdminToolsWorkspace from './AdminToolsWorkspace.jsx';
 import {SecureLessonContent} from './SecureLessonMedia.jsx';
+import LiveLearnerWorkspace from './LiveLearnerWorkspace.jsx';
 import ReviewConnectionDiagnostics from './ReviewConnectionDiagnostics';
 import {fetchAspReviewDomains} from './questionReviewApi';
 
@@ -210,6 +211,10 @@ export default function SupabaseApp({secureReviewEntry=false,reviewerOnly=false}
       <div className="live-empty" role="status"><RefreshCw size={23}/><h3>Preparing ASP course review…</h3><p>Loading the official domain catalog.</p></div>:
       <AdminQuestionReview db={db} course={aspCourse} domains={tree} onDomainsSeeded={refresh}/>}
  </div>;
+ // P15: learner-only navigation, published catalog, Free Intro and My Learning.
+ // Existing Admin Tools and secure Reviewer portals remain unchanged.
+ if(!isAdmin&&identity&&!suspended)
+  return <LiveLearnerWorkspace db={db} user={session.user} onSignOut={()=>db.auth.signOut()}/>;
  return <div className="live-shell">
   <header className="live-top"><div className="live-brand"><img src="/images/technica-logo.webp" alt="Technica Consult"/><strong>TECHNICA CONSULT <span>LMS</span></strong></div><div className="live-top-right"><span className="live-live-pill"><ShieldCheck size={14}/> Supabase</span>{isAdmin&&<button type="button" className="live-secondary" onClick={()=>setAdminToolsOpen(v=>!v)}>{adminToolsOpen?<><BookOpen size={16}/> Course workspace</>:<><ShieldCheck size={16}/> Admin Tools</>}</button>}<small>{session.user.email}</small><button type="button" className="live-secondary" onClick={()=>db.auth.signOut()}><LogOut size={16}/> Sign out</button></div></header>
   <main className="live-main">{isAdmin&&adminToolsOpen?<AdminToolsWorkspace db={db} onExit={()=>setAdminToolsOpen(false)}/>:<>

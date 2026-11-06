@@ -10,6 +10,7 @@ import LiveCoursesPage from './production/LiveCoursesPage';
 import LiveCourseBuilder from './production/LiveCourseBuilder';
 import {LiveLearningLibrary,LiveLearningCourse} from './production/LiveLearning';
 import LivePracticePortal from './production/LivePracticePortal';
+import LiveLearnerPortal from './production/LiveLearnerPortal.jsx';
 import LiveMockPortal from './production/LiveMockPortal';
 import AdminToolsPortal from './production/AdminToolsPortal';
 import LiveLearnerProgress from './production/LiveLearnerProgress';
@@ -54,11 +55,13 @@ export default function App(){
  <Route path="/signup" element={<Navigate to="/home" replace/>}/>
  <Route path="/" element={<Navigate to="/home" replace/>}/>
  <Route path="/home" element={<RoutePage><HomePage/></RoutePage>}/>
- <Route path="/my-learning" element={<RoutePage>{legacyPreview?<LegacyPreviewWarning><LearningLibrary/></LegacyPreviewWarning>:<LiveLearningLibrary/>}</RoutePage>}/>
+ <Route path="/course-catalog" element={<RoutePage><LiveLearnerPortal initialScreen="courses"/></RoutePage>}/>
+ <Route path="/my-learning" element={<RoutePage>{legacyPreview?<LegacyPreviewWarning><LearningLibrary/></LegacyPreviewWarning>:<LiveLearnerPortal initialScreen="learning"/>}</RoutePage>}/>
+ <Route path="/my-practice" element={<RoutePage><LiveLearnerPortal initialScreen="history"/></RoutePage>}/>
  <Route path="/my-progress" element={<RoutePage><LiveLearnerProgress/></RoutePage>}/>
  <Route path="/learning/course/:courseId" element={<RoutePage><LiveLearningCourse/></RoutePage>}/>
  <Route path="/learning/process-safety-foundations" element={<RoutePage><LegacyPreviewWarning><LearningPlayer/></LegacyPreviewWarning></RoutePage>}/>
- <Route path="/practice" element={<RoutePage><PracticePage/></RoutePage>}/>
+ <Route path="/practice" element={<RoutePage>{legacyPreview?<LegacyPreviewWarning><PracticePage/></LegacyPreviewWarning>:<LiveLearnerPortal initialScreen="practice"/>}</RoutePage>}/>
  <Route path="/practice/live" element={<RoutePage standalone><LivePracticePortal/></RoutePage>}/>
  <Route path="/practice/session" element={<RoutePage standalone><QuizPage kind="practice"/></RoutePage>}/>
  <Route path="/admin-tools" element={<AdminOnly><RoutePage><AdminToolsPortal/></RoutePage></AdminOnly>}/>

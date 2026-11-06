@@ -16,8 +16,22 @@ const uuid=/^[\da-f]{8}-[\da-f]{4}-[\da-f]{4}-[\da-f]{4}-[\da-f]{12}$/i;
 const configuredOrigins=(Deno.env.get('TECHNICA_MEDIA_ALLOWED_ORIGINS')||'')
  .split(',').map(x=>x.trim()).filter(x=>/^https:\/\/[^/]+$/.test(x)||/^http:\/\/localhost:\d+$/.test(x));
 const supabaseUrl=Deno.env.get('SUPABASE_URL')||'';
-const publicKey=Deno.env.get('SUPABASE_ANON_KEY')||Deno.env.get('SUPABASE_PUBLISHABLE_KEY')||'';
-const serverKey=Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')||Deno.env.get('SUPABASE_SECRET_KEY')||'';
+// Hosted Supabase now injects named-key JSON dictionaries. Prefer those over
+// legacy JWT-style anon/service_role keys; otherwise @supabase/server gateway
+// may reject our internal Auth/Storage requests with INVALID_API_KEY.
+const injectedDefaultKey=(envName,prefix)=>{
+ try {
+  const keys=JSON.parse(Deno.env.get(envName)||'{}');
+  const value=keys?.default;
+  return typeof value==='string'&&value.startsWith(prefix)?value:'';
+ }catch{return '';}
+};
+const publicKey=injectedDefaultKey('SUPABASE_PUBLISHABLE_KEYS','sb_publishable_')
+ ||Deno.env.get('SUPABASE_PUBLISHABLE_KEY')
+ ||Deno.env.get('SUPABASE_ANON_KEY')||'';
+const serverKey=injectedDefaultKey('SUPABASE_SECRET_KEYS','sb_secret_')
+ ||Deno.env.get('SUPABASE_SECRET_KEY')
+ ||Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')||'';
 const admin=serverKey&&supabaseUrl?createClient(supabaseUrl,serverKey,
  {auth:{persistSession:false,autoRefreshToken:false}}):null;
 const headers=(origin)=>({
@@ -119,7 +133,17 @@ Deno.serve(async(req)=>{
   const {data:allowed,error:grantError}=await db.rpc('lms_p1_can_view_lesson',{
     p_lesson_id:body.lessonId
   });
-  if(grantError||allowed!==true)return failure(403,'Lesson access denied',origin);
+  // P15 permits ONLY the active, explicitly enabled first published Intro.
+  // Fail closed if P15 is absent or its RPC rejects. Paid/Trial keep P1.
+  let previewAllowed=false;
+  if(!grantError&&allowed!==true){
+    const {data:intro,error:introError}=await db.rpc('lms_p15_can_preview_lesson',{
+      p_lesson_id:body.lessonId
+    });
+    previewAllowed=!introError&&intro===true;
+  }
+  if(grantError||(allowed!==true&&!previewAllowed))
+    return failure(403,'Lesson access denied',origin);
   // Read the actual block with the user's RLS, never trust an assetId from client.
   const {data:block,error:blockError}=await db.from('lms_lesson_blocks')
    .select('id,lesson_id,block_type,payload')
