@@ -1,3 +1,11 @@
+### 2026-11-06 — P14 secure PDF/video Lesson content under Admin Tools (SOURCE ONLY)
+
+- Corrected Admin Tools → Courses → Course → Domain → Topic → Lesson: no longer Text-only. Each Lesson has direct **+ PDF**, **+ Video** private file upload controls and protected preview; optional Text remains available for historical lessons. Learner `LiveLearning.jsx` and actual `SupabaseApp.jsx` now render real private PDF/MP4/WebM lesson content.
+- Added `202611060001_p14_private_lesson_media.sql`: private restricted-MIME Supabase Storage bucket and service-only signed upload intents + atomic one-time metadata-verified SQL finalization. Does NOT mutate previously stored questions, user progress, entitlements or existing Lesson data.
+- Added `technica-lesson-media` JWT-enabled Supabase Edge Function (real Auth/Admin + lesson P1 entitlement + RLS + asset ownership checks, restricted CORS) for signed private upload, finalize and short-lived read. No service key in browser and no Public URL. PDF up to 20 MiB, MP4/WebM up to 50 MiB (also subject to Supabase limits).
+- Added animated watermark and anti-copy/print/right-click/download-button deterrence, tab-hidden concealment and 120-second replay authorization with video token refresh. **No claim of perfect screenshot, screen recording or HTTP download prevention:** web browser capture cannot be fully blocked without protected DRM/paginated rendering, and external cameras are never blocked. Video DRM (Widevine/FairPlay) is a separate approved integration.
+- `npm run test:p14` and disposable `test-p14-postgres-smoke.sh` regression, runbook `P14_SECURE_LESSON_MEDIA.md`, Blueprint §69 / DEC-032, Logic Registry LMS-039/040. No live Staging/Production SQL, Edge deploy or file upload conducted.
+
 ### 2026-11-05 — P13 unified Admin Tools, authentic dashboard, Mock curation and learner plans
 
 - Consolidated scattered Admin actions into one premium **Admin Tools** entry with six responsive sub-tabs: Dashboard, Courses, Question Bank, Exams & Mock, Users & Plans, System Tools. Existing old deep links remain for bookmarks, with no previous approved learner behavior removed.

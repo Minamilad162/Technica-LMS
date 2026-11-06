@@ -1,10 +1,11 @@
 import React,{useCallback,useEffect,useMemo,useState} from 'react';
-import {Activity,AlertTriangle,ArrowLeft,ArrowRight,BookOpen,CheckCircle2,ChevronDown,ChevronRight,ClipboardCheck,FileQuestion,GraduationCap,Layers,LockKeyhole,Plus,RefreshCw,Search,ShieldCheck,Target,Users,Wallet} from 'lucide-react';
+import {Activity,AlertTriangle,ArrowLeft,ArrowRight,BookOpen,FileText,Video,CheckCircle2,ChevronDown,ChevronRight,ClipboardCheck,FileQuestion,GraduationCap,Layers,LockKeyhole,Plus,RefreshCw,Search,ShieldCheck,Target,Users,Wallet} from 'lucide-react';
 import {liveCourses,liveCourseTree,addDraftCourse,addAuthoringNode,updateAuthoringTitle,addReadingParagraph} from './liveAuthoringApi.js';
 import {fetchAspReviewDomains} from './questionReviewApi.js';
 import {getAdminOverview,getAdminUsers,getAdminUserDetail,getAdminMockCandidates,getMockBankSummary,preflightAdminMock,reserveAdminMock} from './adminToolsApi.js';
 import {getMockReadiness} from './mockApi.js';
 import AdminQuestionReview from './AdminQuestionReview.jsx';
+import {LessonMediaUploadModal,SecureLessonContent} from './SecureLessonMedia.jsx';
 
 const pct=n=>n===null||n===undefined?'—':Number(n).toFixed(1).replace(/\.0$/,'')+'%';
 const day=s=>s?new Date(s).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'}):'Not set';
@@ -79,6 +80,7 @@ export function AdminCoursesPanel({db}){
  const [courses,setCourses]=useState([]),[course,setCourse]=useState(''),[tree,setTree]=useState([]);
  const [loading,setLoading]=useState(true),[error,setError]=useState(''),[notice,setNotice]=useState('');
  const [revision,setRevision]=useState(0),[editing,setEditing]=useState(null),[busy,setBusy]=useState(false),[open,setOpen]=useState({});
+ const [mediaEditing,setMediaEditing]=useState(null),[previewLesson,setPreviewLesson]=useState(null);
  useEffect(()=>{let live=true;setLoading(true);setError('');
   liveCourses(db).then(list=>{if(live){setCourses(list);setCourse(current=>list.some(x=>x.id===current)?current:list[0]?.id||'');}})
    .catch(e=>{if(live)setError(err(e));}).finally(()=>{if(live)setLoading(false);});
@@ -134,13 +136,30 @@ export function AdminCoursesPanel({db}){
         <button onClick={()=>setOpen(v=>({...v,[t.id]:v[t.id]===false?true:false}))}><ChevronRight size={15}/><b>{t.title}</b></button>
         <button className="at-icon" onClick={()=>start('rename','lms_topics:'+t.id,t.title)}>Edit</button>
         <button className="at-outline tiny" onClick={()=>start('lesson',t.id)}><Plus size={14}/> Lesson</button></div>
-        {open[t.id]!==false&&(t.lessons||[]).map(l=><div className="at-lesson" key={l.id}><span><BookOpen size={14}/>{l.title}</span><span className="at-lesson-actions"><button onClick={()=>start('rename','lms_lessons:'+l.id,l.title)}>Rename</button><button onClick={()=>start('reading',l.id)}>+ Text</button></span></div>)}
+        {open[t.id]!==false&&(t.lessons||[]).map(l=><div key={l.id}>
+         <div className="at-lesson"><span><BookOpen size={14}/>{l.title}</span>
+          <span className="slm-media-editor-actions">
+           <button type="button" onClick={()=>setMediaEditing({lessonId:l.id,lessonTitle:l.title,kind:'pdf'})}><FileText size={14}/> + PDF</button>
+           <button type="button" onClick={()=>setMediaEditing({lessonId:l.id,lessonTitle:l.title,kind:'video'})}><Video size={14}/> + Video</button>
+           <button type="button" onClick={()=>start('reading',l.id)}>+ Text</button>
+           <button type="button" onClick={()=>setPreviewLesson(x=>x===l.id?null:l.id)}>
+            {previewLesson===l.id?'Close preview':'Preview'}</button>
+           <button type="button" onClick={()=>start('rename','lms_lessons:'+l.id,l.title)}>Rename</button>
+          </span>
+         </div>
+         {previewLesson===l.id&&<div className="slm-lesson-preview"><SecureLessonContent
+          db={db} lessonId={l.id} revision={revision} viewerId="ADMIN PREVIEW"/></div>}
+        </div>)}
        </div>)}
       </div>)}
      {!tree.length&&<p className="at-empty">Start with a Domain, then Topics and Lessons.</p>}
     </>}
    </section>
   </div>
+  {mediaEditing&&<LessonMediaUploadModal db={db} lessonId={mediaEditing.lessonId}
+    lessonTitle={mediaEditing.lessonTitle} kind={mediaEditing.kind}
+    onClose={()=>setMediaEditing(null)}
+    onDone={()=>{setNotice('Private file attached. Only authorized learners can view it.');setRevision(n=>n+1);setPreviewLesson(mediaEditing.lessonId);}}/>}
   {editing&&<div className="at-modal-shade" onClick={()=>!busy&&setEditing(null)}>
    <form className="at-modal" onClick={e=>e.stopPropagation()} onSubmit={submit} role="dialog" aria-modal="true" aria-label="Edit course structure">
     <h3>{editing.kind==='rename'?'Rename':editing.kind==='reading'?'New reading paragraph':'Add '+editing.kind}</h3>

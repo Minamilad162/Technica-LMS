@@ -1,0 +1,4 @@
+# P14 private media: Supabase gateway must validate user JWT before Edge code.
+# Never deploy with --no-verify-jwt. Configure allowed origins as an Edge secret.
+[functions.technica-lesson-media]
+verify_jwt = true

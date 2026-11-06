@@ -54,6 +54,7 @@
     "test:p12": "node scripts/test-p12-release-readiness.mjs",
     "test:p12:staging": "node scripts/test-p12-staging-qa.mjs",
     "test:p13": "node scripts/test-p13-admin-tools.mjs",
+    "test:p14": "node scripts/test-p14-secure-lesson-media.mjs",
     "qa:staging:read": "node scripts/p12-staging-e2e.mjs"
   },
   "dependencies": {

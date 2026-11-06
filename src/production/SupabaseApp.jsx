@@ -6,6 +6,7 @@ import './supabaseApp.css';
 import LivePractice from './LivePractice';
 import AdminQuestionReview from './AdminQuestionReview';
 import AdminToolsWorkspace from './AdminToolsWorkspace.jsx';
+import {SecureLessonContent} from './SecureLessonMedia.jsx';
 import ReviewConnectionDiagnostics from './ReviewConnectionDiagnostics';
 import {fetchAspReviewDomains} from './questionReviewApi';
 
@@ -237,7 +238,13 @@ export default function SupabaseApp({secureReviewEntry=false,reviewerOnly=false}
          {topic.lessons.map((lesson,li)=><div className="live-lesson" key={lesson.id}>
           <button className="live-lesson-name" type="button" onClick={()=>setLessonId(id=>id===lesson.id?null:lesson.id)}><FileText size={17}/><span>{di+1}.{ti+1}.{li+1} · {lesson.title}</span>{lessonId===lesson.id?<ChevronDown size={17}/>:<ChevronRight size={17}/>}</button>
           {isAdmin&&<div className="live-actions"><button aria-label="Rename lesson" onClick={()=>setEditing({kind:'rename',table:'lms_lessons',id:lesson.id,initial:lesson.title,label:'Rename lesson'})}><Pencil size={15}/></button><button type="button" disabled={busy} onClick={()=>togglePublish('lms_lessons',lesson.id,lesson.publication_state)}>{lesson.publication_state==='published'?'Draft':'Publish'}</button></div>}
-          {lessonId===lesson.id&&<div className="live-blocks"><small>{lesson.publication_state.toUpperCase()} · Content blocks</small>{blocks.map(block=><p key={block.id}>{String(block.payload?.body||block.payload?.text||'')}</p>)}{!blocks.length&&<p>No reading text added yet.</p>}{isAdmin&&<button type="button" className="live-icon-create" onClick={()=>setEditing({kind:'text',lessonId:lesson.id,label:'Add reading content'})}><Plus size={15}/> Reading paragraph</button>}</div>}
+          {lessonId===lesson.id&&<div className="live-blocks">
+           <small>{lesson.publication_state.toUpperCase()} · Protected Lesson content</small>
+           <SecureLessonContent db={db} lessonId={lesson.id} viewerId={session.user.id.slice(0,8)}/>
+           {isAdmin&&<button type="button" className="live-icon-create"
+            onClick={()=>setEditing({kind:'text',lessonId:lesson.id,label:'Add reading content'})}>
+             <Plus size={15}/> Optional reading paragraph</button>}
+          </div>}
          </div>)}
          {!topic.lessons.length&&<p className="live-muted">No visible lessons yet.</p>}
         </div>)}
