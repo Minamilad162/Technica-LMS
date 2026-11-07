@@ -47,9 +47,10 @@ export function normalizeQuestionRows(rows,{courseId,domainId,sourceName='Excel'
   const levels={easy:'low',low:'low','1':'low',moderate:'medium',medium:'medium','2':'medium',hard:'high',high:'high','3':'high'};
   const difficulty=levels[level]||'unclassified';
   if(level&&!levels[level])problems.push(`${sheetName} row ${i+1}: unknown difficulty "${level}"; imported as unclassified.`);
-  const domainLabel=get('domain')||sheetName;
+  const rawDomain=get('domain');
+  const domainLabel=rawDomain||(/(?:asp11|domain)/i.test(sheetName)?sheetName:'');
   const sourceReference=get('reference');
-  out.push({courseId,domainId:domainId||null,domainLabel,topic:domainLabel,prompt,options,correct,difficulty,
+  out.push({courseId,domainId:domainId||null,domainLabel,topic:rawDomain||sheetName,prompt,options,correct,difficulty,
    explanation:get('explanation'),
    reference:`${sourceName} · ${sheetName} · row ${i+1}${sourceReference?' · '+sourceReference:''}`});
  }
