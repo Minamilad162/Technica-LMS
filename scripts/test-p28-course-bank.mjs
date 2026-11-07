@@ -32,6 +32,8 @@ for(const required of [
 for(const fragment of ['verifiedLiveAdmin(db)','p_course_id:courseId','p_items:rows',
  'p_lesson_id:checkId(lessonId)','p_question_id:checkId(questionId)'])
  assert(api.includes(fragment),'Missing verified P28 API '+fragment);
+assert(!sql.includes("to_regclass('public.lms_p9b_mock_items')"),'P9B must not block non-ASP Course Bank migration');
+assert(sql.includes('P28 missing prerequisites:'),'Admin requires exact missing P1/P4/P22 diagnostics');
 assert(bank.includes('importQuestionFile(file,courseId,domainId)')&&bank.includes('Confirm Draft Import'));
 assert(bank.includes("selected.slug!=='asp'")&&bank.includes("selected.slug==='asp'"));
 assert(bank.includes('reserveNonAspMockQuestion')&&bank.includes('approveNonAspBankQuestion'));
