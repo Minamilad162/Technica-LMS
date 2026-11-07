@@ -145,9 +145,11 @@ assert(admin.includes('+ PDF')&&admin.includes('+ Video')&&admin.includes('Lesso
 assert(admin.includes('SecureLessonContent'));
 assert(learner.includes('<SecureLessonContent'));
 assert(portal.includes('<SecureLessonContent'));
+const mediaViewer=read('src/production/ProtectedLessonViewer.jsx');
+assert(view.includes('ProtectedLessonViewer'),'P14 secure media must use P19 guarded player');
 for(const marker of ['controlsList="nodownload noplaybackrate noremoteplayback"',
- 'disablePictureInPicture','visibilitychange','Watermark','onContextMenu','onCopy','onDragStart'])
- assert(view.includes(marker),'Protected viewer missing '+marker);
+ 'disablePictureInPicture','visibilitychange','ViewerWatermark','onContextMenu','onCopy','onDragStart'])
+ assert(mediaViewer.includes(marker),'Protected viewer missing '+marker);
 assert(read('.github/workflows/ci-security.yml').includes('npm run test:p14'));
 assert(read('.github/workflows/ci-security.yml').includes('bash scripts/test-p14-postgres-smoke.sh'));
 assert(read('TECHNICA_LMS_MASTER_BLUEPRINT.md').includes('## 69. P14 — Secure PDF/Video Lesson delivery'));
