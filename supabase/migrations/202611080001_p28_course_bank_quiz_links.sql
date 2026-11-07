@@ -92,7 +92,7 @@ CREATE TRIGGER lms_p28_bank_assignment_guard BEFORE UPDATE ON public.lms_questio
 CREATE FUNCTION public.lms_p28_import_bank(p_course_id uuid,p_items jsonb)
  RETURNS jsonb LANGUAGE plpgsql SECURITY DEFINER SET search_path='' AS $$
 DECLARE v_item jsonb;v_source text;v_prompt text;v_options jsonb;
-DECLARE v_correct integer;v_domain uuid;v_id uuid;v_added integer:=0;v_skipped integer:=0;
+DECLARE v_correct integer;v_domain uuid;v_difficulty text;v_id uuid;v_added integer:=0;v_skipped integer:=0;
 DECLARE v_actor uuid:=(SELECT auth.uid());
 BEGIN
  IF v_actor IS NULL OR NOT public.lms_p1_actor_is_admin()
@@ -121,6 +121,11 @@ BEGIN
    OR length(coalesce(v_item->>'explanation',''))>12000
    OR length(coalesce(v_item->>'reference',''))>2000
   THEN RAISE EXCEPTION 'Invalid question row or options; no partial batch imported'; END IF;
+  -- Source difficulty is a draft classification only. P6A/P9B verified
+  -- reviewer difficulty still governs live ASP eligibility.
+  v_difficulty:=lower(coalesce(nullif(v_item->>'difficulty',''),'unclassified'));
+  IF v_difficulty NOT IN ('unclassified','low','medium','high')
+  THEN RAISE EXCEPTION 'Invalid draft difficulty; expected low, medium, high or unclassified'; END IF;
   v_domain:=NULL;
   IF nullif(v_item->>'domainId','') IS NOT NULL THEN
    v_domain:=(v_item->>'domainId')::uuid;
@@ -134,10 +139,10 @@ BEGIN
   THEN v_skipped:=v_skipped+1; CONTINUE; END IF;
   INSERT INTO public.lms_questions
    (course_id,source_id,domain_id,legacy_group,prompt,options,correct_index,
-     explanation,reference_text,approval_state,mock_exclusive)
+     explanation,reference_text,difficulty,approval_state,mock_exclusive)
   VALUES(p_course_id,v_source,v_domain,coalesce(v_item->>'topic',''),
    v_prompt,v_options,v_correct,coalesce(v_item->>'explanation',''),
-   coalesce(v_item->>'reference',''),'draft',false)
+   coalesce(v_item->>'reference',''),v_difficulty,'draft',false)
   ON CONFLICT(course_id,source_id) DO NOTHING RETURNING id INTO v_id;
   IF v_id IS NULL THEN v_skipped:=v_skipped+1; ELSE v_added:=v_added+1; END IF;
   v_id:=NULL;
@@ -153,7 +158,8 @@ END $$;
 
 -- Admin-only catalogue: paged, scoped, never usable by learner.
 CREATE FUNCTION public.lms_p28_list_bank(
- p_course_id uuid,p_search text DEFAULT '',p_limit integer DEFAULT 50,p_offset integer DEFAULT 0
+ p_course_id uuid,p_search text DEFAULT '',p_limit integer DEFAULT 50,p_offset integer DEFAULT 0,
+ p_domain_id uuid DEFAULT NULL,p_difficulty text DEFAULT '',p_usage text DEFAULT 'all'
 ) RETURNS jsonb LANGUAGE plpgsql STABLE SECURITY DEFINER SET search_path='' AS $$
 DECLARE v_total integer;v_items jsonb;
 BEGIN
@@ -161,11 +167,24 @@ BEGIN
  IF p_course_id IS NULL OR p_limit NOT BETWEEN 1 AND 100
   OR p_offset NOT BETWEEN 0 AND 100000
   OR length(coalesce(p_search,''))>160
+  OR p_difficulty NOT IN ('','unclassified','low','medium','high')
+  OR p_usage NOT IN ('all','practice','mock','draft','lesson','eligible')
+  OR (p_domain_id IS NOT NULL AND NOT EXISTS(
+    SELECT 1 FROM public.lms_domains d WHERE d.id=p_domain_id AND d.course_id=p_course_id))
  THEN RAISE EXCEPTION 'Invalid course/filter/page'; END IF;
  SELECT count(*) INTO v_total FROM public.lms_questions q
- WHERE q.course_id=p_course_id AND
-  (coalesce(p_search,'')='' OR q.prompt ILIKE '%'||p_search||'%'
-     OR q.source_id ILIKE '%'||p_search||'%');
+ WHERE q.course_id=p_course_id
+  AND (coalesce(p_search,'')='' OR q.prompt ILIKE '%'||p_search||'%'
+     OR q.source_id ILIKE '%'||p_search||'%')
+  AND (p_domain_id IS NULL OR q.domain_id=p_domain_id)
+  AND (p_difficulty='' OR q.difficulty=p_difficulty)
+  AND (p_usage='all'
+    OR (p_usage='practice' AND q.approval_state='approved' AND NOT q.mock_exclusive)
+    OR (p_usage='mock' AND q.mock_exclusive)
+    OR (p_usage='draft' AND q.approval_state='draft' AND NOT q.mock_exclusive)
+    OR (p_usage='eligible' AND q.approval_state<>'archived' AND NOT q.mock_exclusive)
+    OR (p_usage='lesson' AND EXISTS(SELECT 1 FROM public.lms_p22_lesson_quiz_questions l
+       WHERE l.bank_question_id=q.id)));
  SELECT coalesce(jsonb_agg(jsonb_build_object(
   'id',x.id,'courseId',x.course_id,'sourceId',x.source_id,
   'prompt',x.prompt,'options',x.options,'correctIndex',x.correct_index,
@@ -177,9 +196,18 @@ BEGIN
        WHERE l.bank_question_id=x.id)) ORDER BY x.created_at DESC,x.id),'[]'::jsonb)
  INTO v_items FROM (
   SELECT * FROM public.lms_questions q
-  WHERE q.course_id=p_course_id AND
-   (coalesce(p_search,'')='' OR q.prompt ILIKE '%'||p_search||'%'
+  WHERE q.course_id=p_course_id
+   AND (coalesce(p_search,'')='' OR q.prompt ILIKE '%'||p_search||'%'
       OR q.source_id ILIKE '%'||p_search||'%')
+   AND (p_domain_id IS NULL OR q.domain_id=p_domain_id)
+   AND (p_difficulty='' OR q.difficulty=p_difficulty)
+   AND (p_usage='all'
+    OR (p_usage='practice' AND q.approval_state='approved' AND NOT q.mock_exclusive)
+    OR (p_usage='mock' AND q.mock_exclusive)
+    OR (p_usage='draft' AND q.approval_state='draft' AND NOT q.mock_exclusive)
+    OR (p_usage='eligible' AND q.approval_state<>'archived' AND NOT q.mock_exclusive)
+    OR (p_usage='lesson' AND EXISTS(SELECT 1 FROM public.lms_p22_lesson_quiz_questions l
+       WHERE l.bank_question_id=q.id)))
   ORDER BY q.created_at DESC,q.id LIMIT p_limit OFFSET p_offset
  ) x;
  RETURN jsonb_build_object('total',v_total,'items',v_items);
@@ -273,7 +301,7 @@ END $$;
 REVOKE ALL ON FUNCTION public.lms_p28_guard_quiz_link(),
  public.lms_p28_guard_bank_assignment(),
  public.lms_p28_import_bank(uuid,jsonb),
- public.lms_p28_list_bank(uuid,text,integer,integer),
+ public.lms_p28_list_bank(uuid,text,integer,integer,uuid,text,text),
  public.lms_p28_approve_nonasp(uuid,text),
  public.lms_p28_mark_nonasp_mock(uuid,text),
  public.lms_p28_attach_lesson_question(uuid,uuid,boolean)
