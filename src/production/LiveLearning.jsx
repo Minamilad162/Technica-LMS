@@ -44,7 +44,7 @@ export function LiveLearningLibrary(){
       <div className="live-learning-card-icon"><BookOpen size={23}/></div>
       <div><span className="live-learning-card-state">{course.publication_state==='published'?'PUBLISHED':'DRAFT · ADMIN ONLY'}</span><h2>{course.title}</h2><p>{course.summary||'A Technica Consult learning course.'}</p><small>Course ID: {course.slug}</small></div>
       <div className="live-learning-card-footer">
-       <span>{access?<><CheckCircle2 size={16}/> Enrolled / Admin</>:<><LockKeyhole size={16}/> Enrollment required</>}</span>
+       <span>{access?<><CheckCircle2 size={16}/> Enrolled / Admin</>:<><LockKeyhole size={16}/> Subscription required</>}</span>
        <button type="button" className="btn" onClick={()=>navigate('/learning/course/'+encodeURIComponent(course.id))}>{access?'Open course':'View course'} <ArrowRight size={16}/></button>
       </div>
      </article>;
@@ -78,9 +78,9 @@ export function LiveLearningCourse(){
   <Loading loading={loading} error={error} refresh={refresh}/>
   {!loading&&data&&!course&&<div className="live-learning-empty" role="alert"><LockKeyhole size={23}/><b>Course not available</b><p>This course is not visible to your authenticated account.</p></div>}
   {!loading&&course&&<><header className="live-learning-header"><span className="eyebrow">COURSE · SUPABASE</span><h1>{course.title}</h1><p>{course.summary||'Course details will be published by your instructor.'}</p></header>
-   {!access?<div className="live-learning-empty"><LockKeyhole size={23}/><b>Course enrollment required</b><p>See the published course outline and enroll through Checkout.</p>
+   {!access?<div className="live-learning-empty"><LockKeyhole size={23}/><b>Platform subscription required</b><p>Choose one time-based subscription for all published courses, Practice and Mock exams.</p>
     {course.publication_state==='published'&&<button className="btn" type="button"
-     onClick={()=>navigate('/checkout/'+encodeURIComponent(course.id))}>Enroll Now <ArrowRight size={16}/></button>}
+     onClick={()=>navigate('/subscription-plans')}>View Plans <ArrowRight size={16}/></button>}
     </div>:
     <><div className="live-learning-metrics"><span><Layers3 size={17}/> {counts.domains} domains</span><span>{counts.topics} topics</span><span>{counts.lessons} lessons</span><span><CheckCircle2 size={17}/> {completed} verified completed</span></div>
     {data.progressError&&<p className="live-learning-note">{data.progressError}</p>}

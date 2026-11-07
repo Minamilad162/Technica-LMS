@@ -5,7 +5,7 @@ import {CourseCover} from './CourseCover.jsx';
 import './liveCourseCards.css';
 
 function AccessStatus({status,compact=false}){
- const value=status==='real'?'Enrolled':status==='demo'?'Demo Access':'Explore Course';
+ const value=status==='real'?'Included in Plan':status==='demo'?'Demo Access':'Subscription Available';
  const icon=status==='real'?<CheckCircle2 size={13}/>:
   status==='demo'?<ShieldCheck size={13}/>:<Sparkles size={13}/>;
  return <span className={'lcc-access-status lcc-status-'+status+(compact?' lcc-status-small':'')}>{icon}{value}</span>;
@@ -27,11 +27,11 @@ export function LearnerCourseCard({db,course,status='available',onOpen,onEnroll}
     <span><PlayCircle size={14}/> Intro preview when available</span>
     <span><GraduationCap size={14}/> Self-paced</span>
    </div>
-   {demo&&<p className="lcc-demo-explainer">Demo checkout completed · no real payment or protected content access.</p>}
+   {demo&&<p className="lcc-demo-explainer">Legacy demo preview · no real subscription or protected content access.</p>}
    <div className="lcc-card-cta">
     <button className="lj-quiet" type="button" onClick={onOpen}>
      {real?'Continue Learning':demo?'Explore Demo':'View Course'} <ArrowRight size={15}/></button>
-    {!real&&!demo&&<button className="lj-primary" type="button" onClick={onEnroll}>Enroll Now <ArrowRight size={15}/></button>}
+    {!real&&!demo&&<button className="lj-primary" type="button" onClick={onEnroll}>View Plans <ArrowRight size={15}/></button>}
    </div>
   </div>
  </article>;
@@ -50,7 +50,7 @@ export function CourseDetailHero({db,course,status,onEnroll,onContinue}){
    {status==='demo'&&<p className="lcc-hero-demo">Demo Access is only a preview of the learning journey. Real lesson content remains locked.</p>}
    <div className="lcc-detail-actions">
     {status==='available'?<button className="lj-primary" type="button" onClick={onEnroll}>
-     Enroll Now <ArrowRight size={17}/></button>:
+     View Subscription Plans <ArrowRight size={17}/></button>:
      <button className="lj-primary" type="button" onClick={onContinue}>
       {status==='real'?'Your lessons':'Browse Demo Lessons'} <ArrowRight size={17}/></button>}
     {status==='available'&&<span className="lcc-detail-fineprint">

@@ -32,7 +32,7 @@ function RealCourseRow({db,course,result,onOpen}){
    <CourseCover db={db} course={course} variant="card"/>
    <span><PlayCircle size={15}/> Continue</span></button>
   <div className="pml-course-details">
-   <div className="pml-course-top"><span className="pml-badge pml-badge-active"><ShieldCheck size={13}/> Verified enrollment</span>
+   <div className="pml-course-top"><span className="pml-badge pml-badge-active"><ShieldCheck size={13}/> Included with subscription / Verified enrollment</span>
     {state==='completed'&&<span className="pml-badge pml-badge-finished"><CheckCircle2 size={13}/> Completed</span>}</div>
    <h3><button type="button" onClick={()=>onOpen(course.id)}>{course.title}</button></h3>
    <p>{course.summary||'Your structured learning path, ready when you are.'}</p>
@@ -52,7 +52,7 @@ function DemoCourseRow({db,course,onOpen}){
  </article>;
 }
 export default function PremiumMyLearning({
- db,user,activeCourses=[],demoCourses=[],onOpen,onBrowse,onPractice,onHistory,refreshKey=0
+ db,user,activeCourses=[],demoCourses=[],subscription=null,onSubscribe,onOpen,onBrowse,onPractice,onHistory,refreshKey=0
 }){
  const [reports,setReports]=useState({}),[isLoading,setIsLoading]=useState(false);
  const [tab,setTab]=useState('all'),[query,setQuery]=useState('');
@@ -89,6 +89,8 @@ export default function PremiumMyLearning({
     <div className="pml-hero-actions">
      {featured&&<button className="pml-hero-primary" type="button" onClick={()=>onOpen(featured.id)}>
       <PlayCircle size={17}/> Open {featured.title.length>22?'your course':featured.title} <ArrowRight size={16}/></button>}
+     {!subscription&&<button className="pml-hero-primary" type="button" onClick={onSubscribe}>
+      <ShieldCheck size={16}/> View Subscription Plans <ArrowRight size={16}/></button>}
      <button className="pml-hero-secondary" type="button" onClick={onBrowse}>
       Browse Courses <ArrowRight size={16}/></button>
     </div>
@@ -99,6 +101,11 @@ export default function PremiumMyLearning({
      <small><ShieldCheck size={13}/> Verified Supabase access</small></div>
    </div>
   </section>
+  {subscription&&<div className="pml-subscription-banner" role="status">
+   <ShieldCheck size={19}/><div><strong>All-Access Subscription · {subscription.plan_name_snapshot}</strong>
+    <span>Every published Course, Practice and Mock is included until {new Date(subscription.ends_at).toLocaleDateString('en-GB')}.</span></div>
+   <button type="button" onClick={onSubscribe}>Membership details <ArrowRight size={15}/></button>
+  </div>}
   <div className="pml-stats" aria-label="Learning statistics">
    <div className="pml-stat"><span className="pml-stat-icon"><GraduationCap size={19}/></span>
     <div><small>Enrolled Courses</small><strong>{activeCourses.length}</strong></div></div>
@@ -119,7 +126,7 @@ export default function PremiumMyLearning({
   </section>}
   <section className="pml-library" aria-label="My course library">
    <div className="pml-library-head"><div><span className="pml-eyebrow">YOUR LIBRARY</span>
-    <h2>My courses</h2><p>Manage your real enrollments and demo previews separately.</p></div>
+    <h2>My courses</h2><p>All published courses covered by your membership and your verified learning progress.</p></div>
     <button type="button" className="pml-explore-btn" onClick={onBrowse}><Compass size={16}/> Explore Catalog</button>
    </div>
    <div className="pml-toolbar">

@@ -7,6 +7,7 @@ import LivePractice from './LivePractice';
 import AdminQuestionReview from './AdminQuestionReview';
 import AdminToolsWorkspace from './AdminToolsWorkspace.jsx';
 import {SecureLessonContent} from './SecureLessonMedia.jsx';
+import {fetchMyPlatformSubscription,hasPlatformAccess} from './subscriptionApi.js';
 import LiveLearnerWorkspace from './LiveLearnerWorkspace.jsx';
 import ReviewConnectionDiagnostics from './ReviewConnectionDiagnostics';
 import {fetchAspReviewDomains} from './questionReviewApi';
@@ -92,7 +93,7 @@ function EditorModal({editing,onCancel,onSave,busy,error}) {
 }
 export default function SupabaseApp({secureReviewEntry=false,reviewerOnly=false}) {
  const [session,setSession]=useState(null),[boot,setBoot]=useState(true),[identity,setIdentity]=useState(null),[recovering,setRecovering]=useState(false);
- const [courses,setCourses]=useState([]),[entitlements,setEntitlements]=useState([]),[courseId,setCourseId]=useState(null),[tree,setTree]=useState([]),[lessonId,setLessonId]=useState(null),[blocks,setBlocks]=useState([]);
+ const [courses,setCourses]=useState([]),[entitlements,setEntitlements]=useState([]),[platformSubscription,setPlatformSubscription]=useState(null),[courseId,setCourseId]=useState(null),[tree,setTree]=useState([]),[lessonId,setLessonId]=useState(null),[blocks,setBlocks]=useState([]);
  const [reviewExpanded,setReviewExpanded]=useState(false),[loadedStructureFor,setLoadedStructureFor]=useState(null);
  const [adminToolsOpen,setAdminToolsOpen]=useState(true);
  const [busy,setBusy]=useState(false),[fetching,setFetching]=useState(false),[error,setError]=useState(''),[notice,setNotice]=useState(''),[editing,setEditing]=useState(null),[editError,setEditError]=useState('');
@@ -105,7 +106,7 @@ export default function SupabaseApp({secureReviewEntry=false,reviewerOnly=false}
   return()=>{active=false;subscription.unsubscribe();};
  },[db]);
  useEffect(()=>{
-  if(!db||!session?.user){setIdentity(null);setCourses([]);setTree([]);setEntitlements([]);setReviewExpanded(false);setLoadedStructureFor(null);return;}
+  if(!db||!session?.user){setIdentity(null);setCourses([]);setTree([]);setEntitlements([]);setPlatformSubscription(null);setReviewExpanded(false);setLoadedStructureFor(null);return;}
   let active=true;setFetching(true);setError('');
   const load=async()=>{
    try{
@@ -119,8 +120,8 @@ export default function SupabaseApp({secureReviewEntry=false,reviewerOnly=false}
      const items=await listCourses(db);
      if(active){setCourses(items);setEntitlements([]);setCourseId(old=>items.some(c=>c.id===old)?old:(items[0]?.id||null));}
     }else{
-     const [user,items,access]=await Promise.all([loadIdentity(db,session.user),listCourses(db),getCurrentEntitlements(db,session.user.id)]);
-     if(active){setIdentity(user);setCourses(items);setEntitlements(access);setCourseId(old=>items.some(c=>c.id===old)?old:(items[0]?.id||null));}
+     const [user,items,access,sub]=await Promise.all([loadIdentity(db,session.user),listCourses(db),getCurrentEntitlements(db,session.user.id),fetchMyPlatformSubscription(db,session.user.id).catch(()=>null)]);
+     if(active){setIdentity(user);setCourses(items);setEntitlements(access);setPlatformSubscription(sub);setCourseId(old=>items.some(c=>c.id===old)?old:(items[0]?.id||null));}
     }
    }catch(e){if(active)setError(msg(e));}
    finally{if(active)setFetching(false);}
@@ -133,7 +134,7 @@ export default function SupabaseApp({secureReviewEntry=false,reviewerOnly=false}
  const aspCourse=courses.find(c=>c.slug==='asp');
  useEffect(()=>{if(reviewerOnly&&aspCourse?.id&&courseId!==aspCourse.id)setCourseId(aspCourse.id);},[reviewerOnly,aspCourse?.id,courseId]);
  useEffect(()=>{setReviewExpanded(false);},[selected?.id]);
- const entitled=isAdmin||includes(entitlements,courseId);
+ const entitled=isAdmin||includes(entitlements,courseId)||hasPlatformAccess(platformSubscription);
  const suspended=identity?.profile?.account_status==='suspended';
  useEffect(()=>{
   if(!db||!selected||!identity||suspended||!entitled){setTree([]);setLoadedStructureFor(null);setLessonId(null);setBlocks([]);return;}
@@ -157,9 +158,9 @@ export default function SupabaseApp({secureReviewEntry=false,reviewerOnly=false}
     if(asp&&isAdmin){setCourseId(asp.id);setTree(await fetchAspReviewDomains(db,asp.id));setLoadedStructureFor(asp.id);}
     return;
    }
-   const [items,access]=await Promise.all([listCourses(db),getCurrentEntitlements(db,session.user.id)]);
-   setCourses(items);setEntitlements(access);
-   if(selected&&items.some(c=>c.id===selected.id)&&(isAdmin||includes(access,selected.id))){
+   const [items,access,sub]=await Promise.all([listCourses(db),getCurrentEntitlements(db,session.user.id),fetchMyPlatformSubscription(db,session.user.id).catch(()=>null)]);
+   setCourses(items);setEntitlements(access);setPlatformSubscription(sub);
+   if(selected&&items.some(c=>c.id===selected.id)&&(isAdmin||includes(access,selected.id)||hasPlatformAccess(sub))){
     setTree(await loadStructure(db,selected.id));setLoadedStructureFor(selected.id);
     if(lessonId)setBlocks(await loadTextBlocks(db,lessonId));
    }
@@ -224,7 +225,7 @@ export default function SupabaseApp({secureReviewEntry=false,reviewerOnly=false}
    {suspended?<div className="live-empty"><LockKeyhole size={24}/><b>Account suspended</b><p>Contact the LMS administrator.</p></div>:!identity?<div className="live-empty">Loading profile…</div>:
    <div className="live-columns">
     <section className="live-list"><div className="live-list-top"><h2>Courses <span>{courses.length}</span></h2>{isAdmin&&<button className="live-icon-create" type="button" onClick={()=>setEditing({kind:'course',label:'Create course'})}><Plus size={17}/> New</button>}</div>
-      {courses.map(c=><button type="button" key={c.id} onClick={()=>setCourseId(c.id)} className={`live-course ${selected?.id===c.id?'active':''}`}><BookOpen size={19}/><span><b>{c.title}</b><small>{c.publication_state==='published'?'Published':'Draft'} · {c.slug}</small></span>{!(isAdmin||includes(entitlements,c.id))&&<LockKeyhole size={15}/>}</button>)}
+      {courses.map(c=><button type="button" key={c.id} onClick={()=>setCourseId(c.id)} className={`live-course ${selected?.id===c.id?'active':''}`}><BookOpen size={19}/><span><b>{c.title}</b><small>{c.publication_state==='published'?'Published':'Draft'} · {c.slug}</small></span>{!(isAdmin||includes(entitlements,c.id)||hasPlatformAccess(platformSubscription))&&<LockKeyhole size={15}/>}</button>)}
       {!courses.length&&<p className="live-empty">No courses found. {isAdmin?'Create the first course.':'Published courses will appear here.'}</p>}
     </section>
     <section className="live-workspace">
@@ -260,7 +261,7 @@ export default function SupabaseApp({secureReviewEntry=false,reviewerOnly=false}
      </>}
     </section>
    </div>}
-   {selected&&identity&&!suspended&&!(isAdmin&&reviewExpanded&&selected.slug==='asp')&&<LivePractice key={session.user.id+selected.id} db={db} user={session.user} course={selected} domains={tree} access={isAdmin||entitlements.some(e=>e.course_id===selected.id&&['paid','manual'].includes(e.entitlement_type))}/>}
+   {selected&&identity&&!suspended&&!(isAdmin&&reviewExpanded&&selected.slug==='asp')&&<LivePractice key={session.user.id+selected.id} db={db} user={session.user} course={selected} domains={tree} access={isAdmin||hasPlatformAccess(platformSubscription)||entitlements.some(e=>e.course_id===selected.id&&['paid','manual'].includes(e.entitlement_type))}/>}
    
    <p className="live-disclaimer">P6A admin ASP bank review is private and does not publish questions. P4 scope: RLS-governed question bank and server-scored Quick 10, Timed Quiz, Custom and Domain Practice after manual question approval. Reserved Mock, adaptive Level Up, admin Assessment, payments, protected media and learner progress-event writes remain unavailable.</p>
   </>}</main>{editing&&<EditorModal key={editing.kind+editing.id+editing.domainId+editing.topicId} editing={editing} onCancel={()=>{setEditing(null);setEditError('');}} onSave={save} busy={busy} error={editError}/>}

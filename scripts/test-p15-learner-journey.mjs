@@ -69,7 +69,7 @@ const portal=read('src/production/SupabaseApp.jsx');
 assert(api.includes("import.meta.env?.DEV===true"));
 assert(api.includes("sessionStorage.setItem(demoKey(userId,courseId),'yes')"));
 assert(!api.includes("db.from('lms_entitlements').insert"));
-assert(ui.includes('FREE INTRO')&&ui.includes('LOCKED · ENROLL TO VIEW'));
+assert(ui.includes('FREE INTRO')&&ui.includes('LOCKED · SUBSCRIBE TO VIEW'));
 for(const label of ['Courses','My Learning','Practice','My Practice'])assert(ui.includes(label));
 assert(ui.includes('SecureLessonContent')&&ui.includes('LivePractice'));
 assert(ui.includes('Local checkout simulation: lesson navigation is unlocked here'));
