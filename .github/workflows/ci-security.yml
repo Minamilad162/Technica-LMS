@@ -271,5 +271,8 @@ jobs:
       - name: P21 subscription plans, admin-only activation, cross-course access, expiry and revocation on disposable PostgreSQL
         run: bash scripts/test-p21-postgres-smoke.sh
 
+      - name: P22 learner lesson step events and Knowledge Check authorization on disposable PostgreSQL
+        run: bash scripts/test-p22-postgres-smoke.sh
+
       - name: Test scope disclosure
         run: echo "Ephemeral local PostgreSQL smoke only; live Supabase Auth, Storage, Data API and device tests still pending."
