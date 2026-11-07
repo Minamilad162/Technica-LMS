@@ -58,6 +58,7 @@ assert(sql.includes("p_domain_id uuid DEFAULT NULL,p_difficulty text DEFAULT '',
 assert(sql.includes("v_difficulty:=")&&sql.includes("v_difficulty,'draft',false"),'Imported Difficulty must stay Draft');
 assert(bank.includes("selected.slug==='asp'")&&bank.includes("courses.find(c=>c.slug==='asp')"),'ASP must be the primary Question Bank course');
 assert(bank.includes('Filter bank by domain')&&bank.includes('Filter bank by difficulty')&&bank.includes('Filter bank by usage'),'Admin requires course-specific domain / difficulty / usage filters');
+assert(bank.includes('unmappedLabels')&&bank.includes('Map spreadsheet labels to real Course Domains'),'Unmapped ASP11 source labels must require explicit manual mapping');
 assert(quiz.includes("usage:'eligible'")&&quiz.includes('Filter Lesson Quiz by domain'),'Lesson Quiz must use filtered Course Bank');
 assert(!quiz.includes('Manual question</button>'),'New Lesson questions must originate from Course Bank, not a separate pool');
 assert(!sql.includes('UPDATE public.lms_questions SET approval_state=\'approved\' WHERE course_id'));
