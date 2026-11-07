@@ -11,12 +11,16 @@ async function call(db,name,args){
  if(error)failure(error);
  return data;
 }
-export async function listCourseBank(db,courseId,{search='',limit=50,offset=0}={}){
+const difficultyOptions=new Set(['','unclassified','low','medium','high']);
+const usageOptions=new Set(['all','practice','mock','draft','lesson','eligible']);
+export async function listCourseBank(db,courseId,{search='',limit=50,offset=0,domainId=null,difficulty='',usage='all'}={}){
  checkId(courseId);
- if(!Number.isInteger(limit)||limit<1||limit>100||!Number.isInteger(offset)||offset<0||offset>100000)
-  throw Error('Invalid bank page.');
+ if(!Number.isInteger(limit)||limit<1||limit>100||!Number.isInteger(offset)||offset<0||offset>100000
+  ||!difficultyOptions.has(difficulty)||!usageOptions.has(usage)||(domainId&&!uuid.test(domainId)))
+  throw Error('Invalid bank filters or page.');
  const data=await call(db,'lms_p28_list_bank',{p_course_id:courseId,
-  p_search:String(search).slice(0,160),p_limit:limit,p_offset:offset});
+  p_search:String(search).slice(0,160),p_limit:limit,p_offset:offset,
+  p_domain_id:domainId||null,p_difficulty:difficulty,p_usage:usage});
  if(!data||!Number.isInteger(data.total)||!Array.isArray(data.items)
   ||data.items.some(q=>q.courseId!==courseId||!uuid.test(q.id||'')))
   throw Error('Question Bank returned unexpected course data.');
@@ -46,11 +50,22 @@ export function stableBankSourceId(question){
  const shortRef=(question.reference||'imported').slice(0,120);
  return ('file:'+Math.abs(hash>>>0).toString(36)+':'+shortRef).slice(0,160);
 }
-export function mappedImportRows(questions,domainId=null){
- return questions.map(q=>({
-  sourceId:stableBankSourceId(q),domainId:domainId||null,
-  topic:q.topic||'',prompt:q.prompt,options:q.options,
-  correctIndex:q.correct,explanation:q.explanation||'',
-  reference:q.reference||''
- }));
+const normalizeDomain=s=>String(s||'').toLowerCase().replace(/[\\s_-]+/g,' ').trim();
+// Never infer an ASP11 domain from a legacy sheet number: match verified slug/title exactly.
+export function mappedImportRows(questions,defaultDomainId=null,domains=[]){
+ const validated=domains.filter(d=>uuid.test(d.id||''));
+ return questions.map(q=>{
+  const label=normalizeDomain(q.domainLabel);
+  const matches=label?validated.filter(d=>[d.slug,d.title].some(n=>normalizeDomain(n)===label)):[];
+  const matched=matches.length===1?matches[0]:null;
+  const actualDomainId=matched?.id||(!label?defaultDomainId:null)||null;
+  return {
+   sourceId:stableBankSourceId(q),domainId:actualDomainId,
+   // Display-only validation; server imports only its explicit allowed fields.
+   unmappedDomainLabel:label&&!matched?q.domainLabel:null,
+   topic:q.topic||'',prompt:q.prompt,options:q.options,
+   correctIndex:q.correct,difficulty:q.difficulty||'unclassified',
+   explanation:q.explanation||'',reference:q.reference||''
+  };
+ });
 }
