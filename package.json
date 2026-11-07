@@ -56,6 +56,7 @@
     "test:p13": "node scripts/test-p13-admin-tools.mjs",
     "test:p14": "node scripts/test-p14-secure-lesson-media.mjs",
     "test:p15": "node scripts/test-p15-learner-journey.mjs",
+    "test:p16": "node scripts/test-p16-checkout-flow.mjs",
     "qa:staging:read": "node scripts/p12-staging-e2e.mjs"
   },
   "dependencies": {

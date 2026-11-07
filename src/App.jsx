@@ -56,6 +56,8 @@ export default function App(){
  <Route path="/" element={<Navigate to="/home" replace/>}/>
  <Route path="/home" element={<RoutePage><HomePage/></RoutePage>}/>
  <Route path="/course-catalog" element={<RoutePage><LiveLearnerPortal initialScreen="courses"/></RoutePage>}/>
+ <Route path="/course-catalog/:courseId" element={<RoutePage><LiveLearnerPortal initialScreen="course"/></RoutePage>}/>
+ <Route path="/checkout/:courseId" element={<RoutePage><LiveLearnerPortal initialScreen="checkout"/></RoutePage>}/>
  <Route path="/my-learning" element={<RoutePage>{legacyPreview?<LegacyPreviewWarning><LearningLibrary/></LegacyPreviewWarning>:<LiveLearnerPortal initialScreen="learning"/>}</RoutePage>}/>
  <Route path="/my-practice" element={<RoutePage><LiveLearnerPortal initialScreen="history"/></RoutePage>}/>
  <Route path="/my-progress" element={<RoutePage><LiveLearnerProgress/></RoutePage>}/>

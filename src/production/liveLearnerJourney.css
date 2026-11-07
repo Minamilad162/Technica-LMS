@@ -74,3 +74,11 @@
 .lj-embedded .lj-layout{display:grid;grid-template-columns:minmax(0,1fr);max-width:none;padding:0;gap:0}
 .lj-embedded .lj-main{padding:0;max-width:none}
 @media(max-width:850px){.lj-embedded .lj-layout{grid-template-columns:minmax(0,1fr)}}
+
+/* P16: clear enrollment CTA; locked lessons are an actionable checkout entry. */
+.lj-card-buttons{display:flex;align-items:center;gap:8px;flex-wrap:wrap;justify-content:flex-end}
+.lj-card-buttons button{min-height:39px}
+.lj-lesson.locked>button{cursor:pointer}
+.lj-lesson.locked>button:hover{background:#f4f9f9;color:#497c7a}
+.lj-lesson.locked>button:focus-visible{outline:2px solid #178d83;outline-offset:-2px}
+@media(max-width:580px){.lj-card-buttons{width:100%;justify-content:stretch}.lj-card-buttons button{flex:1}}

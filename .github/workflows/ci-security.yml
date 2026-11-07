@@ -116,6 +116,9 @@ jobs:
       - name: P15 published Learner courses, Free Intro and local-only Checkout contracts
         run: npm run test:p15
 
+      - name: P16 enrollment checkout simulation and locked Lesson redirect contract
+        run: npm run test:p16
+
       - name: P5 native fullscreen and exit policy contracts
         run: npm run test:p5
 
