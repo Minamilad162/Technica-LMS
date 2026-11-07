@@ -25,3 +25,16 @@
 - Must build versioned schema/RLS, approved institution templates, enrollment entitlements, private file storage, malware/type/size validation, server-validated cross-reference, protected submission snapshot, assessor assignment, per-criterion human decisions, IQA audit, feedback and resubmission before enabling persistence.
 - Real role checks must be enforced in Supabase, not assumed from the visual designer; no fake Acceptance state. Evidence upload and template editing have no backend yet.
 - CI: npm run test:p19 plus all existing checks and both demo/live Vite builds; manual desktop/mobile visual comparison after preview deployment. No production database connection is needed by P19 test itself.
+
+
+## P25 — Simplified premium horizontal Units navigation (2026-11-07)
+
+**Approved visual correction:** Previous large Unit list and verbose multi-screen headers cluttered the learner and admin experience. In both workspaces, replace vertical Unit tiles/dropdowns with one compact horizontally scrollable row of numbered tabs (01, 02, ...). Clicking a number updates selected Unit details directly beneath the strip, with its real title and official Unit code. Preserve all existing qualification cards, correct Unit count and first imported LO/Assessment Criteria. On desktop and mobile the row stays horizontal and scrolls rather than wrapping into a tall grid.
+
+**Learner UI:** one short qualification heading, number strip, active Unit name, and only three modest section controls: **Evidence, Mapping, Submit**. Evidence displays sample files and a single Add Evidence action; optional official criteria are behind a disclosure. Mapping keeps the full many-to-many evidence-to-criterion checkbox matrix and coverage. Submit still requires actual previewed criteria coverage and creates only an in-memory demo state. No large introductory banner, progress wizard, repetitive explanations, duplicated Unit list, or multi-level breadcrumbs. A small neutral footer states demo-only data and no uploads.
+
+**State handling:** mapping is keyed by Qualification + Unit, so navigating Unit 01 → Unit 02 → Unit 01 restores its draft cross-reference selections. Evidence is shared by Qualification to allow mapping one document against multiple Units. Prevent removing files linked to a preview-submitted Unit. Switching Units changes the visible section to Evidence but does not discard other Units' draft mappings. Units without imported authoritative Assessment Criteria show a clear empty state, and cannot be submitted or auto-approved.
+
+**Admin UI:** Qualification selector, same numbered Unit strip, selected Unit details and concise **Unit Details / Task Templates / Assessments / IQA** controls. Official LO/AC remains read-only. Centre task-template editing, per-criterion Met/Partial/Not Met, feedback and accept/return remain functional in React memory; Admin authorization is unchanged from P24. No dummy claim that the UI has accessed a real learner record.
+
+**Release gates:** Vite Demo and Supabase-only builds, regression tests including P19/P20/P21/P22/P23, plus manual real-browser/mobile layout review. No new SQL, Edge Functions, private file upload, database writes or assessment approval. This remains a frontend preview until separately authorized backend rollout.
