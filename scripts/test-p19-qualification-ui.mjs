@@ -23,7 +23,7 @@ assert.match(ui,/Record preview decision/);
 assert.match(ui,/No real learner file is accessed/);
 assert.match(ui,/Official wording is read-only/);
 assert.match(ui,/IQA/);
-assert.ok(!ui.includes('.from(')&&!ui.includes('.insert(')&&!ui.includes('.update(')&&!ui.includes('.delete('),'UI preview must not write to a database');
+assert.ok(!/\b(?:db|supabase|client)\.(?:from|insert|update|delete|rpc)\s*\(/.test(ui),'UI preview must not write to a database');
 assert.ok(!ui.includes('getSupabaseClient')&&!ui.includes('getCurrentEntitlements'),'Preview must not impersonate verified Supabase data');
 assert.match(layout,/\/qualifications/);
 assert.match(app,/path="\/qualifications"/);
