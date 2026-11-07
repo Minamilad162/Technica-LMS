@@ -69,11 +69,12 @@ const portal=read('src/production/SupabaseApp.jsx');
 assert(api.includes("import.meta.env?.DEV===true"));
 assert(api.includes("sessionStorage.setItem(demoKey(userId,courseId),'yes')"));
 assert(!api.includes("db.from('lms_entitlements').insert"));
-assert(ui.includes('FREE INTRO')&&ui.includes('LOCKED · SUBSCRIBE TO VIEW'));
+const explorer=read('src/production/CourseLessonExplorer.jsx');
+assert(explorer.includes('FREE INTRO')&&explorer.includes('onSubscribe?.()'));
 for(const label of ['Courses','My Learning','Practice','My Practice'])assert(ui.includes(label));
-assert(ui.includes('SecureLessonContent')&&ui.includes('LivePractice'));
-assert(ui.includes('Local checkout simulation: lesson navigation is unlocked here'));
-assert(ui.includes('full||l.isFreeIntro?<SecureLessonContent'));
+assert(ui.includes('CourseLessonExplorer')&&ui.includes('LivePractice'));
+assert(explorer.includes('previewOnly')&&explorer.includes('local preview of the lesson outline'));
+assert(ui.includes('full={Boolean(full)}')&&explorer.includes('full||selected.isFreeIntro'));
 assert(ui.includes('historyId'));
 
 assert(read('src/production/LiveCheckout.jsx').includes('There is no payment gateway connected'));
