@@ -3,6 +3,7 @@ import {useNavigate} from 'react-router-dom';
 import {ArrowLeft,LockKeyhole,RefreshCw,ShieldCheck,TriangleAlert} from 'lucide-react';
 import {getSupabaseClient} from '../lib/supabase.js';
 import {fetchLiveLearningCatalog,mayReadLiveCourse} from './liveLearningApi.js';
+import {hasPlatformAccess} from './subscriptionApi.js';
 import LiveMockExam from './LiveMockExam.jsx';
 import './liveLearning.css';
 import './liveAuthoring.css';
@@ -26,7 +27,7 @@ export default function LiveMockPortal(){
  const {catalog,db,loading,error}=state;
  const course=catalog?.courses?.find(c=>c.slug==='asp');
  const entitled=!!catalog&&!!course&&mayReadLiveCourse(catalog,course)&&
-  (catalog.identity?.isAdmin===true||catalog.entitlements?.some(e=>
+  (catalog.identity?.isAdmin===true||hasPlatformAccess(catalog.subscription)||catalog.entitlements?.some(e=>
     e.course_id===course.id&&['paid','manual'].includes(e.entitlement_type))===true);
  return <main className="live-learning page-enter">
   <div className="live-learning-breadcrumb">
@@ -44,8 +45,8 @@ export default function LiveMockPortal(){
    !course?<div className="live-learning-empty"><LockKeyhole size={21}/>
     ASP must be created in the real course catalog before the Mock is available.</div>:
    !entitled?<div className="live-learning-empty"><LockKeyhole size={21}/>
-    <b>Paid/manual ASP enrollment required</b>
-    <p>Trial access does not unlock official Mock questions.</p></div>:
+    <b>Active platform subscription required</b>
+    <p>Choose a subscription plan to unlock official Mock exams across the platform.</p></div>:
    <LiveMockExam key={catalog.user.id+course.id} db={db}
     user={catalog.user} course={course} access={entitled}/>}
  </main>;

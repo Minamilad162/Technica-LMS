@@ -31,10 +31,10 @@ const api=read('src/production/checkoutSimulationApi.js');
 const portal=read('src/production/LiveLearnerPortal.jsx');
 const app=read('src/App.jsx');
 const css=read('src/production/liveCheckout.css');
-assert(read('src/production/LearnerCourseCard.jsx').includes('Enroll Now')&&workspace.includes('startCheckout(chosen.id)'),
- 'Locked lessons and Course card must link to selected-course checkout');
+assert(read('src/production/LearnerCourseCard.jsx').includes('View Plans')&&workspace.includes('startCheckout(chosen.id)'),
+ 'Locked lessons and Course card must open platform plans');
 assert(workspace.includes('onCheckoutRoute(id)'));
-assert(workspace.includes('screen===\'checkout\''));
+assert(workspace.includes("screen==='subscription'||screen==='checkout'?<SubscriptionPlans"));
 assert(workspace.includes('hasSimulatedEnrollment(user.id,c.id)'));
 assert(workspace.includes('full||l.isFreeIntro?<SecureLessonContent'),
  'Demo flag must NEVER grant access to actual media');
@@ -48,13 +48,13 @@ assert(!/(?:name|id|autoComplete)=["'](?:cvv|expiry|cardNumber|card_number|pan)[
 assert(api.includes('sessionStorage.setItem(key(uid,cid),\'completed\')'));
 assert(!api.includes('lms_entitlements')||api.includes('no P1 entitlements'));
 assert(!api.includes('fetch(')&&!api.includes('.rpc('),'No network or DB writes in checkout simulation');
-assert(portal.includes('onCheckoutRoute={id=>navigate(\'/checkout/\''));
+assert(portal.includes("onCheckoutRoute={()=>navigate('/subscription-plans')}"));
 assert(portal.includes('onCourseRoute={id=>navigate(\'/course-catalog/\''));
 assert(app.includes('path="/checkout/:courseId"'));
 assert(app.includes('path="/course-catalog/:courseId"'));
-assert(read('src/production/LiveLearning.jsx').includes("navigate('/checkout/'+encodeURIComponent(course.id))"),
- 'Old secure deep-linked course page must offer same-course Checkout');
+assert(read('src/production/LiveLearning.jsx').includes("navigate('/subscription-plans')"),
+ 'Secure Course page must offer platform subscription plans');
 assert(css.includes('@media(max-width:575px)'));
 assert(read('TECHNICA_LMS_MASTER_BLUEPRINT.md').includes('## 73. P16'));
 delete globalThis.sessionStorage;
-console.log('PASS P16: selected-course checkout, actionable locked lessons, isolated demo enrollment, My Learning, no real payment/storage/entitlement bypass.');
+console.log('PASS P16: legacy demo remains UI-only, active checkout routes to platform subscription plans.');

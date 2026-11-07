@@ -8,7 +8,8 @@ const response={
  lms_profiles:{data:{full_name:'Learner',account_status:'active'},error:null},
  lms_role_assignments:{data:[],error:null},
  lms_courses:{data:[{id,slug:'asp',title:'ASP',publication_state:'published'}],error:null},
- lms_entitlements:{data:[],error:null}
+ lms_entitlements:{data:[],error:null},
+ lms_platform_subscriptions:{data:[],error:null}
 };
 function pending(table){
  started.push(table);
@@ -16,17 +17,17 @@ function pending(table){
 }
 function query(table){
  return {
-  select(){return this;},eq(){return this;},is(){return this;},order(){return this;},
+  select(){return this;},eq(){return this;},is(){return this;},order(){return this;},limit(){return this;},
   maybeSingle(){return pending(table);},
   then(resolve,reject){return pending(table).then(resolve,reject);}
  };
 }
 const db={from:table=>query(table)};
 const request=fetchP15Catalog(db,{id});
-for(let i=0;i<8&&started.length<4;i++)await Promise.resolve();
+for(let i=0;i<12&&started.length<5;i++)await Promise.resolve();
 assert.deepEqual(started.sort(),[
- 'lms_courses','lms_entitlements','lms_profiles','lms_role_assignments'
-].sort(),'No serial request waterfall: identity+roles+published catalog+entitlements concurrently');
+ 'lms_courses','lms_entitlements','lms_platform_subscriptions','lms_profiles','lms_role_assignments'
+].sort(),'No serial request waterfall: identity+roles+published catalog+entitlements+membership concurrently');
 for(const done of Object.values(finish))done();
 const catalog=await request;
 assert.equal(catalog.courses.length,1);
@@ -43,7 +44,7 @@ assert(!app.includes("import LiveMockPortal from"));
 assert(!app.includes("import AdminToolsPortal from"));
 assert(!app.includes("import QuestionBankPage from"));
 assert(workspace.includes("React.lazy(()=>import('./LivePractice.jsx'))"));
-assert(workspace.includes("React.lazy(()=>import('./LiveCheckout.jsx'))"));
+assert(workspace.includes("React.lazy(()=>import('./SubscriptionPlans.jsx'))"));
 assert(workspace.includes("React.lazy(()=>import('./PremiumMyLearning.jsx'))"));
 assert(workspace.includes("React.lazy(()=>import('./SecureLessonMedia.jsx')"));
 assert(workspace.includes('React.Suspense fallback='));
@@ -53,5 +54,5 @@ assert(media.includes("new IntersectionObserver(entries=>"),'Media access lazy n
 assert(media.includes("rootMargin:'450px 0px'"),'Preload before media is scrolled into view');
 assert(!media.includes("setInterval(()=>{if(active.current)setRenew"),'Do not tear down playing videos on a timer');
 assert(read('TECHNICA_LMS_MASTER_BLUEPRINT.md').includes('## 78. P20 — Direct Lesson Media & Performance'));
-console.log('PASS P20 performance contract: 4 concurrent auth/catalog reads, 21 route chunks, lazy Practice/Media/Checkout, viewport-near signed media.');
+console.log('PASS P20 performance contract: 5 concurrent auth/catalog/membership reads, 21 route chunks, lazy Practice/Media/Membership, viewport-near signed media.');
 console.log('Real browser navigation/TTFB/Core Web Vitals remain unmeasured until post-deploy QA.');

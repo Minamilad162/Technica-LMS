@@ -1,10 +1,12 @@
 import {getCurrentEntitlements,loadIdentity,loadStructure} from './lmsApi.js';
+import {fetchMyPlatformSubscription,hasPlatformAccess} from './subscriptionApi.js';
 
 // P15: browser only receives published titles for locked content. Real lessons
 // still require P1/P15 RLS and signed-media server checks; never trust UI flags.
 const uuid=/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 export const isP15Id=x=>typeof x==='string'&&uuid.test(x);
-export function isFullCourseEnrolled(entitlements,courseId){
+export function isFullCourseEnrolled(entitlements,courseId,subscription=null){
+ if(hasPlatformAccess(subscription))return true;
  return !!courseId&&(entitlements||[]).some(e=>e.course_id===courseId
   &&e.status==='active'&&['paid','manual'].includes(e.entitlement_type)
   &&Date.parse(e.starts_at)<=Date.now()
@@ -14,16 +16,18 @@ export async function fetchP15Catalog(db,user){
  if(!db||!user?.id)throw Error('Real Supabase authentication required.');
  // P20: independent read-only queries run in parallel; retain the exact
  // active-profile authorization check before returning ANY course metadata.
- const [identity,all,entitlements]=await Promise.all([
+ const [identity,all,entitlements,p21]=await Promise.all([
   loadIdentity(db,user),
   db.from('lms_courses')
    .select('id,slug,title,summary,cover_path,publication_state,created_at')
    .eq('publication_state','published').order('created_at',{ascending:false}),
-  getCurrentEntitlements(db,user.id)
+  getCurrentEntitlements(db,user.id),
+  fetchMyPlatformSubscription(db,user.id).then(subscription=>({subscription,error:''}))
+   .catch(()=>({subscription:null,error:'Subscription plans require the P21 database migration.'}))
  ]);
  if(identity.profile?.account_status!=='active')throw Error('Your LMS account is not active.');
  if(all.error)throw Error('Published course catalog is unavailable.');
- return {identity,entitlements,courses:all.data||[]};
+ return {identity,entitlements,courses:all.data||[],subscription:p21.subscription,subscriptionError:p21.error};
 }
 export function nestPublishedOutline(rows,courseId){
  if(!isP15Id(courseId)||!Array.isArray(rows))throw Error('Invalid P15 course outline.');
@@ -99,7 +103,7 @@ export function recordLocalDemoCheckout(userId,courseId,enteredDigits){
  return true;
 }
 export async function getEnrolledStructure(db,catalog,course){
- if(!catalog||!course||!isFullCourseEnrolled(catalog.entitlements,course.id))
-  throw Error('This Course requires verified paid/manual access.');
+ if(!catalog||!course||!isFullCourseEnrolled(catalog.entitlements,course.id,catalog.subscription))
+  throw Error('This Course requires an active platform subscription or a valid legacy grant.');
  return loadStructure(db,course.id);
 }

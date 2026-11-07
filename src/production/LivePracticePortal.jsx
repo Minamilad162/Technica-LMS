@@ -4,6 +4,7 @@ import {ArrowLeft,BookOpen,LockKeyhole,RefreshCw,ShieldCheck,TriangleAlert} from
 import {getSupabaseClient} from '../lib/supabase.js';
 import {fetchLiveLearningCatalog,mayReadLiveCourse} from './liveLearningApi.js';
 import {loadStructure} from './lmsApi.js';
+import {hasPlatformAccess} from './subscriptionApi.js';
 import LivePractice from './LivePractice';
 import './liveLearning.css';
 import './liveAuthoring.css';
@@ -29,7 +30,7 @@ export default function LivePracticePortal(){
     if(requested)return requested.id;
     if(catalog.courses.some(c=>c.id===old))return old;
     const enrolled=catalog.courses.find(c=>mayReadLiveCourse(catalog,c)&&(
-     catalog.identity.isAdmin||catalog.entitlements.some(e=>e.course_id===c.id&&['paid','manual'].includes(e.entitlement_type))));
+     catalog.identity.isAdmin||hasPlatformAccess(catalog.subscription)||catalog.entitlements.some(e=>e.course_id===c.id&&['paid','manual'].includes(e.entitlement_type))));
     return enrolled?.id||catalog.courses[0]?.id||'';
    });}
   }).catch(e=>{if(alive)setState({loading:false,error:e.message||'Unable to verify course access.',catalog:null,db});});
@@ -38,7 +39,7 @@ export default function LivePracticePortal(){
  const {db,catalog,loading,error}=state;
  const course=catalog?.courses.find(c=>c.id===courseId);
  const access=mayReadLiveCourse(catalog,course)&&
-  (catalog?.identity.isAdmin===true||catalog.entitlements.some(e=>e.course_id===courseId&&['paid','manual'].includes(e.entitlement_type)));
+  (catalog?.identity.isAdmin===true||hasPlatformAccess(catalog?.subscription)||catalog.entitlements.some(e=>e.course_id===courseId&&['paid','manual'].includes(e.entitlement_type)));
  useEffect(()=>{
   if(!db||!courseId||!access){setDomains([]);return;}
   let active=true;setDomainLoading(true);setDomains([]);
@@ -58,7 +59,7 @@ export default function LivePracticePortal(){
     <select id="secure-practice-course" value={courseId} onChange={e=>setCourseId(e.target.value)}>
      {catalog.courses.map(c=><option key={c.id} value={c.id}>{c.title} · {c.publication_state}</option>)}
     </select></div>
-    {!access?<div className="live-learning-empty"><LockKeyhole size={22}/><b>Course practice locked</b><p>Only an approved paid/manual enrollment, or a verified Admin, may access the protected bank. Trial-only access does not unlock it.</p></div>:
+    {!access?<div className="live-learning-empty"><LockKeyhole size={22}/><b>Course practice locked</b><p>An active platform subscription unlocks Practice for all published Courses. Legacy paid/manual Course access and Admin permissions are also respected.</p></div>:
       <>{domainLoading&&<p role="status" className="live-learning-note">Loading verified course domains…</p>}
        <LivePractice key={catalog.user.id+course.id+requestedMode} db={db} user={catalog.user} course={course} domains={domains} access={access} defaultMode={requestedMode}/></>}
    </>}

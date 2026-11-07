@@ -61,6 +61,7 @@
     "test:p18": "node scripts/test-p18-premium-my-learning.mjs",
     "test:p19:media": "node scripts/test-p19-protected-course-media.mjs",
     "test:p20:performance": "node scripts/test-p20-performance.mjs",
+    "test:p21:subscriptions": "node scripts/test-p21-subscriptions.mjs",
     "qa:staging:read": "node scripts/p12-staging-e2e.mjs"
   },
   "dependencies": {

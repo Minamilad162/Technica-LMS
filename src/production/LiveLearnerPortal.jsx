@@ -30,7 +30,8 @@ export default function LiveLearnerPortal({initialScreen='courses'}){
  return <LiveLearnerWorkspace key={state.user.id+'-'+initialScreen}
   db={state.db} user={state.user} initialScreen={initialScreen}
   initialCourseId={courseId} embedded
-  onCheckoutRoute={id=>navigate('/checkout/'+encodeURIComponent(id))}
+  onCheckoutRoute={()=>navigate('/subscription-plans')}
+  onSubscriptionRoute={()=>navigate('/subscription-plans')}
   onCourseRoute={id=>navigate('/course-catalog/'+encodeURIComponent(id))}
   onLearningRoute={()=>navigate('/my-learning')}
   onPracticeRoute={()=>navigate('/practice')}

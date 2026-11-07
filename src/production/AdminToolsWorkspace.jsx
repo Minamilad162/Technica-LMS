@@ -6,13 +6,15 @@ import StagingQaEvidencePanel from './StagingQaEvidencePanel.jsx';
 import {AdminDashboardPanel,AdminCoursesPanel,AdminQuestionsPanel,AdminMockPanel,AdminUsersPanel} from './AdminToolsPanels.jsx';
 import './supabaseApp.css';
 import './adminTools.css';
+const AdminSubscriptionsPanel=React.lazy(()=>import('./AdminSubscriptionsPanel.jsx'));
 
 export const ADMIN_TOOLS_TABS=[
  {id:'overview',label:'Dashboard',icon:Activity},
  {id:'courses',label:'Courses',icon:BookOpen},
  {id:'questions',label:'Question Bank',icon:FileQuestion},
  {id:'exams',label:'Exams & Mock',icon:ClipboardCheck},
- {id:'users',label:'Users & Plans',icon:Users},
+ {id:'users',label:'Users',icon:Users},
+ {id:'subscriptions',label:'Subscriptions',icon:GraduationCap},
  {id:'system',label:'System Tools',icon:ShieldCheck}
 ];
 const ids=new Set(ADMIN_TOOLS_TABS.map(x=>x.id));
@@ -87,6 +89,7 @@ export default function AdminToolsWorkspace({db,initialTab='overview',onExit,onT
    {tab==='questions'&&<AdminQuestionsPanel db={db} asp={asp} onUpdate={()=>setRevision(n=>n+1)}/>}
    {tab==='exams'&&<AdminMockPanel db={db} asp={asp}/>}
    {tab==='users'&&<AdminUsersPanel db={db}/>}
+   {tab==='subscriptions'&&<React.Suspense fallback={<div className="at-empty">Loading subscription management…</div>}><AdminSubscriptionsPanel db={db}/></React.Suspense>}
    {tab==='system'&&<AdminSystemPanel db={db}/>}
   </section>
   <footer className="at-footer">Technica Consult LMS · Admin Tools · Actual Supabase records only · No demo data or fabricated payment amounts</footer>
