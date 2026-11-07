@@ -22,9 +22,10 @@ run_as(){
  psql -X -q -A -t -v ON_ERROR_STOP=1 -c \
   "BEGIN;SET LOCAL ROLE authenticated;SET LOCAL request.jwt.claim.sub='$uid';$statement;COMMIT;" | sed '/^$/d' | grep -v '^BEGIN$' | grep -v '^COMMIT$' | tail -n 1
 }
-if psql -X -q -v ON_ERROR_STOP=1 -c "BEGIN;SET LOCAL ROLE authenticated;SET LOCAL request.jwt.claim.sub='$paid';SELECT correct_index FROM public.lms_p22_lesson_quiz_questions;ROLLBACK;" >/dev/null 2>&1;then
- echo "FAIL P22 exposes correct keys to learner";exit 1
-fi
+# Table-level SELECT is granted only so Admin can author, but learner RLS
+# must return ZERO rows: a successful zero-row SELECT is not a data leak.
+keys_visible=$(run_as "$paid" "SELECT count(*) FROM public.lms_p22_lesson_quiz_questions")
+[[ "$keys_visible" == 0 ]] || { echo "FAIL P22 exposes correct keys to learner";exit 1; }
 if psql -X -q -v ON_ERROR_STOP=1 -c "BEGIN;SET LOCAL ROLE authenticated;SET LOCAL request.jwt.claim.sub='$paid';UPDATE public.lms_lesson_progress SET quiz_completed=true WHERE lesson_id='$lesson';ROLLBACK;" >/dev/null 2>&1;then
  echo "FAIL P22 allows browser direct progress write";exit 1
 fi
