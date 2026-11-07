@@ -27,7 +27,8 @@ export default function CourseLessonExplorer({db,userId,courseId,courseTitle,out
  const [lessonLoading,setLessonLoading]=useState(false),[lessonError,setLessonError]=useState('');
  const [quizResult,setQuizResult]=useState(null),[openDomains,setOpenDomains]=useState({});
  const selected=lessons.find(l=>l.id===active);
- const accessible=selected&&hasAccess(selected,full,demo);
+ const previewOnly=Boolean(selected&&demo&&!full&&!selected.isFreeIntro);
+ const accessible=selected&&(full||selected.isFreeIntro)&&!previewOnly;
  const fetchProgress=async()=>{
   if(!userId||!lessons.length)return;
   const {data,error}=await db.from('lms_lesson_progress')
@@ -158,6 +159,7 @@ export default function CourseLessonExplorer({db,userId,courseId,courseTitle,out
      </section>)}
     </aside>
     <main className="cle-lesson-main">
+     {previewOnly?<div className="lj-demo-banner" role="status">This is a local preview of the lesson outline. Video, PDF and Knowledge Check remain protected until your platform subscription is active.</div>:<>
      <div className="cle-steps" role="tablist" aria-label="Lesson activities">
       {tabInfo.map(([key,name,Icon])=><button type="button" role="tab" key={key}
        aria-selected={tab===key} className={tab===key?'selected':''} onClick={()=>setTab(key)}>
@@ -204,6 +206,7 @@ export default function CourseLessonExplorer({db,userId,courseId,courseTitle,out
         </div>)}</React.Suspense>:
         <div className="cle-notice"><Paperclip size={22}/> No attachments for this lesson.</div>}
       </div>}
+     </>}
      <footer className="cle-player-footer">
       <span><ShieldCheck size={15}/> Only server-confirmed progress receives a green check.</span>
       <div><button type="button" disabled={selectedIndex<=0} onClick={()=>selectLesson(lessons[selectedIndex-1])}><ArrowLeft size={15}/> Previous</button>
