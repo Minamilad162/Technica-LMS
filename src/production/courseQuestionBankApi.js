@@ -50,7 +50,7 @@ export function stableBankSourceId(question){
  const shortRef=(question.reference||'imported').slice(0,120);
  return ('file:'+Math.abs(hash>>>0).toString(36)+':'+shortRef).slice(0,160);
 }
-const normalizeDomain=s=>String(s||'').toLowerCase().replace(/[\\s_-]+/g,' ').trim();
+const normalizeDomain=s=>String(s||'').toLowerCase().replace(/[\s_-]+/g,' ').trim();
 // Never infer an ASP11 domain from a legacy sheet number: match verified slug/title exactly.
 export function mappedImportRows(questions,defaultDomainId=null,domains=[]){
  const validated=domains.filter(d=>uuid.test(d.id||''));
