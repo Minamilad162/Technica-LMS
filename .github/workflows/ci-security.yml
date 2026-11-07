@@ -146,6 +146,9 @@ jobs:
       - name: P23 continuous lesson, jump navigation and completion regression
         run: npm run test:p23:lesson
 
+      - name: P27 verified Admin pie charts, safe draft Course Preview and learner nonregression
+        run: npm run test:p27:admin
+
       - name: P5 native fullscreen and exit policy contracts
         run: npm run test:p5
 

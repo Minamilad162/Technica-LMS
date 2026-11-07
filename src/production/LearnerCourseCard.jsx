@@ -36,11 +36,13 @@ export function LearnerCourseCard({db,course,status='available',onOpen,onEnroll}
   </div>
  </article>;
 }
-export function CourseDetailHero({db,course,status,onEnroll,onContinue}){
+export function CourseDetailHero({db,course,status,onEnroll,onContinue,adminPreview=false}){
  return <section className="lcc-detail-hero" aria-label="Course overview">
   <div className="lcc-detail-media"><CourseCover db={db} course={course} variant="hero"/></div>
   <div className="lcc-detail-copy">
-   <div className="lcc-hero-badges"><AccessStatus status={status}/><span className="lcc-detail-chip"><BookOpen size={13}/> Self-paced course</span></div>
+   <div className="lcc-hero-badges">{adminPreview?
+    <span className="lcc-access-status lcc-status-real"><ShieldCheck size={13}/> Working Draft · Admin only</span>:
+    <AccessStatus status={status}/>}<span className="lcc-detail-chip"><BookOpen size={13}/> Self-paced course</span></div>
    <h2>{course.title}</h2>
    <p>{course.summary||'A structured learning journey organized into domains, topics and lessons.'}</p>
    <div className="lcc-detail-features">
@@ -49,7 +51,9 @@ export function CourseDetailHero({db,course,status,onEnroll,onContinue}){
    </div>
    {status==='demo'&&<p className="lcc-hero-demo">Demo Access is only a preview of the learning journey. Real lesson content remains locked.</p>}
    <div className="lcc-detail-actions">
-    {status==='available'?<button className="lj-primary" type="button" onClick={onEnroll}>
+    {adminPreview?<button className="lj-primary" type="button" onClick={onContinue}>
+     Preview course lessons <ArrowRight size={17}/></button>:
+    status==='available'?<button className="lj-primary" type="button" onClick={onEnroll}>
      View Subscription Plans <ArrowRight size={17}/></button>:
      <button className="lj-primary" type="button" onClick={onContinue}>
       {status==='real'?'Your lessons':'Browse Demo Lessons'} <ArrowRight size={17}/></button>}

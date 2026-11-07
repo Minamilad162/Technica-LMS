@@ -66,6 +66,7 @@
     "test:p21:subscriptions": "node scripts/test-p21-subscriptions.mjs",
     "test:p22:learning": "node scripts/test-p22-course-lesson-explorer.mjs",
     "test:p23:lesson": "node scripts/test-p23-single-page-lesson.mjs",
+    "test:p27:admin": "node scripts/test-p27-admin-analytics-preview.mjs",
     "qa:staging:read": "node scripts/p12-staging-e2e.mjs"
   },
   "dependencies": {

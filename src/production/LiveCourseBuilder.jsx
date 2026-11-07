@@ -83,6 +83,9 @@ export default function LiveCourseBuilder(){
     <p className="page-subtitle">Course → Domain → Topic → Lesson, stored with stable IDs in your real database.</p></div>
    <div className="builder-head-actions"><span className="draft-tag"><FileText size={14}/>{course?.publication_state||'No course'}</span>
     <button className="btn btn-secondary" type="button" onClick={refresh} disabled={loading||loadingTree}><RefreshCw size={15}/> Refresh</button>
+    {course&&<a href={'#/admin/course-preview/'+encodeURIComponent(course.id)+'?view=draft'}
+      target="_blank" rel="noopener noreferrer" className="btn btn-secondary">
+       <BookOpen size={15}/> Preview Course ↗</a>}
     {course&&<button className="btn btn-secondary" onClick={openDetails}><Pencil size={15}/> Edit course</button>}</div>
   </div>
   <div className="live-authoring-banner"><ShieldCheck size={17}/><span>Connected to real Supabase tables · No automatic migration from Demo · No delete or publish in this phase</span></div>
