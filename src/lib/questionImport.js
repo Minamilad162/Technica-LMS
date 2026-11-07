@@ -51,7 +51,7 @@ export function normalizeQuestionRows(rows,{courseId,domainId,sourceName='Excel'
   const domainLabel=rawDomain||(/(?:asp11|domain)/i.test(sheetName)?sheetName:'');
   // Preserve the older local *demo* importer contract. Real ASP UUID courses
   // must resolve against their verified nine-domain Supabase catalogue instead.
-  const demoMatch=courseId==='asp'?domainLabel.match(/domain\\s*([1-9])/i):null;
+  const demoMatch=courseId==='asp'?domainLabel.match(/domain\s*([1-9])/i):null;
   const resolvedDomainId=demoMatch?'domain'+demoMatch[1]:(domainId||null);
   const sourceReference=get('reference');
   out.push({courseId,domainId:resolvedDomainId,domainLabel,topic:rawDomain||sheetName,prompt,options,correct,difficulty,
