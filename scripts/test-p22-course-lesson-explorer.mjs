@@ -19,7 +19,7 @@ assert(explorer.includes('allLessons([d])')&&explorer.includes('d.topics.map')
  &&explorer.includes('t.lessons.map'),'P22 must preserve Course→Domain→Topic→Lesson navigation');
 for(const marker of [
  'cle-grid','cle-lesson-sidebar','cle-steps','cle-reading','cle-player-footer',
- 'Video','Reading','Knowledge Check','Resources',
+ 'Video','Study Material','Knowledge Check','Lesson Attachments',
  "quizProgress[lesson]","progress[lesson]?.video_completed",
  'lms_p22_complete_lesson_step','lms_p22_get_lesson_quiz',
  'lms_p22_submit_lesson_quiz','lms_p22_my_steps',
