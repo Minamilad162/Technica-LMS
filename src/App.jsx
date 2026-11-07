@@ -20,6 +20,7 @@ const LivePracticePortal=React.lazy(()=>import('./production/LivePracticePortal'
 const LiveLearnerPortal=React.lazy(()=>import('./production/LiveLearnerPortal.jsx'));
 const LiveMockPortal=React.lazy(()=>import('./production/LiveMockPortal'));
 const AdminToolsPortal=React.lazy(()=>import('./production/AdminToolsPortal'));
+const QualificationsWorkspace=React.lazy(()=>import('./qualification/QualificationsWorkspace.jsx'));
 const LiveLearnerProgress=React.lazy(()=>import('./production/LiveLearnerProgress'));
 const LiveReleaseReadiness=React.lazy(()=>import('./production/LiveReleaseReadiness'));
 const AssessmentOverview=React.lazy(()=>import('./pages/AssessmentOverview'));
@@ -73,6 +74,7 @@ export default function App(){
  <Route path="/subscription-plans" element={<RoutePage><LiveLearnerPortal initialScreen="subscription"/></RoutePage>}/>
  <Route path="/checkout/:courseId" element={<Navigate to="/subscription-plans" replace/>}/>
  <Route path="/my-learning" element={<RoutePage>{legacyPreview?<LegacyPreviewWarning><LearningLibrary/></LegacyPreviewWarning>:<LiveLearnerPortal initialScreen="learning"/>}</RoutePage>}/>
+ <Route path="/qualifications" element={<RoutePage><QualificationsWorkspace/></RoutePage>}/>
  <Route path="/my-practice" element={<RoutePage><LiveLearnerPortal initialScreen="history"/></RoutePage>}/>
  <Route path="/my-progress" element={<RoutePage><LiveLearnerProgress/></RoutePage>}/>
  <Route path="/learning/course/:courseId" element={<RoutePage><LiveLearningCourse/></RoutePage>}/>

@@ -1,3 +1,8 @@
+### 2026-11-07 — P24 Qualifications frontend integrated with latest P23 Lesson flow (SOURCE ONLY)
+
+- Added three qualification front-end previews (OTHM L6, OTHM L7, ProQual NVQ), Unit screens, Evidence Upload selection, evidence-to-assessment-criteria mapping matrix, a read-only official rubric, submit-preview, plus separate verified Admin Tools qualification/task-template and assessor/IQA decision previews. Learner and admin are lazy-loaded without changing P21 subscriptions or P23 single-page Lesson behavior.
+- Sample learner/evidence/acceptance state is browser memory only: **no Supabase upload/write, migration, payment or actual assessment**. Added P19 qualifications UI CI test. Blueprint §82 and documentation updated; manual visual QA still pending.
+
 ### 2026-11-06 — P14 secure PDF/video Lesson content under Admin Tools (SOURCE ONLY)
 
 - Corrected Admin Tools → Courses → Course → Domain → Topic → Lesson: no longer Text-only. Each Lesson has direct **+ PDF**, **+ Video** private file upload controls and protected preview; optional Text remains available for historical lessons. Learner `LiveLearning.jsx` and actual `SupabaseApp.jsx` now render real private PDF/MP4/WebM lesson content.
