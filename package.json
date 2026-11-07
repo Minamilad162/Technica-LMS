@@ -67,7 +67,8 @@
     "test:p22:learning": "node scripts/test-p22-course-lesson-explorer.mjs",
     "test:p23:lesson": "node scripts/test-p23-single-page-lesson.mjs",
     "test:p27:admin": "node scripts/test-p27-admin-analytics-preview.mjs",
-    "qa:staging:read": "node scripts/p12-staging-e2e.mjs"
+    "qa:staging:read": "node scripts/p12-staging-e2e.mjs",
+    "test:p28:bank": "node scripts/test-p28-course-bank.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.58.0",
