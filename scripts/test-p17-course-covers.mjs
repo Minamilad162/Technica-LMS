@@ -60,7 +60,7 @@ assert(learning.includes('Active Enrollments')&&learning.includes('Demo Previews
 assert(ui.includes('courseStatus=c'));
 assert(ui.includes('CourseDetailHero'));
 assert(ui.includes('PremiumMyLearning'));
-assert(ui.includes('full||l.isFreeIntro?<SecureLessonContent'),
+assert(ui.includes('full={Boolean(full)}'),
  'No demo flag can unlock real lesson material');
 assert(read('src/production/liveCourseCards.css').includes('@media(max-width:680px)'));
 assert(read('TECHNICA_LMS_MASTER_BLUEPRINT.md').includes('## 74. P17'));
