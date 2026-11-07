@@ -9,6 +9,7 @@ BEGIN
     OR to_regclass('public.lms_lesson_events') IS NULL
     OR to_regprocedure('public.lms_p1_can_view_lesson(uuid)') IS NULL
     OR to_regprocedure('public.lms_p1_actor_is_admin()') IS NULL
+    OR to_regprocedure('public.lms_p15_can_preview_lesson(uuid)') IS NULL
  THEN RAISE EXCEPTION 'P22 requires the existing verified P1/P2 learning foundation'; END IF;
  IF to_regclass('public.lms_p22_lesson_quiz_questions') IS NOT NULL
     OR to_regprocedure('public.lms_p22_complete_lesson_step(uuid,text)') IS NOT NULL
@@ -80,7 +81,8 @@ CREATE FUNCTION public.lms_p22_complete_lesson_step(p_lesson_id uuid,p_step text
 DECLARE v_user uuid:=(SELECT auth.uid());v_row public.lms_lesson_progress%ROWTYPE;
 BEGIN
  IF v_user IS NULL OR p_lesson_id IS NULL OR p_step NOT IN ('reading','video')
-   OR NOT public.lms_p1_can_view_lesson(p_lesson_id)
+   OR NOT (public.lms_p1_can_view_lesson(p_lesson_id)
+     OR public.lms_p15_can_preview_lesson(p_lesson_id))
    OR NOT EXISTS(SELECT 1 FROM public.lms_profiles
      WHERE id=v_user AND account_status='active')
  THEN RAISE EXCEPTION 'Lesson completion not authorized'; END IF;
@@ -117,7 +119,8 @@ CREATE FUNCTION public.lms_p22_get_lesson_quiz(p_lesson_id uuid)
 DECLARE v_user uuid:=(SELECT auth.uid());v_questions jsonb;
 BEGIN
  IF v_user IS NULL OR p_lesson_id IS NULL
-   OR NOT public.lms_p1_can_view_lesson(p_lesson_id)
+   OR NOT (public.lms_p1_can_view_lesson(p_lesson_id)
+     OR public.lms_p15_can_preview_lesson(p_lesson_id))
    OR NOT EXISTS(SELECT 1 FROM public.lms_profiles
       WHERE id=v_user AND account_status='active')
  THEN RAISE EXCEPTION 'Quiz unavailable'; END IF;
@@ -136,7 +139,8 @@ DECLARE v_user uuid:=(SELECT auth.uid());v_expected int;v_received int;
 DECLARE v_correct int;v_percent numeric(5,2);v_completed timestamptz;
 BEGIN
  IF v_user IS NULL OR p_lesson_id IS NULL
-   OR NOT public.lms_p1_can_view_lesson(p_lesson_id)
+   OR NOT (public.lms_p1_can_view_lesson(p_lesson_id)
+     OR public.lms_p15_can_preview_lesson(p_lesson_id))
    OR NOT EXISTS(SELECT 1 FROM public.lms_profiles
      WHERE id=v_user AND account_status='active')
    OR jsonb_typeof(p_answers) IS DISTINCT FROM 'array'
@@ -185,7 +189,10 @@ CREATE FUNCTION public.lms_p22_my_steps(p_course_id uuid)
 DECLARE v_user uuid:=(SELECT auth.uid());v_result jsonb;
 BEGIN
  IF v_user IS NULL OR p_course_id IS NULL OR
-  NOT public.lms_p1_can_view_structure(p_course_id)
+  NOT (public.lms_p1_can_view_structure(p_course_id)
+    OR EXISTS(SELECT 1 FROM public.lms_p15_intro_settings s
+       WHERE s.course_id=p_course_id AND s.enabled IS TRUE
+         AND public.lms_p15_can_preview_lesson(s.intro_lesson_id)))
  THEN RAISE EXCEPTION 'Course progress unavailable'; END IF;
  SELECT coalesce(jsonb_agg(jsonb_build_object(
    'lesson_id',p.lesson_id,'quiz_completed',p.quiz_completed)
@@ -196,7 +203,8 @@ BEGIN
  JOIN public.lms_topics t ON t.id=l.topic_id
  JOIN public.lms_domains d ON d.id=t.domain_id
  WHERE p.user_id=v_user AND d.course_id=p_course_id
-   AND public.lms_p1_can_view_lesson(p.lesson_id);
+   AND (public.lms_p1_can_view_lesson(p.lesson_id)
+     OR public.lms_p15_can_preview_lesson(p.lesson_id));
  RETURN v_result;
 END $$;
 
