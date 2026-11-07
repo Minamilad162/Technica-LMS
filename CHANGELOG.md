@@ -554,3 +554,12 @@
 - Added additive P22 Supabase staging-only migration for learner-owned server-persisted progress, grade-vs-completion separation and Admin-only quiz answer RLS; DOES NOT run from deployment and must be applied only after ledger/backup/authorization.
 - Added P22 test script and CI hook; preserved P15/P20/P21 contracts with changes limited to the new UI location. Video playback proof is browser-only and can be spoofed by malicious clients until trusted server checkpoint enforcement is implemented. Live browser/server validation and staged rollout remain gates.
 - Rollback: revert P22 UI/import/test additions on branch; SQL roll-forward review required if ever applied. No data deletion, question-bank mutation, real subscription change, CI/release or production database write in this feature.
+
+
+## 2026-11-07 — P23 Continuous Lesson Viewer and In-page Shortcut Navigation
+- Replaced top Video/Reading/Knowledge Check/Resources **panel-switching tabs** with three sticky in-page shortcut buttons: Video, Study Material, Knowledge Check. Every section stays mounted in one uninterrupted vertical lesson page; clicking a shortcut scrolls smoothly to its visible section and the active shortcut follows scroll position.
+- Moved protected PDF Attachments to the bottom of the Study Material section, after the reading content and before the Quiz. No separate Resources panel and no change to signed/private P14 media rights or watermarks.
+- Reading material now uses natural page scrolling instead of an internally scrollable box; the end-of-reading observer keeps P22's 3-second visibility completion behavior, including short reading content. Existing video playback/quiz completion and Domain/Topic/Lesson rollups remain server-backed, not cosmetic.
+- Preserved main sidebar, secondary Lesson navigation, lesson grid, Previous/Next controls, platform-wide P21 subscription, Intro preview, responsive Technica palette and accessibility semantics. No database migrations/production data writes.
+- Updated P22 static reading-progress regression and added P23 one-page layout / no-tab-unmount regression to npm and GitHub Actions. Manual signed-browser/mobile tests remain required after CI.
+- Rollback: revert P23 frontend changes only; no Supabase rollback needed.

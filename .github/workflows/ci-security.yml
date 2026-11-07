@@ -137,6 +137,9 @@ jobs:
       - name: P22 premium course/lesson grid, verified progress and Admin quiz contracts
         run: npm run test:p22:learning
 
+      - name: P23 continuous lesson, jump navigation and completion regression
+        run: npm run test:p23:lesson
+
       - name: P5 native fullscreen and exit policy contracts
         run: npm run test:p5
 

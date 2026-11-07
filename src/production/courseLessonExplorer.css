@@ -50,8 +50,8 @@
 .cle-outline-lesson>span:not(.cle-small-dot){flex:1}.cle-outline-lesson.current{background:#e9f8f2;border-color:#c8e9dc;color:#11776e}
 .cle-small-dot,.cle-pending{display:block;width:12px;height:12px;flex:none;border:1.5px solid #c9d5d8;border-radius:50%}
 .cle-small-dot{width:9px;height:9px}.cle-success{color:#13a579!important;flex:none}
-.cle-lesson-main{overflow:hidden;padding:0 0 15px}
-.cle-steps{display:flex;align-items:stretch;gap:5px;padding:10px 12px 0;border-bottom:1px solid #e5eded;overflow-x:auto}
+.cle-lesson-main{overflow:visible;padding:0 0 15px}
+.cle-steps{position:sticky;top:10px;z-index:10;display:flex;align-items:stretch;gap:5px;padding:10px 12px 0;border-bottom:1px solid #e5eded;overflow-x:auto;border-radius:18px 18px 0 0;background:#fffc;backdrop-filter:blur(14px);box-shadow:0 5px 18px #173d4509;scrollbar-width:thin}
 .cle-steps>button{display:flex;align-items:center;justify-content:center;gap:7px;white-space:nowrap;min-width:max-content;padding:15px 14px;border-bottom:3px solid transparent;background:transparent;color:#779098;font-size:12px;font-weight:800}
 .cle-steps>button.selected{border-color:#159f8c;color:#117f75}
 .cle-activity{min-height:300px;padding:24px}
@@ -59,7 +59,7 @@
 .cle-activity-title h3{font-size:21px;letter-spacing:-.03em;color:#204d57;margin:0}
 .cle-activity-title small{font-size:11px;color:#799198;line-height:1.55;max-width:320px}
 .cle-notice{display:flex;align-items:center;justify-content:center;flex-direction:column;gap:11px;text-align:center;background:#f6faf9;border:1px dashed #d5e5e5;padding:42px 22px;border-radius:13px;color:#64848c;font-size:12px;line-height:1.6}
-.cle-reading{overflow:auto;max-height:min(67dvh,640px);padding:clamp(18px,3vw,34px);background:#fcfefe;border:1px solid #e1eceb;border-radius:14px;color:#3a5f68;scroll-behavior:smooth}
+.cle-reading{overflow:visible;max-height:none;padding:clamp(18px,3vw,34px);background:#fcfefe;border:1px solid #e1eceb;border-radius:14px;color:#3a5f68}
 .cle-reading h3{font-size:19px;color:#194c55;margin:10px 0 13px}
 .cle-reading p{font-size:14px;line-height:2.1;white-space:pre-wrap;margin:0 0 23px}
 .cle-reading-end{border-top:1px solid #e3eded;padding:18px 0 3px;display:flex;align-items:center;gap:8px;color:#14a184;font-size:12px}
@@ -84,3 +84,30 @@
 @media(max-width:540px){.cle-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.cle-card-art{min-height:105px}.cle-card-art>span{width:52px;height:52px;border-radius:16px}.cle-card-body{padding:12px;gap:8px}.cle-card-body strong{font-size:12px;min-height:50px}.cle-card-body>span{font-size:10px}.cle-browser-head,.cle-player-head{align-items:flex-start}.cle-browser-head .cle-meter{min-width:100px}.cle-meter-track{width:55px}.cle-activity{padding:15px}.cle-steps>button{font-size:11px}.cle-player-footer{padding:15px}.cle-player-footer>div{width:100%;justify-content:space-between}.cle-lesson-sidebar{max-height:210px}}
 @media(max-width:360px){.cle-grid{grid-template-columns:1fr}}
 @media(prefers-reduced-motion:reduce){.cle-root *{transition:none!important;scroll-behavior:auto!important}}
+
+
+/* P23: one continuous Lesson scroll. Top buttons are section shortcuts,
+   never stateful tabs that unmount protected video or submitted answers. */
+.cle-single-page{display:grid;gap:0}
+.cle-activity-section{scroll-margin-top:100px;position:relative}
+.cle-activity-section+.cle-activity-section{border-top:1px solid #e5efee}
+.cle-steps>button[aria-current=location]{color:#117f75;border-bottom-color:#159f8c;background:linear-gradient(180deg,transparent,#effbf6)}
+.cle-steps>button{transition:color .2s ease,border-color .2s ease,background .2s ease}
+.cle-steps>button:hover{color:#0f8f80;background:#f0fbf6}
+.cle-reading-end{scroll-margin-bottom:30px}
+.cle-material-attachments{margin-top:25px;padding-top:24px;border-top:1px solid #e4eeed}
+.cle-attachments-title h4{display:flex;align-items:center;gap:9px;margin:0;font-size:16px;color:#1b5660}
+.cle-attachments-title h4 svg{color:#158c80}
+.cle-notice-compact{padding:25px 18px;min-height:90px}
+.cle-activity-section .slm-protected-viewer{margin-bottom:15px}
+@media(max-width:790px){
+ .cle-steps{top:4px}
+ .cle-activity-section{scroll-margin-top:85px}
+}
+@media(max-width:540px){
+ .cle-steps{padding:5px 9px 0;gap:0;border-radius:14px 14px 0 0}
+ .cle-steps>button{padding:12px 13px;font-size:11px}
+ .cle-activity-section{scroll-margin-top:80px}
+ .cle-reading{padding:18px}
+ .cle-material-attachments{padding-top:18px;margin-top:18px}
+}
