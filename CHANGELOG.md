@@ -1,3 +1,11 @@
+## 2026-11-08 — P28: Course Question Bank + Excel → Lesson Quiz → Mock-only source
+
+- Added per-Course protected Question Bank management in Admin Tools (Course picker, .xlsx/.csv validation preview, Draft-only idempotent import, optional manual entry, course-scoped search and explicit non-ASP approval).
+- Lesson Knowledge Check now offers **Choose from Course Bank** with same-course server validation, Draft/non-Mock filtering, approved question publication and explicit unlink without deleting the original bank item. Existing manually authored questions remain supported.
+- Exams & Mock supports Course selection. Preserved versioned ASP exact 200-question / 300-minute immutable P9B/P10; other courses can mark unused, unlinked Drafts Mock-only for a future Mock engine **without activating an exam**. Mock-only IDs remain excluded from Practice and Lesson Quiz.
+- Additive P28 **source-only** SQL, unique quiz link index, triggers, Admin-only import/list/approve/mark/attach RPCs, audit events and CI / disposable PostgreSQL tests. No Supabase Production writes, no demo importer re-run, no Cloudflare deployment or learner data migration. Existing P21 subscriptions and P22/P23 progress/lesson UX preserved.
+- Conflicting Assessment Practice statement deferred: fail-closed exclusive Mock rule still applies until clarified. Staging migration ledger, role-negative tests and browser QA remain pending.
+
 ### 2026-11-07 — P26 Qualification Portfolio reference screens (SOURCE ONLY)
 
 - Added the missing Learning Assistant reference sections while preserving premium compact horizontal Unit tabs: Course (Resources & Actions), Contact (Assessor Feedback / Contact Diary), Records (Registration, Metrics, Grading Checklists and Recording Forms). Learner still has Evidence, Mapping and Submit; all visible in the same Unit workspace.
