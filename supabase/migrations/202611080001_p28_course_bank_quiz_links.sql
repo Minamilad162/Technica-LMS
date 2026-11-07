@@ -41,7 +41,13 @@ CREATE FUNCTION public.lms_p28_guard_quiz_link() RETURNS trigger
  LANGUAGE plpgsql SECURITY DEFINER SET search_path='' AS $$
 DECLARE v_q public.lms_questions%ROWTYPE; v_course uuid;
 BEGIN
- IF NEW.bank_question_id IS NULL THEN RETURN NEW; END IF;
+ IF NEW.bank_question_id IS NULL THEN
+  -- Retain edits to historical P22 manually authored rows. Never allow NEW
+  -- standalone question rows once P28's canonical Bank feature is installed.
+  IF TG_OP='INSERT' OR (TG_OP='UPDATE' AND OLD.bank_question_id IS NOT NULL)
+  THEN RAISE EXCEPTION 'New Lesson Quiz questions must be selected from the Course Question Bank'; END IF;
+  RETURN NEW;
+ END IF;
  SELECT * INTO v_q FROM public.lms_questions WHERE id=NEW.bank_question_id FOR SHARE;
  SELECT d.course_id INTO v_course
  FROM public.lms_lessons l
