@@ -1,6 +1,6 @@
 // P16: checkout UI simulation only. No payment provider, no P1 entitlements,
 // no protected lesson-media reads, and no credit-card collection.
-const uuid=/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+const uuid=/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const key=(uid,cid)=>'technica-p16-checkout-preview:'+uid+':'+cid;
 export const simulationEnabled=()=>import.meta.env?.VITE_DISABLE_CHECKOUT_DEMO!=='1';
 export function hasSimulatedEnrollment(uid,cid){
