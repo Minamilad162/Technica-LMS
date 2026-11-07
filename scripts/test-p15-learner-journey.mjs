@@ -96,7 +96,7 @@ for(const menu of ['/course-catalog','/my-learning','/practice','/my-practice'])
  assert(layout.includes(menu),'P15 learner menu missing '+menu);
 assert(bridge.includes('db.auth.getUser()'),'Router bridge must verify real signed Supabase user');
 assert(bridge.includes('LiveLearnerWorkspace')&&bridge.includes('embedded'));
-assert(ui.includes('embedded=false,initialScreen='));
+assert(ui.includes('embedded=false')&&ui.includes("initialScreen='courses'"));
 const liveClient=read('src/lib/supabase.js');
 const buildConfig=read('vite.config.js');
 assert(liveClient.includes('VITE_SUPABASE_PUBLISHABLE_KEY||import.meta.env.VITE_SUPABASE_ANON_KEY'));
