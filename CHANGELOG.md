@@ -1,3 +1,9 @@
+## 2026-11-08 — P28.1 ASP Course unified Question Bank (source branch)
+- Owner's Supabase read-only check confirmed P1/P4/P9B installed, P22 missing, P28 not installed. Original P28 preflight P0001 rolled back before data changes. P22 prerequisite must be installed after verifying existing P2/P15 requirements, ledger and backup; no remote SQL was run in this development turn.
+- New ASP-first Admin Question Bank import accepts nine official Domains, 2–6 options, correct index A–F, optional proposed Difficulty, Domain, Explanation and Reference. Ambiguous source Domain labels require explicit Admin mapping or remain unassigned. All uploaded questions remain Draft and ASP content rights/answer and independent second-admin review remain mandatory.
+- Admin course-bank query filters per Course/Domain/Difficulty/Usage; Lesson Quiz picker selects only from the same bank, no creation of new standalone quiz questions (legacy editable rows preserved). Approved non-Mock questions power P4 Practice and non-Mock Assessment; ASP Mock stays immutable exact 200/300 via existing P9B/P10 reservation.
+- SQL modified on P28 branch only, not applied remotely. CI and isolated PostgreSQL tests must pass with the updated SQL, then authenticated Staging UI verification before merging/release. No 2,500-question source file imported.
+
 ## 2026-11-08 — P28 preflight correction
 - Corrected an overstrict prerequisite in the source-only P28 SQL: the ASP-specific P9B Mock form is not needed to install per-Course Question Bank, though it remains mandatory for ASP Mock runtime. Preflight identifies the missing P1/P4/P22 object by name. The original user-reported P0001 error came from an early prerequisite guard, before database mutations; actual remote inventory remains unverified. SQL must not be rerun until a read-only ledger and object check passes.
 
