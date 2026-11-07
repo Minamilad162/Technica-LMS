@@ -25,7 +25,7 @@ export default function CourseLessonExplorer({db,userId,courseId,courseTitle,out
  const [statusError,setStatusError]=useState(''),[saving,setSaving]=useState('');
  const [blocks,setBlocks]=useState([]),[questions,setQuestions]=useState([]),[answers,setAnswers]=useState({});
  const [lessonLoading,setLessonLoading]=useState(false),[lessonError,setLessonError]=useState('');
- const readingPane=useRef(null),readingEnd=useRef(null);
+ const readingPane=useRef(null),readingEnd=useRef(null),watchedVideos=useRef(new Set());
  const [quizResult,setQuizResult]=useState(null),[openDomains,setOpenDomains]=useState({});
  const selected=lessons.find(l=>l.id===active);
  const previewOnly=Boolean(selected&&demo&&!full&&!selected.isFreeIntro);
@@ -48,6 +48,7 @@ export default function CourseLessonExplorer({db,userId,courseId,courseTitle,out
  },[db,userId,courseId,lessons.length]);
  useEffect(()=>{
   if(!active||!accessible){setBlocks([]);setQuestions([]);return;}
+  watchedVideos.current=new Set();
   let live=true;setLessonLoading(true);setLessonError('');setQuizResult(null);setAnswers({});
   Promise.all([
    loadLessonContent(db,active),
@@ -191,7 +192,10 @@ export default function CourseLessonExplorer({db,userId,courseId,courseTitle,out
        <div className="cle-activity-title"><h3>Watch & learn</h3><small>{stepDone(selected.id,'video')?'Completed ✓':'Watch each video until the end'}</small></div>
        {section.video.length?<React.Suspense fallback={<div className="cle-notice">Opening protected player…</div>}>
         {section.video.map(b=><ProtectedLessonViewer key={b.id} db={db} lessonId={selected.id}
-         block={b} viewerId={userId.slice(0,8)} onWatched={()=>saveStep('video')}/>)}
+         block={b} viewerId={userId.slice(0,8)} onWatched={()=>{
+          watchedVideos.current.add(b.id);
+          if(section.video.every(v=>watchedVideos.current.has(v.id)))void saveStep('video');
+         }}/>)}
        </React.Suspense>:<div className="cle-notice"><Video size={22}/> No video has been published for this lesson.</div>}
       </div>:tab==='reading'?<div className="cle-activity">
        <div className="cle-activity-title"><h3>Study material</h3><small>{stepDone(selected.id,'reading')?'Completed ✓':'Scroll through the content to complete this step'}</small></div>
