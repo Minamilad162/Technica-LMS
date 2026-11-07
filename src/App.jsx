@@ -1,5 +1,6 @@
 import React,{useEffect,useState}from'react';import{Routes,Route,Navigate,useLocation}from'react-router-dom';
 import Layout from './components/Layout';
+import QualificationsWorkspace from './qualification/QualificationsWorkspace.jsx';
 import {useDemo} from './lib/store';
 import MotionSystem from './components/MotionSystem';
 import AuthPage,{DemoPolicyPage} from './pages/AuthPage';
@@ -59,6 +60,7 @@ export default function App(){
  <Route path="/course-catalog/:courseId" element={<RoutePage><LiveLearnerPortal initialScreen="course"/></RoutePage>}/>
  <Route path="/checkout/:courseId" element={<RoutePage><LiveLearnerPortal initialScreen="checkout"/></RoutePage>}/>
  <Route path="/my-learning" element={<RoutePage>{legacyPreview?<LegacyPreviewWarning><LearningLibrary/></LegacyPreviewWarning>:<LiveLearnerPortal initialScreen="learning"/>}</RoutePage>}/>
+ <Route path="/qualifications" element={<RoutePage><QualificationsWorkspace/></RoutePage>}/>
  <Route path="/my-practice" element={<RoutePage><LiveLearnerPortal initialScreen="history"/></RoutePage>}/>
  <Route path="/my-progress" element={<RoutePage><LiveLearnerProgress/></RoutePage>}/>
  <Route path="/learning/course/:courseId" element={<RoutePage><LiveLearningCourse/></RoutePage>}/>

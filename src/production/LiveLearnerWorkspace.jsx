@@ -12,11 +12,13 @@ import {hasSimulatedEnrollment} from './checkoutSimulationApi.js';
 import LiveCheckout from './LiveCheckout.jsx';
 import {LearnerCourseCard,CourseDetailHero} from './LearnerCourseCard.jsx';
 import PremiumMyLearning from './PremiumMyLearning.jsx';
+import QualificationsWorkspace from '../qualification/QualificationsWorkspace.jsx';
 import './liveLearnerJourney.css';
 
 const nav=[
  {id:'courses',label:'Courses',icon:BookOpen,group:'Learning'},
  {id:'learning',label:'My Learning',icon:BookOpenCheck,group:'Learning'},
+ {id:'qualifications',label:'Qualifications',icon:GraduationCap,group:'Learning'},
  {id:'practice',label:'Practice',icon:Target,group:'Exam Preparation'},
  {id:'history',label:'My Practice',icon:ClipboardCheck,group:'Exam Preparation'}
 ];
@@ -103,10 +105,11 @@ export default function LiveLearnerWorkspace({db,user,onSignOut,embedded=false,
   if(embedded&&onHistoryRoute){onHistoryRoute();return;}go('history');
  };
  const screenTitle=screen==='courses'?'Explore Courses':screen==='learning'?'My Learning':
+  screen==='qualifications'?'My Qualifications':
   screen==='checkout'?'Course Checkout':
   screen==='course'?'Course Overview':
   screen==='practice'?'Practice Center':'My Practice';
- return <div className={"lj-shell"+(embedded?" lj-embedded":"")}>
+ return <div className={"lj-shell"+(embedded?" lj-embedded":"")+(screen==="qualifications"?" lj-qualification-mode":"")}>
   <header className="lj-top"><div className="lj-logo"><img alt="Technica Consult" src="/images/technica-logo.webp"/>
    <b>TECHNICA CONSULT <span>LMS</span></b></div><div className="lj-account">
     <span><ShieldCheck size={14}/> Secure learning</span><small>{user.email}</small>
@@ -124,7 +127,7 @@ export default function LiveLearnerWorkspace({db,user,onSignOut,embedded=false,
      <Icon size={18}/><span>{label}</span></button>)}
    <div className="lj-nav-note"><ShieldCheck size={17}/> Course access and exam scores are verified by Supabase, not browser flags.</div>
   </aside>
-  <main className="lj-main"><div className="lj-heading">
+  <main className="lj-main">{screen!=="qualifications"&&<div className="lj-heading">
    <div><span className="lj-eyebrow">TECHNICA LEARNING PLATFORM</span>
     <h1>{screenTitle}</h1><p>{screen==='courses'?'Browse published courses. Preview the first lesson before enrolling.':
       screen==='learning'?'Your active enrollments and demo checkout previews are clearly separated.':
@@ -133,9 +136,9 @@ export default function LiveLearnerWorkspace({db,user,onSignOut,embedded=false,
       screen==='practice'?'Train with protected questions and difficulty modes.':
       'Your own verified practice and Mock results.'}</p></div>
    <button type="button" className="lj-quiet" disabled={loading} onClick={refresh}><RefreshCw size={16}/> Refresh</button>
-  </div>
+  </div>}
   {error&&<p className="lj-error" role="alert">{error}</p>}
-  {loading?<div className="lj-empty" role="status">Loading your published learning catalog…</div>:
+  {screen==="qualifications"?<QualificationsWorkspace/>:loading?<div className="lj-empty" role="status">Loading your published learning catalog…</div>:
    !catalog?<div className="lj-empty">Course catalog is unavailable. Check your LMS session.</div>:
    screen==='courses'?<section className="lj-grid" aria-label="Published courses">
     {catalog.courses.map(c=><LearnerCourseCard key={c.id} course={c} db={db}

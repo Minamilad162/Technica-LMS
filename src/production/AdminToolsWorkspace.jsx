@@ -5,11 +5,13 @@ import {checkReleaseReadiness,summarizeReleaseReadiness} from './releaseReadines
 import StagingQaEvidencePanel from './StagingQaEvidencePanel.jsx';
 import {AdminDashboardPanel,AdminCoursesPanel,AdminQuestionsPanel,AdminMockPanel,AdminUsersPanel} from './AdminToolsPanels.jsx';
 import './supabaseApp.css';
+import QualificationsWorkspace from '../qualification/QualificationsWorkspace.jsx';
 import './adminTools.css';
 
 export const ADMIN_TOOLS_TABS=[
  {id:'overview',label:'Dashboard',icon:Activity},
  {id:'courses',label:'Courses',icon:BookOpen},
+ {id:'qualifications',label:'Qualifications',icon:GraduationCap},
  {id:'questions',label:'Question Bank',icon:FileQuestion},
  {id:'exams',label:'Exams & Mock',icon:ClipboardCheck},
  {id:'users',label:'Users & Plans',icon:Users},
@@ -84,6 +86,7 @@ export default function AdminToolsWorkspace({db,initialTab='overview',onExit,onT
   <section id={'at-panel-'+tab} role="tabpanel" aria-labelledby={'at-tab-'+tab} className="at-panel">
    {tab==='overview'&&<AdminDashboardPanel db={db} onNavigate={change}/>}
    {tab==='courses'&&<AdminCoursesPanel db={db}/>}
+   {tab==='qualifications'&&<QualificationsWorkspace admin/>}
    {tab==='questions'&&<AdminQuestionsPanel db={db} asp={asp} onUpdate={()=>setRevision(n=>n+1)}/>}
    {tab==='exams'&&<AdminMockPanel db={db} asp={asp}/>}
    {tab==='users'&&<AdminUsersPanel db={db}/>}

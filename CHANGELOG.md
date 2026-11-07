@@ -1,3 +1,9 @@
+### 2026-11-07 — P19 Qualifications & Evidence Mapping premium frontend preview (SOURCE ONLY)
+
+- New Qualifications area for OTHM Level 6, OTHM Level 7 and ProQual NVQ, with responsive My Qualifications, Unit Overview, Task/Evidence, dedicated evidence-to-criterion mapping grid and submission preview, styled from owner-approved Technica UI mockups. Dedicated Admin Tools Qualifications tab offers unit builder, customizable centre templates, assessor decisions/feedback and IQA placeholders.
+- **No Supabase changes:** all sample learner names, evidence and acceptance decisions are explicitly browser-memory design previews; official criteria read-only, incomplete units not fabricated. Existing secure learner/admin routes and ASP content/exam logic preserved. CI adds P19 UI contract test; manual browser visual QA pending.
+- See docs/current/P19_QUALIFICATIONS_UI_PREVIEW.md and Master Blueprint §76. This is not a live qualification assessment service.
+
 ### 2026-11-06 — P14 secure PDF/video Lesson content under Admin Tools (SOURCE ONLY)
 
 - Corrected Admin Tools → Courses → Course → Domain → Topic → Lesson: no longer Text-only. Each Lesson has direct **+ PDF**, **+ Video** private file upload controls and protected preview; optional Text remains available for historical lessons. Learner `LiveLearning.jsx` and actual `SupabaseApp.jsx` now render real private PDF/MP4/WebM lesson content.

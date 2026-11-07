@@ -125,6 +125,9 @@ jobs:
       - name: P18 premium My Learning and P11 verified progress contract
         run: npm run test:p18
 
+      - name: P19 Qualifications UI preview, evidence-mapping and separate verified Admin entry contracts
+        run: npm run test:p19
+
       - name: P5 native fullscreen and exit policy contracts
         run: npm run test:p5
 
