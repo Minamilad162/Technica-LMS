@@ -6,6 +6,7 @@ import StagingQaEvidencePanel from './StagingQaEvidencePanel.jsx';
 import {AdminDashboardPanel,AdminCoursesPanel,AdminQuestionsPanel,AdminMockPanel,AdminUsersPanel} from './AdminToolsPanels.jsx';
 import './supabaseApp.css';
 import './adminTools.css';
+import AdminCourseBank from './AdminCourseBank.jsx';
 const QualificationsWorkspace=React.lazy(()=>import('../qualification/QualificationsWorkspace.jsx'));
 const AdminSubscriptionsPanel=React.lazy(()=>import('./AdminSubscriptionsPanel.jsx'));
 
@@ -89,8 +90,8 @@ export default function AdminToolsWorkspace({db,initialTab='overview',onExit,onT
    {tab==='overview'&&<AdminDashboardPanel db={db} onNavigate={change}/>}
    {tab==='courses'&&<AdminCoursesPanel db={db}/>}
    {tab==='qualifications'&&<React.Suspense fallback={<div className="at-empty">Loading qualifications…</div>}><QualificationsWorkspace admin/></React.Suspense>}
-   {tab==='questions'&&<AdminQuestionsPanel db={db} asp={asp} onUpdate={()=>setRevision(n=>n+1)}/>}
-   {tab==='exams'&&<AdminMockPanel db={db} asp={asp}/>}
+   {tab==='questions'&&<AdminCourseBank db={db} courses={courses} asp={asp} mode="bank"/>}
+   {tab==='exams'&&<AdminCourseBank db={db} courses={courses} asp={asp} mode="mock"/>}
    {tab==='users'&&<AdminUsersPanel db={db}/>}
    {tab==='subscriptions'&&<React.Suspense fallback={<div className="at-empty">Loading subscription management…</div>}><AdminSubscriptionsPanel db={db}/></React.Suspense>}
    {tab==='system'&&<AdminSystemPanel db={db}/>}
