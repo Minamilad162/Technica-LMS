@@ -32,44 +32,7 @@ outside=$(psql -X -v ON_ERROR_STOP=1 -q -A -t -c "
  BEGIN;SET LOCAL ROLE authenticated;SET LOCAL request.jwt.claim.sub='$OUTSIDER';
  WITH updated AS (UPDATE public.lms_courses SET cover_path='$NEWPATH'
   WHERE id='$C' RETURNING id) SELECT count(*) FROM updated;
- ROLLBACK;" | grep -E '^[0-9]+
-# Verified Admin mutation creates one audit record.
-psql -X -v ON_ERROR_STOP=1 -q -c "
- BEGIN;SET LOCAL ROLE authenticated;SET LOCAL request.jwt.claim.sub='$ADMIN';
- UPDATE public.lms_courses SET cover_path='$NEWPATH' WHERE id='$C';
- COMMIT;"
-[[ "$(psql -X -v ON_ERROR_STOP=1 -q -A -t -c "
- SELECT count(*) FROM public.lms_p17_cover_audit
- WHERE course_id='$C' AND previous_path IS NULL
- AND new_path='$NEWPATH' AND event_type='uploaded' AND actor_id='$ADMIN'")" == 1 ]] ||
- { echo 'FAIL P17 cover audit missing';exit 1; }
-# No foreign course path can be saved even by verified Admin.
-if psql -X -v ON_ERROR_STOP=1 -q -c "
- BEGIN;SET LOCAL ROLE authenticated;SET LOCAL request.jwt.claim.sub='$ADMIN';
- UPDATE public.lms_courses SET cover_path='00000000-0000-0000-0000-000000000009/$FILE.webp'
- WHERE id='$C';ROLLBACK;" >/dev/null 2>&1;then
- echo 'FAIL P17 accepted cross-course object path';exit 1
-fi
-# Admin removal is auditable and does not affect course publication.
-psql -X -v ON_ERROR_STOP=1 -q -c "
- BEGIN;SET LOCAL ROLE authenticated;SET LOCAL request.jwt.claim.sub='$ADMIN';
- UPDATE public.lms_courses SET cover_path=NULL WHERE id='$C';
- COMMIT;"
-[[ "$(psql -X -v ON_ERROR_STOP=1 -q -A -t -c "
- SELECT count(*) FROM public.lms_p17_cover_audit
- WHERE course_id='$C' AND previous_path='$NEWPATH'
- AND new_path IS NULL AND event_type='removed'")" == 1 ]] ||
- { echo 'FAIL P17 removal audit missing';exit 1; }
-if psql -X -v ON_ERROR_STOP=1 -q -c "
- BEGIN;SET LOCAL ROLE authenticated;SET LOCAL request.jwt.claim.sub='$OUTSIDER';
- SELECT * FROM public.lms_p17_cover_audit;ROLLBACK;" >/dev/null 2>&1;then
- echo 'FAIL P17 audit readable by learner';exit 1
-fi
-if psql -X -v ON_ERROR_STOP=1 -q -f supabase/migrations/202611070001_p17_course_covers.sql >/dev/null 2>&1;then
- echo 'FAIL P17 migration replay succeeded';exit 1
-fi
-echo 'PASS P17: no existing data mutation, cover bucket, Admin-only writes, path ownership, audit and strict replay guard.'
- | tail -n 1)
+ ROLLBACK;" | grep -E '^[0-9]+$' | tail -n 1)
 [[ "$outside" == 0 ]] || { echo 'FAIL P17 outsider changed cover';exit 1; }
 # Verified Admin mutation creates one audit record.
 psql -X -v ON_ERROR_STOP=1 -q -c "
