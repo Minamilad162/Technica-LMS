@@ -1,5 +1,6 @@
 import React,{useEffect,useState} from 'react';
 import {AlertCircle,CheckCircle2,FileQuestion,Plus,Save,Trash2} from 'lucide-react';
+import './adminLessonQuiz.css';
 
 const blank=()=>({prompt:'',options:['','','',''],correct_index:0,is_published:false});
 const isValid=q=>q.prompt.trim().length>=8&&q.prompt.trim().length<=1000
