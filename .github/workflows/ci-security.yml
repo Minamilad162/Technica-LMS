@@ -122,6 +122,9 @@ jobs:
       - name: P17 premium Course cards, cover security and Real vs Demo My Learning contracts
         run: npm run test:p17
 
+      - name: P18 premium My Learning and P11 verified progress contract
+        run: npm run test:p18
+
       - name: P5 native fullscreen and exit policy contracts
         run: npm run test:p5
 

@@ -55,9 +55,11 @@ assert(admin.includes('CourseCoverManager')&&admin.includes('onSaved={()=>setRev
 assert(cards.includes('<CourseCover')&&cards.includes('Enroll Now'));
 assert(cards.includes('Demo checkout completed · no real payment'));
 assert(cards.includes("status==='real'?'Enrolled'"));
-assert(ui.includes('Active Enrollments')&&ui.includes('Demo Previews'));
+const learning=read('src/production/PremiumMyLearning.jsx');
+assert(learning.includes('Active Enrollments')&&learning.includes('Demo Previews'));
 assert(ui.includes('courseStatus=c'));
 assert(ui.includes('CourseDetailHero'));
+assert(ui.includes('PremiumMyLearning'));
 assert(ui.includes('full||l.isFreeIntro?<SecureLessonContent'),
  'No demo flag can unlock real lesson material');
 assert(read('src/production/liveCourseCards.css').includes('@media(max-width:680px)'));
