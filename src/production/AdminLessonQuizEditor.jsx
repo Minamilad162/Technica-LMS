@@ -15,6 +15,7 @@ export default function AdminLessonQuizEditor({db,lessonId,courseId}){
  const [error,setError]=useState(''),[notice,setNotice]=useState('');
  const [picker,setPicker]=useState(false),[search,setSearch]=useState(''),[query,setQuery]=useState('');
  const [page,setPage]=useState(0),[bank,setBank]=useState({items:[],total:0}),[bankLoading,setBankLoading]=useState(false);
+ const [domains,setDomains]=useState([]),[domainFilter,setDomainFilter]=useState(''),[difficulty,setDifficulty]=useState('');
  const reload=async()=>{
   const {data,error}=await db.from('lms_p22_lesson_quiz_questions')
    .select('*').eq('lesson_id',lessonId).order('position',{ascending:true});
@@ -28,16 +29,23 @@ export default function AdminLessonQuizEditor({db,lessonId,courseId}){
    .finally(()=>{if(active)setLoading(false);});
   return()=>{active=false;};
  },[db,lessonId]);
- useEffect(()=>{setPicker(false);setSearch('');setQuery('');setPage(0);},[courseId,lessonId]);
+ useEffect(()=>{setPicker(false);setSearch('');setQuery('');setPage(0);setDomainFilter('');setDifficulty('');},[courseId,lessonId]);
+ useEffect(()=>{
+  if(!courseId)return;
+  let active=true;
+  db.from('lms_domains').select('id,title').eq('course_id',courseId).order('position')
+   .then(({data,error})=>{if(active)setDomains(error?[]:data||[]);});
+  return()=>{active=false;};
+ },[db,courseId]);
  useEffect(()=>{
   if(!picker||!courseId)return;
   let active=true;setBankLoading(true);
-  listCourseBank(db,courseId,{search:query,offset:page,limit:50})
+  listCourseBank(db,courseId,{search:query,offset:page,limit:50,domainId:domainFilter||null,difficulty,usage:'eligible'})
    .then(data=>{if(active)setBank(data);})
    .catch(e=>{if(active)setError('Course Question Bank unavailable: '+(e.message||'Check P28'));})
    .finally(()=>{if(active)setBankLoading(false);});
   return()=>{active=false;};
- },[db,courseId,picker,query,page]);
+ },[db,courseId,picker,query,page,domainFilter,difficulty]);
  const addFromBank=async q=>{
   if(saving||q.mockExclusive||q.approvalState==='archived')return;
   setSaving(true);setError('');setNotice('');
@@ -58,14 +66,13 @@ export default function AdminLessonQuizEditor({db,lessonId,courseId}){
   finally{setSaving(false);}
  };
  const save=async e=>{
-  e.preventDefault();if(!editing||saving||!isValid(editing))return;
+  e.preventDefault();if(!editing?.id||saving||!isValid(editing))return;
   setSaving(true);setError('');setNotice('');
   try{
    const payload={lesson_id:lessonId,prompt:editing.prompt.trim(),
     options:editing.options.map(v=>v.trim()),correct_index:editing.correct_index,
     is_published:!!editing.is_published,position:editing.position??items.length};
-   const action=editing.id?db.from('lms_p22_lesson_quiz_questions')
-    .update(payload).eq('id',editing.id):db.from('lms_p22_lesson_quiz_questions').insert(payload);
+   const action=db.from('lms_p22_lesson_quiz_questions').update(payload).eq('id',editing.id);
    const {data,error}=await action.select('id').single();
    if(error||!data?.id)throw Error('Could not save this question. Verify Admin permissions and P22 installation.');
    await reload();setEditing(null);setNotice('Knowledge Check question saved.');
@@ -88,7 +95,7 @@ export default function AdminLessonQuizEditor({db,lessonId,courseId}){
    <small>{items.length} questions · Learners must answer every published question</small></div>
    <div className="p28-quiz-head-actions">
     {courseId&&<button type="button" className="btn" onClick={()=>{setPicker(v=>!v);setEditing(null);}} disabled={saving||loading}><FileQuestion size={14}/> Choose from Course Bank</button>}
-    <button type="button" className="btn btn-secondary" onClick={()=>{setEditing(blank());setPicker(false);}} disabled={saving||loading}><Plus size={14}/> Manual question</button>
+
    </div></div>
   {error&&<p className="live-authoring-alert" role="alert"><AlertCircle size={15}/>{error}</p>}
   {notice&&<p className="live-authoring-success" role="status"><CheckCircle2 size={15}/>{notice}</p>}
@@ -96,7 +103,17 @@ export default function AdminLessonQuizEditor({db,lessonId,courseId}){
    <form onSubmit={e=>{e.preventDefault();setQuery(search.trim());setPage(0);}}>
     <input placeholder="Search your Course Question Bank" aria-label="Search Course Bank" value={search} onChange={e=>setSearch(e.target.value)}/>
     <button className="btn btn-secondary" type="submit">Search</button></form>
-   <small>Approved questions are published immediately. Draft questions remain unpublished until approved. Mock-only questions are unavailable.</small>
+   <div className="p28-quiz-bank-filters">
+    <label>Domain<select aria-label="Filter Lesson Quiz by domain" value={domainFilter} onChange={e=>{setDomainFilter(e.target.value);setPage(0);}}>
+     <option value="">All course domains</option>
+     {domains.map(d=><option key={d.id} value={d.id}>{d.title}</option>)}
+    </select></label>
+    <label>Difficulty<select aria-label="Filter Lesson Quiz by difficulty" value={difficulty} onChange={e=>{setDifficulty(e.target.value);setPage(0);}}>
+     <option value="">Any difficulty</option><option value="unclassified">Unclassified</option><option value="low">Low</option>
+     <option value="medium">Medium</option><option value="high">High</option>
+    </select></label>
+   </div>
+   <small>Choose existing questions from this Course Question Bank. Approved questions publish immediately; Drafts remain hidden. Mock-only questions are excluded.</small>
    {bankLoading?<p>Loading questions…</p>:<div className="p28-quiz-choices">
     {bank.items.filter(q=>!q.mockExclusive&&q.approvalState!=='archived').map(q=><div key={q.id}>
      <span><b>{q.prompt}</b><small>{q.approvalState} · {q.sourceId}</small></span>
@@ -116,8 +133,8 @@ export default function AdminLessonQuizEditor({db,lessonId,courseId}){
     {q.bank_question_id?<button type="button" disabled={saving} onClick={()=>publishLinked(q)}>{q.is_published?'Unpublish':'Publish'}</button>:
      <button type="button" disabled={saving} onClick={()=>setEditing({...q,options:[...q.options]})}>Edit</button>}
     <button type="button" disabled={saving} aria-label={'Remove '+q.prompt} onClick={()=>remove(q)}><Trash2 size={14}/></button>
-   </div>)}</div>:<p>No quiz questions yet. Choose approved questions from this Course Bank.</p>}
-  {editing&&<form className="p22-admin-quiz-form" onSubmit={save}>
+   </div>)}</div>:<p>No quiz questions yet. Select questions from the ASP / Course Question Bank; questions are authored only in the Bank.</p>}
+  {editing?.id&&!editing.bank_question_id&&<form className="p22-admin-quiz-form" onSubmit={save}>
    <label>Question<textarea rows={3} maxLength={1000} value={editing.prompt}
     onChange={e=>setEditing(x=>({...x,prompt:e.target.value}))}/></label>
    <div className="p22-admin-quiz-options">
