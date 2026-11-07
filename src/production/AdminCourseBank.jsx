@@ -18,7 +18,7 @@ export default function AdminCourseBank({db,courses=[],asp,onUpdate,mode='bank'}
  const [pending,setPending]=useState(null),[uploadCount,setUploadCount]=useState(0);
  const [manual,setManual]=useState(null),[expanded,setExpanded]=useState(null);
  const selected=useMemo(()=>courses.find(c=>c.id===courseId),[courses,courseId]);
- useEffect(()=>{if(!courses.some(c=>c.id===courseId))setCourseId(courses[0]?.id||'');},[courses,courseId]);
+ useEffect(()=>{if(!courses.some(c=>c.id===courseId))setCourseId(courses.find(c=>c.slug==='asp')?.id||courses[0]?.id||'');},[courses,courseId]);
  useEffect(()=>{setOffset(0);setSearch('');setQuery('');setPending(null);setManual(null);setExpanded(null);
   setError('');setNotice('');setDomainId('');setFilterDomain('');setDifficulty('');setUsage('all');setDomains([]);
   if(!courseId)return;
