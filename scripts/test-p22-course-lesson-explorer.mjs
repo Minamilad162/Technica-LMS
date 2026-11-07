@@ -25,7 +25,7 @@ for(const marker of [
  'lms_p22_submit_lesson_quiz','lms_p22_my_steps',
  "stepDone(selected.id,'video')","stepDone(selected.id,'reading')",
  'questions.some(q=>!Number.isInteger(answers[q.id]))',
- "onScroll={e=>", "saveStep('reading')",
+ "readingEnd.current", "root:null", "saveStep('reading')",
  "if(section.video.every(v=>watchedVideos.current.has(v.id)))void saveStep('video')",
  'previewOnly','full||selected.isFreeIntro',
  'onSubscribe?.()'
