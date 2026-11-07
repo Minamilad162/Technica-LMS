@@ -83,6 +83,10 @@ for(const mark of [
  'pg_advisory_xact_lock',
  'make_interval(months=>plan.duration_months)',
  'duration_months_snapshot',
+ 'price_amount_snapshot',
+ 'currency_snapshot',
+ 'v_plan.price_amount',
+ 'r.duration_months_snapshot',
  'lms_p21_subscription_scoped_read',
  'GRANT SELECT ON public.lms_subscription_plans TO anon,authenticated',
  'GRANT SELECT ON public.lms_subscription_requests,public.lms_platform_subscriptions TO authenticated'

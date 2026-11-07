@@ -85,7 +85,7 @@ export async function adminRevokePlatformSubscription(db,subscriptionId){
 export async function fetchAdminSubscriptionOverview(db){
  const [plans,requests,subscriptions]=await Promise.all([
   db.from('lms_subscription_plans').select('*').order('display_order',{ascending:true}),
-  db.from('lms_subscription_requests').select('id,user_id,plan_id,status,requested_at,decided_at')
+  db.from('lms_subscription_requests').select('id,user_id,plan_id,plan_name_snapshot,duration_months_snapshot,price_amount_snapshot,currency_snapshot,status,requested_at,decided_at')
    .order('requested_at',{ascending:false}).limit(100),
   db.from('lms_platform_subscriptions')
    .select('id,user_id,plan_id,plan_name_snapshot,duration_months_snapshot,starts_at,ends_at,status,source')

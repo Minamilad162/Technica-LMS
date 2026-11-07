@@ -62,7 +62,6 @@ export default function AdminSubscriptionsPanel({db}){
  };
  const requests=data?.requests?.filter(x=>x.status==='pending')||[];
  const members=data?.subscriptions?.filter(s=>s.status==='active'&&Date.parse(s.ends_at)>Date.now())||[];
- const planById=new Map((data?.plans||[]).map(p=>[p.id,p]));
  return <div className="asub-shell at-animate" aria-label="Subscription plan management">
   <header className="at-section-title"><div><span className="at-eyebrow">MEMBERSHIP & ACCESS CONTROL</span>
    <h2>Subscription Plans</h2>
@@ -93,7 +92,7 @@ export default function AdminSubscriptionsPanel({db}){
       <th>Learner</th><th>Plan</th><th>Requested</th><th>Status</th><th>Decision</th></tr></thead>
       <tbody>{requests.map(r=><tr key={r.id}>
        <td>{profiles[r.user_id]||r.user_id.slice(0,8)}</td>
-       <td>{planById.get(r.plan_id)?.name||'Plan no longer available'}</td>
+       <td>{r.plan_name_snapshot}<small className="asub-request-terms">{r.duration_months_snapshot} months · {displayPlanPrice({price_amount:r.price_amount_snapshot,currency:r.currency_snapshot})}</small></td>
        <td>{date(r.requested_at)}</td><td><span className="asub-wait">Pending</span></td>
        <td className="asub-row-actions"><button type="button" disabled={!!busy} onClick={()=>decide(r,true)}
         className="asub-approve"><CheckCircle2 size={14}/> Activate manually</button>

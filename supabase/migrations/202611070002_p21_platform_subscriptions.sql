@@ -34,6 +34,11 @@ CREATE TABLE public.lms_subscription_requests(
  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
  user_id uuid NOT NULL REFERENCES public.lms_profiles(id) ON DELETE CASCADE,
  plan_id uuid NOT NULL REFERENCES public.lms_subscription_plans(id) ON DELETE RESTRICT,
+ -- Freeze learner-requested commercial terms before Admin later edits a Plan.
+ plan_name_snapshot text NOT NULL,
+ duration_months_snapshot integer NOT NULL CHECK(duration_months_snapshot BETWEEN 1 AND 36),
+ price_amount_snapshot numeric(12,2) NOT NULL CHECK(price_amount_snapshot>=0),
+ currency_snapshot text NOT NULL CHECK(currency_snapshot ~ '^[A-Z]{3}$'),
  status text NOT NULL DEFAULT 'pending' CHECK(status IN ('pending','approved','rejected','cancelled')),
  requested_at timestamptz NOT NULL DEFAULT now(),
  decided_at timestamptz,
@@ -149,7 +154,7 @@ GRANT EXECUTE ON FUNCTION public.lms_p21_save_plan(uuid,text,integer,numeric,tex
 
 CREATE FUNCTION public.lms_p21_request_plan(p_plan_id uuid) RETURNS uuid
  LANGUAGE plpgsql VOLATILE SECURITY DEFINER SET search_path='' AS $$
-DECLARE v_id uuid;v_user uuid;
+DECLARE v_id uuid;v_user uuid;v_plan public.lms_subscription_plans%ROWTYPE;
 BEGIN
  v_user=(SELECT auth.uid());
  IF v_user IS NULL OR NOT EXISTS(
@@ -157,12 +162,16 @@ BEGIN
  THEN RAISE EXCEPTION 'Active learner required'; END IF;
  IF public.lms_p21_has_active_subscription() THEN
   RAISE EXCEPTION 'You already have an active platform subscription'; END IF;
- IF NOT EXISTS(SELECT 1 FROM public.lms_subscription_plans
-  WHERE id=p_plan_id AND is_published AND price_amount IS NOT NULL
-   AND currency IS NOT NULL)
- THEN RAISE EXCEPTION 'Subscription plan is unavailable'; END IF;
- INSERT INTO public.lms_subscription_requests(user_id,plan_id)
- VALUES (v_user,p_plan_id) RETURNING id INTO v_id;
+ SELECT * INTO v_plan FROM public.lms_subscription_plans
+ WHERE id=p_plan_id AND is_published AND price_amount IS NOT NULL
+  AND currency IS NOT NULL FOR SHARE;
+ IF NOT FOUND THEN RAISE EXCEPTION 'Subscription plan is unavailable'; END IF;
+ INSERT INTO public.lms_subscription_requests(
+  user_id,plan_id,plan_name_snapshot,duration_months_snapshot,
+  price_amount_snapshot,currency_snapshot)
+ VALUES (v_user,v_plan.id,v_plan.name,v_plan.duration_months,
+  v_plan.price_amount,v_plan.currency)
+ RETURNING id INTO v_id;
  INSERT INTO public.lms_audit_events(actor_id,event_type,target_type,target_id,details)
  VALUES(v_user,'p21_subscription_requested','subscription_request',v_id,
   jsonb_build_object('plan_id',p_plan_id));
@@ -174,7 +183,6 @@ GRANT EXECUTE ON FUNCTION public.lms_p21_request_plan(uuid) TO authenticated;
 CREATE FUNCTION public.lms_p21_admin_decide_request(p_request_id uuid,p_approve boolean)
  RETURNS uuid LANGUAGE plpgsql VOLATILE SECURITY DEFINER SET search_path='' AS $$
 DECLARE r public.lms_subscription_requests%ROWTYPE;
-DECLARE plan public.lms_subscription_plans%ROWTYPE;
 DECLARE v_id uuid;v_start timestamptz;
 BEGIN
  IF NOT public.lms_p1_actor_is_admin() THEN RAISE EXCEPTION 'Admin required'; END IF;
@@ -183,20 +191,22 @@ BEGIN
  IF NOT FOUND OR r.status<>'pending' THEN RAISE EXCEPTION 'No pending request'; END IF;
  -- Serialize all manual grants for the same learner, including separate requests.
  PERFORM pg_advisory_xact_lock(hashtextextended(r.user_id::text,21021));
- IF EXISTS(SELECT 1 FROM public.lms_platform_subscriptions
-   WHERE user_id=r.user_id AND status='active' AND starts_at<=now() AND ends_at>now())
- THEN RAISE EXCEPTION 'Learner already has active platform access'; END IF;
- SELECT * INTO plan FROM public.lms_subscription_plans WHERE id=r.plan_id;
- IF NOT FOUND OR NOT plan.is_published OR plan.price_amount IS NULL THEN
-  RAISE EXCEPTION 'Plan is unavailable; configure it before approval'; END IF;
  IF p_approve THEN
+  IF EXISTS(SELECT 1 FROM public.lms_platform_subscriptions
+    WHERE user_id=r.user_id AND status='active' AND starts_at<=now() AND ends_at>now())
+  THEN RAISE EXCEPTION 'Learner already has active platform access'; END IF;
+  IF NOT EXISTS(SELECT 1 FROM public.lms_profiles
+   WHERE id=r.user_id AND account_status='active')
+  THEN RAISE EXCEPTION 'Active learner required for approval'; END IF;
+  -- Activation uses the student's ORIGINAL requested terms, never edited prices.
+  -- An unpublished/edited Plan does not silently change the pending order.
   v_start=now();
   INSERT INTO public.lms_platform_subscriptions(user_id,plan_id,plan_name_snapshot,
     duration_months_snapshot,price_amount_snapshot,currency_snapshot,
     status,source,starts_at,ends_at,granted_by)
-  VALUES(r.user_id,plan.id,plan.name,plan.duration_months,plan.price_amount,
-    plan.currency,'active','admin_manual',v_start,
-    v_start+make_interval(months=>plan.duration_months),(SELECT auth.uid()))
+  VALUES(r.user_id,r.plan_id,r.plan_name_snapshot,r.duration_months_snapshot,
+    r.price_amount_snapshot,r.currency_snapshot,'active','admin_manual',v_start,
+    v_start+make_interval(months=>r.duration_months_snapshot),(SELECT auth.uid()))
   RETURNING id INTO v_id;
  END IF;
  UPDATE public.lms_subscription_requests
