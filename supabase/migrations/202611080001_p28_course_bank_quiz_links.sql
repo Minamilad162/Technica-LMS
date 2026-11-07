@@ -2,12 +2,26 @@
 -- SOURCE ONLY: owner-approved Staging ledger/backup/RLS tests before executing.
 -- DOES NOT import rows, reserve ASP Mock forms, publish content or change learner data.
 BEGIN;
-DO $$ BEGIN
+DO $
+DECLARE v_missing text[] := ARRAY[]::text[];
+BEGIN
+ IF to_regprocedure('public.lms_p1_actor_is_admin()') IS NULL
+ THEN v_missing := array_append(v_missing, 'P1 Admin role function'); END IF;
+ IF to_regclass('public.lms_courses') IS NULL
+    OR to_regclass('public.lms_lessons') IS NULL
+    OR to_regclass('public.lms_audit_events') IS NULL
+ THEN v_missing := array_append(v_missing, 'P1 Course/Lesson/Audit tables'); END IF;
  IF to_regclass('public.lms_questions') IS NULL
- OR to_regclass('public.lms_p22_lesson_quiz_questions') IS NULL
- OR to_regclass('public.lms_p9b_mock_items') IS NULL
- OR to_regprocedure('public.lms_p1_actor_is_admin()') IS NULL
- THEN RAISE EXCEPTION 'P28 requires verified P1, P4, P9B and P22 migrations'; END IF;
+    OR to_regclass('public.lms_practice_attempt_items') IS NULL
+ THEN v_missing := array_append(v_missing, 'P4 Question Bank/Practice tables'); END IF;
+ IF to_regclass('public.lms_p22_lesson_quiz_questions') IS NULL
+ THEN v_missing := array_append(v_missing, 'P22 Lesson Quiz table'); END IF;
+ IF array_length(v_missing,1)>0
+ THEN RAISE EXCEPTION 'P28 missing prerequisites: %',array_to_string(v_missing,', ');
+ END IF;
+ -- P9B is deliberately NOT a prerequisite for non-ASP Course banks.
+ -- Its immutable ASP 200-question reservation rules remain untouched and
+ -- are still required before using the separate ASP Mock engine.
  IF to_regprocedure('public.lms_p28_import_bank(uuid,jsonb)') IS NOT NULL
  OR EXISTS(SELECT 1 FROM information_schema.columns
    WHERE table_schema='public' AND table_name='lms_p22_lesson_quiz_questions'
