@@ -307,7 +307,7 @@ REVOKE ALL ON FUNCTION public.lms_p28_guard_quiz_link(),
  public.lms_p28_attach_lesson_question(uuid,uuid,boolean)
  FROM PUBLIC,anon,authenticated;
 GRANT EXECUTE ON FUNCTION public.lms_p28_import_bank(uuid,jsonb),
- public.lms_p28_list_bank(uuid,text,integer,integer),
+ public.lms_p28_list_bank(uuid,text,integer,integer,uuid,text,text),
  public.lms_p28_approve_nonasp(uuid,text),
  public.lms_p28_mark_nonasp_mock(uuid,text),
  public.lms_p28_attach_lesson_question(uuid,uuid,boolean)
