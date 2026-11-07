@@ -134,6 +134,9 @@ jobs:
       - name: P21 platform-wide subscriptions, admin plans and expiration access contracts
         run: npm run test:p21:subscriptions
 
+      - name: P22 premium course/lesson grid, verified progress and Admin quiz contracts
+        run: npm run test:p22:learning
+
       - name: P5 native fullscreen and exit policy contracts
         run: npm run test:p5
 
