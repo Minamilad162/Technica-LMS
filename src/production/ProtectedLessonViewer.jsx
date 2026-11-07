@@ -25,10 +25,11 @@ const privacyMessage={
  'capture-shortcut':'A protected-content shortcut was detected.',
  'print-request':'Printing protected learning material is not available.'
 };
-export default function ProtectedLessonViewer({db,lessonId,block,viewerId=''}){
+export default function ProtectedLessonViewer({db,lessonId,block,viewerId='',onWatched}){
  const shell=useRef(null),video=useRef(null),pdf=useRef(null),curtain=useRef(null);
  const mounted=useRef(true),active=useRef(false),currentSrc=useRef('');
  const lastTime=useRef(0),wasPlaying=useRef(false);
+ const watched=useRef({last:null,seconds:new Set(),reported:false});
  const [state,setState]=useState('ready'),[url,setUrl]=useState(''),[error,setError]=useState('');
  const [reason,setReason]=useState(''),[nearViewport,setNearViewport]=useState(false);
  const [fullscreen,setFullscreen]=useState(false),[retry,setRetry]=useState(0);
@@ -147,6 +148,24 @@ export default function ProtectedLessonViewer({db,lessonId,block,viewerId=''}){
   const v=video.current;
   if(v){lastTime.current=v.currentTime;wasPlaying.current=!v.paused;}
  };
+ const trackWatched=()=>{
+  remember();
+  const v=video.current;if(!v||!Number.isFinite(v.currentTime))return;
+  const data=watched.current,at=v.currentTime,previous=data.last;
+  if(!v.paused&&!v.seeking&&previous!==null&&at>=previous&&at-previous<=2.5){
+   for(let sec=Math.floor(previous);sec<Math.ceil(at);sec++)data.seconds.add(sec);
+  }
+  data.last=at;
+ };
+ const finishWatched=()=>{
+  const v=video.current,data=watched.current;
+  if(data.reported||!v||!Number.isFinite(v.duration)||v.duration<=0)return;
+  const duration=Math.ceil(v.duration),fraction=data.seconds.size/Math.max(1,duration);
+  // Seeking to the end cannot satisfy the watched-segment threshold.
+  if(v.currentTime>=v.duration-1.25&&fraction>=.9){
+   data.reported=true;onWatched?.();
+  }
+ };
  const restore=()=>{
   const v=video.current;if(!v||!lastTime.current)return;
   try{
@@ -170,7 +189,8 @@ export default function ProtectedLessonViewer({db,lessonId,block,viewerId=''}){
     isVideo?<video ref={video} key={url} src={url} controls playsInline preload="metadata"
       disablePictureInPicture disableRemotePlayback
       controlsList="nodownload noplaybackrate noremoteplayback"
-      onTimeUpdate={remember} onPlay={remember} onPause={remember}
+      onTimeUpdate={trackWatched} onPlay={remember} onPause={remember}
+      onSeeking={()=>{watched.current.last=null;}} onEnded={finishWatched}
       onLoadedMetadata={restore} onContextMenu={e=>e.preventDefault()}/>:
      <iframe ref={pdf} key={url} title={'Protected PDF '+title}
       src={url+'#toolbar=0&navpanes=0&scrollbar=1'} loading="eager" referrerPolicy="no-referrer"/>}
