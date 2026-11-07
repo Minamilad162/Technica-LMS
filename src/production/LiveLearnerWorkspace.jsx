@@ -3,15 +3,15 @@ import {ArrowLeft,ArrowRight,BookOpen,BookOpenCheck,CheckCircle2,ChevronDown,Che
  ClipboardCheck,GraduationCap,Layers3,LockKeyhole,LogOut,PlayCircle,RefreshCw,
  ShieldCheck,ShoppingBag,Target,X} from 'lucide-react';
 import {getLearnerProgress} from './learnerProgressApi.js';
-import {SecureLessonContent} from './SecureLessonMedia.jsx';
-import LivePractice from './LivePractice.jsx';
+const SecureLessonContent=React.lazy(()=>import('./SecureLessonMedia.jsx').then(m=>({default:m.SecureLessonContent})));
+const LivePractice=React.lazy(()=>import('./LivePractice.jsx'));
 import {fetchP15Catalog,fetchP15Outline,hasLocalDemoCheckout,
  isFullCourseEnrolled,localCheckoutEnabled,recordLocalDemoCheckout} from './learnerJourneyApi.js';
 import {loadStructure} from './lmsApi.js';
 import {hasSimulatedEnrollment} from './checkoutSimulationApi.js';
-import LiveCheckout from './LiveCheckout.jsx';
+const LiveCheckout=React.lazy(()=>import('./LiveCheckout.jsx'));
 import {LearnerCourseCard,CourseDetailHero} from './LearnerCourseCard.jsx';
-import PremiumMyLearning from './PremiumMyLearning.jsx';
+const PremiumMyLearning=React.lazy(()=>import('./PremiumMyLearning.jsx'));
 import './liveLearnerJourney.css';
 
 const nav=[
@@ -135,6 +135,7 @@ export default function LiveLearnerWorkspace({db,user,onSignOut,embedded=false,
    <button type="button" className="lj-quiet" disabled={loading} onClick={refresh}><RefreshCw size={16}/> Refresh</button>
   </div>
   {error&&<p className="lj-error" role="alert">{error}</p>}
+  <React.Suspense fallback={<div className="lj-empty" role="status">Preparing this section…</div>}>
   {loading?<div className="lj-empty" role="status">Loading your published learning catalog…</div>:
    !catalog?<div className="lj-empty">Course catalog is unavailable. Check your LMS session.</div>:
    screen==='courses'?<section className="lj-grid" aria-label="Published courses">
@@ -224,6 +225,7 @@ export default function LiveLearnerWorkspace({db,user,onSignOut,embedded=false,
       <p className="lj-muted">History is read from your own protected P11 report. No estimated scores or browser-local grade records.</p>
      </>:<div className="lj-empty">Choose an enrolled course to see verified history.</div>}
    </div>}
+  </React.Suspense>
   </main></div>
  </div>;
 }

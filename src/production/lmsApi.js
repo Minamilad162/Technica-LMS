@@ -18,10 +18,14 @@ export function nestStructure(domains=[],topics=[],lessons=[]) {
 const ordered = q => q.order('position',{ascending:true}).order('id',{ascending:true});
 function value(data,error){if(error)throw new Error(error.message||'Database request failed');return data;}
 export async function loadIdentity(db,user) {
-  const {data:profileData,error:profileError}=await db.from('lms_profiles').select('full_name,account_status').eq('id',user.id).maybeSingle();
+  // P20: profile + active role queries are independent. Parallelizing saves
+  // one complete network round-trip for every authenticated LMS workspace.
+  const [{data:profileData,error:profileError},{data:roleData,error:roleError}]=await Promise.all([
+   db.from('lms_profiles').select('full_name,account_status').eq('id',user.id).maybeSingle(),
+   db.from('lms_role_assignments').select('role,scope_course_id').eq('user_id',user.id).is('revoked_at',null)
+  ]);
   const profile=value(profileData,profileError);
   if(!profile)throw Error('Your account profile is missing. Contact the LMS administrator; do not create an admin role from the browser.');
-  const {data:roleData,error:roleError}=await db.from('lms_role_assignments').select('role,scope_course_id').eq('user_id',user.id).is('revoked_at',null);
   const roles=value(roleData,roleError);
   return {profile,roles:roles||[],isAdmin:profile.account_status==='active'&&(roles||[]).some(r=>r.role==='admin')};
 }

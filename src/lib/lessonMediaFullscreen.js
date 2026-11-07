@@ -3,7 +3,7 @@
  * native fullscreen primitive; neither detects real OS screenshots or DRM.
  */
 import {isMobileWebContext,isPotentialCaptureShortcut} from './contentProtection.js';
-import {isNativeFullscreenAvailable,isFullscreenActive,requestQuestionFullscreen}
+import {isNativeFullscreenAvailable,requestQuestionFullscreen}
  from './questionFullscreen.js';
 
 export {isPotentialCaptureShortcut,requestQuestionFullscreen};
@@ -19,16 +19,13 @@ export function isMobileMediaBrowser(win){
   userAgent:win.navigator?.userAgent||''
  });
 }
-export function mediaFullscreenPolicy(doc,element,win){
- if(isNativeFullscreenAvailable(doc,element))return 'required';
- // Some mobile browsers (notably iPhone Safari) lack Element fullscreen.
- // Allow a visibly labeled inline fallback; private P14 tokens remain required.
- return isMobileMediaBrowser(win)?'mobile-fallback':'unsupported';
+export function mediaFullscreenPolicy(doc,element){
+ // Fullscreen is an optional viewing preference, not a prerequisite to access.
+ return isNativeFullscreenAvailable(doc,element)?'optional':'inline';
 }
-export function canRenderAuthorizedMedia({phase,inlineFallback,doc,element}={}){
- if(phase!=='active'||doc?.visibilityState==='hidden')return false;
- if(inlineFallback===true)return true;
- return !!element&&isFullscreenActive(doc,element);
+export function canRenderAuthorizedMedia({phase,doc}={}){
+ // P14/P15 server-side authorization is always required for a real URL.
+ return phase==='ready'&&doc?.visibilityState!=='hidden';
 }
 export function shouldShieldMediaOnBlur({mobile=false,activeTag='',visibility='visible'}={}){
  // PDF iframe focus and iOS soft keyboards generate legitimate blur.
