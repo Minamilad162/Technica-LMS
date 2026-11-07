@@ -1,3 +1,6 @@
+## 2026-11-08 — P28 preflight correction
+- Corrected an overstrict prerequisite in the source-only P28 SQL: the ASP-specific P9B Mock form is not needed to install per-Course Question Bank, though it remains mandatory for ASP Mock runtime. Preflight identifies the missing P1/P4/P22 object by name. The original user-reported P0001 error came from an early prerequisite guard, before database mutations; actual remote inventory remains unverified. SQL must not be rerun until a read-only ledger and object check passes.
+
 ## 2026-11-08 — P28: Course Question Bank + Excel → Lesson Quiz → Mock-only source
 
 - Added per-Course protected Question Bank management in Admin Tools (Course picker, .xlsx/.csv validation preview, Draft-only idempotent import, optional manual entry, course-scoped search and explicit non-ASP approval).
