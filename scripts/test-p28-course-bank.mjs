@@ -56,6 +56,7 @@ assert(builder.includes('courseId={courseId}')&&builder.includes('AdminLessonQui
 assert(workspace.includes('AdminCourseBank db={db} courses={courses}')&&workspace.includes('mode="mock"'));
 assert(sql.includes("p_domain_id uuid DEFAULT NULL,p_difficulty text DEFAULT '',p_usage text DEFAULT 'all'"),'Secure bank filters must be database-side');
 assert(sql.includes("v_difficulty:=")&&sql.includes("v_difficulty,'draft',false"),'Imported Difficulty must stay Draft');
+assert(sql.includes('New Lesson Quiz questions must be selected from the Course Question Bank'),'Database must prevent new quiz content outside the Bank');
 assert(bank.includes("selected.slug==='asp'")&&bank.includes("courses.find(c=>c.slug==='asp')"),'ASP must be the primary Question Bank course');
 assert(bank.includes('Filter bank by domain')&&bank.includes('Filter bank by difficulty')&&bank.includes('Filter bank by usage'),'Admin requires course-specific domain / difficulty / usage filters');
 assert(bank.includes('unmappedLabels')&&bank.includes('Map spreadsheet labels to real Course Domains'),'Unmapped ASP11 source labels must require explicit manual mapping');
