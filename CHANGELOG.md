@@ -1,3 +1,9 @@
+### 2026-11-07 — P25 Minimal Qualifications UX with numbered horizontal Units (SOURCE ONLY)
+
+- Replaced text-heavy headers/step wizard, vertical learner Unit list and admin Unit dropdown with shared small horizontal 01–07 / 01–06 / 01–10 tabs, responsive overflow scroll, and Unit details opened directly below. Kept only Evidence / Mapping / Submit learner sections and compact Admin Unit Details / Task Templates / Assessments / IQA sections.
+- Preserved evidence × assessment-criterion matrix, preview submission gate, Admin human acceptance/feedback mock. Draft mappings remain when switching Units; evidence library is shared across Units, with submitted-preview referenced files protected from removal. Existing official criteria remain read-only; unimported criteria do not appear fabricated.
+- UI preview only: no Supabase, migrations, real file uploads or assessor decisions. Updated P19 test and canonical Blueprint §83; protected P21 subscriptions/P22-P23 Lessons unchanged.
+
 ### 2026-11-07 — P24 Qualifications frontend integrated with latest P23 Lesson flow (SOURCE ONLY)
 
 - Added three qualification front-end previews (OTHM L6, OTHM L7, ProQual NVQ), Unit screens, Evidence Upload selection, evidence-to-assessment-criteria mapping matrix, a read-only official rubric, submit-preview, plus separate verified Admin Tools qualification/task-template and assessor/IQA decision previews. Learner and admin are lazy-loaded without changing P21 subscriptions or P23 single-page Lesson behavior.

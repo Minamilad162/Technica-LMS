@@ -1,100 +1,208 @@
-import React,{useMemo,useRef,useState} from 'react';
-import {ArrowLeft,ArrowRight,BookOpen,BookOpenCheck,Check,CheckCircle2,ChevronDown,ChevronRight,ClipboardCheck,ClipboardList,Clock3,FileCheck2,FileImage,FileSpreadsheet,FileText,FolderOpen,GraduationCap,Info,Link2,LockKeyhole,MessageSquare,Plus,Save,Search,Send,ShieldCheck,Upload,Users,X} from 'lucide-react';
-import {QUALIFICATIONS,FIRST_LO,SAMPLE_EVIDENCE,DEMO_NOTE} from './qualificationData.js';
+import React,{useRef,useState} from 'react';
+import {ArrowLeft,ArrowRight,BookOpen,Check,CheckCircle2,ChevronRight,ClipboardCheck,FileImage,FileSpreadsheet,FileText,FolderOpen,GraduationCap,Info,Link2,LockKeyhole,MessageSquare,Plus,Save,Send,ShieldCheck,Upload,X} from 'lucide-react';
+import {QUALIFICATIONS,FIRST_LO,SAMPLE_EVIDENCE} from './qualificationData.js';
 import './qualifications.css';
 
-function Status({children,tone='neutral'}){return <span className={'qf-status qf-status-'+tone}>{children}</span>}
-function Button({children,onClick,variant='primary',disabled=false,type='button',className=''}){return <button type={type} className={'qf-button '+variant+' '+className} disabled={disabled} onClick={onClick}>{children}</button>}
-function FileIcon({kind}){const Icon=kind==='image'?FileImage:kind==='sheet'?FileSpreadsheet:FileText;return <span className={'qf-file-icon '+(kind||'doc')}><Icon size={19}/></span>}
-function PreviewNote(){return <div className="qf-preview-note" role="note"><Info size={16}/><span>{DEMO_NOTE}</span></div>}
-function Head({back,title,kicker,detail,action}){return <div className="qf-section-head">{back&&<button className="qf-back" type="button" onClick={back}><ArrowLeft size={17}/> Back</button>}<div className="qf-heading-copy"><span className="qf-kicker">{kicker}</span><h1>{title}</h1>{detail&&<p>{detail}</p>}</div>{action&&<div className="qf-head-action">{action}</div>}</div>}
-function FileItem({item,onRemove,selected=false,onClick}){return <div className={'qf-file-row '+(selected?'selected':'')}><FileIcon kind={item.icon}/><div className="qf-file-copy"><strong title={item.name}>{item.name}</strong><small>{item.kind} · {item.size}</small></div>{onClick&&<button className="qf-icon-action" type="button" onClick={onClick} aria-label={'Select '+item.name}><ChevronRight size={17}/></button>}{onRemove&&<button className="qf-icon-action" type="button" onClick={onRemove} aria-label={'Remove '+item.name} title="Remove from draft"><X size={16}/></button>}</div>}
-function QualificationCard({item,onClick}){return <article className="qf-card qf-course-card"><div className={'qf-course-art '+item.color}><div className="qf-award"><GraduationCap size={27}/></div><span>{item.body}</span></div><div className="qf-course-copy"><div className="qf-course-tags"><Status tone="soft">{item.short}</Status><Status>Design preview</Status></div><h2>{item.name}</h2><p>{item.units.length} mandatory units · Ref {item.ref}</p><div className="qf-course-foot"><span><BookOpen size={16}/> View the unit structure</span><Button onClick={onClick}>Explore <ArrowRight size={16}/></Button></div></div></article>}
+// P25: visual-only Qualifications workspace. No private files, credentials or assessment writes.
+const unitKey=(qualificationId,unitIndex)=>qualificationId+':'+unitIndex;
+const two=n=>String(n+1).padStart(2,'0');
 
-function LearnerQualifications(){
- const [qualificationId,setQualificationId]=useState('othm6'),[unitIndex,setUnitIndex]=useState(0),[page,setPage]=useState('catalog');
- const [unitTab,setUnitTab]=useState('overview'),[files,setFiles]=useState(SAMPLE_EVIDENCE),[links,setLinks]=useState({});
- const [submitted,setSubmitted]=useState(false),[notice,setNotice]=useState('');
- const fileInput=useRef(null);
- const qualification=QUALIFICATIONS.find(item=>item.id===qualificationId);
- const unit=qualification.units[unitIndex];
- const lo=FIRST_LO[qualificationId],criteria=unitIndex===0?lo.criteria:[];
- const mapped=criteria.filter(([code])=>files.some(file=>(links[file.id]||[]).includes(code))).length;
- const allMapped=criteria.length>0&&mapped===criteria.length;
- const pct=criteria.length?Math.round(mapped/criteria.length*100):0;
- const openQualification=id=>{setQualificationId(id);setUnitIndex(0);setUnitTab('overview');setPage('unit');setFiles(SAMPLE_EVIDENCE);setLinks({});setSubmitted(false);setNotice('');};
- const openUnit=index=>{setUnitIndex(index);setUnitTab('overview');setPage('unit');setLinks({});setSubmitted(false);setNotice('');};
- const toggle=(fileId,code)=>{if(submitted)return;setLinks(old=>{const prev=old[fileId]||[];return {...old,[fileId]:prev.includes(code)?prev.filter(x=>x!==code):[...prev,code]};});};
- const removeFile=fileId=>{if(submitted)return;setFiles(prev=>prev.filter(f=>f.id!==fileId));setLinks(prev=>{const next={...prev};delete next[fileId];return next;});};
- const onFiles=e=>{
-  if(submitted)return;
-  const added=Array.from(e.target.files||[]).slice(0,10).map((file,i)=>({
-   id:'local-'+Date.now()+'-'+i,name:file.name,kind:'Local draft',size:file.size>=1048576?(file.size/1048576).toFixed(1)+' MB':Math.max(1,Math.ceil(file.size/1024))+' KB',
-   icon:/\.(jpg|jpeg|png|webp)$/i.test(file.name)?'image':/\.(xls|xlsx|csv)$/i.test(file.name)?'sheet':/\.(pdf)$/i.test(file.name)?'pdf':'doc'
-  }));
-  if(added.length){setFiles(prev=>[...prev,...added]);setNotice('Files added to this browser preview only. No file was uploaded.');}
-  e.target.value='';
- };
- const upload=<><input ref={fileInput} className="qf-hidden-input" type="file" multiple accept=".pdf,.doc,.docx,.jpg,.jpeg,.png,.webp,.xls,.xlsx,.csv" onChange={onFiles} aria-label="Select evidence files for preview"/><Button variant="outline" disabled={submitted} onClick={()=>fileInput.current?.click()}><Upload size={17}/> Add evidence</Button></>;
- const coverage=<div className="qf-coverage"><span><CheckCircle2 size={17}/> {mapped} of {criteria.length} criteria linked</span><div className="qf-progress"><i style={{width:pct+'%'}}/></div><b>{pct}%</b></div>;
- const breadcrumbs=<div className="qf-breadcrumbs"><button onClick={()=>setPage('catalog')}>My Qualifications</button><ChevronRight size={14}/><button onClick={()=>setPage('unit')}>{qualification.short}</button>{page!=='unit'&&<><ChevronRight size={14}/><button onClick={()=>setPage('unit')}>Unit {String(unitIndex+1).padStart(2,'0')}</button><ChevronRight size={14}/><span>{page==='mapping'?'Evidence mapping':page==='submission'?'Submission':'Task & Evidence'}</span></>}</div>;
- return <div className="qf-workspace qf-learner">
-  <PreviewNote/>
-  {page==='catalog'?<>
-   <Head kicker="YOUR PROFESSIONAL QUALIFICATIONS" title="My Qualifications" detail="Everything you need for your units, tasks and evidence — in one place."/>
-   <div className="qf-catalog-grid">{QUALIFICATIONS.map(item=><QualificationCard key={item.id} item={item} onClick={()=>openQualification(item.id)}/>)}</div>
-   <section className="qf-support-strip"><ShieldCheck size={19}/><div><b>Clear and simple</b><p>Choose a qualification, open a unit, attach evidence, then link it to the assessment criteria. Formal decisions are made by your assessor.</p></div></section>
-  </>:<>
-   {breadcrumbs}
-   <div className="qf-qual-heading"><span className={'qf-level '+qualification.color}>{qualification.body} L{qualification.level}</span><div><h1>{qualification.name}</h1><p>Unit {String(unitIndex+1).padStart(2,'0')}: {unit[1]}</p></div>{page==='mapping'?coverage:<Status tone={submitted?'good':'amber'}>{submitted?'Sample submission':'Draft preview'}</Status>}</div>
-   {page==='unit'?<>
-    <div className="qf-unit-tabs" role="tablist" aria-label="Unit sections">{[['overview','Overview'],['tasks','Tasks & Evidence'],['criteria','Assessment Criteria'],['resources','Resources']].map(([id,title])=><button key={id} role="tab" aria-selected={unitTab===id} className={unitTab===id?'active':''} onClick={()=>setUnitTab(id)}>{title}</button>)}</div>
-    {unitTab==='overview'&&<div className="qf-unit-layout"><section className="qf-card qf-feature"><span className="qf-kicker">UNIT OVERVIEW</span><div className="qf-unit-hero-icon"><ShieldCheck size={38}/></div><h2>{unit[1]}</h2><p>Official unit reference: {unit[0]}. Complete the approved assessment tasks and demonstrate all required criteria.</p><div className="qf-mini-stats"><span><BookOpen size={16}/> Unit {unitIndex+1} of {qualification.units.length}</span><span><ClipboardCheck size={16}/> {unitIndex===0?criteria.length+' previewed criteria':'Criteria not imported'}</span></div><Button onClick={()=>{setUnitTab('tasks');}}>View Tasks & Evidence <ArrowRight size={16}/></Button></section><section className="qf-card qf-unit-list"><h3>Qualification units</h3>{qualification.units.map(([ref,title],i)=><button key={ref} className={i===unitIndex?'selected':''} onClick={()=>openUnit(i)}><span className="qf-unit-code">U{String(i+1).padStart(2,'0')}</span><span>{title}<small>{ref}</small></span><ChevronRight size={16}/></button>)}</section></div>}
-    {unitTab==='tasks'&&<div className="qf-card qf-task-list"><div><span className="qf-kicker">YOUR ASSIGNMENT</span><h2>{unitIndex===0?'Task 1.1 · Unit Evidence Portfolio':'Unit assessment workspace'}</h2><p>{unitIndex===0?'Organise your documents and show which criteria each one supports.':'Awaiting the approved assignment brief and criterion import for this unit.'}</p></div><Status tone={unitIndex===0?'amber':'neutral'}>{unitIndex===0?'Ready to prepare':'Awaiting content'}</Status><Button disabled={unitIndex!==0} onClick={()=>setPage('task')}>Open task <ArrowRight size={16}/></Button></div>}
-    {unitTab==='criteria'&&<section className="qf-card qf-criteria-list"><h2>Assessment criteria</h2>{unitIndex===0?<><p><b>Learning Outcome 1:</b> {lo.title}</p>{criteria.map(([code,title])=><div key={code} className="qf-criterion-row"><Status tone="blue">AC {code}</Status><span>{title}</span></div>)}<Button variant="outline" onClick={()=>setPage('mapping')}><Link2 size={16}/> Map evidence</Button></>:<p className="qf-empty">The approved assessment criteria for this unit have not been imported into this frontend preview.</p>}</section>}
-    {unitTab==='resources'&&<section className="qf-card qf-criteria-list"><h2>Unit resources</h2><p>Approved assignment briefs, templates and guidance will be added by your Qualification Admin. This UI preview does not supply downloadable official materials.</p><div className="qf-placeholder"><FolderOpen size={21}/> No published unit resources yet</div></section>}
-   </>:page==='task'?<>
-    <div className="qf-steps"><span className="current"><FileText size={17}/> 1. Prepare evidence</span><span><Link2 size={17}/> 2. Map criteria</span><span><CheckCircle2 size={17}/> 3. Review & Submit</span></div>
-    <Head back={()=>setPage('unit')} kicker="TASK 1.1 · EVIDENCE PORTFOLIO" title="Prepare your evidence" detail="Add documents now. You will choose which criteria they support in the next step." action={upload}/>
-    <div className="qf-task-grid"><section className="qf-card qf-task-summary"><span className="qf-icon-bubble"><ClipboardList size={23}/></span><h2>What do I need to do?</h2><p>Prepare evidence that demonstrates your knowledge or workplace practice against this unit's assessment criteria.</p><div className="qf-task-hint"><Info size={17}/><span>This task is a UI example, not an approved OTHM or ProQual assignment brief.</span></div><h3>Quick checklist</h3><div className="qf-checkline"><Check size={15}/> Have relevant evidence ready</div><div className="qf-checkline"><Check size={15}/> Add a clear document title</div><div className="qf-checkline"><Check size={15}/> Map each file to applicable criteria</div></section><section className="qf-card qf-files-panel"><div className="qf-panel-title"><h2>Your evidence <small>({files.length})</small></h2>{upload}</div><div className="qf-file-list">{files.map(file=><FileItem key={file.id} item={file} onRemove={!submitted?()=>removeFile(file.id):null}/>)}</div>{!files.length&&<p className="qf-empty">No files selected. Add at least one item.</p>}<div className="qf-panel-footer"><Button disabled={!files.length} onClick={()=>setPage('mapping')}>Next: Map evidence <ArrowRight size={16}/></Button></div></section></div>
-   </>:page==='mapping'?<>
-    <div className="qf-steps"><span><FileText size={17}/> 1. Prepare evidence</span><span className="current"><Link2 size={17}/> 2. Map criteria</span><span><CheckCircle2 size={17}/> 3. Review & Submit</span></div>
-    <Head back={()=>setPage('task')} kicker="EVIDENCE CROSS-REFERENCE" title="Map evidence to assessment criteria" detail="Tick the criteria supported by each document. Hover over a criterion to read its full wording." action={upload}/>
-    <div className="qf-mapping-grid"><section className="qf-card qf-map-files"><div className="qf-panel-title"><h2>Your evidence <small>({files.length})</small></h2></div><div className="qf-file-list">{files.map(file=><FileItem key={file.id} item={file}/>)}</div><div className="qf-small-note"><Info size={15}/> One document can support several criteria.</div></section>
-    <section className="qf-card qf-matrix-card"><div className="qf-panel-title"><div><h2>Evidence mapping</h2><p>Learning Outcome {lo.code}: {lo.title}</p></div><Status tone="blue">Unit {String(unitIndex+1).padStart(2,'0')}</Status></div><div className="qf-matrix-scroll" role="region" tabIndex={0} aria-label="Evidence to criteria mapping table, scroll horizontally if needed"><table className="qf-matrix"><thead><tr><th scope="col">Evidence</th>{criteria.map(([code,title])=><th scope="col" key={code}><span>AC {code}</span><button className="qf-criterion-info" type="button" aria-label={'Criterion '+code+': '+title} title={title}><Info size={14}/></button><small title={title}>{title}</small></th>)}</tr></thead><tbody>{files.map(file=><tr key={file.id}><th scope="row"><FileIcon kind={file.icon}/><span title={file.name}>{file.name}</span></th>{criteria.map(([code,title])=><td key={code}><label className="qf-map-check"><input type="checkbox" aria-label={'Map '+file.name+' to criterion '+code+': '+title} checked={(links[file.id]||[]).includes(code)} disabled={submitted} onChange={()=>toggle(file.id,code)}/><span aria-hidden="true"><Check size={15}/></span></label></td>)}</tr>)}</tbody></table></div><div className="qf-matrix-bottom">{coverage}<p>Mapping shows document coverage, not assessor acceptance.</p></div></section>
-    <aside className="qf-card qf-help-card"><div className="qf-help-heading"><Info size={18}/> How to link evidence</div><div className="qf-how-step"><b>1</b><span>Read the criterion</span></div><div className="qf-how-step"><b>2</b><span>Tick the relevant document</span></div><div className="qf-how-step"><b>3</b><span>Review your links</span></div><div className="qf-tip"><CheckCircle2 size={17}/> Your assessor decides whether each criterion is met.</div></aside></div>
-    <div className="qf-sticky-actions"><span>{mapped} of {criteria.length} linked</span><div><Button variant="outline" onClick={()=>setNotice('Draft mapping is held in this browser preview only.')}><Save size={16}/> Save draft</Button><Button disabled={!files.length||!criteria.length} onClick={()=>setPage('submission')}>Review submission <ArrowRight size={16}/></Button></div></div>
-   </>:<><div className="qf-steps"><span><FileText size={17}/> 1. Prepare evidence</span><span><Link2 size={17}/> 2. Map criteria</span><span className="current"><CheckCircle2 size={17}/> 3. Review & Submit</span></div>
-    <Head back={()=>setPage('mapping')} kicker="FINAL CHECK" title="Review your submission" detail="Confirm the evidence and cross-references before handing it to your assessor."/>
-    <div className="qf-submit-grid"><section className="qf-card"><h2>Task 1.1 · Evidence Portfolio</h2><p>{unit[1]}</p><div className="qf-summary-list"><span><FileText size={17}/> {files.length} documents in draft</span><span><Link2 size={17}/> {mapped} of {criteria.length} criteria linked</span><span><ShieldCheck size={17}/> Assessor review required</span></div>{!allMapped&&<div className="qf-warning"><Info size={17}/> Not all previewed criteria have evidence linked. Check your mapping before submitting.</div>}{submitted&&<div className="qf-success"><CheckCircle2 size={18}/> Preview claim locked locally. Nothing was submitted to an assessor.</div>}<div className="qf-submit-actions"><Button variant="outline" onClick={()=>setPage('mapping')}>Review mapping</Button><Button disabled={!allMapped||submitted} onClick={()=>{setSubmitted(true);setNotice('Submission simulated in this browser. No assessor has been notified.');}}><Send size={16}/> {submitted?'Preview submitted':'Submit preview'}</Button></div></section><aside className="qf-card qf-help-card"><h3>What happens next?</h3><p>In the final connected system your claim will be locked and sent to the assigned assessor. They can accept criteria or return a claim with feedback.</p><Status>Frontend preview only</Status></aside></div></>}
-   {notice&&<div className="qf-toast" role="status"><Info size={16}/>{notice}<button aria-label="Dismiss" onClick={()=>setNotice('')}><X size={15}/></button></div>}
-  </>}
+function Button({children,onClick,variant='primary',disabled=false}) {
+ return <button type="button" className={'qf-button qf-'+variant} disabled={disabled} onClick={onClick}>{children}</button>;
+}
+function PreviewNote(){return <p className="qf-preview-note" role="note"><Info size={13}/> Demo preview · No file uploads or assessment records are saved.</p>;}
+function FileIcon({kind}){const Icon=kind==='image'?FileImage:kind==='sheet'?FileSpreadsheet:FileText;return <span className={'qf-file-icon '+(kind||'doc')}><Icon size={19}/></span>;}
+function FileRow({file,onRemove}){
+ return <div className="qf-file-row"><FileIcon kind={file.icon}/><span className="qf-file-name"><strong title={file.name}>{file.name}</strong><small>{file.kind} · {file.size}</small></span>
+ {onRemove&&<button className="qf-icon-button" type="button" aria-label={'Remove '+file.name} onClick={onRemove}><X size={16}/></button>}</div>;
+}
+function UnitTabs({qualification,active,onSelect,scope}) {
+ return <nav className="qf-unit-strip" aria-label="Qualification units"><div className="qf-unit-strip-label">UNITS</div>
+  <div className="qf-number-tabs" role="tablist" aria-label="Choose a unit">
+   {qualification.units.map(([ref,title],i)=><button key={ref} id={scope+'-unit-tab-'+i} role="tab" type="button" aria-selected={i===active} aria-controls={scope+'-unit-panel'}
+    title={'Unit '+two(i)+' · '+title} aria-label={'Unit '+two(i)+': '+title} className={'qf-number-tab '+(i===active?'active':'')}
+    onClick={()=>onSelect(i)}>{two(i)}</button>)}
+  </div><span className="qf-unit-total">{qualification.units.length} units</span>
+ </nav>;
+}
+function UnitHeading({qualification,unitIndex,status,scope}){
+ const [ref,title]=qualification.units[unitIndex];
+ return <header className="qf-unit-heading">
+  <div><span className="qf-overline">UNIT {two(unitIndex)} <span aria-hidden="true">·</span> {ref}</span><h2>{title}</h2></div>
+  {status&&<span className="qf-soft-status">{status}</span>}
+ </header>;
+}
+function PaneTabs({tabs,active,onChange,label}){
+ return <div className="qf-pane-tabs" role="tablist" aria-label={label}>
+  {tabs.map(([id,text,Icon])=><button key={id} role="tab" aria-selected={active===id} aria-controls={label.replace(/\s/g,'-')+'-panel'} className={active===id?'active':''} type="button" onClick={()=>onChange(id)}><Icon size={16}/>{text}</button>)}
  </div>;
 }
-
-function AdminQualifications(){
- const [qualificationId,setQualificationId]=useState('othm6'),[unitIndex,setUnitIndex]=useState(0),[tab,setTab]=useState('builder');
- const [templateTitle,setTemplateTitle]=useState('Unit 01 · Evidence Portfolio'),[templateBrief,setTemplateBrief]=useState('Submit relevant, authentic evidence and reference it to the applicable assessment criteria.');
- const [templates,setTemplates]=useState([{id:'t1',title:'Unit 01 · Evidence Portfolio'}]),[decisions,setDecisions]=useState({}),[feedback,setFeedback]=useState(''),[reviewOutcome,setReviewOutcome]=useState('return'),[notice,setNotice]=useState('');
- const qualification=QUALIFICATIONS.find(x=>x.id===qualificationId),unit=qualification.units[unitIndex],lo=FIRST_LO[qualificationId],criteria=unitIndex===0?lo.criteria:[];
- const selectQualification=id=>{setQualificationId(id);setUnitIndex(0);setDecisions({});setNotice('');};
- const recordReview=()=>{
-  if(reviewOutcome==='accept'&&(!criteria.length||criteria.some(([id])=>decisions[id]!=='met'))){setNotice('To accept, mark every listed criterion Met.');return;}
-  if(reviewOutcome==='return'&&!feedback.trim()){setNotice('Add feedback explaining what the learner needs to improve.');return;}
-  setNotice('Assessment decision simulated locally. No acceptance, feedback or student record was changed.');
+function Card({title,action,children,className=''}) {
+ return <section className={'qf-card '+className}><div className="qf-card-header"><h3>{title}</h3>{action}</div>{children}</section>;
+}
+function QualificationCard({item,onClick}){
+ return <article className="qf-course-card"><div className={'qf-course-mark '+item.color}><GraduationCap size={25}/></div>
+ <div className="qf-course-body"><small>{item.body} · Level {item.level}</small><h2>{item.name}</h2><span>{item.units.length} Units</span></div>
+ <button type="button" onClick={onClick} aria-label={'Open '+item.name}>Open <ArrowRight size={16}/></button></article>;
+}
+function LearnerQualifications(){
+ const [qualificationId,setQualificationId]=useState('othm6');
+ const [unitIndex,setUnitIndex]=useState(0);
+ const [page,setPage]=useState('catalog');
+ const [pane,setPane]=useState('evidence');
+ const [filesByQualification,setFilesByQualification]=useState({});
+ const [linksByUnit,setLinksByUnit]=useState({});
+ const [submittedByUnit,setSubmittedByUnit]=useState({});
+ const [notice,setNotice]=useState('');
+ const inputRef=useRef(null);
+ const qualification=QUALIFICATIONS.find(x=>x.id===qualificationId);
+ const key=unitKey(qualificationId,unitIndex);
+ const files=filesByQualification[qualificationId]||SAMPLE_EVIDENCE;
+ const links=linksByUnit[key]||{};
+ const submitted=!!submittedByUnit[key];
+ const criteria=unitIndex===0?FIRST_LO[qualificationId].criteria:[];
+ const lo=FIRST_LO[qualificationId];
+ const mapped=criteria.filter(([code])=>files.some(file=>(links[file.id]||[]).includes(code))).length;
+ const allMapped=criteria.length>0&&mapped===criteria.length;
+ const setUnit=i=>{setUnitIndex(i);setPane('evidence');setNotice('');};
+ const openQualification=id=>{setQualificationId(id);setUnitIndex(0);setPane('evidence');setPage('units');setNotice('');};
+ const onFiles=e=>{
+  const selected=Array.from(e.target.files||[]).slice(0,10);
+  if(!submitted&&selected.length){
+   const incoming=selected.map((file,i)=>({id:'local-'+Date.now()+'-'+i,name:file.name,kind:'Draft',size:file.size>1048576?(file.size/1048576).toFixed(1)+' MB':Math.max(1,Math.ceil(file.size/1024))+' KB',
+    icon:/\.(jpg|jpeg|png|webp)$/i.test(file.name)?'image':/\.(xls|xlsx|csv)$/i.test(file.name)?'sheet':/\.pdf$/i.test(file.name)?'pdf':'doc'}));
+   setFilesByQualification(old=>({...old,[qualificationId]:[...files,...incoming]}));
+   setNotice('Files added to this preview only. No file was uploaded.');
+  }
+  e.target.value='';
  };
- const createTemplate=()=>{const title='New custom task '+(templates.length+1);setTemplates(prev=>[...prev,{id:'t'+Date.now(),title}]);setTemplateTitle(title);setTemplateBrief('');setNotice('Template added to this frontend preview only.');};
- const saveTemplate=()=>{if(!templateTitle.trim()){setNotice('Enter a title for the template.');return;}setTemplates(prev=>prev.map((t,i)=>i===0?{...t,title:templateTitle}:t));setNotice('Template changes saved only in this browser preview.');};
- return <div className="qf-workspace qf-admin">
+ const fileProtected=id=>Object.keys(submittedByUnit).some(k=>k.startsWith(qualificationId+':')&&submittedByUnit[k]&&(linksByUnit[k]?.[id]||[]).length>0);
+ const removeFile=id=>{
+  if(fileProtected(id))return;
+  if(submitted)return;
+  setFilesByQualification(old=>({...old,[qualificationId]:files.filter(file=>file.id!==id)}));
+  setLinksByUnit(old=>{const next={...old};for(const k of Object.keys(next)){if(k.startsWith(qualificationId+':')){next[k]={...next[k]};delete next[k][id];}}return next;});
+ };
+ const toggle=(fileId,code)=>{
+  if(submitted)return;
+  setLinksByUnit(old=>{const existing=old[key]||{},prev=existing[fileId]||[];return {...old,[key]:{...existing,[fileId]:prev.includes(code)?prev.filter(v=>v!==code):[...prev,code]}};});
+ };
+ const chooseFile=<input ref={inputRef} className="qf-visually-hidden" type="file" multiple accept=".pdf,.doc,.docx,.jpg,.jpeg,.png,.webp,.xls,.xlsx,.csv" aria-label="Select evidence files for preview" onChange={onFiles}/>;
+ const addEvidence=<Button variant="outline" disabled={submitted} onClick={()=>inputRef.current?.click()}><Upload size={16}/> Add Evidence</Button>;
+ const coverage=<div className="qf-coverage"><span>{mapped}/{criteria.length} mapped</span><div className="qf-progress"><span style={{width:(criteria.length?Math.round(100*mapped/criteria.length):0)+'%'}}/></div></div>;
+ return <div className="qf-workspace qf-learner">
+ {page==='catalog'?<>
+   <div className="qf-intro"><h1>My Qualifications</h1><p>Choose a qualification.</p></div>
+   <div className="qf-course-grid">{QUALIFICATIONS.map(q=><QualificationCard key={q.id} item={q} onClick={()=>openQualification(q.id)}/>)}</div>
+  </>:<>
+   <div className="qf-topline"><button type="button" className="qf-plain-back" onClick={()=>setPage('catalog')}><ArrowLeft size={16}/> Qualifications</button><span>{qualification.short}</span></div>
+   <h1 className="qf-programme-title">{qualification.name}</h1>
+   <UnitTabs qualification={qualification} active={unitIndex} onSelect={setUnit} scope="learner"/>
+   <section id="learner-unit-panel" role="tabpanel" aria-labelledby={'learner-unit-tab-'+unitIndex}>
+   <UnitHeading qualification={qualification} unitIndex={unitIndex} status={submitted?'Submitted · Demo':null} scope="learner"/>
+   <PaneTabs label="Unit sections" active={pane} onChange={setPane} tabs={[[ 'evidence','Evidence',FolderOpen],['mapping','Mapping',Link2],['submission','Submit',Send]]}/>
+   <main id="Unit-sections-panel" className="qf-pane-content" role="tabpanel">
+    {pane==='evidence'&&<div className="qf-columns">
+      <Card title={'Your Evidence ('+files.length+')'} className="qf-evidence-card" action={<>{chooseFile}{addEvidence}</>}>
+       {files.length?<div className="qf-file-list">{files.map(file=><FileRow key={file.id} file={file} onRemove={submitted||fileProtected(file.id)?null:()=>removeFile(file.id)}/>)}</div>:<div className="qf-empty"><FileText size={25}/> No evidence yet.</div>}
+       <div className="qf-card-footer"><Button disabled={!files.length||!criteria.length} onClick={()=>setPane('mapping')}>Map Evidence <ArrowRight size={16}/></Button></div>
+      </Card>
+      <Card title="Unit details" className="qf-details-card">
+       {unitIndex===0?<><p className="qf-detail-code">Learning Outcome {lo.code}</p><p>{lo.title}</p><details className="qf-criteria-details"><summary>Assessment Criteria ({criteria.length})</summary><div>{criteria.map(([code,title])=><p key={code}><b>{code}</b> {title}</p>)}</div></details></>:
+        <div className="qf-empty qf-empty-compact">Assessment criteria not available for this unit yet.</div>}
+      </Card>
+     </div>}
+    {pane==='mapping'&&<Card className="qf-mapping-card" title="Map evidence to assessment criteria" action={criteria.length?coverage:null}>
+      {!criteria.length?<div className="qf-empty"><LockKeyhole size={22}/> Assessment criteria not available for this unit yet.</div>:
+       !files.length?<div className="qf-empty">Add evidence first.</div>:
+       <><div className="qf-matrix-scroll" role="region" tabIndex={0} aria-label="Evidence to criteria mapping table"><table className="qf-matrix"><thead><tr><th scope="col">Evidence</th>{criteria.map(([code,title])=><th key={code} scope="col" title={title}>AC {code}<span className="qf-ac-short">{title}</span></th>)}</tr></thead>
+         <tbody>{files.map(file=><tr key={file.id}><th scope="row"><FileIcon kind={file.icon}/><span title={file.name}>{file.name}</span></th>{criteria.map(([code,title])=><td key={code}><label className="qf-map-check" title={'AC '+code+': '+title}><input type="checkbox" aria-label={'Map '+file.name+' to criterion '+code+': '+title} disabled={submitted} checked={(links[file.id]||[]).includes(code)} onChange={()=>toggle(file.id,code)}/><span aria-hidden="true"><Check size={15}/></span></label></td>)}</tr>)}</tbody></table></div>
+        <div className="qf-mapping-actions"><span>One file can cover several criteria.</span><div><Button variant="ghost" onClick={()=>setNotice('Draft is stored in this browser preview only.')}><Save size={16}/> Save Draft</Button><Button disabled={!allMapped||submitted} onClick={()=>setPane('submission')}>Next <ArrowRight size={16}/></Button></div></div></>}
+     </Card>}
+    {pane==='submission'&&<div className="qf-submit-layout">
+      <Card title="Submit for Review"><div className="qf-review-summary"><div><FileText size={17}/>{files.length} Evidence files</div><div><Link2 size={17}/>{mapped}/{criteria.length} Criteria mapped</div></div>
+        {!allMapped&&<p className="qf-inline-help">Map all available criteria before submitting.</p>}
+        {submitted?<div className="qf-done"><CheckCircle2 size={18}/> Demo submitted · No assessor notified</div>:
+         <Button disabled={!files.length||!allMapped} onClick={()=>{setSubmittedByUnit(old=>({...old,[key]:true}));setNotice('Submission simulated in this browser only.');}}><Send size={16}/> Submit for Review</Button>}
+      </Card>
+      <Card title="Your status"><p>{submitted?'Submitted (preview)':'Not submitted'}</p><p className="qf-small-note">Your assessor will review the evidence once the live workflow is enabled.</p></Card>
+     </div>}
+   </main>
+   </section>
+  </>}
   <PreviewNote/>
-  <Head kicker="ADMIN TOOLS · QUALIFICATIONS" title="Qualification Management" detail="Configure approved programmes and task templates, then review learner evidence in a separate assessment workspace."/>
-  <div className="qf-admin-tabs" role="tablist" aria-label="Qualification management sections">{[['builder','Qualifications & Units'],['templates','Task Templates'],['reviews','Evidence Review'],['iqa','IQA & Audit']].map(([id,title])=><button role="tab" aria-selected={tab===id} key={id} onClick={()=>setTab(id)} className={tab===id?'active':''}>{title}</button>)}</div>
-  <div className="qf-admin-filter"><label>Qualification<select value={qualificationId} onChange={e=>selectQualification(e.target.value)}>{QUALIFICATIONS.map(q=><option key={q.id} value={q.id}>{q.body} · {q.name}</option>)}</select></label><label>Unit<select value={unitIndex} onChange={e=>{setUnitIndex(Number(e.target.value));setDecisions({});}}>{qualification.units.map(([ref,title],i)=><option key={ref} value={i}>{String(i+1).padStart(2,'0')} · {title}</option>)}</select></label><Status tone="soft">{qualification.units.length} mandatory units</Status></div>
-  {tab==='builder'&&<div className="qf-admin-grid"><section className="qf-card qf-builder-list"><div className="qf-panel-title"><h2>Units ({qualification.units.length})</h2><Status>Official structure</Status></div>{qualification.units.map(([ref,title],i)=><button key={ref} onClick={()=>setUnitIndex(i)} className={i===unitIndex?'selected':''}><span className="qf-unit-code">U{String(i+1).padStart(2,'0')}</span><span>{title}<small>{ref}</small></span><ChevronRight size={16}/></button>)}</section><section className="qf-card qf-builder-content"><div className="qf-panel-title"><h2>Unit details</h2><Status tone="blue">Official reference</Status></div><div className="qf-readonly-pair"><label>Unit code<div>{unit[0]}</div></label><label>Unit title<div>{unit[1]}</div></label></div><div className="qf-panel-title"><h3>Learning Outcomes & Assessment Criteria</h3></div>{criteria.length?<><p className="qf-muted"><b>LO 1</b> · {lo.title}</p>{criteria.map(([code,title])=><div className="qf-builder-criterion" key={code}><Status tone="blue">{code}</Status><span>{title}</span></div>)}</>:<div className="qf-placeholder"><LockKeyhole size={20}/> Awaiting official criteria import for this unit</div>}<div className="qf-task-hint"><ShieldCheck size={17}/><span>Official wording is read-only. Admin-specific tasks and guidance are edited separately under Task Templates.</span></div></section></div>}
-  {tab==='templates'&&<div className="qf-admin-grid"><section className="qf-card qf-builder-list"><div className="qf-panel-title"><h2>Task templates</h2></div>{templates.map((t,i)=><button key={t.id} onClick={()=>{setTemplateTitle(t.title);setNotice('');}} className={templateTitle===t.title?'selected':''}><FileText size={17}/><span>{t.title}<small>Center draft · UI preview</small></span><ChevronRight size={16}/></button>)}<Button variant="outline" onClick={createTemplate}><Plus size={16}/> New template</Button></section><section className="qf-card qf-builder-content"><h2>Customize an approved template</h2><p className="qf-muted">Add center instructions without altering the awarding body's criteria.</p><label className="qf-field">Task title<input value={templateTitle} maxLength={140} onChange={e=>setTemplateTitle(e.target.value)}/></label><label className="qf-field">Additional instructions<textarea rows={6} maxLength={1200} value={templateBrief} onChange={e=>setTemplateBrief(e.target.value)}/></label><div className="qf-task-hint"><Info size={17}/><span>This is a frontend editing preview. Publishing requires version control, permissions and verified backend storage.</span></div><Button onClick={saveTemplate}><Save size={16}/> Save preview draft</Button></section></div>}
-  {tab==='reviews'&&<><div className="qf-review-stats"><div><ClipboardList size={19}/><span><b>1</b> Sample submission</span></div><div><Clock3 size={19}/><span><b>UI</b> Review queue preview</span></div><div><CheckCircle2 size={19}/><span><b>0</b> Verified acceptances</span></div></div><div className="qf-review-grid"><section className="qf-card qf-review-queue"><div className="qf-panel-title"><h2>Review queue</h2><Status tone="amber">Sample only</Status></div><div className="qf-review-person"><span className="qf-avatar">SL</span><div><strong>Sample Learner</strong><small>{qualification.short} · Unit {unitIndex+1}</small></div><Status tone="blue">Submitted (demo)</Status></div><h3>Evidence attached</h3>{SAMPLE_EVIDENCE.map(item=><FileItem key={item.id} item={item}/>)}</section><section className="qf-card qf-review-criteria"><h2>Criterion-by-criterion review</h2><p className="qf-muted">Evidence mapping is not approval. Choose a decision for each criterion.</p>{criteria.length?criteria.map(([code,title])=><div className="qf-review-criterion" key={code}><div><b>AC {code}</b><p>{title}</p></div><fieldset><legend className="qf-sr-only">Decision for AC {code}</legend>{[['met','Met'],['partial','Partially met'],['not','Not met']].map(([id,label])=><label key={id} className={decisions[code]===id?'selected '+id:''}><input type="radio" name={'ac-'+code} checked={decisions[code]===id} onChange={()=>setDecisions(x=>({...x,[code]:id}))}/>{label}</label>)}</fieldset></div>):<div className="qf-placeholder">No imported assessment criteria for this unit yet.</div>}</section><aside className="qf-card qf-review-actions"><h2>Assessment decision</h2><div className="qf-decision-options"><label className={reviewOutcome==='accept'?'selected':''}><input type="radio" name="outcome" checked={reviewOutcome==='accept'} onChange={()=>setReviewOutcome('accept')}/><CheckCircle2 size={17}/> Accept submission</label><label className={reviewOutcome==='return'?'selected':''}><input type="radio" name="outcome" checked={reviewOutcome==='return'} onChange={()=>setReviewOutcome('return')}/><MessageSquare size={17}/> Return for action</label></div><label className="qf-field">Feedback to learner<textarea rows={5} value={feedback} onChange={e=>setFeedback(e.target.value)} maxLength={1500} placeholder="Explain which criteria are met or what additional evidence is needed…"/></label><Button onClick={recordReview}><ClipboardCheck size={17}/> Record preview decision</Button><div className="qf-task-hint"><Info size={17}/><span>No real learner file is accessed and no accept/reject is saved to Supabase.</span></div></aside></div></>}
-  {tab==='iqa'&&<section className="qf-card qf-iqa-panel"><div className="qf-unit-hero-icon"><ShieldCheck size={36}/></div><h2>Internal quality assurance</h2><p>This separate workspace will let assigned IQA reviewers sample assessor decisions, view versioned evidence, return findings and track verification.</p><div className="qf-placeholder"><Users size={20}/> No verified assessment records connected yet</div><Status tone="soft">Backend & permission integration required</Status></section>}
-  {notice&&<div className="qf-toast" role="status"><Info size={16}/>{notice}<button aria-label="Dismiss" onClick={()=>setNotice('')}><X size={15}/></button></div>}
+  {notice&&<div className="qf-toast" role="status">{notice}<button type="button" aria-label="Dismiss message" onClick={()=>setNotice('')}><X size={16}/></button></div>}
+ </div>;
+}
+function AdminQualifications(){
+ const [qualificationId,setQualificationId]=useState('othm6');
+ const [unitIndex,setUnitIndex]=useState(0);
+ const [pane,setPane]=useState('details');
+ const [templatesByUnit,setTemplatesByUnit]=useState({});
+ const [selectedTemplateByUnit,setSelectedTemplateByUnit]=useState({});
+ const [decisionsByUnit,setDecisionsByUnit]=useState({});
+ const [feedbackByUnit,setFeedbackByUnit]=useState({});
+ const [outcomesByUnit,setOutcomesByUnit]=useState({});
+ const [notice,setNotice]=useState('');
+ const qualification=QUALIFICATIONS.find(x=>x.id===qualificationId);
+ const key=unitKey(qualificationId,unitIndex);
+ const criteria=unitIndex===0?FIRST_LO[qualificationId].criteria:[];
+ const lo=FIRST_LO[qualificationId];
+ const templates=templatesByUnit[key]||[{id:'example',title:'Evidence portfolio',instructions:''}];
+ const selectedId=selectedTemplateByUnit[key]||templates[0]?.id;
+ const activeTemplate=templates.find(t=>t.id===selectedId)||templates[0];
+ const decisions=decisionsByUnit[key]||{};
+ const feedback=feedbackByUnit[key]||'';
+ const outcome=outcomesByUnit[key]||'return';
+ const changeUnit=i=>{setUnitIndex(i);setPane('details');setNotice('');};
+ const changeQualification=id=>{setQualificationId(id);setUnitIndex(0);setPane('details');setNotice('');};
+ const updateTemplate=patch=>{setTemplatesByUnit(old=>({...old,[key]:templates.map(t=>t.id===selectedId?{...t,...patch}:t)}));};
+ const createTemplate=()=>{const id='draft-'+Date.now(),next=[...templates,{id,title:'New task',instructions:''}];setTemplatesByUnit(old=>({...old,[key]:next}));setSelectedTemplateByUnit(old=>({...old,[key]:id}));setPane('templates');setNotice('New draft added to preview.');};
+ const recordReview=()=>{
+  if(outcome==='accept'&&(!criteria.length||criteria.some(([code])=>decisions[code]!=='met'))){setNotice('Mark every criterion Met before accepting.');return;}
+  if(outcome==='return'&&!feedback.trim()){setNotice('Add feedback before returning.');return;}
+  setNotice('Record preview decision only. No real learner file is accessed and no acceptance was saved.');
+ };
+ return <div className="qf-workspace qf-admin">
+  <div className="qf-intro qf-admin-intro"><h1>Qualifications</h1><div className="qf-select-wrap"><label htmlFor="qf-qualification-select">Qualification</label><select id="qf-qualification-select" value={qualificationId} onChange={e=>changeQualification(e.target.value)}>{QUALIFICATIONS.map(q=><option key={q.id} value={q.id}>{q.short} · {q.name}</option>)}</select></div></div>
+  <UnitTabs qualification={qualification} active={unitIndex} onSelect={changeUnit} scope="admin"/>
+  <section id="admin-unit-panel" role="tabpanel" aria-labelledby={'admin-unit-tab-'+unitIndex}>
+  <UnitHeading qualification={qualification} unitIndex={unitIndex} scope="admin"/>
+  <PaneTabs label="Admin qualification sections" active={pane} onChange={setPane} tabs={[[ 'details','Unit Details',BookOpen],['templates','Task Templates',FileText],['review','Assessments',ClipboardCheck],['iqa','IQA',ShieldCheck]]}/>
+  <div id="Admin-qualification-sections-panel" className="qf-pane-content" role="tabpanel">
+   {pane==='details'&&<Card title="Assessment criteria" className="qf-admin-details">
+     <div className="qf-readonly"><span>Unit reference</span><strong>{qualification.units[unitIndex][0]}</strong></div>
+     {criteria.length?<><p className="qf-detail-code">LO {lo.code} · {lo.title}</p>{criteria.map(([code,title])=><div className="qf-criterion-item" key={code}><b>{code}</b><span>{title}</span></div>)}</>:<div className="qf-empty qf-empty-compact">Approved assessment criteria not imported yet.</div>}
+     <p className="qf-small-note">Official wording is read-only.</p>
+   </Card>}
+   {pane==='templates'&&<div className="qf-admin-two">
+      <Card title="Task Templates" action={<Button variant="outline" onClick={createTemplate}><Plus size={16}/> New Task</Button>}>
+       <div className="qf-template-list">{templates.map(t=><button key={t.id} type="button" className={t.id===selectedId?'active':''} onClick={()=>setSelectedTemplateByUnit(old=>({...old,[key]:t.id}))}><FileText size={16}/>{t.title}<ChevronRight size={16}/></button>)}</div>
+      </Card>
+      <Card title="Edit task"><label className="qf-field">Task name<input value={activeTemplate?.title||''} maxLength={140} onChange={e=>updateTemplate({title:e.target.value})}/></label>
+       <label className="qf-field">Instructions<textarea rows={5} value={activeTemplate?.instructions||''} maxLength={1600} onChange={e=>updateTemplate({instructions:e.target.value})}/></label>
+       <Button disabled={!activeTemplate?.title.trim()} onClick={()=>setNotice('Template saved in preview only.')}><Save size={16}/> Save Draft</Button>
+      </Card>
+     </div>}
+   {pane==='review'&&<div className="qf-review-grid">
+     <Card title="Evidence"><div className="qf-sample-learner"><span className="qf-avatar">SL</span><span><strong>Sample learner</strong><small>Assessment preview</small></span></div>
+      <div className="qf-file-list">{SAMPLE_EVIDENCE.map(file=><FileRow key={file.id} file={file}/>)}</div></Card>
+     <Card title="Assessment criteria" className="qf-assessor-criteria">
+      {criteria.length?criteria.map(([code,title])=><div key={code} className="qf-review-item"><div><strong>AC {code}</strong><p>{title}</p></div>
+        <div className="qf-choices">{[['met','Met'],['partial','Partial'],['not','Not Met']].map(([value,label])=><label key={value} className={decisions[code]===value?'selected '+value:''}><input type="radio" name={'decision-'+key+'-'+code} checked={decisions[code]===value} onChange={()=>setDecisionsByUnit(old=>({...old,[key]:{...decisions,[code]:value}}))}/>{label}</label>)}</div></div>):
+        <div className="qf-empty qf-empty-compact">No assessment criteria imported for this unit.</div>}
+     </Card>
+     <Card title="Decision"><div className="qf-decision-choices"><label><input type="radio" name={'outcome-'+key} checked={outcome==='accept'} onChange={()=>setOutcomesByUnit(old=>({...old,[key]:'accept'}))}/> Accept</label><label><input type="radio" name={'outcome-'+key} checked={outcome==='return'} onChange={()=>setOutcomesByUnit(old=>({...old,[key]:'return'}))}/> Return</label></div>
+       <label className="qf-field">Feedback<textarea value={feedback} onChange={e=>setFeedbackByUnit(old=>({...old,[key]:e.target.value}))} rows={5} maxLength={1600} placeholder="Feedback to learner"/></label>
+       <Button onClick={recordReview}><ClipboardCheck size={16}/> Record preview decision</Button>
+       <p className="qf-small-note">No real learner file is accessed.</p>
+     </Card>
+   </div>}
+   {pane==='iqa'&&<Card title="Internal Quality Assurance"><div className="qf-empty"><ShieldCheck size={26}/> No assessments connected yet.</div></Card>}
+  </div>
+  </section>
+  <PreviewNote/>
+  {notice&&<div className="qf-toast" role="status">{notice}<button type="button" aria-label="Dismiss message" onClick={()=>setNotice('')}><X size={16}/></button></div>}
  </div>;
 }
 export default function QualificationsWorkspace({admin=false}){return admin?<AdminQualifications/>:<LearnerQualifications/>;}
