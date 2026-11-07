@@ -1,5 +1,5 @@
 import React,{useEffect,useState} from 'react';
-import {Link} from 'react-router-dom';
+import {Link,useNavigate,useParams} from 'react-router-dom';
 import {getSupabaseClient} from '../lib/supabase.js';
 import {signOutPortal} from '../lib/portalAuth.js';
 import LiveLearnerWorkspace from './LiveLearnerWorkspace.jsx';
@@ -7,6 +7,7 @@ import LiveLearnerWorkspace from './LiveLearnerWorkspace.jsx';
 // The ReactRouter /#/ portal and the isolated Supabase Vite entrypoint share
 // one P15 learner UI and the same real Auth/RLS. No synthetic course fallback.
 export default function LiveLearnerPortal({initialScreen='courses'}){
+ const navigate=useNavigate();const {courseId=''}=useParams();
  const [state,setState]=useState({loading:true,db:null,user:null,error:''});
  useEffect(()=>{
   let alive=true,db;
@@ -27,6 +28,10 @@ export default function LiveLearnerPortal({initialScreen='courses'}){
   <strong>Secure learning unavailable</strong><p>{state.error}</p>
   <Link className="btn" to="/login">Sign in</Link></div></main>;
  return <LiveLearnerWorkspace key={state.user.id+'-'+initialScreen}
-  db={state.db} user={state.user} initialScreen={initialScreen} embedded
+  db={state.db} user={state.user} initialScreen={initialScreen}
+  initialCourseId={courseId} embedded
+  onCheckoutRoute={id=>navigate('/checkout/'+encodeURIComponent(id))}
+  onCourseRoute={id=>navigate('/course-catalog/'+encodeURIComponent(id))}
+  onLearningRoute={()=>navigate('/my-learning')}
   onSignOut={()=>{void signOutPortal();}}/>;
 }

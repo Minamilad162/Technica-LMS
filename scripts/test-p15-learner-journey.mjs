@@ -76,7 +76,7 @@ assert(ui.includes('Local checkout simulation: lesson navigation is unlocked her
 assert(ui.includes('full||l.isFreeIntro?<SecureLessonContent'));
 assert(ui.includes('historyId'));
 
-assert(ui.includes('No payment processor is called')||ui.includes('No payment processor'));
+assert(read('src/production/LiveCheckout.jsx').includes('There is no payment gateway connected'));
 assert(portal.includes('LiveLearnerWorkspace db={db}'));
 assert(admin.includes('Publish course')&&admin.includes('Publish Lesson')&&admin.includes('Enable Free Intro'));
 // Both real Supabase standalone and currently deployed /#/ router shell must

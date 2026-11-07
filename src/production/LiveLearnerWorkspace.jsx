@@ -8,6 +8,8 @@ import LivePractice from './LivePractice.jsx';
 import {fetchP15Catalog,fetchP15Outline,hasLocalDemoCheckout,
  isFullCourseEnrolled,localCheckoutEnabled,recordLocalDemoCheckout} from './learnerJourneyApi.js';
 import {loadStructure} from './lmsApi.js';
+import {hasSimulatedEnrollment} from './checkoutSimulationApi.js';
+import LiveCheckout from './LiveCheckout.jsx';
 import './liveLearnerJourney.css';
 
 const nav=[
@@ -19,32 +21,13 @@ const nav=[
 const formatDate=d=>d&&Number.isFinite(Date.parse(d))?new Date(d).toLocaleDateString('en-GB'):'—';
 const modeLabel={quick10:'Quick 10',timed25:'Timed Quiz',custom:'Custom',domain:'Domain Practice',
  levelup:'Level Up',asp_mock_200:'ASP Mock'};
-function DemoCheckout({course,onClose,onSuccess}){
- const [digits,setDigits]=useState(''),[error,setError]=useState('');
- const submit=e=>{
-  e.preventDefault();setError('');
-  try{onSuccess(digits);}catch(ex){setError(ex.message||'Local demo failed.');}
- };
- return <div className="lj-shade" role="presentation" onMouseDown={e=>e.target===e.currentTarget&&onClose()}>
-  <form className="lj-checkout" role="dialog" aria-modal="true" aria-label="Local demo checkout" onSubmit={submit}>
-   <div className="lj-checkout-head"><div><small>LOCAL QA DEMO · NO REAL PAYMENT</small><h2>Try the enrollment flow</h2></div>
-    <button type="button" aria-label="Close" onClick={onClose}><X size={19}/></button></div>
-   <p><strong>{course.title}</strong> · This is a browser-local UI simulation, not a purchase or a real Supabase enrollment.</p>
-   <p className="lj-security">Use fake digits only. No payment processor is called. Your digits are discarded immediately and never stored or sent. Protected video/PDF, Practice and Mock remain server-locked until real enrollment.</p>
-   <label>Fake test number<input autoFocus autoComplete="off" inputMode="numeric"
-    type="text" maxLength={19} pattern="[0-9]{8,19}" placeholder="1234567890123456"
-    required value={digits} onChange={e=>setDigits(e.target.value.replace(/[^0-9]/g,''))}/></label>
-   {error&&<p className="lj-error" role="alert">{error}</p>}
-   <div className="lj-checkout-actions"><button className="lj-quiet" type="button" onClick={onClose}>Cancel</button>
-    <button className="lj-primary" type="submit">Simulate only <ArrowRight size={17}/></button></div>
-  </form></div>;
-}
-export default function LiveLearnerWorkspace({db,user,onSignOut,embedded=false,initialScreen='courses'}){
+export default function LiveLearnerWorkspace({db,user,onSignOut,embedded=false,
+ initialScreen='courses',initialCourseId='',onCheckoutRoute=null,onCourseRoute=null,onLearningRoute=null}){
  const [screen,setScreen]=useState(initialScreen),[catalog,setCatalog]=useState(null),
   [loading,setLoading]=useState(true),[error,setError]=useState(''),[revision,setRevision]=useState(0),
-  [selectedId,setSelectedId]=useState(''),[outline,setOutline]=useState([]),
+  [selectedId,setSelectedId]=useState(initialCourseId),[outline,setOutline]=useState([]),
   [outlineLoading,setOutlineLoading]=useState(false),[outlineError,setOutlineError]=useState(''),
-  [activeLesson,setActiveLesson]=useState(null),[checkout,setCheckout]=useState(null),
+  [activeLesson,setActiveLesson]=useState(null),
   [demoRevision,setDemoRevision]=useState(0),[practiceId,setPracticeId]=useState(''),[historyId,setHistoryId]=useState(''),
   [practiceTree,setPracticeTree]=useState([]),[practiceError,setPracticeError]=useState(''),
   [report,setReport]=useState(null),[reportError,setReportError]=useState(''),[reportLoading,setReportLoading]=useState(false);
@@ -63,10 +46,12 @@ export default function LiveLearnerWorkspace({db,user,onSignOut,embedded=false,i
  },[db,user.id,revision]);
  const enrolled=catalog?.courses.filter(c=>isFullCourseEnrolled(catalog.entitlements,c.id))||[];
  const inMyLearning=c=>isFullCourseEnrolled(catalog?.entitlements,c.id)||
+  hasSimulatedEnrollment(user.id,c.id)||
   (localCheckoutEnabled()&&hasLocalDemoCheckout(user.id,c.id));
  const chosen=catalog?.courses.find(c=>c.id===selectedId);
  const full=chosen&&isFullCourseEnrolled(catalog?.entitlements,chosen.id);
- const demoChosen=chosen&&localCheckoutEnabled()&&hasLocalDemoCheckout(user.id,chosen.id)&&!full;
+ const demoChosen=chosen&&!full&&(hasSimulatedEnrollment(user.id,chosen.id)||
+  (localCheckoutEnabled()&&hasLocalDemoCheckout(user.id,chosen.id)));
  const allowedLesson=lesson=>!!full||lesson.isFreeIntro||!!demoChosen;
  useEffect(()=>{
   if(!chosen){setOutline([]);setActiveLesson(null);setOutlineError('');return;}
@@ -91,13 +76,23 @@ export default function LiveLearnerWorkspace({db,user,onSignOut,embedded=false,i
    .finally(()=>{if(live)setReportLoading(false);});
   return()=>{live=false;};
  },[screen,db,historyId,enrolled.length,revision]);
- const openCourse=id=>{setSelectedId(id);setActiveLesson(null);setScreen('course');};
- const go=page=>{setScreen(page);setActiveLesson(null);if(page!=='course')setSelectedId('');};
- const onDemoCheckout=digits=>{
-  recordLocalDemoCheckout(user.id,checkout.id,digits);
-  setDemoRevision(v=>v+1);setCheckout(null);go('learning');
+ const openCourse=id=>{
+  if(embedded&&onCourseRoute){onCourseRoute(id);return;}
+  setSelectedId(id);setActiveLesson(null);setScreen('course');
  };
+ const startCheckout=id=>{
+  if(!catalog?.courses.some(c=>c.id===id))return;
+  if(embedded&&onCheckoutRoute){onCheckoutRoute(id);return;}
+  setSelectedId(id);setActiveLesson(null);setScreen('checkout');
+ };
+ const openLearning=()=>{
+  if(embedded&&onLearningRoute){onLearningRoute();return;}
+  go('learning');
+ };
+ const go=page=>{setScreen(page);setActiveLesson(null);if(page!=='course'&&page!=='checkout')setSelectedId('');};
+ const checkoutCompleted=()=>setDemoRevision(v=>v+1);
  const screenTitle=screen==='courses'?'Explore Courses':screen==='learning'?'My Learning':
+  screen==='checkout'?'Course Checkout':
   screen==='course'?(chosen?.title||'Course Outline'):
   screen==='practice'?'Practice Center':'My Practice';
  return <div className={"lj-shell"+(embedded?" lj-embedded":"")}>
@@ -123,6 +118,7 @@ export default function LiveLearnerWorkspace({db,user,onSignOut,embedded=false,i
     <h1>{screenTitle}</h1><p>{screen==='courses'?'Browse published courses. Preview the first lesson before enrolling.':
       screen==='learning'?'Your actual enrolled courses, organized in one place.':
       screen==='course'?'Course → Domain → Topic → Lesson. Locked lessons require enrollment.':
+      screen==='checkout'?'Secure checkout journey · currently a clearly labeled demonstration, not a real payment.':
       screen==='practice'?'Train with protected questions and difficulty modes.':
       'Your own verified practice and Mock results.'}</p></div>
    <button type="button" className="lj-quiet" disabled={loading} onClick={refresh}><RefreshCw size={16}/> Refresh</button>
@@ -132,13 +128,17 @@ export default function LiveLearnerWorkspace({db,user,onSignOut,embedded=false,i
    !catalog?<div className="lj-empty">Course catalog is unavailable. Check your LMS session.</div>:
    screen==='courses'||screen==='learning'?<section className="lj-grid" aria-label={screen==='courses'?'Published courses':'Enrolled courses'}>
     {(screen==='courses'?catalog.courses:catalog.courses.filter(inMyLearning)).map(c=>{
-     const paid=isFullCourseEnrolled(catalog.entitlements,c.id),demo=localCheckoutEnabled()&&hasLocalDemoCheckout(user.id,c.id)&&!paid;
+     const paid=isFullCourseEnrolled(catalog.entitlements,c.id),demo=!paid&&(hasSimulatedEnrollment(user.id,c.id)||
+      (localCheckoutEnabled()&&hasLocalDemoCheckout(user.id,c.id)));
      return <article className="lj-card" key={c.id}><div className="lj-card-symbol"><GraduationCap size={25}/></div>
       <div><span className="lj-kicker">{paid?'ENROLLED':demo?'LOCAL DEMO ONLY':'PUBLISHED COURSE'}</span>
        <h2>{c.title}</h2><p>{c.summary||'Explore the syllabus and start with an introductory lesson.'}</p></div>
       <div className="lj-card-foot"><span>{paid?<><CheckCircle2 size={15}/> Full access</>:
-       demo?<><ShieldCheck size={15}/> UI preview only</>:<><LockKeyhole size={15}/> Free Intro available if enabled</>}</span>
-       <button type="button" className="lj-primary" onClick={()=>openCourse(c.id)}>{paid?'Continue':'View course'} <ArrowRight size={16}/></button></div>
+       demo?<><ShieldCheck size={15}/> Demo enrolled · content protected</>:<><LockKeyhole size={15}/> Free Intro preview</>}</span>
+       <div className="lj-card-buttons"><button type="button" className="lj-quiet" onClick={()=>openCourse(c.id)}>
+        {paid||demo?'Continue':'View course'}</button>
+        {!paid&&!demo&&<button type="button" className="lj-primary" onClick={()=>startCheckout(c.id)}>
+         Enroll Now <ArrowRight size={16}/></button>}</div></div>
      </article>;
     })}
     {!(screen==='courses'?catalog.courses:catalog.courses.filter(inMyLearning)).length&&<div className="lj-empty">
@@ -147,13 +147,18 @@ export default function LiveLearnerWorkspace({db,user,onSignOut,embedded=false,i
       'Courses enter My Learning only after a real paid/manual entitlement (or a labeled local-only demo).'}
      </p>{screen==='learning'&&<button type="button" className="lj-primary" onClick={()=>go('courses')}>Explore courses <ArrowRight size={16}/></button>}</div>}
    </section>:
+   screen==='checkout'? !chosen?<div className="lj-empty">Course unavailable. Please select a published course.</div>:
+    <LiveCheckout key={chosen.id} course={chosen} user={user}
+     onBack={()=>openCourse(chosen.id)} onSuccess={checkoutCompleted}
+     onOpenCourse={()=>openCourse(chosen.id)} onMyLearning={openLearning}/>:
    screen==='course'? !chosen?<div className="lj-empty">Choose a published course from Courses.</div>:
    <div className="lj-course">
     <div className="lj-course-actions"><button className="lj-quiet" type="button" onClick={()=>go('courses')}><ArrowLeft size={16}/> All Courses</button>
      {full?<span className="lj-enrolled"><CheckCircle2 size={16}/> Full access</span>:
       <div className="lj-course-lock"><LockKeyhole size={17}/> Full course locked
-       {localCheckoutEnabled()?<button type="button" className="lj-primary" onClick={()=>setCheckout(chosen)}>Try local checkout</button>:
-        <span>Payment integration coming soon · Contact your Admin for enrollment</span>}</div>}
+       {!demoChosen?<button type="button" className="lj-primary" onClick={()=>startCheckout(chosen.id)}>
+         Enroll Now <ArrowRight size={16}/></button>:
+         <span>Demo lesson navigation enabled. Protected content still requires real enrollment.</span>}</div>}
     </div>
     {demoChosen&&<p className="lj-demo-banner">Local demo confirmed · This preview does not unlock protected course media, exam questions or Supabase enrollment.</p>}
     {outlineLoading?<div className="lj-empty" role="status">Loading published course outline…</div>:
@@ -166,7 +171,9 @@ export default function LiveLearnerWorkspace({db,user,onSignOut,embedded=false,i
        {t.lessons.map((l,li)=>{
         const unlocked=allowedLesson(l),expanded=activeLesson===l.id;
         return <div key={l.id} className={'lj-lesson'+(unlocked?'':' locked')}>
-         <button type="button" aria-expanded={expanded} onClick={()=>{if(unlocked)setActiveLesson(v=>v===l.id?'':l.id);else setActiveLesson(null);}}>
+         <button type="button" aria-expanded={expanded} aria-label={unlocked?'Open '+l.title:
+          'Enroll in '+chosen.title+' to unlock '+l.title}
+          onClick={()=>{if(unlocked)setActiveLesson(v=>v===l.id?'':l.id);else startCheckout(chosen.id);}}>
           {unlocked?<PlayCircle size={18}/>:<LockKeyhole size={18}/>}
           <span><strong>{di+1}.{ti+1}.{li+1} · {l.title}</strong>
            <small>{l.isFreeIntro?'FREE INTRO':unlocked?(demoChosen?'LOCAL DEMO PREVIEW':'AVAILABLE'):'LOCKED · ENROLL TO VIEW'}</small></span>
@@ -213,7 +220,5 @@ export default function LiveLearnerWorkspace({db,user,onSignOut,embedded=false,i
      </>:<div className="lj-empty">Choose an enrolled course to see verified history.</div>}
    </div>}
   </main></div>
-  {checkout&&localCheckoutEnabled()&&<DemoCheckout course={checkout}
-   onClose={()=>setCheckout(null)} onSuccess={onDemoCheckout}/>}
  </div>;
 }
