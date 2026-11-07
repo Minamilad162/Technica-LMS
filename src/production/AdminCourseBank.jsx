@@ -44,12 +44,12 @@ export default function AdminCourseBank({db,courses=[],asp,onUpdate,mode='bank'}
    if(!data.questions.length)throw Error('No valid questions found. Check the required columns.');
    const mapped=mappedImportRows(data.questions,domainId||null,domains);
    // Import creates Draft questions only. Admin must confirm the row count.
-   setPending({courseId,filename:file.name,rows:mapped,problems:data.problems,sheets:data.sheets,unmappedCount:mapped.filter(q=>q.unmappedDomainLabel).length,unassignedCount:mapped.filter(q=>!q.domainId).length});
+   setPending({courseId,filename:file.name,rows:mapped,problems:data.problems,sheets:data.sheets,unmappedLabels:[...new Set(mapped.map(q=>q.unmappedDomainLabel).filter(Boolean))]});
   }catch(e){setError(fail(e));}
  }
  async function upload(){
   if(!pending||pending.courseId!==courseId||busy)return;
-  if(!window.confirm('Import '+pending.rows.length+' valid questions as DRAFT into '+selected.title+'? Existing questions and Mock reservations will not be modified.'))return;
+  if(!window.confirm('Import '+pending.rows.length+' valid questions as DRAFT into '+selected.title+'? '+pending.rows.filter(q=>!q.domainId).length+' will remain unassigned to a Domain until human review. Existing questions and Mock reservations will not be modified.'))return;
   setBusy(true);setError('');setNotice('');
   let inserted=0,skipped=0;
   try{
@@ -132,7 +132,16 @@ export default function AdminCourseBank({db,courses=[],asp,onUpdate,mode='bank'}
     <button className="at-outline" type="button" disabled={busy} onClick={()=>{setPending(null);setManual(initial());}}><Plus size={14}/> Add manually</button>
     {pending&&<div className="p28-preview"><b>{pending.filename} · {pending.rows.length} valid · {pending.problems.length} import notes</b>
      <span>{pending.sheets.join(', ')}</span>
-     <small>{pending.unassignedCount} questions will remain without an assigned Domain; {pending.unmappedCount} workbook Domain labels could not be matched exactly. Review their ASP11 domain before any learner approval.</small>
+     <small>{pending.rows.filter(q=>!q.domainId).length} questions currently have no mapped Domain. Map ambiguous worksheet labels below before importing, or leave them unassigned for human ASP11 review.</small>
+     {!!pending.unmappedLabels.length&&<div className="p28-domain-map">
+      <strong>Map spreadsheet labels to real Course Domains (optional)</strong>
+      {pending.unmappedLabels.map(label=><label key={label}><span>{label}</span>
+       <select aria-label={'Map source Domain '+label} value={pending.rows.find(q=>q.unmappedDomainLabel===label)?.domainId||''}
+        onChange={e=>setPending(v=>({...v,rows:v.rows.map(q=>q.unmappedDomainLabel===label?{...q,domainId:e.target.value||null}:q)}))}>
+        <option value="">Leave unassigned for review</option>
+        {domains.map(d=><option key={d.id} value={d.id}>{d.title}</option>)}
+       </select></label>)}
+     </div>}
      {pending.rows.slice(0,3).map((q,i)=><small key={i}>{i+1}. {q.prompt} · {q.difficulty} · {q.domainId?domains.find(d=>d.id===q.domainId)?.title:'Unassigned domain'}</small>)}
      {!!pending.problems.length&&<details><summary>Import validation notes</summary>{pending.problems.slice(0,20).map((p,i)=><small key={i}>{p}</small>)}</details>}
      <button className="at-primary" type="button" disabled={busy} onClick={upload}>{busy?'Importing '+uploadCount+'/'+pending.rows.length:'Confirm Draft Import'}</button></div>}
