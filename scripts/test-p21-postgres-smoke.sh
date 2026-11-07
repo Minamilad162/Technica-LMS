@@ -96,11 +96,11 @@ psql -X -v ON_ERROR_STOP=1 -q -c "
  COMMIT;" >/dev/null
 [[ "$(psql -X -v ON_ERROR_STOP=1 -q -A -t -c "SELECT duration_months_snapshot FROM public.lms_platform_subscriptions WHERE id='$SUB'")" == 3 ]] || { echo 'FAIL P21 retroactively changed purchased duration';exit 1; }
 psql -X -v ON_ERROR_STOP=1 -q -c "
- UPDATE public.lms_platform_subscriptions SET ends_at=now()-interval '1 second'
+ UPDATE public.lms_platform_subscriptions SET starts_at=now()-interval '4 months',ends_at=now()-interval '1 second'
  WHERE id='$SUB'" >/dev/null
 [[ "$(query_as authenticated "$LEARNER" "SELECT public.lms_p21_has_active_subscription()")" == false ]] || { echo 'FAIL P21 expired subscription still unlocked';exit 1; }
 psql -X -v ON_ERROR_STOP=1 -q -c "
- UPDATE public.lms_platform_subscriptions SET ends_at=now()+interval '1 day'
+ UPDATE public.lms_platform_subscriptions SET starts_at=now()-interval '1 day',ends_at=now()+interval '1 day'
  WHERE id='$SUB'" >/dev/null
 psql -X -v ON_ERROR_STOP=1 -q -c "
  BEGIN;SET LOCAL ROLE authenticated;SET LOCAL request.jwt.claim.sub='$ADMIN';

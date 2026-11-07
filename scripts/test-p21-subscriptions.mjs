@@ -81,7 +81,7 @@ for(const mark of [
  'public.lms_p21_has_active_subscription()',
  'WHERE id=p_request_id FOR UPDATE',
  'pg_advisory_xact_lock',
- 'make_interval(months=>plan.duration_months)',
+ 'make_interval(months=>r.duration_months_snapshot)',
  'duration_months_snapshot',
  'price_amount_snapshot',
  'currency_snapshot',
