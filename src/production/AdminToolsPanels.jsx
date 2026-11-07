@@ -1,5 +1,5 @@
 import React,{useCallback,useEffect,useMemo,useState} from 'react';
-import {Activity,AlertTriangle,ArrowLeft,ArrowRight,BookOpen,FileText,Video,CheckCircle2,ChevronDown,ChevronRight,ClipboardCheck,FileQuestion,GraduationCap,Layers,LockKeyhole,Plus,RefreshCw,Search,ShieldCheck,Target,Users,Wallet} from 'lucide-react';
+import {Activity,AlertTriangle,ArrowLeft,ArrowRight,BookOpen,FileText,Video,CheckCircle2,ChevronDown,ChevronRight,ClipboardCheck,FileQuestion,GraduationCap,Layers,LockKeyhole,Plus,RefreshCw,Search,ShieldCheck,Target,Users,Wallet,ExternalLink} from 'lucide-react';
 import {liveCourses,liveCourseTree,addDraftCourse,addAuthoringNode,updateAuthoringTitle,addReadingParagraph} from './liveAuthoringApi.js';
 import {fetchAspReviewDomains} from './questionReviewApi.js';
 import {getAdminOverview,getAdminUsers,getAdminUserDetail,getAdminMockCandidates,getMockBankSummary,preflightAdminMock,reserveAdminMock} from './adminToolsApi.js';
@@ -9,6 +9,7 @@ import {LessonMediaUploadModal,SecureLessonContent} from './SecureLessonMedia.js
 import {fetchAdminFreeIntro,setAdminFreeIntro,setAdminPublished} from './learnerJourneyApi.js';
 import {verifiedLiveAdmin} from './liveAuthoringApi.js';
 import {CourseCover,CourseCoverManager} from './CourseCover.jsx';
+import AdminAnalyticsCharts from './AdminAnalyticsCharts.jsx';
 
 const pct=n=>n===null||n===undefined?'—':Number(n).toFixed(1).replace(/\.0$/,'')+'%';
 const day=s=>s?new Date(s).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'}):'Not set';
@@ -51,7 +52,7 @@ export function AdminDashboardPanel({db,onNavigate}){
   ['Registered accounts',report.kpis.users,Users],
   ['Active accounts',report.kpis.activeAccounts,ShieldCheck],
   ['Learners engaged · 30 days',report.kpis.engaged30Days,Activity],
-  ['Active enrollments',report.kpis.activeEnrollments,GraduationCap],
+  ['Legacy Course grants',report.kpis.activeEnrollments,GraduationCap],
   ['Courses / published',report.kpis.courses+' / '+report.kpis.publishedCourses,BookOpen],
   ['Approved Practice questions',report.kpis.practiceApproved,CheckCircle2],
   ['Exclusive Mock questions',report.kpis.mockReserved,LockKeyhole],
@@ -61,21 +62,23 @@ export function AdminDashboardPanel({db,onNavigate}){
   <div className="at-section-title"><div><span className="at-eyebrow">SYSTEM PERFORMANCE</span><h2>Real-time overview</h2><p>Counts and trends generated from your authenticated Supabase records.</p></div><button className="at-outline" onClick={()=>setRefresh(n=>n+1)}><RefreshCw size={15}/> Refresh</button></div>
   <div className="at-kpis">{stats.map(([label,value,Icon])=><article className="at-kpi" key={label}>
    <span className="at-kpi-icon"><Icon size={18}/></span><small>{label}</small><strong>{num(value)}</strong></article>)}</div>
+  <AdminAnalyticsCharts report={report} onNavigate={onNavigate}/>
   <div className="at-grid-two">
    <section className="at-surface"><div className="at-section-title"><div><h3>Growth & activity</h3><p>Six-month trend · actual records</p></div>
     <select aria-label="Select trend metric" value={metric} onChange={e=>setMetric(e.target.value)}>
      <option value="registrations">New accounts</option><option value="practice">Practice completions</option><option value="mock">Mock completions</option>
     </select></div>
     <TrendChart trend={report.trend} kind={metric}/></section>
-   <section className="at-surface"><div className="at-section-title"><div><h3>Course performance</h3><p>Enrollment by real course</p></div><button className="at-text-button" onClick={()=>onNavigate('courses')}>Manage <ArrowRight size={14}/></button></div>
+   <section className="at-surface"><div className="at-section-title"><div><h3>Legacy Course access</h3><p>Course-scoped grants only · excludes platform-wide subscriptions</p></div><button className="at-text-button" onClick={()=>onNavigate('courses')}>Manage <ArrowRight size={14}/></button></div>
     <div className="at-course-bars">{report.courses.map(c=><div className="at-course-bar" key={c.id}>
-      <div><b>{c.title}</b><span>{c.enrollments} enrolled · {c.questions} questions</span></div>
+      <div><b>{c.title}</b><span>{c.enrollments} legacy grants · {c.questions} questions</span></div>
       <div className="at-track"><span style={{width:(c.enrollments/(Math.max(1,...report.courses.map(x=>x.enrollments))))*100+'%'}}/></div>
      </div>)}{!report.courses.length&&empty}</div>
    </section>
   </div>
   <div className="at-disclaimer"><Wallet size={17}/> Verified revenue: <b>Not tracked</b>. Paid entitlement is not proof of money received; no billing ledger exists in P1.</div>
-  <div className="at-footnote">Updated {day(report.generatedAt)} · Read-only reporting · Live Supabase Admin JWT required</div>
+  <div className="at-footnote">Updated {day(report.generatedAt)} · Read-only reporting · Live Supabase Admin JWT required ·
+   P13 course grants exclude P21 platform memberships; chart totals are not revenue or live subscription counts.</div>
  </div>;
 }
 const formDefaults={kind:'',parentId:'',title:'',summary:'',position:0};
@@ -95,6 +98,8 @@ export function AdminCoursesPanel({db}){
   .catch(e=>{if(live)setError(err(e));});return()=>{live=false;};
  },[db,course,revision]);
  const chosen=courses.find(x=>x.id===course);
+ const previewHref=lessonId=>'#/admin/course-preview/'+encodeURIComponent(course)+
+  '?view=draft'+(lessonId?'&lesson='+encodeURIComponent(lessonId):'');
  useEffect(()=>{
   if(!course){setIntroEnabled(null);setIntroError('');return;}
   let live=true;setIntroEnabled(null);setIntroError('');
@@ -162,7 +167,10 @@ export function AdminCoursesPanel({db}){
    </div>
    <section className="at-surface at-hierarchy">
     {!chosen?empty:<><div className="at-section-title"><div><span className="at-eyebrow">{chosen.publication_state}</span><h3>{chosen.title}</h3><p>{chosen.summary||'No summary yet.'}</p></div>
-     <div className="at-publication-controls"><button className="at-outline" disabled={busy}
+     <div className="at-publication-controls">
+      <a className="at-preview-link" href={previewHref()} target="_blank" rel="noopener noreferrer">
+       <ExternalLink size={15}/> Preview Course <span aria-hidden="true">↗</span></a>
+      <button className="at-outline" disabled={busy}
       onClick={()=>publish('lms_courses',chosen.id,chosen.publication_state==='published'?'draft':'published')}>
       {chosen.publication_state==='published'?'Unpublish course':'Publish course'}</button>
       <button className="at-outline" disabled={busy||introEnabled===null||chosen.publication_state!=='published'}
@@ -189,8 +197,10 @@ export function AdminCoursesPanel({db}){
            <button type="button" onClick={()=>setMediaEditing({lessonId:l.id,lessonTitle:l.title,kind:'pdf'})}><FileText size={14}/> + PDF</button>
            <button type="button" onClick={()=>setMediaEditing({lessonId:l.id,lessonTitle:l.title,kind:'video'})}><Video size={14}/> + Video</button>
            <button type="button" onClick={()=>start('reading',l.id)}>+ Text</button>
+           <a className="at-preview-link tiny" href={previewHref(l.id)} target="_blank" rel="noopener noreferrer">
+            <ExternalLink size={13}/> Preview Page</a>
            <button type="button" onClick={()=>setPreviewLesson(x=>x===l.id?null:l.id)}>
-            {previewLesson===l.id?'Close preview':'Preview'}</button>
+            {previewLesson===l.id?'Close inline':'Inline preview'}</button>
            <button type="button" onClick={()=>start('rename','lms_lessons:'+l.id,l.title)}>Rename</button>
           </span>
          </div>

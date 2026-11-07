@@ -1,0 +1,56 @@
+/* P24 — real Course components wrapped in authenticated Admin-only Preview */
+.acp-shell{display:grid;gap:19px;max-width:1550px;margin:0 auto;color:#24515b;min-width:0}
+.acp-shell *{box-sizing:border-box}
+.acp-shell button,.acp-shell a{font:inherit}
+.acp-toolbar{display:flex;justify-content:space-between;align-items:center;gap:20px;flex-wrap:wrap;
+ padding:25px 29px;border-radius:19px;background:linear-gradient(116deg,#073645,#0b7c7c 65%,#1ab6a1);
+ color:#fff;box-shadow:0 17px 35px #114b5023}
+.acp-eyebrow{display:flex;align-items:center;gap:7px;color:#b3f8e6;font-size:10px;font-weight:870;letter-spacing:.14em}
+.acp-toolbar h1{font-size:clamp(24px,3vw,34px);color:#fff;letter-spacing:-.04em;margin:8px 0 5px}
+.acp-toolbar p{color:#d8f5f0;font-size:12px;line-height:1.7;margin:0;max-width:650px}
+.acp-toolbar-actions{display:flex;align-items:center;gap:9px;flex-wrap:wrap}
+.acp-toolbar-actions button{display:flex;align-items:center;gap:8px;padding:10px 12px;border-radius:9px;
+ background:#ffffff18;color:#fff;border:1px solid #d1fff454;font-size:11px;font-weight:800;cursor:pointer}
+.acp-toolbar-actions button:hover{background:#ffffff36}
+.acp-modebar{display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;
+ background:#fff;padding:11px 17px;border:1px solid #dfeae9;border-radius:14px}
+.acp-mode-label{display:flex;align-items:center;gap:8px;font-size:12px;color:#45777b}
+.acp-mode-label svg{color:#128c7d}
+.acp-mode-options{display:flex;align-items:center;gap:4px;background:#edf5f4;border-radius:10px;padding:4px;flex-wrap:wrap}
+.acp-mode-options button{border:0;border-radius:8px;padding:10px 14px;background:transparent;color:#67888d;
+ font-size:11px;font-weight:800;cursor:pointer}
+.acp-mode-options button.selected{color:#137a73;background:#fff;box-shadow:0 3px 12px #244d5a16}
+.acp-status{border-radius:999px;padding:8px 11px;font-size:10px;font-weight:830}
+.acp-status-published{background:#e2f8ed;color:#117d6e}
+.acp-status-draft,.acp-status-archived{background:#fff3dc;color:#9f7a30}
+.acp-description,.acp-unpublished,.acp-notice{display:flex;align-items:flex-start;gap:10px;
+ padding:13px 17px;border:1px solid #cce7df;border-radius:12px;background:#ecfaf5;color:#3d746e;font-size:12px;line-height:1.75}
+.acp-description svg,.acp-unpublished svg{flex:none;margin-top:2px}
+.acp-description p{margin:0}
+.acp-unpublished{border-color:#f2ddad;background:#fff8eb;color:#8d702d}
+.acp-notice{border-color:#cfdeea;background:#f3f8fb;color:#47788f}
+.acp-syllabus{display:grid;gap:13px;scroll-margin-top:30px}
+.acp-syllabus-heading{display:flex;align-items:center;justify-content:space-between;gap:15px;flex-wrap:wrap}
+.acp-syllabus-heading>div>span{color:#158e82;font-size:10px;letter-spacing:.11em;font-weight:850}
+.acp-syllabus-heading h2{display:flex;align-items:center;gap:9px;margin:6px 0;color:#20515b;font-size:23px}
+.acp-syllabus-heading small{color:#7f949a;font-size:12px}
+.acp-syllabus .cle-meter-preview{justify-content:center;min-width:128px}
+.acp-syllabus .cle-meter-preview b{font-size:11px;background:#e6f7f1;padding:8px 11px;border-radius:9px;color:#188b77}
+.acp-footer{display:flex;gap:9px;align-items:flex-start;margin:10px 0 0;padding:16px;color:#728a90;
+ border-top:1px solid #dfe9e9;font-size:11px;line-height:1.7}
+.acp-footer svg{flex:none}
+.acp-access{display:grid;justify-items:center;gap:10px;max-width:650px;margin:30px auto;
+ padding:36px;border:1px solid #d9e9e8;border-radius:16px;background:#fff;color:#547a82;text-align:center}
+.acp-access h2{margin:0;color:#23535d}.acp-access p{line-height:1.7;margin:0}
+.acp-access button{padding:9px 12px;border-radius:9px;background:#0f8b80;color:#fff;border:0;cursor:pointer}
+.at-preview-link{display:inline-flex;justify-content:center;align-items:center;gap:7px;text-decoration:none!important;
+ border:1px solid #addbcf;border-radius:10px;padding:10px 13px;background:#eaf9f3;
+ color:#0b786c!important;font-size:12px;font-weight:820;white-space:nowrap}
+.at-preview-link:hover{background:#d6f1e6}
+.at-preview-link.tiny{padding:7px 9px;font-size:11px;border-radius:8px}
+@media(max-width:790px){.acp-toolbar{padding:20px}.acp-toolbar-actions{width:100%}
+ .acp-toolbar-actions button{flex:1;justify-content:center}.acp-modebar{align-items:flex-start}
+ .acp-mode-options{width:100%;display:grid;grid-template-columns:repeat(3,minmax(0,1fr))}
+ .acp-mode-options button{padding:10px 5px}}
+@media(max-width:500px){.acp-shell{gap:13px}.acp-syllabus-heading h2{font-size:20px}
+ .acp-modebar{padding:12px}.acp-mode-options button{font-size:10px}}
