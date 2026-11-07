@@ -38,3 +38,12 @@
 **Admin UI:** Qualification selector, same numbered Unit strip, selected Unit details and concise **Unit Details / Task Templates / Assessments / IQA** controls. Official LO/AC remains read-only. Centre task-template editing, per-criterion Met/Partial/Not Met, feedback and accept/return remain functional in React memory; Admin authorization is unchanged from P24. No dummy claim that the UI has accessed a real learner record.
 
 **Release gates:** Vite Demo and Supabase-only builds, regression tests including P19/P20/P21/P22/P23, plus manual real-browser/mobile layout review. No new SQL, Edge Functions, private file upload, database writes or assessment approval. This remains a frontend preview until separately authorized backend rollout.
+
+
+## P26 — Missing portfolio sections restored (2026-11-07)
+
+The owner supplied screenshots of the reference platform's Course/Evidence/Registration/Contact/Metrics navigation, Resources/Actions, Competence Claim, Assessor/Verifier and grading/feedback areas. The P25 redesign left the Evidence ↔ Assessment Criteria matrix but omitted the other portfolio areas. P26 adds a compact programme strip, Course resources/actions, Contact Diary and example returned feedback, Records with registration, metrics, grading checklists and recording forms. Existing Evidence/Mapping/Submit remains independent and reachable from each Unit. These are premium responsive screens, **not imported student or assessor data**.
+
+Admin Tools → Qualifications also adds draft resource metadata controls and Contact & Records for in-memory contact notes and local review history. Recorded decisions remain human-operated demo-only; no confirmed live acceptance, grading document, registration date, verifier account, deadline or protected resource URL is manufactured. First documented NVQ Unit 1 resource titles from the screenshot are presented explicitly as examples, not downloadable files. Complete authoritative rubric, resource upload, backend grades, contact history, real notifications and RLS must be implemented and approved separately.
+
+Validation: npm run test:p19, npm run test:p26:qualification, full CI Vite builds and disposable PostgreSQL integration checks. Manual desktop/mobile visual QA remains outstanding.
