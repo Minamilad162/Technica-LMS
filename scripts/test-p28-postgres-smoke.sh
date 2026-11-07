@@ -33,6 +33,10 @@ practice_before=$(run_as "$admin" "SELECT public.lms_p28_list_bank('$course','',
 [[ "$practice_before" == 0 ]] || { echo "FAIL P28 draft questions visible as approved Practice";exit 1; }
 q1=$(psql -X -A -t -v ON_ERROR_STOP=1 -c "SELECT id FROM public.lms_questions WHERE course_id='$course' AND source_id='P28-fixture-1'")
 q2=$(psql -X -A -t -v ON_ERROR_STOP=1 -c "SELECT id FROM public.lms_questions WHERE course_id='$course' AND source_id='P28-fixture-2'")
+if run_as "$admin" "INSERT INTO public.lms_p22_lesson_quiz_questions(lesson_id,position,prompt,options,correct_index)
+ VALUES('$other',40,'What is a valid independent question prompt?','[\"Yes\",\"No\"]'::jsonb,0)" >/dev/null 2>&1;then
+ echo 'FAIL P28 permits new standalone quiz question instead of Course Bank';exit 1
+fi
 if run_as "$admin" "SELECT public.lms_p28_attach_lesson_question('$asp_lesson','$q1',false)" >/dev/null 2>&1;then
  echo 'FAIL P28 cross-course quiz link';exit 1
 fi
