@@ -1,4 +1,4 @@
-import React,{useEffect,useMemo,useState} from 'react';
+import React,{useEffect,useMemo,useRef,useState} from 'react';
 import {ArrowLeft,ArrowRight,BookOpen,CheckCircle2,ChevronDown,ChevronRight,FileText,Layers3,LockKeyhole,Paperclip,PlayCircle,ShieldCheck,Video} from 'lucide-react';
 import {loadLessonContent} from './lessonMediaApi.js';
 import './courseLessonExplorer.css';
@@ -25,6 +25,7 @@ export default function CourseLessonExplorer({db,userId,courseId,courseTitle,out
  const [statusError,setStatusError]=useState(''),[saving,setSaving]=useState('');
  const [blocks,setBlocks]=useState([]),[questions,setQuestions]=useState([]),[answers,setAnswers]=useState({});
  const [lessonLoading,setLessonLoading]=useState(false),[lessonError,setLessonError]=useState('');
+ const readingPane=useRef(null),readingEnd=useRef(null);
  const [quizResult,setQuizResult]=useState(null),[openDomains,setOpenDomains]=useState({});
  const selected=lessons.find(l=>l.id===active);
  const previewOnly=Boolean(selected&&demo&&!full&&!selected.isFreeIntro);
@@ -82,6 +83,24 @@ export default function CourseLessonExplorer({db,userId,courseId,courseTitle,out
   }catch(e){setStatusError(e.message||'Your progress could not be saved. Please retry.');}
   finally{setSaving('');}
  };
+ useEffect(()=>{
+  if(tab!=='reading'||!selected||!accessible||saving||
+    stepDone(selected.id,'reading')||!section.reading.length)return;
+  const pane=readingPane.current,end=readingEnd.current;
+  if(!pane||!end)return;
+  if(typeof IntersectionObserver==='undefined')return;
+  let delay=null;
+  const observer=new IntersectionObserver(entries=>{
+   if(entries[0]?.isIntersecting){
+    // Short pages: the learner has reached the entire content without needing
+    // artificial scrolling. Give sufficient visible dwell before completion.
+    delay=setTimeout(()=>{void saveStep('reading');},3000);
+   }else if(delay!==null){clearTimeout(delay);delay=null;}
+  },{root:pane,threshold:1});
+  observer.observe(end);
+  return()=>{observer.disconnect();if(delay!==null)clearTimeout(delay);};
+ },[tab,selected?.id,accessible,section.reading.length,saving,
+     progress[selected?.id]?.reading_completed]);
  const submitQuiz=async()=>{
   if(!selected||saving||questions.length===0||
    questions.some(q=>!Number.isInteger(answers[q.id])))return;
@@ -176,12 +195,12 @@ export default function CourseLessonExplorer({db,userId,courseId,courseTitle,out
        </React.Suspense>:<div className="cle-notice"><Video size={22}/> No video has been published for this lesson.</div>}
       </div>:tab==='reading'?<div className="cle-activity">
        <div className="cle-activity-title"><h3>Study material</h3><small>{stepDone(selected.id,'reading')?'Completed ✓':'Scroll through the content to complete this step'}</small></div>
-       {section.reading.length?<div className="cle-reading" key={selected.id}
+       {section.reading.length?<div ref={readingPane} className="cle-reading" key={selected.id}
         onScroll={e=>{const el=e.currentTarget;if(el.scrollTop>15&&el.scrollTop+el.clientHeight>=el.scrollHeight-15)saveStep('reading');}}
         tabIndex={0} aria-label="Scrollable reading material">
         {section.reading.map(b=>b.block_type==='heading'?<h3 key={b.id}>{b.payload?.body||b.payload?.text||''}</h3>:
          <p key={b.id}>{b.payload?.body||b.payload?.text||''}</p>)}
-        <div className="cle-reading-end"><CheckCircle2 size={16}/> End of reading</div>
+        <div className="cle-reading-end" ref={readingEnd}><CheckCircle2 size={16}/> End of reading</div>
        </div>:<div className="cle-notice"><FileText size={22}/> No reading material has been published yet.</div>}
       </div>:tab==='quiz'?<div className="cle-activity">
        <div className="cle-activity-title"><h3>Knowledge Check</h3><small>Answer every question to finish. Incorrect answers still count as completing the activity.</small></div>
