@@ -33,5 +33,7 @@ export default function LiveLearnerPortal({initialScreen='courses'}){
   onCheckoutRoute={id=>navigate('/checkout/'+encodeURIComponent(id))}
   onCourseRoute={id=>navigate('/course-catalog/'+encodeURIComponent(id))}
   onLearningRoute={()=>navigate('/my-learning')}
+  onPracticeRoute={()=>navigate('/practice')}
+  onHistoryRoute={()=>navigate('/my-practice')}
   onSignOut={()=>{void signOutPortal();}}/>;
 }
