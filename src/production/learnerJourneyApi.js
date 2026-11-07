@@ -1,4 +1,4 @@
-import {getCurrentEntitlements,listCourses,loadIdentity,loadStructure} from './lmsApi.js';
+import {getCurrentEntitlements,loadIdentity,loadStructure} from './lmsApi.js';
 
 // P15: browser only receives published titles for locked content. Real lessons
 // still require P1/P15 RLS and signed-media server checks; never trust UI flags.
@@ -12,12 +12,18 @@ export function isFullCourseEnrolled(entitlements,courseId){
 }
 export async function fetchP15Catalog(db,user){
  if(!db||!user?.id)throw Error('Real Supabase authentication required.');
- const identity=await loadIdentity(db,user);
- if(identity.profile?.account_status!=='active')throw Error('Your LMS account is not active.');
- const [all,entitlements]=await Promise.all([
-  listCourses(db),getCurrentEntitlements(db,user.id)
+ // P20: independent read-only queries run in parallel; retain the exact
+ // active-profile authorization check before returning ANY course metadata.
+ const [identity,all,entitlements]=await Promise.all([
+  loadIdentity(db,user),
+  db.from('lms_courses')
+   .select('id,slug,title,summary,cover_path,publication_state,created_at')
+   .eq('publication_state','published').order('created_at',{ascending:false}),
+  getCurrentEntitlements(db,user.id)
  ]);
- return {identity,entitlements,courses:all.filter(c=>c.publication_state==='published')};
+ if(identity.profile?.account_status!=='active')throw Error('Your LMS account is not active.');
+ if(all.error)throw Error('Published course catalog is unavailable.');
+ return {identity,entitlements,courses:all.data||[]};
 }
 export function nestPublishedOutline(rows,courseId){
  if(!isP15Id(courseId)||!Array.isArray(rows))throw Error('Invalid P15 course outline.');
