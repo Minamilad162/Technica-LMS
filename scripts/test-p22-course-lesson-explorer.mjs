@@ -26,7 +26,7 @@ for(const marker of [
  "stepDone(selected.id,'video')","stepDone(selected.id,'reading')",
  'questions.some(q=>!Number.isInteger(answers[q.id]))',
  "onScroll={e=>", "saveStep('reading')",
- "onWatched={()=>saveStep('video')}",
+ "if(section.video.every(v=>watchedVideos.current.has(v.id)))void saveStep('video')",
  'previewOnly','full||selected.isFreeIntro',
  'onSubscribe?.()'
 ])assert(explorer.includes(marker),'Missing P22 learner behavior: '+marker);
