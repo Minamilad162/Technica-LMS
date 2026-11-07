@@ -115,8 +115,9 @@ assert(admin.includes('Manually activate')&&admin.includes('Confirm offline paym
 assert(tools.includes("id:'subscriptions'")&&tools.includes('AdminSubscriptionsPanel'));
 assert(workspace.includes("screen==='subscription'||screen==='checkout'?<SubscriptionPlans"));
 assert(workspace.includes('isFullCourseEnrolled(catalog?.entitlements,chosen.id,catalog?.subscription)'));
-assert(workspace.includes('full||l.isFreeIntro?<SecureLessonContent'));
-assert(workspace.includes("LOCKED · SUBSCRIBE TO VIEW"));
+const explorer=read('src/production/CourseLessonExplorer.jsx');
+assert(workspace.includes('full={Boolean(full)}')&&explorer.includes('full||selected.isFreeIntro'));
+assert(explorer.includes('onSubscribe?.()')&&explorer.includes('Subscription required'));
 assert(!workspace.includes('<LiveCheckout'),'No legacy course checkout in active learner flow');
 assert(cards.includes('View Plans')&&cards.includes('View Subscription Plans'));
 assert(learning.includes('All-Access Subscription'));

@@ -3,7 +3,7 @@ import {ArrowLeft,ArrowRight,BookOpen,BookOpenCheck,CheckCircle2,ChevronDown,Che
  ClipboardCheck,GraduationCap,Layers3,LockKeyhole,LogOut,PlayCircle,RefreshCw,
  ShieldCheck,ShoppingBag,Target,X} from 'lucide-react';
 import {getLearnerProgress} from './learnerProgressApi.js';
-const SecureLessonContent=React.lazy(()=>import('./SecureLessonMedia.jsx').then(m=>({default:m.SecureLessonContent})));
+const CourseLessonExplorer=React.lazy(()=>import('./CourseLessonExplorer.jsx'));
 const LivePractice=React.lazy(()=>import('./LivePractice.jsx'));
 import {fetchP15Catalog,fetchP15Outline,hasLocalDemoCheckout,
  isFullCourseEnrolled,localCheckoutEnabled,recordLocalDemoCheckout} from './learnerJourneyApi.js';
@@ -170,40 +170,14 @@ export default function LiveLearnerWorkspace({db,user,onSignOut,embedded=false,
     <CourseDetailHero db={db} course={chosen} status={full?'real':demoChosen?'demo':'available'}
      onEnroll={()=>startCheckout(chosen.id)}
      onContinue={()=>syllabusRef.current?.scrollIntoView({behavior:'smooth',block:'start'})}/>
-    <section className="lcc-syllabus" ref={syllabusRef}>
-     <div className="lcc-syllabus-head"><h2>Course Syllabus</h2>
-      {!outlineLoading&&!outlineError&&<span>{outline.reduce((n,d)=>n+d.topics.reduce((m,t)=>m+t.lessons.length,0),0)} published lessons</span>}</div>
-    {outlineLoading?<div className="lj-empty" role="status">Loading published course outline…</div>:
-     outlineError?<div className="lj-empty" role="alert"><LockKeyhole size={20}/>{outlineError}</div>:
-     !outline.length?<div className="lj-empty">No published lessons are available in this course yet.</div>:
-     <div className="lj-domains">{outline.map((d,di)=><section className="lj-domain" key={d.id}>
-      <h2><Layers3 size={18}/> Domain {di+1} · {d.title}</h2>
-      {d.topics.map((t,ti)=><div className="lj-topic" key={t.id}>
-       <h3>Topic {di+1}.{ti+1} · {t.title}</h3>
-       {t.lessons.map((l,li)=>{
-        const unlocked=allowedLesson(l),expanded=activeLesson===l.id;
-        return <div key={l.id} className={'lj-lesson'+(unlocked?'':' locked')}>
-         <button type="button" aria-expanded={expanded} aria-label={unlocked?'Open '+l.title:
-          'Enroll in '+chosen.title+' to unlock '+l.title}
-          onClick={()=>{if(unlocked)setActiveLesson(v=>v===l.id?'':l.id);else startCheckout(chosen.id);}}>
-          {unlocked?<PlayCircle size={18}/>:<LockKeyhole size={18}/>}
-          <span><strong>{di+1}.{ti+1}.{li+1} · {l.title}</strong>
-           <small>{l.isFreeIntro?'FREE INTRO':unlocked?(demoChosen?'LOCAL DEMO PREVIEW':'AVAILABLE'):'LOCKED · SUBSCRIBE TO VIEW'}</small></span>
-          {unlocked?(expanded?<ChevronDown size={17}/>:<ChevronRight size={17}/>):null}</button>
-         {expanded&&unlocked&&<div className="lj-lesson-content">
-          {full||l.isFreeIntro?<SecureLessonContent
-           db={db} lessonId={l.id} viewerId={user.id.slice(0,8)}/>:
-           <div className="lj-demo-banner" role="status">
-            Local checkout simulation: lesson navigation is unlocked here, but the actual PDF/video and content are NOT fetched.
-            Real signed-in paid/manual enrollment is required to access protected lessons.
-           </div>}
-          <small>Lesson completion is recorded by the verified P2 workflow, not simply by opening a video.</small>
-         </div>}
-        </div>;
-       })}
-      </div>)}
-     </section>)}</div>}
-    </section>
+    <div className="lcc-syllabus" ref={syllabusRef}>
+     {outlineLoading?<div className="lj-empty" role="status">Loading published lessons…</div>:
+      outlineError?<div className="lj-empty" role="alert"><LockKeyhole size={20}/>{outlineError}</div>:
+      !outline.length?<div className="lj-empty">No published lessons are available in this course yet.</div>:
+      <CourseLessonExplorer db={db} userId={user.id} courseId={chosen.id}
+       courseTitle={chosen.title} outline={outline} full={Boolean(full)} demo={Boolean(demoChosen)}
+       onSubscribe={()=>startCheckout(chosen.id)}/>}
+    </div>
    </div>:
    screen==='practice'?<div className="lj-practice">
     <div className="lj-section-head"><h2>Choose your course</h2><p>Quick 10, Timed Quiz, Build Your Own, Domain Practice and adaptive Level Up are available in the secure engine.</p></div>

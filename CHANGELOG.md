@@ -545,3 +545,12 @@
 - Added controlled P5 migration, read-only verification, disposable PostgreSQL negative tests, fullscreen browser regression and rollout runbook. No screenshot/recording guarantee, iPhone native element fullscreen not supported consistently, no production deploy.
 
 - Applied P5 fullscreen requirement to the demo lesson's final 10-question knowledge check as well, returning to previous lesson when exiting and preserving prior lesson progress.
+
+
+## 2026-11-07 — P22 Premium Course Lesson Explorer (development branch; migration not applied)
+- Replaced long nested Course syllabus list with a responsive Domain/Topic-grouped Lesson card grid. Selecting a Lesson opens an elegant dedicated learner view with secondary Domain/Topic/Lesson navigation, Video/Reading/Knowledge Check/optional Resources tabs, Previous/Next and progress by Lesson/Topic/Domain/Course. Keeps the original Technica main sidebar and teal/mint style.
+- Added playback-segment tracking to existing protected video viewer (only actual played ending counts; skipping to the end not accepted in the normal client), scroll-to-bottom text completion, complete-all-answers quiz submission, and server-backed green progress indicators.
+- Added Admin Knowledge Check editor to the live Course Builder (per-lesson question prompts, choices, correct answer, draft/publish), leaving private media signed and existing question/exam bank unchanged.
+- Added additive P22 Supabase staging-only migration for learner-owned server-persisted progress, grade-vs-completion separation and Admin-only quiz answer RLS; DOES NOT run from deployment and must be applied only after ledger/backup/authorization.
+- Added P22 test script and CI hook; preserved P15/P20/P21 contracts with changes limited to the new UI location. Video playback proof is browser-only and can be spoofed by malicious clients until trusted server checkpoint enforcement is implemented. Live browser/server validation and staged rollout remain gates.
+- Rollback: revert P22 UI/import/test additions on branch; SQL roll-forward review required if ever applied. No data deletion, question-bank mutation, real subscription change, CI/release or production database write in this feature.

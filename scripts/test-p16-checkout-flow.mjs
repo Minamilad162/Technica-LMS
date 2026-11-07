@@ -36,7 +36,7 @@ assert(read('src/production/LearnerCourseCard.jsx').includes('View Plans')&&work
 assert(workspace.includes('onCheckoutRoute(id)'));
 assert(workspace.includes("screen==='subscription'||screen==='checkout'?<SubscriptionPlans"));
 assert(workspace.includes('hasSimulatedEnrollment(user.id,c.id)'));
-assert(workspace.includes('full||l.isFreeIntro?<SecureLessonContent'),
+assert(workspace.includes('full={Boolean(full)}'),
  'Demo flag must NEVER grant access to actual media');
 assert(checkout.includes('course.title')&&checkout.includes('user.email'));
 assert(checkout.includes('onMyLearning')&&checkout.includes('onOpenCourse'));
