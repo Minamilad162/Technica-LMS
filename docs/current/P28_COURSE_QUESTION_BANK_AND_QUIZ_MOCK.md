@@ -1,6 +1,6 @@
 # P28 — Course Question Bank → Lesson Quiz → Mock-only selection
 
-**Date:** 2026-11-08. **Status:** source implementation on a review branch. No Supabase deployment or learner data changes have been performed. P28 is additive to existing P1/P4/P6A/P9B/P10/P22.
+**Date:** 2026-11-08. **Status:** source implementation on a review branch. No Supabase deployment or learner data changes have been performed. P28 is additive to P1/P4/P22. Existing P6A/P9B/P10 ASP governance remains unchanged; **P9B is optional for installing non-ASP Course Bank features** and remains mandatory for operating the separate ASP Mock workflow.
 
 ## Accepted owner journey
 
@@ -14,7 +14,7 @@
 
 ## Scope / authorization
 
-- The new P28 SQL creates **no new question bank**; it reuses `lms_questions` and adds only a nullable `bank_question_id` reference to existing `lms_p22_lesson_quiz_questions`, a unique link index, two protective triggers, and five Admin-only RPCs.
+- The P28 migration checks and reports precise missing P1/P4/P22 prerequisites before changing the database. It does not require the unrelated ASP-specific P9B table just to manage non-ASP courses. The new P28 SQL creates **no new question bank**; it reuses `lms_questions` and adds only a nullable `bank_question_id` reference to existing `lms_p22_lesson_quiz_questions`, a unique link index, two protective triggers, and five Admin-only RPCs.
 - Anonymous and learner roles receive **no direct bank SELECT/INSERT/UPDATE**; the RPC verifies the signed-in Admin role using `lms_p1_actor_is_admin()`. Import writes and Mock-only decisions are audit-logged. SQL import explicitly avoids `approved` and `mock_exclusive` defaults; no autofill into real exams.
 - P4/P8e Practice still requires approved questions and `NOT mock_exclusive`. P9B ASP reservation still requires 200 unique qualified questions and existing independent review, P10 keeps 200/300. No change to P21 subscriptions, P22 progress, P23 lesson single-page layout or P14 media access.
 - The owner made contradictory statements regarding whether Mock-reserved questions appear in **Assessment Practice**. Until a single precise exception is approved and implemented server-side, the **safer existing rule applies: all Mock-reserved items are excluded from every Practice, assessment practice, lesson quiz and pre-assessment pool.** No client-side bypass.
@@ -22,7 +22,7 @@
 
 ## Before applying any SQL
 
-1. Verify the correct isolated **Technica Staging** project identity, remote Supabase migration ledger, current P1–P22 installation, backup, grants and RLS. Do not replay the previous migrations. The P28 migration must run **once** only after previous migrations and in the correct order.
+1. Verify the correct isolated **Technica Staging** project identity, remote Supabase migration ledger, the installed P1/P4/P22 objects and any applicable ASP P9B workflow, backup, grants and RLS. Do not replay the previous migrations. The P28 migration must run **once** only after previous migrations and in the correct order.
 2. Run `npm run test:p28:bank` and `bash scripts/test-p28-postgres-smoke.sh` in isolated, disposable CI DB AFTER P22, with existing full CI and Vite builds. SQL added to source is not proof it is installed remotely.
 3. In Staging, test signed Admin import of synthetic .xlsx with multiple worksheets, malformed row, duplicate import idempotency, selecting Course and Domain, attaching a Draft vs approved question, publishing, unpublishing, unlinking, cross-Course attempt, an ASP restricted 200 candidate, and attempted Mock-only flag on already linked/used question. Test an ordinary learner and signed-out user cannot access source keys or author questions, and an authorized paid learner sees only published Quiz prompts/options.
 4. Verify with existing RLS/GRANT helper queries that newly added public functions are Admin-only and that only authenticated may EXECUTE. Admin must explicitly approve any future real question import; never use synthetic data in Production. Manual desktop + mobile visual QA is pending.
