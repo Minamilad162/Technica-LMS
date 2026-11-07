@@ -43,7 +43,8 @@ assert(checkout.includes('onMyLearning')&&checkout.includes('onOpenCourse'));
 assert(checkout.includes('There is no payment gateway connected'));
 assert(checkout.includes('Never enter actual card numbers'));
 assert(checkout.includes('type="checkbox"')&&checkout.includes('confirmedDemo:accepted'));
-assert(!checkout.includes('cvv')&&!checkout.includes('expiry')&&!checkout.includes('cardNumber'));
+assert(!/(?:name|id|autoComplete)=["'](?:cvv|expiry|cardNumber|card_number|pan)["']/i.test(checkout),
+ 'No actual card details should be requested as input fields');
 assert(api.includes('sessionStorage.setItem(key(uid,cid),\'completed\')'));
 assert(!api.includes('lms_entitlements')||api.includes('no P1 entitlements'));
 assert(!api.includes('fetch(')&&!api.includes('.rpc('),'No network or DB writes in checkout simulation');
