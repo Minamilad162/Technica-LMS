@@ -1,4 +1,4 @@
-import React,{useEffect,useState} from 'react';
+import React,{useEffect,useRef,useState} from 'react';
 import {ArrowLeft,ArrowRight,BookOpen,BookOpenCheck,CheckCircle2,ChevronDown,ChevronRight,
  ClipboardCheck,GraduationCap,Layers3,LockKeyhole,LogOut,PlayCircle,RefreshCw,
  ShieldCheck,ShoppingBag,Target,X} from 'lucide-react';
@@ -10,6 +10,7 @@ import {fetchP15Catalog,fetchP15Outline,hasLocalDemoCheckout,
 import {loadStructure} from './lmsApi.js';
 import {hasSimulatedEnrollment} from './checkoutSimulationApi.js';
 import LiveCheckout from './LiveCheckout.jsx';
+import {LearnerCourseCard,CourseDetailHero} from './LearnerCourseCard.jsx';
 import './liveLearnerJourney.css';
 
 const nav=[
@@ -23,6 +24,7 @@ const modeLabel={quick10:'Quick 10',timed25:'Timed Quiz',custom:'Custom',domain:
  levelup:'Level Up',asp_mock_200:'ASP Mock'};
 export default function LiveLearnerWorkspace({db,user,onSignOut,embedded=false,
  initialScreen='courses',initialCourseId='',onCheckoutRoute=null,onCourseRoute=null,onLearningRoute=null}){
+ const syllabusRef=useRef(null);
  const [screen,setScreen]=useState(initialScreen),[catalog,setCatalog]=useState(null),
   [loading,setLoading]=useState(true),[error,setError]=useState(''),[revision,setRevision]=useState(0),
   [selectedId,setSelectedId]=useState(initialCourseId),[outline,setOutline]=useState([]),
@@ -45,9 +47,10 @@ export default function LiveLearnerWorkspace({db,user,onSignOut,embedded=false,
   return()=>{live=false;};
  },[db,user.id,revision]);
  const enrolled=catalog?.courses.filter(c=>isFullCourseEnrolled(catalog.entitlements,c.id))||[];
- const inMyLearning=c=>isFullCourseEnrolled(catalog?.entitlements,c.id)||
-  hasSimulatedEnrollment(user.id,c.id)||
-  (localCheckoutEnabled()&&hasLocalDemoCheckout(user.id,c.id));
+ const demoCourses=catalog?.courses.filter(c=>!isFullCourseEnrolled(catalog.entitlements,c.id)&&(
+  hasSimulatedEnrollment(user.id,c.id)||(localCheckoutEnabled()&&hasLocalDemoCheckout(user.id,c.id))))||[];
+ const courseStatus=c=>isFullCourseEnrolled(catalog?.entitlements,c.id)?'real':
+  demoCourses.some(d=>d.id===c.id)?'demo':'available';
  const chosen=catalog?.courses.find(c=>c.id===selectedId);
  const full=chosen&&isFullCourseEnrolled(catalog?.entitlements,chosen.id);
  const demoChosen=chosen&&!full&&(hasSimulatedEnrollment(user.id,chosen.id)||
@@ -93,7 +96,7 @@ export default function LiveLearnerWorkspace({db,user,onSignOut,embedded=false,
  const checkoutCompleted=()=>setDemoRevision(v=>v+1);
  const screenTitle=screen==='courses'?'Explore Courses':screen==='learning'?'My Learning':
   screen==='checkout'?'Course Checkout':
-  screen==='course'?(chosen?.title||'Course Outline'):
+  screen==='course'?'Course Overview':
   screen==='practice'?'Practice Center':'My Practice';
  return <div className={"lj-shell"+(embedded?" lj-embedded":"")}>
   <header className="lj-top"><div className="lj-logo"><img alt="Technica Consult" src="/images/technica-logo.webp"/>
@@ -116,7 +119,7 @@ export default function LiveLearnerWorkspace({db,user,onSignOut,embedded=false,
   <main className="lj-main"><div className="lj-heading">
    <div><span className="lj-eyebrow">TECHNICA LEARNING PLATFORM</span>
     <h1>{screenTitle}</h1><p>{screen==='courses'?'Browse published courses. Preview the first lesson before enrolling.':
-      screen==='learning'?'Your actual enrolled courses, organized in one place.':
+      screen==='learning'?'Your active enrollments and demo checkout previews are clearly separated.':
       screen==='course'?'Course → Domain → Topic → Lesson. Locked lessons require enrollment.':
       screen==='checkout'?'Secure checkout journey · currently a clearly labeled demonstration, not a real payment.':
       screen==='practice'?'Train with protected questions and difficulty modes.':
@@ -126,41 +129,52 @@ export default function LiveLearnerWorkspace({db,user,onSignOut,embedded=false,
   {error&&<p className="lj-error" role="alert">{error}</p>}
   {loading?<div className="lj-empty" role="status">Loading your published learning catalog…</div>:
    !catalog?<div className="lj-empty">Course catalog is unavailable. Check your LMS session.</div>:
-   screen==='courses'||screen==='learning'?<section className="lj-grid" aria-label={screen==='courses'?'Published courses':'Enrolled courses'}>
-    {(screen==='courses'?catalog.courses:catalog.courses.filter(inMyLearning)).map(c=>{
-     const paid=isFullCourseEnrolled(catalog.entitlements,c.id),demo=!paid&&(hasSimulatedEnrollment(user.id,c.id)||
-      (localCheckoutEnabled()&&hasLocalDemoCheckout(user.id,c.id)));
-     return <article className="lj-card" key={c.id}><div className="lj-card-symbol"><GraduationCap size={25}/></div>
-      <div><span className="lj-kicker">{paid?'ENROLLED':demo?'LOCAL DEMO ONLY':'PUBLISHED COURSE'}</span>
-       <h2>{c.title}</h2><p>{c.summary||'Explore the syllabus and start with an introductory lesson.'}</p></div>
-      <div className="lj-card-foot"><span>{paid?<><CheckCircle2 size={15}/> Full access</>:
-       demo?<><ShieldCheck size={15}/> Demo enrolled · content protected</>:<><LockKeyhole size={15}/> Free Intro preview</>}</span>
-       <div className="lj-card-buttons"><button type="button" className="lj-quiet" onClick={()=>openCourse(c.id)}>
-        {paid||demo?'Continue':'View course'}</button>
-        {!paid&&!demo&&<button type="button" className="lj-primary" onClick={()=>startCheckout(c.id)}>
-         Enroll Now <ArrowRight size={16}/></button>}</div></div>
-     </article>;
-    })}
-    {!(screen==='courses'?catalog.courses:catalog.courses.filter(inMyLearning)).length&&<div className="lj-empty">
-     <BookOpen size={27}/><b>{screen==='courses'?'No published courses yet':'No enrollments yet'}</b>
-     <p>{screen==='courses'?'Courses appear here after the Admin publishes them.':
-      'Courses enter My Learning only after a real paid/manual entitlement (or a labeled local-only demo).'}
-     </p>{screen==='learning'&&<button type="button" className="lj-primary" onClick={()=>go('courses')}>Explore courses <ArrowRight size={16}/></button>}</div>}
-   </section>:
+   screen==='courses'||screen==='learning'?<div className="lcc-catalog-content">
+    {screen==='courses'?<section className="lj-grid" aria-label="Published courses">
+     {catalog.courses.map(c=><LearnerCourseCard key={c.id} course={c} db={db}
+       status={courseStatus(c)} onOpen={()=>openCourse(c.id)} onEnroll={()=>startCheckout(c.id)}/>)}
+     {!catalog.courses.length&&<div className="lj-empty"><BookOpen size={28}/>
+      <b>No published courses yet</b><p>Once an Admin publishes a Course, it appears here automatically.</p></div>}
+    </section>:<div className="lcc-learning-groups">
+     {!!enrolled.length&&<section className="lcc-learning-group" aria-label="Active enrollments">
+      <div className="lcc-group-head"><div><h2>Active Enrollments</h2>
+       <p>Verified paid or manually granted access. Your real lessons and Practice are available.</p></div>
+       <span>{enrolled.length} active</span></div>
+      <div className="lj-grid">{enrolled.map(c=><LearnerCourseCard key={c.id}
+       course={c} db={db} status="real" onOpen={()=>openCourse(c.id)}/>)}</div>
+     </section>}
+     {!!demoCourses.length&&<section className="lcc-learning-group lcc-demo-group" aria-label="Demo previews">
+      <div className="lcc-group-head"><div><h2>Demo Previews</h2>
+       <p>No real payment was made. Lesson titles can be explored, but protected material remains locked.</p></div>
+       <span>{demoCourses.length} demo</span></div>
+      <div className="lj-grid">{demoCourses.map(c=><LearnerCourseCard key={c.id}
+       course={c} db={db} status="demo" onOpen={()=>openCourse(c.id)}/>)}</div>
+     </section>}
+     {!enrolled.length&&!demoCourses.length&&<div className="lj-empty">
+      <BookOpen size={27}/><b>Your learning journey starts here</b>
+      <p>Courses will appear in My Learning after verified enrollment or a clearly labeled checkout demo.</p>
+      <button type="button" className="lj-primary" onClick={()=>go('courses')}>
+       Explore Courses <ArrowRight size={16}/></button></div>}
+    </div>}
+   </div>:
    screen==='checkout'? !chosen?<div className="lj-empty">Course unavailable. Please select a published course.</div>:
     <LiveCheckout key={chosen.id} course={chosen} user={user}
      onBack={()=>openCourse(chosen.id)} onSuccess={checkoutCompleted}
      onOpenCourse={()=>openCourse(chosen.id)} onMyLearning={openLearning}/>:
    screen==='course'? !chosen?<div className="lj-empty">Choose a published course from Courses.</div>:
    <div className="lj-course">
-    <div className="lj-course-actions"><button className="lj-quiet" type="button" onClick={()=>go('courses')}><ArrowLeft size={16}/> All Courses</button>
-     {full?<span className="lj-enrolled"><CheckCircle2 size={16}/> Full access</span>:
-      <div className="lj-course-lock"><LockKeyhole size={17}/> Full course locked
-       {!demoChosen?<button type="button" className="lj-primary" onClick={()=>startCheckout(chosen.id)}>
-         Enroll Now <ArrowRight size={16}/></button>:
-         <span>Demo lesson navigation enabled. Protected content still requires real enrollment.</span>}</div>}
+    <div className="lj-course-actions"><button className="lj-quiet" type="button" onClick={()=>go('courses')}>
+     <ArrowLeft size={16}/> All Courses</button>
+     {full?<span className="lj-enrolled"><CheckCircle2 size={16}/> Verified enrollment</span>:
+      demoChosen?<span className="lcc-access-status lcc-status-demo"><ShieldCheck size={15}/> Demo Access · No Charge</span>:
+      <span className="lcc-access-status lcc-status-available"><LockKeyhole size={15}/> Not enrolled</span>}
     </div>
-    {demoChosen&&<p className="lj-demo-banner">Local demo confirmed · This preview does not unlock protected course media, exam questions or Supabase enrollment.</p>}
+    <CourseDetailHero db={db} course={chosen} status={full?'real':demoChosen?'demo':'available'}
+     onEnroll={()=>startCheckout(chosen.id)}
+     onContinue={()=>syllabusRef.current?.scrollIntoView({behavior:'smooth',block:'start'})}/>
+    <section className="lcc-syllabus" ref={syllabusRef}>
+     <div className="lcc-syllabus-head"><h2>Course Syllabus</h2>
+      {!outlineLoading&&!outlineError&&<span>{outline.reduce((n,d)=>n+d.topics.reduce((m,t)=>m+t.lessons.length,0),0)} published lessons</span>}</div>
     {outlineLoading?<div className="lj-empty" role="status">Loading published course outline…</div>:
      outlineError?<div className="lj-empty" role="alert"><LockKeyhole size={20}/>{outlineError}</div>:
      !outline.length?<div className="lj-empty">No published lessons are available in this course yet.</div>:
@@ -191,6 +205,7 @@ export default function LiveLearnerWorkspace({db,user,onSignOut,embedded=false,
        })}
       </div>)}
      </section>)}</div>}
+    </section>
    </div>:
    screen==='practice'?<div className="lj-practice">
     <div className="lj-section-head"><h2>Choose your course</h2><p>Quick 10, Timed Quiz, Build Your Own, Domain Practice and adaptive Level Up are available in the secure engine.</p></div>

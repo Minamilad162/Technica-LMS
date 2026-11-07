@@ -8,6 +8,7 @@ import AdminQuestionReview from './AdminQuestionReview.jsx';
 import {LessonMediaUploadModal,SecureLessonContent} from './SecureLessonMedia.jsx';
 import {fetchAdminFreeIntro,setAdminFreeIntro,setAdminPublished} from './learnerJourneyApi.js';
 import {verifiedLiveAdmin} from './liveAuthoringApi.js';
+import {CourseCover,CourseCoverManager} from './CourseCover.jsx';
 
 const pct=n=>n===null||n===undefined?'—':Number(n).toFixed(1).replace(/\.0$/,'')+'%';
 const day=s=>s?new Date(s).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'}):'Not set';
@@ -156,7 +157,7 @@ export function AdminCoursesPanel({db}){
   <div className="at-course-layout">
    <div className="at-surface at-course-picker"><h3>Courses <span>{courses.length}</span></h3>
     {loading?<p>Loading…</p>:courses.map(c=><button key={c.id} className={'at-course-choice '+(course===c.id?'active':'')}
-     onClick={()=>setCourse(c.id)}><BookOpen size={18}/><span><b>{c.title}</b><small>{c.publication_state}</small></span><ChevronRight size={15}/></button>)}
+     onClick={()=>setCourse(c.id)}><CourseCover db={db} course={c} variant="mini"/><span><b>{c.title}</b><small>{c.publication_state}</small></span><ChevronRight size={15}/></button>)}
     {!courses.length&&empty}
    </div>
    <section className="at-surface at-hierarchy">
@@ -167,6 +168,7 @@ export function AdminCoursesPanel({db}){
       <button className="at-outline" disabled={busy||introEnabled===null||chosen.publication_state!=='published'}
        onClick={changeIntro}>{introEnabled?'Disable Free Intro':'Enable Free Intro'}</button>
       <button className="at-outline" onClick={()=>start('domain')}><Plus size={15}/> Domain</button></div></div>
+     <CourseCoverManager db={db} course={chosen} onSaved={()=>setRevision(n=>n+1)}/>
      {introError&&<p className="at-error" role="status">{introError}</p>}
      <p className="at-intro-note">Free Intro is opt-in: publish Course and first Lesson, then enable preview.
       Only the approved first Lesson becomes free; the remaining media stays server-locked.</p>

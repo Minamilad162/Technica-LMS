@@ -119,6 +119,9 @@ jobs:
       - name: P16 enrollment checkout simulation and locked Lesson redirect contract
         run: npm run test:p16
 
+      - name: P17 premium Course cards, cover security and Real vs Demo My Learning contracts
+        run: npm run test:p17
+
       - name: P5 native fullscreen and exit policy contracts
         run: npm run test:p5
 
@@ -246,6 +249,9 @@ jobs:
 
       - name: P15 published Intro and locked-outline RLS on disposable PostgreSQL
         run: bash scripts/test-p15-postgres-smoke.sh
+
+      - name: P17 public Course cover Storage/Admin RLS and audit on disposable PostgreSQL
+        run: bash scripts/test-p17-postgres-smoke.sh
 
       - name: Test scope disclosure
         run: echo "Ephemeral local PostgreSQL smoke only; live Supabase Auth, Storage, Data API and device tests still pending."
