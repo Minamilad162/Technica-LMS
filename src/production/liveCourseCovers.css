@@ -1,0 +1,59 @@
+/* P17: premium course covers. Public marketing imagery only, not lesson media. */
+.lcc-cover{position:relative;overflow:hidden;isolation:isolate;aspect-ratio:16/9;
+ display:flex;flex-direction:column;justify-content:space-between;
+ background:linear-gradient(124deg,#07394c,#116978 60%,#16a89d);color:white;
+ padding:clamp(15px,2.5vw,25px);min-width:0;border-radius:17px}
+.lcc-cover::before{content:'';position:absolute;z-index:-1;inset:0;pointer-events:none;
+ background:radial-gradient(ellipse at 78% 32%,#82ebdc50,transparent 43%),
+ linear-gradient(125deg,#09324d22,transparent 45%,#09253340)}
+.lcc-ocean{background:linear-gradient(125deg,#102d58,#16667c 55%,#31a6bc)}
+.lcc-indigo{background:linear-gradient(125deg,#29214f,#394d8b 55%,#6482ba)}
+.lcc-amber{background:linear-gradient(125deg,#423929,#88734b 55%,#bda068)}
+.lcc-image{position:absolute;z-index:-3;inset:0;width:100%;height:100%;object-fit:cover}
+.lcc-with-image::after{content:'';position:absolute;z-index:-2;inset:0;
+ background:linear-gradient(105deg,#061e32a8,#102a344f 65%,#051a2080)}
+.lcc-glow{position:absolute;z-index:-1;width:57%;aspect-ratio:1;right:-11%;top:-44%;
+ border-radius:50%;border:1px solid #d8fff836;box-shadow:0 0 0 18px #d8fff80b,0 0 0 44px #d8fff80b;
+ pointer-events:none}
+.lcc-pattern{position:absolute;inset:0;z-index:-1;pointer-events:none;opacity:.30}
+.lcc-pattern i{position:absolute;display:block;border:1px solid #ffffff52;border-radius:50%}
+.lcc-pattern i:nth-child(1){width:45%;aspect-ratio:1;right:11%;bottom:-48%}
+.lcc-pattern i:nth-child(2){width:23%;aspect-ratio:1;right:34%;top:17%}
+.lcc-pattern i:nth-child(3){width:12%;aspect-ratio:1;left:-3%;top:42%}
+.lcc-topline,.lcc-bottomline{display:flex;justify-content:space-between;align-items:center;gap:12px;position:relative;z-index:1}
+.lcc-topline{font-size:clamp(7px,.72vw,9px);letter-spacing:.18em;font-weight:750;color:#e2f8f8}
+.lcc-topline b{font-weight:900;color:#d3ffed}
+.lcc-mark{display:grid;place-items:center;width:36px;height:34px;border:1px solid #ffffff69;
+ border-radius:10px;background:#ffffff1e;font-size:12px;font-weight:900;letter-spacing:0}
+.lcc-mark span{display:inline;color:#86ffe0}
+.lcc-art{position:relative;z-index:1;display:flex;align-items:center;justify-content:flex-start;flex:1}
+.lcc-art span{font-size:clamp(45px,7vw,96px);line-height:1;letter-spacing:-.085em;font-weight:900;color:#e3fff1;text-shadow:0 5px 22px #002b4066}
+.lcc-bottomline{font-size:clamp(7px,.75vw,10px);letter-spacing:.18em;font-weight:800}
+.lcc-bottomline i{width:32px;height:2px;background:#7ef6d3;border-radius:5px}
+.lcc-with-image .lcc-art{opacity:.60}
+.lcc-card{border-radius:0;aspect-ratio:16/9;padding:18px 21px}
+.lcc-card .lcc-art span{font-size:clamp(48px,5vw,78px)}
+.lcc-hero{height:clamp(220px,34vw,360px);aspect-ratio:auto;border-radius:20px}
+.lcc-manager-preview{height:auto;aspect-ratio:16/9;border-radius:14px}
+.lcc-manager-preview .lcc-art span{font-size:clamp(45px,5vw,70px)}
+.lcc-mini{width:62px;min-width:62px;aspect-ratio:1;border-radius:11px;padding:7px}
+.lcc-mini .lcc-topline,.lcc-mini .lcc-bottomline,.lcc-mini .lcc-pattern{display:none}
+.lcc-mini .lcc-art{justify-content:center}
+.lcc-mini .lcc-art span{font-size:22px;letter-spacing:-.06em}
+/* Admin editor preview and controls */
+.lcc-admin{display:grid;grid-template-columns:minmax(150px,330px) minmax(0,1fr);
+ gap:19px;align-items:center;padding:15px;background:linear-gradient(125deg,#f5faf9,#fff);
+ border:1px solid #dceae8;border-radius:16px;margin:14px 0 18px}
+.lcc-admin-preview{width:100%;overflow:hidden;border-radius:14px;
+ box-shadow:0 12px 25px #193d5120}
+.lcc-admin-preview .lcc-cover{border-radius:14px}
+.lcc-admin-details{min-width:0;display:grid;gap:9px;align-content:center}
+.lcc-admin-details h4{font-size:17px;letter-spacing:-.025em;margin:0;color:#204d57}
+.lcc-admin-details p{font-size:12px;line-height:1.7;margin:0;color:#69868d}
+.lcc-admin-buttons{display:flex;align-items:center;gap:9px;flex-wrap:wrap;margin-top:5px}
+.lcc-admin-buttons button{display:flex;align-items:center;gap:7px}
+.lcc-success{display:flex;align-items:center;gap:7px;color:#0e8b6e!important}
+.lcc-error{color:#af403d!important}
+@media(max-width:690px){.lcc-admin{grid-template-columns:1fr}.lcc-admin-preview{max-width:420px}
+ .lcc-cover{padding:14px}.lcc-art span{font-size:48px}.lcc-hero{height:220px}}
+@media(prefers-reduced-motion:reduce){.lcc-cover *{transition:none!important}}

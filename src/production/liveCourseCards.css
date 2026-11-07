@@ -1,0 +1,69 @@
+/* P17 catalog cards / details — visual semantics reflect verified enrollment state */
+.lcc-course-card{min-width:0;overflow:hidden;border-radius:20px;background:#fff;
+ border:1px solid #d9e9e8;box-shadow:0 10px 32px #153f4d0a;display:flex;flex-direction:column;
+ transition:transform .2s ease,box-shadow .2s ease,border-color .2s ease}
+.lcc-course-card:hover{transform:translateY(-3px);border-color:#b7dcd7;box-shadow:0 20px 45px #123e4c1e}
+.lcc-card-cover-button{display:block;position:relative;width:100%;background:none;border:0;padding:0;text-align:left;cursor:pointer}
+.lcc-card-cover-button .lcc-cover{width:100%}
+.lcc-card-cover-button:focus-visible{outline:3px solid #079a8d;outline-offset:-3px;z-index:2}
+.lcc-open-mark{position:absolute;right:17px;top:17px;display:grid;place-items:center;
+ width:32px;height:32px;border:1px solid #ffffff8a;background:#1036444d;
+ backdrop-filter:blur(8px);border-radius:9px;color:#fff;transition:transform .18s}
+.lcc-course-card:hover .lcc-open-mark{transform:translate(2px,-2px)}
+.lcc-card-inner{display:flex;flex-direction:column;gap:13px;flex:1;padding:19px}
+.lcc-card-tagrow{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.lcc-access-status{display:inline-flex;align-items:center;gap:6px;min-width:0;
+ font-weight:800;font-size:11px;border-radius:999px;padding:8px 11px}
+.lcc-status-small{font-size:10px;padding:6px 9px}
+.lcc-status-real{color:#117962;background:#e6f6ef}
+.lcc-status-demo{color:#8e6118;background:#fff2d7}
+.lcc-status-available{color:#0f7c80;background:#e6f6f7}
+.lcc-card-meta{display:flex;align-items:center;gap:5px;color:#829a9e;font-size:10px;font-weight:650}
+.lcc-card-inner h2{font-size:20px;line-height:1.27;letter-spacing:-.035em;color:#214c58;margin:0;min-height:1.3em}
+.lcc-card-inner h2 button{background:none;border:0;color:inherit;font:inherit;text-align:left;cursor:pointer;padding:0}
+.lcc-card-inner h2 button:hover{color:#0c9487}
+.lcc-card-summary{line-height:1.65;color:#728991;font-size:12px;display:-webkit-box;-webkit-line-clamp:3;
+ -webkit-box-orient:vertical;overflow:hidden;min-height:2.85em;margin:0}
+.lcc-card-details{display:flex;align-items:center;gap:9px 17px;flex-wrap:wrap;color:#6b8a8f;
+ font-size:10px;margin-top:1px}
+.lcc-card-details>span{display:flex;align-items:center;gap:6px}
+.lcc-demo-explainer{font-size:11px!important;line-height:1.6!important;color:#8b691f!important;
+ padding:9px 11px;background:#fff8e8;border:1px solid #f2deb7;border-radius:10px;margin:0!important}
+.lcc-card-cta{display:flex;gap:8px;justify-content:space-between;flex-wrap:wrap;
+ padding-top:14px;border-top:1px solid #edf2f2;margin-top:auto}
+.lcc-card-cta button{flex:1 1 auto;min-height:41px;white-space:nowrap}
+.lcc-detail-hero{display:grid;grid-template-columns:minmax(245px,.96fr) minmax(0,1.04fr);align-items:stretch;
+ gap:20px;background:#fff;border:1px solid #dbe9e9;border-radius:23px;padding:17px;box-shadow:0 14px 36px #153d490b}
+.lcc-detail-media{min-width:0}.lcc-detail-media .lcc-cover{height:100%;min-height:290px}
+.lcc-detail-copy{display:flex;flex-direction:column;gap:18px;justify-content:center;padding:clamp(5px,1.9vw,22px)}
+.lcc-hero-badges{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.lcc-detail-chip{display:inline-flex;align-items:center;gap:6px;border:1px solid #e2eaec;
+ color:#69878c;padding:7px 10px;border-radius:999px;font-size:11px}
+.lcc-detail-copy h2{font-size:clamp(26px,3.2vw,42px);line-height:1.08;letter-spacing:-.045em;
+ margin:0;color:#1b4a57;overflow-wrap:anywhere}
+.lcc-detail-copy>p{font-size:13px;line-height:1.75;color:#6d8790;margin:0}
+.lcc-detail-features{display:flex;flex-wrap:wrap;gap:10px 16px;color:#517b7e;font-size:11px}
+.lcc-detail-features>span{display:flex;align-items:center;gap:7px}
+.lcc-detail-copy .lcc-hero-demo{padding:11px 13px;background:#fff5e4;border-radius:10px;
+ color:#8d692d;line-height:1.7;font-size:11px}
+.lcc-detail-actions{display:flex;align-items:center;gap:13px;flex-wrap:wrap}
+.lcc-detail-actions button{min-height:44px;padding:12px 21px}
+.lcc-detail-fineprint{font-size:11px;color:#789398}
+.lcc-learning-group{display:grid;gap:16px;margin-bottom:20px}
+.lcc-group-head{display:flex;gap:12px;justify-content:space-between;align-items:start;
+ padding:4px 0 2px}
+.lcc-group-head h2{font-size:19px;color:#23515e;margin:0 0 5px;letter-spacing:-.02em}
+.lcc-group-head p{font-size:12px;line-height:1.6;color:#728a90;margin:0}
+.lcc-group-head>span{font-size:11px;font-weight:800;color:#688d88;background:#e9f6f2;
+ border-radius:100px;padding:6px 10px;white-space:nowrap}
+.lcc-demo-group{border-top:1px solid #d7e8e9;padding-top:21px;margin-top:7px}
+.lcc-demo-group .lcc-group-head>span{color:#8d6a31;background:#fff3df}
+.lcc-syllabus-head{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.lcc-syllabus-head h2{font-size:21px;margin:0;color:#27545c}
+.lcc-syllabus-head span{color:#6e8b8f;font-size:11px}
+@media(max-width:1030px){.lcc-detail-hero{grid-template-columns:1fr}.lcc-detail-media .lcc-cover{height:auto;min-height:0}
+ .lcc-detail-copy{padding:8px 7px 13px}}
+@media(max-width:680px){.lcc-detail-hero{padding:10px;border-radius:18px;gap:9px}
+ .lcc-detail-media .lcc-cover{height:215px}.lcc-detail-copy{gap:13px}.lcc-card-inner{padding:15px}
+ .lcc-course-card:hover{transform:none}.lcc-card-cta button{flex:1 1 44%}}
+@media(prefers-reduced-motion:reduce){.lcc-course-card,.lcc-open-mark{transition:none!important}}

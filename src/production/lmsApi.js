@@ -26,7 +26,7 @@ export async function loadIdentity(db,user) {
   return {profile,roles:roles||[],isAdmin:profile.account_status==='active'&&(roles||[]).some(r=>r.role==='admin')};
 }
 export async function listCourses(db) {
-  const {data,error}=await db.from('lms_courses').select('id,slug,title,summary,publication_state,created_at').order('created_at',{ascending:false});
+  const {data,error}=await db.from('lms_courses').select('id,slug,title,summary,cover_path,publication_state,created_at').order('created_at',{ascending:false});
   return value(data,error)||[];
 }
 export async function loadStructure(db,courseId) {

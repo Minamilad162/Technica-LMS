@@ -31,7 +31,7 @@ const api=read('src/production/checkoutSimulationApi.js');
 const portal=read('src/production/LiveLearnerPortal.jsx');
 const app=read('src/App.jsx');
 const css=read('src/production/liveCheckout.css');
-assert(workspace.includes('Enroll Now')&&workspace.includes('startCheckout(chosen.id)'),
+assert(read('src/production/LearnerCourseCard.jsx').includes('Enroll Now')&&workspace.includes('startCheckout(chosen.id)'),
  'Locked lessons and Course card must link to selected-course checkout');
 assert(workspace.includes('onCheckoutRoute(id)'));
 assert(workspace.includes('screen===\'checkout\''));

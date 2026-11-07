@@ -39,3 +39,5 @@ Record immutable commit SHA and environment/project identity (never publish priv
 ### P12.2 staging evidence rule
 
 Use `docs/current/P12_2_STAGING_API_QA_AND_EVIDENCE.md`. `npm run qa:staging:read` is explicitly manual with independent project reference/confirmation guards and only tests 19 read-only API scenarios. An imported JSON QA report does not prove its origin or grant Production authorization. Never put genuine staging accounts, keys, tokens or source questions in GitHub CI/reports. Real browser/mobile E2E, media, payments and load tests still must be separately evidenced. Current verdict remains NO-GO.
+
+| P17 Course Covers / catalog clarity | P1 already provides cover_path; P17 source adds public marketing-only Cover bucket/Admin Storage RLS, audit trigger, responsive cards and real-vs-demo My Learning grouping. | Owner-reviewed P17 migration ONCE after ledger/backup; live Admin JPEG/PNG/WebP upload, unauthorized upload denied, public cover fetch, private Lesson unchanged; mobile QA. No live DB write made by code author. |
