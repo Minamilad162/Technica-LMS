@@ -43,7 +43,7 @@ assert.match(ui,/scope="learner"/);
 assert.match(ui,/scope="admin"/);
 assert.match(ui,/setLinksByUnit/);
 assert.match(ui,/linksByUnit\[key\]/);
-assert.match(ui,/const setUnit=i=>\{setUnitIndex\(i\);setPane\('evidence'\)/);
+assert.match(ui,/const setUnit=i=>\{setUnitIndex\(i\);setPane\('overview'\)/);
 assert.match(ui,/fileProtected/);
 assert.match(css,/\.qf-number-tabs\{[^}]*overflow-x:auto/s);
 assert.match(css,/\.qf-number-tab\.active/);

@@ -1,3 +1,9 @@
+### 2026-11-07 — P26 Qualification Portfolio reference screens (SOURCE ONLY)
+
+- Added the missing Learning Assistant reference sections while preserving premium compact horizontal Unit tabs: Course (Resources & Actions), Contact (Assessor Feedback / Contact Diary), Records (Registration, Metrics, Grading Checklists and Recording Forms). Learner still has Evidence, Mapping and Submit; all visible in the same Unit workspace.
+- Added compact assessor/verifier summary with no fabricated assignment/dates/expected progress. For NVQ Unit 1 guidance files, only reference names are shown and clearly non-downloadable. Admin Resources supports in-memory draft labels/file names; Contact & Records stores local demo notes and criterion-decision history, without claiming real grading.
+- Added P26 regression contract and updated canonical Blueprint §84; no Supabase writes, new migrations, actual uploaded resources, real assessor decisions or changed ASP learning/subscriptions.
+
 ### 2026-11-07 — P25 Minimal Qualifications UX with numbered horizontal Units (SOURCE ONLY)
 
 - Replaced text-heavy headers/step wizard, vertical learner Unit list and admin Unit dropdown with shared small horizontal 01–07 / 01–06 / 01–10 tabs, responsive overflow scroll, and Unit details opened directly below. Kept only Evidence / Mapping / Submit learner sections and compact Admin Unit Details / Task Templates / Assessments / IQA sections.

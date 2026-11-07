@@ -2,6 +2,7 @@ import React,{useRef,useState} from 'react';
 import {ArrowLeft,ArrowRight,BookOpen,Check,CheckCircle2,ChevronRight,ClipboardCheck,FileImage,FileSpreadsheet,FileText,FolderOpen,GraduationCap,Info,Link2,LockKeyhole,MessageSquare,Plus,Save,Send,ShieldCheck,Upload,X} from 'lucide-react';
 import {QUALIFICATIONS,FIRST_LO,SAMPLE_EVIDENCE} from './qualificationData.js';
 import './qualifications.css';
+import {PortfolioSnapshot,LearnerCourseSection,LearnerContactSection,LearnerRecordsSection,AdminResourcesSection,AdminPortfolioRecords} from './QualificationExtras.jsx';
 
 // P25: visual-only Qualifications workspace. No private files, credentials or assessment writes.
 const unitKey=(qualificationId,unitIndex)=>qualificationId+':'+unitIndex;
@@ -49,7 +50,7 @@ function LearnerQualifications(){
  const [qualificationId,setQualificationId]=useState('othm6');
  const [unitIndex,setUnitIndex]=useState(0);
  const [page,setPage]=useState('catalog');
- const [pane,setPane]=useState('evidence');
+ const [pane,setPane]=useState('overview');
  const [filesByQualification,setFilesByQualification]=useState({});
  const [linksByUnit,setLinksByUnit]=useState({});
  const [submittedByUnit,setSubmittedByUnit]=useState({});
@@ -64,8 +65,8 @@ function LearnerQualifications(){
  const lo=FIRST_LO[qualificationId];
  const mapped=criteria.filter(([code])=>files.some(file=>(links[file.id]||[]).includes(code))).length;
  const allMapped=criteria.length>0&&mapped===criteria.length;
- const setUnit=i=>{setUnitIndex(i);setPane('evidence');setNotice('');};
- const openQualification=id=>{setQualificationId(id);setUnitIndex(0);setPane('evidence');setPage('units');setNotice('');};
+ const setUnit=i=>{setUnitIndex(i);setPane('overview');setNotice('');};
+ const openQualification=id=>{setQualificationId(id);setUnitIndex(0);setPane('overview');setPage('units');setNotice('');};
  const onFiles=e=>{
   const selected=Array.from(e.target.files||[]).slice(0,10);
   if(!submitted&&selected.length){
@@ -100,8 +101,10 @@ function LearnerQualifications(){
    <UnitTabs qualification={qualification} active={unitIndex} onSelect={setUnit} scope="learner"/>
    <section id="learner-unit-panel" role="tabpanel" aria-labelledby={'learner-unit-tab-'+unitIndex}>
    <UnitHeading qualification={qualification} unitIndex={unitIndex} status={submitted?'Submitted · Demo':null} scope="learner"/>
-   <PaneTabs label="Unit sections" active={pane} onChange={setPane} tabs={[[ 'evidence','Evidence',FolderOpen],['mapping','Mapping',Link2],['submission','Submit',Send]]}/>
+   <PortfolioSnapshot filesCount={files.length} mapped={mapped} criteriaCount={criteria.length} submitted={submitted}/>
+   <PaneTabs label="Unit sections" active={pane} onChange={setPane} tabs={[[ 'overview','Course',BookOpen],['evidence','Evidence',FolderOpen],['mapping','Mapping',Link2],['submission','Submit',Send],['contact','Contact',MessageSquare],['records','Records',ClipboardCheck]]}/>
    <main id="Unit-sections-panel" className="qf-pane-content" role="tabpanel">
+    {pane==='overview'&&<LearnerCourseSection qualificationId={qualificationId} unitIndex={unitIndex} submitted={submitted} hasCriteria={!!criteria.length} onEvidence={()=>setPane('evidence')} onMapping={()=>setPane('mapping')}/>}
     {pane==='evidence'&&<div className="qf-columns">
       <Card title={'Your Evidence ('+files.length+')'} className="qf-evidence-card" action={<>{chooseFile}{addEvidence}</>}>
        {files.length?<div className="qf-file-list">{files.map(file=><FileRow key={file.id} file={file} onRemove={submitted||fileProtected(file.id)?null:()=>removeFile(file.id)}/>)}</div>:<div className="qf-empty"><FileText size={25}/> No evidence yet.</div>}
@@ -127,6 +130,8 @@ function LearnerQualifications(){
       </Card>
       <Card title="Your status"><p>{submitted?'Submitted (preview)':'Not submitted'}</p><p className="qf-small-note">Your assessor will review the evidence once the live workflow is enabled.</p></Card>
      </div>}
+    {pane==='contact'&&<LearnerContactSection qualificationId={qualificationId} unitIndex={unitIndex} submitted={submitted}/>}
+    {pane==='records'&&<LearnerRecordsSection filesCount={files.length} mapped={mapped} criteriaCount={criteria.length} submitted={submitted}/>}
    </main>
    </section>
   </>}
@@ -143,6 +148,9 @@ function AdminQualifications(){
  const [decisionsByUnit,setDecisionsByUnit]=useState({});
  const [feedbackByUnit,setFeedbackByUnit]=useState({});
  const [outcomesByUnit,setOutcomesByUnit]=useState({});
+ const [resourceDraftsByUnit,setResourceDraftsByUnit]=useState({});
+ const [reviewHistoryByUnit,setReviewHistoryByUnit]=useState({});
+ const [notesByUnit,setNotesByUnit]=useState({});
  const [notice,setNotice]=useState('');
  const qualification=QUALIFICATIONS.find(x=>x.id===qualificationId);
  const key=unitKey(qualificationId,unitIndex);
@@ -161,6 +169,7 @@ function AdminQualifications(){
  const recordReview=()=>{
   if(outcome==='accept'&&(!criteria.length||criteria.some(([code])=>decisions[code]!=='met'))){setNotice('Mark every criterion Met before accepting.');return;}
   if(outcome==='return'&&!feedback.trim()){setNotice('Add feedback before returning.');return;}
+  setReviewHistoryByUnit(old=>({...old,[key]:[{outcome,feedback,decisions:{...decisions},date:new Date().toLocaleString()},...(old[key]||[])]}));
   setNotice('Record preview decision only. No real learner file is accessed and no acceptance was saved.');
  };
  return <div className="qf-workspace qf-admin">
@@ -168,13 +177,15 @@ function AdminQualifications(){
   <UnitTabs qualification={qualification} active={unitIndex} onSelect={changeUnit} scope="admin"/>
   <section id="admin-unit-panel" role="tabpanel" aria-labelledby={'admin-unit-tab-'+unitIndex}>
   <UnitHeading qualification={qualification} unitIndex={unitIndex} scope="admin"/>
-  <PaneTabs label="Admin qualification sections" active={pane} onChange={setPane} tabs={[[ 'details','Unit Details',BookOpen],['templates','Task Templates',FileText],['review','Assessments',ClipboardCheck],['iqa','IQA',ShieldCheck]]}/>
+  <PortfolioSnapshot filesCount={SAMPLE_EVIDENCE.length} mapped={0} criteriaCount={criteria.length} submitted={false}/>
+  <PaneTabs label="Admin qualification sections" active={pane} onChange={setPane} tabs={[[ 'details','Unit',BookOpen],['resources','Resources',FolderOpen],['templates','Templates',FileText],['review','Assessment',ClipboardCheck],['records','Contact & Records',MessageSquare],['iqa','IQA',ShieldCheck]]}/>
   <div id="Admin-qualification-sections-panel" className="qf-pane-content" role="tabpanel">
    {pane==='details'&&<Card title="Assessment criteria" className="qf-admin-details">
      <div className="qf-readonly"><span>Unit reference</span><strong>{qualification.units[unitIndex][0]}</strong></div>
      {criteria.length?<><p className="qf-detail-code">LO {lo.code} · {lo.title}</p>{criteria.map(([code,title])=><div className="qf-criterion-item" key={code}><b>{code}</b><span>{title}</span></div>)}</>:<div className="qf-empty qf-empty-compact">Approved assessment criteria not imported yet.</div>}
      <p className="qf-small-note">Official wording is read-only.</p>
    </Card>}
+   {pane==='resources'&&<AdminResourcesSection key={key} unitRef={qualification.units[unitIndex][0]} onNotify={setNotice} resources={resourceDraftsByUnit[key]||[]} onResourcesChange={resources=>setResourceDraftsByUnit(old=>({...old,[key]:resources}))}/>}
    {pane==='templates'&&<div className="qf-admin-two">
       <Card title="Task Templates" action={<Button variant="outline" onClick={createTemplate}><Plus size={16}/> New Task</Button>}>
        <div className="qf-template-list">{templates.map(t=><button key={t.id} type="button" className={t.id===selectedId?'active':''} onClick={()=>setSelectedTemplateByUnit(old=>({...old,[key]:t.id}))}><FileText size={16}/>{t.title}<ChevronRight size={16}/></button>)}</div>
@@ -198,6 +209,7 @@ function AdminQualifications(){
        <p className="qf-small-note">No real learner file is accessed.</p>
      </Card>
    </div>}
+   {pane==='records'&&<AdminPortfolioRecords key={key} unitRef={qualification.units[unitIndex][0]} criteria={criteria} reviewHistory={reviewHistoryByUnit[key]||[]} notes={notesByUnit[key]||[]} addNote={text=>setNotesByUnit(old=>({...old,[key]:[{text,date:new Date().toLocaleString()},...(old[key]||[])]}))}/>}
    {pane==='iqa'&&<Card title="Internal Quality Assurance"><div className="qf-empty"><ShieldCheck size={26}/> No assessments connected yet.</div></Card>}
   </div>
   </section>
