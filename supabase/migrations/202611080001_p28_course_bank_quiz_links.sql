@@ -2,7 +2,7 @@
 -- SOURCE ONLY: owner-approved Staging ledger/backup/RLS tests before executing.
 -- DOES NOT import rows, reserve ASP Mock forms, publish content or change learner data.
 BEGIN;
-DO $
+DO $p28$
 DECLARE v_missing text[] := ARRAY[]::text[];
 BEGIN
  IF to_regprocedure('public.lms_p1_actor_is_admin()') IS NULL
@@ -27,7 +27,7 @@ BEGIN
    WHERE table_schema='public' AND table_name='lms_p22_lesson_quiz_questions'
      AND column_name='bank_question_id')
  THEN RAISE EXCEPTION 'P28 already installed or conflicts; do not replay'; END IF;
-END $$;
+END $p28$;
 
 ALTER TABLE public.lms_p22_lesson_quiz_questions
  ADD COLUMN bank_question_id uuid REFERENCES public.lms_questions(id) ON DELETE RESTRICT;
