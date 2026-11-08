@@ -28,18 +28,17 @@ assert(!learner.includes("db.from('lms_questions')"), 'Learner must never read t
 
 for(const snippet of [
  '0 Published','2 Not published',
- 'unsaved edit','click Save All Changes first',
- 'Review Draft questions','Open Lesson Quiz',
- 'openQuestionReview','setReviewOpen(true)',
+ 'Publish saved Lesson questions on Save All Changes',
+ 'releaseLessonId','Open Lesson Quiz',
  'inspectLessonQuizPublication(db,inspectLessonId)'
 ]){
  const dynamic=snippet==='0 Published'||snippet==='2 Not published';
  if(!dynamic)assert(admin.includes(snippet),'Missing P33 admin guidance: '+snippet);
 }
-assert(admin.includes('if(selected?.slug===\'asp\')setReviewOpen(true)'));
+assert(!admin.includes('>Review Draft questions</button>'),'Quiz publication must not require separate Draft review');
 assert(admin.includes("className=\"p30-advanced-review\"")||admin.includes("className=\"p30-advanced-review\""));
 assert(lesson.includes('Lesson Quiz</strong>'));
-assert(lesson.includes('Review the question in the Course Bank, then click Publish below.'));
+assert(lesson.includes('To publish these saved linked questions'));
 assert(p30.includes("v_q.approval_state='approved'"),
  'Draft approval cannot be skipped in P30 Lesson link publication');
 assert(p22.includes('is_published IS TRUE'),'Learner must only see published records');
