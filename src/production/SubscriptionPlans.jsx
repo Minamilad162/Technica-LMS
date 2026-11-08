@@ -146,6 +146,7 @@ export default function SubscriptionPlans({db,user,subscription,subscriptionErro
       {configured&&<span className="sp-period">/ {term}</span>}
       {savings!==null&&<span className="sp-savings"><Zap size={13}/> Save {savings}%</span>}
      </div>
+     <p className="sp-term-note">One-time membership term · no per-course charges</p>
      <div className="sp-card-callout">
       {featured?<Crown size={18}/>:long?<Rocket size={18}/>:<Zap size={18}/>}
       <span>{subscriptionPlanCallout(plan,featured)}</span>
