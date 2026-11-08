@@ -4,7 +4,7 @@ import {hasPlatformAccess} from './subscriptionApi.js';
 import {subscriptionTimeLeft,formatEnd} from './subscriptionCountdownPolicy.js';
 import './subscriptionCountdown.css';
 
-export default function SubscriptionCountdown({subscription,loading=false,error='',onOpenPlans,compact=false}){
+export default function SubscriptionCountdown({subscription,openAccess=false,loading=false,error='',onOpenPlans,compact=false}){
  const [now,setNow]=useState(()=>Date.now());
  useEffect(()=>{
   const tick=()=>setNow(Date.now());
@@ -17,19 +17,19 @@ export default function SubscriptionCountdown({subscription,loading=false,error=
  const info=subscriptionTimeLeft(subscription,now);
  // Even if a prop looks valid, server-owned active status is the only access source.
  const active=info.state==='active'&&hasPlatformAccess(subscription);
- const status=loading?'loading':error?'error':active?'active':info.state==='expired'?'expired':info.state==='upcoming'?'upcoming':'none';
+ const status=loading?'loading':openAccess&&!active?'open':error?'error':active?'active':info.state==='expired'?'expired':info.state==='upcoming'?'upcoming':'none';
  const days=active?info.days:0;
- const label=status==='active'?days===1?'1 day left':days+' days left':
+ const label=status==='open'?'Learning access':status==='active'?days===1?'1 day left':days+' days left':
   status==='upcoming'?'Starts in '+info.days+' days':
   status==='expired'?'Plan expired':status==='loading'?'Checking plan…':
   status==='error'?'Plan unavailable':'No active plan';
  const end=active?formatEnd(subscription.ends_at):'';
- const hint=active?'Subscription valid until '+end:status==='error'?error:label;
+ const hint=status==='open'?'Published learning content is currently available':active?'Subscription valid until '+end:status==='error'?error:label;
  const labelId=active?'Subscription: '+label+', ends '+end:label;
  const content=<>
-  <div className="sc-text"><CalendarClock size={16} aria-hidden="true"/><span className="sc-copy"><strong>{label}</strong>{!compact&&<small>{active?'Until '+end:'Subscription'}</small>}</span></div>
+  <div className="sc-text"><CalendarClock size={16} aria-hidden="true"/><span className="sc-copy"><strong>{label}</strong>{!compact&&<small>{active?'Until '+end:status==='open'?'All courses':'Subscription'}</small>}</span></div>
   <span className="sc-track" role="progressbar" aria-label="Subscription time remaining" aria-valuemin={0} aria-valuemax={100} aria-valuenow={active?Math.round(info.remainingPercent):0}
-   aria-valuetext={active?label:'No active remaining subscription'}>
+   aria-valuetext={status==='open'?'Published learning available':active?label:'No active remaining subscription'}>
    <i style={{width:(active?info.remainingPercent:0)+'%'}}/>
   </span>
  </>;

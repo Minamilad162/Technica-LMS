@@ -1,14 +1,15 @@
 import {useEffect,useState} from 'react';
 import {getSupabaseClient} from '../lib/supabase.js';
 import {fetchMyPlatformSubscription,validP21Id} from './subscriptionApi.js';
+import {fetchLearningAccessMode} from './accessModeApi.js';
 
 // Header is purely informational: it reads current P21 rows under the logged-in
 // learner's JWT and RLS. Approval/revocation/payment logic is unchanged.
 export default function useHeaderSubscription(userId,enabled=true){
- const [result,setResult]=useState({subscription:null,loading:true,error:''});
+ const [result,setResult]=useState({subscription:null,openAccess:false,loading:true,error:''});
  useEffect(()=>{
   if(!enabled||!validP21Id(userId)){
-   setResult({subscription:null,loading:false,error:''});
+   setResult({subscription:null,openAccess:false,loading:false,error:''});
    return undefined;
   }
   let active=true,inFlight=false,lastAttempt=0;
@@ -18,13 +19,13 @@ export default function useHeaderSubscription(userId,enabled=true){
    try{
     const db=getSupabaseClient({secureReviewEntry:true});
     if(!db)throw new Error('Real subscription connection unavailable.');
-    const subscription=await fetchMyPlatformSubscription(db,userId);
-    if(active)setResult({subscription,loading:false,error:''});
+    const [subscription,policy]=await Promise.all([fetchMyPlatformSubscription(db,userId).catch(()=>null),fetchLearningAccessMode(db)]);
+    if(active)setResult({subscription,openAccess:policy.openAccess,loading:false,error:''});
    }catch(_error){
-    if(active)setResult({subscription:null,loading:false,error:'Subscription status unavailable'});
+    if(active)setResult({subscription:null,openAccess:false,loading:false,error:'Subscription status unavailable'});
    }finally{inFlight=false;}
   }
-  setResult({subscription:null,loading:true,error:''});
+  setResult({subscription:null,openAccess:false,loading:true,error:''});
   void load(true);
   const refresh=()=>{if(document.visibilityState==='visible')void load();};
   const interval=window.setInterval(refresh,300_000);
