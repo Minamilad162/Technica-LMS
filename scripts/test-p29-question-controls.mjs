@@ -31,6 +31,9 @@ for(const part of [
  'REVOKE ALL ON FUNCTION public.lms_p29_set_question_flags',
  ])assert(sql.includes(part),'P29 SQL missing '+part);
 assert(!sql.includes('DROP TABLE')&&!sql.includes('DELETE FROM public.lms_questions'),'P29 must preserve source bank and graded histories');
+assert(!/(?:AS\s+\$\s*$|END\s+\$;)/m.test(sql),'P29 SQL cannot have a lone dollar quote delimiter');
+assert((sql.match(/\$\$/g)||[]).length%2===0,'P29 SQL dollar-quote markers must be paired');
+
 for(const part of [
  'Upload Question File','type="file"','accept=".xlsx,.csv"','Active: ',
  'Mock Exam: ','Lesson Quiz','Select a lesson…','Add to Quiz',
