@@ -1,3 +1,9 @@
+## 2026-11-08 — Question Bank old UI / ASP Course false-missing diagnostic
+- Screenshot confirmed main deployed old `AdminQuestionsPanel` and exact-ASP slug gate rather than unmerged P28/P29 upload UI. The old Admin Tools catalog fetch silently replaced SQL/Auth/RLS errors with empty Courses, falsely instructing admins to create an ASP Course.
+- Admin Tools now distinguishes real Supabase Course loading/errors/empty with Retry/Courses navigation, and prefers existing canonical ASP identity. A legacy Course titled “ASP Course” but slugged `asp-course` remains visible with an explicit warning; no duplicate creation/import or silent migration of its identity.
+- New explicit ASP Course authoring selects canonical `asp` slug and guards against a second course when a legacy ASP title already exists. Existing course/Question/Mock IDs untouched. Added pure and static regression tests.
+- The new upload/check-box UI still requires successful CI, deployment and the already staged P28.2/P29 schema; none were applied to live Supabase by this code change.
+
 ## 2026-11-08 — P29 Admin Question Bank controls and Lesson Quiz selection
 - Added visible per-question Active (true by default) and Mock Exam candidate checkboxes to the course-scoped Excel/CSV uploader. Admin picks a nested Lesson for the question and adds it directly to that Lesson Quiz; existing Course Builder Lesson Quiz selection from Bank remains.
 - Added protected P29 SQL: additive boolean switches, Admin-only audited flag RPC and Mock selection handoff, strict 200-question ASP official reservation unchanged, disabled/candidate questions excluded from server P4/P8e new draws, disabled published lesson quizzes unpublished without deleting historical attempts or quiz answers.
