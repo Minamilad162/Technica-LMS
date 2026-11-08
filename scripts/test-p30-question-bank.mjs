@@ -35,7 +35,7 @@ for(const required of [
  'Save All Changes','Discard','unsaved','Upload Excel / CSV','Add Question',
  'Difficulty: ','Active: ','Mock Exam: ','Assign Lesson Quiz:',
  'onChange={e=>stage(q,','batchStage(','Save or discard pending edits',
- 'stagedToBatch(staged)','saveCourseBankBatch(db,courseId,payload)',
+ 'stagedToBatch(staged)','saveCourseBankBatch(db,courseId,payload,releaseLessonId',
  'onDirtyChange?.(dirtyCount>0)','beforeunload','p30-table',
  'p30-question-cell','p30-bulk-bar'
 ])assert(bank.includes(required),'Missing P30 compact single-save UX '+required);
