@@ -80,9 +80,9 @@ export default function App(){
  <Route path="/my-progress" element={<RoutePage><LiveLearnerProgress/></RoutePage>}/>
  <Route path="/learning/course/:courseId" element={<RoutePage><LiveLearningCourse/></RoutePage>}/>
  <Route path="/learning/process-safety-foundations" element={<RoutePage><LegacyPreviewWarning><LearningPlayer/></LegacyPreviewWarning></RoutePage>}/>
- <Route path="/practice" element={legacyPreview?<RoutePage><LegacyPreviewWarning><PracticePage/></LegacyPreviewWarning></RoutePage>:<Navigate to="/assessments?tab=practice" replace/>}/>
+ <Route path="/practice" element={legacyBrowserQa?<RoutePage><LegacyPreviewWarning><PracticePage/></LegacyPreviewWarning></RoutePage>:<Navigate to="/assessments?tab=practice" replace/>}/>
  <Route path="/practice/live" element={<RoutePage standalone><LivePracticePortal/></RoutePage>}/>
- <Route path="/practice/session" element={<RoutePage standalone><QuizPage kind="practice"/></RoutePage>}/>
+ <Route path="/practice/session" element={legacyBrowserQa?<RoutePage standalone><QuizPage kind="practice"/></RoutePage>:<Navigate to="/assessments?tab=practice" replace/>}/>
  <Route path="/admin-tools" element={<AdminOnly><RoutePage><AdminToolsPortal/></RoutePage></AdminOnly>}/>
  <Route path="/admin/course-preview/:courseId" element={<AdminOnly><RoutePage><AdminCoursePreview/></RoutePage></AdminOnly>}/>
  <Route path="/analytics" element={<AdminOnly><RoutePage><AnalyticsPage/></RoutePage></AdminOnly>}/>
@@ -92,7 +92,7 @@ export default function App(){
  <Route path="/release-readiness" element={<AdminOnly><RoutePage><LiveReleaseReadiness/></RoutePage></AdminOnly>}/>
  <Route path="/assessments" element={<RoutePage><LiveExamPracticeHub/></RoutePage>}/>
  <Route path="/assessments/mock/live" element={<RoutePage standalone><LiveMockPortal/></RoutePage>}/>
- <Route path="/assessments/take" element={<RoutePage standalone><QuizPage kind="assessment"/></RoutePage>}/>
+ <Route path="/assessments/take" element={legacyBrowserQa?<RoutePage standalone><QuizPage kind="assessment"/></RoutePage>:<Navigate to="/assessments?tab=mock" replace/>}/>
  <Route path="/results" element={<RoutePage><ResultsPage/></RoutePage>}/>
  <Route path="/practice/results" element={<RoutePage><PracticeResultsPage/></RoutePage>}/>
  <Route path="/learners" element={<AdminOnly><RoutePage><LearnersPage/></RoutePage></AdminOnly>}/>
