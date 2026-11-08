@@ -145,16 +145,46 @@ export default function CourseLessonExplorer({db,userId='',courseId,courseTitle,
   }));
   return()=>cancelAnimationFrame(frame);
  },[active]);
- const jumpToSection=key=>{
+ const scrollToLessonSection=key=>{
   const target={video:videoSectionRef.current,material:materialSectionRef.current,
    quiz:quizSectionRef.current}[key];
-  if(!target)return;
+  if(!target)return false;
   setCurrentSection(key);
   target.scrollIntoView({behavior:window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches?
    'auto':'smooth',block:'start'});
+  return true;
  };
+ const refreshLessonQuiz=async()=>{
+  if(!selected||!accessible||lessonLoading||quizLoading)return;
+  const request=++quizRequest.current,lessonId=selected.id;
+  setQuizLoading(true);setQuizError('');
+  try{
+   const newQuestions=await fetchLessonQuiz(db,lessonId,{adminPreview});
+   if(request!==quizRequest.current)return;
+   if(quizQuestionIdsChanged(questions,newQuestions)){
+    setAnswers({});setQuizResult(null);
+   }
+   setQuestions(newQuestions);
+  }catch(e){
+   if(request===quizRequest.current)setQuizError(e.message||'Unable to refresh this Knowledge Check.');
+  }finally{
+   if(request===quizRequest.current)setQuizLoading(false);
+  }
+ };
+ const jumpToSection=key=>{
+  // These are page anchors, not content-swapping tabs.
+  if(!scrollToLessonSection(key))setPendingJump(key);
+  if(key==='quiz')void refreshLessonQuiz();
+ };
+ useEffect(()=>{
+  if(!pendingJump||lessonLoading||!selected||!accessible)return;
+  const frame=requestAnimationFrame(()=>{
+   if(scrollToLessonSection(pendingJump))setPendingJump('');
+  });
+  return()=>cancelAnimationFrame(frame);
+ },[pendingJump,lessonLoading,selected?.id,accessible]);
  const submitQuiz=async()=>{
-  if(adminPreview||!selected||saving||questions.length===0||
+  if(adminPreview||!selected||saving||quizLoading||questions.length===0||
    questions.some(q=>!Number.isInteger(answers[q.id])))return;
   setSaving('quiz');setStatusError('');
   try{
@@ -173,7 +203,7 @@ export default function CourseLessonExplorer({db,userId='',courseId,courseTitle,
  const totals=lessons.length,finished=lessons.filter(l=>completed(progress[l.id])).length;
  const selectLesson=l=>{
   if(!hasAccess(l,full,demo)){onSubscribe?.();return;}
-  setActive(l.id);
+  setPendingJump('');setActive(l.id);
   setCurrentSection('video');
  };
  const tabInfo=[['video','Video',Video,'video'],['material','Study Material',BookOpen,'reading'],['quiz','Knowledge Check',CheckCircle2,'quiz']];
@@ -237,7 +267,7 @@ export default function CourseLessonExplorer({db,userId='',courseId,courseTitle,
        aria-controls={'cle-'+key+'-'+selected.id}
        className={currentSection===key?'selected':''} onClick={()=>jumpToSection(key)}>
        {stepDone(selected.id,step)?<CheckCircle2 className="cle-success" size={16}/>:<Icon size={16}/>}
-       {name}</button>)}
+       {name}{key==='quiz'&&!lessonLoading&&questions.length>0&&<span className="cle-quiz-count" aria-label={questions.length+' quiz questions'}>{questions.length}</span>}</button>)}
      </nav>
      {statusError&&<p className="cle-error" role="alert">{statusError}</p>}
      {lessonLoading?<div className="cle-notice" role="status">Loading your protected lesson…</div>:
