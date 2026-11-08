@@ -29,8 +29,8 @@ for(const marker of ['params.get(\'lessonId\')','setLessonId(realLesson.id)',
  "id={'lms-builder-lesson-'+lesson.id}","scrollIntoView({behavior:'smooth'"])
  assert(builder.includes(marker),'P32 deep link to exact Lesson editor missing '+marker);
 for(const marker of ['publishedCount=items.filter(q=>q.is_published).length',
- 'pendingCount=items.length-publishedCount','Learners will see 0 questions until you approve the Drafts',
- 'Review the question in the Course Bank','Not published · learner cannot see it yet',
+ 'pendingCount=items.length-publishedCount','Learners will see 0 questions',
+ 'To publish these saved linked questions','Not published · learner cannot see it yet',
  "q.is_published?'Unpublish':'Publish'"])
  assert(editor.includes(marker),'P32 Admin Lesson editor publication guidance missing '+marker);
 assert(css.includes('.p32-publication-status')&&css.includes('@media(max-width:760px)'));
