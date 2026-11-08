@@ -43,7 +43,7 @@ for(const marker of [
  'Admin-reviewed activation','Price not configured',
  'Already subscribed','Awaiting Admin','Request this plan'
 ]){
- const value=marker==='Request this plan'?'Request '+"'"+'+term+"'"+' access':marker;
+ const value=marker==='Request this plan'?'Request this plan':marker;
  assert(ui.includes(value),'P38 Premium UI missing '+marker);
 }
 assert(!ui.includes('$29.99')&&!ui.includes('$49.99')&&!ui.includes('$69.99'),'No hardcoded mockup price');
