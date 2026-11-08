@@ -17,7 +17,6 @@ export default function OfficialMockBankFinalizer({db,course,disabled=false,revi
    if(!live)return;
    if(new Set(marked).size!==marked.length)throw Error('Duplicate saved Mock question IDs.');
    if(marked.length>200){setIds(marked);setOpen(false);return;}
-   if(marked.length>200){setIds(marked);setOpen(false);return;}
    setIds(marked);setOpen(marked.length===200&&course.slug==='asp');
   }).catch(e=>{if(live)setError(e?.message||'Saved Mock selection could not be read.');})
    .finally(()=>{if(live)setLoading(false);});
@@ -29,6 +28,7 @@ export default function OfficialMockBankFinalizer({db,course,disabled=false,revi
   try{
    const marked=await loadMarkedMockCandidateIds(db,course.id);
    if(new Set(marked).size!==marked.length)throw Error('Duplicate saved Mock question IDs.');
+   if(marked.length>200){setIds(marked);setOpen(false);return;}
    setIds(marked);setOpen(marked.length===200&&course.slug==='asp');
   }catch(e){setError(e?.message||'Could not verify saved Mock questions.');}
   finally{setLoading(false);}
