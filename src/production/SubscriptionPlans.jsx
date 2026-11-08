@@ -155,7 +155,7 @@ export default function SubscriptionPlans({db,user,subscription,subscriptionErro
       {planFeatures.map(({label,icon:Icon})=><span key={label}><Icon size={17}/>{label}</span>)}
      </div>
      {selected&&<div className="sp-focused-label"><CheckCircle2 size={13}/> Highlighted plan</div>}
-     <button className="sp-subscribe" type="button"
+     <button className="sp-subscribe" type="button" title={!subscription&&!pending&&configured?'Request this plan: '+term:undefined}
       disabled={!!subscription||!!pending||!configured||!!busy}
       onClick={()=>choose(plan)}>
       {subscription?(current?'Your active plan':'Already subscribed'):
