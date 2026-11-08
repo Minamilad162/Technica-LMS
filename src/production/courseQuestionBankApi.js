@@ -39,6 +39,20 @@ export async function reserveNonAspMockQuestion(db,id){
  return call(db,'lms_p28_mark_nonasp_mock',{p_question_id:checkId(id),
   p_confirmation:'RESERVE NON-ASP MOCK ONLY'});
 }
+export async function setQuestionBankFlags(db,questionId,isActive,mockCandidate){
+ if(typeof isActive!=='boolean'||typeof mockCandidate!=='boolean')
+  throw Error('Select an explicit Active / Mock Exam state.');
+ const data=await call(db,'lms_p29_set_question_flags',{
+  p_question_id:checkId(questionId),p_is_active:isActive,p_mock_candidate:mockCandidate});
+ if(data?.id!==questionId)throw Error('Bank state change was not verified.');
+ return data;
+}
+export async function loadMarkedMockCandidateIds(db,courseId){
+ const data=await call(db,'lms_p29_mock_candidate_ids',{p_course_id:checkId(courseId)});
+ if(!data||!Array.isArray(data.ids)||data.count!==data.ids.length
+  ||data.ids.some(id=>!uuid.test(id)))throw Error('Unexpected Mock selection response.');
+ return data.ids;
+}
 export async function attachBankToLesson(db,lessonId,questionId,publish=false){
  return call(db,'lms_p28_attach_lesson_question',{
   p_lesson_id:checkId(lessonId),p_question_id:checkId(questionId),p_publish:!!publish});
