@@ -3,6 +3,7 @@ import {AlertCircle,BookOpen,CheckCircle2,FileQuestion,FileSpreadsheet,Plus,Refr
 import {importQuestionFile} from '../lib/questionImport.js';
 import {importCourseBank,listCourseBank,mappedImportRows,saveCourseBankBatch,getCourseBankBatchCapabilities,approveNonAspBankQuestion,reserveNonAspMockQuestion} from './courseQuestionBankApi.js';
 import {stagedQuestionEdit,stagedToBatch,originalQuestionValues,BANK_DIFFICULTIES} from './questionBankDraft.js';
+import {summarizeSavedLessonAssignments} from './lessonQuizSyncApi.js';
 import {liveCourseTree} from './liveAuthoringApi.js';
 import {isAspCourseTitle,isOfficialAspCourse,preferredQuestionBankCourse,questionBankCatalogState} from './questionBankCourseSelection.js';
 import {AdminQuestionsPanel,AdminMockPanel} from './AdminToolsPanels.jsx';
@@ -112,11 +113,15 @@ export default function AdminCourseBank({db,courses=[],asp,onUpdate,onDirtyChang
   try{
    const payload=stagedToBatch(staged);
    if(payload.length>500)throw Error('Save no more than 500 staged questions in one batch.');
+   const links=summarizeSavedLessonAssignments(payload);
    const result=await saveCourseBankBatch(db,courseId,payload);
    setStaged({});setSelectedIds([]);
-   setNotice('Saved '+result.saved+' question(s) in one transaction'+
-    (result.linked?' · '+result.linked+' Lesson Quiz links added':'')+
-    (result.unpublished?' · '+result.unpublished+' quiz entries unpublished':'')+'.');
+   const details=result.linked&&result.linked===links.assigned
+    ?' · '+links.approved+' Lesson Quiz question(s) published for eligible learners'+
+      (links.draft?' · '+links.draft+' Draft link(s) require question approval AND publishing in Course Builder → Lesson Quiz':'')
+    :result.linked?' · '+result.linked+' Lesson Quiz links added (verify their publication status in Course Builder)':'';
+   setNotice('Saved '+result.saved+' question(s) in one transaction'+details+
+    (result.unpublished?' · '+result.unpublished+' previously published quiz question(s) unpublished':'')+'.');
    refresh(true);
   }catch(e){setError('Nothing was partially saved; your edits are still staged. '+fail(e));}
   finally{setBusy(false);}
@@ -281,6 +286,11 @@ export default function AdminCourseBank({db,courses=[],asp,onUpdate,onDirtyChang
     <button type="submit" className="at-primary" disabled={busy}>Create Draft Question</button></div>
   </form>}
   {selected&&<>
+   <p className="p31-lesson-publish-note">
+    <BookOpen size={16}/> Assigning a question to a Lesson Quiz links it to that Lesson.
+    <strong> Approved + Active + non-Mock</strong> questions publish to the learner Knowledge Check on Save.
+    <strong> Draft</strong> links stay hidden until independent approval and publication in Course Builder.
+   </p>
    <div className="p30-table-card at-surface">
     <div className="p30-table-top">
      <strong>{selected.title} <span>· {bank.total} results</span></strong>
