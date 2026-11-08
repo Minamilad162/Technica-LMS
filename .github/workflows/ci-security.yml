@@ -158,7 +158,7 @@ jobs:
       - name: P30 compact Question Bank, staged edits and one atomic Save contract
         run: npm run test:p30:bank
 
-      - name: P31 learner Lesson Quiz links: published-only P22 fetch, same-page jump/refresh and Draft approval gate
+      - name: P31 learner Lesson Quiz published-only P22 fetch, same-page jump and Draft approval gate
         run: npm run test:p31:lesson-quiz
 
       - name: P5 native fullscreen and exit policy contracts
