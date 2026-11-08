@@ -19,3 +19,12 @@ export function questionBankCatalogState(courses,loading=false,error=''){
  };
  return {status:'ready',message:''};
 }
+
+export function aspMissingReason(courses=[]){
+ const rows=Array.isArray(courses)?courses:[];
+ if(rows.some(isOfficialAspCourse))
+  return 'The ASP Mock question form requires 200 verified and reserved questions.';
+ if(rows.some(isAspCourseTitle))
+  return 'Your ASP course needs its internal course identifier checked by an administrator before the official Mock can start.';
+ return 'The ASP Mock is not configured yet. An administrator needs to publish the ASP course and reserve its official 200-question form.';
+}
