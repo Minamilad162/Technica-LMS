@@ -21,7 +21,7 @@ for(const marker of ['inspectLessonQuizPublication(db,inspectLessonId)',
  'Saved Lesson Quiz publication status','Check learner quiz for',
  'Open Lesson Quiz','Published','Not published',
  'No saved questions are linked to this Lesson',
- 'All linked questions are hidden from learners',
+ 'Linked questions are saved but hidden from learners',
  '/builder?courseId=','&lessonId='])
  assert(bank.includes(marker),'P32 Admin lesson status markup missing '+marker);
 assert(bank.includes('Save All Changes')&&bank.includes('stagedToBatch(staged)'));
@@ -29,13 +29,13 @@ for(const marker of ['params.get(\'lessonId\')','setLessonId(realLesson.id)',
  "id={'lms-builder-lesson-'+lesson.id}","scrollIntoView({behavior:'smooth'"])
  assert(builder.includes(marker),'P32 deep link to exact Lesson editor missing '+marker);
 for(const marker of ['publishedCount=items.filter(q=>q.is_published).length',
- 'pendingCount=items.length-publishedCount','Learners will see 0 questions.',
- 'Review the Course Bank question first','Not published · learner cannot see it yet',
+ 'pendingCount=items.length-publishedCount','Learners will see 0 questions until you approve the Drafts',
+ 'Review the question in the Course Bank','Not published · learner cannot see it yet',
  "q.is_published?'Unpublish':'Publish'"])
  assert(editor.includes(marker),'P32 Admin Lesson editor publication guidance missing '+marker);
 assert(css.includes('.p32-publication-status')&&css.includes('@media(max-width:760px)'));
 assert(learner.includes("fetchLessonQuiz(db,active,{adminPreview})"));
-assert(learner.includes('No published Knowledge Check questions are available for this lesson yet.'));
+assert(learner.includes('No published quiz questions yet.'));
 assert(backend.includes("v_q.approval_state='approved'"),'P30 must continue to auto-publish only independently approved questions');
 assert(source.includes('p_publish boolean DEFAULT false'),'P28 linkage has an explicit publish flag');
 assert(sql.includes('LEFT JOIN public.lms_p22_lesson_quiz_questions')&&

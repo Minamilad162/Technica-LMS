@@ -1,4 +1,4 @@
-import React,{useEffect,useMemo,useState} from 'react';
+import React,{useEffect,useMemo,useRef,useState} from 'react';
 import {AlertCircle,BookOpen,CheckCircle2,FileQuestion,FileSpreadsheet,Plus,RefreshCw,Search,ShieldCheck,Save,Undo2,Upload,SlidersHorizontal} from 'lucide-react';
 import {importQuestionFile} from '../lib/questionImport.js';
 import {importCourseBank,listCourseBank,mappedImportRows,saveCourseBankBatch,getCourseBankBatchCapabilities,approveNonAspBankQuestion,reserveNonAspMockQuestion,inspectLessonQuizPublication} from './courseQuestionBankApi.js';
@@ -11,7 +11,7 @@ import './courseQuestionBank.css';
 
 const fail=e=>e?.message||'The protected Question Bank request failed.';
 const initial=()=>({prompt:'',options:['','','',''],correct:0,explanation:''});
-function Status({value}){return <span className={'p28-status '+(value==='approved'?'approved':value==='mock'?'mock':'draft')}>{value}</span>;}
+function Status({value}){return <span title={value==='draft'?'Draft · not visible to learners until approved and published':value==='approved'?'Approved question · learner visibility also requires a published Lesson Quiz link':'Reserved for Mock · excluded from Lesson Quiz'} className={'p28-status '+(value==='approved'?'approved':value==='mock'?'mock':'draft')}>{value}</span>;}
 
 export default function AdminCourseBank({db,courses=[],asp,onUpdate,onDirtyChange,mode='bank',coursesLoading=false,coursesError='',onRefreshCourses,onGoToCourses}){
  const [courseId,setCourseId]=useState(''),[domains,setDomains]=useState([]),[domainId,setDomainId]=useState('');
@@ -26,6 +26,7 @@ export default function AdminCourseBank({db,courses=[],asp,onUpdate,onDirtyChang
  const [inspectLessonId,setInspectLessonId]=useState('');
  const [inspectState,setInspectState]=useState({loading:false,data:null,error:''});
  const [reviewOpen,setReviewOpen]=useState(false);
+ const reviewRef=useRef(null);
  const [batchReady,setBatchReady]=useState(false),[batchLoading,setBatchLoading]=useState(true);
  const [batchError,setBatchError]=useState('');
  const dirtyCount=Object.keys(staged).length;
@@ -142,6 +143,11 @@ export default function AdminCourseBank({db,courses=[],asp,onUpdate,onDirtyChang
   }catch(e){setError('Nothing was partially saved; your edits are still staged. '+fail(e));}
   finally{setBusy(false);}
  }
+ const openQuestionReview=()=>{
+  if(selected?.slug==='asp')setReviewOpen(true);
+  else if(reviewRef.current)reviewRef.current.open=true;
+  requestAnimationFrame(()=>reviewRef.current?.scrollIntoView({behavior:'smooth',block:'start'}));
+ };
  const discard=()=>{
   if(dirtyCount&&window.confirm('Discard all '+dirtyCount+' unsaved edits?')){
    setStaged({});setNotice('Unsaved edits discarded.');setError('');
@@ -322,9 +328,14 @@ export default function AdminCourseBank({db,courses=[],asp,onUpdate,onDirtyChang
       <strong>{inspectState.data.published} Published</strong>
       <span>{inspectState.data.pending} Not published</span>
       {inspectState.data.total===0?<small>No saved questions are linked to this Lesson. Select it in a question row and click Save All Changes.</small>:
-       inspectState.data.published===0?<small>All linked questions are hidden from learners. Drafts need independent approval; approved linked questions can be published in the Lesson Quiz editor.</small>:
-       <small>These published questions should appear to an authorized learner in this Lesson's Knowledge Check.</small>}
+       inspectState.data.published===0?<small>Linked questions are saved but hidden from learners. To show them in the Quiz: finish any unsaved edits, complete independent question review, then publish eligible entries in the Lesson Quiz editor.</small>:
+       <small>These published questions should appear to an authorized learner in this Lesson's Quiz.</small>}
      </div>}
+    {mode==='bank'&&inspectState.data?.pending>0&&<div className="p33-next-steps">
+     {dirtyCount>0&&<span className="p33-unsaved-note">{dirtyCount} unsaved edit{dirtyCount===1?'':'s'} — click Save All Changes first.</span>}
+     <button type="button" className="at-outline" onClick={openQuestionReview} disabled={busy}>Review Draft questions</button>
+     <small>After approval, open the Lesson Quiz and publish eligible linked questions.</small>
+    </div>}
     <a className="at-outline p32-open-lesson" href={'/builder?courseId='+encodeURIComponent(courseId)+'&lessonId='+encodeURIComponent(inspectLessonId)}
      target="_blank" rel="noopener noreferrer" aria-label="Open the selected Lesson Quiz editor">
      Open Lesson Quiz <span aria-hidden="true">↗</span></a>
@@ -421,7 +432,7 @@ export default function AdminCourseBank({db,courses=[],asp,onUpdate,onDirtyChang
     </div>
    </div>
    {dirtyCount>500&&<p role="alert" className="at-error">Maximum 500 edits per atomic save. Discard or reduce the staged changes before saving.</p>}
-   {selected.slug!=='asp'&&mode==='bank'&&<details className="p30-advanced-review">
+   {selected.slug!=='asp'&&mode==='bank'&&<details ref={reviewRef} className="p30-advanced-review">
     <summary>Independent approval / non-ASP Mock-only review</summary>
     <p>Approval is an audited, separate rights-and-answer verification action. Finish Save All Changes first.</p>
     {bank.items.filter(q=>q.approvalState==='draft'&&!q.mockExclusive).map(q=><div key={q.id} className="p30-review-row">
@@ -431,7 +442,7 @@ export default function AdminCourseBank({db,courses=[],asp,onUpdate,onDirtyChang
       onClick={()=>void action(q,'mock')}>Reserve Mock-only</button>
     </div>)}
    </details>}
-   {selected.slug==='asp'&&mode==='bank'&&<div className="p30-advanced-review">
+   {selected.slug==='asp'&&mode==='bank'&&<div ref={reviewRef} className="p30-advanced-review">
     <button type="button" className="at-outline" onClick={()=>setReviewOpen(v=>!v)}>
      {reviewOpen?'Hide':'Open'} ASP rights & independent approval workbench</button>
     {reviewOpen&&<section className="p28-asp-review"><AdminQuestionsPanel db={db} asp={asp||selected} onUpdate={()=>refresh()}/></section>}

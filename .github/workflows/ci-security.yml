@@ -164,6 +164,9 @@ jobs:
       - name: P32 Admin actual Lesson Quiz published vs Draft read-only diagnostics and deep links
         run: npm run test:p32:quiz-visibility
 
+      - name: P33 explicit learner Quiz tab, 0 Published clarity and Draft approval pathway
+        run: npm run test:p33:learner-quiz
+
       - name: P5 native fullscreen and exit policy contracts
         run: npm run test:p5
 

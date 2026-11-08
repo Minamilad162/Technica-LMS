@@ -191,3 +191,11 @@
  .p32-publication-select,.p32-publication-summary,.p32-open-lesson{flex-basis:100%}
  .p32-publication-select select{max-width:none;width:100%;flex:1}
  .p32-open-lesson{justify-content:center}}
+
+/* P33: short, actionable pathway when Lesson 1 has unpublished questions. */
+.p33-next-steps{display:flex;align-items:center;gap:8px;flex-wrap:wrap;min-width:0}
+.p33-next-steps button{padding:8px 11px;font-size:11px;font-weight:800;white-space:nowrap}
+.p33-next-steps small{flex-basis:100%;font-size:10px;line-height:1.4;color:#6b858e}
+.p33-unsaved-note{font-size:11px;font-weight:800;color:#a46f11}
+.p30-advanced-review{scroll-margin-top:110px}
+@media(max-width:780px){.p33-next-steps{width:100%;justify-content:flex-start}}

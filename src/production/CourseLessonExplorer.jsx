@@ -75,7 +75,7 @@ export default function CourseLessonExplorer({db,userId='',courseId,courseTitle,
    if(quizResult.status==='fulfilled')setQuestions(quizResult.value);
    else{
     setQuestions([]);
-    setQuizError(quizResult.reason?.message||'Published Knowledge Check unavailable.');
+    setQuizError(quizResult.reason?.message||'Published Lesson Quiz unavailable.');
    }
   }).finally(()=>{
    if(live){setLessonLoading(false);setQuizLoading(false);}
@@ -166,7 +166,7 @@ export default function CourseLessonExplorer({db,userId='',courseId,courseTitle,
    }
    setQuestions(newQuestions);
   }catch(e){
-   if(request===quizRequest.current)setQuizError(e.message||'Unable to refresh this Knowledge Check.');
+   if(request===quizRequest.current)setQuizError(e.message||'Unable to refresh this Lesson Quiz.');
   }finally{
    if(request===quizRequest.current)setQuizLoading(false);
   }
@@ -206,7 +206,7 @@ export default function CourseLessonExplorer({db,userId='',courseId,courseTitle,
   setPendingJump('');setActive(l.id);
   setCurrentSection('video');
  };
- const tabInfo=[['video','Video',Video,'video'],['material','Study Material',BookOpen,'reading'],['quiz','Knowledge Check',CheckCircle2,'quiz']];
+ const tabInfo=[['video','Video',Video,'video'],['material','Study Material',BookOpen,'reading'],['quiz','Quiz',CheckCircle2,'quiz']];
  const selectedIndex=lessons.findIndex(l=>l.id===active);
  return <div className="cle-root">
   {!selected?<div className="cle-browser">
@@ -260,14 +260,14 @@ export default function CourseLessonExplorer({db,userId='',courseId,courseTitle,
      </section>)}
     </aside>
     <main className="cle-lesson-main">
-     {previewOnly?<div className="lj-demo-banner" role="status">This is a local preview of the lesson outline. Video, PDF and Knowledge Check remain protected until your platform subscription is active.</div>:<>
+     {previewOnly?<div className="lj-demo-banner" role="status">This is a local preview of the lesson outline. Video, PDF and Quiz remain protected until your platform subscription is active.</div>:<>
      <nav className="cle-steps" aria-label="Jump to lesson section">
       {tabInfo.map(([key,name,Icon,step])=><button type="button" key={key}
        aria-current={currentSection===key?'location':undefined}
        aria-controls={'cle-'+key+'-'+selected.id}
        className={currentSection===key?'selected':''} onClick={()=>jumpToSection(key)}>
        {stepDone(selected.id,step)?<CheckCircle2 className="cle-success" size={16}/>:<Icon size={16}/>}
-       {name}{key==='quiz'&&!lessonLoading&&questions.length>0&&<span className="cle-quiz-count" aria-label={questions.length+' quiz questions'}>{questions.length}</span>}</button>)}
+       {name}{key==='quiz'&&!lessonLoading&&<span className="cle-quiz-count" aria-label={questions.length+' published quiz questions'}>{questions.length}</span>}</button>)}
      </nav>
      {statusError&&<p className="cle-error" role="alert">{statusError}</p>}
      {lessonError&&<p className="cle-error" role="alert">{lessonError}</p>}
@@ -302,7 +302,7 @@ export default function CourseLessonExplorer({db,userId='',courseId,courseTitle,
         </div>}
        </section>
        <section id={'cle-quiz-'+selected.id} ref={quizSectionRef} className="cle-activity cle-activity-section" aria-labelledby={'cle-quiz-title-'+selected.id}>
-        <div className="cle-activity-title"><h3 id={'cle-quiz-title-'+selected.id}>Knowledge Check</h3><small>{adminPreview?'Admin preview · no answers or scores are submitted':'Answer every question to finish. Incorrect answers still count as completing the activity.'}</small></div>
+        <div className="cle-activity-title"><h3 id={'cle-quiz-title-'+selected.id}>Lesson Quiz</h3><small>{adminPreview?'Admin preview · no answers or scores are submitted':'Answer every question to finish. Incorrect answers still count as completing the activity.'}</small></div>
         {quizError&&<p className="cle-error" role="alert">{quizError}</p>}
         <div className="cle-quiz-tools">
          <span>{adminPreview?'Draft + published preview':questions.length+' published question'+(questions.length===1?'':'s')}</span>
@@ -310,9 +310,9 @@ export default function CourseLessonExplorer({db,userId='',courseId,courseTitle,
           disabled={quizLoading} aria-label="Refresh Lesson Quiz from published Course Question Bank">
           {quizLoading?'Refreshing…':'Refresh questions'}</button>
         </div>
-        {quizLoading&&!questions.length?<div className="cle-notice cle-notice-compact" role="status">Loading the published Knowledge Check…</div>:
-        !questions.length?<div className="cle-notice cle-notice-compact"><CheckCircle2 size={20}/> No published Knowledge Check questions are available for this lesson yet.</div>:
-        quizResult?<div className="cle-quiz-result"><CheckCircle2 size={30}/><h3>Knowledge Check completed</h3>
+        {quizLoading&&!questions.length?<div className="cle-notice cle-notice-compact" role="status">Loading published Lesson Quiz questions…</div>:
+        !questions.length?<div className="cle-notice cle-notice-compact"><CheckCircle2 size={20}/> No published quiz questions yet. If your instructor assigned questions to this lesson, they must be approved and published before they appear here.</div>:
+        quizResult?<div className="cle-quiz-result"><CheckCircle2 size={30}/><h3>Lesson Quiz completed</h3>
          <p>You answered all {questions.length} questions. Your score is {quizResult.scorePercent}%.</p>
          <button type="button" onClick={()=>{setAnswers({});setQuizResult(null);}}>Try again</button></div>:
         <div className="cle-quiz-list">{questions.map((q,i)=><fieldset key={q.id} className="cle-question">

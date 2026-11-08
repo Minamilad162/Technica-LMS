@@ -19,7 +19,7 @@ for(const text of [
  "currentSection===key?'location':undefined",
  "['video','Video',Video,'video']",
  "['material','Study Material',BookOpen,'reading']",
- "['quiz','Knowledge Check',CheckCircle2,'quiz']",
+ "['quiz','Quiz',CheckCircle2,'quiz']",
  'cle-lesson-sidebar',
  "allLessons([d])",
  "d.topics.map",
