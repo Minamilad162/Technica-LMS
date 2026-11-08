@@ -58,6 +58,8 @@ assert(practice.includes('catalog.openAccess===true'));
 assert(workspace.includes('catalog?.openAccess'));
 assert(workspace.includes('openAccess={catalog?.openAccess===true}'));
 assert(plans.includes('disabled={openAccess||'));
+assert(read('src/production/AdminSubscriptionsPanel.jsx').includes('setLearningOpenAccess(db,next)'));
+assert(read('src/production/AdminSubscriptionsPanel.jsx').includes('Enable subscription rules'));
 assert(plans.includes("'Coming soon'"));
 assert(!layout.includes('Reset demo data'));
 assert(!app.includes("new URLSearchParams(l.search).get('legacyPreview')==='1'"));

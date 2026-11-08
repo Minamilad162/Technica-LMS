@@ -1,3 +1,9 @@
+## 2026-11-08 — P41 production-facing copy and temporary open learning access
+- Add server-owned, Admin-audited/reversible `Open Access` commercial mode: all active authenticated learners may view **published** Courses/Lessons/Quiz/media, approved Practice and ready official ASP 200-question/300-minute Mock without subscription. Keep nonpublished/review/Mock security gates and existing memberships untouched.
+- Subscription Plans design remains with verified pricing but disabled requests and Coming soon CTA while open; Admin Tools → Subscriptions includes protected switch to restore original paywall later. Header and learner cards show available learning, not fake days-left subscriptions. Remove visible old demo/reset/staging explanations from core pages; keep meaningful admin technical diagnostics.
+- ASP missing alert distinguishes canonical slug mismatch; read-only SQL inventories actual ASP records/publication without assuming a new course or importing questions. No Supabase remote SQL, payments, new enrollments or production data modifications were executed by source commit.
+- One additive `202611080007_p41_open_access_showcase.sql` (not installed), `P41_ACCESS_AND_ASP_READ_ONLY.sql`, new CI static/PG tests and project Blueprint. Real staging/production migration ledger/backup and signed browser acceptance are required before release.
+
 ## 2026-11-08 — P40 Question Bank → official ASP Mock finalization
 - Inline **Finalize official Mock** loads 200 saved checked Question Bank candidates across pages, uses the existing P9B reviewed-answer/rights preflight and explicit audited permanent reservation. P10 readiness refreshes after reservation.
 - A saved checkbox is only a candidate until approved; fixed learner Mock 200/300, Practice customization, P34B historical data and entitlement/security rules unchanged. Source UI only, no migration or live Supabase data writes.
