@@ -306,5 +306,8 @@ jobs:
       - name: P29 protected Active and Mock candidate, live Practice/Level Up exclusions
         run: bash scripts/test-p29-postgres-smoke.sh
 
+      - name: P29 real upgrade compatibility on original P28 then P28.2 (old and new Bank RPC)
+        run: bash scripts/test-p29-forward-upgrade-postgres-smoke.sh
+
       - name: Test scope disclosure
         run: echo "Ephemeral local PostgreSQL smoke only; live Supabase Auth, Storage, Data API and device tests still pending."
