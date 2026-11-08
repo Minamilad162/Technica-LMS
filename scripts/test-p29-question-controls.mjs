@@ -37,7 +37,7 @@ assert((sql.match(/\$\$/g)||[]).length%2===0,'P29 SQL dollar-quote markers must 
 for(const part of [
  'Upload Excel / CSV','type="file"','accept=".xlsx,.csv"','Active: ',
  'Mock Exam: ','Lesson Quiz','Select lesson…','Save All Changes',
- 'stagedQuestionEdit(q,staged[q.id]','saveCourseBankBatch(db,courseId,payload)',
+ 'stagedQuestionEdit(q,staged[q.id]','saveCourseBankBatch(db,courseId,payload,releaseLessonId',
  'liveCourseTree(db,courseId)','bank.compatibilityMode',
  ])assert(bank.includes(part),'P29 admin UI missing '+part);
 for(const part of [
