@@ -109,6 +109,29 @@ BEGIN
  RETURN jsonb_build_object('ids',v_list,'count',jsonb_array_length(v_list));
 END $$;
 
+-- Prevent every existing/legacy approval path from leaking a marked Mock
+-- candidate to learner Practice; preserve the previous P28 guard behavior.
+CREATE OR REPLACE FUNCTION public.lms_p28_guard_bank_assignment() RETURNS trigger
+ LANGUAGE plpgsql SECURITY DEFINER SET search_path='' AS $
+BEGIN
+ -- Mock candidate rows cannot be independently released to Practice, even
+ -- if an older P9B approval RPC is called directly by an Admin.
+ IF NEW.mock_candidate AND NEW.approval_state='approved'
+ THEN RAISE EXCEPTION 'Mock Exam candidate is excluded from Practice approval; uncheck Mock selection first'; END IF;
+ IF EXISTS(SELECT 1 FROM public.lms_p22_lesson_quiz_questions
+   WHERE bank_question_id=OLD.id)
+ AND (
+   NEW.mock_exclusive IS TRUE OR NEW.approval_state='archived'
+   OR NEW.prompt IS DISTINCT FROM OLD.prompt
+   OR NEW.options IS DISTINCT FROM OLD.options
+   OR NEW.correct_index IS DISTINCT FROM OLD.correct_index
+   OR (NEW.approval_state<>'approved'
+      AND EXISTS(SELECT 1 FROM public.lms_p22_lesson_quiz_questions
+       WHERE bank_question_id=OLD.id AND is_published))
+ ) THEN RAISE EXCEPTION 'Question linked to lesson quiz: unlink before Mock, archive or changing served content'; END IF;
+ RETURN NEW;
+END $;
+
 -- Keep existing Lesson Quiz protection and enforce both new switches.
 CREATE OR REPLACE FUNCTION public.lms_p28_guard_quiz_link() RETURNS trigger
  LANGUAGE plpgsql SECURITY DEFINER SET search_path='' AS $$
