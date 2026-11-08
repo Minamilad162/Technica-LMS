@@ -141,6 +141,12 @@ export default function AdminCourseBank({db,courses=[],asp,onUpdate,mode='bank'}
      <option value="">Unassigned — classify later</option>
      {domains.map(d=><option value={d.id} key={d.id}>{d.title}</option>)}
     </select></label>}</div>
+  {selected&&bank.compatibilityMode&&<p role="status" className="at-disclaimer">
+    This database still has the old P28 Question Bank. File upload can work, but Domain/Difficulty filters and Active/Mock/Quiz controls need P28.2 + P29 migrations. The fallback list is unfiltered.
+   </p>}
+  {selected&&!bank.compatibilityMode&&bank.items.length>0&&typeof bank.items[0].isActive!=='boolean'&&<p role="status" className="at-disclaimer">
+    Apply P29 to enable per-question Active, Mock Exam and Lesson Quiz controls. Questions remain unchanged until then.
+   </p>}
   {selected&&<div className="p28-filters at-surface">
    <label>Domain<select aria-label="Filter bank by domain" value={filterDomain} onChange={e=>{setFilterDomain(e.target.value);setOffset(0);}}>
     <option value="">All domains</option>
