@@ -152,6 +152,9 @@ jobs:
       - name: P21 platform-wide subscriptions, admin plans and expiration access contracts
         run: npm run test:p21:subscriptions
 
+      - name: P38 premium Subscription Plans UI and real-price presentation
+        run: npm run test:p38:subscription-ui
+
       - name: P22 premium course/lesson grid, verified progress and Admin quiz contracts
         run: npm run test:p22:learning
 
