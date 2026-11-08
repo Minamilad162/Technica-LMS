@@ -18,13 +18,24 @@ export async function listCourseBank(db,courseId,{search='',limit=50,offset=0,do
  if(!Number.isInteger(limit)||limit<1||limit>100||!Number.isInteger(offset)||offset<0||offset>100000
   ||!difficultyOptions.has(difficulty)||!usageOptions.has(usage)||(domainId&&!uuid.test(domainId)))
   throw Error('Invalid bank filters or page.');
- const data=await call(db,'lms_p28_list_bank',{p_course_id:courseId,
-  p_search:String(search).slice(0,160),p_limit:limit,p_offset:offset,
-  p_domain_id:domainId||null,p_difficulty:difficulty,p_usage:usage});
+ let data,compatibilityMode=false;
+ try{
+  data=await call(db,'lms_p28_list_bank',{p_course_id:courseId,
+   p_search:String(search).slice(0,160),p_limit:limit,p_offset:offset,
+   p_domain_id:domainId||null,p_difficulty:difficulty,p_usage:usage});
+ }catch(e){
+  // Older installed P28 exposes only the 4-argument catalog. During a
+  // database-first transition show the real unfiltered bank for uploads;
+  // never claim Domain/Difficulty/Usage filters or P29 switches are active.
+  if(!/PGRST202|42883|could not find the function|does not exist|schema cache/i.test(String(e.message||'')))throw e;
+  compatibilityMode=true;
+  data=await call(db,'lms_p28_list_bank',{p_course_id:courseId,
+   p_search:String(search).slice(0,160),p_limit:limit,p_offset:offset});
+ }
  if(!data||!Number.isInteger(data.total)||!Array.isArray(data.items)
   ||data.items.some(q=>q.courseId!==courseId||!uuid.test(q.id||'')))
   throw Error('Question Bank returned unexpected course data.');
- return data;
+ return {...data,compatibilityMode};
 }
 export async function importCourseBank(db,courseId,rows){
  checkId(courseId);
