@@ -158,6 +158,9 @@ jobs:
       - name: P39 unified Mock Exam and Practice menu with real P10 200/5h delivery
         run: npm run test:p39:exam-practice
 
+      - name: P41 Open Access published-only and learner presentation contract
+        run: npm run test:p41:open-access
+
       - name: P22 premium course/lesson grid, verified progress and Admin quiz contracts
         run: npm run test:p22:learning
 
@@ -350,6 +353,9 @@ jobs:
 
       - name: P34 new/existing Draft Lesson Quiz publish and separated Mock attempt grading
         run: bash scripts/test-p34-postgres-smoke.sh
+
+      - name: P41 server-controlled access switch on disposable PostgreSQL
+        run: bash scripts/test-p41-postgres-smoke.sh
 
       - name: Test scope disclosure
         run: echo "Ephemeral local PostgreSQL smoke only; live Supabase Auth, Storage, Data API and device tests still pending."

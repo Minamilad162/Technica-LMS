@@ -22,7 +22,7 @@ function query(table){
   then(resolve,reject){return pending(table).then(resolve,reject);}
  };
 }
-const db={from:table=>query(table)};
+const db={from:table=>query(table),rpc:async(name)=>{assert.equal(name,'lms_p41_access_mode');return {data:'subscription',error:null};}};
 const request=fetchP15Catalog(db,{id});
 for(let i=0;i<12&&started.length<5;i++)await Promise.resolve();
 assert.deepEqual(started.sort(),[
