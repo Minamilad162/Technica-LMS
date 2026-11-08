@@ -9,6 +9,8 @@ Replace separate learner menu entries **Practice** and **Assessments** with a si
 
 Use the real `LivePractice.jsx` and `LiveMockExam.jsx` components, not old unsynchronized Demo `AssessmentOverview`, Demo `QuizPage` or the P34B dynamic `LiveSelectedMockExam`. The P34B tables and code remain for backwards compatibility, but **are not available as a third learner Mock mode**; do not drop live tables or existing attempts. Old `/practice` URL redirects to `/assessments?tab=practice`, while `/assessments/mock/live` remains a compatibility entry opening only the official P10 Mock. Mobile bottom and desktop sidebar show a single exam-preparation item. Historical `My Practice` remains separate because it is a results/history page, not an exam setup.
 
+Historical Demo quiz session deep links `/assessments/take` and `/practice/session` are now available ONLY with the explicit local `VITE_LOCAL_QA_DEMO=1` + Vite DEV gate; in deployed production they redirect to the real Mock or Practice tab. A production `?legacyPreview=1` must never enable either of these old quiz engines.
+
 The embedded learner Courses/My Learning cross-links to Practice should open `/assessments?tab=practice`. The separate non-router `SupabaseApp` learner workspace exposes the same two tabs in its own Practice screen. Tab changes must not mix attempt state: inactive panel is unmounted; protected P5 fullscreen and server attempts control access.
 
 ### IMPORTANT: Question Bank candidate flags vs official Mock reservation
