@@ -1,7 +1,8 @@
 import React,{useEffect,useMemo,useState} from 'react';
 import {AlertCircle,BookOpen,CheckCircle2,FileQuestion,FileSpreadsheet,Plus,RefreshCw,Search,ShieldCheck} from 'lucide-react';
 import {importQuestionFile} from '../lib/questionImport.js';
-import {approveNonAspBankQuestion,importCourseBank,listCourseBank,mappedImportRows,reserveNonAspMockQuestion} from './courseQuestionBankApi.js';
+import {approveNonAspBankQuestion,importCourseBank,listCourseBank,mappedImportRows,reserveNonAspMockQuestion,setQuestionBankFlags,attachBankToLesson} from './courseQuestionBankApi.js';
+import {liveCourseTree} from './liveAuthoringApi.js';
 import {AdminQuestionsPanel,AdminMockPanel} from './AdminToolsPanels.jsx';
 import './courseQuestionBank.css';
 
@@ -17,14 +18,24 @@ export default function AdminCourseBank({db,courses=[],asp,onUpdate,mode='bank'}
  const [error,setError]=useState(''),[notice,setNotice]=useState(''),[revision,setRevision]=useState(0);
  const [pending,setPending]=useState(null),[uploadCount,setUploadCount]=useState(0);
  const [manual,setManual]=useState(null),[expanded,setExpanded]=useState(null);
+ const [lessons,setLessons]=useState([]),[pickedLesson,setPickedLesson]=useState({});
  const selected=useMemo(()=>courses.find(c=>c.id===courseId),[courses,courseId]);
  useEffect(()=>{if(!courses.some(c=>c.id===courseId))setCourseId(courses.find(c=>c.slug==='asp')?.id||courses[0]?.id||'');},[courses,courseId]);
  useEffect(()=>{setOffset(0);setSearch('');setQuery('');setPending(null);setManual(null);setExpanded(null);
-  setError('');setNotice('');setDomainId('');setFilterDomain('');setDifficulty('');setUsage('all');setDomains([]);
+  setError('');setNotice('');setDomainId('');setFilterDomain('');setDifficulty('');setUsage('all');setDomains([]);setLessons([]);setPickedLesson({});
   if(!courseId)return;
   let live=true;
-  db.from('lms_domains').select('id,slug,title').eq('course_id',courseId).order('position',{ascending:true})
-   .then(({data,error})=>{if(!live)return;if(error)setError('Course domains unavailable.');else setDomains(data||[]);});
+  Promise.all([
+   db.from('lms_domains').select('id,slug,title').eq('course_id',courseId).order('position',{ascending:true}),
+   liveCourseTree(db,courseId)
+  ]).then(([result,tree])=>{
+   if(!live)return;
+   if(result.error)setError('Course domains unavailable.');
+   else setDomains(result.data||[]);
+   setLessons((tree||[]).flatMap(d=>(d.topics||[]).flatMap(t=>(t.lessons||[]).map(l=>({
+    id:l.id,label:d.title+' / '+t.title+' / '+l.title
+   })))));
+  }).catch(e=>{if(live)setError('Course lesson list unavailable: '+fail(e));});
   return()=>{live=false;};
  },[db,courseId]);
  useEffect(()=>{
@@ -90,6 +101,32 @@ export default function AdminCourseBank({db,courses=[],asp,onUpdate,mode='bank'}
    refresh();
   }catch(e){setError(fail(e));}finally{setBusy(false);}
  }
+ async function changeFlags(q,key,checked){
+  if(busy||typeof q.isActive!=='boolean'||typeof q.mockCandidate!=='boolean')return;
+  const newActive=key==='active'?checked:q.isActive;
+  const newMock=key==='mock'?checked:q.mockCandidate;
+  if(key==='mock'&&checked&&!window.confirm('Mark as Mock Exam candidate? The question will be excluded from Practice and Lesson Quizzes. Official ASP Mock reservation still requires 200 independently reviewed questions.'))return;
+  if(key==='active'&&!checked&&!window.confirm('Disable this question for new Practice and unpublish it from any linked Lesson Quiz? Existing graded answers are retained.'))return;
+  setBusy(true);setError('');setNotice('');
+  try{
+   const result=await setQuestionBankFlags(db,q.id,newActive,newMock);
+   setNotice(key==='active'?(checked?'Question enabled. Publication still requires approval.':'Question disabled; linked published Lesson quizzes were unpublished.'):
+     (checked?'Selected as Mock candidate. Finalize exactly 200 from Exams & Mock.':'Removed Mock candidate selection.'));
+   if(result.unpublishedLessonQuizItems)setNotice('Question disabled; '+result.unpublishedLessonQuizItems+' published Lesson Quiz entries unpublished.');
+   refresh();
+  }catch(e){setError(fail(e));}finally{setBusy(false);}
+ }
+ async function assignLesson(q){
+  const lessonId=pickedLesson[q.id];
+  if(busy||!lessonId||!q.isActive||q.mockCandidate||q.mockExclusive)return;
+  setBusy(true);setError('');setNotice('');
+  try{
+   await attachBankToLesson(db,lessonId,q.id,q.approvalState==='approved');
+   setNotice('Question added to '+(lessons.find(l=>l.id===lessonId)?.label||'Lesson')+' Quiz.'+
+    (q.approvalState==='approved'?' Published.':' Draft until approval.'));
+   setPickedLesson(v=>({...v,[q.id]:''}));refresh();
+  }catch(e){setError(fail(e));}finally{setBusy(false);}
+ }
  return <div className="p28-workspace at-stack at-animate">
   <div className="at-section-title"><div><span className="at-eyebrow">COURSE-SCOPED QUESTION BANK</span>
    <h2>{mode==='mock'?'Mock question selection':'Question Bank'}</h2>
@@ -125,7 +162,7 @@ export default function AdminCourseBank({db,courses=[],asp,onUpdate,mode='bank'}
    {error&&<p role="alert" className="at-error"><AlertCircle size={15}/>{error}</p>}
    {notice&&<p role="status" className="at-success"><CheckCircle2 size={15}/>{notice}</p>}
    {mode==='bank'&&<div className="p28-import at-surface">
-    <div><h3><FileSpreadsheet size={19}/> Upload Excel / CSV</h3>
+    <div><h3><FileSpreadsheet size={19}/> Upload Question File</h3>
      <p>Upload all ASP questions here once. Columns: Question, Option A–F, Correct Answer, Domain, Difficulty, Explanation, Reference (last four optional). Every worksheet is parsed. Imported rows remain Draft until review.</p></div>
     <label className="p28-file">Choose .xlsx or .csv file
      <input type="file" accept=".xlsx,.csv" disabled={busy} onChange={e=>{void readFile(e.target.files?.[0]);e.target.value='';}}/></label>
@@ -155,20 +192,53 @@ export default function AdminCourseBank({db,courses=[],asp,onUpdate,mode='bank'}
     </form>}
    </div>}
    <div className="at-surface p28-questions">
-    <div className="p28-list-title"><strong><FileQuestion size={17}/> {bank.total} matching questions · {selected.title}</strong>
+    <div className="p28-list-title"><strong><FileQuestion size={17}/> {bank.total} questions · {selected.title}</strong>
      <form onSubmit={e=>{e.preventDefault();setQuery(search.trim());setOffset(0);}}>
       <input aria-label="Search course questions" placeholder="Search question or source ID" value={search} onChange={e=>setSearch(e.target.value)}/>
       <button className="at-outline" type="submit"><Search size={14}/> Search</button>
      </form></div>
+    <p className="p29-help">Active is enabled by default, but a Draft question is still hidden until reviewed. Mock Exam selects candidates; final ASP Mock reservation happens in Exams & Mock (200 questions).</p>
     {loading?<p>Loading the protected course bank…</p>:!bank.items.length?<p>No questions on this page. Upload an Excel file or adjust the search.</p>:
      <div className="p28-rows">{bank.items.map(q=><article key={q.id} className="p28-question">
       <div className="p28-row-title"><button type="button" onClick={()=>setExpanded(v=>v===q.id?null:q.id)} aria-expanded={expanded===q.id}>{q.prompt}</button>
-       <Status value={q.mockExclusive?'mock':q.approvalState}/></div>
+       <Status value={q.mockExclusive?'mock':q.mockCandidate?'mock':q.approvalState}/></div>
       <div className="p28-row-meta"><span>{q.sourceId}</span>
        <span>{domains.find(d=>d.id===q.domainId)?.title||'Unassigned Domain'}</span>
        <span>{q.difficulty||'unclassified'}</span>
        <span>{q.mockExclusive?'Mock-only':q.approvalState==='approved'?'Practice / Assessment':q.approvalState}</span>
        <span>{q.linkedCount} Lesson Quiz links</span></div>
+      <div className="p29-question-controls">
+       <label title={typeof q.isActive!=='boolean'?'Apply P29 migration to enable this control':q.mockExclusive?'Immutable official Mock reservation':''}>
+        <input type="checkbox" aria-label={'Active: '+q.prompt} checked={q.isActive===true}
+         disabled={busy||typeof q.isActive!=='boolean'||q.mockExclusive}
+         onChange={e=>void changeFlags(q,'active',e.target.checked)}/>
+        Active
+       </label>
+       <label title={q.mockExclusive?'Official Mock form reserved; cannot edit':q.approvalState!=='draft'?'Only unused Draft questions can be reserved for Mock':''}>
+        <input type="checkbox" aria-label={'Mock Exam: '+q.prompt}
+         checked={q.mockExclusive||q.mockCandidate===true}
+         disabled={busy||typeof q.mockCandidate!=='boolean'||q.mockExclusive||
+          (!q.mockCandidate&&(q.approvalState!=='draft'||q.linkedCount>0))}
+         onChange={e=>void changeFlags(q,'mock',e.target.checked)}/>
+        Mock Exam
+       </label>
+       {q.mockExclusive&&<small>Official reserved</small>}
+       {!q.mockExclusive&&q.mockCandidate&&<small>Candidate · complete 200-item review</small>}
+      </div>
+      {mode==='bank'&&<div className="p29-lesson-picker">
+       <label htmlFor={'p29-lesson-'+q.id}>Lesson Quiz</label>
+       <select id={'p29-lesson-'+q.id} aria-label={'Assign Lesson Quiz: '+q.prompt}
+        value={pickedLesson[q.id]||''} disabled={busy||!q.isActive||q.mockExclusive||q.mockCandidate||q.approvalState==='archived'}
+        onChange={e=>setPickedLesson(v=>({...v,[q.id]:e.target.value}))}>
+        <option value="">Select a lesson…</option>
+        {lessons.map(l=><option key={l.id} value={l.id} disabled={(q.linkedLessonIds||[]).includes(l.id)}>
+         {l.label}{(q.linkedLessonIds||[]).includes(l.id)?' ✓ already linked':''}
+        </option>)}
+       </select>
+       <button type="button" className="at-outline" disabled={busy||!pickedLesson[q.id]||!q.isActive||q.mockExclusive||q.mockCandidate}
+        onClick={()=>void assignLesson(q)}>Add to Quiz</button>
+       {(q.linkedLessonIds||[]).length>0&&<small>Linked: {(q.linkedLessonIds||[]).map(id=>lessons.find(l=>l.id===id)?.label||'Lesson').join(' · ')}</small>}
+      </div>
       {expanded===q.id&&<div className="p28-answers">{q.options.map((answer,i)=><p key={i} className={i===q.correctIndex?'correct':''}>
        <strong>{String.fromCharCode(65+i)}.</strong> {answer}{i===q.correctIndex?' ✓':''}</p>)}</div>}
       <div className="p28-actions">
