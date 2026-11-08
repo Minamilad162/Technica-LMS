@@ -215,3 +215,20 @@
 .p39-official-mock-status>svg{flex:0 0 auto;margin-top:2px;color:#088e78}
 .p39-official-mock-status strong{font-size:12px;font-weight:850}
 .p39-official-mock-status p{margin:4px 0 0;font-size:11px;line-height:1.65;color:#587b77}
+
+/* P40 — finalize the exact saved ASP Mock candidate selection in the Bank. */
+.p40-bank-finalizer{padding:14px 16px;border:1px solid #cce5de;border-radius:13px;background:#fff}
+.p40-finalizer-intro{display:flex;align-items:flex-start;flex-wrap:wrap;gap:11px}
+.p40-finalizer-intro>svg{color:#0b8a7c;flex-shrink:0;margin-top:3px}
+.p40-finalizer-intro>div{flex:1;min-width:190px}
+.p40-finalizer-intro strong{font-size:13px;color:#1c5359}
+.p40-finalizer-intro p{font-size:11px;line-height:1.6;color:#5e7c82;margin:5px 0 0}
+.p40-finalizer-intro button{display:inline-flex;align-items:center;gap:7px;min-height:38px}
+.p40-finalizer-body{border-top:1px solid #e3eeed;margin-top:12px;padding-top:14px;display:grid;gap:12px}
+.p40-finalizer-load{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.p40-finalizer-load button{min-height:38px}
+.p40-finalizer-load span{font-size:12px;font-weight:800;color:#286760}
+.p40-finalizer-note{font-size:12px;color:#a36e20;line-height:1.55;margin:8px 0 0}
+@media(max-width:600px){.p40-finalizer-intro>div{flex-basis:calc(100% - 35px)}
+ .p40-finalizer-intro button,.p40-finalizer-load button{width:100%;justify-content:center}
+ .p40-finalizer-load span{width:100%;text-align:center}}

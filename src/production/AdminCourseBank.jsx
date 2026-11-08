@@ -7,6 +7,7 @@ import {liveCourseTree} from './liveAuthoringApi.js';
 import {isAspCourseTitle,isOfficialAspCourse,preferredQuestionBankCourse,questionBankCatalogState} from './questionBankCourseSelection.js';
 import {getMockReadiness} from './mockApi.js';
 import {AdminQuestionsPanel,AdminMockPanel} from './AdminToolsPanels.jsx';
+import OfficialMockBankFinalizer from './OfficialMockBankFinalizer.jsx';
 import './courseQuestionBank.css';
 
 const fail=e=>e?.message||'The protected Question Bank request failed.';
@@ -288,6 +289,9 @@ export default function AdminCourseBank({db,courses=[],asp,onUpdate,onDirtyChang
       'Mock Exam checks stage candidates. Only a finalized reservation of exactly 200 eligible ASP Question Bank IDs is delivered to learners.'}</p>
    </div>
   </div>}
+  {selected?.slug==='asp'&&mode==='bank'&&!officialMock.data?.ready&&
+   <OfficialMockBankFinalizer db={db} course={selected} disabled={pendingCount>0||busy}
+    revision={revision} onReserved={()=>refresh(true)}/>}
   {selected&&batchReady&&batchMode==='p30'&&<p role="status" className="at-disclaimer">
    P34A/P34B are not both installed on this Supabase database. Existing P30 Question Bank editing remains available.
    <strong> Legacy saves do not publish Draft Lesson Quiz questions; Mock candidate flags alone cannot activate the fixed official exam.</strong>

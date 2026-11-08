@@ -43,7 +43,7 @@ export default function AspMockReservation({db,course,ids=[],onReserved}){
   <div className="p9b-reservation">
    <span className="live-eyebrow">P9B · CONTROLLED BANK RELEASE</span>
    <h3><LockKeyhole size={18}/> Exclusive Mock reservation</h3>
-   <p>Select individually reviewed <strong>Draft</strong> questions from the <b>Reviewed · ready</b> queue below. The 200 selected IDs become a permanent, private Mock form only after an explicit Admin action. This does <strong>not</strong> activate the 5-hour Mock exam or publish any questions.</p>
+   <p>Use the saved Mock Exam checkboxes in Question Bank or select reviewed <strong>Draft</strong> questions from the separate review queue. Only a verified, explicit Admin reservation creates the permanent private 200-question form. Checking a box alone never publishes an exam.</p>
    <div className="p9b-progress"><strong>{selected.length} / 200 selected</strong><span>Requirements: official ASP11 domain, verified answer, usage rights and no prior Practice use. No automatic selections.</span></div>
    <button className="live-secondary" type="button" disabled={busy||selected.length!==200||!!success} onClick={check}><RefreshCw size={16}/> {busy?'Checking…':'Verify 200 selected IDs'}</button>
    {preview&&<div className="p9b-check" role="status">
@@ -59,7 +59,7 @@ export default function AspMockReservation({db,course,ids=[],onReserved}){
      <ClipboardCheck size={16}/> Reserve 200 for Mock
     </button>
    </div>}
-   {success&&<p className="live-notice" role="status"><CheckCircle2 size={16}/> Reserved exactly 200 questions in Mock Form v{success.version}. Practice approvals remain a separate step; Mock delivery is not active.</p>}
+   {success&&<p className="live-notice" role="status"><CheckCircle2 size={16}/> Reserved exactly 200 questions in Mock Form v{success.version}. The fixed 5-hour learner Mock opens only when the P10 server readiness gate verifies this form and the learner has access.</p>}
    {error&&<p className="live-error" role="alert"><TriangleAlert size={16}/>{error}</p>}
    <p className="live-review-hint"><ShieldAlert size={16}/> Only authorized Admins can use these RPCs. Source and CI alone do not indicate that this migration is installed in Supabase.</p>
   </div>

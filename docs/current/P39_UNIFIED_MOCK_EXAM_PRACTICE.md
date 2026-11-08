@@ -24,3 +24,9 @@ If the owner later authorizes converting 200 selected candidates into the offici
 Tests: `npm run test:p39:exam-practice`, existing P10 Mock and P15 navigation contracts, all P21-P38 suites, Vite build and disposable PostgreSQL smoke. Review at ~1440px and ~390px, keyboard focus/tab switching, My Learning Practice deep link, legacy /practice alias, direct official /assessments/mock/live, Mock readiness 199 (blocked) and exactly 200 (enabled), Practice customization and timer, subscription lock, no answer keys or dynamic Mock resurfacing.
 
 Update `TECHNICA_LMS_MASTER_BLUEPRINT.md` and Logic Registry. Deploy via one grouped tested PR to `main`, then verify Cloudflare Worker build and real browser; no SQL migration or user-data change. 
+
+## P40 — direct official finalization inside ASP Question Bank
+
+In Admin Tools → Question Bank, check 200 intended ASP questions as **Mock Exam** and **Save All Changes**. Click **Finalize official Mock**, then **Load saved Mock Exam choices** to read the Admin-only saved selection from all pages, not just the current 50. The existing P9B preflight checks exactly 200 unique Draft questions, human answer review, commercial rights, official ASP11 domain and no prior usage. Type `RESERVE 200 ASP MOCK QUESTIONS` and explicitly confirm the permanent audited P9B transaction. Marking/saving alone never publishes the form. A permanent official form is never overwritten.
+
+After reservation the real P10 readiness status refreshes; the learner sees the immutable 200-question/300-minute Mock only when server readiness and membership access pass. Practice tab customization and Mock exclusions remain intact. This is frontend-only and does not install migrations, modify production Supabase data or restore a third learner Mock. Full staging JWT/browser QA still pending.
