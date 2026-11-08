@@ -91,7 +91,7 @@ assert(app.includes("LiveLearnerPortal initialScreen=\"courses\""));
 assert(app.includes("LiveLearnerPortal initialScreen=\"learning\""));
 assert(app.includes("LiveLearnerPortal initialScreen=\"history\""));
 assert(app.includes('LiveExamPracticeHub')&&app.includes('Navigate to="/assessments?tab=practice" replace'),'Practice route must resolve to unified Practice tab');
-assert(app.includes("legacyPreview?<LegacyPreviewWarning><PracticePage"));
+assert(app.includes("legacyPreview?<RoutePage><LegacyPreviewWarning><PracticePage"),'P15 local-only Demo Practice preview preserved');
 assert(app.includes('path="/courses" element={<AdminOnly>'));
 for(const menu of ['/course-catalog','/my-learning','/assessments','/my-practice'])
  assert(layout.includes(menu),'P15 learner menu missing '+menu);
