@@ -1,3 +1,9 @@
+### 2026-11-08 — P34 PDF-sourced Unit Materials embedded in Qualifications (SOURCE ONLY)
+
+- Reviewed connected Drive walkthrough transcript (course vs Unit resources at 06:12–09:33) and all three historical qualification PDFs. Built a 23-Unit code-keyed material map (OTHM L6 7, OTHM L7 6, ProQual NVQ L6 10) with verified PDF Unit Aims, Learning/Competence Outcomes and OTHM indicative study topics. No imaginary lesson PDFs or Assignment Briefs.
+- Added premium Unit Material panel under selected horizontal Unit → Course, with authentic topics and a source PDF link; compact right rail keeps Resources/Actions. Evidence contextual card links to selected Unit Material. Admin → Unit Resources shows the same imported outline before local draft controls.
+- Source documents are older qualification specifications (OTHM Dec 2023; ProQual Feb 2018), not complete courseware or current approved assessment briefs. Preview-only source data, no Supabase writes/migrations, entitlement or ASP Lesson changes. P34 verification test and Blueprint §94 updated.
+
 ## 2026-11-08 — P33: visible Learner Quiz shortcut and Draft publication guidance
 - Owner screenshot: C04 Lesson 1 has 0 Published and 2 Not published Quiz links, questions marked DRAFT, plus 1 unsaved change. These links must not become learner-visible before independent review and publication.
 - Renamed the learner's same-page Knowledge Check shortcut to **Quiz**, showing published count even at zero; section title now Lesson Quiz. Video and Material remain mounted. Empty state explains why saved Drafts cannot appear yet.
