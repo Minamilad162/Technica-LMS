@@ -70,6 +70,7 @@ const panels=file('src/production/AdminToolsPanels.jsx');
 const api=file('src/production/adminCoursePreviewApi.js');
 const page=file('src/production/AdminCoursePreview.jsx');
 const explorer=file('src/production/CourseLessonExplorer.jsx');
+const lessonQuizApi=file('src/production/lessonQuizSyncApi.js');
 const app=file('src/App.jsx');
 const builder=file('src/production/LiveCourseBuilder.jsx');
 const cards=file('src/production/LearnerCourseCard.jsx');
@@ -98,17 +99,19 @@ for(const mark of [
  "if(adminPreview)return;",
  "if(adminPreview||!userId||!lessons.length)return;",
  "if(adminPreview||!selected||saving||stepDone(selected.id,step))return;",
- "if(adminPreview||!selected||saving||questions.length===0||",
+ "if(adminPreview||!selected||saving||quizLoading||questions.length===0||",
  "if(adminPreview||!selected||!accessible||lessonLoading||saving||",
  "if(adminPreview)return;",
  "watchedVideos.current.add(b.id)",
- ".select('id,prompt,options,is_published,position')",
- "lms_p22_get_lesson_quiz",
+
  "lms_p22_submit_lesson_quiz",
  "lms_p22_complete_lesson_step",
  "Preview only · Quiz submission and learner progress are disabled.",
  "adminPreview?'ADMIN PREVIEW':userId.slice(0,8)"
 ])assert(explorer.includes(mark),'Admin read-only Preview contract missing '+mark);
+assert(lessonQuizApi.includes(".select('id,prompt,options,is_published,position')")&&
+ lessonQuizApi.includes("lms_p22_get_lesson_quiz"),
+ 'Admin preview and learner P22 Quiz RPC remain available through secure dedicated loader.');
 assert(!explorer.includes(".select('id,prompt,options,correct_index") &&
  !explorer.includes(".select('id,prompt,options,is_published,position,correct_index"),'Preview must not expose answer keys');
 assert(css.includes('@media(max-width:540px)')&&pc.includes('@media(max-width:790px)'));
