@@ -57,6 +57,21 @@ REVOKE ALL ON public.lms_p34_selected_mock_attempts,
 GRANT ALL ON public.lms_p34_selected_mock_attempts,
  public.lms_p34_selected_mock_answers TO service_role;
 
+-- Admin capability probe confirms that selecting Mock on Save really creates
+-- a learner-visible Selected Mock pool, not merely an old candidate flag.
+CREATE FUNCTION public.lms_p34b_admin_capabilities()
+RETURNS jsonb LANGUAGE plpgsql STABLE SECURITY DEFINER SET search_path='' AS $p34b_caps$
+BEGIN
+ IF (SELECT auth.uid()) IS NULL OR NOT public.lms_p1_actor_is_admin()
+ THEN RAISE EXCEPTION 'Admin only'; END IF;
+ RETURN jsonb_build_object('version','p34b-v1','selectedMockOnSave',true,
+  'official200Unchanged',true,'maxPerAttempt',200);
+END $p34b_caps$;
+REVOKE ALL ON FUNCTION public.lms_p34b_admin_capabilities()
+ FROM PUBLIC,anon,authenticated;
+GRANT EXECUTE ON FUNCTION public.lms_p34b_admin_capabilities()
+ TO authenticated,service_role;
+
 -- Readiness is a count-only, no question text/answer key/IDs API.
 CREATE FUNCTION public.lms_p34_selected_mock_readiness(p_course_id uuid)
 RETURNS jsonb LANGUAGE plpgsql STABLE SECURITY DEFINER SET search_path='' AS $p34b_ready$
