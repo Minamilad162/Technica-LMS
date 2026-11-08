@@ -179,6 +179,9 @@ jobs:
       - name: P33 explicit learner Quiz tab, 0 Published clarity and Draft approval pathway
         run: npm run test:p33:learner-quiz
 
+      - name: P34 single Save Lesson Quiz and secure Selected Mock frontend contracts
+        run: npm run test:p34:one-save
+
       - name: P5 native fullscreen and exit policy contracts
         run: npm run test:p5
 
@@ -335,6 +338,9 @@ jobs:
 
       - name: P30 single-request atomic Admin Question Bank save and Mock/Level Up protection
         run: bash scripts/test-p30-postgres-smoke.sh
+
+      - name: P34 new/existing Draft Lesson Quiz publish and separated Mock attempt grading
+        run: bash scripts/test-p34-postgres-smoke.sh
 
       - name: Test scope disclosure
         run: echo "Ephemeral local PostgreSQL smoke only; live Supabase Auth, Storage, Data API and device tests still pending."
