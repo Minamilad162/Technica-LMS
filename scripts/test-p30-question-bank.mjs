@@ -36,7 +36,7 @@ for(const required of [
  'Difficulty: ','Active: ','Mock Exam: ','Assign Lesson Quiz:',
  'onChange={e=>stage(q,','batchStage(','Save or discard pending edits',
  'stagedToBatch(staged)','saveCourseBankBatch(db,courseId,payload,releaseLessonId',
- 'onDirtyChange?.(dirtyCount>0)','beforeunload','p30-table',
+ 'onDirtyChange?.(pendingCount>0)','beforeunload','p30-table',
  'p30-question-cell','p30-bulk-bar'
 ])assert(bank.includes(required),'Missing P30 compact single-save UX '+required);
 assert(!bank.includes('p28-answers'),'Per-row answers must not be rendered in the Question Bank list');
