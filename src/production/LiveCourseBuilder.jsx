@@ -42,6 +42,21 @@ export default function LiveCourseBuilder(){
    .finally(()=>{if(active)setLoadingTree(false);});
   return()=>{active=false;};
  },[db,status,courseId,revision]);
+ // Open the exact Lesson selected in Admin Question Bank, not the first
+ // similarly named "Lesson 1" from another Course/Topic.
+ useEffect(()=>{
+  const requestedLessonId=params.get('lessonId');
+  if(!requestedLessonId||loadedCourse!==courseId||!tree.length)return;
+  const realLesson=tree.flatMap(d=>(d.topics||[]).flatMap(t=>t.lessons||[]))
+   .find(l=>l.id===requestedLessonId);
+  if(realLesson)setLessonId(realLesson.id);
+ },[params,courseId,loadedCourse,tree]);
+ useEffect(()=>{
+  if(!lessonId||params.get('lessonId')!==lessonId)return;
+  const frame=requestAnimationFrame(()=>document.getElementById('lms-builder-lesson-'+lessonId)
+   ?.scrollIntoView({behavior:'smooth',block:'center'}));
+  return()=>cancelAnimationFrame(frame);
+ },[lessonId,params,blocksLoading]);
  useEffect(()=>{
   if(!lessonId||status!=='ready'){setBlocks([]);return;}
   let active=true;setBlocksLoading(true);
@@ -126,7 +141,7 @@ export default function LiveCourseBuilder(){
         <div className="hierarchy-actions"><button type="button" aria-label="Rename topic" onClick={()=>openRename('lms_topics',topic)}><Pencil size={16}/></button></div>
        </div>
        {(opened[topic.id]??true)&&<div className="hierarchy-lessons">
-        {topic.lessons.map((lesson,li)=><section className="hierarchy-lesson live-authoring-lesson" key={lesson.id}>
+        {topic.lessons.map((lesson,li)=><section className="hierarchy-lesson live-authoring-lesson" id={'lms-builder-lesson-'+lesson.id} key={lesson.id}>
          <div className="hierarchy-lesson-mark"><FileText size={16}/></div>
          <button className="live-authoring-lesson-title hierarchy-title" type="button" aria-expanded={lessonId===lesson.id} onClick={()=>setLessonId(v=>v===lesson.id?null:lesson.id)}>
           <small>LESSON {di+1}.{ti+1}.{li+1} · {lesson.publication_state}</small><strong>{lesson.title}</strong>
