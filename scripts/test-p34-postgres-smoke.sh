@@ -46,6 +46,12 @@ result=$(run_as "$admin" "SELECT public.lms_p34_save_question_bank('$course','[]
  { echo 'FAIL linked Draft not visible as published P22 question';exit 1; }
 [[ "$(query "SELECT approval_state FROM public.lms_questions WHERE id='$q'")" == draft ]] ||
  { echo 'FAIL P34 Lesson-specific publication globally approved Draft for Practice';exit 1; }
+# The existing P1 fixture paid learner is entitled to ASP only, NOT Other Course.
+# Grant synthetic Other Course entitlement in disposable PG, not Production.
+psql -X -q -v ON_ERROR_STOP=1 -c "INSERT INTO public.lms_entitlements
+ (user_id,course_id,entitlement_type,status,grant_reference)
+ VALUES ('$learner','$course','paid','active','P34-DISPOSABLE-CI')
+ ON CONFLICT DO NOTHING"
 got=$(run_as "$learner" "SELECT jsonb_array_length(public.lms_p22_get_lesson_quiz('$lesson'))")
 [[ "$got" -ge 1 ]] || { echo 'FAIL actual learner P22 Quiz does not see saved published link';exit 1; }
 keys=$(run_as "$learner" "SELECT public.lms_p22_get_lesson_quiz('$lesson')::text LIKE '%correct_index%'")
