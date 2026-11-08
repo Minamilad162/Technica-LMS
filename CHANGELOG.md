@@ -1,3 +1,9 @@
+## 2026-11-08 — P38 Premium Subscription Plans learner page (UI-only)
+- Translated the owner's approved light Technica mint/teal premium plans concept into responsive React/CSS with an illustrated laptop/book/education hero, a keyboard-accessible duration highlight selector, dynamic mint/deep-teal/lilac plan cards, improved benefits and activation disclosures.
+- All prices, currencies, plan titles, durations and published options remain sourced from real P21 Supabase records; featured 6-month term is only selected if it exists. Savings percentages appear only from valid same-currency comparison. No design-mockup prices, paid activation claims, stock images or screenshot backgrounds.
+- Preserved server-verified active plans, pending requests, Admin-reviewed `lms_p21_request_plan`, no payment collection, existing course/paywall entitlements, Admin Tools plan management and header countdown. No SQL/API/data changes.
+- Added `subscriptionPlanPresentation.js`, P38 regression/CI and spec `docs/current/P38_PREMIUM_SUBSCRIPTION_PLANS_UI.md`.
+
 ## 2026-11-08 — P34 transitional fallback guard (source-only)
 - If P34A/P34B are not yet installed, retain existing verified P30 Admin Question Bank settings via the original atomic P30 RPC. Show a prominent **P30 Legacy** warning and Save Settings label, explicitly stating that saved Draft Lesson links and Mock candidates are **not yet learner-published**; disallow the P34 release-only action. Full one-save publish activates only after BOTH Admin P34 capability probes succeed. No remote DB writes, no schema changes.
 - New compatibility CI regression protects old UI functions during separate Cloudflare/Supabase rollout.
