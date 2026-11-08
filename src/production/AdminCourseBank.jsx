@@ -24,11 +24,11 @@ export default function AdminCourseBank({db,courses=[],asp,onUpdate,onDirtyChang
  const [lessons,setLessons]=useState([]);
  const [reviewOpen,setReviewOpen]=useState(false);
  const dirtyCount=Object.keys(staged).length;
- const canEdit=!!courseId&&!aspIdentityMismatch&&!bank.compatibilityMode
-   &&(!bank.items.length||typeof bank.items[0].isActive==='boolean');
  const selected=useMemo(()=>courses.find(c=>c.id===courseId),[courses,courseId]);
  const courseProblem=questionBankCatalogState(courses,coursesLoading,coursesError);
  const aspIdentityMismatch=!!selected&&isAspCourseTitle(selected)&&!isOfficialAspCourse(selected);
+ const canEdit=!!courseId&&!aspIdentityMismatch&&!bank.compatibilityMode
+   &&(!bank.items.length||typeof bank.items[0].isActive==='boolean');
  useEffect(()=>{if(!courses.some(c=>c.id===courseId))setCourseId(preferredQuestionBankCourse(courses)?.id||'');},[courses,courseId]);
  useEffect(()=>{setOffset(0);setSearch('');setQuery('');setPending(null);setManual(null);
   setError('');setNotice('');setDomainId('');setFilterDomain('');setDifficulty('');setUsage('all');setDomains([]);setLessons([]);setSelectedIds([]);
