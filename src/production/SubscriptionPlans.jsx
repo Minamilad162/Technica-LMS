@@ -47,7 +47,7 @@ function PlanCalendar({featured=false,long=false}){
  </div>;
 }
 
-export default function SubscriptionPlans({db,user,subscription,subscriptionError='',onBack,onRefresh,onMyLearning}){
+export default function SubscriptionPlans({db,user,subscription,subscriptionError='',openAccess=false,onBack,onRefresh,onMyLearning}){
  const [plans,setPlans]=useState([]),[requests,setRequests]=useState([]),
   [loading,setLoading]=useState(true),[busy,setBusy]=useState(''),
   [error,setError]=useState(''),[notice,setNotice]=useState('');
@@ -64,7 +64,7 @@ export default function SubscriptionPlans({db,user,subscription,subscriptionErro
  useEffect(()=>{setFocusedPlanId(previous=>plans.some(p=>p.id===previous)?previous:featuredId);},[plans,featuredId]);
  const pending=requests.find(r=>r.status==='pending');
  const choose=async plan=>{
-  if(busy||subscription||pending||plan.price_amount===null||!plan.currency)return;
+  if(openAccess||busy||subscription||pending||plan.price_amount===null||!plan.currency)return;
   setBusy(plan.id);setError('');setNotice('');
   try{
    await requestPlatformPlan(db,plan.id);
@@ -78,8 +78,7 @@ export default function SubscriptionPlans({db,user,subscription,subscriptionErro
   <header className="sp-hero">
    <div className="sp-hero-copy"><span className="sp-eyebrow"><Sparkles size={15}/> PREMIUM TECHNICA MEMBERSHIP</span>
     <h1>Choose Your <em>Learning Plan</em></h1>
-    <p>One subscription unlocks the full learning platform — courses, quizzes,
-     practice and assessments to help you reach your goals.</p>
+    <p>Flexible learning plans for every stage of your professional development.</p>
     <div className="sp-hero-points">
      <span><Crown size={16}/> Full Platform Access</span>
      <span><Zap size={16}/> Learn & Practice</span>
@@ -89,14 +88,14 @@ export default function SubscriptionPlans({db,user,subscription,subscriptionErro
    <LearningIllustration/>
   </header>
 
-  {subscription&&<div className="sp-active" role="status">
+  {subscription&&!openAccess&&<div className="sp-active" role="status">
    <div className="sp-status-icon"><CheckCircle2 size={23}/></div>
    <div><strong>Your platform subscription is active</strong>
     <p>{subscription.plan_name_snapshot} · Valid until {when(subscription.ends_at)}.
      All published learning features are unlocked on your account.</p></div>
    {onMyLearning&&<button type="button" onClick={onMyLearning}>My Learning <ArrowRight size={16}/></button>}
   </div>}
-  {pending&&!subscription&&<div className="sp-pending" role="status">
+  {pending&&!subscription&&!openAccess&&<div className="sp-pending" role="status">
    <div className="sp-status-icon"><Clock3 size={23}/></div>
    <div><strong>Subscription request pending</strong>
     <p>Your chosen plan is awaiting Admin approval. You have not been charged;
@@ -120,8 +119,9 @@ export default function SubscriptionPlans({db,user,subscription,subscriptionErro
   </div>
 
   {error&&<p className="sp-alert" role="alert">{error}</p>}
-  {subscriptionError&&<p className="sp-alert" role="note">{subscriptionError}</p>}
-  {notice&&<p className="sp-notice" role="status"><CheckCircle2 size={18}/>{notice}</p>}
+  {subscriptionError&&!openAccess&&<p className="sp-alert" role="note">{subscriptionError}</p>}
+  {openAccess&&<p className="sp-notice" role="status"><CheckCircle2 size={18}/> Learning is currently available. Membership plans will be activated when enrollment opens.</p>}
+   {notice&&<p className="sp-notice" role="status"><CheckCircle2 size={18}/>{notice}</p>}
 
   {loading?<div className="sp-loading" role="status"><span className="sp-loader"/><strong>Loading membership options…</strong><small>Checking current published plans and prices</small></div>:
    <div className="sp-grid" data-plan-count={plans.length}>{plans.map((plan,i)=>{
@@ -157,9 +157,9 @@ export default function SubscriptionPlans({db,user,subscription,subscriptionErro
      </div>
      {selected&&<div className="sp-focused-label"><CheckCircle2 size={13}/> Highlighted plan</div>}
      <button className="sp-subscribe" type="button" title={!subscription&&!pending&&configured?'Request this plan: '+term:undefined}
-      disabled={!!subscription||!!pending||!configured||!!busy}
+      disabled={openAccess||!!subscription||!!pending||!configured||!!busy}
       onClick={()=>choose(plan)}>
-      {subscription?(current?'Your active plan':'Already subscribed'):
+      {openAccess?'Coming soon':subscription?(current?'Your active plan':'Already subscribed'):
        pending?'Awaiting Admin':!configured?'Price not configured':
        busy===plan.id?'Submitting…':'Request '+term+' access'}
       <ArrowRight size={18}/>
@@ -179,7 +179,7 @@ export default function SubscriptionPlans({db,user,subscription,subscriptionErro
    </div>)}
   </section>
 
-  <div className="sp-trust-row" aria-label="Subscription request information">
+  <div className="sp-trust-row" aria-label="Subscription request information" style={{display:openAccess?'none':undefined}}>
    <div><span><LockKeyhole size={21}/></span><div><strong>No card payment at this step</strong>
     <p>Request a published plan without entering card details.</p></div></div>
    <div><span><Zap size={24}/></span><div><strong>Admin-reviewed activation</strong>
@@ -188,10 +188,8 @@ export default function SubscriptionPlans({db,user,subscription,subscriptionErro
     <p>Contact your Technica LMS administrator for assistance.</p></div></div>
   </div>
   <div className="sp-policy"><ShieldCheck size={19}/><div>
-   <strong>Transparent membership activation</strong>
-   <p>Online payment is not connected yet. Choosing a plan sends an Admin-reviewed request
-    — no payment is collected and no protected access is unlocked until a verified active
-    subscription is granted by the server.</p>
+   <strong>{openAccess?'Membership plans':'Transparent membership activation'}</strong>
+   <p>{openAccess?'Membership activation will be available when online enrollment opens. Published content is currently accessible to signed-in learners.':'Online payment is not connected yet. Choosing a plan sends an Admin-reviewed request — no payment is collected and no protected access is unlocked until a verified active subscription is granted by the server.'}</p>
   </div></div>
   {onBack&&<button type="button" className="sp-back" onClick={onBack}>
    <ArrowLeft size={16}/> Back to Courses</button>}

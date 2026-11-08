@@ -45,14 +45,14 @@ function RealCourseRow({db,course,result,onOpen}){
 function DemoCourseRow({db,course,onOpen}){
  return <article className="pml-demo-row">
   <div className="pml-demo-cover"><CourseCover db={db} course={course} variant="mini"/></div>
-  <div className="pml-demo-content"><span className="pml-badge pml-badge-demo"><Sparkles size={13}/> Checkout demo</span>
-   <h3>{course.title}</h3><p>No payment was made. Protected lessons and Practice remain locked.</p></div>
+  <div className="pml-demo-content"><span className="pml-badge pml-badge-demo"><Sparkles size={13}/> Course preview</span>
+   <h3>{course.title}</h3><p>Explore introductory lessons.</p></div>
   <button type="button" className="pml-demo-action" onClick={()=>onOpen(course.id)}>
-   Explore Demo <ChevronRight size={16}/></button>
+   View course <ChevronRight size={16}/></button>
  </article>;
 }
 export default function PremiumMyLearning({
- db,user,activeCourses=[],demoCourses=[],subscription=null,onSubscribe,onOpen,onBrowse,onPractice,onHistory,refreshKey=0
+ db,user,activeCourses=[],demoCourses=[],subscription=null,openAccess=false,onSubscribe,onOpen,onBrowse,onPractice,onHistory,refreshKey=0
 }){
  const [reports,setReports]=useState({}),[isLoading,setIsLoading]=useState(false);
  const [tab,setTab]=useState('all'),[query,setQuery]=useState('');
@@ -89,7 +89,7 @@ export default function PremiumMyLearning({
     <div className="pml-hero-actions">
      {featured&&<button className="pml-hero-primary" type="button" onClick={()=>onOpen(featured.id)}>
       <PlayCircle size={17}/> Open {featured.title.length>22?'your course':featured.title} <ArrowRight size={16}/></button>}
-     {!subscription&&<button className="pml-hero-primary" type="button" onClick={onSubscribe}>
+     {!subscription&&!openAccess&&<button className="pml-hero-primary" type="button" onClick={onSubscribe}>
       <ShieldCheck size={16}/> View Subscription Plans <ArrowRight size={16}/></button>}
      <button className="pml-hero-secondary" type="button" onClick={onBrowse}>
       Browse Courses <ArrowRight size={16}/></button>
@@ -98,7 +98,7 @@ export default function PremiumMyLearning({
    <div className="pml-hero-side" aria-label="Verified learning summary">
     <div className="pml-orbit" aria-hidden="true"><i/><i/><BookOpenCheck size={38}/></div>
     <div className="pml-metric-lead"><span>Active Courses</span><strong>{activeCourses.length}</strong>
-     <small><ShieldCheck size={13}/> Verified Supabase access</small></div>
+     <small><ShieldCheck size={13}/> Your learning progress</small></div>
    </div>
   </section>
   {subscription&&<div className="pml-subscription-banner" role="status">
@@ -108,12 +108,12 @@ export default function PremiumMyLearning({
   </div>}
   <div className="pml-stats" aria-label="Learning statistics">
    <div className="pml-stat"><span className="pml-stat-icon"><GraduationCap size={19}/></span>
-    <div><small>Enrolled Courses</small><strong>{activeCourses.length}</strong></div></div>
+    <div><small>{openAccess?'Available Courses':'Enrolled Courses'}</small><strong>{activeCourses.length}</strong></div></div>
    <div className="pml-stat"><span className="pml-stat-icon"><CheckCircle2 size={19}/></span>
     <div><small>Verified lessons complete</small>
      <strong>{formatCount(summary.completedLessons)}{summary.totalLessons!==null&&<span> / {summary.totalLessons}</span>}</strong></div></div>
    <div className="pml-stat"><span className="pml-stat-icon"><Compass size={19}/></span>
-    <div><small>Demo Previews</small><strong>{demoCourses.length}</strong></div></div>
+    <div><small>Course Previews</small><strong>{demoCourses.length}</strong></div></div>
   </div>
   {activeCourses.length>0&&featured&&<section className="pml-featured" aria-label="Your featured course">
    <div className="pml-featured-image"><CourseCover db={db} course={featured} variant="card"/></div>
@@ -133,8 +133,8 @@ export default function PremiumMyLearning({
     <div className="pml-filters" role="group" aria-label="Filter learning courses">
      {[
       {id:'all',name:'All Courses',count:activeCourses.length+demoCourses.length},
-      {id:'active',name:'Enrolled',count:activeCourses.length},
-      {id:'demo',name:'Demo Previews',count:demoCourses.length}
+      {id:'active',name:openAccess?'Available':'Enrolled',count:activeCourses.length},
+      {id:'demo',name:'Course Previews',count:demoCourses.length}
      ].map(x=><button key={x.id} type="button" aria-pressed={tab===x.id}
        className={tab===x.id?'active':''} onClick={()=>setTab(x.id)}>
        {x.name}<span>{x.count}</span></button>)}
@@ -147,14 +147,14 @@ export default function PremiumMyLearning({
    </div>
    {!!realShown.length&&<section className="pml-real-group" aria-label="Verified enrolled courses">
     <div className="pml-group-header"><div><span className="pml-group-icon"><ShieldCheck size={17}/></span>
-      <div><h3>Active Enrollments</h3><p>Server-verified courses with protected content access.</p></div></div>
+      <div><h3>{openAccess?'Available Courses':'Active Enrollments'}</h3><p>Continue where you left off.</p></div></div>
      <strong>{realShown.length} courses</strong></div>
     <div className="pml-real-grid">{realShown.map(c=><RealCourseRow key={c.id} db={db} course={c}
       result={resolved[c.id]} onOpen={onOpen}/>)}</div>
    </section>}
    {!!demoShown.length&&<section className="pml-demo-group" aria-label="Simulation courses">
     <div className="pml-group-header"><div><span className="pml-group-icon pml-icon-demo"><Sparkles size={17}/></span>
-      <div><h3>Demo Previews</h3><p>Simulation only · not purchased, no private lessons unlocked.</p></div></div>
+      <div><h3>Course Previews</h3><p>Explore introductory lessons.</p></div></div>
      <strong>{demoShown.length} previews</strong></div>
     <div className="pml-demo-grid">{demoShown.map(c=><DemoCourseRow key={c.id} db={db}
       course={c} onOpen={onOpen}/>)}</div>
@@ -175,7 +175,6 @@ export default function PremiumMyLearning({
       Go to Practice <ArrowRight size={16}/></button>
     <button type="button" className="lj-quiet" onClick={onHistory}>My Practice History</button></div>
   </section>
-  <p className="pml-disclaimer"><ShieldCheck size={14}/> Completion percentages come from verified P11 records.
-   Demo checkout cannot create real enrollment, learning scores or paid content access.</p>
+  
  </div>;
 }
