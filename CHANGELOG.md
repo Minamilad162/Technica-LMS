@@ -1,3 +1,10 @@
+## 2026-11-08 — P30 Question Bank UI + atomic batch save (source-only)
+- Reproduced the owner-approved Technica Question Bank teal dashboard layout as a compact table with Course selector, upload/manual creation, filters, page counts, readable one- or two-line question preview, Domain, inline Difficulty, Active, Mock, Lesson, Status and bulk actions. Removed per-row answer expansion entirely.
+- All row and bulk setting changes remain in browser memory with Unsaved badge; one Save All Changes action sends ONE transactional SQL RPC (max 500 question rows), with optimistic concurrency, whole-transaction rollback on any problem, Discard, and navigation/unload warning.
+- Added `202611080004_p30_batch_question_bank_edits.sql` source-only Admin guarded batch RPC and read-only capability handshake; no existing Question Bank/Mock/attempt rows modified at migration install. Only Draft Difficulty is editable without independent review; official P9B Mock remains immutable and forbidden in Practice/Lessons.
+- Preserved ASP P6A and non-ASP rights approval actions behind separate collapsed advanced workbenches; imports remain explicit Draft creation and not part of bulk settings Save.
+- Added pure staging logic, static UI/security regressions, disposable PostgreSQL single-transaction/RLS/rollback smoke, Master Blueprint and P30 runbook. Production Supabase not touched.
+
 ## 2026-11-08 — Question Bank old UI / ASP Course false-missing diagnostic
 - Screenshot confirmed main deployed old `AdminQuestionsPanel` and exact-ASP slug gate rather than unmerged P28/P29 upload UI. The old Admin Tools catalog fetch silently replaced SQL/Auth/RLS errors with empty Courses, falsely instructing admins to create an ASP Course.
 - Admin Tools now distinguishes real Supabase Course loading/errors/empty with Retry/Courses navigation, and prefers existing canonical ASP identity. A legacy Course titled “ASP Course” but slugged `asp-course` remains visible with an explicit warning; no duplicate creation/import or silent migration of its identity.
