@@ -24,12 +24,14 @@ export default function AdminCourseBank({db,courses=[],asp,onUpdate,onDirtyChang
  const [selectedIds,setSelectedIds]=useState([]);
  const [lessons,setLessons]=useState([]);
  const [inspectLessonId,setInspectLessonId]=useState('');
+ const [releaseLessonId,setReleaseLessonId]=useState('');
  const [inspectState,setInspectState]=useState({loading:false,data:null,error:''});
  const [reviewOpen,setReviewOpen]=useState(false);
  const reviewRef=useRef(null);
  const [batchReady,setBatchReady]=useState(false),[batchLoading,setBatchLoading]=useState(true);
  const [batchError,setBatchError]=useState('');
  const dirtyCount=Object.keys(staged).length;
+ const pendingCount=dirtyCount+(releaseLessonId?1:0);
  const selected=useMemo(()=>courses.find(c=>c.id===courseId),[courses,courseId]);
  const courseProblem=questionBankCatalogState(courses,coursesLoading,coursesError);
  const aspIdentityMismatch=!!selected&&isAspCourseTitle(selected)&&!isOfficialAspCourse(selected);
@@ -40,7 +42,7 @@ export default function AdminCourseBank({db,courses=[],asp,onUpdate,onDirtyChang
   let live=true;setBatchReady(false);setBatchLoading(true);setBatchError('');
   getCourseBankBatchCapabilities(db)
    .then(()=>{if(live)setBatchReady(true);})
-   .catch(e=>{if(live)setBatchError('P30 batch editor has not been verified on this database: '+fail(e));})
+   .catch(e=>{if(live)setBatchError('P34 One-Save publish migration is required on this database: '+fail(e));})
    .finally(()=>{if(live)setBatchLoading(false);});
   return()=>{live=false;};
  },[db]);
@@ -91,7 +93,7 @@ export default function AdminCourseBank({db,courses=[],asp,onUpdate,onDirtyChang
  useEffect(()=>{onDirtyChange?.(dirtyCount>0);},[dirtyCount,onDirtyChange]);
  useEffect(()=>()=>onDirtyChange?.(false),[onDirtyChange]);
  useEffect(()=>{
-  if(!dirtyCount)return;
+  if(!pendingCount)return;
   const warn=e=>{e.preventDefault();e.returnValue='';};
   window.addEventListener('beforeunload',warn);
   return()=>window.removeEventListener('beforeunload',warn);
@@ -99,13 +101,13 @@ export default function AdminCourseBank({db,courses=[],asp,onUpdate,onDirtyChang
  useEffect(()=>{setSelectedIds([]);},[courseId,offset,query,filterDomain,difficulty,usage]);
  const moveCourse=id=>{
   if(id===courseId)return;
-  if(dirtyCount&&!window.confirm('Discard unsaved Question Bank edits before changing Course?'))return;
-  setStaged({});setSelectedIds([]);setCourseId(id);
+  if(pendingCount&&!window.confirm('Discard unsaved Question Bank actions before changing Course?'))return;
+  setStaged({});setReleaseLessonId('');setSelectedIds([]);setCourseId(id);
  };
  const stage=(q,field,value)=>{
   setError('');setNotice('');
   try{
-   if(!canEdit)throw Error(batchError||'Install the P30 batch editor migration first.');
+   if(!canEdit)throw Error(batchError||'Install P34 One-Save publishing on Supabase before editing.');
    const next=stagedQuestionEdit(q,staged[q.id],field,value);
    setStaged(prev=>{const result={...prev};if(next)result[q.id]=next;else delete result[q.id];return result;});
   }catch(e){setError(fail(e));}
