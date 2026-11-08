@@ -52,15 +52,17 @@ export async function reserveNonAspMockQuestion(db,id){
 }
 // Single atomic Admin RPC for all staged rows, NOT one request per switch.
 export async function getCourseBankBatchCapabilities(db){
- const x=await call(db,'lms_p30_bank_capabilities');
- if(x?.version!=='p30-v1'||x.maxBatch!==500||x.atomic!==true)
-  throw Error('Unexpected Question Bank Batch API version.');
+ const x=await call(db,'lms_p34_bank_capabilities');
+ if(x?.version!=='p34a-v1'||x.maxBatch!==500||x.atomic!==true
+  ||x.lessonQuizPublishOnSave!==true)
+  throw Error('One-Save Question Bank publication is not enabled on this database.');
  return x;
 }
-export async function saveCourseBankBatch(db,courseId,rows){
+export async function saveCourseBankBatch(db,courseId,rows,releaseLessonId=null){
  checkId(courseId);
- if(!Array.isArray(rows)||rows.length<1||rows.length>500)
-  throw Error('Save between 1 and 500 pending Question Bank edits.');
+ if(releaseLessonId)checkId(releaseLessonId);
+ if(!Array.isArray(rows)||rows.length>500||(!rows.length&&!releaseLessonId))
+  throw Error('Choose question edits or an existing Lesson Quiz to publish.');
  const ids=new Set();
  for(const r of rows){
   checkId(r.questionId);
@@ -74,11 +76,18 @@ export async function saveCourseBankBatch(db,courseId,rows){
    ||(r.addLessonId&&!uuid.test(r.addLessonId)))
    throw Error('Invalid staged Question Bank change.');
  }
- const response=await call(db,'lms_p30_save_question_bank',{p_course_id:courseId,p_changes:rows});
+ const response=await call(db,'lms_p34_save_question_bank',{
+  p_course_id:courseId,p_changes:rows,p_release_lesson_id:releaseLessonId||null});
  if(!response||response.requested!==rows.length||!Number.isInteger(response.saved)
   ||response.saved<0||response.saved>rows.length)
   throw Error('Question Bank Save response could not be verified.');
  return response;
+}
+// Admin directly publishes existing bank-linked Draft lesson questions with
+// one explicit action. This receipt is scoped to the Lesson only, not Practice.
+export async function publishBankLessonQuiz(db,lessonId,quizQuestionId){
+ return call(db,'lms_p34_publish_lesson_quiz',{
+  p_lesson_id:checkId(lessonId),p_quiz_question_id:checkId(quizQuestionId)});
 }
 export async function setQuestionBankFlags(db,questionId,isActive,mockCandidate){
  if(typeof isActive!=='boolean'||typeof mockCandidate!=='boolean')
