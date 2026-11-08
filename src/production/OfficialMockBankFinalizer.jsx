@@ -16,6 +16,8 @@ export default function OfficialMockBankFinalizer({db,course,disabled=false,revi
   loadMarkedMockCandidateIds(db,course.id).then(marked=>{
    if(!live)return;
    if(new Set(marked).size!==marked.length)throw Error('Duplicate saved Mock question IDs.');
+   if(marked.length>200){setIds(marked);setOpen(false);return;}
+   if(marked.length>200){setIds(marked);setOpen(false);return;}
    setIds(marked);setOpen(marked.length===200&&course.slug==='asp');
   }).catch(e=>{if(live)setError(e?.message||'Saved Mock selection could not be read.');})
    .finally(()=>{if(live)setLoading(false);});
@@ -48,10 +50,7 @@ export default function OfficialMockBankFinalizer({db,course,disabled=false,revi
   {disabled&&<p className="p40-finalizer-note">Save or discard pending Question Bank edits before finalizing.</p>}
   {course?.slug==='asp'&&open&&ids?.length===200&&!disabled&&<div className="p40-finalizer-body">
    <div className="p40-finalizer-load">
-    <button type="button" className="at-primary" disabled={disabled||loading} onClick={()=>void load()}>
-     {loading?'Checking saved choices…':'Load saved Mock Exam choices'}
-    </button>
-    <span role="status">{ids?ids.length+' / 200 saved candidates loaded':'No saved selection loaded yet'}</span>
+    <span role="status">{ids?ids.length+' / 200 saved candidates ready for verification':'Checking saved candidates…'}</span>
    </div>
    {ids&&ids.length!==200&&<p className="p40-finalizer-note" role="status">
     Exactly 200 distinct saved Mock choices are required. Adjust the checkboxes in Question Bank and Save All.
@@ -60,7 +59,7 @@ export default function OfficialMockBankFinalizer({db,course,disabled=false,revi
     <AspMockReservation db={db} course={course} ids={ids} onReserved={()=>{
      setOpen(false);setIds(null);onReserved?.();
     }}/>}
-   {error&&<p className="at-error" role="alert"><TriangleAlert size={15}/>{error}</p>}
   </div>}
+  {error&&<p className="at-error" role="alert"><TriangleAlert size={15}/>{error}</p>}
  </section>;
 }
