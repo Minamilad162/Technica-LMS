@@ -134,7 +134,7 @@ BEGIN
  WHERE l.id=NEW.lesson_id;
  IF v_q.id IS NULL OR v_course IS NULL OR v_q.course_id<>v_course
  THEN RAISE EXCEPTION 'Lesson question must belong to the same course'; END IF;
- IF v_q.mock_exclusive OR v_q.mock_candidate OR NOT v_q.is_active OR v_q.approval_state='archived'
+ IF v_q.mock_exclusive OR v_q.mock_candidate OR (NOT v_q.is_active AND (TG_OP='INSERT' OR NEW.is_published)) OR v_q.approval_state='archived'
  THEN RAISE EXCEPTION 'Mock-only or archived question cannot be used in a lesson quiz'; END IF;
  IF NEW.is_published AND v_q.approval_state<>'approved'
  THEN RAISE EXCEPTION 'Only approved non-Mock bank questions can be published'; END IF;
