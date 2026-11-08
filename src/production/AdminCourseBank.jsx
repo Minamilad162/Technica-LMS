@@ -304,8 +304,7 @@ export default function AdminCourseBank({db,courses=[],asp,onUpdate,onDirtyChang
   {selected&&<>
    <p className="p31-lesson-publish-note">
     <BookOpen size={16}/> Assigning a question to a Lesson Quiz links it to that Lesson.
-    <strong> Approved + Active + non-Mock</strong> questions publish to the learner Knowledge Check on Save.
-    <strong> Draft</strong> links stay hidden until independent approval and publication in Course Builder.
+    <strong> Active, non-Mock questions publish immediately to the selected Lesson Quiz on Save All Changes</strong> — including imported Drafts. Questions ticked for Mock are included in the separate Selected Mock Test.
    </p>
    {!!lessons.length&&<div className="p32-publication-status at-surface" aria-label="Saved Lesson Quiz publication status">
     <div className="p32-publication-select">
@@ -326,9 +325,13 @@ export default function AdminCourseBank({db,courses=[],asp,onUpdate,onDirtyChang
        <small>These published questions should appear to an authorized learner in this Lesson's Quiz.</small>}
      </div>}
     {mode==='bank'&&inspectState.data?.pending>0&&<div className="p33-next-steps">
-     {dirtyCount>0&&<span className="p33-unsaved-note">{dirtyCount} unsaved edit{dirtyCount===1?'':'s'} — click Save All Changes first.</span>}
-     <button type="button" className="at-outline" onClick={openQuestionReview} disabled={busy}>Review Draft questions</button>
-     <small>After approval, open the Lesson Quiz and publish eligible linked questions.</small>
+     <label className="p34-release-option">
+      <input type="checkbox" aria-label="Publish saved Lesson questions on Save All Changes"
+       checked={releaseLessonId===inspectLessonId} disabled={!canEdit||busy}
+       onChange={e=>setReleaseLessonId(e.target.checked?inspectLessonId:'')}/>
+      Publish {inspectState.data.pending} saved Lesson question(s) on Save All Changes
+     </label>
+     <small>One Save publishes these eligible linked questions to the learner Quiz. No separate Review Draft step.</small>
     </div>}
     <a className="at-outline p32-open-lesson" href={'/builder?courseId='+encodeURIComponent(courseId)+'&lessonId='+encodeURIComponent(inspectLessonId)}
      target="_blank" rel="noopener noreferrer" aria-label="Open the selected Lesson Quiz editor">
