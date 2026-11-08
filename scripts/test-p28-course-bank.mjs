@@ -69,7 +69,7 @@ for(const fragment of ['verifiedLiveAdmin(db)','p_course_id:courseId','p_items:r
  assert(api.includes(fragment),'Missing verified P28 API '+fragment);
 assert(!sql.includes("to_regclass('public.lms_p9b_mock_items')"),'P9B must not block non-ASP Course Bank migration');
 assert(sql.includes('P28 missing prerequisites:'),'Admin requires exact missing P1/P4/P22 diagnostics');
-assert(bank.includes('importQuestionFile(file,courseId,domainId)')&&bank.includes('Confirm Draft Import'));
+assert(bank.includes('importQuestionFile(file,courseId,domainId)')&&bank.includes('Upload Excel / CSV')&&bank.includes('Import '+"'"+'+pending.rows.length+"'"+' as Draft'));
 assert(bank.includes("selected.slug!=='asp'")&&bank.includes("selected.slug==='asp'"));
 assert(bank.includes('reserveNonAspMockQuestion')&&bank.includes('approveNonAspBankQuestion'));
 assert(quiz.includes('Choose from Course Bank')&&quiz.includes('attachBankToLesson(db,lessonId,q.id'));
@@ -81,7 +81,7 @@ assert(sql.includes("v_difficulty:=")&&sql.includes("v_difficulty,'draft',false"
 assert(sql.includes('New Lesson Quiz questions must be selected from the Course Question Bank'),'Database must prevent new quiz content outside the Bank');
 assert(bank.includes("selected.slug==='asp'")&&bank.includes('preferredQuestionBankCourse(courses)'),'Real canonical ASP must be the primary Question Bank course');
 assert(bank.includes('Filter bank by domain')&&bank.includes('Filter bank by difficulty')&&bank.includes('Filter bank by usage'),'Admin requires course-specific domain / difficulty / usage filters');
-assert(bank.includes('unmappedLabels')&&bank.includes('Map spreadsheet labels to real Course Domains'),'Unmapped ASP11 source labels must require explicit manual mapping');
+assert(bank.includes('unmappedLabels')&&bank.includes('Map spreadsheet Domains before importing'),'Unmapped ASP11 source labels must require explicit manual mapping');
 assert(quiz.includes("usage:'eligible'")&&quiz.includes('Filter Lesson Quiz by domain'),'Lesson Quiz must use filtered Course Bank');
 assert(!quiz.includes('Manual question</button>'),'New Lesson questions must originate from Course Bank, not a separate pool');
 assert(!sql.includes('UPDATE public.lms_questions SET approval_state=\'approved\' WHERE course_id'));
