@@ -18,7 +18,11 @@ query_as(){
   grep -E '^(t|f|true|false)$' | tail -n 1 | sed 's/^t$/true/;s/^f$/false/'
 }
 [[ "$(query_as authenticated "$LEARNER" "SELECT public.lms_p41_open_access()")" == true ]] || { echo 'FAIL active learner open mode'; exit 1; }
-[[ "$(query_as anon 00000000-0000-0000-0000-000000000000 "SELECT public.lms_p1_course_entitled('$C2')")" == false ]] || { echo 'FAIL anonymous access'; exit 1; }
+if psql -X -v ON_ERROR_STOP=1 -q -c "BEGIN;SET LOCAL ROLE anon;
+ SET LOCAL request.jwt.claim.sub='00000000-0000-0000-0000-000000000000';
+ SELECT public.lms_p1_course_entitled('$C2');ROLLBACK;" >/dev/null 2>&1;then
+ echo 'FAIL anonymous could invoke protected entitlement';exit 1
+fi
 [[ "$(query_as authenticated "$LEARNER" "SELECT public.lms_p1_course_entitled('$C2')")" == true ]] || { echo 'FAIL published Course access'; exit 1; }
 [[ "$(query_as authenticated "$LEARNER" "SELECT public.lms_p1_can_view_lesson('$LESSON')")" == true ]] || { echo 'FAIL published lesson access'; exit 1; }
 [[ "$(query_as authenticated "$LEARNER" "SELECT public.lms_p4_can_practice('$C2')")" == true ]] || { echo 'FAIL published Practice access'; exit 1; }

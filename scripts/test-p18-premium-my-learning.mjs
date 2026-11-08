@@ -71,7 +71,7 @@ assert(portal.includes("onPracticeRoute={()=>navigate('/assessments?tab=practice
 assert(portal.includes("onHistoryRoute={()=>navigate('/my-practice')}"));
 assert(jsx.includes('Active Enrollments')&&jsx.includes('Course Previews'));
 assert(jsx.includes('Your learning progress'));
-assert(jsx.includes('Explore available introductory lessons.'));
+assert(jsx.includes('Explore introductory lessons.'));
 assert(jsx.includes('loadVerifiedCourseReports(db,activeCourses'));
 assert(jsx.includes('onBrowse')&&jsx.includes('onPractice')&&jsx.includes('onHistory'));
 assert(jsx.includes('role="progressbar"')&&jsx.includes('aria-valuenow'));
