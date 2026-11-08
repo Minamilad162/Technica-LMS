@@ -55,8 +55,12 @@ export async function getCourseBankBatchCapabilities(db){
  const x=await call(db,'lms_p34_bank_capabilities');
  if(x?.version!=='p34a-v1'||x.maxBatch!==500||x.atomic!==true
   ||x.lessonQuizPublishOnSave!==true)
-  throw Error('One-Save Question Bank publication is not enabled on this database.');
- return x;
+  throw Error('One-Save Lesson Quiz publication is not installed on this database.');
+ const mock=await call(db,'lms_p34b_admin_capabilities');
+ if(mock?.version!=='p34b-v1'||mock.selectedMockOnSave!==true
+  ||mock.official200Unchanged!==true)
+  throw Error('The Selected Mock Test is not installed on this database.');
+ return {...x,selectedMockOnSave:true};
 }
 export async function saveCourseBankBatch(db,courseId,rows,releaseLessonId=null){
  checkId(courseId);
