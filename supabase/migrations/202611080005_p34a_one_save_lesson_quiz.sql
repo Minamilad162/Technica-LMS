@@ -199,9 +199,12 @@ BEGIN
   WHERE lesson_id=p_release_lesson_id AND bank_question_id IS NOT NULL;
   IF v_lesson_count>100 THEN RAISE EXCEPTION 'Maximum 100 Lesson Quiz questions'; END IF;
   FOR v_quiz IN
-   SELECT id FROM public.lms_p22_lesson_quiz_questions
-   WHERE lesson_id=p_release_lesson_id AND bank_question_id IS NOT NULL
-   ORDER BY position,id
+   SELECT z.id FROM public.lms_p22_lesson_quiz_questions z
+   JOIN public.lms_questions q ON q.id=z.bank_question_id
+   WHERE z.lesson_id=p_release_lesson_id AND z.bank_question_id IS NOT NULL
+    AND NOT z.is_published AND q.is_active AND NOT q.mock_candidate
+    AND NOT q.mock_exclusive AND q.approval_state<>'archived'
+   ORDER BY z.position,z.id
   LOOP
    v_new:=public.lms_p34_release_one(p_release_lesson_id,v_quiz);
    IF v_new THEN v_published:=v_published+1; END IF;
