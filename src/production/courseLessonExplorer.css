@@ -111,3 +111,18 @@
  .cle-reading{padding:18px}
  .cle-material-attachments{padding-top:18px;margin-top:18px}
 }
+
+/* P31: Published bank questions inside the same Lesson Quiz anchor. */
+.cle-quiz-count{display:inline-flex;justify-content:center;align-items:center;min-width:22px;height:22px;
+ padding:0 6px;background:#d8f5ec;border:1px solid #bde3d6;border-radius:40px;color:#087d6e;
+ font-size:11px;font-weight:850;line-height:1}
+.cle-steps>button.selected .cle-quiz-count{background:#c8f1e5}
+.cle-quiz-tools{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;
+ margin:-3px 0 16px;color:#5f7f87;font-size:11px}
+.cle-quiz-tools>span{font-weight:750}
+.cle-quiz-tools button{border:1px solid #d5e9e3;background:#f3fbf8;border-radius:9px;
+ padding:9px 12px;color:#138276;font-size:11px;font-weight:800;cursor:pointer}
+.cle-quiz-tools button:disabled{opacity:.65;cursor:not-allowed}
+.cle-quiz-tools button:focus-visible{outline:2px solid #0e9b87;outline-offset:3px}
+@media(max-width:540px){.cle-quiz-count{min-width:18px;height:18px;font-size:10px}
+ .cle-quiz-tools button{padding:8px 10px}}

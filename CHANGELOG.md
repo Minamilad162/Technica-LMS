@@ -1,3 +1,9 @@
+## 2026-11-08 — P31 Question Bank lesson assignment visible in Learner Quiz
+- Kept Course → Domain → Topic → Lesson and P23 single-page Video → Study Material/PDF → Knowledge Check/Quiz.
+- P30 approved+Active+non-Mock Lesson links publish via the existing P28/P22 server path; Draft links remain unpublished pending independent question approval and explicit Course Builder publish. Admin Save now explains this distinction.
+- P31 learner Quiz loads protected published P22 questions for the selected Lesson; tapping the sticky Knowledge Check shortcut scrolls to the Quiz, including if tapped during lesson loading, and refreshes newly published questions without unmounting media. Added in-place Refresh and published-count labels.
+- P22 Auth/entitlement/free-intro verification and server-only answer grading retained; no Admin Bank answer keys sent to learners. Added P31 integration test and runbook. No SQL/data writes from authoring.
+
 ## 2026-11-08 — P30 Question Bank UI + atomic batch save (source-only)
 - Reproduced the owner-approved Technica Question Bank teal dashboard layout as a compact table with Course selector, upload/manual creation, filters, page counts, readable one- or two-line question preview, Domain, inline Difficulty, Active, Mock, Lesson, Status and bulk actions. Removed per-row answer expansion entirely.
 - All row and bulk setting changes remain in browser memory with Unsaved badge; one Save All Changes action sends ONE transactional SQL RPC (max 500 question rows), with optimistic concurrency, whole-transaction rollback on any problem, Discard, and navigation/unload warning.

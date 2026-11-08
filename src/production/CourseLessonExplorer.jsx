@@ -1,6 +1,7 @@
 import React,{useEffect,useMemo,useRef,useState} from 'react';
 import {ArrowLeft,ArrowRight,BookOpen,CheckCircle2,ChevronDown,ChevronRight,FileText,Layers3,LockKeyhole,Paperclip,PlayCircle,ShieldCheck,Video} from 'lucide-react';
 import {loadLessonContent} from './lessonMediaApi.js';
+import {fetchLessonQuiz,quizQuestionIdsChanged} from './lessonQuizSyncApi.js';
 import './courseLessonExplorer.css';
 
 const ProtectedLessonViewer=React.lazy(()=>import('./ProtectedLessonViewer.jsx'));
@@ -27,8 +28,11 @@ export default function CourseLessonExplorer({db,userId='',courseId,courseTitle,
  const [statusError,setStatusError]=useState(''),[saving,setSaving]=useState('');
  const [blocks,setBlocks]=useState([]),[questions,setQuestions]=useState([]),[answers,setAnswers]=useState({});
  const [lessonLoading,setLessonLoading]=useState(false),[lessonError,setLessonError]=useState('');
+ const [quizLoading,setQuizLoading]=useState(false),[quizError,setQuizError]=useState('');
+ const [pendingJump,setPendingJump]=useState('');
  const playerHeadingRef=useRef(null),videoSectionRef=useRef(null),materialSectionRef=useRef(null),quizSectionRef=useRef(null);
  const readingEnd=useRef(null),watchedVideos=useRef(new Set());
+ const quizRequest=useRef(0);
  const [quizResult,setQuizResult]=useState(null),[openDomains,setOpenDomains]=useState({});
  const selected=lessons.find(l=>l.id===active);
  const previewOnly=Boolean(selected&&demo&&!full&&!selected.isFreeIntro);
@@ -50,24 +54,33 @@ export default function CourseLessonExplorer({db,userId='',courseId,courseTitle,
   (async()=>{try{await fetchProgress();if(live)setStatusError('');}catch(e){if(live)setStatusError(e.message);}})();
   return()=>{live=false;};
  },[db,userId,courseId,lessons.length,adminPreview]);
+ // Load the published P22 quiz for the selected learner Lesson. Question Bank
+ // answer keys stay on the server, and Admin draft questions are preview-only.
  useEffect(()=>{
-  if(!active||!accessible){setBlocks([]);setQuestions([]);return;}
+  const request=++quizRequest.current;
+  if(!active||!accessible){
+   setBlocks([]);setQuestions([]);setQuizError('');setQuizLoading(false);
+   return;
+  }
   watchedVideos.current=new Set();
-  let live=true;setLessonLoading(true);setLessonError('');setQuizResult(null);setAnswers({});
-  Promise.all([
-   loadLessonContent(db,active),
-   adminPreview?db.from('lms_p22_lesson_quiz_questions')
-     .select('id,prompt,options,is_published,position').eq('lesson_id',active)
-     .order('position',{ascending:true}):
-     db.rpc('lms_p22_get_lesson_quiz',{p_lesson_id:active})
-  ]).then(([content,result])=>{
+  let live=true;setLessonLoading(true);setLessonError('');setQuizLoading(true);setQuizError('');
+  setQuizResult(null);setAnswers({});setQuestions([]);
+  Promise.allSettled([
+   loadLessonContent(db,active),fetchLessonQuiz(db,active,{adminPreview})
+  ]).then(([contentResult,quizResult])=>{
    if(!live)return;
-   setBlocks(content);
-   if(result.error){setQuestions([]);setLessonError(adminPreview?'Admin quiz preview unavailable. Verify P22 Admin read permission.':'Knowledge Check is not available until the P22 backend is installed.');}
-   else setQuestions(Array.isArray(result.data)?result.data:[]);
-  }).catch(e=>{if(live){setBlocks([]);setQuestions([]);setLessonError(e.message||'Could not load this lesson.');}})
-   .finally(()=>{if(live)setLessonLoading(false);});
-  return()=>{live=false;};
+   if(contentResult.status==='fulfilled')setBlocks(contentResult.value);
+   else{setBlocks([]);setLessonError(contentResult.reason?.message||'Could not load lesson material.');}
+   if(request!==quizRequest.current)return;
+   if(quizResult.status==='fulfilled')setQuestions(quizResult.value);
+   else{
+    setQuestions([]);
+    setQuizError(quizResult.reason?.message||'Published Knowledge Check unavailable.');
+   }
+  }).finally(()=>{
+   if(live){setLessonLoading(false);setQuizLoading(false);}
+  });
+  return()=>{live=false;quizRequest.current++;};
  },[db,active,accessible,adminPreview]);
  const section={video:blocks.filter(b=>b.block_type==='video'),
   reading:blocks.filter(b=>['text','heading'].includes(b.block_type)),
@@ -132,16 +145,46 @@ export default function CourseLessonExplorer({db,userId='',courseId,courseTitle,
   }));
   return()=>cancelAnimationFrame(frame);
  },[active]);
- const jumpToSection=key=>{
+ const scrollToLessonSection=key=>{
   const target={video:videoSectionRef.current,material:materialSectionRef.current,
    quiz:quizSectionRef.current}[key];
-  if(!target)return;
+  if(!target)return false;
   setCurrentSection(key);
   target.scrollIntoView({behavior:window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches?
    'auto':'smooth',block:'start'});
+  return true;
  };
+ const refreshLessonQuiz=async()=>{
+  if(!selected||!accessible||lessonLoading||quizLoading)return;
+  const request=++quizRequest.current,lessonId=selected.id;
+  setQuizLoading(true);setQuizError('');
+  try{
+   const newQuestions=await fetchLessonQuiz(db,lessonId,{adminPreview});
+   if(request!==quizRequest.current)return;
+   if(quizQuestionIdsChanged(questions,newQuestions)){
+    setAnswers({});setQuizResult(null);
+   }
+   setQuestions(newQuestions);
+  }catch(e){
+   if(request===quizRequest.current)setQuizError(e.message||'Unable to refresh this Knowledge Check.');
+  }finally{
+   if(request===quizRequest.current)setQuizLoading(false);
+  }
+ };
+ const jumpToSection=key=>{
+  // These are page anchors, not content-swapping tabs.
+  if(!scrollToLessonSection(key))setPendingJump(key);
+  if(key==='quiz')void refreshLessonQuiz();
+ };
+ useEffect(()=>{
+  if(!pendingJump||lessonLoading||!selected||!accessible)return;
+  const frame=requestAnimationFrame(()=>{
+   if(scrollToLessonSection(pendingJump))setPendingJump('');
+  });
+  return()=>cancelAnimationFrame(frame);
+ },[pendingJump,lessonLoading,selected?.id,accessible]);
  const submitQuiz=async()=>{
-  if(adminPreview||!selected||saving||questions.length===0||
+  if(adminPreview||!selected||saving||quizLoading||questions.length===0||
    questions.some(q=>!Number.isInteger(answers[q.id])))return;
   setSaving('quiz');setStatusError('');
   try{
@@ -160,7 +203,7 @@ export default function CourseLessonExplorer({db,userId='',courseId,courseTitle,
  const totals=lessons.length,finished=lessons.filter(l=>completed(progress[l.id])).length;
  const selectLesson=l=>{
   if(!hasAccess(l,full,demo)){onSubscribe?.();return;}
-  setActive(l.id);
+  setPendingJump('');setActive(l.id);
   setCurrentSection('video');
  };
  const tabInfo=[['video','Video',Video,'video'],['material','Study Material',BookOpen,'reading'],['quiz','Knowledge Check',CheckCircle2,'quiz']];
@@ -224,9 +267,10 @@ export default function CourseLessonExplorer({db,userId='',courseId,courseTitle,
        aria-controls={'cle-'+key+'-'+selected.id}
        className={currentSection===key?'selected':''} onClick={()=>jumpToSection(key)}>
        {stepDone(selected.id,step)?<CheckCircle2 className="cle-success" size={16}/>:<Icon size={16}/>}
-       {name}</button>)}
+       {name}{key==='quiz'&&!lessonLoading&&questions.length>0&&<span className="cle-quiz-count" aria-label={questions.length+' quiz questions'}>{questions.length}</span>}</button>)}
      </nav>
      {statusError&&<p className="cle-error" role="alert">{statusError}</p>}
+     {lessonError&&<p className="cle-error" role="alert">{lessonError}</p>}
      {lessonLoading?<div className="cle-notice" role="status">Loading your protected lesson…</div>:
       <div className="cle-single-page">
        <section id={'cle-video-'+selected.id} ref={videoSectionRef} className="cle-activity cle-activity-section" aria-labelledby={'cle-video-title-'+selected.id}>
@@ -259,8 +303,15 @@ export default function CourseLessonExplorer({db,userId='',courseId,courseTitle,
        </section>
        <section id={'cle-quiz-'+selected.id} ref={quizSectionRef} className="cle-activity cle-activity-section" aria-labelledby={'cle-quiz-title-'+selected.id}>
         <div className="cle-activity-title"><h3 id={'cle-quiz-title-'+selected.id}>Knowledge Check</h3><small>{adminPreview?'Admin preview · no answers or scores are submitted':'Answer every question to finish. Incorrect answers still count as completing the activity.'}</small></div>
-        {lessonError&&<p className="cle-error" role="alert">{lessonError}</p>}
-        {!questions.length?<div className="cle-notice cle-notice-compact"><CheckCircle2 size={20}/> No Knowledge Check has been published for this lesson.</div>:
+        {quizError&&<p className="cle-error" role="alert">{quizError}</p>}
+        <div className="cle-quiz-tools">
+         <span>{adminPreview?'Draft + published preview':questions.length+' published question'+(questions.length===1?'':'s')}</span>
+         <button type="button" onClick={()=>void refreshLessonQuiz()}
+          disabled={quizLoading} aria-label="Refresh Lesson Quiz from published Course Question Bank">
+          {quizLoading?'Refreshing…':'Refresh questions'}</button>
+        </div>
+        {quizLoading&&!questions.length?<div className="cle-notice cle-notice-compact" role="status">Loading the published Knowledge Check…</div>:
+        !questions.length?<div className="cle-notice cle-notice-compact"><CheckCircle2 size={20}/> No published Knowledge Check questions are available for this lesson yet.</div>:
         quizResult?<div className="cle-quiz-result"><CheckCircle2 size={30}/><h3>Knowledge Check completed</h3>
          <p>You answered all {questions.length} questions. Your score is {quizResult.scorePercent}%.</p>
          <button type="button" onClick={()=>{setAnswers({});setQuizResult(null);}}>Try again</button></div>:
@@ -272,7 +323,7 @@ export default function CourseLessonExplorer({db,userId='',courseId,courseTitle,
         </fieldset>)}
         {adminPreview?<div className="cle-notice cle-notice-compact" role="note">
           Preview only · Quiz submission and learner progress are disabled.</div>:
-         <button className="cle-submit" type="button" disabled={!!saving||questions.some(q=>!Number.isInteger(answers[q.id]))}
+         <button className="cle-submit" type="button" disabled={!!saving||quizLoading||questions.some(q=>!Number.isInteger(answers[q.id]))}
           onClick={submitQuiz}>Submit all answers <ArrowRight size={16}/></button>}</div>}
        </section>
       </div>}
