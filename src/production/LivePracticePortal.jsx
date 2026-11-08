@@ -30,7 +30,7 @@ export default function LivePracticePortal(){
     if(requested)return requested.id;
     if(catalog.courses.some(c=>c.id===old))return old;
     const enrolled=catalog.courses.find(c=>mayReadLiveCourse(catalog,c)&&(
-     catalog.identity.isAdmin||hasPlatformAccess(catalog.subscription)||catalog.entitlements.some(e=>e.course_id===c.id&&['paid','manual'].includes(e.entitlement_type))));
+     catalog.identity.isAdmin||catalog.openAccess===true||hasPlatformAccess(catalog.subscription)||catalog.entitlements.some(e=>e.course_id===c.id&&['paid','manual'].includes(e.entitlement_type))));
     return enrolled?.id||catalog.courses[0]?.id||'';
    });}
   }).catch(e=>{if(alive)setState({loading:false,error:e.message||'Unable to verify course access.',catalog:null,db});});
@@ -39,7 +39,7 @@ export default function LivePracticePortal(){
  const {db,catalog,loading,error}=state;
  const course=catalog?.courses.find(c=>c.id===courseId);
  const access=mayReadLiveCourse(catalog,course)&&
-  (catalog?.identity.isAdmin===true||hasPlatformAccess(catalog?.subscription)||catalog.entitlements.some(e=>e.course_id===courseId&&['paid','manual'].includes(e.entitlement_type)));
+  (catalog?.identity.isAdmin===true||catalog?.openAccess===true||hasPlatformAccess(catalog?.subscription)||catalog.entitlements.some(e=>e.course_id===courseId&&['paid','manual'].includes(e.entitlement_type)));
  useEffect(()=>{
   if(!db||!courseId||!access){setDomains([]);return;}
   let active=true;setDomainLoading(true);setDomains([]);
@@ -50,8 +50,8 @@ export default function LivePracticePortal(){
  },[db,courseId,access]);
  return <main className="live-learning page-enter">
   <div className="live-learning-breadcrumb"><button type="button" onClick={()=>navigate('/practice')}><ArrowLeft size={16}/> Practice Center</button></div>
-  <header className="live-learning-header"><span className="eyebrow">SUPABASE · SECURE PRACTICE</span><h1>Live Practice &amp; Level Up</h1><p>Real authorized questions are selected and graded on the server. Adaptive difficulty follows your correct answers proportionally to the session length.</p></header>
-  <div className="live-learning-security"><ShieldCheck size={16}/> P4/P5 protected practice · P8 Level Up activates only after reviewed bank and owner-approved migration</div>
+  <header className="live-learning-header"><span className="eyebrow">PRACTICE CENTER</span><h1>Live Practice &amp; Level Up</h1><p>Real authorized questions are selected and graded on the server. Adaptive difficulty follows your correct answers proportionally to the session length.</p></header>
+  <div className="live-learning-security"><ShieldCheck size={16}/> Your answers and results are saved securely.</div>
   {loading?<div className="live-learning-empty" role="status">Checking verified Supabase courses…</div>:
    error?<div className="live-learning-empty" role="alert"><TriangleAlert size={23}/><b>Secure Practice unavailable</b><p>{error}</p><button className="btn" onClick={()=>setRevision(n=>n+1)}><RefreshCw size={16}/> Retry</button></div>:
    !catalog.courses.length?<div className="live-learning-empty">No authorized courses are visible in the live database yet.</div>:
@@ -59,7 +59,7 @@ export default function LivePracticePortal(){
     <select id="secure-practice-course" value={courseId} onChange={e=>setCourseId(e.target.value)}>
      {catalog.courses.map(c=><option key={c.id} value={c.id}>{c.title} · {c.publication_state}</option>)}
     </select></div>
-    {!access?<div className="live-learning-empty"><LockKeyhole size={22}/><b>Course practice locked</b><p>An active platform subscription unlocks Practice for all published Courses. Legacy paid/manual Course access and Admin permissions are also respected.</p></div>:
+    {!access?<div className="live-learning-empty"><LockKeyhole size={22}/><b>Practice access unavailable</b><p>Course access is not ready yet. Refresh the page or contact your LMS administrator.</p></div>:
       <>{domainLoading&&<p role="status" className="live-learning-note">Loading verified course domains…</p>}
        <LivePractice key={catalog.user.id+course.id+requestedMode} db={db} user={catalog.user} course={course} domains={domains} access={access} defaultMode={requestedMode}/></>}
    </>}

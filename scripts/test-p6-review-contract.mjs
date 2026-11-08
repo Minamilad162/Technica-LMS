@@ -46,7 +46,7 @@ const secureFrame=read('src/components/SecureAspReviewPanel.jsx');
 const frameCss=read('src/components/secureAspReviewPanel.css');
 const sourceEntry=read('src/production/reviewMain.jsx');
 assert.ok(!demoMenu.includes("['/asp-review'"),'Separate Demo ASP review menu item must be removed');
-assert.ok(demoRoutes.includes('path="/asp-review" element={<AdminOnly><Navigate to="/question-bank?course=asp&review=1" replace/>'), 'Legacy bookmarked URL must redirect inside Admin Question Bank');
+assert.ok(demoRoutes.includes('path="/asp-review" element={<AdminOnly><Navigate to="/admin-tools?tab=questions" replace/>'), 'Legacy bookmarked URL must redirect into the real Admin Question Bank');
 assert.ok(bankPage.includes('c.id===\'asp\'&&<button'),'Only ASP course cards may expose reviewer control');
 assert.ok(bankPage.includes('Review & classify'),'Review action must exist inside ASP card');
 assert.ok(bankPage.includes('c.id===\'asp\'&&reviewOpen&&<div id="asp-review-inside-card"'),'Secure viewer must be structurally inside the ASP course card');

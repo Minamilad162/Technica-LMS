@@ -10,7 +10,7 @@ const bundle=files.map(path=>readFileSync(path,'utf8')).join('\n');
 const bank=JSON.parse(readFileSync('src/data/aspQuestionBank.json','utf8'));
 const sample=bank.find(q=>String(q.prompt||'').length>45)?.prompt;
 assert(sample,'ASP bank regression fixture missing');
-assert(bundle.includes('LIVE DATABASE MODE'),'production Supabase entry was not emitted');
+assert(bundle.includes('Sign in with your email and password.'),'production Supabase sign-in entry was not emitted');
 assert(!bundle.includes('Demo@1234'),'demo credentials included in live bundle');
 assert(!bundle.includes('AdminDemo@1234'),'demo administrator credentials included in live bundle');
 assert(!bundle.includes(sample.slice(0,45)),'ASP answer bank prompt leaked in live bundle');

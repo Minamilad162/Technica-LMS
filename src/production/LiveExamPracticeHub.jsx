@@ -6,6 +6,7 @@ import {getSupabaseClient} from '../lib/supabase.js';
 import {fetchLiveLearningCatalog,mayReadLiveCourse} from './liveLearningApi.js';
 import {loadStructure} from './lmsApi.js';
 import {hasPlatformAccess} from './subscriptionApi.js';
+import {aspMissingReason} from './questionBankCourseSelection.js';
 import LivePractice from './LivePractice.jsx';
 import LiveMockExam from './LiveMockExam.jsx';
 import './liveLearning.css';
@@ -23,6 +24,7 @@ export function examPracticeTab(value){
 }
 const accessTo=(catalog,course)=>!!catalog&&!!course&&mayReadLiveCourse(catalog,course)&&(
  catalog.identity?.isAdmin===true||
+ catalog.openAccess===true||
  hasPlatformAccess(catalog.subscription)||
  catalog.entitlements?.some(e=>e.course_id===course.id&&e.status==='active'&&
  ['paid','manual'].includes(e.entitlement_type))===true
@@ -134,7 +136,7 @@ export default function LiveExamPracticeHub(){
       </div>
       {!course||!practiceAccess?<div className="live-learning-empty"><LockKeyhole size={24}/>
        <b>Course Practice is locked</b>
-       <p>Subscribe to the platform or use an existing verified course entitlement to access protected question banks.</p>
+       <p>Course access is not available yet. Refresh the page or contact the LMS administrator.</p>
        <button type="button" className="btn" onClick={()=>navigate('/subscription-plans')}>View Subscription Plans</button>
       </div>:<>
        {domainLoading&&<p className="live-learning-note" role="status">Loading course domains…</p>}
@@ -144,11 +146,11 @@ export default function LiveExamPracticeHub(){
       </>}
      </>}
     </>:!officialAsp?<div className="live-learning-empty"><LockKeyhole size={25}/>
-     <b>Official ASP Course not available</b>
-     <p>The fixed 200-question Mock requires the ASP Course and its reserved official question form.</p>
+     <b>ASP Mock setup is incomplete</b>
+     <p>{aspMissingReason(catalog.courses)}</p>
     </div>:!mockAccess?<div className="live-learning-empty"><LockKeyhole size={24}/>
      <b>Mock Exam requires active access</b>
-     <p>Unlock ASP with a verified platform subscription or existing eligible course access.</p>
+     <p>Course access settings are unavailable. Refresh or contact the LMS administrator.</p>
      <button type="button" className="btn" onClick={()=>navigate('/subscription-plans')}>View Subscription Plans</button>
     </div>:<>
      <div className="lep-mock-promise">

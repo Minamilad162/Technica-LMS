@@ -39,3 +39,13 @@
 @media(max-width:650px){.asub-plan-grid,.asub-metrics{grid-template-columns:1fr}.asub-editor{padding:17px}.asub-form-cols{grid-template-columns:1fr}}
 
 .asub-request-terms{display:block;font-size:10px;color:#7b9999;line-height:1.6;margin-top:4px}
+
+/* P41 Admin-only server-owned temporary open-access toggle. */
+.asub-access-mode{border:1px solid #b7e1d4;background:#f1fbf7;border-radius:14px;
+ padding:16px;display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap}
+.asub-access-mode>div{display:flex;gap:10px;align-items:flex-start;color:#136b5d}
+.asub-access-mode>div>span{display:grid;gap:5px}
+.asub-access-mode strong{font-size:14px}
+.asub-access-mode small{font-size:12px;line-height:1.4;color:#557875}
+.asub-access-mode button{min-height:42px}
+@media(max-width:600px){.asub-access-mode button{width:100%;justify-content:center}}

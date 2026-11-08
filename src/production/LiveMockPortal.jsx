@@ -4,6 +4,7 @@ import {ArrowLeft,LockKeyhole,RefreshCw,ShieldCheck,TriangleAlert} from 'lucide-
 import {getSupabaseClient} from '../lib/supabase.js';
 import {fetchLiveLearningCatalog,mayReadLiveCourse} from './liveLearningApi.js';
 import {hasPlatformAccess} from './subscriptionApi.js';
+import {aspMissingReason} from './questionBankCourseSelection.js';
 import LiveMockExam from './LiveMockExam.jsx';
 import './liveLearning.css';
 import './liveAuthoring.css';
@@ -28,7 +29,7 @@ export default function LiveMockPortal(){
  const officialCourse=catalog?.courses?.find(c=>c.slug==='asp')||null;
  const viewingCourse=officialCourse;
  const entitled=!!catalog&&!!viewingCourse&&mayReadLiveCourse(catalog,viewingCourse)&&
-  (catalog.identity?.isAdmin===true||hasPlatformAccess(catalog.subscription)||
+  (catalog.identity?.isAdmin===true||catalog.openAccess===true||hasPlatformAccess(catalog.subscription)||
    catalog.entitlements?.some(e=>e.course_id===viewingCourse.id&&
     ['paid','manual'].includes(e.entitlement_type))===true);
  return <main className="live-learning page-enter">
@@ -36,7 +37,7 @@ export default function LiveMockPortal(){
    <button type="button" onClick={()=>navigate('/assessments?tab=mock')}><ArrowLeft size={16}/> Mock Exam &amp; Practice</button>
   </div>
   <header className="live-learning-header">
-   <span className="eyebrow">OFFICIAL ASP MOCK · LIVE SUPABASE</span>
+   <span className="eyebrow">ASP MOCK EXAM</span>
    <h1>ASP Official Mock Exam</h1>
    <p>Exactly 200 questions selected and officially reserved from the ASP Question Bank, with a fixed 5-hour limit.</p>
   </header>
@@ -46,10 +47,10 @@ export default function LiveMockPortal(){
      <p>{error}</p><button type="button" className="btn" onClick={()=>setReload(n=>n+1)}><RefreshCw size={16}/> Retry</button>
     </div>:
    !viewingCourse?<div className="live-learning-empty"><LockKeyhole size={21}/>
-    No suitable real Course is available for this Mock Test.</div>:
+    <div><b>ASP Mock setup is incomplete</b><p>{aspMissingReason(catalog.courses)}</p></div></div>:
    !entitled?<div className="live-learning-empty"><LockKeyhole size={21}/>
-    <b>Active platform subscription required</b>
-    <p>Choose a subscription plan to unlock official Mock exams across the platform.</p></div>:
+    <b>Mock access unavailable</b>
+    <p>Course access is not ready yet. Refresh or contact your LMS administrator.</p></div>:
    <LiveMockExam key={catalog.user.id+viewingCourse.id} db={db}
     user={catalog.user} course={viewingCourse} access={entitled}/>}
  </main>;

@@ -12,7 +12,7 @@ const two=n=>String(n+1).padStart(2,'0');
 function Button({children,onClick,variant='primary',disabled=false}) {
  return <button type="button" className={'qf-button qf-'+variant} disabled={disabled} onClick={onClick}>{children}</button>;
 }
-function PreviewNote(){return <p className="qf-preview-note" role="note"><Info size={13}/> Demo preview · No file uploads or assessment records are saved.</p>;}
+function PreviewNote(){return <p className="qf-preview-note" role="note"><Info size={13}/> Qualification preview · Evidence submissions are not yet available.</p>;}
 function FileIcon({kind}){const Icon=kind==='image'?FileImage:kind==='sheet'?FileSpreadsheet:FileText;return <span className={'qf-file-icon '+(kind||'doc')}><Icon size={19}/></span>;}
 function FileRow({file,onRemove}){
  return <div className="qf-file-row"><FileIcon kind={file.icon}/><span className="qf-file-name"><strong title={file.name}>{file.name}</strong><small>{file.kind} · {file.size}</small></span>
@@ -88,7 +88,7 @@ function LearnerQualifications(){
    const incoming=selected.map((file,i)=>({id:'local-'+Date.now()+'-'+i,name:file.name,kind:'Draft',size:file.size>1048576?(file.size/1048576).toFixed(1)+' MB':Math.max(1,Math.ceil(file.size/1024))+' KB',
     icon:/\.(jpg|jpeg|png|webp)$/i.test(file.name)?'image':/\.(xls|xlsx|csv)$/i.test(file.name)?'sheet':/\.pdf$/i.test(file.name)?'pdf':'doc'}));
    setFilesByQualification(old=>({...old,[qualificationId]:[...files,...incoming]}));
-   setNotice('Files added to this preview only. No file was uploaded.');
+   setNotice('Files selected for preview. Uploads are not yet available.');
   }
   e.target.value='';
  };
@@ -115,7 +115,7 @@ function LearnerQualifications(){
    <h1 className="qf-programme-title">{qualification.name}</h1>
    <UnitTabs qualification={qualification} active={unitIndex} onSelect={setUnit} scope="learner"/>
    <section id="learner-unit-panel" role="tabpanel" aria-labelledby={'learner-unit-tab-'+unitIndex}>
-   <UnitHeading qualification={qualification} unitIndex={unitIndex} status={submitted?'Submitted · Demo':null} scope="learner"/>
+   <UnitHeading qualification={qualification} unitIndex={unitIndex} status={submitted?'Submission preview':null} scope="learner"/>
    <PortfolioSnapshot filesCount={files.length} mapped={mapped} criteriaCount={criteria.length} submitted={submitted}/>
    <PaneTabs label="Unit sections" active={pane} onChange={setPane} tabs={[[ 'overview','Course',BookOpen],['evidence','Evidence',FolderOpen],['mapping','Mapping',Link2],['submission','Submit',Send],['contact','Contact',MessageSquare],['records','Records',ClipboardCheck]]}/>
    <main id="Unit-sections-panel" className="qf-pane-content" role="tabpanel">
@@ -137,12 +137,12 @@ function LearnerQualifications(){
        !files.length?<div className="qf-empty">Add evidence first.</div>:
        <><div className="qf-matrix-scroll" role="region" tabIndex={0} aria-label="Evidence to criteria mapping table"><table className="qf-matrix"><thead><tr><th scope="col">Evidence</th>{criteria.map(([code,title])=><th key={code} scope="col" title={title}>AC {code}<span className="qf-ac-short">{title}</span></th>)}</tr></thead>
          <tbody>{files.map(file=><tr key={file.id}><th scope="row"><FileIcon kind={file.icon}/><span title={file.name}>{file.name}</span></th>{criteria.map(([code,title])=><td key={code}><label className="qf-map-check" title={'AC '+code+': '+title}><input type="checkbox" aria-label={'Map '+file.name+' to criterion '+code+': '+title} disabled={submitted} checked={(links[file.id]||[]).includes(code)} onChange={()=>toggle(file.id,code)}/><span aria-hidden="true"><Check size={15}/></span></label></td>)}</tr>)}</tbody></table></div>
-        <div className="qf-mapping-actions"><span>One file can cover several criteria.</span><div><Button variant="ghost" onClick={()=>setNotice('Draft is stored in this browser preview only.')}><Save size={16}/> Save Draft</Button><Button disabled={!allMapped||submitted} onClick={()=>setPane('submission')}>Next <ArrowRight size={16}/></Button></div></div></>}
+        <div className="qf-mapping-actions"><span>One file can cover several criteria.</span><div><Button variant="ghost" onClick={()=>setNotice('Draft changes are not yet saved to your account.')}><Save size={16}/> Save Draft</Button><Button disabled={!allMapped||submitted} onClick={()=>setPane('submission')}>Next <ArrowRight size={16}/></Button></div></div></>}
      </Card>}
     {pane==='submission'&&<div className="qf-submit-layout">
       <Card title="Submit for Review"><div className="qf-review-summary"><div><FileText size={17}/>{files.length} Evidence files</div><div><Link2 size={17}/>{mapped}/{criteria.length} Criteria mapped</div></div>
         {!allMapped&&<p className="qf-inline-help">Map all available criteria before submitting.</p>}
-        {submitted?<div className="qf-done"><CheckCircle2 size={18}/> Demo submitted · No assessor notified</div>:
+        {submitted?<div className="qf-done"><CheckCircle2 size={18}/> Submission preview recorded · No assessor notified</div>:
          <Button disabled={!files.length||!allMapped} onClick={()=>{setSubmittedByUnit(old=>({...old,[key]:true}));setNotice('Submission simulated in this browser only.');}}><Send size={16}/> Submit for Review</Button>}
       </Card>
       <Card title="Your status"><p>{submitted?'Submitted (preview)':'Not submitted'}</p><p className="qf-small-note">Your assessor will review the evidence once the live workflow is enabled.</p></Card>
@@ -182,12 +182,12 @@ function AdminQualifications(){
  const changeUnit=i=>{setUnitIndex(i);setPane('details');setNotice('');};
  const changeQualification=id=>{setQualificationId(id);setUnitIndex(0);setPane('details');setNotice('');};
  const updateTemplate=patch=>{setTemplatesByUnit(old=>({...old,[key]:templates.map(t=>t.id===selectedId?{...t,...patch}:t)}));};
- const createTemplate=()=>{const id='draft-'+Date.now(),next=[...templates,{id,title:'New task',instructions:''}];setTemplatesByUnit(old=>({...old,[key]:next}));setSelectedTemplateByUnit(old=>({...old,[key]:id}));setPane('templates');setNotice('New draft added to preview.');};
+ const createTemplate=()=>{const id='draft-'+Date.now(),next=[...templates,{id,title:'New task',instructions:''}];setTemplatesByUnit(old=>({...old,[key]:next}));setSelectedTemplateByUnit(old=>({...old,[key]:id}));setPane('templates');setNotice('New template preview added.');};
  const recordReview=()=>{
   if(outcome==='accept'&&(!criteria.length||criteria.some(([code])=>decisions[code]!=='met'))){setNotice('Mark every criterion Met before accepting.');return;}
   if(outcome==='return'&&!feedback.trim()){setNotice('Add feedback before returning.');return;}
   setReviewHistoryByUnit(old=>({...old,[key]:[{outcome,feedback,decisions:{...decisions},date:new Date().toLocaleString()},...(old[key]||[])]}));
-  setNotice('Record preview decision only. No real learner file is accessed and no acceptance was saved.');
+  setNotice('Review preview completed. No learner record was changed.');
  };
  return <div className="qf-workspace qf-admin">
   <div className="qf-intro qf-admin-intro"><h1>Qualifications</h1><div className="qf-select-wrap"><label htmlFor="qf-qualification-select">Qualification</label><select id="qf-qualification-select" value={qualificationId} onChange={e=>changeQualification(e.target.value)}>{QUALIFICATIONS.map(q=><option key={q.id} value={q.id}>{q.short} · {q.name}</option>)}</select></div></div>
@@ -209,7 +209,7 @@ function AdminQualifications(){
       </Card>
       <Card title="Edit task"><label className="qf-field">Task name<input value={activeTemplate?.title||''} maxLength={140} onChange={e=>updateTemplate({title:e.target.value})}/></label>
        <label className="qf-field">Instructions<textarea rows={5} value={activeTemplate?.instructions||''} maxLength={1600} onChange={e=>updateTemplate({instructions:e.target.value})}/></label>
-       <Button disabled={!activeTemplate?.title.trim()} onClick={()=>setNotice('Template saved in preview only.')}><Save size={16}/> Save Draft</Button>
+       <Button disabled={!activeTemplate?.title.trim()} onClick={()=>setNotice('Template edits are available in this preview.')}><Save size={16}/> Save Draft</Button>
       </Card>
      </div>}
    {pane==='review'&&<div className="qf-review-grid">

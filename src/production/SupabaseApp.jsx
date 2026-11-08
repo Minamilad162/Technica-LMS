@@ -8,6 +8,7 @@ import AdminQuestionReview from './AdminQuestionReview';
 import AdminToolsWorkspace from './AdminToolsWorkspace.jsx';
 import {SecureLessonContent} from './SecureLessonMedia.jsx';
 import {fetchMyPlatformSubscription,hasPlatformAccess} from './subscriptionApi.js';
+import {fetchLearningAccessMode} from './accessModeApi.js';
 import LiveLearnerWorkspace from './LiveLearnerWorkspace.jsx';
 import ReviewConnectionDiagnostics from './ReviewConnectionDiagnostics';
 import {fetchAspReviewDomains} from './questionReviewApi';
@@ -48,7 +49,7 @@ function LoginScreen({db,reviewerOnly=false}) {
  };
  return <div className="live-login">
   <section className="live-login-story"><img src="/images/technica-logo.webp" alt="Technica Consult"/><span>TECHNICA CONSULT · LMS</span><h1>Learn today.<br/>Build a <em>safer</em> tomorrow.</h1><p>Secure course access powered by Supabase Auth and database policies.</p><div><ShieldCheck size={17}/> Verified account access</div></section>
-  <section className="live-login-panel"><div className="live-login-form"><span className="live-eyebrow">LIVE DATABASE MODE</span><h2>{mode==='register'?'Create your account':mode==='reset'?'Password recovery':'Welcome back'}</h2><p>Use your registered email and password. Demo Employee IDs and sample passwords are not accepted here.</p>
+  <section className="live-login-panel"><div className="live-login-form"><span className="live-eyebrow">TECHNICA LEARNING PLATFORM</span><h2>{mode==='register'?'Create your account':mode==='reset'?'Password recovery':'Welcome back'}</h2><p>Sign in with your email and password.</p>
    <form onSubmit={submit}>
     {mode==='register'&&<label>Full name<input required minLength={3} maxLength={160} value={name} onChange={e=>setName(e.target.value)} autoComplete="name"/></label>}
     <label>Email<input type="email" required value={email} onChange={e=>setEmail(e.target.value)} autoComplete="email"/></label>
@@ -94,7 +95,8 @@ function EditorModal({editing,onCancel,onSave,busy,error}) {
 export default function SupabaseApp({secureReviewEntry=false,reviewerOnly=false}) {
  const [session,setSession]=useState(null),[boot,setBoot]=useState(true),[identity,setIdentity]=useState(null),[recovering,setRecovering]=useState(false);
  const [courses,setCourses]=useState([]),[entitlements,setEntitlements]=useState([]),[platformSubscription,setPlatformSubscription]=useState(null),[courseId,setCourseId]=useState(null),[tree,setTree]=useState([]),[lessonId,setLessonId]=useState(null),[blocks,setBlocks]=useState([]);
- const [reviewExpanded,setReviewExpanded]=useState(false),[loadedStructureFor,setLoadedStructureFor]=useState(null);
+ const [openAccess,setOpenAccess]=useState(false);
+  const [reviewExpanded,setReviewExpanded]=useState(false),[loadedStructureFor,setLoadedStructureFor]=useState(null);
  const [adminToolsOpen,setAdminToolsOpen]=useState(true);
  const [busy,setBusy]=useState(false),[fetching,setFetching]=useState(false),[error,setError]=useState(''),[notice,setNotice]=useState(''),[editing,setEditing]=useState(null),[editError,setEditError]=useState('');
  const {db,configurationError}=useMemo(()=>initializeConnection(secureReviewEntry),[secureReviewEntry]);
@@ -106,7 +108,7 @@ export default function SupabaseApp({secureReviewEntry=false,reviewerOnly=false}
   return()=>{active=false;subscription.unsubscribe();};
  },[db]);
  useEffect(()=>{
-  if(!db||!session?.user){setIdentity(null);setCourses([]);setTree([]);setEntitlements([]);setPlatformSubscription(null);setReviewExpanded(false);setLoadedStructureFor(null);return;}
+  if(!db||!session?.user){setIdentity(null);setCourses([]);setTree([]);setEntitlements([]);setPlatformSubscription(null);setOpenAccess(false);setReviewExpanded(false);setLoadedStructureFor(null);return;}
   let active=true;setFetching(true);setError('');
   const load=async()=>{
    try{
@@ -120,8 +122,8 @@ export default function SupabaseApp({secureReviewEntry=false,reviewerOnly=false}
      const items=await listCourses(db);
      if(active){setCourses(items);setEntitlements([]);setCourseId(old=>items.some(c=>c.id===old)?old:(items[0]?.id||null));}
     }else{
-     const [user,items,access,sub]=await Promise.all([loadIdentity(db,session.user),listCourses(db),getCurrentEntitlements(db,session.user.id),fetchMyPlatformSubscription(db,session.user.id).catch(()=>null)]);
-     if(active){setIdentity(user);setCourses(items);setEntitlements(access);setPlatformSubscription(sub);setCourseId(old=>items.some(c=>c.id===old)?old:(items[0]?.id||null));}
+     const [user,items,access,sub,policy]=await Promise.all([loadIdentity(db,session.user),listCourses(db),getCurrentEntitlements(db,session.user.id),fetchMyPlatformSubscription(db,session.user.id).catch(()=>null),fetchLearningAccessMode(db)]);
+     if(active){setIdentity(user);setCourses(items);setEntitlements(access);setPlatformSubscription(sub);setOpenAccess(policy.openAccess);setCourseId(old=>items.some(c=>c.id===old)?old:(items[0]?.id||null));}
     }
    }catch(e){if(active)setError(msg(e));}
    finally{if(active)setFetching(false);}
@@ -134,7 +136,7 @@ export default function SupabaseApp({secureReviewEntry=false,reviewerOnly=false}
  const aspCourse=courses.find(c=>c.slug==='asp');
  useEffect(()=>{if(reviewerOnly&&aspCourse?.id&&courseId!==aspCourse.id)setCourseId(aspCourse.id);},[reviewerOnly,aspCourse?.id,courseId]);
  useEffect(()=>{setReviewExpanded(false);},[selected?.id]);
- const entitled=isAdmin||includes(entitlements,courseId)||hasPlatformAccess(platformSubscription);
+ const entitled=isAdmin||includes(entitlements,courseId)||hasPlatformAccess(platformSubscription)||(openAccess&&selected?.publication_state==='published');
  const suspended=identity?.profile?.account_status==='suspended';
  useEffect(()=>{
   if(!db||!selected||!identity||suspended||!entitled){setTree([]);setLoadedStructureFor(null);setLessonId(null);setBlocks([]);return;}
@@ -158,9 +160,9 @@ export default function SupabaseApp({secureReviewEntry=false,reviewerOnly=false}
     if(asp&&isAdmin){setCourseId(asp.id);setTree(await fetchAspReviewDomains(db,asp.id));setLoadedStructureFor(asp.id);}
     return;
    }
-   const [items,access,sub]=await Promise.all([listCourses(db),getCurrentEntitlements(db,session.user.id),fetchMyPlatformSubscription(db,session.user.id).catch(()=>null)]);
-   setCourses(items);setEntitlements(access);setPlatformSubscription(sub);
-   if(selected&&items.some(c=>c.id===selected.id)&&(isAdmin||includes(access,selected.id)||hasPlatformAccess(sub))){
+   const [items,access,sub,policy]=await Promise.all([listCourses(db),getCurrentEntitlements(db,session.user.id),fetchMyPlatformSubscription(db,session.user.id).catch(()=>null),fetchLearningAccessMode(db)]);
+   setCourses(items);setEntitlements(access);setPlatformSubscription(sub);setOpenAccess(policy.openAccess);
+   if(selected&&items.some(c=>c.id===selected.id)&&(isAdmin||includes(access,selected.id)||hasPlatformAccess(sub)||(policy.openAccess&&selected.publication_state==='published'))){
     setTree(await loadStructure(db,selected.id));setLoadedStructureFor(selected.id);
     if(lessonId)setBlocks(await loadTextBlocks(db,lessonId));
    }
@@ -206,7 +208,7 @@ export default function SupabaseApp({secureReviewEntry=false,reviewerOnly=false}
    <ReviewConnectionDiagnostics db={db} session={session} identity={identity} course={aspCourse} identityError={error}/>
    {suspended?<div className="live-empty" role="alert"><LockKeyhole size={23}/><strong>Account suspended</strong><p>Contact the LMS administrator.</p></div>:
     !identity?<div className="live-empty" role={error&&!fetching?'alert':'status'}>{error&&!fetching?'Supabase account or LMS tables could not be verified. Open Check database connection above to identify the failed stage.':'Verifying your Supabase account…'}</div>:
-    !isAdmin?<div className="live-empty" role="alert"><LockKeyhole size={24}/><h3>Verified administrator required</h3><p>Your Supabase account is not assigned an active LMS Admin role. Demo Admin accounts cannot review live questions.</p></div>:
+    !isAdmin?<div className="live-empty" role="alert"><LockKeyhole size={24}/><h3>Verified administrator required</h3><p>Your account does not have an active LMS administrator role.</p></div>:
     !aspCourse?<div className="live-empty" role={error&&!fetching?'alert':'status'}><BookOpen size={23}/><h3>{fetching?'Checking ASP course catalog…':error?'ASP course catalog could not load':'ASP course not found'}</h3><p>{error?'Open Check database connection above to identify permissions and catalog problems.':'Create the genuine ASP course with slug asp in Supabase before starting reviews.'}</p></div>:
     selected?.id!==aspCourse.id||loadedStructureFor!==aspCourse.id?
       <div className="live-empty" role="status"><RefreshCw size={23}/><h3>Preparing ASP course review…</h3><p>Loading the official domain catalog.</p></div>:
@@ -261,9 +263,9 @@ export default function SupabaseApp({secureReviewEntry=false,reviewerOnly=false}
      </>}
     </section>
    </div>}
-   {selected&&identity&&!suspended&&!(isAdmin&&reviewExpanded&&selected.slug==='asp')&&<LivePractice key={session.user.id+selected.id} db={db} user={session.user} course={selected} domains={tree} access={isAdmin||hasPlatformAccess(platformSubscription)||entitlements.some(e=>e.course_id===selected.id&&['paid','manual'].includes(e.entitlement_type))}/>}
+   {selected&&identity&&!suspended&&!(isAdmin&&reviewExpanded&&selected.slug==='asp')&&<LivePractice key={session.user.id+selected.id} db={db} user={session.user} course={selected} domains={tree} access={isAdmin||(openAccess&&selected.publication_state==='published')||hasPlatformAccess(platformSubscription)||entitlements.some(e=>e.course_id===selected.id&&['paid','manual'].includes(e.entitlement_type))}/>}
    
-   <p className="live-disclaimer">P6A admin ASP bank review is private and does not publish questions. P4 scope: RLS-governed question bank and server-scored Quick 10, Timed Quiz, Custom and Domain Practice after manual question approval. Reserved Mock, adaptive Level Up, admin Assessment, payments, protected media and learner progress-event writes remain unavailable.</p>
+   
   </>}</main>{editing&&<EditorModal key={editing.kind+editing.id+editing.domainId+editing.topicId} editing={editing} onCancel={()=>{setEditing(null);setEditError('');}} onSave={save} busy={busy} error={editError}/>}
  </div>;
 }

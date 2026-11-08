@@ -39,7 +39,7 @@ function AdminOnly({children}){const {state}=useDemo();return getAuthSession()?.
 function RoutePage({children,standalone=false}){return <><MotionSystem/><Layout standalone={standalone} onLogout={()=>{window.dispatchEvent(new Event('technica-demo-logout'))}}><React.Suspense fallback={<div className="route-chunk-fallback" role="status">Loading the selected page…</div>}>{children}</React.Suspense></Layout></>}
 export default function App(){
  const l=useLocation(),{update}=useDemo();
- const legacyPreview=legacyBrowserQa||new URLSearchParams(l.search).get('legacyPreview')==='1';
+ const legacyPreview=legacyBrowserQa; // Private historical QA never opens from a production query parameter.
  const [auth,setAuth]=useState(null),[authLoading,setAuthLoading]=useState(true),[authError,setAuthError]=useState('');
  useEffect(()=>{window.scrollTo({top:0,behavior:'instant'})},[l.pathname]);
  useEffect(()=>{
@@ -69,7 +69,7 @@ export default function App(){
  <Route path="/login" element={<Navigate to="/home" replace/>}/>
  <Route path="/signup" element={<Navigate to="/home" replace/>}/>
  <Route path="/" element={<Navigate to="/home" replace/>}/>
- <Route path="/home" element={<RoutePage><HomePage/></RoutePage>}/>
+ <Route path="/home" element={<RoutePage>{legacyBrowserQa?<HomePage/>:<LiveLearnerPortal initialScreen="learning"/>}</RoutePage>}/>
  <Route path="/course-catalog" element={<RoutePage><LiveLearnerPortal initialScreen="courses"/></RoutePage>}/>
  <Route path="/course-catalog/:courseId" element={<RoutePage><LiveLearnerPortal initialScreen="course"/></RoutePage>}/>
  <Route path="/subscription-plans" element={<RoutePage><LiveLearnerPortal initialScreen="subscription"/></RoutePage>}/>
@@ -79,24 +79,24 @@ export default function App(){
  <Route path="/my-practice" element={<RoutePage><LiveLearnerPortal initialScreen="history"/></RoutePage>}/>
  <Route path="/my-progress" element={<RoutePage><LiveLearnerProgress/></RoutePage>}/>
  <Route path="/learning/course/:courseId" element={<RoutePage><LiveLearningCourse/></RoutePage>}/>
- <Route path="/learning/process-safety-foundations" element={<RoutePage><LegacyPreviewWarning><LearningPlayer/></LegacyPreviewWarning></RoutePage>}/>
+ <Route path="/learning/process-safety-foundations" element={legacyBrowserQa?<RoutePage><LegacyPreviewWarning><LearningPlayer/></LegacyPreviewWarning></RoutePage>:<Navigate to="/my-learning" replace/>}/>
  <Route path="/practice" element={legacyBrowserQa?<RoutePage><LegacyPreviewWarning><PracticePage/></LegacyPreviewWarning></RoutePage>:<Navigate to="/assessments?tab=practice" replace/>}/>
  <Route path="/practice/live" element={<RoutePage standalone><LivePracticePortal/></RoutePage>}/>
  <Route path="/practice/session" element={legacyBrowserQa?<RoutePage standalone><QuizPage kind="practice"/></RoutePage>:<Navigate to="/assessments?tab=practice" replace/>}/>
  <Route path="/admin-tools" element={<AdminOnly><RoutePage><AdminToolsPortal/></RoutePage></AdminOnly>}/>
  <Route path="/admin/course-preview/:courseId" element={<AdminOnly><RoutePage><AdminCoursePreview/></RoutePage></AdminOnly>}/>
- <Route path="/analytics" element={<AdminOnly><RoutePage><AnalyticsPage/></RoutePage></AdminOnly>}/>
+ <Route path="/analytics" element={<AdminOnly><Navigate to="/admin-tools?tab=overview" replace/></AdminOnly>}/>
  <Route path="/builder" element={<AdminOnly><RoutePage>{legacyPreview?(legacyBrowserQa?<BuilderPage/>:<LegacyPreviewWarning><BuilderPage/></LegacyPreviewWarning>):<LiveCourseBuilder/>}</RoutePage></AdminOnly>}/>
  <Route path="/courses" element={<AdminOnly><RoutePage>{legacyPreview?(legacyBrowserQa?<CoursesPage/>:<LegacyPreviewWarning><CoursesPage/></LegacyPreviewWarning>):<LiveCoursesPage/>}</RoutePage></AdminOnly>}/>
- <Route path="/reports" element={<AdminOnly><RoutePage><AnalyticsPage/></RoutePage></AdminOnly>}/>
+ <Route path="/reports" element={<AdminOnly><Navigate to="/admin-tools?tab=overview" replace/></AdminOnly>}/>
  <Route path="/release-readiness" element={<AdminOnly><RoutePage><LiveReleaseReadiness/></RoutePage></AdminOnly>}/>
  <Route path="/assessments" element={<RoutePage><LiveExamPracticeHub/></RoutePage>}/>
  <Route path="/assessments/mock/live" element={<RoutePage standalone><LiveMockPortal/></RoutePage>}/>
  <Route path="/assessments/take" element={legacyBrowserQa?<RoutePage standalone><QuizPage kind="assessment"/></RoutePage>:<Navigate to="/assessments?tab=mock" replace/>}/>
- <Route path="/results" element={<RoutePage><ResultsPage/></RoutePage>}/>
- <Route path="/practice/results" element={<RoutePage><PracticeResultsPage/></RoutePage>}/>
- <Route path="/learners" element={<AdminOnly><RoutePage><LearnersPage/></RoutePage></AdminOnly>}/>
- <Route path="/question-bank" element={<AdminOnly><RoutePage><QuestionBankPage/></RoutePage></AdminOnly>}/>
- <Route path="/asp-review" element={<AdminOnly><Navigate to="/question-bank?course=asp&review=1" replace/></AdminOnly>}/>
+ <Route path="/results" element={<Navigate to="/my-practice" replace/>}/>
+ <Route path="/practice/results" element={<Navigate to="/my-practice" replace/>}/>
+ <Route path="/learners" element={<AdminOnly><Navigate to="/admin-tools?tab=users" replace/></AdminOnly>}/>
+ <Route path="/question-bank" element={<AdminOnly><Navigate to="/admin-tools?tab=questions" replace/></AdminOnly>}/>
+ <Route path="/asp-review" element={<AdminOnly><Navigate to="/admin-tools?tab=questions" replace/></AdminOnly>}/>
  <Route path="*" element={<Navigate to="/home" replace/>}/>
  </Routes>}
