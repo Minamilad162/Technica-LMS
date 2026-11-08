@@ -1631,3 +1631,18 @@ User reports the P15 SQL Editor execution returned `Success. No rows returned` o
 **UI:** `AdminCourseBank.jsx` provides a first-class upload panel, row toggles and a real Course hierarchy Lesson dropdown; per-lesson Course Builder picker is preserved. `AdminMockPanel` loads marked candidates into existing human-review P9B preflight. The frontend reports transitional old installed P28 schema rather than claiming inactive toggles work without P29. It keeps exactly one canonical question-bank source; old P22 manually authored questions are not silently deleted.
 
 **Migration order:** User's Supabase snapshot identified P28 four-arg list present, seven-arg filtered list missing. **P28.2** updates that original installation without replay. Then the new guarded `202611080003_p29_bank_active_mock_and_lesson_controls.sql` may be applied once only after verified Staging ledger, backup, P8e/P9B installed state, owner approval and isolated PostgreSQL CI tests. P29 adds additive columns and safe RPC replacements; no auto-upload or mass question approval. Checklist: `npm run test:p29:bank`, `bash scripts/test-p29-postgres-smoke.sh`, full CI/build, authenticated Admin+learner RLS and desktop/mobile browser QA. Runbook: `docs/current/P29_ADMIN_QUESTION_BANK_FLAGS_AND_LESSON_PICKER.md`.
+
+## 89. P28/P29 Question Bank visibility and ASP identity (2026-11-08)
+
+**Owner screenshot:** `Admin Tools → Question Bank` on the deployed `main` shows only “Create the actual ASP course before classifying questions.” Root cause verified in repository: `main` still renders the old `AdminQuestionsPanel`, which returns that message when `courses.find(c => c.slug === 'asp')` is unavailable. The tested P28/P29 `AdminCourseBank` upload/flags/Lesson picker exists only in PR #70 until merged and the site is redeployed. A second bug in the old workspace swallowed the real Supabase Course-list error and replaced the catalog with `[]`, turning network/RLS issues into a false “missing ASP” message. **Actual remote course IDs and row counts have NOT been read.** Do not infer that ASP Course is absent or create another blindly.
+
+**Code fix:** Branch Admin Tools now loads catalog with explicit loading/permission/error states, a Retry action and a link to Courses. The real bank prefers the canonical ASP slug `asp`; if a real Course titled `ASP Course` exists with a different slug (commonly `asp-course`), the UI identifies and displays that record but prevents mistaken ASP uploads into a Course that P6A/P9B will not treat as ASP. No slug/ID/content migration is performed. New `ASP Course` creation uses canonical `asp` and refuses duplicates if a named legacy ASP exists. Manual correction of an existing legacy Course requires a separate verified, owner-approved read-only DB inventory/plan; no production DB changes were made. Pure regression tests prove canonical priority, no duplicates, empty vs loading vs RLS error handling, and expected Question Bank tab wiring.
+
+**Read-only reconciliation SQL (staging or production as explicitly authorized for SELECT):**
+```sql
+SELECT id, title, slug, publication_state, created_at
+FROM public.lms_courses
+WHERE lower(title) LIKE '%asp%' OR lower(slug) LIKE '%asp%'
+ORDER BY created_at DESC;
+```
+Check the canonical single ASP Course, its Domain hierarchy, question counts and actual app Supabase project before considering any migration. **Do not create a new ASP Course or modify the existing slug without reviewing existing references and user approval.** After successful CI, merge and Cloudflare deployment require separate verification; code and SQL rollout gates are distinct.
