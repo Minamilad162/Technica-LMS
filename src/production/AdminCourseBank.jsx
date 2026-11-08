@@ -86,18 +86,18 @@ export default function AdminCourseBank({db,courses=[],asp,onUpdate,onDirtyChang
   return()=>{live=false;};
  },[db,courseId,query,offset,filterDomain,difficulty,usage,revision]);
  const refresh=(force=false)=>{
-  if(!force&&dirtyCount&&!window.confirm('Discard '+dirtyCount+' unsaved question edits and reload?'))return;
-  if(!force)setStaged({});
+  if(!force&&pendingCount&&!window.confirm('Discard '+pendingCount+' pending changes and reload?'))return;
+  if(!force){setStaged({});setReleaseLessonId('');}
   setRevision(n=>n+1);onUpdate?.();
  };
- useEffect(()=>{onDirtyChange?.(dirtyCount>0);},[dirtyCount,onDirtyChange]);
+ useEffect(()=>{onDirtyChange?.(pendingCount>0);},[pendingCount,onDirtyChange]);
  useEffect(()=>()=>onDirtyChange?.(false),[onDirtyChange]);
  useEffect(()=>{
   if(!pendingCount)return;
   const warn=e=>{e.preventDefault();e.returnValue='';};
   window.addEventListener('beforeunload',warn);
   return()=>window.removeEventListener('beforeunload',warn);
- },[dirtyCount]);
+ },[pendingCount]);
  useEffect(()=>{setSelectedIds([]);},[courseId,offset,query,filterDomain,difficulty,usage]);
  const moveCourse=id=>{
   if(id===courseId)return;
@@ -127,32 +127,25 @@ export default function AdminCourseBank({db,courses=[],asp,onUpdate,onDirtyChang
    (skipped?' '+skipped+' protected/ineligible question(s) skipped.':''));
  };
  async function saveAll(){
-  if(!dirtyCount||busy||!selected||!canEdit)return;
+  if(!pendingCount||busy||!selected||!canEdit)return;
   setError('');setNotice('');setBusy(true);
   try{
    const payload=stagedToBatch(staged);
-   if(payload.length>500)throw Error('Save no more than 500 staged questions in one batch.');
-   const links=summarizeSavedLessonAssignments(payload);
-   const result=await saveCourseBankBatch(db,courseId,payload);
-   setStaged({});setSelectedIds([]);
-   const details=result.linked&&result.linked===links.assigned
-    ?' · '+links.approved+' Lesson Quiz question(s) published for eligible learners'+
-      (links.draft?' · '+links.draft+' Draft link(s) require question approval AND publishing in Course Builder → Lesson Quiz':'')
-    :result.linked?' · '+result.linked+' Lesson Quiz links added (verify their publication status in Course Builder)':'';
-   setNotice('Saved '+result.saved+' question(s) in one transaction'+details+
-    (result.unpublished?' · '+result.unpublished+' previously published quiz question(s) unpublished':'')+'.');
+   if(payload.length>500)throw Error('Maximum 500 staged questions in one save.');
+   const result=await saveCourseBankBatch(db,courseId,payload,releaseLessonId||null);
+   setStaged({});setReleaseLessonId('');setSelectedIds([]);
+   setNotice('Saved in one transaction: '+result.saved+' question setting(s), '+
+    (result.published||0)+' Lesson Quiz question(s) published'+
+    (result.linked?' · '+result.linked+' new Lesson link(s)':'')+
+    (result.unpublished?' · '+result.unpublished+' disabled quiz item(s) unpublished':'')+
+    '. Mock-selected questions are available in the separate Selected Mock Test.');
    refresh(true);
-  }catch(e){setError('Nothing was partially saved; your edits are still staged. '+fail(e));}
+  }catch(e){setError('No partial changes saved. Your pending selections are retained. '+fail(e));}
   finally{setBusy(false);}
  }
- const openQuestionReview=()=>{
-  if(selected?.slug==='asp')setReviewOpen(true);
-  else if(reviewRef.current)reviewRef.current.open=true;
-  requestAnimationFrame(()=>reviewRef.current?.scrollIntoView({behavior:'smooth',block:'start'}));
- };
  const discard=()=>{
-  if(dirtyCount&&window.confirm('Discard all '+dirtyCount+' unsaved edits?')){
-   setStaged({});setNotice('Unsaved edits discarded.');setError('');
+  if(pendingCount&&window.confirm('Discard all '+pendingCount+' unsaved actions?')){
+   setStaged({});setReleaseLessonId('');setNotice('Unsaved actions discarded.');setError('');
   }
  };
  // Independent legal/answer review for non-ASP remains an explicit separate
