@@ -1,7 +1,7 @@
 import React,{useEffect,useMemo,useState} from 'react';
 import {AlertCircle,BookOpen,CheckCircle2,FileQuestion,FileSpreadsheet,Plus,RefreshCw,Search,ShieldCheck,Save,Undo2,Upload,SlidersHorizontal} from 'lucide-react';
 import {importQuestionFile} from '../lib/questionImport.js';
-import {importCourseBank,listCourseBank,mappedImportRows,saveCourseBankBatch} from './courseQuestionBankApi.js';
+import {importCourseBank,listCourseBank,mappedImportRows,saveCourseBankBatch,getCourseBankBatchCapabilities} from './courseQuestionBankApi.js';
 import {stagedQuestionEdit,stagedToBatch,originalQuestionValues,BANK_DIFFICULTIES} from './questionBankDraft.js';
 import {liveCourseTree} from './liveAuthoringApi.js';
 import {isAspCourseTitle,isOfficialAspCourse,preferredQuestionBankCourse,questionBankCatalogState} from './questionBankCourseSelection.js';
@@ -23,13 +23,23 @@ export default function AdminCourseBank({db,courses=[],asp,onUpdate,onDirtyChang
  const [selectedIds,setSelectedIds]=useState([]);
  const [lessons,setLessons]=useState([]);
  const [reviewOpen,setReviewOpen]=useState(false);
+ const [batchReady,setBatchReady]=useState(false),[batchLoading,setBatchLoading]=useState(true);
+ const [batchError,setBatchError]=useState('');
  const dirtyCount=Object.keys(staged).length;
  const selected=useMemo(()=>courses.find(c=>c.id===courseId),[courses,courseId]);
  const courseProblem=questionBankCatalogState(courses,coursesLoading,coursesError);
  const aspIdentityMismatch=!!selected&&isAspCourseTitle(selected)&&!isOfficialAspCourse(selected);
- const canEdit=!!courseId&&!aspIdentityMismatch&&!bank.compatibilityMode
+ const canEdit=!!courseId&&batchReady&&!aspIdentityMismatch&&!bank.compatibilityMode
    &&(!bank.items.length||typeof bank.items[0].isActive==='boolean');
  useEffect(()=>{if(!courses.some(c=>c.id===courseId))setCourseId(preferredQuestionBankCourse(courses)?.id||'');},[courses,courseId]);
+ useEffect(()=>{
+  let live=true;setBatchReady(false);setBatchLoading(true);setBatchError('');
+  getCourseBankBatchCapabilities(db)
+   .then(()=>{if(live)setBatchReady(true);})
+   .catch(e=>{if(live)setBatchError('P30 batch editor has not been verified on this database: '+fail(e));})
+   .finally(()=>{if(live)setBatchLoading(false);});
+  return()=>{live=false;};
+ },[db]);
  useEffect(()=>{setOffset(0);setSearch('');setQuery('');setPending(null);setManual(null);
   setError('');setNotice('');setDomainId('');setFilterDomain('');setDifficulty('');setUsage('all');setDomains([]);setLessons([]);setSelectedIds([]);
   if(!courseId)return;
@@ -77,12 +87,13 @@ export default function AdminCourseBank({db,courses=[],asp,onUpdate,onDirtyChang
  const stage=(q,field,value)=>{
   setError('');setNotice('');
   try{
+   if(!canEdit)throw Error(batchError||'Install the P30 batch editor migration first.');
    const next=stagedQuestionEdit(q,staged[q.id],field,value);
    setStaged(prev=>{const result={...prev};if(next)result[q.id]=next;else delete result[q.id];return result;});
   }catch(e){setError(fail(e));}
  };
  const batchStage=(field,value)=>{
-  if(!selectedIds.length)return;
+  if(!selectedIds.length||!canEdit)return;
   const rows=bank.items.filter(q=>selectedIds.includes(q.id));
   const changed={...staged};let accepted=0,skipped=0;
   for(const q of rows){
@@ -215,6 +226,10 @@ export default function AdminCourseBank({db,courses=[],asp,onUpdate,onDirtyChang
   {aspIdentityMismatch&&<p className="at-disclaimer" role="alert">
    This ASP Course has slug <code>{selected?.slug||'(missing)'}</code> rather than <code>asp</code>.
    Verify the original Course ID before uploading or changing questions; do not create a duplicate Course.
+  </p>}
+  {selected&&!batchLoading&&!batchReady&&<p role="status" className="at-disclaimer">
+   {batchError||'This database requires the P30 atomic batch-editor migration before inline controls are enabled.'}
+   The Question Bank list remains visible, but unsaved inline edits cannot be saved yet.
   </p>}
   {selected&&bank.compatibilityMode&&<p role="status" className="at-disclaimer">
    The installed Question Bank is the older P28 version. Apply P28.2 and P29 before changing question settings; this list may not apply advanced filters.
