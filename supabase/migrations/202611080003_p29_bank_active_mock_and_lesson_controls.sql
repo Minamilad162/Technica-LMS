@@ -171,7 +171,12 @@ BEGIN
  RETURN NEW;
 END $$;
 
--- Preserve original 4-argument Bank listing; upgrade only 7-argument Admin list.
+-- Preserve the existing exact 7-arg signature, including its DEFAULT
+-- expressions if installed by the newer initial P28.2 source. The user's
+-- original-P28->P28.2 path has NO DEFAULTS; do not add them and make the old
+-- four-argument overload ambiguous.
+DO $p29_update_catalog$
+DECLARE v_definition text:=$p29_catalog_ddl$
 CREATE OR REPLACE FUNCTION public.lms_p28_list_bank(
  p_course_id uuid,p_search text,p_limit integer,p_offset integer,
  p_domain_id uuid,p_difficulty text,p_usage text
@@ -230,6 +235,20 @@ BEGIN
  ) x;
  RETURN jsonb_build_object('total',v_total,'items',v_items);
 END $$;
+$p29_catalog_ddl$;
+DECLARE v_existing_args text;
+BEGIN
+ SELECT pg_get_function_arguments(p.oid) INTO v_existing_args
+ FROM pg_proc p
+ WHERE p.oid=to_regprocedure('public.lms_p28_list_bank(uuid,text,integer,integer,uuid,text,text)');
+ IF v_existing_args IS NULL THEN
+  RAISE EXCEPTION 'P29 requires the installed 7-argument P28.2 catalog'; END IF;
+ v_definition:=replace(v_definition,$p29_signature$
+p_course_id uuid,p_search text,p_limit integer,p_offset integer,
+ p_domain_id uuid,p_difficulty text,p_usage text
+$p29_signature$,v_existing_args);
+ EXECUTE v_definition;
+END $p29_update_catalog$;
 
 -- Ensure actual server selectors (not UI-only filters) reject disabled
 -- or Mock-candidate questions for all NEW Practice and adaptive questions.
