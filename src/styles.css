@@ -242,3 +242,12 @@
 .top-actions{min-width:0}
 @media(max-width:1000px){.topbar{gap:12px}.top-actions{gap:9px}.top-search{max-width:365px}}
 @media(max-width:700px){.top-actions{gap:7px}.top-actions .sc-countdown{margin-right:1px}.account-button{padding:2px}}
+
+/* P37: reserve visible space for the learner subscription countdown in the actual top header. */
+.topbar .top-search{min-width:110px}
+.topbar .top-actions{flex:0 0 auto;min-width:0;white-space:nowrap}
+.topbar .top-subscription-slot{display:flex;align-items:center;flex:0 0 auto;min-width:0}
+.topbar .top-subscription-slot .sc-countdown{display:flex;flex:0 0 auto}
+@media(max-width:900px){.topbar .top-search{max-width:300px}}
+@media(max-width:700px){.topbar .top-actions{gap:6px}.topbar .top-subscription-slot{flex-shrink:0}}
+@media(max-width:400px){.topbar .top-actions{gap:3px}.topbar .top-subscription-slot .sc-countdown{min-width:98px;width:98px;max-width:98px}}

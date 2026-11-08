@@ -125,6 +125,9 @@ jobs:
       - name: P18 premium My Learning and P11 verified progress contract
         run: npm run test:p18
 
+      - name: P37 visible subscription header slot even without active plan
+        run: npm run test:p37:header
+
       - name: P36 verified subscription remaining-days header countdown
         run: npm run test:p36:countdown
 

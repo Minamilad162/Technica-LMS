@@ -37,3 +37,7 @@ button.sc-countdown:hover{border-color:#8fc0e9;background:#f0f7ff}
  .sc-text>svg{display:none}
 }
 @media(prefers-reduced-motion:reduce){.sc-track i{transition:none}}
+
+/* P37: the status is visible for every learner, including those without an active plan. */
+.sc-countdown[data-subscription-status="none"] .sc-track,
+.sc-countdown[data-subscription-status="expired"] .sc-track{background:#e9edf3}

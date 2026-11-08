@@ -1,3 +1,9 @@
+### 2026-11-08 — P37 Header subscription visibility and live-deployment diagnosis (SOURCE ONLY)
+
+- Rechecked open Technica Worker browser tab: the rendered /#/home header has Search, Notifications and Learner account but is missing the P36 countdown. GitHub main already includes P36, indicating a likely outdated Worker deployment rather than an invalid Demo account.
+- Hardened header with explicit always-visible learner countdown slot (including No active plan), responsive topbar sizing and DOM markers for QA. Admin and fullscreen exam remain exempt, P21 dates/auth intact.
+- Added P37 static regression and read-only `npm run check:live-header` remote bundle smoke to distinguish outdated Worker builds from source issues. No new Cloudflare deployment is claimed, and no Supabase/production mutations were made.
+
 ### 2026-11-08 — P36 verified platform-subscription days-left bar in learner headers (FRONTEND ONLY)
 
 - Added a compact time-remaining bar with `N days left` near the learner username in both Technica headers. Uses actual P21 server-owned start/end/status, including calendar-month varying lengths; displays expiration, no active plan and unavailable backend states honestly.
