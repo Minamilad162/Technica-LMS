@@ -104,9 +104,9 @@ export default function AdminCourseBank({db,courses=[],asp,onUpdate,mode='bank'}
  async function changeFlags(q,key,checked){
   if(busy||typeof q.isActive!=='boolean'||typeof q.mockCandidate!=='boolean')return;
   const newActive=key==='active'?checked:q.isActive;
-  const newMock=key==='mock'?checked:q.mockCandidate;
+  const newMock=key==='mock'?checked:(!checked?false:q.mockCandidate);
   if(key==='mock'&&checked&&!window.confirm('Mark as Mock Exam candidate? The question will be excluded from Practice and Lesson Quizzes. Official ASP Mock reservation still requires 200 independently reviewed questions.'))return;
-  if(key==='active'&&!checked&&!window.confirm('Disable this question for new Practice and unpublish it from any linked Lesson Quiz? Existing graded answers are retained.'))return;
+  if(key==='active'&&!checked&&!window.confirm('Disable this question for new Practice and unpublish linked Lesson Quizzes? Any temporary Mock candidate tick will also be cleared. Existing grades stay intact.'))return;
   setBusy(true);setError('');setNotice('');
   try{
    const result=await setQuestionBankFlags(db,q.id,newActive,newMock);
