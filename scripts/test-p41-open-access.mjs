@@ -23,7 +23,7 @@ assert(mayReadLiveCourse(catalog,{id:C,publication_state:'published'}));
 assert(!mayReadLiveCourse(catalog,{id:C,publication_state:'draft'}));
 assert(!mayReadLiveCourse({...catalog,openAccess:false},{id:C,publication_state:'published'}));
 assert.match(aspMissingReason([{id:C,slug:'asp-course',title:'ASP Course'}]),/identifier/);
-assert.match(aspMissingReason([]),/not configured/);
+assert.match(aspMissingReason([]),/published ASP Course/);
 
 const sql=read('supabase/migrations/202611080007_p41_open_access_showcase.sql');
 for(const term of [
