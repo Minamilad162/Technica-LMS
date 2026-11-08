@@ -210,6 +210,8 @@ export default function LiveLearnerWorkspace({db,user,onSignOut,embedded=false,
      </>}</>:
       !officialAsp?<div className="lj-empty"><LockKeyhole size={24}/><b>Official ASP Mock unavailable</b>
        <p>{aspMissingReason(catalog.courses)}</p></div>:
+      officialAsp.publication_state!=='published'?<div className="lj-empty"><LockKeyhole size={24}/>
+       <b>ASP Course is not published</b><p>Your saved Mock selections are intact. Publish the Course and finalize 200 reviewed questions before the official exam becomes available.</p></div>:
       <LiveMockExam key={user.id+'-'+officialAsp.id} db={db} user={user} course={officialAsp}
        access={!!catalog.identity?.isAdmin||catalog.openAccess===true||isFullCourseEnrolled(catalog.entitlements,officialAsp.id,catalog.subscription)}/>}
     </div>

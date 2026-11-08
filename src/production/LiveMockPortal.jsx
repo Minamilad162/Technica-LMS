@@ -47,7 +47,14 @@ export default function LiveMockPortal(){
      <p>{error}</p><button type="button" className="btn" onClick={()=>setReload(n=>n+1)}><RefreshCw size={16}/> Retry</button>
     </div>:
    !viewingCourse?<div className="live-learning-empty"><LockKeyhole size={21}/>
-    <div><b>ASP Mock setup is incomplete</b><p>{aspMissingReason(catalog.courses)}</p></div></div>:
+    <div><b>ASP Mock setup is incomplete</b><p>{aspMissingReason(catalog.courses)}</p>
+     {catalog.identity?.isAdmin&&<button type="button" className="btn"
+      onClick={()=>navigate('/admin-tools?tab=questions')}>Open ASP Question Bank</button>}</div></div>:
+   viewingCourse.publication_state!=='published'?<div className="live-learning-empty"><LockKeyhole size={21}/>
+    <b>ASP Course is not published</b><p>Publish the existing ASP Course and finalize its 200 saved, reviewed Mock questions to open the exam.</p>
+    {catalog.identity?.isAdmin&&<button type="button" className="btn"
+     onClick={()=>navigate('/admin-tools?tab=courses')}>Open Courses</button>}
+   </div>:
    !entitled?<div className="live-learning-empty"><LockKeyhole size={21}/>
     <b>Mock access unavailable</b>
     <p>Course access is not ready yet. Refresh or contact your LMS administrator.</p></div>:
