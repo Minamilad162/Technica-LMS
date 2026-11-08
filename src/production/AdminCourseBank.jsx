@@ -3,6 +3,7 @@ import {AlertCircle,BookOpen,CheckCircle2,FileQuestion,FileSpreadsheet,Plus,Refr
 import {importQuestionFile} from '../lib/questionImport.js';
 import {approveNonAspBankQuestion,importCourseBank,listCourseBank,mappedImportRows,reserveNonAspMockQuestion,setQuestionBankFlags,attachBankToLesson} from './courseQuestionBankApi.js';
 import {liveCourseTree} from './liveAuthoringApi.js';
+import {isAspCourseTitle,isOfficialAspCourse,preferredQuestionBankCourse,questionBankCatalogState} from './questionBankCourseSelection.js';
 import {AdminQuestionsPanel,AdminMockPanel} from './AdminToolsPanels.jsx';
 import './courseQuestionBank.css';
 
@@ -10,7 +11,7 @@ const fail=e=>e?.message||'The protected Question Bank request failed.';
 const initial=()=>({prompt:'',options:['','','',''],correct:0,explanation:''});
 function Status({value}){return <span className={'p28-status '+(value==='approved'?'approved':value==='mock'?'mock':'draft')}>{value}</span>;}
 
-export default function AdminCourseBank({db,courses=[],asp,onUpdate,mode='bank'}){
+export default function AdminCourseBank({db,courses=[],asp,onUpdate,mode='bank',coursesLoading=false,coursesError='',onRefreshCourses,onGoToCourses}){
  const [courseId,setCourseId]=useState(''),[domains,setDomains]=useState([]),[domainId,setDomainId]=useState('');
  const [search,setSearch]=useState(''),[query,setQuery]=useState(''),[offset,setOffset]=useState(0);
  const [filterDomain,setFilterDomain]=useState(''),[difficulty,setDifficulty]=useState(''),[usage,setUsage]=useState('all');
@@ -20,7 +21,9 @@ export default function AdminCourseBank({db,courses=[],asp,onUpdate,mode='bank'}
  const [manual,setManual]=useState(null),[expanded,setExpanded]=useState(null);
  const [lessons,setLessons]=useState([]),[pickedLesson,setPickedLesson]=useState({});
  const selected=useMemo(()=>courses.find(c=>c.id===courseId),[courses,courseId]);
- useEffect(()=>{if(!courses.some(c=>c.id===courseId))setCourseId(courses.find(c=>c.slug==='asp')?.id||courses[0]?.id||'');},[courses,courseId]);
+ const courseProblem=questionBankCatalogState(courses,coursesLoading,coursesError);
+ const aspIdentityMismatch=!!selected&&isAspCourseTitle(selected)&&!isOfficialAspCourse(selected);
+ useEffect(()=>{if(!courses.some(c=>c.id===courseId))setCourseId(preferredQuestionBankCourse(courses)?.id||'');},[courses,courseId]);
  useEffect(()=>{setOffset(0);setSearch('');setQuery('');setPending(null);setManual(null);setExpanded(null);
   setError('');setNotice('');setDomainId('');setFilterDomain('');setDifficulty('');setUsage('all');setDomains([]);setLessons([]);setPickedLesson({});
   if(!courseId)return;
@@ -48,7 +51,7 @@ export default function AdminCourseBank({db,courses=[],asp,onUpdate,mode='bank'}
  },[db,courseId,query,offset,filterDomain,difficulty,usage,revision]);
  const refresh=()=>{setRevision(n=>n+1);onUpdate?.();};
  async function readFile(file){
-  if(!file||!courseId||busy)return;
+  if(!file||!courseId||busy||aspIdentityMismatch)return;
   setError('');setNotice('');setPending(null);setUploadCount(0);
   try{
    const data=await importQuestionFile(file,courseId,domainId);
@@ -59,7 +62,7 @@ export default function AdminCourseBank({db,courses=[],asp,onUpdate,mode='bank'}
   }catch(e){setError(fail(e));}
  }
  async function upload(){
-  if(!pending||pending.courseId!==courseId||busy)return;
+  if(!pending||pending.courseId!==courseId||busy||aspIdentityMismatch)return;
   if(!window.confirm('Import '+pending.rows.length+' valid questions as DRAFT into '+selected.title+'? '+pending.rows.filter(q=>!q.domainId).length+' will remain unassigned to a Domain until human review. Existing questions and Mock reservations will not be modified.'))return;
   setBusy(true);setError('');setNotice('');
   let inserted=0,skipped=0;
@@ -74,7 +77,7 @@ export default function AdminCourseBank({db,courses=[],asp,onUpdate,mode='bank'}
   finally{setBusy(false);}
  }
  async function addManual(e){
-  e.preventDefault();if(!manual||busy)return;
+  e.preventDefault();if(!manual||busy||aspIdentityMismatch)return;
   const values=manual.options.map(x=>x.trim()).filter(Boolean);
   if(manual.prompt.trim().length<5||values.length<2||!values[manual.correct]){setError('Provide a question, two options and a correct answer.');return;}
   setBusy(true);setError('');
@@ -133,14 +136,27 @@ export default function AdminCourseBank({db,courses=[],asp,onUpdate,mode='bank'}
    <p>One protected Question Bank per Course. Lesson Quiz, Assessment, Practice and Mock use the same question IDs; publication and reservations are checked by Supabase.</p></div>
    <button type="button" className="at-outline" onClick={refresh} disabled={busy}><RefreshCw size={14}/> Refresh</button></div>
   <div className="p28-top"><label>Course
-   <select value={courseId} disabled={busy} onChange={e=>setCourseId(e.target.value)}>
-    {courses.map(c=><option key={c.id} value={c.id}>{c.title}</option>)}
+   <select value={courseId} disabled={busy||coursesLoading||!!coursesError||!courses.length} onChange={e=>setCourseId(e.target.value)}>
+    {!courses.length&&<option value="">No real Courses loaded</option>}
+    {courses.map(c=><option key={c.id} value={c.id}>{c.title}{c.slug?' · '+c.slug:''}</option>)}
    </select></label>
    {mode==='bank'&&<label>Default domain for uploaded questions with no domain
     <select value={domainId} disabled={busy} onChange={e=>{setDomainId(e.target.value);setPending(null);}}>
      <option value="">Unassigned — classify later</option>
      {domains.map(d=><option value={d.id} key={d.id}>{d.title}</option>)}
     </select></label>}</div>
+  {courseProblem.status!=='ready'&&<div className="at-surface p28-catalog-state" role={coursesError?'alert':'status'}>
+   <strong>{courseProblem.status==='loading'?'Loading Course Question Banks':courseProblem.status==='error'?'Could not load Courses':'No real database Courses found'}</strong>
+   <p>{courseProblem.message}</p>
+   <div className="p28-catalog-actions">
+    <button type="button" className="at-outline" onClick={()=>onRefreshCourses?.()} disabled={coursesLoading}><RefreshCw size={15}/> Retry loading</button>
+    <button type="button" className="at-primary" onClick={()=>onGoToCourses?.()} disabled={!onGoToCourses}>Open Courses</button>
+   </div>
+  </div>}
+  {aspIdentityMismatch&&<p role="alert" className="at-disclaimer">
+   This Course is titled ASP but its database slug is <code>{selected.slug||'(missing)'}</code>, not <code>asp</code>.
+   The official ASP Review and Mock processes require the canonical Course identity. Upload/approval are blocked for this Course until its existing database record is verified; do not create a duplicate.
+  </p>}
   {selected&&bank.compatibilityMode&&<p role="status" className="at-disclaimer">
     This database still has the old P28 Question Bank. File upload can work, but Domain/Difficulty filters and Active/Mock/Quiz controls need P28.2 + P29 migrations. The fallback list is unfiltered.
    </p>}
@@ -164,15 +180,15 @@ export default function AdminCourseBank({db,courses=[],asp,onUpdate,mode='bank'}
     <option value="mock">Mock-only reserved</option>
    </select></label>
   </div>}
-  {!selected?<p className="at-empty">Create a real Course in Admin Tools → Courses first.</p>:<>
+  {!selected?null:<>
    {error&&<p role="alert" className="at-error"><AlertCircle size={15}/>{error}</p>}
    {notice&&<p role="status" className="at-success"><CheckCircle2 size={15}/>{notice}</p>}
    {mode==='bank'&&<div className="p28-import at-surface">
     <div><h3><FileSpreadsheet size={19}/> Upload Question File</h3>
      <p>Upload all ASP questions here once. Columns: Question, Option A–F, Correct Answer, Domain, Difficulty, Explanation, Reference (last four optional). Every worksheet is parsed. Imported rows remain Draft until review.</p></div>
     <label className="p28-file">Choose .xlsx or .csv file
-     <input type="file" accept=".xlsx,.csv" disabled={busy} onChange={e=>{void readFile(e.target.files?.[0]);e.target.value='';}}/></label>
-    <button className="at-outline" type="button" disabled={busy} onClick={()=>{setPending(null);setManual(initial());}}><Plus size={14}/> Add manually</button>
+     <input type="file" accept=".xlsx,.csv" disabled={busy||aspIdentityMismatch} onChange={e=>{void readFile(e.target.files?.[0]);e.target.value='';}}/></label>
+    <button className="at-outline" type="button" disabled={busy||aspIdentityMismatch} onClick={()=>{setPending(null);setManual(initial());}}><Plus size={14}/> Add manually</button>
     {pending&&<div className="p28-preview"><b>{pending.filename} · {pending.rows.length} valid · {pending.problems.length} import notes</b>
      <span>{pending.sheets.join(', ')}</span>
      <small>{pending.rows.filter(q=>!q.domainId).length} questions currently have no mapped Domain. Map ambiguous worksheet labels below before importing, or leave them unassigned for human ASP11 review.</small>
@@ -187,7 +203,7 @@ export default function AdminCourseBank({db,courses=[],asp,onUpdate,mode='bank'}
      </div>}
      {pending.rows.slice(0,3).map((q,i)=><small key={i}>{i+1}. {q.prompt} · {q.difficulty} · {q.domainId?domains.find(d=>d.id===q.domainId)?.title:'Unassigned domain'}</small>)}
      {!!pending.problems.length&&<details><summary>Import validation notes</summary>{pending.problems.slice(0,20).map((p,i)=><small key={i}>{p}</small>)}</details>}
-     <button className="at-primary" type="button" disabled={busy} onClick={upload}>{busy?'Importing '+uploadCount+'/'+pending.rows.length:'Confirm Draft Import'}</button></div>}
+     <button className="at-primary" type="button" disabled={busy||aspIdentityMismatch} onClick={upload}>{busy?'Importing '+uploadCount+'/'+pending.rows.length:'Confirm Draft Import'}</button></div>}
     {manual&&<form className="p28-manual" onSubmit={addManual}>
      <label>Question<textarea value={manual.prompt} onChange={e=>setManual(v=>({...v,prompt:e.target.value}))} rows={2} required/></label>
      {manual.options.map((answer,i)=><label key={i}>Option {String.fromCharCode(65+i)}
@@ -261,7 +277,7 @@ export default function AdminCourseBank({db,courses=[],asp,onUpdate,mode='bank'}
    </div>
    {selected.slug==='asp'&&mode==='bank'&&<section className="p28-asp-review"><AdminQuestionsPanel db={db} asp={asp||selected} onUpdate={refresh}/></section>}
    {selected.slug==='asp'&&mode==='mock'&&<AdminMockPanel db={db} asp={asp||selected}/>}
-   {selected.slug!=='asp'&&mode==='mock'&&<p className="at-disclaimer"><ShieldCheck size={16}/> Non-ASP Mock-only marks exclude questions from learner Practice and Lesson Quizzes. Launching a Mock for this Course requires a separate versioned exam form and server-side assessment engine.</p>}
+   {selected.slug!=='asp'&&mode==='mock'&&!aspIdentityMismatch&&<p className="at-disclaimer"><ShieldCheck size={16}/> Non-ASP Mock-only marks exclude questions from learner Practice and Lesson Quizzes. Launching a Mock for this Course requires a separate versioned exam form and server-side assessment engine.</p>}
   </>}
  </div>;
 }
