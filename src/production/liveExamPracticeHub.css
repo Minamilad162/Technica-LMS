@@ -1,0 +1,104 @@
+/* P39: one premium Mock Exam & Practice destination; shared old protected engines unchanged. */
+.lep-page{max-width:1310px;padding:22px clamp(14px,2.3vw,34px) 50px}
+.lep-page *{box-sizing:border-box}
+.lep-page button:focus-visible,.lep-page select:focus-visible{outline:3px solid #19a990;outline-offset:3px}
+.lep-hero{position:relative;isolation:isolate;overflow:hidden;display:grid;
+ grid-template-columns:minmax(0,1fr) 210px;min-height:205px;align-items:center;
+ gap:12px;padding:clamp(22px,3vw,37px);border-radius:23px;
+ background:radial-gradient(circle at 89% 30%,#85ead5b5,transparent 45%),
+ linear-gradient(108deg,#0b4353 0%,#096a67 72%,#13a58a 100%);
+ box-shadow:0 16px 33px #0a575723;color:white}
+.lep-hero::after{content:"";position:absolute;right:-125px;top:-140px;width:460px;height:460px;
+ border:1px solid #ffffff30;border-radius:50%;box-shadow:0 0 0 35px #c5fff10b,
+ 0 0 0 80px #c5fff10a;z-index:-1;pointer-events:none}
+.lep-hero-copy{position:relative;z-index:2}
+.lep-eyebrow{display:inline-flex;align-items:center;gap:9px;letter-spacing:.12em;
+ font-size:11px;font-weight:900;color:#cbfff0}
+.lep-hero h1{font-size:clamp(28px,3.15vw,42px);line-height:1.15;
+ letter-spacing:-.045em;margin:12px 0;color:white}
+.lep-hero h1 em{font-style:normal;color:#a8f9d7}
+.lep-hero-copy>p{max-width:690px;margin:0;color:#d5f5f1;font-size:13px;line-height:1.8}
+.lep-hero-tags{display:flex;gap:8px;flex-wrap:wrap;margin-top:19px}
+.lep-hero-tags span{display:inline-flex;align-items:center;gap:7px;color:#e6fffa;
+ background:#ffffff19;border:1px solid #e7fff340;border-radius:999px;
+ font-size:11px;font-weight:750;padding:7px 11px}
+.lep-hero-decoration{position:relative;width:190px;height:155px;justify-self:center;
+ display:grid;place-items:center}
+.lep-hero-icon{width:123px;height:115px;border-radius:26px;display:grid;place-items:center;
+ transform:rotate(-8deg);background:linear-gradient(145deg,#b3ffe3,#46c8a4);
+ color:#07575b;box-shadow:0 18px 25px #044d533f,inset 0 3px 3px #ffffff9c}
+.lep-float{position:absolute;z-index:2;width:56px;height:56px;border-radius:17px;
+ display:grid;place-items:center;box-shadow:0 8px 15px #053c4a38}
+.lep-float-one{left:-9px;top:0;transform:rotate(-18deg);color:#fff;
+ background:linear-gradient(120deg,#fbbf56,#f9a629)}
+.lep-float-two{right:-6px;bottom:3px;transform:rotate(13deg);color:#076b61;
+ background:#e2fff5}
+.lep-tabs{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:19px 0}
+.lep-tabs button{display:flex;align-items:center;justify-content:flex-start;gap:15px;
+ min-height:80px;text-align:left;padding:15px 19px;border-radius:17px;
+ border:1px solid #d8e8e9;background:#fff;color:#55717a;
+ box-shadow:0 6px 16px #123f4a0a;transition:border-color .16s,background .16s,transform .16s}
+.lep-tabs button svg{color:#0b917e;flex-shrink:0}
+.lep-tabs button>span{display:grid;gap:5px}
+.lep-tabs button strong{font-size:17px;color:#174650}
+.lep-tabs button small{font-size:11px;color:#718d94;line-height:1.5}
+.lep-tabs button[aria-selected="true"]{border-color:#0bb29b;
+ background:linear-gradient(110deg,#e7fbf3,#f8fffb);
+ box-shadow:0 0 0 2px #13b1971e,0 10px 22px #0b89781b}
+.lep-tabs button[aria-selected="true"] strong,.lep-tabs button[aria-selected="true"] svg{color:#078977}
+.lep-tabs button:hover:not([aria-selected="true"]){border-color:#9accbe;transform:translateY(-1px)}
+.lep-content{padding:clamp(15px,2vw,26px);background:#fff;border:1px solid #d9e9e9;
+ border-radius:20px;box-shadow:0 14px 28px #15494d0b;min-width:0}
+.lep-section-heading{display:flex;justify-content:space-between;align-items:center;gap:12px;
+ padding-bottom:18px;border-bottom:1px solid #e8f0ef}
+.lep-section-kicker{font-size:10px;font-weight:900;letter-spacing:.12em;color:#088e7d}
+.lep-section-heading h2{font-size:clamp(20px,2vw,27px);letter-spacing:-.035em;
+ color:#174652;margin:7px 0 5px}
+.lep-section-heading p{color:#6c858e;font-size:12px;line-height:1.65;margin:0;max-width:750px}
+.lep-section-mark{flex:0 0 47px;height:47px;display:grid;place-items:center;
+ border-radius:14px;background:#e7f9f3;color:#0e9b88}
+.lep-course-selector{display:flex;align-items:center;flex-wrap:wrap;gap:12px;padding:14px;
+ margin:19px 0 5px;border-radius:14px;background:#f6fcfa;border:1px solid #dceee9}
+.lep-course-selector label{display:flex;gap:8px;align-items:center;color:#266168;
+ font-size:12px;font-weight:850}
+.lep-course-selector select{min-width:200px;max-width:100%;flex:1;border:1px solid #cfe3e1;
+ background:white;border-radius:10px;padding:11px;color:#20535c;font-size:12px}
+.lep-course-selector>span{display:flex;align-items:center;gap:6px;color:#47857b;font-size:10px}
+.lep-mock-promise{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:13px;
+ margin:20px 0 12px}
+.lep-mock-promise>div{min-width:0;padding:15px 13px;display:grid;gap:6px;
+ background:#f0faf7;border:1px solid #d9ede6;border-radius:14px}
+.lep-mock-promise svg{color:#0d9d85}
+.lep-mock-promise strong{font-size:13px;color:#28555e}
+.lep-mock-promise span{font-size:11px;color:#62828c;line-height:1.5}
+.lep-page .live-practice{margin-top:17px;background:#fff;border-color:#e4eded}
+.lep-page .live-practice:fullscreen{max-width:none}
+@media(max-width:760px){
+ .lep-hero{grid-template-columns:minmax(0,1fr) 105px}
+ .lep-hero-decoration{width:110px;height:116px;transform:scale(.7)}
+ .lep-tabs button{padding:12px;gap:9px}
+ .lep-tabs button strong{font-size:14px}
+ .lep-mock-promise{grid-template-columns:1fr 1fr}
+ .lep-mock-promise>div:last-child{grid-column:1/-1}
+}
+@media(max-width:520px){
+ .lep-page{padding:13px 11px 34px}
+ .lep-hero{padding:22px 17px;grid-template-columns:1fr;min-height:0}
+ .lep-hero h1{font-size:29px}
+ .lep-hero-decoration{display:none}
+ .lep-hero-tags span{font-size:10px}
+ .lep-tabs{gap:8px;margin:14px 0}
+ .lep-tabs button{min-height:77px;border-radius:13px;padding:10px 11px}
+ .lep-tabs button svg{width:20px}
+ .lep-tabs button strong{font-size:14px}
+ .lep-tabs button small{font-size:10px}
+ .lep-content{padding:13px;border-radius:15px}
+ .lep-section-heading{padding-bottom:12px}
+ .lep-section-mark{display:none}
+ .lep-course-selector{display:grid;gap:9px}
+ .lep-course-selector select{min-width:0;width:100%}
+ .lep-mock-promise{grid-template-columns:1fr;gap:8px}
+ .lep-mock-promise>div:last-child{grid-column:auto}
+ .lep-page .live-practice{padding:12px}
+}
+@media(prefers-reduced-motion:reduce){.lep-tabs button{transition:none}.lep-tabs button:hover{transform:none}}
