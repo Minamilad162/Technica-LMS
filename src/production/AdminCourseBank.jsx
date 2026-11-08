@@ -1,7 +1,7 @@
 import React,{useEffect,useMemo,useState} from 'react';
 import {AlertCircle,BookOpen,CheckCircle2,FileQuestion,FileSpreadsheet,Plus,RefreshCw,Search,ShieldCheck,Save,Undo2,Upload,SlidersHorizontal} from 'lucide-react';
 import {importQuestionFile} from '../lib/questionImport.js';
-import {importCourseBank,listCourseBank,mappedImportRows,saveCourseBankBatch,getCourseBankBatchCapabilities,approveNonAspBankQuestion,reserveNonAspMockQuestion} from './courseQuestionBankApi.js';
+import {importCourseBank,listCourseBank,mappedImportRows,saveCourseBankBatch,getCourseBankBatchCapabilities,approveNonAspBankQuestion,reserveNonAspMockQuestion,inspectLessonQuizPublication} from './courseQuestionBankApi.js';
 import {stagedQuestionEdit,stagedToBatch,originalQuestionValues,BANK_DIFFICULTIES} from './questionBankDraft.js';
 import {summarizeSavedLessonAssignments} from './lessonQuizSyncApi.js';
 import {liveCourseTree} from './liveAuthoringApi.js';
@@ -23,6 +23,8 @@ export default function AdminCourseBank({db,courses=[],asp,onUpdate,onDirtyChang
  const [manual,setManual]=useState(null),[staged,setStaged]=useState({});
  const [selectedIds,setSelectedIds]=useState([]);
  const [lessons,setLessons]=useState([]);
+ const [inspectLessonId,setInspectLessonId]=useState('');
+ const [inspectState,setInspectState]=useState({loading:false,data:null,error:''});
  const [reviewOpen,setReviewOpen]=useState(false);
  const [batchReady,setBatchReady]=useState(false),[batchLoading,setBatchLoading]=useState(true);
  const [batchError,setBatchError]=useState('');
@@ -58,6 +60,20 @@ export default function AdminCourseBank({db,courses=[],asp,onUpdate,onDirtyChang
   }).catch(e=>{if(live)setError('Course lesson list unavailable: '+fail(e));});
   return()=>{live=false;};
  },[db,courseId]);
+ // P32: make published vs linked-but-hidden states visible to the Admin.
+ useEffect(()=>{
+  const valid=lessons.some(l=>l.id===inspectLessonId);
+  if(!valid)setInspectLessonId(lessons[0]?.id||'');
+ },[lessons,inspectLessonId]);
+ useEffect(()=>{
+  if(!inspectLessonId){setInspectState({loading:false,data:null,error:''});return;}
+  let live=true;
+  setInspectState({loading:true,data:null,error:''});
+  inspectLessonQuizPublication(db,inspectLessonId)
+   .then(data=>{if(live)setInspectState({loading:false,data,error:''});})
+   .catch(e=>{if(live)setInspectState({loading:false,data:null,error:fail(e)});});
+  return()=>{live=false;};
+ },[db,inspectLessonId,revision]);
  useEffect(()=>{
   if(!courseId)return;let live=true;setLoading(true);setError('');
   listCourseBank(db,courseId,{search:query,offset,limit:50,domainId:filterDomain||null,difficulty,usage})
@@ -291,6 +307,28 @@ export default function AdminCourseBank({db,courses=[],asp,onUpdate,onDirtyChang
     <strong> Approved + Active + non-Mock</strong> questions publish to the learner Knowledge Check on Save.
     <strong> Draft</strong> links stay hidden until independent approval and publication in Course Builder.
    </p>
+   {!!lessons.length&&<div className="p32-publication-status at-surface" aria-label="Saved Lesson Quiz publication status">
+    <div className="p32-publication-select">
+     <BookOpen size={17}/>
+     <label htmlFor="p32-lesson-picker">Check learner quiz for</label>
+     <select id="p32-lesson-picker" value={inspectLessonId}
+      onChange={e=>setInspectLessonId(e.target.value)}>
+      {lessons.map(l=><option key={l.id} value={l.id}>{l.label}</option>)}
+     </select>
+    </div>
+    {inspectState.loading?<span role="status">Checking actual saved quiz…</span>:
+     inspectState.error?<span className="p32-publication-warning" role="alert">{inspectState.error}</span>:
+     inspectState.data&&<div className="p32-publication-summary" role="status">
+      <strong>{inspectState.data.published} Published</strong>
+      <span>{inspectState.data.pending} Not published</span>
+      {inspectState.data.total===0?<small>No saved questions are linked to this Lesson. Select it in a question row and click Save All Changes.</small>:
+       inspectState.data.published===0?<small>All linked questions are hidden from learners. Drafts need independent approval; approved linked questions can be published in the Lesson Quiz editor.</small>:
+       <small>These published questions should appear to an authorized learner in this Lesson's Knowledge Check.</small>}
+     </div>}
+    <a className="at-outline p32-open-lesson" href={'/builder?courseId='+encodeURIComponent(courseId)+'&lessonId='+encodeURIComponent(inspectLessonId)}
+     target="_blank" rel="noopener noreferrer" aria-label="Open the selected Lesson Quiz editor">
+     Open Lesson Quiz <span aria-hidden="true">↗</span></a>
+   </div>}
    <div className="p30-table-card at-surface">
     <div className="p30-table-top">
      <strong>{selected.title} <span>· {bank.total} results</span></strong>

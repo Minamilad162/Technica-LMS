@@ -173,3 +173,21 @@
  .p30-bulk-actions{flex-basis:100%}
 }
 @media(prefers-reduced-motion:reduce){.p30-switch span,.p30-switch span::before{transition:none}}
+
+/* P32: compact, read-only Lesson Quiz publish-status strip. */
+.p32-publication-status{display:flex;align-items:center;flex-wrap:wrap;gap:12px;
+ padding:12px 14px;border:1px solid #d7e8e5;background:#fafffe}
+.p32-publication-select{display:flex;align-items:center;gap:9px;min-width:0;color:#087c73;font-weight:750;font-size:12px}
+.p32-publication-select select{min-width:125px;max-width:260px;width:clamp(125px,20vw,260px);
+ padding:8px 9px;border:1px solid #d7e7e4;border-radius:8px;background:#fff;color:#265563;font-size:11px}
+.p32-publication-summary{display:flex;align-items:center;gap:8px;flex-wrap:wrap;flex:1;min-width:220px;font-size:11px}
+.p32-publication-summary strong{color:#077c67;background:#e3f8ee;border-radius:9px;padding:7px 9px;white-space:nowrap}
+.p32-publication-summary span{color:#a56f27;background:#fff5e4;border-radius:9px;padding:7px 9px;white-space:nowrap;font-weight:750}
+.p32-publication-summary small{color:#5d7680;line-height:1.45;flex-basis:100%}
+.p32-publication-warning{color:#9f5144;font-size:11px}
+.p32-open-lesson{margin-left:auto;white-space:nowrap;display:flex;align-items:center;gap:5px;padding:9px 11px;font-size:11px}
+.p32-open-lesson:hover{border-color:#10a38b}
+@media(max-width:760px){.p32-publication-status{align-items:stretch}
+ .p32-publication-select,.p32-publication-summary,.p32-open-lesson{flex-basis:100%}
+ .p32-publication-select select{max-width:none;width:100%;flex:1}
+ .p32-open-lesson{justify-content:center}}

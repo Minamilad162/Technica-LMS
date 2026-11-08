@@ -16,6 +16,8 @@ export default function AdminLessonQuizEditor({db,lessonId,courseId}){
  const [picker,setPicker]=useState(false),[search,setSearch]=useState(''),[query,setQuery]=useState('');
  const [page,setPage]=useState(0),[bank,setBank]=useState({items:[],total:0}),[bankLoading,setBankLoading]=useState(false);
  const [domains,setDomains]=useState([]),[domainFilter,setDomainFilter]=useState(''),[difficulty,setDifficulty]=useState('');
+ const publishedCount=items.filter(q=>q.is_published).length;
+ const pendingCount=items.length-publishedCount;
  const reload=async()=>{
   const {data,error}=await db.from('lms_p22_lesson_quiz_questions')
    .select('*').eq('lesson_id',lessonId).order('position',{ascending:true});
@@ -61,7 +63,7 @@ export default function AdminLessonQuizEditor({db,lessonId,courseId}){
    const {error}=await db.from('lms_p22_lesson_quiz_questions')
     .update({is_published:!q.is_published}).eq('id',q.id).eq('lesson_id',lessonId);
    if(error)throw Error(error.message);
-   await reload();setNotice(q.is_published?'Bank question unpublished.':'Bank question published.');
+   await reload();setNotice(q.is_published?'Bank question unpublished.':'Bank question published to eligible learners.');
   }catch(e){setError(e.message||'Only approved non-Mock questions can be published.');}
   finally{setSaving(false);}
  };
@@ -92,13 +94,17 @@ export default function AdminLessonQuizEditor({db,lessonId,courseId}){
  };
  return <section className="p22-admin-quiz">
   <div className="p22-admin-quiz-head"><div><strong><FileQuestion size={16}/> Lesson Knowledge Check</strong>
-   <small>{items.length} questions · Learners must answer every published question</small></div>
+   <small>{publishedCount} published to learners · {pendingCount} not published · {items.length} saved in this Lesson</small></div>
    <div className="p28-quiz-head-actions">
     {courseId&&<button type="button" className="btn" onClick={()=>{setPicker(v=>!v);setEditing(null);}} disabled={saving||loading}><FileQuestion size={14}/> Choose from Course Bank</button>}
 
    </div></div>
   {error&&<p className="live-authoring-alert" role="alert"><AlertCircle size={15}/>{error}</p>}
   {notice&&<p className="live-authoring-success" role="status"><CheckCircle2 size={15}/>{notice}</p>}
+  {items.length>0&&publishedCount===0&&<p className="live-authoring-alert" role="status">
+   This Lesson has saved Quiz questions, but none are published. Learners will see 0 questions.
+   Review the Course Bank question first, then select Publish next to each eligible question below.
+  </p>}
   {picker&&<section className="p28-quiz-picker">
    <form onSubmit={e=>{e.preventDefault();setQuery(search.trim());setPage(0);}}>
     <input placeholder="Search your Course Question Bank" aria-label="Search Course Bank" value={search} onChange={e=>setSearch(e.target.value)}/>
@@ -129,7 +135,7 @@ export default function AdminLessonQuizEditor({db,lessonId,courseId}){
   </section>}
   {loading?<p>Loading quiz questions…</p>:items.length?<div className="p22-admin-quiz-rows">
    {items.map((q,i)=><div key={q.id}>
-    <div><b>{i+1}. {q.prompt}</b><small>{q.bank_question_id?'Course Bank · ':''}{q.is_published?'Published · visible in learner quiz':'Draft · not visible to learners'}</small></div>
+    <div><b>{i+1}. {q.prompt}</b><small>{q.bank_question_id?'Course Bank · ':''}{q.is_published?'Published · visible in learner Knowledge Check':'Not published · learner cannot see it yet'}</small></div>
     {q.bank_question_id?<button type="button" disabled={saving} onClick={()=>publishLinked(q)}>{q.is_published?'Unpublish':'Publish'}</button>:
      <button type="button" disabled={saving} onClick={()=>setEditing({...q,options:[...q.options]})}>Edit</button>}
     <button type="button" disabled={saving} aria-label={'Remove '+q.prompt} onClick={()=>remove(q)}><Trash2 size={14}/></button>

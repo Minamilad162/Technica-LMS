@@ -161,6 +161,9 @@ jobs:
       - name: P31 learner Lesson Quiz published-only P22 fetch, same-page jump and Draft approval gate
         run: npm run test:p31:lesson-quiz
 
+      - name: P32 Admin actual Lesson Quiz published vs Draft read-only diagnostics and deep links
+        run: npm run test:p32:quiz-visibility
+
       - name: P5 native fullscreen and exit policy contracts
         run: npm run test:p5
 
