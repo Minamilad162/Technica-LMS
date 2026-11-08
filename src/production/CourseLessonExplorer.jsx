@@ -302,8 +302,15 @@ export default function CourseLessonExplorer({db,userId='',courseId,courseTitle,
        </section>
        <section id={'cle-quiz-'+selected.id} ref={quizSectionRef} className="cle-activity cle-activity-section" aria-labelledby={'cle-quiz-title-'+selected.id}>
         <div className="cle-activity-title"><h3 id={'cle-quiz-title-'+selected.id}>Knowledge Check</h3><small>{adminPreview?'Admin preview · no answers or scores are submitted':'Answer every question to finish. Incorrect answers still count as completing the activity.'}</small></div>
-        {lessonError&&<p className="cle-error" role="alert">{lessonError}</p>}
-        {!questions.length?<div className="cle-notice cle-notice-compact"><CheckCircle2 size={20}/> No Knowledge Check has been published for this lesson.</div>:
+        {quizError&&<p className="cle-error" role="alert">{quizError}</p>}
+        <div className="cle-quiz-tools">
+         <span>{adminPreview?'Draft + published preview':questions.length+' published question'+(questions.length===1?'':'s')}</span>
+         <button type="button" onClick={()=>void refreshLessonQuiz()}
+          disabled={quizLoading} aria-label="Refresh Lesson Quiz from published Course Question Bank">
+          {quizLoading?'Refreshing…':'Refresh questions'}</button>
+        </div>
+        {quizLoading&&!questions.length?<div className="cle-notice cle-notice-compact" role="status">Loading the published Knowledge Check…</div>:
+        !questions.length?<div className="cle-notice cle-notice-compact"><CheckCircle2 size={20}/> No published Knowledge Check questions are available for this lesson yet.</div>:
         quizResult?<div className="cle-quiz-result"><CheckCircle2 size={30}/><h3>Knowledge Check completed</h3>
          <p>You answered all {questions.length} questions. Your score is {quizResult.scorePercent}%.</p>
          <button type="button" onClick={()=>{setAnswers({});setQuizResult(null);}}>Try again</button></div>:
@@ -315,7 +322,7 @@ export default function CourseLessonExplorer({db,userId='',courseId,courseTitle,
         </fieldset>)}
         {adminPreview?<div className="cle-notice cle-notice-compact" role="note">
           Preview only · Quiz submission and learner progress are disabled.</div>:
-         <button className="cle-submit" type="button" disabled={!!saving||questions.some(q=>!Number.isInteger(answers[q.id]))}
+         <button className="cle-submit" type="button" disabled={!!saving||quizLoading||questions.some(q=>!Number.isInteger(answers[q.id]))}
           onClick={submitQuiz}>Submit all answers <ArrowRight size={16}/></button>}</div>}
        </section>
       </div>}
