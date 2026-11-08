@@ -67,7 +67,7 @@ const css=read('src/production/premiumMyLearning.css');
 assert(workspace.includes('screen===\'learning\'?<PremiumMyLearning'));
 assert(workspace.includes('activeCourses={enrolled} demoCourses={demoCourses}'));
 assert(workspace.includes("onPractice={openPractice} onHistory={openHistory}"));
-assert(portal.includes("onPracticeRoute={()=>navigate('/practice')}"));
+assert(portal.includes("onPracticeRoute={()=>navigate('/assessments?tab=practice')}"));
 assert(portal.includes("onHistoryRoute={()=>navigate('/my-practice')}"));
 assert(jsx.includes('Active Enrollments')&&jsx.includes('Demo Previews'));
 assert(jsx.includes('Verified Supabase access'));

@@ -155,6 +155,9 @@ jobs:
       - name: P38 premium Subscription Plans UI and real-price presentation
         run: npm run test:p38:subscription-ui
 
+      - name: P39 unified Mock Exam and Practice menu with real P10 200/5h delivery
+        run: npm run test:p39:exam-practice
+
       - name: P22 premium course/lesson grid, verified progress and Admin quiz contracts
         run: npm run test:p22:learning
 

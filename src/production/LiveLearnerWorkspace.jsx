@@ -5,6 +5,7 @@ import {ArrowLeft,ArrowRight,BookOpen,BookOpenCheck,CheckCircle2,ChevronDown,Che
 import {getLearnerProgress} from './learnerProgressApi.js';
 const CourseLessonExplorer=React.lazy(()=>import('./CourseLessonExplorer.jsx'));
 const LivePractice=React.lazy(()=>import('./LivePractice.jsx'));
+const LiveMockExam=React.lazy(()=>import('./LiveMockExam.jsx'));
 import {fetchP15Catalog,fetchP15Outline,hasLocalDemoCheckout,
  isFullCourseEnrolled,localCheckoutEnabled,recordLocalDemoCheckout} from './learnerJourneyApi.js';
 import {loadStructure} from './lmsApi.js';
@@ -14,6 +15,7 @@ import {LearnerCourseCard,CourseDetailHero} from './LearnerCourseCard.jsx';
 const PremiumMyLearning=React.lazy(()=>import('./PremiumMyLearning.jsx'));
 const QualificationsWorkspace=React.lazy(()=>import('../qualification/QualificationsWorkspace.jsx'));
 import './liveLearnerJourney.css';
+import './liveExamPracticeHub.css';
 import SubscriptionCountdown from './SubscriptionCountdown.jsx';
 
 const nav=[
@@ -21,7 +23,7 @@ const nav=[
  {id:'learning',label:'My Learning',icon:BookOpenCheck,group:'Learning'},
  {id:'qualifications',label:'Qualifications',icon:GraduationCap,group:'Learning'},
  {id:'subscription',label:'Subscription',icon:ShoppingBag,group:'Learning'},
- {id:'practice',label:'Practice',icon:Target,group:'Exam Preparation'},
+ {id:'practice',label:'Mock Exam & Practice',icon:Target,group:'Exam Preparation'},
  {id:'history',label:'My Practice',icon:ClipboardCheck,group:'Exam Preparation'}
 ];
 const formatDate=d=>d&&Number.isFinite(Date.parse(d))?new Date(d).toLocaleDateString('en-GB'):'—';
@@ -38,7 +40,8 @@ export default function LiveLearnerWorkspace({db,user,onSignOut,embedded=false,
   [activeLesson,setActiveLesson]=useState(null),
   [demoRevision,setDemoRevision]=useState(0),[practiceId,setPracticeId]=useState(''),[historyId,setHistoryId]=useState(''),
   [practiceTree,setPracticeTree]=useState([]),[practiceError,setPracticeError]=useState(''),
-  [report,setReport]=useState(null),[reportError,setReportError]=useState(''),[reportLoading,setReportLoading]=useState(false);
+  [report,setReport]=useState(null),[reportError,setReportError]=useState(''),[reportLoading,setReportLoading]=useState(false),
+  [preparationTab,setPreparationTab]=useState('practice');
  const refresh=()=>setRevision(x=>x+1);
  useEffect(()=>{
   let live=true;setLoading(true);setError('');
@@ -58,6 +61,7 @@ export default function LiveLearnerWorkspace({db,user,onSignOut,embedded=false,
  const courseStatus=c=>isFullCourseEnrolled(catalog?.entitlements,c.id,catalog?.subscription)?'real':
   demoCourses.some(d=>d.id===c.id)?'demo':'available';
  const chosen=catalog?.courses.find(c=>c.id===selectedId);
+ const officialAsp=catalog?.courses.find(c=>c.slug==='asp')||null;
  const full=chosen&&isFullCourseEnrolled(catalog?.entitlements,chosen.id,catalog?.subscription);
  const demoChosen=chosen&&!full&&(hasSimulatedEnrollment(user.id,chosen.id)||
   (localCheckoutEnabled()&&hasLocalDemoCheckout(user.id,chosen.id)));
@@ -106,7 +110,7 @@ export default function LiveLearnerWorkspace({db,user,onSignOut,embedded=false,
  };
  const checkoutCompleted=()=>setDemoRevision(v=>v+1);
  const openPractice=()=>{
-  if(embedded&&onPracticeRoute){onPracticeRoute();return;}go('practice');
+  if(embedded&&onPracticeRoute){onPracticeRoute();return;}setPreparationTab('practice');go('practice');
  };
  const openHistory=()=>{
   if(embedded&&onHistoryRoute){onHistoryRoute();return;}go('history');
@@ -115,7 +119,7 @@ export default function LiveLearnerWorkspace({db,user,onSignOut,embedded=false,
   screen==='qualifications'?'My Qualifications':
   screen==='subscription'||screen==='checkout'?'Subscription Plans':
   screen==='course'?'Course Overview':
-  screen==='practice'?'Practice Center':'My Practice';
+  screen==='practice'?'Mock Exam & Practice':'My Practice';
  return <div className={"lj-shell"+(embedded?" lj-embedded":"")+(screen==="qualifications"?" lj-qualification-mode":"")}>
   <header className="lj-top"><div className="lj-logo"><img alt="Technica Consult" src="/images/technica-logo.webp"/>
    <b>TECHNICA CONSULT <span>LMS</span></b></div><SubscriptionCountdown subscription={catalog?.subscription} loading={loading} error={catalog?.subscriptionError||(!loading&&!catalog?'Subscription status unavailable':'')} onOpenPlans={()=>go('subscription')}/><div className="lj-account">
@@ -130,7 +134,7 @@ export default function LiveLearnerWorkspace({db,user,onSignOut,embedded=false,
    <small className="lj-nav-label">EXAM PREPARATION</small>
    {nav.filter(x=>x.group==='Exam Preparation').map(({id,label,icon:Icon})=>
     <button key={id} type="button" className={screen===id?'active':''}
-     aria-current={screen===id?'page':undefined} onClick={()=>go(id)}>
+     aria-current={screen===id?'page':undefined} onClick={()=>id==='practice'?openPractice():go(id)}>
      <Icon size={18}/><span>{label}</span></button>)}
    <div className="lj-nav-note"><ShieldCheck size={17}/> Course access and exam scores are verified by Supabase, not browser flags.</div>
   </aside>
@@ -140,7 +144,7 @@ export default function LiveLearnerWorkspace({db,user,onSignOut,embedded=false,
       screen==='learning'?'Your subscribed courses and verified progress are gathered here.':
       screen==='course'?'Course → Domain → Topic → Lesson. One subscription unlocks all published content.':
       screen==='subscription'||screen==='checkout'?'Choose a membership term. Activation requires verified Admin approval.':
-      screen==='practice'?'Train with protected questions and difficulty modes.':
+      screen==='practice'?'Customize your Practice, or take the fixed 200-question, 5-hour ASP Mock.':
       'Your own verified practice and Mock results.'}</p></div>
    <button type="button" className="lj-quiet" disabled={loading} onClick={refresh}><RefreshCw size={16}/> Refresh</button>
   </div>}
@@ -184,6 +188,16 @@ export default function LiveLearnerWorkspace({db,user,onSignOut,embedded=false,
     </div>
    </div>:
    screen==='practice'?<div className="lj-practice">
+    <div className="lep-tabs" role="tablist" aria-label="Exam preparation mode">
+     <button type="button" role="tab" id="lj-prep-practice" aria-controls="lj-prep-panel"
+      aria-selected={preparationTab==='practice'} className={preparationTab==='practice'?'lep-tab-active':''}
+      onClick={()=>setPreparationTab('practice')}><Target size={21}/><span><strong>Practice</strong><small>Custom questions and time</small></span></button>
+     <button type="button" role="tab" id="lj-prep-mock" aria-controls="lj-prep-panel"
+      aria-selected={preparationTab==='mock'} className={preparationTab==='mock'?'lep-tab-active':''}
+      onClick={()=>setPreparationTab('mock')}><GraduationCap size={23}/><span><strong>Mock Exam</strong><small>200 questions · 5 hours</small></span></button>
+    </div>
+    <div id="lj-prep-panel" role="tabpanel" aria-labelledby={'lj-prep-'+preparationTab}>
+    {preparationTab==='practice'?<>
     <div className="lj-section-head"><h2>Choose your course</h2><p>Quick 10, Timed Quiz, Build Your Own, Domain Practice and adaptive Level Up are available in the secure engine.</p></div>
     {!enrolled.length?<div className="lj-empty"><LockKeyhole size={24}/><b>Practice requires an active platform subscription</b><p>Preview lessons do not unlock protected question banks. One platform subscription opens published Practice and Assessments.</p><button className="lj-primary" onClick={()=>go('courses')}>Explore Courses <ArrowRight size={16}/></button></div>:
      <><label className="lj-picker">Enrolled course<select value={practiceId} onChange={e=>setPracticeId(e.target.value)}>
@@ -192,7 +206,12 @@ export default function LiveLearnerWorkspace({db,user,onSignOut,embedded=false,
       {enrolled.find(c=>c.id===practiceId)&&<LivePractice key={user.id+'-'+practiceId}
        db={db} user={user} course={enrolled.find(c=>c.id===practiceId)}
        domains={practiceTree} access={true} defaultMode="quick10"/>}
-     </>}
+     </>}</>:
+      !officialAsp?<div className="lj-empty"><LockKeyhole size={24}/><b>Official ASP Mock unavailable</b>
+       <p>The 200 reserved questions must be configured in the real ASP Course Question Bank.</p></div>:
+      <LiveMockExam key={user.id+'-'+officialAsp.id} db={db} user={user} course={officialAsp}
+       access={!!catalog.identity?.isAdmin||isFullCourseEnrolled(catalog.entitlements,officialAsp.id,catalog.subscription)}/>}
+    </div>
    </div>:
    <div className="lj-history"><h2>My Practice History</h2>
     {!!enrolled.length&&<label className="lj-picker">Course<select value={historyId} onChange={e=>setHistoryId(e.target.value)}>

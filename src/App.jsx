@@ -24,7 +24,7 @@ const AdminCoursePreview=React.lazy(()=>import('./production/AdminCoursePreview.
 const QualificationsWorkspace=React.lazy(()=>import('./qualification/QualificationsWorkspace.jsx'));
 const LiveLearnerProgress=React.lazy(()=>import('./production/LiveLearnerProgress'));
 const LiveReleaseReadiness=React.lazy(()=>import('./production/LiveReleaseReadiness'));
-const AssessmentOverview=React.lazy(()=>import('./pages/AssessmentOverview'));
+const LiveExamPracticeHub=React.lazy(()=>import('./production/LiveExamPracticeHub.jsx'));
 const ResultsPage=React.lazy(()=>import('./pages/ResultsPage'));
 const PracticeResultsPage=React.lazy(()=>import('./pages/PracticeResultsPage'));
 const LearnersPage=React.lazy(()=>import('./pages/LearnersPage'));
@@ -80,9 +80,9 @@ export default function App(){
  <Route path="/my-progress" element={<RoutePage><LiveLearnerProgress/></RoutePage>}/>
  <Route path="/learning/course/:courseId" element={<RoutePage><LiveLearningCourse/></RoutePage>}/>
  <Route path="/learning/process-safety-foundations" element={<RoutePage><LegacyPreviewWarning><LearningPlayer/></LegacyPreviewWarning></RoutePage>}/>
- <Route path="/practice" element={<RoutePage>{legacyPreview?<LegacyPreviewWarning><PracticePage/></LegacyPreviewWarning>:<LiveLearnerPortal initialScreen="practice"/>}</RoutePage>}/>
+ <Route path="/practice" element={legacyBrowserQa?<RoutePage><LegacyPreviewWarning><PracticePage/></LegacyPreviewWarning></RoutePage>:<Navigate to="/assessments?tab=practice" replace/>}/>
  <Route path="/practice/live" element={<RoutePage standalone><LivePracticePortal/></RoutePage>}/>
- <Route path="/practice/session" element={<RoutePage standalone><QuizPage kind="practice"/></RoutePage>}/>
+ <Route path="/practice/session" element={legacyBrowserQa?<RoutePage standalone><QuizPage kind="practice"/></RoutePage>:<Navigate to="/assessments?tab=practice" replace/>}/>
  <Route path="/admin-tools" element={<AdminOnly><RoutePage><AdminToolsPortal/></RoutePage></AdminOnly>}/>
  <Route path="/admin/course-preview/:courseId" element={<AdminOnly><RoutePage><AdminCoursePreview/></RoutePage></AdminOnly>}/>
  <Route path="/analytics" element={<AdminOnly><RoutePage><AnalyticsPage/></RoutePage></AdminOnly>}/>
@@ -90,9 +90,9 @@ export default function App(){
  <Route path="/courses" element={<AdminOnly><RoutePage>{legacyPreview?(legacyBrowserQa?<CoursesPage/>:<LegacyPreviewWarning><CoursesPage/></LegacyPreviewWarning>):<LiveCoursesPage/>}</RoutePage></AdminOnly>}/>
  <Route path="/reports" element={<AdminOnly><RoutePage><AnalyticsPage/></RoutePage></AdminOnly>}/>
  <Route path="/release-readiness" element={<AdminOnly><RoutePage><LiveReleaseReadiness/></RoutePage></AdminOnly>}/>
- <Route path="/assessments" element={<RoutePage><AssessmentOverview/></RoutePage>}/>
+ <Route path="/assessments" element={<RoutePage><LiveExamPracticeHub/></RoutePage>}/>
  <Route path="/assessments/mock/live" element={<RoutePage standalone><LiveMockPortal/></RoutePage>}/>
- <Route path="/assessments/take" element={<RoutePage standalone><QuizPage kind="assessment"/></RoutePage>}/>
+ <Route path="/assessments/take" element={legacyBrowserQa?<RoutePage standalone><QuizPage kind="assessment"/></RoutePage>:<Navigate to="/assessments?tab=mock" replace/>}/>
  <Route path="/results" element={<RoutePage><ResultsPage/></RoutePage>}/>
  <Route path="/practice/results" element={<RoutePage><PracticeResultsPage/></RoutePage>}/>
  <Route path="/learners" element={<AdminOnly><RoutePage><LearnersPage/></RoutePage></AdminOnly>}/>

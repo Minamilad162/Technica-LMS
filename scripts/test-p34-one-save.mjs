@@ -26,8 +26,7 @@ assert(!bank.includes('>Review Draft questions</button>'),'No Review Draft step 
 assert(!bank.includes('Draft link(s) require question approval AND publishing'),'No extra Draft step on Save');
 has(editor,'publishBankLessonQuiz(db,lessonId,q.id)','P34 editor direct publish');
 has(learner,"if(key==='quiz')void refreshLessonQuiz()",'Learner selected Quiz refresh');
-for(const key of ['LiveSelectedMockExam','Selected Mock Test','Official ASP 200',
- 'selected?<LiveSelectedMockExam','catalog.courses.map'])
+for(const key of ['LiveMockExam','ASP Official Mock Exam','Exactly 200 questions selected'])
  has(portal,key,'P34 Mock UI');
 for(const key of ['getSelectedMockReadiness(db,course.id)','startSelectedMock(db,course.id,requestId)',
  'saveSelectedMock(db,attempt.attemptId','submitSelectedMock(db,attempt.attemptId)',

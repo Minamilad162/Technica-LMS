@@ -206,3 +206,12 @@
 .p34-release-option input{width:18px;height:18px;accent-color:#0b9b81;flex-shrink:0}
 .p34-release-option input:disabled{opacity:.45;cursor:not-allowed}
 .p34-release-option:focus-within{outline:2px solid #0d9982;outline-offset:4px;border-radius:6px}
+
+/* P39: public-mode distinction: staged Mock candidate != P9B's locked official 200. */
+.p39-official-mock-status{display:flex;align-items:flex-start;gap:11px;
+ margin:13px 0;padding:13px 16px;border-radius:13px;
+ border:1px solid #a6dccd;background:linear-gradient(100deg,#e7f9f1,#fafffd);
+ color:#185d55}
+.p39-official-mock-status>svg{flex:0 0 auto;margin-top:2px;color:#088e78}
+.p39-official-mock-status strong{font-size:12px;font-weight:850}
+.p39-official-mock-status p{margin:4px 0 0;font-size:11px;line-height:1.65;color:#587b77}
