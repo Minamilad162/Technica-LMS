@@ -17,6 +17,7 @@ const QualificationsWorkspace=React.lazy(()=>import('../qualification/Qualificat
 import './liveLearnerJourney.css';
 import './liveExamPracticeHub.css';
 import SubscriptionCountdown from './SubscriptionCountdown.jsx';
+import {aspMissingReason} from './questionBankCourseSelection.js';
 
 const nav=[
  {id:'courses',label:'Courses',icon:BookOpen,group:'Learning'},
@@ -47,22 +48,22 @@ export default function LiveLearnerWorkspace({db,user,onSignOut,embedded=false,
   let live=true;setLoading(true);setError('');
   fetchP15Catalog(db,user).then(x=>{if(live){setCatalog(x);
     setSelectedId(old=>x.courses.some(c=>c.id===old)?old:'');
-    setPracticeId(old=>x.courses.some(c=>c.id===old&&isFullCourseEnrolled(x.entitlements,c.id,x.subscription))?
-     old:(x.courses.find(c=>isFullCourseEnrolled(x.entitlements,c.id,x.subscription))?.id||''));
+    setPracticeId(old=>x.courses.some(c=>c.id===old&&(x.openAccess||isFullCourseEnrolled(x.entitlements,c.id,x.subscription)))?
+     old:(x.courses.find(c=>x.openAccess||isFullCourseEnrolled(x.entitlements,c.id,x.subscription))?.id||''));
     setHistoryId(old=>x.courses.some(c=>c.id===old&&isFullCourseEnrolled(x.entitlements,c.id,x.subscription))?
-     old:(x.courses.find(c=>isFullCourseEnrolled(x.entitlements,c.id,x.subscription))?.id||''));}})
+     old:(x.courses.find(c=>x.openAccess||isFullCourseEnrolled(x.entitlements,c.id,x.subscription))?.id||''));}})
    .catch(e=>{if(live){setCatalog(null);setError(e.message||'Course catalog unavailable.');}})
    .finally(()=>{if(live)setLoading(false);});
   return()=>{live=false;};
  },[db,user.id,revision]);
- const enrolled=catalog?.courses.filter(c=>isFullCourseEnrolled(catalog.entitlements,c.id,catalog.subscription))||[];
- const demoCourses=catalog?.courses.filter(c=>!isFullCourseEnrolled(catalog.entitlements,c.id,catalog.subscription)&&(
+ const enrolled=catalog?.courses.filter(c=>catalog.openAccess||isFullCourseEnrolled(catalog.entitlements,c.id,catalog.subscription))||[];
+ const demoCourses=catalog?.openAccess?[]:catalog?.courses.filter(c=>!isFullCourseEnrolled(catalog.entitlements,c.id,catalog.subscription)&&(
   hasSimulatedEnrollment(user.id,c.id)||(localCheckoutEnabled()&&hasLocalDemoCheckout(user.id,c.id))))||[];
- const courseStatus=c=>isFullCourseEnrolled(catalog?.entitlements,c.id,catalog?.subscription)?'real':
+ const courseStatus=c=>catalog?.openAccess||isFullCourseEnrolled(catalog?.entitlements,c.id,catalog?.subscription)?'real':
   demoCourses.some(d=>d.id===c.id)?'demo':'available';
  const chosen=catalog?.courses.find(c=>c.id===selectedId);
  const officialAsp=catalog?.courses.find(c=>c.slug==='asp')||null;
- const full=chosen&&isFullCourseEnrolled(catalog?.entitlements,chosen.id,catalog?.subscription);
+ const full=chosen&&(catalog?.openAccess||isFullCourseEnrolled(catalog?.entitlements,chosen.id,catalog?.subscription));
  const demoChosen=chosen&&!full&&(hasSimulatedEnrollment(user.id,chosen.id)||
   (localCheckoutEnabled()&&hasLocalDemoCheckout(user.id,chosen.id)));
  const allowedLesson=lesson=>!!full||lesson.isFreeIntro||!!demoChosen;
@@ -85,7 +86,7 @@ export default function LiveLearnerWorkspace({db,user,onSignOut,embedded=false,
   if(screen!=='history'||!enrolled.some(c=>c.id===historyId)){setReport(null);setReportError('');return;}
   let live=true;setReportLoading(true);setReport(null);setReportError('');
   getLearnerProgress(db,historyId).then(x=>{if(live)setReport(x);})
-   .catch(()=>{if(live)setReportError('Verified Practice history requires the P11 backend. No demo scores are shown.');})
+   .catch(()=>{if(live)setReportError('Your practice results are temporarily unavailable.');})
    .finally(()=>{if(live)setReportLoading(false);});
   return()=>{live=false;};
  },[screen,db,historyId,enrolled.length,revision]);
@@ -122,8 +123,8 @@ export default function LiveLearnerWorkspace({db,user,onSignOut,embedded=false,
   screen==='practice'?'Mock Exam & Practice':'My Practice';
  return <div className={"lj-shell"+(embedded?" lj-embedded":"")+(screen==="qualifications"?" lj-qualification-mode":"")}>
   <header className="lj-top"><div className="lj-logo"><img alt="Technica Consult" src="/images/technica-logo.webp"/>
-   <b>TECHNICA CONSULT <span>LMS</span></b></div><SubscriptionCountdown subscription={catalog?.subscription} loading={loading} error={catalog?.subscriptionError||(!loading&&!catalog?'Subscription status unavailable':'')} onOpenPlans={()=>go('subscription')}/><div className="lj-account">
-    <span><ShieldCheck size={14}/> {catalog?.subscription?'Platform Subscriber':'Secure learning'}</span><small>{user.email}</small>
+   <b>TECHNICA CONSULT <span>LMS</span></b></div><SubscriptionCountdown subscription={catalog?.subscription} openAccess={catalog?.openAccess===true} loading={loading} error={catalog?.subscriptionError||(!loading&&!catalog?'Subscription status unavailable':'')} onOpenPlans={()=>go('subscription')}/><div className="lj-account">
+    <span><ShieldCheck size={14}/> {catalog?.openAccess?'Learning access':catalog?.subscription?'Platform Subscriber':'Secure learning'}</span><small>{user.email}</small>
     <button type="button" onClick={onSignOut}><LogOut size={16}/> Sign out</button></div></header>
   <div className="lj-layout"><aside className="lj-nav" aria-label="Learner navigation">
    <small className="lj-nav-label">LEARNING</small>
@@ -136,14 +137,14 @@ export default function LiveLearnerWorkspace({db,user,onSignOut,embedded=false,
     <button key={id} type="button" className={screen===id?'active':''}
      aria-current={screen===id?'page':undefined} onClick={()=>id==='practice'?openPractice():go(id)}>
      <Icon size={18}/><span>{label}</span></button>)}
-   <div className="lj-nav-note"><ShieldCheck size={17}/> Course access and exam scores are verified by Supabase, not browser flags.</div>
+   
   </aside>
   <main className="lj-main">{screen!=="qualifications"&&<div className="lj-heading">
    <div><span className="lj-eyebrow">TECHNICA LEARNING PLATFORM</span>
-    <h1>{screenTitle}</h1><p>{screen==='courses'?'Browse published courses. One active platform subscription unlocks them all.':
-      screen==='learning'?'Your subscribed courses and verified progress are gathered here.':
-      screen==='course'?'Course → Domain → Topic → Lesson. One subscription unlocks all published content.':
-      screen==='subscription'||screen==='checkout'?'Choose a membership term. Activation requires verified Admin approval.':
+    <h1>{screenTitle}</h1><p>{screen==='courses'?'Explore published courses and start learning.':
+      screen==='learning'?'Your courses, progress and next lessons in one place.':
+      screen==='course'?'Your course content, organized for focused learning.':
+      screen==='subscription'||screen==='checkout'?'Discover our learning plans.':
       screen==='practice'?'Customize your Practice, or take the fixed 200-question, 5-hour ASP Mock.':
       'Your own verified practice and Mock results.'}</p></div>
    <button type="button" className="lj-quiet" disabled={loading} onClick={refresh}><RefreshCw size={16}/> Refresh</button>
@@ -154,28 +155,28 @@ export default function LiveLearnerWorkspace({db,user,onSignOut,embedded=false,
    !catalog?<div className="lj-empty">Course catalog is unavailable. Check your LMS session.</div>:
    screen==='courses'?<section className="lj-grid" aria-label="Published courses">
     {catalog.courses.map(c=><LearnerCourseCard key={c.id} course={c} db={db}
-     status={courseStatus(c)} onOpen={()=>openCourse(c.id)} onEnroll={()=>startCheckout(c.id)}/>)}
+     status={courseStatus(c)} openAccess={catalog?.openAccess===true} onOpen={()=>openCourse(c.id)} onEnroll={()=>startCheckout(c.id)}/>)}
     {!catalog.courses.length&&<div className="lj-empty"><BookOpen size={28}/>
      <b>No published courses yet</b><p>Once an Admin publishes a Course, it appears here automatically.</p></div>}
    </section>:
    screen==='learning'?<PremiumMyLearning db={db} user={user}
-    activeCourses={enrolled} demoCourses={demoCourses} subscription={catalog?.subscription}
+    activeCourses={enrolled} demoCourses={demoCourses} subscription={catalog?.subscription} openAccess={catalog?.openAccess===true}
     refreshKey={revision} onSubscribe={()=>go('subscription')}
     onOpen={openCourse} onBrowse={()=>go('courses')}
     onPractice={openPractice} onHistory={openHistory}/>:
    screen==='subscription'||screen==='checkout'?<SubscriptionPlans
     db={db} user={user} subscription={catalog?.subscription}
-    subscriptionError={catalog?.subscriptionError||''}
+    subscriptionError={catalog?.subscriptionError||''} openAccess={catalog?.openAccess===true}
     onBack={()=>go('courses')} onRefresh={refresh} onMyLearning={openLearning}/>:
    screen==='course'? !chosen?<div className="lj-empty">Choose a published course from Courses.</div>:
    <div className="lj-course">
     <div className="lj-course-actions"><button className="lj-quiet" type="button" onClick={()=>go('courses')}>
      <ArrowLeft size={16}/> All Courses</button>
-     {full?<span className="lj-enrolled"><CheckCircle2 size={16}/> Verified enrollment</span>:
+     {full?<span className="lj-enrolled"><CheckCircle2 size={16}/> {catalog?.openAccess?'Course available':'Verified enrollment'}</span>:
       demoChosen?<span className="lcc-access-status lcc-status-demo"><ShieldCheck size={15}/> Demo Access · No Charge</span>:
       <span className="lcc-access-status lcc-status-available"><LockKeyhole size={15}/> Subscription required</span>}
     </div>
-    <CourseDetailHero db={db} course={chosen} status={full?'real':demoChosen?'demo':'available'}
+    <CourseDetailHero db={db} course={chosen} status={full?'real':demoChosen?'demo':'available'} openAccess={catalog?.openAccess===true}
      onEnroll={()=>startCheckout(chosen.id)}
      onContinue={()=>syllabusRef.current?.scrollIntoView({behavior:'smooth',block:'start'})}/>
     <div className="lcc-syllabus" ref={syllabusRef}>
@@ -199,8 +200,8 @@ export default function LiveLearnerWorkspace({db,user,onSignOut,embedded=false,
     <div id="lj-prep-panel" role="tabpanel" aria-labelledby={'lj-prep-'+preparationTab}>
     {preparationTab==='practice'?<>
     <div className="lj-section-head"><h2>Choose your course</h2><p>Quick 10, Timed Quiz, Build Your Own, Domain Practice and adaptive Level Up are available in the secure engine.</p></div>
-    {!enrolled.length?<div className="lj-empty"><LockKeyhole size={24}/><b>Practice requires an active platform subscription</b><p>Preview lessons do not unlock protected question banks. One platform subscription opens published Practice and Assessments.</p><button className="lj-primary" onClick={()=>go('courses')}>Explore Courses <ArrowRight size={16}/></button></div>:
-     <><label className="lj-picker">Enrolled course<select value={practiceId} onChange={e=>setPracticeId(e.target.value)}>
+    {!enrolled.length?<div className="lj-empty"><LockKeyhole size={24}/><b>Practice is not available yet</b><p>No accessible courses are published. Contact the LMS administrator.</p><button className="lj-primary" onClick={()=>go('courses')}>Explore Courses <ArrowRight size={16}/></button></div>:
+     <><label className="lj-picker">Course<select value={practiceId} onChange={e=>setPracticeId(e.target.value)}>
       {enrolled.map(c=><option value={c.id} key={c.id}>{c.title}</option>)}</select></label>
       {practiceError&&<p className="lj-error">{practiceError}</p>}
       {enrolled.find(c=>c.id===practiceId)&&<LivePractice key={user.id+'-'+practiceId}
@@ -208,15 +209,15 @@ export default function LiveLearnerWorkspace({db,user,onSignOut,embedded=false,
        domains={practiceTree} access={true} defaultMode="quick10"/>}
      </>}</>:
       !officialAsp?<div className="lj-empty"><LockKeyhole size={24}/><b>Official ASP Mock unavailable</b>
-       <p>The 200 reserved questions must be configured in the real ASP Course Question Bank.</p></div>:
+       <p>{aspMissingReason(catalog.courses)}</p></div>:
       <LiveMockExam key={user.id+'-'+officialAsp.id} db={db} user={user} course={officialAsp}
-       access={!!catalog.identity?.isAdmin||isFullCourseEnrolled(catalog.entitlements,officialAsp.id,catalog.subscription)}/>}
+       access={!!catalog.identity?.isAdmin||catalog.openAccess===true||isFullCourseEnrolled(catalog.entitlements,officialAsp.id,catalog.subscription)}/>}
     </div>
    </div>:
    <div className="lj-history"><h2>My Practice History</h2>
     {!!enrolled.length&&<label className="lj-picker">Course<select value={historyId} onChange={e=>setHistoryId(e.target.value)}>
       {enrolled.map(c=><option value={c.id} key={c.id}>{c.title}</option>)}</select></label>}
-    {!enrolled.length?<div className="lj-empty">Your practice history appears here after real enrollment and graded sessions.</div>:
+    {!enrolled.length?<div className="lj-empty">Your practice history will appear after your first completed session.</div>:
      reportLoading?<div className="lj-empty" role="status">Loading your verified results…</div>:
      reportError?<div className="lj-empty" role="alert">{reportError}</div>:
      report?<><div className="lj-history-stats"><div><small>Completed practice sessions</small><strong>{report.practice.attempts}</strong></div>
@@ -226,7 +227,7 @@ export default function LiveLearnerWorkspace({db,user,onSignOut,embedded=false,
        <b>{modeLabel[a.mode]||a.mode}</b><span>{formatDate(a.submittedAt)}</span>
        <strong>{a.correctCount} / {a.questionCount} · {a.scorePercent}%</strong></div>)}
        {!report.recentAttempts.length&&<p>No graded Practice or Mock attempts yet.</p>}</div>
-      <p className="lj-muted">History is read from your own protected P11 report. No estimated scores or browser-local grade records.</p>
+      
      </>:<div className="lj-empty">Choose an enrolled course to see verified history.</div>}
    </div>}
   </React.Suspense>
