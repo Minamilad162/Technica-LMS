@@ -1,3 +1,9 @@
+## 2026-11-09 — P42 fix for missing ASP Mock selected questions
+- Show actual saved Mock Exam selections across Question Bank pagination as N/200; auto-preflight only when exactly 200 are saved. Preserve explicit rights review and Admin confirmation before immutable P9B reservation.
+- Allow verified Admin to repair one existing ASP Course's noncanonical slug without new Course creation or moving question IDs; reject ambiguous/duplicate ASP records. Publication remains a separate Admin action.
+- Distinguish unpublished/incorrect ASP in learner Mock; preserve protected P10 fixed 200 questions/300 minutes. Added read-only database inventory, new P42 test and updated Master Blueprint.
+- Source-only update: no live Supabase mutation, no paid/permissions changes, no automatic final reservation.
+
 ## 2026-11-08 — P41 production-facing copy and temporary open learning access
 - Add server-owned, Admin-audited/reversible `Open Access` commercial mode: all active authenticated learners may view **published** Courses/Lessons/Quiz/media, approved Practice and ready official ASP 200-question/300-minute Mock without subscription. Keep nonpublished/review/Mock security gates and existing memberships untouched.
 - Subscription Plans design remains with verified pricing but disabled requests and Coming soon CTA while open; Admin Tools → Subscriptions includes protected switch to restore original paywall later. Header and learner cards show available learning, not fake days-left subscriptions. Remove visible old demo/reset/staging explanations from core pages; keep meaningful admin technical diagnostics.

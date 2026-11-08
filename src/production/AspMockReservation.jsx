@@ -14,6 +14,19 @@ export default function AspMockReservation({db,course,ids=[],onReserved}){
  useEffect(()=>{
   req.current+=1;setPreview(null);setPhrase('');setError('');setSuccess(null);
  },[course?.id,signature,db]);
+ // As soon as the saved selection reaches 200, perform ONLY the read-only
+ // P9B rights / answer / ASP-domain preflight. Final reservation still needs
+ // the typed phrase plus a separate explicit Admin confirmation.
+ useEffect(()=>{
+  if(course?.slug!=='asp'||selected.length!==200)return;
+  let live=true;const serial=++req.current;
+  setBusy(true);setPreview(null);setError('');
+  previewAspMockReservation(db,course.id,selected).then(result=>{
+   if(live&&serial===req.current)setPreview(result);
+  }).catch(e=>{if(live&&serial===req.current)setError(message(e));})
+   .finally(()=>{if(live&&serial===req.current)setBusy(false);});
+  return()=>{live=false;req.current++;};
+ },[db,course?.id,signature]);
  if(course?.slug!=='asp')return null;
  const check=async()=>{
   const serial=++req.current;setBusy(true);setPreview(null);setError('');
@@ -50,6 +63,7 @@ export default function AspMockReservation({db,course,ids=[],onReserved}){
     <strong>{preview.ready?'All selected items qualify':'Reservation blocked'}</strong>
     <span>Eligible {preview.verifiedEligible}/200 · Unique {preview.distinctSelected}/200 · Existing Mock flags {preview.existingReserved} · Official ASP11 domains {preview.officialDomainCount}/9</span>
     <span>Low {preview.low} · Medium {preview.medium} · High {preview.high} (this is not a required Mock difficulty split).</span>
+    {!preview.ready&&<span>Open the ASP rights review in Question Bank and complete all 200 human answer checks, content-rights checks, difficulty classifications and official ASP11 domain mappings before reserving.</span>}
    </div>}
    {preview?.ready&&<div className="p9b-confirm">
     <label>Type <strong>{PHRASE}</strong> to authorize this irreversible reservation

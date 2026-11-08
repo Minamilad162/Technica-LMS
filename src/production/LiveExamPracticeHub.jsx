@@ -148,6 +148,12 @@ export default function LiveExamPracticeHub(){
     </>:!officialAsp?<div className="live-learning-empty"><LockKeyhole size={25}/>
      <b>ASP Mock setup is incomplete</b>
      <p>{aspMissingReason(catalog.courses)}</p>
+     {catalog.identity?.isAdmin&&<button type="button" className="btn"
+      onClick={()=>navigate('/admin-tools?tab=questions')}>Open ASP Question Bank</button>}
+    </div>:officialAsp.publication_state!=='published'?<div className="live-learning-empty"><LockKeyhole size={24}/>
+     <b>ASP Course is not published</b><p>Your saved Mock choices remain intact. To enable this official 200-question exam, publish the existing ASP Course and finalize the reviewed form.</p>
+     {catalog.identity?.isAdmin&&<button type="button" className="btn"
+      onClick={()=>navigate('/admin-tools?tab=courses')}>Open Admin Courses</button>}
     </div>:!mockAccess?<div className="live-learning-empty"><LockKeyhole size={24}/>
      <b>Mock Exam requires active access</b>
      <p>Course access settings are unavailable. Refresh or contact the LMS administrator.</p>

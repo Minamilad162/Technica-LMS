@@ -8,6 +8,7 @@ import {isAspCourseTitle,isOfficialAspCourse,preferredQuestionBankCourse,questio
 import {getMockReadiness} from './mockApi.js';
 import {AdminQuestionsPanel,AdminMockPanel} from './AdminToolsPanels.jsx';
 import OfficialMockBankFinalizer from './OfficialMockBankFinalizer.jsx';
+import {repairExistingAspCourseId} from './aspCourseSetupApi.js';
 import './courseQuestionBank.css';
 
 const fail=e=>e?.message||'The protected Question Bank request failed.';
@@ -28,7 +29,7 @@ export default function AdminCourseBank({db,courses=[],asp,onUpdate,onDirtyChang
  const [inspectLessonId,setInspectLessonId]=useState('');
  const [releaseLessonId,setReleaseLessonId]=useState('');
  const [inspectState,setInspectState]=useState({loading:false,data:null,error:''});
- const [reviewOpen,setReviewOpen]=useState(false);
+ const [reviewOpen,setReviewOpen]=useState(false),[repairingAsp,setRepairingAsp]=useState(false);
  const [officialMock,setOfficialMock]=useState({loading:false,data:null,error:''});
  const reviewRef=useRef(null);
  const [batchReady,setBatchReady]=useState(false),[batchLoading,setBatchLoading]=useState(true);
@@ -158,6 +159,17 @@ export default function AdminCourseBank({db,courses=[],asp,onUpdate,onDirtyChang
   }catch(e){setError('No partial changes saved. Your pending selections are retained. '+fail(e));}
   finally{setBusy(false);}
  }
+ const fixExistingAsp=async()=>{
+  if(repairingAsp||busy||pendingCount||!aspIdentityMismatch)return;
+  if(!window.confirm('Link this EXISTING ASP Course to the official Mock? Only the internal slug changes to "asp". Course and question IDs stay the same. Publishing and final reservation are separate actions.'))return;
+  setRepairingAsp(true);setError('');setNotice('');
+  try{
+   const result=await repairExistingAspCourseId(db,selected.id,'USE EXISTING ASP COURSE');
+   setNotice('Linked existing ASP Course: '+result.title+'. No questions were moved or approved.');
+   onRefreshCourses?.();refresh(true);
+  }catch(e){setError(fail(e));}
+  finally{setRepairingAsp(false);}
+ };
  const discard=()=>{
   if(pendingCount&&window.confirm('Discard all '+pendingCount+' unsaved actions?')){
    setStaged({});setReleaseLessonId('');setNotice('Unsaved actions discarded.');setError('');
@@ -275,10 +287,14 @@ export default function AdminCourseBank({db,courses=[],asp,onUpdate,onDirtyChang
    <div className="p28-catalog-actions"><button className="at-outline" onClick={()=>onRefreshCourses?.()} type="button" disabled={coursesLoading}>Retry</button>
     <button className="at-primary" onClick={()=>onGoToCourses?.()} type="button">Open Courses</button></div>
   </div>}
-  {aspIdentityMismatch&&<p className="at-disclaimer" role="alert">
-   This ASP Course has slug <code>{selected?.slug||'(missing)'}</code> rather than <code>asp</code>.
-   Verify the original Course ID before uploading or changing questions; do not create a duplicate Course.
-  </p>}
+  {aspIdentityMismatch&&<div className="at-disclaimer p42-asp-repair" role="alert">
+   <strong>Existing ASP Course needs its internal identifier linked.</strong>
+   <p>This Course is saved as <code>{selected?.slug||'(missing)'}</code> instead of <code>asp</code>.
+    Your existing questions and Course ID will remain unchanged.</p>
+   <button type="button" className="at-primary" disabled={repairingAsp||busy||pendingCount}
+    onClick={()=>void fixExistingAsp()}>{repairingAsp?'Verifying existing Course…':'Link existing ASP Course to Mock'}</button>
+   <small>Admin-only action. This does not publish courses, approve questions or reserve the Mock.</small>
+  </div>}
   {selected?.slug==='asp'&&mode==='bank'&&<div className="p39-official-mock-status" role="status">
    <ShieldCheck size={18}/>
    <div><strong>Official ASP Mock · {officialMock.loading?'Checking…':officialMock.data
@@ -286,12 +302,18 @@ export default function AdminCourseBank({db,courses=[],asp,onUpdate,onDirtyChang
     <p>{officialMock.data?.ready
      ?'The exact 200-question official form is ready and locked. New Mock candidates do not rewrite it.'
      :officialMock.error?'Official Mock readiness unavailable: '+officialMock.error:
-      'Mock Exam checks stage candidates. Only a finalized reservation of exactly 200 eligible ASP Question Bank IDs is delivered to learners.'}</p>
+      'Save All preserves your selected Mock choices. Exactly 200 reviewed choices must then be finalized in the protected official reservation to appear in the learner Mock.'}</p>
    </div>
   </div>}
-  {selected?.slug==='asp'&&mode==='bank'&&!officialMock.data?.ready&&
-   <OfficialMockBankFinalizer db={db} course={selected} disabled={pendingCount>0||busy}
+  {selected&&mode==='bank'&&!officialMock.data?.ready&&
+   <OfficialMockBankFinalizer db={db} course={selected}
+    disabled={pendingCount>0||busy||aspIdentityMismatch||repairingAsp}
     revision={revision} onReserved={()=>refresh(true)}/>}
+  {selected?.slug==='asp'&&selected.publication_state!=='published'&&<div className="at-disclaimer p42-asp-repair" role="status">
+   <strong>Publish the ASP Course before learners can take this Mock.</strong>
+   <p>Reserved questions remain unchanged. This Course is currently {selected.publication_state} and is not in the learner catalogue.</p>
+   <button type="button" className="at-outline" onClick={()=>onGoToCourses?.()}>Open Courses</button>
+  </div>}
   {selected&&batchReady&&batchMode==='p30'&&<p role="status" className="at-disclaimer">
    P34A/P34B are not both installed on this Supabase database. Existing P30 Question Bank editing remains available.
    <strong> Legacy saves do not publish Draft Lesson Quiz questions; Mock candidate flags alone cannot activate the fixed official exam.</strong>

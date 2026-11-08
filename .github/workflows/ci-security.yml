@@ -161,6 +161,9 @@ jobs:
       - name: P41 Open Access published-only and learner presentation contract
         run: npm run test:p41:open-access
 
+      - name: P42 ASP Mock selected bank, guarded identity recovery and official 200-question learner gates
+        run: npm run test:p42:mock-selection
+
       - name: P22 premium course/lesson grid, verified progress and Admin quiz contracts
         run: npm run test:p22:learning
 
