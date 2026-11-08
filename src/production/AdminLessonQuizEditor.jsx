@@ -1,6 +1,6 @@
 import React,{useEffect,useState} from 'react';
 import {AlertCircle,CheckCircle2,FileQuestion,Plus,Save,Trash2} from 'lucide-react';
-import {attachBankToLesson,listCourseBank} from './courseQuestionBankApi.js';
+import {attachBankToLesson,listCourseBank,publishBankLessonQuiz} from './courseQuestionBankApi.js';
 import './adminLessonQuiz.css';
 
 const blank=()=>({prompt:'',options:['','','',''],correct_index:0,is_published:false});
@@ -60,10 +60,18 @@ export default function AdminLessonQuizEditor({db,lessonId,courseId}){
  const publishLinked=async q=>{
   if(saving)return;setSaving(true);setError('');setNotice('');
   try{
-   const {error}=await db.from('lms_p22_lesson_quiz_questions')
-    .update({is_published:!q.is_published}).eq('id',q.id).eq('lesson_id',lessonId);
-   if(error)throw Error(error.message);
-   await reload();setNotice(q.is_published?'Bank question unpublished.':'Bank question published to eligible learners.');
+   if(q.is_published){
+    const {error}=await db.from('lms_p22_lesson_quiz_questions')
+     .update({is_published:false}).eq('id',q.id).eq('lesson_id',lessonId);
+    if(error)throw Error(error.message);
+   }else if(q.bank_question_id){
+    await publishBankLessonQuiz(db,lessonId,q.id);
+   }else{
+    const {error}=await db.from('lms_p22_lesson_quiz_questions')
+     .update({is_published:true}).eq('id',q.id).eq('lesson_id',lessonId);
+    if(error)throw Error(error.message);
+   }
+   await reload();setNotice(q.is_published?'Question unpublished.':'Question published to eligible learners without another Draft review.');
   }catch(e){setError(e.message||'Only approved non-Mock questions can be published.');}
   finally{setSaving(false);}
  };
@@ -103,7 +111,7 @@ export default function AdminLessonQuizEditor({db,lessonId,courseId}){
   {notice&&<p className="live-authoring-success" role="status"><CheckCircle2 size={15}/>{notice}</p>}
   {items.length>0&&publishedCount===0&&<p className="live-authoring-alert" role="status">
    This Lesson has saved Quiz questions, but none are published. Learners will see 0 questions until you approve the Drafts and publish the eligible Quiz entries.
-   Review the question in the Course Bank, then click Publish below. Reopen the Learner Quiz to check.
+   To publish these saved linked questions, click Publish on each, or select this Lesson in Question Bank and click Save All Changes once.
   </p>}
   {picker&&<section className="p28-quiz-picker">
    <form onSubmit={e=>{e.preventDefault();setQuery(search.trim());setPage(0);}}>
@@ -119,7 +127,7 @@ export default function AdminLessonQuizEditor({db,lessonId,courseId}){
      <option value="medium">Medium</option><option value="high">High</option>
     </select></label>
    </div>
-   <small>Choose existing questions from this Course Question Bank. Approved questions publish immediately; Drafts remain hidden. Mock-only questions are excluded.</small>
+   <small>Choose existing questions from this Course Question Bank. Selected Active non-Mock questions can be published immediately when saved. Mock-only questions are excluded.</small>
    {bankLoading?<p>Loading questions…</p>:<div className="p28-quiz-choices">
     {bank.items.filter(q=>!q.mockExclusive&&!q.mockCandidate&&q.isActive&&q.approvalState!=='archived').map(q=><div key={q.id}>
      <span><b>{q.prompt}</b><small>{q.approvalState} · {q.sourceId}</small></span>
