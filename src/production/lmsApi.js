@@ -1,3 +1,5 @@
+import {isAspCourseTitle,isOfficialAspCourse} from './questionBankCourseSelection.js';
+
 // P3 is intentionally scoped to metadata and text lessons: no question keys,
 // assessment grading, direct progress writes or private media paths are exposed.
 export function courseSlug(title) {
@@ -58,9 +60,19 @@ export async function getCurrentEntitlements(db,userId) {
 }
 // All writes below are checked by Supabase RLS (P1) against the authenticated
 // admin. Frontend checks are only UX; NEVER a substitute for table policies.
+export function newCourseSlug(title,peers=[]) {
+  if(!isAspCourseTitle({title}))return unusedSlug(title,peers);
+  // The controlled P6A/P9B ASP workflow requires slug='asp' even when
+  // its DISPLAY TITLE is 'ASP Course'. Never manufacture a second ASP
+  // when a differently slugged legacy Course already exists.
+  if(peers.some(c=>isOfficialAspCourse(c)||isAspCourseTitle(c)))
+    throw Error('An ASP Course already exists. Select its existing record; do not create another ASP Course.');
+  return 'asp';
+}
 export async function createCourse(db,title,summary,peers) {
+  const slug=newCourseSlug(title,peers);
   const {data,error}=await db.from('lms_courses').insert({
-    title,summary,slug:unusedSlug(title,peers),publication_state:'draft'
+    title,summary,slug,publication_state:'draft'
   }).select('id').single();
   return value(data,error);
 }

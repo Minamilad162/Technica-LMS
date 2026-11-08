@@ -1,3 +1,38 @@
+## 2026-11-08 — Question Bank old UI / ASP Course false-missing diagnostic
+- Screenshot confirmed main deployed old `AdminQuestionsPanel` and exact-ASP slug gate rather than unmerged P28/P29 upload UI. The old Admin Tools catalog fetch silently replaced SQL/Auth/RLS errors with empty Courses, falsely instructing admins to create an ASP Course.
+- Admin Tools now distinguishes real Supabase Course loading/errors/empty with Retry/Courses navigation, and prefers existing canonical ASP identity. A legacy Course titled “ASP Course” but slugged `asp-course` remains visible with an explicit warning; no duplicate creation/import or silent migration of its identity.
+- New explicit ASP Course authoring selects canonical `asp` slug and guards against a second course when a legacy ASP title already exists. Existing course/Question/Mock IDs untouched. Added pure and static regression tests.
+- The new upload/check-box UI still requires successful CI, deployment and the already staged P28.2/P29 schema; none were applied to live Supabase by this code change.
+
+## 2026-11-08 — P29 Admin Question Bank controls and Lesson Quiz selection
+- Added visible per-question Active (true by default) and Mock Exam candidate checkboxes to the course-scoped Excel/CSV uploader. Admin picks a nested Lesson for the question and adds it directly to that Lesson Quiz; existing Course Builder Lesson Quiz selection from Bank remains.
+- Added protected P29 SQL: additive boolean switches, Admin-only audited flag RPC and Mock selection handoff, strict 200-question ASP official reservation unchanged, disabled/candidate questions excluded from server P4/P8e new draws, disabled published lesson quizzes unpublished without deleting historical attempts or quiz answers.
+- Old P28 database frontends remain in read-only compatibility mode until P28.2+P29 installed; new UI must be deployed to main separately. Real ASP source XLSX still not uploaded automatically.
+- Added static P29 and disposable Postgres security tests, authoring runbook and Master Blueprint. No Supabase production writes.
+
+## 2026-11-08 — P28.2 existing-installation forward migration
+- Owner screenshot: original protected P28 import, 4-argument Bank listing, lesson link and both guards were installed; 7-argument filtered listing was absent. Re-running initial P28 raised the intended replay/conflict guard.
+- Added one-time, transactional `202611080002_p28_2_forward_upgrade_existing.sql` to preserve old Bank RPC and data, create the 7-required-argument Admin filtered Bank RPC (without ambiguous defaults), enhance draft Difficulty import and strengthen new standalone Lesson Quiz exclusion. Does not alter existing questions/answers/approval, ASP 200 Mock form, learner progress or attachments.
+- Added exact archived original-P28 **CI-only** SQL fixture and disposable PostgreSQL clone/test for old-to-new forward upgrades; real Supabase unchanged. Full test status and owner-approved staging install are separate gates.
+- See `docs/current/P28_2_INSTALLED_FORWARD_UPGRADE.md`.
+
+## 2026-11-08 — P28.1 ASP Course unified Question Bank (source branch)
+- Owner's Supabase read-only check confirmed P1/P4/P9B installed, P22 missing, P28 not installed. Original P28 preflight P0001 rolled back before data changes. P22 prerequisite must be installed after verifying existing P2/P15 requirements, ledger and backup; no remote SQL was run in this development turn.
+- New ASP-first Admin Question Bank import accepts nine official Domains, 2–6 options, correct index A–F, optional proposed Difficulty, Domain, Explanation and Reference. Ambiguous source Domain labels require explicit Admin mapping or remain unassigned. All uploaded questions remain Draft and ASP content rights/answer and independent second-admin review remain mandatory.
+- Admin course-bank query filters per Course/Domain/Difficulty/Usage; Lesson Quiz picker selects only from the same bank, no creation of new standalone quiz questions (legacy editable rows preserved). Approved non-Mock questions power P4 Practice and non-Mock Assessment; ASP Mock stays immutable exact 200/300 via existing P9B/P10 reservation.
+- SQL modified on P28 branch only, not applied remotely. CI and isolated PostgreSQL tests must pass with the updated SQL, then authenticated Staging UI verification before merging/release. No 2,500-question source file imported.
+
+## 2026-11-08 — P28 preflight correction
+- Corrected an overstrict prerequisite in the source-only P28 SQL: the ASP-specific P9B Mock form is not needed to install per-Course Question Bank, though it remains mandatory for ASP Mock runtime. Preflight identifies the missing P1/P4/P22 object by name. The original user-reported P0001 error came from an early prerequisite guard, before database mutations; actual remote inventory remains unverified. SQL must not be rerun until a read-only ledger and object check passes.
+
+## 2026-11-08 — P28: Course Question Bank + Excel → Lesson Quiz → Mock-only source
+
+- Added per-Course protected Question Bank management in Admin Tools (Course picker, .xlsx/.csv validation preview, Draft-only idempotent import, optional manual entry, course-scoped search and explicit non-ASP approval).
+- Lesson Knowledge Check now offers **Choose from Course Bank** with same-course server validation, Draft/non-Mock filtering, approved question publication and explicit unlink without deleting the original bank item. Existing manually authored questions remain supported.
+- Exams & Mock supports Course selection. Preserved versioned ASP exact 200-question / 300-minute immutable P9B/P10; other courses can mark unused, unlinked Drafts Mock-only for a future Mock engine **without activating an exam**. Mock-only IDs remain excluded from Practice and Lesson Quiz.
+- Additive P28 **source-only** SQL, unique quiz link index, triggers, Admin-only import/list/approve/mark/attach RPCs, audit events and CI / disposable PostgreSQL tests. No Supabase Production writes, no demo importer re-run, no Cloudflare deployment or learner data migration. Existing P21 subscriptions and P22/P23 progress/lesson UX preserved.
+- Conflicting Assessment Practice statement deferred: fail-closed exclusive Mock rule still applies until clarified. Staging migration ledger, role-negative tests and browser QA remain pending.
+
 ### 2026-11-07 — P26 Qualification Portfolio reference screens (SOURCE ONLY)
 
 - Added the missing Learning Assistant reference sections while preserving premium compact horizontal Unit tabs: Course (Resources & Actions), Contact (Assessor Feedback / Contact Diary), Records (Registration, Metrics, Grading Checklists and Recording Forms). Learner still has Evidence, Mapping and Submit; all visible in the same Unit workspace.

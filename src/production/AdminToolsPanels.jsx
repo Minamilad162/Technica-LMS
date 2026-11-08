@@ -10,6 +10,7 @@ import {fetchAdminFreeIntro,setAdminFreeIntro,setAdminPublished} from './learner
 import {verifiedLiveAdmin} from './liveAuthoringApi.js';
 import {CourseCover,CourseCoverManager} from './CourseCover.jsx';
 import AdminAnalyticsCharts from './AdminAnalyticsCharts.jsx';
+import {loadMarkedMockCandidateIds} from './courseQuestionBankApi.js';
 
 const pct=n=>n===null||n===undefined?'—':Number(n).toFixed(1).replace(/\.0$/,'')+'%';
 const day=s=>s?new Date(s).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'}):'Not set';
@@ -259,6 +260,17 @@ export function AdminMockPanel({db,asp}){
   return()=>{live=false;};
  },[db,asp?.id,offset,revision]);
  const toggle=id=>{setPreview(null);setPhrase('');setSelected(old=>old.includes(id)?old.filter(x=>x!==id):old.length<200?[...old,id]:old);};
+ async function loadBankSelection(){
+  if(!asp||processing)return;
+  setProcessing(true);setError('');setNotice('');setPreview(null);setPhrase('');
+  try{
+   const ids=await loadMarkedMockCandidateIds(db,asp.id);
+   if(ids.length>200)throw Error('More than 200 Mock candidates marked. Uncheck excess candidates in Question Bank first.');
+   setSelected(ids);
+   setNotice(ids.length+' candidates loaded from ASP Question Bank. Human review and secure 200-question preflight are still mandatory.');
+  }catch(e){setError(err(e));}finally{setProcessing(false);}
+ }
+
  async function check(){
   if(!asp||selected.length!==200)return;
   setError('');setNotice('');setProcessing(true);
@@ -285,7 +297,12 @@ export function AdminMockPanel({db,asp}){
    <div><b>{readiness?.ready?'Ready':'Not ready'}</b><span>Server Mock gate</span></div></div>
   <div className="at-disclaimer"><ShieldCheck size={17}/> Exam form: exactly 200 selected UUIDs. A protected server transaction excludes reserved questions from Practice; no bulk auto-picker or client-side bypass.</div>
   <div className="at-surface"><div className="at-section-title"><div><h3>Reviewed candidates</h3><p>Only human-verified Ready Draft items are presented · {pool.total} in current queue</p></div>
-   <span className="at-selection-count">{selected.length} / 200 selected</span></div>
+   <div className="at-mock-pick-controls">
+    <span className="at-selection-count">{selected.length} / 200 selected</span>
+    <button type="button" className="at-outline" disabled={processing||loading} onClick={loadBankSelection}>
+     <FileQuestion size={14}/> Load checked Mock questions from Bank
+    </button>
+   </div></div>
    {loading?<p className="at-empty">Loading protected ASP candidate list…</p>:
     <div className="at-candidate-list">{pool.items.map(q=><label className="at-candidate" key={q.id}>
      <input type="checkbox" checked={selected.includes(q.id)} disabled={processing||(!selected.includes(q.id)&&selected.length===200)}

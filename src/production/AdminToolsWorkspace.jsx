@@ -6,6 +6,7 @@ import StagingQaEvidencePanel from './StagingQaEvidencePanel.jsx';
 import {AdminDashboardPanel,AdminCoursesPanel,AdminQuestionsPanel,AdminMockPanel,AdminUsersPanel} from './AdminToolsPanels.jsx';
 import './supabaseApp.css';
 import './adminTools.css';
+import AdminCourseBank from './AdminCourseBank.jsx';
 const QualificationsWorkspace=React.lazy(()=>import('../qualification/QualificationsWorkspace.jsx'));
 const AdminSubscriptionsPanel=React.lazy(()=>import('./AdminSubscriptionsPanel.jsx'));
 
@@ -50,17 +51,26 @@ export default function AdminToolsWorkspace({db,initialTab='overview',onExit,onT
  const [tab,setTab]=useState(ids.has(initialTab)?initialTab:'overview');
  const [state,setState]=useState('checking'),[error,setError]=useState('');
  const [courses,setCourses]=useState([]),[revision,setRevision]=useState(0);
+ const [coursesLoading,setCoursesLoading]=useState(true),[coursesError,setCoursesError]=useState('');
+ const [catalogRevision,setCatalogRevision]=useState(0);
  useEffect(()=>{setTab(ids.has(initialTab)?initialTab:'overview');},[initialTab]);
  useEffect(()=>{let live=true;setState('checking');setError('');
   verifiedLiveAdmin(db).then(()=>{if(live)setState('ready');})
    .catch(e=>{if(live){setState('blocked');setError(e?.message||'Active LMS Admin required.');}});
   return()=>{live=false;};
  },[db,revision]);
- useEffect(()=>{if(state!=='ready')return;let live=true;
-  liveCourses(db).then(c=>{if(live)setCourses(c);})
-   .catch(()=>{if(live)setCourses([]);});
+ useEffect(()=>{
+  if(state!=='ready')return;
+  let live=true;setCoursesLoading(true);setCoursesError('');
+  liveCourses(db).then(c=>{
+   if(!live)return;
+   if(!Array.isArray(c))throw Error('Unexpected Supabase Course catalog response.');
+   setCourses(c);
+  }).catch(e=>{
+   if(live)setCoursesError(e?.message||'Course catalog unavailable from Supabase.');
+  }).finally(()=>{if(live)setCoursesLoading(false);});
   return()=>{live=false;};
- },[db,state,tab]);
+ },[db,state,catalogRevision]);
  const change=id=>{if(!ids.has(id))return;setTab(id);onTabChange?.(id);};
  const asp=courses.find(c=>c.slug==='asp');
  if(state!=='ready')return <section className="at-access-state"><LockKeyhole size={34}/>
@@ -89,8 +99,12 @@ export default function AdminToolsWorkspace({db,initialTab='overview',onExit,onT
    {tab==='overview'&&<AdminDashboardPanel db={db} onNavigate={change}/>}
    {tab==='courses'&&<AdminCoursesPanel db={db}/>}
    {tab==='qualifications'&&<React.Suspense fallback={<div className="at-empty">Loading qualifications…</div>}><QualificationsWorkspace admin/></React.Suspense>}
-   {tab==='questions'&&<AdminQuestionsPanel db={db} asp={asp} onUpdate={()=>setRevision(n=>n+1)}/>}
-   {tab==='exams'&&<AdminMockPanel db={db} asp={asp}/>}
+   {tab==='questions'&&<AdminCourseBank db={db} courses={courses} asp={asp} mode="bank"
+     coursesLoading={coursesLoading} coursesError={coursesError}
+     onRefreshCourses={()=>setCatalogRevision(v=>v+1)} onGoToCourses={()=>change('courses')}/>}
+   {tab==='exams'&&<AdminCourseBank db={db} courses={courses} asp={asp} mode="mock"
+     coursesLoading={coursesLoading} coursesError={coursesError}
+     onRefreshCourses={()=>setCatalogRevision(v=>v+1)} onGoToCourses={()=>change('courses')}/>} 
    {tab==='users'&&<AdminUsersPanel db={db}/>}
    {tab==='subscriptions'&&<React.Suspense fallback={<div className="at-empty">Loading subscription management…</div>}><AdminSubscriptionsPanel db={db}/></React.Suspense>}
    {tab==='system'&&<AdminSystemPanel db={db}/>}

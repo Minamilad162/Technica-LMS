@@ -149,6 +149,12 @@ jobs:
       - name: P27 verified Admin pie charts, safe draft Course Preview and learner nonregression
         run: npm run test:p27:admin
 
+      - name: P28 per-Course Excel Question Bank and Lesson Quiz / Mock exclusion contract
+        run: npm run test:p28:bank
+
+      - name: P29 per-question Active/Mock Exam and Course Lesson Quiz selection contract
+        run: npm run test:p29:bank
+
       - name: P5 native fullscreen and exit policy contracts
         run: npm run test:p5
 
@@ -285,6 +291,23 @@ jobs:
 
       - name: P22 learner lesson step events and Knowledge Check authorization on disposable PostgreSQL
         run: bash scripts/test-p22-postgres-smoke.sh
+
+      - name: Clone P22 baseline for original-P28-to-P28.2 forward-upgrade test
+        run: |
+          PGPASSWORD=postgres psql -h localhost -U postgres -d template1 -v ON_ERROR_STOP=1 \
+            -c "CREATE DATABASE technica_p28_upgrade TEMPLATE postgres;"
+
+      - name: P28 Course Question Bank SQL RLS / no-cross-course Quiz / Mock exclusion
+        run: bash scripts/test-p28-postgres-smoke.sh
+
+      - name: P28.2 forward-upgrade original installed P28 without touching the primary CI database
+        run: bash scripts/test-p28-forward-upgrade-postgres-smoke.sh
+
+      - name: P29 protected Active and Mock candidate, live Practice/Level Up exclusions
+        run: bash scripts/test-p29-postgres-smoke.sh
+
+      - name: P29 real upgrade compatibility on original P28 then P28.2 (old and new Bank RPC)
+        run: bash scripts/test-p29-forward-upgrade-postgres-smoke.sh
 
       - name: Test scope disclosure
         run: echo "Ephemeral local PostgreSQL smoke only; live Supabase Auth, Storage, Data API and device tests still pending."

@@ -8,8 +8,12 @@ const fieldAliases={
  option2:['option2','answer2','choice2','optionb','answerb','choiceb','b'],
  option3:['option3','answer3','choice3','optionc','answerc','choicec','c'],
  option4:['option4','answer4','choice4','optiond','answerd','choiced','d'],
+ option5:['option5','answer5','choice5','optione','answere','choicee','e'],
+ option6:['option6','answer6','choice6','optionf','answerf','choicef','f'],
  correct:['correctanswer','correctoption','correctchoice','answer','correct','key'],
  explanation:['explanation','rationale','reason','feedback'],
+ difficulty:['difficulty','difficultyindex','level','questionlevel'],
+ reference:['reference','source','citation','rationale_reference'],
  domain:['domain','topic','subject','section'],
 };
 export function normalizeQuestionRows(rows,{courseId,domainId,sourceName='Excel',sheetName='Questions'}={}){
@@ -19,27 +23,40 @@ export function normalizeQuestionRows(rows,{courseId,domainId,sourceName='Excel'
  const header=rows[headerIndex].map(key);
  const col={};
  for(const [name,aliases] of Object.entries(fieldAliases))col[name]=header.findIndex(v=>aliases.includes(v));
- for(const needed of ['prompt','option1','option2','option3','correct'])if(col[needed]<0)
+ for(const needed of ['prompt','option1','option2','correct'])if(col[needed]<0)
   return {questions:[],problems:[`${sheetName}: Missing required column (${needed}).`]};
  const seen=new Set();
  for(let i=headerIndex+1;i<rows.length;i++){
   const row=rows[i],get=name=>col[name]<0?'':clean(row[col[name]]);
   if(!row.some(v=>clean(v)))continue;
-  const prompt=get('prompt');const options=[get('option1'),get('option2'),get('option3'),get('option4')].filter(Boolean);
+  const prompt=get('prompt');
+  const rawOptions=['option1','option2','option3','option4','option5','option6'].map(get);
+  const last=rawOptions.findLastIndex(Boolean);
+  const options=rawOptions.slice(0,last+1);
+  if(options.some(v=>!v)){problems.push(`${sheetName} row ${i+1}: option letters must be contiguous from A; row skipped to prevent answer mismatch.`);continue;}
   const raw=get('correct');const letter=raw.toUpperCase();
-  let correct=/^[A-D]$/.test(letter)?letter.charCodeAt(0)-65:-1;
+  let correct=/^[A-F]$/.test(letter)?letter.charCodeAt(0)-65:-1;
   if(correct<0&&/^\d+$/.test(raw))correct=Number(raw)-1;
   if(correct<0)correct=options.findIndex(v=>v.toLowerCase()===raw.toLowerCase());
-  if(!prompt||options.length<2||correct<0||correct>=options.length){problems.push(`${sheetName} row ${i+1}: missing question/options or invalid correct answer.`);continue}
+  if(prompt.length<5||options.length<2||correct<0||correct>=options.length){problems.push(`${sheetName} row ${i+1}: missing question/options or invalid correct answer.`);continue;}
   const identity=prompt.toLowerCase();
-  if(seen.has(identity)){problems.push(`${sheetName} row ${i+1}: duplicate question skipped.`);continue}
+  if(seen.has(identity)){problems.push(`${sheetName} row ${i+1}: duplicate question skipped.`);continue;}
   seen.add(identity);
-  const topic=get('domain')||sheetName;
-  const aspSheet=courseId==='asp'?String(topic).match(/domain\s*([1-9])/i):null;
-  if(aspSheet&&Number(aspSheet[1])>5){problems.push(`${sheetName} row ${i+1}: ASP has only Domains 1–5; not imported.`);continue}
-  const aspMatch=aspSheet;
-  const questionDomain=aspMatch?`domain${aspMatch[1]}`:domainId;
-  out.push({courseId,domainId:questionDomain,topic,prompt,options,correct,explanation:get('explanation'),reference:`${sourceName} · ${sheetName} · row ${i+1}`});
+  // File Difficulty is a DRAFT suggestion, not a verified ASP review decision.
+  const level=get('difficulty').toLowerCase();
+  const levels={easy:'low',low:'low','1':'low',moderate:'medium',medium:'medium','2':'medium',hard:'high',high:'high','3':'high'};
+  const difficulty=levels[level]||'unclassified';
+  if(level&&!levels[level])problems.push(`${sheetName} row ${i+1}: unknown difficulty "${level}"; imported as unclassified.`);
+  const rawDomain=get('domain');
+  const domainLabel=rawDomain||(/(?:asp11|domain)/i.test(sheetName)?sheetName:'');
+  // Preserve the older local *demo* importer contract. Real ASP UUID courses
+  // must resolve against their verified nine-domain Supabase catalogue instead.
+  const demoMatch=courseId==='asp'?domainLabel.match(/domain\s*([1-9])/i):null;
+  const resolvedDomainId=demoMatch?'domain'+demoMatch[1]:(domainId||null);
+  const sourceReference=get('reference');
+  out.push({courseId,domainId:resolvedDomainId,domainLabel,topic:rawDomain||sheetName,prompt,options,correct,difficulty,
+   explanation:get('explanation'),
+   reference:`${sourceName} · ${sheetName} · row ${i+1}${sourceReference?' · '+sourceReference:''}`});
  }
  return {questions:out,problems};
 }

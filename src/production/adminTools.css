@@ -169,3 +169,6 @@
  background:#eaf9f3;color:#0b786c!important;font-size:12px;font-weight:820;white-space:nowrap}
 .at-preview-link:hover{background:#d6f1e6}
 .at-preview-link.tiny{padding:7px 9px;font-size:11px;border-radius:8px}
+
+.at-mock-pick-controls{display:flex;align-items:center;flex-wrap:wrap;gap:10px}
+.at-mock-pick-controls button{display:inline-flex;gap:6px;align-items:center}

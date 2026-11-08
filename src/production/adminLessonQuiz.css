@@ -14,3 +14,16 @@
 .p22-admin-quiz-form-foot>label{display:flex;align-items:center;gap:8px;font-size:12px}
 .p22-admin-quiz-form-foot>div{display:flex;gap:8px}
 @media(max-width:600px){.p22-admin-quiz{padding:13px}.p22-admin-quiz-head .btn{width:100%}.p22-admin-quiz-options>label{grid-template-columns:20px minmax(0,1fr)}.p22-admin-quiz-options>label>input:last-child{grid-column:1/-1}.p22-admin-quiz-form-foot>div{width:100%;justify-content:flex-end}}
+
+.p28-quiz-head-actions{display:flex;gap:8px;flex-wrap:wrap}.p28-quiz-picker{display:grid;gap:12px;margin-top:15px;padding:14px;background:#f0f7f7;border:1px solid #d4e6e4;border-radius:12px}
+.p28-quiz-picker form{display:flex;gap:8px}.p28-quiz-picker form input{flex:1;min-width:0;border:1px solid #d9e7e5;border-radius:9px;padding:10px;background:white;color:#214454}
+.p28-quiz-picker>small{color:#698487;font-size:11px}.p28-quiz-choices{display:grid;gap:7px;max-height:420px;overflow:auto}
+.p28-quiz-choices>div{display:flex;align-items:center;gap:10px;justify-content:space-between;padding:10px 11px;background:#fff;border:1px solid #e2eceb;border-radius:9px}
+.p28-quiz-choices span{min-width:0;flex:1;display:grid;gap:5px}.p28-quiz-choices b{font-size:12px}.p28-quiz-choices small{font-size:10px;color:#71888d}
+.p28-quiz-choices .btn{font-size:11px;white-space:nowrap}.p28-quiz-pagination{display:flex;align-items:center;justify-content:center;gap:10px;font-size:12px}
+@media(max-width:600px){.p28-quiz-head-actions{width:100%}.p28-quiz-head-actions .btn{flex:1}.p28-quiz-picker form{flex-wrap:wrap}.p28-quiz-choices>div{align-items:flex-start;flex-wrap:wrap}}
+
+.p28-quiz-bank-filters{display:grid;grid-template-columns:repeat(2,minmax(150px,1fr));gap:12px;margin:10px 0}
+.p28-quiz-bank-filters label{display:grid;gap:6px;color:#426473;font-size:12px;font-weight:700}
+.p28-quiz-bank-filters select{width:100%;min-width:0;padding:10px;border-radius:9px;border:1px solid #d5e6eb;background:#fff;color:#173c4c}
+@media(max-width:600px){.p28-quiz-bank-filters{grid-template-columns:1fr}}

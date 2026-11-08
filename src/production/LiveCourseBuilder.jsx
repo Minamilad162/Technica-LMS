@@ -135,7 +135,7 @@ export default function LiveCourseBuilder(){
          {lessonId===lesson.id&&<div className="live-authoring-reading">
           <div className="live-authoring-reading-top"><b>Reading text</b><button className="btn btn-secondary" type="button" onClick={()=>openNode('text',{lessonId:lesson.id})}><Plus size={15}/> Add paragraph</button></div>
           {blocksLoading?<p>Loading reading text…</p>:blocks.length?blocks.map(b=><p key={b.id}>{String(b.payload?.body||b.payload?.text||'')}</p>):<p>No reading text blocks added yet.</p>}
-          <React.Suspense fallback={<p>Opening Knowledge Check tools…</p>}><AdminLessonQuizEditor db={db} lessonId={lesson.id}/></React.Suspense>
+          <React.Suspense fallback={<p>Opening Knowledge Check tools…</p>}><AdminLessonQuizEditor db={db} lessonId={lesson.id} courseId={courseId}/></React.Suspense>
          </div>}
         </section>)}
         <button type="button" className="hierarchy-add" onClick={()=>openNode('lesson',{domainId:domain.id,topicId:topic.id})}><Plus size={16}/> Add lesson</button>
