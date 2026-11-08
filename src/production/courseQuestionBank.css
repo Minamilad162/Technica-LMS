@@ -199,3 +199,10 @@
 .p33-unsaved-note{font-size:11px;font-weight:800;color:#a46f11}
 .p30-advanced-review{scroll-margin-top:110px}
 @media(max-width:780px){.p33-next-steps{width:100%;justify-content:flex-start}}
+
+/* P34: one-step publish controls for existing Lesson Quiz links. */
+.p34-release-option{display:flex;align-items:center;gap:9px;max-width:440px;font-weight:850;
+ color:#136d66;font-size:12px;line-height:1.4;cursor:pointer}
+.p34-release-option input{width:18px;height:18px;accent-color:#0b9b81;flex-shrink:0}
+.p34-release-option input:disabled{opacity:.45;cursor:not-allowed}
+.p34-release-option:focus-within{outline:2px solid #0d9982;outline-offset:4px;border-radius:6px}
