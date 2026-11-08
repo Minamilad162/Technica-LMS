@@ -1,4 +1,4 @@
-import React,{useEffect,useState} from 'react';
+import React,{useCallback,useEffect,useState} from 'react';
 import {Activity,AlertTriangle,ArrowLeft,BookOpen,CheckCircle2,ClipboardCheck,FileQuestion,GraduationCap,Layers,LockKeyhole,RefreshCw,ShieldCheck,Users} from 'lucide-react';
 import {verifiedLiveAdmin,liveCourses} from './liveAuthoringApi.js';
 import {checkReleaseReadiness,summarizeReleaseReadiness} from './releaseReadiness.js';
@@ -53,6 +53,8 @@ export default function AdminToolsWorkspace({db,initialTab='overview',onExit,onT
  const [courses,setCourses]=useState([]),[revision,setRevision]=useState(0);
  const [coursesLoading,setCoursesLoading]=useState(true),[coursesError,setCoursesError]=useState('');
  const [catalogRevision,setCatalogRevision]=useState(0);
+ const [questionBankDirty,setQuestionBankDirty]=useState(false);
+ const bankDirtyChanged=useCallback(flag=>setQuestionBankDirty(!!flag),[]);
  useEffect(()=>{setTab(ids.has(initialTab)?initialTab:'overview');},[initialTab]);
  useEffect(()=>{let live=true;setState('checking');setError('');
   verifiedLiveAdmin(db).then(()=>{if(live)setState('ready');})
@@ -71,7 +73,12 @@ export default function AdminToolsWorkspace({db,initialTab='overview',onExit,onT
   }).finally(()=>{if(live)setCoursesLoading(false);});
   return()=>{live=false;};
  },[db,state,catalogRevision]);
- const change=id=>{if(!ids.has(id))return;setTab(id);onTabChange?.(id);};
+ const change=id=>{
+  if(!ids.has(id)||id===tab)return;
+  if((tab==='questions'||tab==='exams')&&questionBankDirty&&
+     !window.confirm('You have unsaved Question Bank changes. Discard them and leave this page?'))return;
+  setQuestionBankDirty(false);setTab(id);onTabChange?.(id);
+ };
  const asp=courses.find(c=>c.slug==='asp');
  if(state!=='ready')return <section className="at-access-state"><LockKeyhole size={34}/>
   <h2>{state==='checking'?'Verifying your Admin account…':'Admin Tools access restricted'}</h2>
@@ -79,12 +86,12 @@ export default function AdminToolsWorkspace({db,initialTab='overview',onExit,onT
   {state==='blocked'&&<button className="at-primary" onClick={()=>setRevision(n=>n+1)}><RefreshCw size={16}/> Retry verification</button>}
  </section>;
  return <div className="admin-tools-workspace">
-  <header className="at-hero">
+  <header className={"at-hero "+(tab==='questions'?"p30-hero":"")}>
    <div className="at-hero-content">
     <div className="at-eyebrow"><ShieldCheck size={15}/> VERIFIED ADMIN WORKSPACE</div>
-    <h1>Admin <span>Tools</span></h1>
-    <p>One place to manage learning, questions, exams, people and the system. Every action is permission-checked by Supabase.</p>
-    <div className="at-hero-pills"><span>Live database</span><span>Protected question bank</span><span>Release controls</span></div>
+    <h1>{tab==='questions'?<>Question <span>Bank</span></>:<>Admin <span>Tools</span></>}</h1>
+    <p>{tab==='questions'?'Upload, review and classify questions, then assign them to Lessons, Practice and Mock Exams.':'One place to manage learning, questions, exams, people and the system. Every action is permission-checked by Supabase.'}</p>
+    <div className="at-hero-pills"><span>Live database</span><span>Course scoped</span><span>Protected actions</span></div>
    </div>
    <div className="at-hero-art" aria-hidden="true"><div className="at-orbit at-orbit-one"/><div className="at-orbit at-orbit-two"/><GraduationCap size={45}/></div>
    {onExit&&<button type="button" className="at-back" onClick={onExit}><ArrowLeft size={16}/> Back to courses</button>}
@@ -100,10 +107,10 @@ export default function AdminToolsWorkspace({db,initialTab='overview',onExit,onT
    {tab==='courses'&&<AdminCoursesPanel db={db}/>}
    {tab==='qualifications'&&<React.Suspense fallback={<div className="at-empty">Loading qualifications…</div>}><QualificationsWorkspace admin/></React.Suspense>}
    {tab==='questions'&&<AdminCourseBank db={db} courses={courses} asp={asp} mode="bank"
-     coursesLoading={coursesLoading} coursesError={coursesError}
+     coursesLoading={coursesLoading} coursesError={coursesError} onDirtyChange={bankDirtyChanged}
      onRefreshCourses={()=>setCatalogRevision(v=>v+1)} onGoToCourses={()=>change('courses')}/>}
    {tab==='exams'&&<AdminCourseBank db={db} courses={courses} asp={asp} mode="mock"
-     coursesLoading={coursesLoading} coursesError={coursesError}
+     coursesLoading={coursesLoading} coursesError={coursesError} onDirtyChange={bankDirtyChanged}
      onRefreshCourses={()=>setCatalogRevision(v=>v+1)} onGoToCourses={()=>change('courses')}/>} 
    {tab==='users'&&<AdminUsersPanel db={db}/>}
    {tab==='subscriptions'&&<React.Suspense fallback={<div className="at-empty">Loading subscription management…</div>}><AdminSubscriptionsPanel db={db}/></React.Suspense>}

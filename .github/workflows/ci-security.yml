@@ -155,6 +155,9 @@ jobs:
       - name: P29 per-question Active/Mock Exam and Course Lesson Quiz selection contract
         run: npm run test:p29:bank
 
+      - name: P30 compact Question Bank, staged edits and one atomic Save contract
+        run: npm run test:p30:bank
+
       - name: P5 native fullscreen and exit policy contracts
         run: npm run test:p5
 
@@ -308,6 +311,9 @@ jobs:
 
       - name: P29 real upgrade compatibility on original P28 then P28.2 (old and new Bank RPC)
         run: bash scripts/test-p29-forward-upgrade-postgres-smoke.sh
+
+      - name: P30 single-request atomic Admin Question Bank save and Mock/Level Up protection
+        run: bash scripts/test-p30-postgres-smoke.sh
 
       - name: Test scope disclosure
         run: echo "Ephemeral local PostgreSQL smoke only; live Supabase Auth, Storage, Data API and device tests still pending."

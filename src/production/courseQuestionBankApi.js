@@ -50,6 +50,36 @@ export async function reserveNonAspMockQuestion(db,id){
  return call(db,'lms_p28_mark_nonasp_mock',{p_question_id:checkId(id),
   p_confirmation:'RESERVE NON-ASP MOCK ONLY'});
 }
+// Single atomic Admin RPC for all staged rows, NOT one request per switch.
+export async function getCourseBankBatchCapabilities(db){
+ const x=await call(db,'lms_p30_bank_capabilities');
+ if(x?.version!=='p30-v1'||x.maxBatch!==500||x.atomic!==true)
+  throw Error('Unexpected Question Bank Batch API version.');
+ return x;
+}
+export async function saveCourseBankBatch(db,courseId,rows){
+ checkId(courseId);
+ if(!Array.isArray(rows)||rows.length<1||rows.length>500)
+  throw Error('Save between 1 and 500 pending Question Bank edits.');
+ const ids=new Set();
+ for(const r of rows){
+  checkId(r.questionId);
+  if(ids.has(r.questionId))throw Error('Question appears twice in one batch.');
+  ids.add(r.questionId);
+  if(typeof r.isActive!=='boolean'||typeof r.mockCandidate!=='boolean'
+   ||typeof r.expectedActive!=='boolean'||typeof r.expectedMockCandidate!=='boolean'
+   ||!['unclassified','low','medium','high'].includes(r.difficulty)
+   ||typeof r.expectedDifficulty!=='string'
+   ||typeof r.expectedApprovalState!=='string'
+   ||(r.addLessonId&&!uuid.test(r.addLessonId)))
+   throw Error('Invalid staged Question Bank change.');
+ }
+ const response=await call(db,'lms_p30_save_question_bank',{p_course_id:courseId,p_changes:rows});
+ if(!response||response.requested!==rows.length||!Number.isInteger(response.saved)
+  ||response.saved<0||response.saved>rows.length)
+  throw Error('Question Bank Save response could not be verified.');
+ return response;
+}
 export async function setQuestionBankFlags(db,questionId,isActive,mockCandidate){
  if(typeof isActive!=='boolean'||typeof mockCandidate!=='boolean')
   throw Error('Select an explicit Active / Mock Exam state.');
