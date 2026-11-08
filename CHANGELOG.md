@@ -1,3 +1,9 @@
+## 2026-11-08 — P32: Lesson Quiz published visibility diagnosis
+- User's learner screenshot showed existing Knowledge Check section but 0 published questions. Repo confirms the P30/P28 Lesson selector creates a secure P22 link, while P22 learner RPC returns only Published quiz rows. Draft-source questions remain hidden pending independent approval + explicit publish; no evidence of the exact live lesson/question state was available.
+- Admin Question Bank now shows read-only actual-P22 per-Lesson Published and Not published totals and direct Open Lesson Quiz deep-link; Course Builder opens the exact Course/Domain/Topic/Lesson and scrolls to it.
+- Admin Lesson Quiz editor shows actual published/pending status and warns when saved questions remain invisible. Added read-only SQL report for Course/Lesson UUID + approved/pending/missing link preflight; no SQL migration or live data edits.
+- Preserves P30 Save All, P6A independent ASP review, P9B official Mock exclusion, P22/RLS learner Auth, published-only quiz and server-side answer scoring. Regression P32 added.
+
 ## 2026-11-08 — P31 Question Bank lesson assignment visible in Learner Quiz
 - Kept Course → Domain → Topic → Lesson and P23 single-page Video → Study Material/PDF → Knowledge Check/Quiz.
 - P30 approved+Active+non-Mock Lesson links publish via the existing P28/P22 server path; Draft links remain unpublished pending independent question approval and explicit Course Builder publish. Admin Save now explains this distinction.
