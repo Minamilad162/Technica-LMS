@@ -1,7 +1,7 @@
 // P34B. A configurable Mock from Admin-selected Mock candidates.
 // Does NOT modify or substitute the immutable P9B/P10 official 200-item exam.
 import {officialMockSecondsLeft} from './mockApi.js';
-const uuid=/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+const uuid=/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 async function rpc(db,name,args){
  if(!db||typeof db.rpc!=='function')throw Error('Verified Supabase login required.');
  const {data,error}=await db.rpc(name,args);
