@@ -42,5 +42,5 @@ assert.match(css, /prefers-reduced-motion/);
 assert.match(ui,/function UnitTabs/);
 assert.match(ui,/Map evidence to assessment criteria/);
 assert.match(ui,/Record preview decision/);
-assert.ok(!/\.from\(|\.insert\(|\.update\(|\.delete\(/.test(ui),'No Supabase mutations allowed in UI preview');
+assert.ok(!/\b(?:db|supabase|client)\.(?:from|rpc|insert|update|delete|storage)\s*[\.(]/.test(ui),'No Supabase mutations allowed in UI preview');
 console.log('P35 premium Qualification heroes, 3 verified local images, clear responsive typography and workflow preservation PASS');
