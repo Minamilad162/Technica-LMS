@@ -47,7 +47,7 @@ export default function AdminLessonQuizEditor({db,lessonId,courseId}){
   return()=>{active=false;};
  },[db,courseId,picker,query,page,domainFilter,difficulty]);
  const addFromBank=async q=>{
-  if(saving||q.mockExclusive||q.approvalState==='archived')return;
+  if(saving||q.mockExclusive||q.mockCandidate||!q.isActive||q.approvalState==='archived')return;
   setSaving(true);setError('');setNotice('');
   try{
    await attachBankToLesson(db,lessonId,q.id,q.approvalState==='approved');
@@ -115,7 +115,7 @@ export default function AdminLessonQuizEditor({db,lessonId,courseId}){
    </div>
    <small>Choose existing questions from this Course Question Bank. Approved questions publish immediately; Drafts remain hidden. Mock-only questions are excluded.</small>
    {bankLoading?<p>Loading questions…</p>:<div className="p28-quiz-choices">
-    {bank.items.filter(q=>!q.mockExclusive&&q.approvalState!=='archived').map(q=><div key={q.id}>
+    {bank.items.filter(q=>!q.mockExclusive&&!q.mockCandidate&&q.isActive&&q.approvalState!=='archived').map(q=><div key={q.id}>
      <span><b>{q.prompt}</b><small>{q.approvalState} · {q.sourceId}</small></span>
      <button type="button" className="btn btn-secondary"
       disabled={saving||items.some(item=>item.bank_question_id===q.id)}
