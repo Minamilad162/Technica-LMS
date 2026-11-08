@@ -28,6 +28,7 @@ export default function AdminCourseBank({db,courses=[],asp,onUpdate,onDirtyChang
  const [reviewOpen,setReviewOpen]=useState(false);
  const reviewRef=useRef(null);
  const [batchReady,setBatchReady]=useState(false),[batchLoading,setBatchLoading]=useState(true);
+ const [batchMode,setBatchMode]=useState('unverified');
  const [batchError,setBatchError]=useState('');
  const dirtyCount=Object.keys(staged).length;
  const pendingCount=dirtyCount+(releaseLessonId?1:0);
@@ -38,9 +39,9 @@ export default function AdminCourseBank({db,courses=[],asp,onUpdate,onDirtyChang
    &&(!bank.items.length||typeof bank.items[0].isActive==='boolean');
  useEffect(()=>{if(!courses.some(c=>c.id===courseId))setCourseId(preferredQuestionBankCourse(courses)?.id||'');},[courses,courseId]);
  useEffect(()=>{
-  let live=true;setBatchReady(false);setBatchLoading(true);setBatchError('');
+  let live=true;setBatchReady(false);setBatchMode('unverified');setBatchLoading(true);setBatchError('');
   getCourseBankBatchCapabilities(db)
-   .then(()=>{if(live)setBatchReady(true);})
+   .then(c=>{if(live){setBatchMode(c.mode);setBatchReady(true);}})
    .catch(e=>{if(live)setBatchError('P34 One-Save publish migration is required on this database: '+fail(e));})
    .finally(()=>{if(live)setBatchLoading(false);});
   return()=>{live=false;};
@@ -131,13 +132,15 @@ export default function AdminCourseBank({db,courses=[],asp,onUpdate,onDirtyChang
   try{
    const payload=stagedToBatch(staged);
    if(payload.length>500)throw Error('Maximum 500 staged questions in one save.');
-   const result=await saveCourseBankBatch(db,courseId,payload,releaseLessonId||null);
+   const result=await saveCourseBankBatch(db,courseId,payload,releaseLessonId||null,batchMode);
    setStaged({});setReleaseLessonId('');setSelectedIds([]);
-   setNotice('Saved in one transaction: '+result.saved+' question setting(s), '+
-    (result.published||0)+' Lesson Quiz question(s) published'+
-    (result.linked?' · '+result.linked+' new Lesson link(s)':'')+
-    (result.unpublished?' · '+result.unpublished+' disabled quiz item(s) unpublished':'')+
-    '. Mock-selected questions are available in the separate Selected Mock Test.');
+   setNotice(batchMode==='p34'
+    ?'Saved in one transaction: '+result.saved+' question setting(s), '+
+      (result.published||0)+' Lesson Quiz question(s) published'+
+      (result.linked?' · '+result.linked+' new Lesson link(s)':'')+
+      (result.unpublished?' · '+result.unpublished+' disabled quiz item(s) unpublished':'')+
+      '. Mock-selected questions are available in the separate Selected Mock Test.'
+    :'Saved '+result.saved+' question settings using legacy P30. Draft Lesson links are NOT learner-published, and Mock selections are NOT yet available as a Selected Mock Test. Install P34A and P34B to enable one-save publication.');
    refresh(true);
   }catch(e){setError('No partial changes saved. Your pending selections are retained. '+fail(e));}
   finally{setBusy(false);}
@@ -263,6 +266,11 @@ export default function AdminCourseBank({db,courses=[],asp,onUpdate,onDirtyChang
    This ASP Course has slug <code>{selected?.slug||'(missing)'}</code> rather than <code>asp</code>.
    Verify the original Course ID before uploading or changing questions; do not create a duplicate Course.
   </p>}
+  {selected&&batchReady&&batchMode==='p30'&&<p role="status" className="at-disclaimer">
+   P34A/P34B are not both installed on this Supabase database. Existing P30 Question Bank editing remains available.
+   <strong> Legacy saves do not make Draft Lesson Quiz questions or Selected Mock tests visible to learners.</strong>
+   Apply the two P34 migrations to enable one-save publication.
+  </p>}
   {selected&&!batchLoading&&!batchReady&&<p role="status" className="at-disclaimer">
    {batchError||'This database requires P34 One-Save publish before inline controls are enabled.'}
    The Question Bank list remains visible, but unsaved inline edits cannot be saved yet.
@@ -304,7 +312,8 @@ export default function AdminCourseBank({db,courses=[],asp,onUpdate,onDirtyChang
   {selected&&<>
    <p className="p31-lesson-publish-note">
     <BookOpen size={16}/> Assigning a question to a Lesson Quiz links it to that Lesson.
-    <strong> Active, non-Mock questions publish immediately to the selected Lesson Quiz on Save All Changes</strong> — including imported Drafts. Questions ticked for Mock are included in the separate Selected Mock Test.
+    {batchMode==='p34'?<><strong> Active, non-Mock questions publish immediately to the selected Lesson Quiz on Save All Changes</strong> — including imported Drafts. Mock ticks go to Selected Mock Test.</>:<>
+     <strong> Legacy P30 mode:</strong> editing is available, but Drafts cannot publish until P34A/P34B are installed.</>}
    </p>
    {!!lessons.length&&<div className="p32-publication-status at-surface" aria-label="Saved Lesson Quiz publication status">
     <div className="p32-publication-select">
@@ -327,7 +336,7 @@ export default function AdminCourseBank({db,courses=[],asp,onUpdate,onDirtyChang
     {mode==='bank'&&inspectState.data?.pending>0&&<div className="p33-next-steps">
      <label className="p34-release-option">
       <input type="checkbox" aria-label="Publish saved Lesson questions on Save All Changes"
-       checked={releaseLessonId===inspectLessonId} disabled={!canEdit||busy}
+       checked={releaseLessonId===inspectLessonId} disabled={!canEdit||busy||batchMode!=='p34'}
        onChange={e=>setReleaseLessonId(e.target.checked?inspectLessonId:'')}/>
       Publish {inspectState.data.pending} saved Lesson question(s) on Save All Changes
      </label>
@@ -425,7 +434,7 @@ export default function AdminCourseBank({db,courses=[],asp,onUpdate,onDirtyChang
      <button type="button" className="at-outline" onClick={discard} disabled={!pendingCount||busy}><Undo2 size={15}/> Discard</button>
      <button type="button" className="at-primary p30-save-all" onClick={()=>void saveAll()}
       disabled={!pendingCount||busy||!canEdit||dirtyCount>500}><Save size={16}/>
-      {busy?'Saving…':'Save All Changes'}</button>
+      {busy?'Saving…':batchMode==='p30'?'Save Settings (P30 Legacy)':'Save All Changes'}</button>
     </div>
    </div>
    {dirtyCount>500&&<p role="alert" className="at-error">Maximum 500 edits per atomic save. Discard or reduce the staged changes before saving.</p>}
