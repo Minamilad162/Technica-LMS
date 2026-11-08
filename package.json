@@ -79,7 +79,8 @@
     "test:p31:lesson-quiz": "node scripts/test-p31-learner-lesson-quiz.mjs",
     "test:p32:quiz-visibility": "node scripts/test-p32-lesson-quiz-visibility.mjs",
     "test:p33:learner-quiz": "node scripts/test-p33-learner-quiz-tab.mjs",
-    "test:p34:one-save": "node scripts/test-p34-one-save.mjs"
+    "test:p34:one-save": "node scripts/test-p34-one-save.mjs",
+    "test:p34:compatibility": "node scripts/test-p34-compatibility.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.58.0",
