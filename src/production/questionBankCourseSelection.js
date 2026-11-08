@@ -1,7 +1,7 @@
 // Pure UI catalog selection. Never manufacture a Course or rewrite its ID/slug.
 // The ASP P6A/P9B backend identifies the controlled Course by slug='asp'.
 const clean=x=>String(x||'').trim().toLowerCase().replace(/\s+/g,' ');
-const aspTitles=new Set(['asp','asp course','associated safety professional','associated safety professional course']);
+const aspTitles=new Set(['asp','asp course','associate safety professional','associate safety professional course','associated safety professional','associated safety professional course']);
 // Exact common title variants. Ambiguous matches are never auto-repaired.
 export const isAspCourseTitle=course=>{
  const title=clean(course?.title).replace(/[–—]/g,'-');
@@ -10,7 +10,12 @@ export const isAspCourseTitle=course=>{
   'asp: associated safety professional',
   'asp (associated safety professional)',
   'associated safety professional (asp)',
-  'associated safety professional - asp'
+  'associated safety professional - asp',
+  'asp - associate safety professional',
+  'asp: associate safety professional',
+  'asp (associate safety professional)',
+  'associate safety professional (asp)',
+  'associate safety professional - asp'
  ].includes(title);
 };
 export const isOfficialAspCourse=course=>clean(course?.slug)==='asp';

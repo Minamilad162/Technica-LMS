@@ -287,7 +287,7 @@ export default function AdminCourseBank({db,courses=[],asp,onUpdate,onDirtyChang
    <div className="p28-catalog-actions"><button className="at-outline" onClick={()=>onRefreshCourses?.()} type="button" disabled={coursesLoading}>Retry</button>
     <button className="at-primary" onClick={()=>onGoToCourses?.()} type="button">Open Courses</button></div>
   </div>}
-  {aspIdentityMismatch&&<div className="at-disclaimer" role="alert">
+  {aspIdentityMismatch&&<div className="at-disclaimer p42-asp-repair" role="alert">
    <strong>Existing ASP Course needs its internal identifier linked.</strong>
    <p>This Course is saved as <code>{selected?.slug||'(missing)'}</code> instead of <code>asp</code>.
     Your existing questions and Course ID will remain unchanged.</p>
@@ -309,7 +309,7 @@ export default function AdminCourseBank({db,courses=[],asp,onUpdate,onDirtyChang
    <OfficialMockBankFinalizer db={db} course={selected}
     disabled={pendingCount>0||busy||aspIdentityMismatch||repairingAsp}
     revision={revision} onReserved={()=>refresh(true)}/>}
-  {selected?.slug==='asp'&&selected.publication_state!=='published'&&<div className="at-disclaimer" role="status">
+  {selected?.slug==='asp'&&selected.publication_state!=='published'&&<div className="at-disclaimer p42-asp-repair" role="status">
    <strong>Publish the ASP Course before learners can take this Mock.</strong>
    <p>Reserved questions remain unchanged. This Course is currently {selected.publication_state} and is not in the learner catalogue.</p>
    <button type="button" className="at-outline" onClick={()=>onGoToCourses?.()}>Open Courses</button>

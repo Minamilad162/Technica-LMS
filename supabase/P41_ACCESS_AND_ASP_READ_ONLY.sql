@@ -7,12 +7,12 @@ SELECT current_database() AS database_name,
  (SELECT count(*) FROM public.lms_courses) AS total_courses,
  (SELECT count(*) FROM public.lms_courses WHERE slug='asp') AS canonical_asp_count,
  (SELECT count(*) FROM public.lms_courses
-  WHERE lower(btrim(title)) IN ('asp','asp course','associated safety professional',
-    'associated safety professional course')) AS asp_named_count;
+  WHERE lower(btrim(title)) IN ('asp','asp course','associate safety professional','associated safety professional',
+    'associate safety professional course','associated safety professional course')) AS asp_named_count;
 SELECT id,slug,title,publication_state,created_at
  FROM public.lms_courses
  WHERE slug='asp' OR lower(btrim(title)) IN
-  ('asp','asp course','associated safety professional','associated safety professional course')
+  ('asp','asp course','associate safety professional','associated safety professional','associate safety professional course','associated safety professional course')
  ORDER BY created_at;
 -- Distinguish genuinely missing ASP from existing ASP with incorrect slug or Draft status.
 -- The official Mock MUST NOT be populated with another course's unrelated questions.

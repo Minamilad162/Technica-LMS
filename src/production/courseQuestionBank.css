@@ -232,3 +232,11 @@
 @media(max-width:600px){.p40-finalizer-intro>div{flex-basis:calc(100% - 35px)}
  .p40-finalizer-intro button,.p40-finalizer-load button{width:100%;justify-content:center}
  .p40-finalizer-load span{width:100%;text-align:center}}
+
+/* P42: a clear, compact course-identity/publishing repair path for Admins. */
+.p42-asp-repair{display:grid;align-items:start;gap:8px;padding:18px 20px}
+.p42-asp-repair strong{color:#155e61;font-size:15px}
+.p42-asp-repair p{margin:0;color:#516f73;line-height:1.55}
+.p42-asp-repair button{width:max-content;max-width:100%;min-height:40px}
+.p42-asp-repair small{display:block;line-height:1.5;color:#648388}
+@media(max-width:560px){.p42-asp-repair button{width:100%}}
