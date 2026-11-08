@@ -51,6 +51,12 @@ export async function reserveNonAspMockQuestion(db,id){
   p_confirmation:'RESERVE NON-ASP MOCK ONLY'});
 }
 // Single atomic Admin RPC for all staged rows, NOT one request per switch.
+export async function getCourseBankBatchCapabilities(db){
+ const x=await call(db,'lms_p30_bank_capabilities');
+ if(x?.version!=='p30-v1'||x.maxBatch!==500||x.atomic!==true)
+  throw Error('Unexpected Question Bank Batch API version.');
+ return x;
+}
 export async function saveCourseBankBatch(db,courseId,rows){
  checkId(courseId);
  if(!Array.isArray(rows)||rows.length<1||rows.length>500)
