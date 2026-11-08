@@ -43,7 +43,7 @@ export default function LiveCoursesPage(){
    setNotice(editing==='new'?'Draft course created in Supabase.':'Course details saved in Supabase.');
    if(editing==='new')setExpanded(item.id);
    setEditing(null);refresh();
-  }catch(err){setError(err.message||'Supabase rejected the change. No preview fallback was used.');}
+  }catch(err){setError(err.message||'The change could not be saved.');}
   finally{setSaving(false);}
  };
  if(status!=='ready')return <div className="live-authoring-container"><div className="live-authoring-state" role={status==='error'?'alert':'status'}>
@@ -53,10 +53,10 @@ export default function LiveCoursesPage(){
  </div></div>;
  const visible=courses.filter(c=>filter==='all'||c.publication_state===filter);
  return <div className="page-enter admin-courses-page live-authoring-container">
-  <div className="admin-page-heading"><div><span className="eyebrow">COURSE MANAGEMENT · SUPABASE</span><h1>Courses</h1>
-   <p className="page-subtitle">Your actual Supabase course catalog. New courses stay <b>Draft</b> until a separate publication review.</p>
+  <div className="admin-page-heading"><div><span className="eyebrow">COURSE MANAGEMENT</span><h1>Courses</h1>
+   <p className="page-subtitle">Your course catalog. New courses stay <b>Draft</b> until a separate publication review.</p>
   </div><div className="live-authoring-heading-actions"><button type="button" className="btn btn-secondary" onClick={refresh} disabled={loading}><RefreshCw size={16}/> Refresh</button><button className="btn" onClick={()=>openEdit(null)}><Plus size={17}/> Create course</button></div></div>
-  <div className="live-authoring-banner"><ShieldCheck size={17}/><span>Live database · Real Admin permissions · No automatic import from the old browser Demo · No auto-publish</span></div>
+  <div className="live-authoring-banner"><ShieldCheck size={17}/><span>Manage your course content and publication status.</span></div>
   {error&&!editing&&<div className="live-authoring-alert" role="alert"><AlertCircle size={16}/>{error}</div>}
   {notice&&<div className="live-authoring-success" role="status"><CheckCircle2 size={17}/>{notice}</div>}
   <div className="admin-course-filters" role="group" aria-label="Filter live courses">{[['all','All courses'],['draft','Drafts'],['published','Published'],['archived','Archived']].map(([id,label])=>
@@ -91,7 +91,6 @@ export default function LiveCoursesPage(){
    })}
    {!visible.length&&<div className="white-panel admin-empty">{courses.length?'No courses match the selected status.':'No live courses yet. Create the first Draft course using the button above.'}</div>}
    </div>}
-  <div className="live-authoring-secondary"><p>Need the older local-only course tools? Their data is not synced.</p><button className="btn btn-secondary" onClick={()=>navigate('/courses?legacyPreview=1')}>Open legacy demo preview</button></div>
   {editing&&<Modal title={editing==='new'?'Create Supabase Draft course':'Edit Supabase course details'} onClose={()=>{if(!saving)setEditing(null);}}>
    <form className="simple-fields" onSubmit={save}>
     <label>Course title<input autoFocus required maxLength={180} value={form.title} onChange={e=>setForm(v=>({...v,title:e.target.value}))}/></label>

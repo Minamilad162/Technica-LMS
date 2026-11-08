@@ -39,7 +39,7 @@ function AdminOnly({children}){const {state}=useDemo();return getAuthSession()?.
 function RoutePage({children,standalone=false}){return <><MotionSystem/><Layout standalone={standalone} onLogout={()=>{window.dispatchEvent(new Event('technica-demo-logout'))}}><React.Suspense fallback={<div className="route-chunk-fallback" role="status">Loading the selected page…</div>}>{children}</React.Suspense></Layout></>}
 export default function App(){
  const l=useLocation(),{update}=useDemo();
- const legacyPreview=legacyBrowserQa||new URLSearchParams(l.search).get('legacyPreview')==='1';
+ const legacyPreview=legacyBrowserQa; // Private historical QA never opens from a production query parameter.
  const [auth,setAuth]=useState(null),[authLoading,setAuthLoading]=useState(true),[authError,setAuthError]=useState('');
  useEffect(()=>{window.scrollTo({top:0,behavior:'instant'})},[l.pathname]);
  useEffect(()=>{
@@ -79,7 +79,7 @@ export default function App(){
  <Route path="/my-practice" element={<RoutePage><LiveLearnerPortal initialScreen="history"/></RoutePage>}/>
  <Route path="/my-progress" element={<RoutePage><LiveLearnerProgress/></RoutePage>}/>
  <Route path="/learning/course/:courseId" element={<RoutePage><LiveLearningCourse/></RoutePage>}/>
- <Route path="/learning/process-safety-foundations" element={<RoutePage><LegacyPreviewWarning><LearningPlayer/></LegacyPreviewWarning></RoutePage>}/>
+ <Route path="/learning/process-safety-foundations" element={legacyBrowserQa?<RoutePage><LegacyPreviewWarning><LearningPlayer/></LegacyPreviewWarning></RoutePage>:<Navigate to="/my-learning" replace/>}/>
  <Route path="/practice" element={legacyBrowserQa?<RoutePage><LegacyPreviewWarning><PracticePage/></LegacyPreviewWarning></RoutePage>:<Navigate to="/assessments?tab=practice" replace/>}/>
  <Route path="/practice/live" element={<RoutePage standalone><LivePracticePortal/></RoutePage>}/>
  <Route path="/practice/session" element={legacyBrowserQa?<RoutePage standalone><QuizPage kind="practice"/></RoutePage>:<Navigate to="/assessments?tab=practice" replace/>}/>

@@ -200,8 +200,8 @@ export default function LivePractice({db,user,course,domains=[],access,defaultMo
  const answered=attempt?.questions?.filter(q=>q.selectedIndex!==null&&q.selectedIndex!==undefined).length||0;
  const revealed=finished?current:feedback[current?.id];
  return <div ref={containerRef} className="live-practice" aria-label="Secure practice engine">
-  <div className="live-practice-top"><div><span className="live-eyebrow">P5 · FULLSCREEN PROTECTED PRACTICE</span><h3><ShieldCheck size={21}/> Secure Practice Center</h3><p>Questions are selected and scored in Supabase. Exiting fullscreen closes this attempt and returns to the course setup.</p></div>{attempt&&<button type="button" className="live-secondary" onClick={()=>{void sealAttempt(attempt.attemptId);void leaveIntentionally();}}>Leave questions</button>}</div>
-  {!eligible?<div className="live-empty"><LockKeyhole size={22}/><b>Practice requires paid or manually granted course access</b><p>Trial lesson access alone does not unlock the full question bank.</p></div>:!attempt?<>
+  <div className="live-practice-top"><div><span className="live-eyebrow">SECURE PRACTICE</span><h3><ShieldCheck size={21}/> Secure Practice Center</h3><p>Questions are selected and scored in Supabase. Exiting fullscreen closes this attempt and returns to the course setup.</p></div>{attempt&&<button type="button" className="live-secondary" onClick={()=>{void sealAttempt(attempt.attemptId);void leaveIntentionally();}}>Leave questions</button>}</div>
+  {!eligible?<div className="live-empty"><LockKeyhole size={22}/><b>Practice is not available</b><p>This course needs an active learning access policy and approved questions.</p></div>:!attempt?<>
    <div className="live-mode-grid">{PRESETS.map(p=><button key={p.id} className={'live-mode-card '+(mode===p.id?'chosen':'')} onClick={()=>setMode(p.id)} type="button"><strong>{p.title}</strong><span>{p.desc}</span>{mode===p.id&&<Check size={17}/>}</button>)}</div>
    {['custom','domain','levelup'].includes(mode)&&<div className="live-practice-controls">
       <label>Number of questions<input type="number" min={1} max={50} value={count} onChange={e=>setCount(e.target.value)}/></label>
@@ -221,7 +221,7 @@ export default function LivePractice({db,user,course,domains=[],access,defaultMo
      !readiness?'Choose a session length; the server will check its three tiers.':
      readiness.ready?'Ready: after '+readiness.checkpoint+' initial Low questions, '+readiness.lowRequiredCorrect+' correct answers unlock the next stage; Medium needs '+readiness.mediumRequiredCorrect+' correct of its original '+readiness.mediumCheckpoint+'. Extra questions do not raise these targets. Questions adapt silently; total stops at '+count+'.':
       'Not ready: need '+readiness.requiredPerTier+' approved, non-Mock questions in EACH tier. Available Low '+readiness.low+', Medium '+readiness.medium+', High '+readiness.high+'.'}
-   </div>:<p className="live-practice-note"><TriangleAlert size={16}/> The exclusive 200-question Mock Exam is a separate locked 5-hour workflow. Level Up requires reviewed difficulty tags and the P8 server migration.</p>}
+   </div>:<p className="live-practice-note"><TriangleAlert size={16}/> The full Mock Exam is 200 questions in five hours. Adaptive sessions use approved, difficulty-rated questions.</p>}
    <button className="live-primary" disabled={busy||!eligible||(mode==='levelup'&&(!readyForCurrent||readinessBusy))} onClick={begin} type="button"><PlayCircle size={17}/>{busy?'Preparing your questions…':'Start practice'}</button>
   </>:<>
    <div className="live-attempt-bar"><b>{finished?'Review your result':(attempt.mode==='quick10'?'Quick 10':attempt.mode==='timed25'?'Timed Quiz':attempt.mode==='levelup'?'Level Up · Adaptive':'Custom Practice')}</b>

@@ -33,9 +33,9 @@ export function LiveLearningLibrary(){
  const navigate=useNavigate();
  const {loading,data,error,refresh}=useLiveLearningCatalog();
  return <main className="live-learning page-enter">
-  <header className="live-learning-header"><span className="eyebrow">LEARNING CENTER · SUPABASE</span><h1>My learning</h1><p>Published courses and your real enrollments, retrieved from your Technica LMS database.</p></header>
+  <header className="live-learning-header"><span className="eyebrow">LEARNING CENTER</span><h1>My learning</h1><p>Continue your learning across published courses.</p></header>
   <Loading loading={loading} error={error} refresh={refresh}/>
-  {!loading&&data&&<><div className="live-learning-security"><ShieldCheck size={17}/> Read-only verified learning catalog · No Demo course mixing or simulated progress</div>
+  {!loading&&data&&<>
    {data.progressError&&<p className="live-learning-note">{data.progressError}</p>}
    <section className="live-learning-grid" aria-label="Available courses">
     {data.courses.map(course=>{
@@ -44,14 +44,14 @@ export function LiveLearningLibrary(){
       <div className="live-learning-card-icon"><BookOpen size={23}/></div>
       <div><span className="live-learning-card-state">{course.publication_state==='published'?'PUBLISHED':'DRAFT · ADMIN ONLY'}</span><h2>{course.title}</h2><p>{course.summary||'A Technica Consult learning course.'}</p><small>Course ID: {course.slug}</small></div>
       <div className="live-learning-card-footer">
-       <span>{access?<><CheckCircle2 size={16}/> Enrolled / Admin</>:<><LockKeyhole size={16}/> Subscription required</>}</span>
+       <span>{access?<><CheckCircle2 size={16}/> Enrolled / Admin</>:<><LockKeyhole size={16}/> Access unavailable</>}</span>
        <button type="button" className="btn" onClick={()=>navigate('/learning/course/'+encodeURIComponent(course.id))}>{access?'Open course':'View course'} <ArrowRight size={16}/></button>
       </div>
      </article>;
     })}
     {!data.courses.length&&<div className="live-learning-empty"><GraduationCap size={25}/><b>No published courses available</b><p>The Admin can create Draft courses, then publish approved content in a separate controlled release step.</p></div>}
    </section>
-   <div className="live-learning-footer"><span>Legacy learning demonstration is preserved separately.</span><button className="btn btn-secondary" onClick={()=>navigate('/my-learning?legacyPreview=1')}>Open old Demo preview</button></div>
+   
   </>}
  </main>;
 }
@@ -78,7 +78,7 @@ export function LiveLearningCourse(){
   <Loading loading={loading} error={error} refresh={refresh}/>
   {!loading&&data&&!course&&<div className="live-learning-empty" role="alert"><LockKeyhole size={23}/><b>Course not available</b><p>This course is not visible to your authenticated account.</p></div>}
   {!loading&&course&&<><header className="live-learning-header"><span className="eyebrow">COURSE · SUPABASE</span><h1>{course.title}</h1><p>{course.summary||'Course details will be published by your instructor.'}</p></header>
-   {!access?<div className="live-learning-empty"><LockKeyhole size={23}/><b>Platform subscription required</b><p>Choose one time-based subscription for all published courses, Practice and Mock exams.</p>
+   {!access?<div className="live-learning-empty"><LockKeyhole size={23}/><b>Platform subscription required</b><p>Access is being configured. Contact your LMS administrator.</p>
     {course.publication_state==='published'&&<button className="btn" type="button"
      onClick={()=>navigate('/subscription-plans')}>View Plans <ArrowRight size={16}/></button>}
     </div>:
