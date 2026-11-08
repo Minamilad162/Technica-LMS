@@ -1,6 +1,7 @@
 import React,{useRef,useState} from 'react';
 import {BookOpen,CalendarDays,Check,CheckCircle2,ChevronRight,ClipboardCheck,ClipboardList,Clock3,FileText,FolderOpen,Info,MessageSquare,Plus,Send,ShieldCheck,Upload,Users,X} from 'lucide-react';
 import './qualificationExtras.css';
+import UnitMaterialPanel from './UnitMaterialPanel.jsx';
 
 // P26: Portfolio *preview* only, intentionally no Supabase access or official resource URLs.
 // Learners and admins see clearly identified demo/reference content until approved files and
@@ -31,21 +32,25 @@ export function PortfolioSnapshot({filesCount,mapped,criteriaCount,submitted,ass
   <div className="qfx-person"><span><ShieldCheck size={15}/> Verifier</span><strong>{verifier}</strong></div>
  </div>;
 }
-export function LearnerCourseSection({qualificationId,unitIndex,submitted,hasCriteria,onEvidence,onMapping}){
- const isNvqSample=qualificationId==='nvq6'&&unitIndex===0;
- return <div className="qfx-grid qfx-two">
-  <MiniCard title="Resources" icon={FolderOpen}>
-   {isNvqSample?<div className="qfx-resource-list">{exampleResources.map(name=><div key={name}><FileText size={17}/><span>{name}</span><small>Example · Not downloadable</small></div>)}</div>:
-    <Empty>No approved resources published for this unit.</Empty>}
-   <p className="qfx-footnote">Templates and guides will be downloadable after Admin publishes verified files.</p>
-  </MiniCard>
-  <MiniCard title="Actions" icon={ClipboardCheck}>
-   <div className="qfx-simple-details"><div><span>Status</span><strong>{submitted?'Submitted (demo)':'Not submitted'}</strong></div>
-    <div><span>Assessment</span><strong>{hasCriteria?'Criteria preview available':'Awaiting approved criteria'}</strong></div>
-    <div><span>Deadline</span><strong>Not set</strong></div></div>
-   <button className="qfx-action" type="button" onClick={onEvidence}>View Evidence <ChevronRight size={16}/></button>
-   <button className="qfx-text-action" type="button" onClick={onMapping} disabled={!hasCriteria}>Map criteria</button>
-  </MiniCard>
+export function LearnerCourseSection({unitCode,qualificationId,unitIndex,submitted,hasCriteria,onEvidence,onMapping}){
+ const isNvqReference=qualificationId==='nvq6'&&unitIndex===0;
+ return <div className="qfx-course-material-layout">
+  <UnitMaterialPanel key={unitCode} unitCode={unitCode}/>
+  <aside className="qfx-course-sidebar" aria-label="Unit resources and actions">
+   <MiniCard title="Resources" icon={FolderOpen}>
+    {isNvqReference?<><div className="qfx-example-tag">REFERENCE FROM WALKTHROUGH</div><div className="qfx-resource-list">
+      {exampleResources.map(name=><div key={name}><FileText size={17}/><span>{name}</span><small>Not downloadable · not supplied</small></div>)}
+     </div></>:<Empty>No approved resources published for this unit. The source outline is available.</Empty>}
+    <p className="qfx-footnote">The study outline and its source PDF are on this Unit page. Assignment briefs and downloadable templates require authorised centre files.</p>
+   </MiniCard>
+   <MiniCard title="Actions" icon={ClipboardCheck}>
+    <div className="qfx-simple-details"><div><span>Status</span><strong>{submitted?'Submitted (demo)':'Not submitted'}</strong></div>
+     <div><span>Criteria</span><strong>{hasCriteria?'Sample criteria available':'Full rubric not imported'}</strong></div>
+     <div><span>Deadline</span><strong>Not set</strong></div></div>
+    <button className="qfx-action" type="button" onClick={onEvidence}>View Evidence <ChevronRight size={16}/></button>
+    <button className="qfx-text-action" type="button" onClick={onMapping} disabled={!hasCriteria}>Map criteria</button>
+   </MiniCard>
+  </aside>
  </div>;
 }
 export function LearnerContactSection({qualificationId,unitIndex,submitted}){
@@ -90,7 +95,7 @@ export function AdminResourcesSection({onNotify,unitRef,resources=[],onResources
   if(added.length){onResourcesChange([...resources,...added]);onNotify('File names stored in the preview only. No upload occurred.');}
   e.target.value='';
  };
- return <div className="qfx-grid qfx-two">
+ return <><UnitMaterialPanel key={unitRef} unitCode={unitRef} compact/><div className="qfx-grid qfx-two">
   <MiniCard title="Unit Resources" icon={FolderOpen}>
    <p className="qfx-muted">Unit {unitRef} · Draft guidance and templates.</p>
    {resources.length?<div className="qfx-resource-list">{resources.map(item=><div key={item.id}><FileText size={17}/><span>{item.name}</span><small>{item.type}</small><button type="button" title={'Remove '+item.name} aria-label={'Remove '+item.name} onClick={()=>onResourcesChange(resources.filter(x=>x.id!==item.id))}><X size={16}/></button></div>)}</div>:<Empty>No unit resources added.</Empty>}
@@ -102,7 +107,7 @@ export function AdminResourcesSection({onNotify,unitRef,resources=[],onResources
     <button type="button" className="qfx-outline" onClick={()=>inputRef.current?.click()}><Upload size={15}/> Select files</button></div>
    <p className="qfx-footnote">Draft names only. Publication requires approved Storage upload, permission checks and file versioning.</p>
   </MiniCard>
- </div>;
+ </div></>;
 }
 export function AdminPortfolioRecords({reviewHistory=[],criteria=[],unitRef,addNote,notes=[]}){
  const [draft,setDraft]=useState('');

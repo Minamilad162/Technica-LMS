@@ -1,0 +1,36 @@
+/* P34 - Unit-specific learning material from supplied PDF specifications.
+   Local to Qualifications, responsive and compatible with the P25 number tabs. */
+.qmat-panel{min-width:0;background:#fff;border:1px solid #e2eaf5;border-radius:15px;box-shadow:0 5px 18px rgba(20,49,87,.045);padding:20px;color:#243d60}
+.qmat-head{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;border-bottom:1px solid #ebf0f7;padding-bottom:15px}
+.qmat-heading{display:flex;align-items:center;gap:12px;min-width:0}.qmat-heading>svg{width:39px;height:39px;padding:10px;border-radius:11px;color:#2e7ecb;background:#eaf4ff;flex-shrink:0}
+.qmat-heading h3{margin:0;color:#1f385e;font-size:17px;font-weight:840;letter-spacing:-.02em}.qmat-heading small{display:block;margin-top:3px;color:#8c9cb2;font-size:11px}
+.qmat-edition{font-size:10px;font-weight:750;color:#587dab;background:#eff6ff;border:1px solid #e0edfc;padding:6px 10px;border-radius:20px}
+.qmat-aim{padding:17px 0 4px}.qmat-label{display:block;font-size:11px;color:#2f7fc0;font-weight:840;margin-bottom:7px}
+.qmat-aim p{font-size:12px;line-height:1.8;color:#526d8c;margin:0}
+.qmat-block{margin-top:17px}.qmat-subheading{display:flex;align-items:center;gap:8px;padding:11px 0;margin-bottom:7px;border-bottom:1px solid #edf1f8;color:#3d7fbf}
+.qmat-subheading h4{color:#263e5f;font-size:13px;font-weight:830;letter-spacing:-.01em;margin:0}.qmat-subheading>span{margin-left:auto;font-size:10px;color:#94a5b9}
+.qmat-outcomes{list-style:none;display:grid;gap:6px;margin:8px 0 0;padding:0}
+.qmat-outcomes li{display:grid;grid-template-columns:29px minmax(0,1fr);gap:11px;padding:10px 8px;background:#f8fbff;border:1px solid #edf1fa;border-radius:9px;font-size:12px;color:#59718e;line-height:1.55}
+.qmat-outcomes b{color:#2d79bf;font-size:11px;font-weight:860}
+.qmat-topics{list-style:none;display:grid;gap:0;padding:0;margin:6px 0 0}
+.qmat-topics li{position:relative;padding:10px 6px 10px 20px;border-bottom:1px solid #edf1f7;color:#59728e;font-size:11.5px;line-height:1.65;overflow-wrap:anywhere}
+.qmat-topics li:before{content:'';position:absolute;top:16px;left:6px;width:6px;height:6px;background:#6ca7df;border-radius:50%}
+.qmat-more{display:inline-flex;gap:7px;align-items:center;border:0;background:transparent;color:#2d79c2;padding:12px 1px 3px;font-weight:800;font-size:11px;cursor:pointer}
+.qmat-more svg{transition:transform .18s}.qmat-more svg.up{transform:rotate(180deg)}
+.qmat-footnote{display:flex;gap:8px;align-items:flex-start;margin:17px 0 5px;padding:11px 12px;border:1px solid #e4edf6;background:#f8fbff;border-radius:10px;font-size:11px;color:#697f9e;line-height:1.55}
+.qmat-footnote svg{flex-shrink:0;color:#5b91c4}
+.qmat-source{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px;border-top:1px solid #e9eef6;margin-top:20px;padding-top:16px}
+.qmat-source>div{display:flex;align-items:center;gap:10px;min-width:0}
+.qmat-source>div>svg{color:#6e8fb4;flex-shrink:0}
+.qmat-source span{font-size:11px;font-weight:800;color:#385678}
+.qmat-source small{display:block;font-weight:500;color:#97a7b9;font-size:10px;margin-top:3px}
+.qmat-source a{display:inline-flex;align-items:center;justify-content:center;gap:6px;white-space:nowrap;padding:9px 12px;background:#fff;border:1px solid #c5dcf4;color:#2e6ca6;border-radius:9px;font-size:11px;font-weight:820;text-decoration:none}
+.qmat-source a:hover{background:#eef6fe}
+.qmat-compact{margin-bottom:15px}.qmat-compact .qmat-outcomes{grid-template-columns:repeat(2,minmax(0,1fr))}
+.qfx-course-material-layout{display:grid;grid-template-columns:minmax(0,1.75fr) minmax(240px,.75fr);gap:15px;align-items:start}
+.qfx-course-sidebar{display:grid;gap:15px;min-width:0}
+.qfx-course-sidebar .qfx-resource-list>div{flex-wrap:wrap}
+.qfx-resource-note{font-size:11px;color:#869bb3;line-height:1.5}
+@media(max-width:1000px){.qfx-course-material-layout{grid-template-columns:minmax(0,1fr)}.qfx-course-sidebar{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:680px){.qmat-panel{padding:14px}.qmat-heading h3{font-size:16px}.qmat-outcomes li{font-size:11px}.qmat-compact .qmat-outcomes,.qfx-course-sidebar{grid-template-columns:minmax(0,1fr)}.qmat-source>div{flex:1 1 100%}.qmat-source a{width:100%}}
+@media(prefers-reduced-motion:reduce){.qmat-more svg{transition:none}}

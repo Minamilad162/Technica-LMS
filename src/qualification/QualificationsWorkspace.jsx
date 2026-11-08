@@ -1,6 +1,7 @@
 import React,{useRef,useState} from 'react';
 import {ArrowLeft,ArrowRight,BookOpen,Check,CheckCircle2,ChevronRight,ClipboardCheck,FileImage,FileSpreadsheet,FileText,FolderOpen,GraduationCap,Info,Link2,LockKeyhole,MessageSquare,Plus,Save,Send,ShieldCheck,Upload,X} from 'lucide-react';
 import {QUALIFICATIONS,FIRST_LO,SAMPLE_EVIDENCE} from './qualificationData.js';
+import {getUnitSourceMaterial} from './qualificationUnitMaterial.js';
 import './qualifications.css';
 import {PortfolioSnapshot,LearnerCourseSection,LearnerContactSection,LearnerRecordsSection,AdminResourcesSection,AdminPortfolioRecords} from './QualificationExtras.jsx';
 
@@ -62,6 +63,7 @@ function LearnerQualifications(){
  const links=linksByUnit[key]||{};
  const submitted=!!submittedByUnit[key];
  const criteria=unitIndex===0?FIRST_LO[qualificationId].criteria:[];
+ const unitMaterial=getUnitSourceMaterial(qualification.units[unitIndex][0]);
  const lo=FIRST_LO[qualificationId];
  const mapped=criteria.filter(([code])=>files.some(file=>(links[file.id]||[]).includes(code))).length;
  const allMapped=criteria.length>0&&mapped===criteria.length;
@@ -104,15 +106,17 @@ function LearnerQualifications(){
    <PortfolioSnapshot filesCount={files.length} mapped={mapped} criteriaCount={criteria.length} submitted={submitted}/>
    <PaneTabs label="Unit sections" active={pane} onChange={setPane} tabs={[[ 'overview','Course',BookOpen],['evidence','Evidence',FolderOpen],['mapping','Mapping',Link2],['submission','Submit',Send],['contact','Contact',MessageSquare],['records','Records',ClipboardCheck]]}/>
    <main id="Unit-sections-panel" className="qf-pane-content" role="tabpanel">
-    {pane==='overview'&&<LearnerCourseSection qualificationId={qualificationId} unitIndex={unitIndex} submitted={submitted} hasCriteria={!!criteria.length} onEvidence={()=>setPane('evidence')} onMapping={()=>setPane('mapping')}/>}
+    {pane==='overview'&&<LearnerCourseSection unitCode={qualification.units[unitIndex][0]} qualificationId={qualificationId} unitIndex={unitIndex} submitted={submitted} hasCriteria={!!criteria.length} onEvidence={()=>setPane('evidence')} onMapping={()=>setPane('mapping')}/>}
     {pane==='evidence'&&<div className="qf-columns">
       <Card title={'Your Evidence ('+files.length+')'} className="qf-evidence-card" action={<>{chooseFile}{addEvidence}</>}>
        {files.length?<div className="qf-file-list">{files.map(file=><FileRow key={file.id} file={file} onRemove={submitted||fileProtected(file.id)?null:()=>removeFile(file.id)}/>)}</div>:<div className="qf-empty"><FileText size={25}/> No evidence yet.</div>}
        <div className="qf-card-footer"><Button disabled={!files.length||!criteria.length} onClick={()=>setPane('mapping')}>Map Evidence <ArrowRight size={16}/></Button></div>
       </Card>
-      <Card title="Unit details" className="qf-details-card">
-       {unitIndex===0?<><p className="qf-detail-code">Learning Outcome {lo.code}</p><p>{lo.title}</p><details className="qf-criteria-details"><summary>Assessment Criteria ({criteria.length})</summary><div>{criteria.map(([code,title])=><p key={code}><b>{code}</b> {title}</p>)}</div></details></>:
-        <div className="qf-empty qf-empty-compact">Assessment criteria not available for this unit yet.</div>}
+      <Card title="Unit Material" className="qf-details-card">
+       <p className="qf-detail-code">{unitMaterial?.learningOutcomes.length||0} {qualificationId==='nvq6'?'Competence':'Learning'} Outcomes</p>
+       <p>{unitMaterial?.aim||unitMaterial?.learningOutcomes[0]?.title||'Unit material not available yet.'}</p>
+       <Button variant="outline" onClick={()=>setPane('overview')}>Read Material <ArrowRight size={15}/></Button>
+       {unitIndex===0&&<details className="qf-criteria-details"><summary>Assessment Criteria ({criteria.length})</summary><div>{criteria.map(([code,title])=><p key={code}><b>{code}</b> {title}</p>)}</div></details>}
       </Card>
      </div>}
     {pane==='mapping'&&<Card className="qf-mapping-card" title="Map evidence to assessment criteria" action={criteria.length?coverage:null}>
