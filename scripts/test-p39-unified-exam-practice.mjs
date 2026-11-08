@@ -79,7 +79,7 @@ check(bank,"q.mockExclusive?'mock':q.mockCandidate?'candidate'",'Bank distinguis
 assert(!bank.includes('Mock-selected questions are available in the separate Selected Mock Test.'),
  'Question Bank must not promise hidden variable Selected Mock as the official exam');
 check(bank,'<OfficialMockBankFinalizer','Bank finalizer alongside P10 readiness');
-check(bank,'disabled={pendingCount>0||busy}','Cannot finalize while edits unsaved');
+check(bank,'disabled={pendingCount>0||busy||aspIdentityMismatch||repairingAsp}','Cannot finalize before all edits are saved and ASP identity is valid');
 check(finalizer,'loadMarkedMockCandidateIds(db,course.id)','Load only saved marked IDs');
 check(finalizer,'marked.length>200','More than 200 rejected');
 check(finalizer,'new Set(marked).size!==marked.length','Duplicate IDs rejected');
