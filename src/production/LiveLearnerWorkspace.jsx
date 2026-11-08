@@ -14,6 +14,7 @@ import {LearnerCourseCard,CourseDetailHero} from './LearnerCourseCard.jsx';
 const PremiumMyLearning=React.lazy(()=>import('./PremiumMyLearning.jsx'));
 const QualificationsWorkspace=React.lazy(()=>import('../qualification/QualificationsWorkspace.jsx'));
 import './liveLearnerJourney.css';
+import SubscriptionCountdown from './SubscriptionCountdown.jsx';
 
 const nav=[
  {id:'courses',label:'Courses',icon:BookOpen,group:'Learning'},
@@ -117,7 +118,7 @@ export default function LiveLearnerWorkspace({db,user,onSignOut,embedded=false,
   screen==='practice'?'Practice Center':'My Practice';
  return <div className={"lj-shell"+(embedded?" lj-embedded":"")+(screen==="qualifications"?" lj-qualification-mode":"")}>
   <header className="lj-top"><div className="lj-logo"><img alt="Technica Consult" src="/images/technica-logo.webp"/>
-   <b>TECHNICA CONSULT <span>LMS</span></b></div><div className="lj-account">
+   <b>TECHNICA CONSULT <span>LMS</span></b></div><SubscriptionCountdown subscription={catalog?.subscription} loading={loading} error={catalog?.subscriptionError||(!loading&&!catalog?'Subscription status unavailable':'')} onOpenPlans={()=>go('subscription')}/><div className="lj-account">
     <span><ShieldCheck size={14}/> {catalog?.subscription?'Platform Subscriber':'Secure learning'}</span><small>{user.email}</small>
     <button type="button" onClick={onSignOut}><LogOut size={16}/> Sign out</button></div></header>
   <div className="lj-layout"><aside className="lj-nav" aria-label="Learner navigation">

@@ -125,6 +125,9 @@ jobs:
       - name: P18 premium My Learning and P11 verified progress contract
         run: npm run test:p18
 
+      - name: P36 verified subscription remaining-days header countdown
+        run: npm run test:p36:countdown
+
       - name: P35 premium qualification card hero images and accessible typography
         run: npm run test:p35:cards
 
