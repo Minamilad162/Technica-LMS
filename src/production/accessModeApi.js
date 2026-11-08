@@ -13,3 +13,10 @@ export async function fetchLearningAccessMode(db){
   throw Error('Unexpected learning access policy from the server.');
  return {mode:data,openAccess:data==='open',installed:true};
 }
+
+export async function setLearningOpenAccess(db,enabled){
+ if(typeof enabled!=='boolean'||!db?.rpc)throw Error('Verified Admin and explicit access mode required.');
+ const {data,error}=await db.rpc('lms_p41_set_open_access',{p_enabled:enabled});
+ if(error||data!==enabled)throw Error('Learning access mode change was not confirmed by the server.');
+ return data;
+}

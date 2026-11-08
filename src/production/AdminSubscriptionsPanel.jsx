@@ -3,6 +3,7 @@ import {AlertTriangle,CalendarDays,CheckCircle2,Clock3,Plus,RefreshCw,
  ShieldCheck,Wallet,XCircle} from 'lucide-react';
 import {adminDecideSubscriptionRequest,adminRevokePlatformSubscription,
  adminSaveSubscriptionPlan,displayPlanPrice,fetchAdminSubscriptionOverview} from './subscriptionApi.js';
+import {fetchLearningAccessMode,setLearningOpenAccess} from './accessModeApi.js';
 import './adminSubscriptions.css';
 const date=v=>v&&Number.isFinite(Date.parse(v))?new Date(v).toLocaleDateString('en-GB'):'—';
 const planModel=p=>({
@@ -15,6 +16,14 @@ export default function AdminSubscriptionsPanel({db}){
   [revision,setRevision]=useState(0),[error,setError]=useState(''),[notice,setNotice]=useState('');
  const [editing,setEditing]=useState(null),[saving,setSaving]=useState(false),[busy,setBusy]=useState('');
  const [profiles,setProfiles]=useState({});
+ const [accessMode,setAccessMode]=useState({installed:false,openAccess:false,loading:true});
+ const [modeBusy,setModeBusy]=useState(false);
+ useEffect(()=>{let alive=true;
+  setAccessMode(x=>({...x,loading:true}));
+  fetchLearningAccessMode(db).then(x=>{if(alive)setAccessMode({...x,loading:false});})
+   .catch(e=>{if(alive){setAccessMode({installed:false,openAccess:false,loading:false});setError(e?.message||'Learning access policy unavailable.');}});
+  return()=>{alive=false;};
+ },[db,revision]);
  useEffect(()=>{let alive=true;setLoading(true);setError('');
   Promise.all([fetchAdminSubscriptionOverview(db),
    db.from('lms_profiles').select('id,full_name').limit(500)])
@@ -60,13 +69,35 @@ export default function AdminSubscriptionsPanel({db}){
   catch(e){setError(e?.message||'Revocation failed.');}
   finally{setBusy('');}
  };
+ const setMode=async next=>{
+  if(modeBusy||!accessMode.installed||accessMode.openAccess===next)return;
+  const message=next
+   ?'Open all PUBLISHED learning courses, quizzes, approved Practice and ready Mock to every ACTIVE signed-in learner? Drafts and Admin roles remain protected.'
+   :'Enable the subscription requirement again for users without a verified paid/manual grant? Some learners may immediately lose access.';
+  if(!window.confirm(message))return;
+  setModeBusy(true);setError('');setNotice('');
+  try{await setLearningOpenAccess(db,next);
+   setNotice(next?'Learning access opened for published courses.':'Subscription access requirements restored.');
+   refresh();
+  }catch(e){setError(e?.message||'Access mode change failed.');}
+  finally{setModeBusy(false);}
+ };
  const requests=data?.requests?.filter(x=>x.status==='pending')||[];
  const members=data?.subscriptions?.filter(s=>s.status==='active'&&Date.parse(s.ends_at)>Date.now())||[];
  return <div className="asub-shell at-animate" aria-label="Subscription plan management">
   <header className="at-section-title"><div><span className="at-eyebrow">MEMBERSHIP & ACCESS CONTROL</span>
    <h2>Subscription Plans</h2>
-   <p>One time-based membership unlocks every published Course, Practice and Assessment.</p></div>
+   <p>Manage membership plans and the platform access policy.</p></div>
    <button className="at-outline" type="button" onClick={refresh}><RefreshCw size={15}/> Refresh</button></header>
+  <div className="asub-access-mode" aria-label="Platform access mode">
+   <div><ShieldCheck size={20}/><span><strong>Learning access</strong>
+    <small>{accessMode.loading?'Checking access policy…':!accessMode.installed?'Access policy setup required':
+      accessMode.openAccess?'Open to active learners — published content only':'Subscription rules active'}</small></span></div>
+   <button type="button" className="at-primary" disabled={modeBusy||accessMode.loading||!accessMode.installed}
+    onClick={()=>void setMode(!accessMode.openAccess)}>
+    {modeBusy?'Updating…':accessMode.openAccess?'Enable subscription rules':'Open learning access'}
+   </button>
+  </div>
   <div className="asub-disclaimer"><ShieldCheck size={17}/> Plan prices and durations are editable.
    Existing active subscriptions keep their original term and price snapshots.
    Payment processing is not connected; approval below is explicitly a MANUAL grant.</div>
