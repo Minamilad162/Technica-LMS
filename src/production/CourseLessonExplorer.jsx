@@ -270,6 +270,7 @@ export default function CourseLessonExplorer({db,userId='',courseId,courseTitle,
        {name}{key==='quiz'&&!lessonLoading&&questions.length>0&&<span className="cle-quiz-count" aria-label={questions.length+' quiz questions'}>{questions.length}</span>}</button>)}
      </nav>
      {statusError&&<p className="cle-error" role="alert">{statusError}</p>}
+     {lessonError&&<p className="cle-error" role="alert">{lessonError}</p>}
      {lessonLoading?<div className="cle-notice" role="status">Loading your protected lesson…</div>:
       <div className="cle-single-page">
        <section id={'cle-video-'+selected.id} ref={videoSectionRef} className="cle-activity cle-activity-section" aria-labelledby={'cle-video-title-'+selected.id}>
