@@ -62,6 +62,8 @@ BEGIN
   THEN RAISE EXCEPTION 'Official reserved Mock question is immutable; selections cannot be changed'; END IF;
   RETURN jsonb_build_object('id',q.id,'isActive',q.is_active,'mockCandidate',true,'mockExclusive',true);
  END IF;
+ IF p_mock_candidate AND NOT p_is_active THEN
+  RAISE EXCEPTION 'Enable question before selecting it for Mock Exam'; END IF;
  IF p_mock_candidate AND NOT q.mock_candidate THEN
   IF q.approval_state <> 'draft'
      OR EXISTS(SELECT 1 FROM public.lms_practice_attempt_items WHERE question_id=q.id)
