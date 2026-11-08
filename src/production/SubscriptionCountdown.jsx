@@ -35,6 +35,6 @@ export default function SubscriptionCountdown({subscription,loading=false,error=
  </>;
  const cls='sc-countdown sc-'+status+(compact?' sc-compact':'');
  return onOpenPlans
-  ?<button type="button" className={cls} aria-label={labelId+'. Open subscription plans'} title={hint} onClick={onOpenPlans}>{content}</button>
-  :<div className={cls} aria-label={labelId} title={hint}>{content}</div>;
+  ?<button type="button" className={cls} data-feature="subscription-countdown" data-subscription-status={status} aria-label={labelId+'. Open subscription plans'} title={hint} onClick={onOpenPlans}>{content}</button>
+  :<div className={cls} data-feature="subscription-countdown" data-subscription-status={status} aria-label={labelId} title={hint}>{content}</div>;
 }
