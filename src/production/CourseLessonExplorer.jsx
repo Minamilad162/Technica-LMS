@@ -1,6 +1,7 @@
 import React,{useEffect,useMemo,useRef,useState} from 'react';
 import {ArrowLeft,ArrowRight,BookOpen,CheckCircle2,ChevronDown,ChevronRight,FileText,Layers3,LockKeyhole,Paperclip,PlayCircle,ShieldCheck,Video} from 'lucide-react';
 import {loadLessonContent} from './lessonMediaApi.js';
+import {fetchLessonQuiz,quizQuestionIdsChanged} from './lessonQuizSyncApi.js';
 import './courseLessonExplorer.css';
 
 const ProtectedLessonViewer=React.lazy(()=>import('./ProtectedLessonViewer.jsx'));
@@ -27,8 +28,11 @@ export default function CourseLessonExplorer({db,userId='',courseId,courseTitle,
  const [statusError,setStatusError]=useState(''),[saving,setSaving]=useState('');
  const [blocks,setBlocks]=useState([]),[questions,setQuestions]=useState([]),[answers,setAnswers]=useState({});
  const [lessonLoading,setLessonLoading]=useState(false),[lessonError,setLessonError]=useState('');
+ const [quizLoading,setQuizLoading]=useState(false),[quizError,setQuizError]=useState('');
+ const [pendingJump,setPendingJump]=useState('');
  const playerHeadingRef=useRef(null),videoSectionRef=useRef(null),materialSectionRef=useRef(null),quizSectionRef=useRef(null);
  const readingEnd=useRef(null),watchedVideos=useRef(new Set());
+ const quizRequest=useRef(0);
  const [quizResult,setQuizResult]=useState(null),[openDomains,setOpenDomains]=useState({});
  const selected=lessons.find(l=>l.id===active);
  const previewOnly=Boolean(selected&&demo&&!full&&!selected.isFreeIntro);
@@ -50,24 +54,33 @@ export default function CourseLessonExplorer({db,userId='',courseId,courseTitle,
   (async()=>{try{await fetchProgress();if(live)setStatusError('');}catch(e){if(live)setStatusError(e.message);}})();
   return()=>{live=false;};
  },[db,userId,courseId,lessons.length,adminPreview]);
+ // Load the published P22 quiz for the selected learner Lesson. Question Bank
+ // answer keys stay on the server, and Admin draft questions are preview-only.
  useEffect(()=>{
-  if(!active||!accessible){setBlocks([]);setQuestions([]);return;}
+  const request=++quizRequest.current;
+  if(!active||!accessible){
+   setBlocks([]);setQuestions([]);setQuizError('');setQuizLoading(false);
+   return;
+  }
   watchedVideos.current=new Set();
-  let live=true;setLessonLoading(true);setLessonError('');setQuizResult(null);setAnswers({});
-  Promise.all([
-   loadLessonContent(db,active),
-   adminPreview?db.from('lms_p22_lesson_quiz_questions')
-     .select('id,prompt,options,is_published,position').eq('lesson_id',active)
-     .order('position',{ascending:true}):
-     db.rpc('lms_p22_get_lesson_quiz',{p_lesson_id:active})
-  ]).then(([content,result])=>{
+  let live=true;setLessonLoading(true);setLessonError('');setQuizLoading(true);setQuizError('');
+  setQuizResult(null);setAnswers({});setQuestions([]);
+  Promise.allSettled([
+   loadLessonContent(db,active),fetchLessonQuiz(db,active,{adminPreview})
+  ]).then(([contentResult,quizResult])=>{
    if(!live)return;
-   setBlocks(content);
-   if(result.error){setQuestions([]);setLessonError(adminPreview?'Admin quiz preview unavailable. Verify P22 Admin read permission.':'Knowledge Check is not available until the P22 backend is installed.');}
-   else setQuestions(Array.isArray(result.data)?result.data:[]);
-  }).catch(e=>{if(live){setBlocks([]);setQuestions([]);setLessonError(e.message||'Could not load this lesson.');}})
-   .finally(()=>{if(live)setLessonLoading(false);});
-  return()=>{live=false;};
+   if(contentResult.status==='fulfilled')setBlocks(contentResult.value);
+   else{setBlocks([]);setLessonError(contentResult.reason?.message||'Could not load lesson material.');}
+   if(request!==quizRequest.current)return;
+   if(quizResult.status==='fulfilled')setQuestions(quizResult.value);
+   else{
+    setQuestions([]);
+    setQuizError(quizResult.reason?.message||'Published Knowledge Check unavailable.');
+   }
+  }).finally(()=>{
+   if(live){setLessonLoading(false);setQuizLoading(false);}
+  });
+  return()=>{live=false;quizRequest.current++;};
  },[db,active,accessible,adminPreview]);
  const section={video:blocks.filter(b=>b.block_type==='video'),
   reading:blocks.filter(b=>['text','heading'].includes(b.block_type)),
