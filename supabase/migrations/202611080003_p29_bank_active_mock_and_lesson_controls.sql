@@ -244,7 +244,7 @@ BEGIN
  IF v_existing_args IS NULL THEN
   RAISE EXCEPTION 'P29 requires the installed 7-argument P28.2 catalog'; END IF;
  v_definition:=replace(v_definition,$p29_signature$
-p_course_id uuid,p_search text,p_limit integer,p_offset integer,
+ p_course_id uuid,p_search text,p_limit integer,p_offset integer,
  p_domain_id uuid,p_difficulty text,p_usage text
 $p29_signature$,v_existing_args);
  EXECUTE v_definition;
