@@ -23,7 +23,8 @@ BEGIN
   RAISE EXCEPTION 'P30 missing verified prerequisites: %',array_to_string(missing,', ');
  END IF;
  IF to_regprocedure('public.lms_p30_save_question_bank(uuid,jsonb)') IS NOT NULL
- THEN RAISE EXCEPTION 'P30 already installed; do not replay'; END IF;
+  OR to_regprocedure('public.lms_p30_bank_capabilities()') IS NOT NULL
+ THEN RAISE EXCEPTION 'P30 already installed or partial conflict; do not replay'; END IF;
 END $p30_preflight$;
 
 -- One network request, one PostgreSQL transaction. ANY invalid row aborts all
@@ -130,8 +131,19 @@ BEGIN
    'linked',v_links,'unpublished',v_unpublished);
 END $p30_fn$;
 
-REVOKE ALL ON FUNCTION public.lms_p30_save_question_bank(uuid,jsonb)
+-- Read-only version probe so the UI can disable batch edit controls until this
+-- exact migration is present. Never use a write attempt for capability detection.
+CREATE FUNCTION public.lms_p30_bank_capabilities()
+RETURNS jsonb LANGUAGE plpgsql STABLE SECURITY DEFINER SET search_path='' AS $p30_caps$
+BEGIN
+ IF (SELECT auth.uid()) IS NULL OR NOT public.lms_p1_actor_is_admin()
+ THEN RAISE EXCEPTION 'Admin only'; END IF;
+ RETURN jsonb_build_object('version','p30-v1','maxBatch',500,'atomic',true);
+END $p30_caps$;
+REVOKE ALL ON FUNCTION public.lms_p30_save_question_bank(uuid,jsonb),
+ public.lms_p30_bank_capabilities()
  FROM PUBLIC,anon,authenticated;
-GRANT EXECUTE ON FUNCTION public.lms_p30_save_question_bank(uuid,jsonb)
+GRANT EXECUTE ON FUNCTION public.lms_p30_save_question_bank(uuid,jsonb),
+ public.lms_p30_bank_capabilities()
  TO authenticated,service_role;
 COMMIT;
