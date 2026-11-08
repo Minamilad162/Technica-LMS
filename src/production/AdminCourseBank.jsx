@@ -5,6 +5,7 @@ import {importCourseBank,listCourseBank,mappedImportRows,saveCourseBankBatch,get
 import {stagedQuestionEdit,stagedToBatch,originalQuestionValues,BANK_DIFFICULTIES} from './questionBankDraft.js';
 import {liveCourseTree} from './liveAuthoringApi.js';
 import {isAspCourseTitle,isOfficialAspCourse,preferredQuestionBankCourse,questionBankCatalogState} from './questionBankCourseSelection.js';
+import {getMockReadiness} from './mockApi.js';
 import {AdminQuestionsPanel,AdminMockPanel} from './AdminToolsPanels.jsx';
 import './courseQuestionBank.css';
 
@@ -27,6 +28,7 @@ export default function AdminCourseBank({db,courses=[],asp,onUpdate,onDirtyChang
  const [releaseLessonId,setReleaseLessonId]=useState('');
  const [inspectState,setInspectState]=useState({loading:false,data:null,error:''});
  const [reviewOpen,setReviewOpen]=useState(false);
+ const [officialMock,setOfficialMock]=useState({loading:false,data:null,error:''});
  const reviewRef=useRef(null);
  const [batchReady,setBatchReady]=useState(false),[batchLoading,setBatchLoading]=useState(true);
  const [batchMode,setBatchMode]=useState('unverified');
@@ -86,6 +88,15 @@ export default function AdminCourseBank({db,courses=[],asp,onUpdate,onDirtyChang
    .finally(()=>{if(live)setLoading(false);});
   return()=>{live=false;};
  },[db,courseId,query,offset,filterDomain,difficulty,usage,revision]);
+ // Count-only verification of permanent P9B/P10 fixed 200-question ASP form.
+ useEffect(()=>{
+  if(!courseId||selected?.slug!=='asp'){setOfficialMock({loading:false,data:null,error:''});return;}
+  let live=true;setOfficialMock({loading:true,data:null,error:''});
+  getMockReadiness(db,courseId).then(data=>{
+   if(live)setOfficialMock({loading:false,data,error:''});
+  }).catch(e=>{if(live)setOfficialMock({loading:false,data:null,error:fail(e)});});
+  return()=>{live=false;};
+ },[db,courseId,selected?.slug,revision]);
  const refresh=(force=false)=>{
   if(!force&&pendingCount&&!window.confirm('Discard '+pendingCount+' pending changes and reload?'))return;
   if(!force){setStaged({});setReleaseLessonId('');}
@@ -267,6 +278,16 @@ export default function AdminCourseBank({db,courses=[],asp,onUpdate,onDirtyChang
    This ASP Course has slug <code>{selected?.slug||'(missing)'}</code> rather than <code>asp</code>.
    Verify the original Course ID before uploading or changing questions; do not create a duplicate Course.
   </p>}
+  {selected?.slug==='asp'&&mode==='bank'&&<div className="p39-official-mock-status" role="status">
+   <ShieldCheck size={18}/>
+   <div><strong>Official ASP Mock · {officialMock.loading?'Checking…':officialMock.data
+    ?officialMock.data.verifiedReserved+'/200 reserved':'Status unavailable'}</strong>
+    <p>{officialMock.data?.ready
+     ?'The exact 200-question official form is ready and locked. New Mock candidates do not rewrite it.'
+     :officialMock.error?'Official Mock readiness unavailable: '+officialMock.error:
+      'Mock Exam checks stage candidates. Only a finalized reservation of exactly 200 eligible ASP Question Bank IDs is delivered to learners.'}</p>
+   </div>
+  </div>}
   {selected&&batchReady&&batchMode==='p30'&&<p role="status" className="at-disclaimer">
    P34A/P34B are not both installed on this Supabase database. Existing P30 Question Bank editing remains available.
    <strong> Legacy saves do not publish Draft Lesson Quiz questions; Mock candidate flags alone cannot activate the fixed official exam.</strong>
@@ -440,8 +461,8 @@ export default function AdminCourseBank({db,courses=[],asp,onUpdate,onDirtyChang
    </div>
    {dirtyCount>500&&<p role="alert" className="at-error">Maximum 500 edits per atomic save. Discard or reduce the staged changes before saving.</p>}
    {selected.slug!=='asp'&&mode==='bank'&&<details ref={reviewRef} className="p30-advanced-review">
-    <summary>Optional Practice approval tools (not required for Lesson Quiz or Selected Mock)</summary>
-    <p>Only use these tools if you separately want to approve questions for normal Practice. Lesson Quiz and Selected Mock publishing already happens on Save All Changes.</p>
+    <summary>Optional review tools for Practice and official Mock reservation</summary>
+    <p>Only use these tools if you separately want to approve questions for normal Practice. The fixed official Mock requires its finalized reserved 200-question form.</p>
     {bank.items.filter(q=>q.approvalState==='draft'&&!q.mockExclusive).map(q=><div key={q.id} className="p30-review-row">
      <span>{q.prompt}</span>
      <button type="button" className="at-outline" disabled={busy||dirtyCount>0} onClick={()=>void action(q,'approve')}>Approve for Practice</button>
@@ -451,7 +472,7 @@ export default function AdminCourseBank({db,courses=[],asp,onUpdate,onDirtyChang
    </details>}
    {selected.slug==='asp'&&mode==='bank'&&<div ref={reviewRef} className="p30-advanced-review">
     <button type="button" className="at-outline" onClick={()=>setReviewOpen(v=>!v)}>
-     {reviewOpen?'Hide':'Open'} optional ASP Practice rights review — not required for Lesson Quiz or Selected Mock</button>
+     {reviewOpen?'Hide':'Open'} ASP rights review for Practice and official Mock reservation</button>
     {reviewOpen&&<section className="p28-asp-review"><AdminQuestionsPanel db={db} asp={asp||selected} onUpdate={()=>refresh()}/></section>}
    </div>}
    {selected.slug==='asp'&&mode==='mock'&&<AdminMockPanel db={db} asp={asp||selected}/>}
