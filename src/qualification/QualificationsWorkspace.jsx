@@ -43,9 +43,22 @@ function Card({title,action,children,className=''}) {
  return <section className={'qf-card '+className}><div className="qf-card-header"><h3>{title}</h3>{action}</div>{children}</section>;
 }
 function QualificationCard({item,onClick}){
- return <article className="qf-course-card"><div className={'qf-course-mark '+item.color}><GraduationCap size={25}/></div>
- <div className="qf-course-body"><small>{item.body} · Level {item.level}</small><h2>{item.name}</h2><span>{item.units.length} Units</span></div>
- <button type="button" onClick={onClick} aria-label={'Open '+item.name}>Open <ArrowRight size={16}/></button></article>;
+ const image=item.heroImage;
+ return <article className={'qf-course-card qf-course-theme-'+item.color}>
+  <div className="qf-course-hero">
+   <img src={image} alt="" loading="lazy" decoding="async" aria-hidden="true"/>
+   <div className="qf-course-hero-shade" aria-hidden="true"/>
+   <div className="qf-course-hero-head"><span>PROFESSIONAL QUALIFICATION</span><span className="qf-course-hero-level">LEVEL {item.level}</span></div>
+   <div className="qf-course-hero-brand"><strong>{item.body}</strong></div>
+  </div>
+  <div className="qf-course-body">
+   <h2>{item.name}</h2>
+   <div className="qf-course-foot">
+    <span className="qf-course-units"><BookOpen size={17} aria-hidden="true"/> {item.units.length} Units</span>
+    <button type="button" onClick={onClick} aria-label={'Open '+item.name}>Explore <ArrowRight size={17} aria-hidden="true"/></button>
+   </div>
+  </div>
+ </article>;
 }
 function LearnerQualifications(){
  const [qualificationId,setQualificationId]=useState('othm6');

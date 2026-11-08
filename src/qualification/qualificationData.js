@@ -2,7 +2,7 @@
 // Unit titles/codes and the first shown LO/criteria come from supplied awarding-body PDFs.
 // Only the approved centre may publish current, complete assessment versions.
 export const QUALIFICATIONS=[
- {id:'othm6',body:'OTHM',name:'Level 6 Diploma in Occupational Health and Safety',short:'OTHM Level 6',ref:'603/5002/7',level:6,color:'blue',credits:60,
+ {id:'othm6',heroImage:'/images/hazop-engineers-sm.webp',body:'OTHM',name:'Level 6 Diploma in Occupational Health and Safety',short:'OTHM Level 6',ref:'603/5002/7',level:6,color:'blue',credits:60,
   units:[
    ['H/617/7539','Health and Safety Management Principles and Policy'],
    ['Y/617/8526','Health and Safety Management Practice'],
@@ -11,7 +11,7 @@ export const QUALIFICATIONS=[
    ['R/617/9092','Maintaining a Safe Workplace Environment'],
    ['H/617/7542','Health and Safety Law, Regulation and Influence'],
    ['K/617/7543','Development of the Health and Safety Practitioner']]},
- {id:'othm7',body:'OTHM',name:'Level 7 Diploma in Occupational Health and Safety Management',short:'OTHM Level 7',ref:'603/7782/3',level:7,color:'violet',credits:120,
+ {id:'othm7',heroImage:'/images/course-banner-sm.webp',body:'OTHM',name:'Level 7 Diploma in Occupational Health and Safety Management',short:'OTHM Level 7',ref:'603/7782/3',level:7,color:'violet',credits:120,
   units:[
    ['M/618/8236','Health and Safety Management Practice'],
    ['T/618/8237','Effectiveness of Health and Safety Management Systems'],
@@ -19,7 +19,7 @@ export const QUALIFICATIONS=[
    ['F/618/8239','Strategic Commitment to Health and Well-Being'],
    ['T/618/8240','Sustainability and Ethics in Health and Safety Practice'],
    ['Y/618/8246','Advanced Research Methods']]},
- {id:'nvq6',body:'ProQual',name:'Level 6 NVQ Diploma in Occupational Health and Safety Practice',short:'ProQual NVQ Level 6',ref:'603/3106/9',level:6,color:'orange',
+ {id:'nvq6',heroImage:'/images/practice-plant-sm.webp',body:'ProQual',name:'Level 6 NVQ Diploma in Occupational Health and Safety Practice',short:'ProQual NVQ Level 6',ref:'603/3106/9',level:6,color:'orange',
   units:[
    ['D/616/9536','Promote a positive health and safety culture'],
    ['F/616/9531','Develop and implement the health and safety policy'],
