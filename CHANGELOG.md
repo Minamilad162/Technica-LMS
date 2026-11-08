@@ -1,3 +1,9 @@
+## 2026-11-08 — P28.2 existing-installation forward migration
+- Owner screenshot: original protected P28 import, 4-argument Bank listing, lesson link and both guards were installed; 7-argument filtered listing was absent. Re-running initial P28 raised the intended replay/conflict guard.
+- Added one-time, transactional `202611080002_p28_2_forward_upgrade_existing.sql` to preserve old Bank RPC and data, create the 7-required-argument Admin filtered Bank RPC (without ambiguous defaults), enhance draft Difficulty import and strengthen new standalone Lesson Quiz exclusion. Does not alter existing questions/answers/approval, ASP 200 Mock form, learner progress or attachments.
+- Added exact archived original-P28 **CI-only** SQL fixture and disposable PostgreSQL clone/test for old-to-new forward upgrades; real Supabase unchanged. Full test status and owner-approved staging install are separate gates.
+- See `docs/current/P28_2_INSTALLED_FORWARD_UPGRADE.md`.
+
 ## 2026-11-08 — P28.1 ASP Course unified Question Bank (source branch)
 - Owner's Supabase read-only check confirmed P1/P4/P9B installed, P22 missing, P28 not installed. Original P28 preflight P0001 rolled back before data changes. P22 prerequisite must be installed after verifying existing P2/P15 requirements, ledger and backup; no remote SQL was run in this development turn.
 - New ASP-first Admin Question Bank import accepts nine official Domains, 2–6 options, correct index A–F, optional proposed Difficulty, Domain, Explanation and Reference. Ambiguous source Domain labels require explicit Admin mapping or remain unassigned. All uploaded questions remain Draft and ASP content rights/answer and independent second-admin review remain mandatory.
