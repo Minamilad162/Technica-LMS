@@ -152,6 +152,9 @@ jobs:
       - name: P28 per-Course Excel Question Bank and Lesson Quiz / Mock exclusion contract
         run: npm run test:p28:bank
 
+      - name: P29 per-question Active/Mock Exam and Course Lesson Quiz selection contract
+        run: npm run test:p29:bank
+
       - name: P5 native fullscreen and exit policy contracts
         run: npm run test:p5
 
@@ -299,6 +302,9 @@ jobs:
 
       - name: P28.2 forward-upgrade original installed P28 without touching the primary CI database
         run: bash scripts/test-p28-forward-upgrade-postgres-smoke.sh
+
+      - name: P29 protected Active and Mock candidate, live Practice/Level Up exclusions
+        run: bash scripts/test-p29-postgres-smoke.sh
 
       - name: Test scope disclosure
         run: echo "Ephemeral local PostgreSQL smoke only; live Supabase Auth, Storage, Data API and device tests still pending."
