@@ -72,7 +72,8 @@
     "test:p29:bank": "node scripts/test-p29-question-controls.mjs",
     "test:p30:bank": "node scripts/test-p30-question-bank.mjs",
     "test:p31:lesson-quiz": "node scripts/test-p31-learner-lesson-quiz.mjs",
-    "test:p32:quiz-visibility": "node scripts/test-p32-lesson-quiz-visibility.mjs"
+    "test:p32:quiz-visibility": "node scripts/test-p32-lesson-quiz-visibility.mjs",
+    "test:p33:learner-quiz": "node scripts/test-p33-learner-quiz-tab.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.58.0",
