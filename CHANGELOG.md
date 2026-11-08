@@ -1,3 +1,9 @@
+## 2026-11-08 — P29 Admin Question Bank controls and Lesson Quiz selection
+- Added visible per-question Active (true by default) and Mock Exam candidate checkboxes to the course-scoped Excel/CSV uploader. Admin picks a nested Lesson for the question and adds it directly to that Lesson Quiz; existing Course Builder Lesson Quiz selection from Bank remains.
+- Added protected P29 SQL: additive boolean switches, Admin-only audited flag RPC and Mock selection handoff, strict 200-question ASP official reservation unchanged, disabled/candidate questions excluded from server P4/P8e new draws, disabled published lesson quizzes unpublished without deleting historical attempts or quiz answers.
+- Old P28 database frontends remain in read-only compatibility mode until P28.2+P29 installed; new UI must be deployed to main separately. Real ASP source XLSX still not uploaded automatically.
+- Added static P29 and disposable Postgres security tests, authoring runbook and Master Blueprint. No Supabase production writes.
+
 ## 2026-11-08 — P28.2 existing-installation forward migration
 - Owner screenshot: original protected P28 import, 4-argument Bank listing, lesson link and both guards were installed; 7-argument filtered listing was absent. Re-running initial P28 raised the intended replay/conflict guard.
 - Added one-time, transactional `202611080002_p28_2_forward_upgrade_existing.sql` to preserve old Bank RPC and data, create the 7-required-argument Admin filtered Bank RPC (without ambiguous defaults), enhance draft Difficulty import and strengthen new standalone Lesson Quiz exclusion. Does not alter existing questions/answers/approval, ASP 200 Mock form, learner progress or attachments.
