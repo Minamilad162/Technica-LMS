@@ -1,7 +1,29 @@
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import {normalizeQuestionRows} from '../src/lib/questionImport.js';
+import {isAspCourseTitle,isOfficialAspCourse,preferredQuestionBankCourse,questionBankCatalogState} from '../src/production/questionBankCourseSelection.js';
+import {newCourseSlug} from '../src/production/lmsApi.js';
 const read=p=>readFileSync(new URL('../'+p,import.meta.url),'utf8');
+
+const unrelated={id:'10000000-0000-0000-0000-000000000001',slug:'fundamentals',title:'Other Course'};
+const officialAsp={id:'10000000-0000-0000-0000-000000000002',slug:'asp',title:'ASP Course'};
+const legacyAsp={id:'10000000-0000-0000-0000-000000000003',slug:'asp-course',title:'ASP Course'};
+assert.equal(preferredQuestionBankCourse([unrelated,officialAsp]).id,officialAsp.id,'Official ASP must be preferred even when not first');
+assert.equal(preferredQuestionBankCourse([unrelated,legacyAsp]).id,legacyAsp.id,'A uniquely identified real legacy ASP title should be visible for diagnostics');
+assert(isAspCourseTitle(legacyAsp)&&!isOfficialAspCourse(legacyAsp));
+assert.equal(questionBankCatalogState([legacyAsp]).status,'asp-slug-mismatch','Never treat legacy titled ASP Course as official P9B ASP');
+assert.equal(questionBankCatalogState([]).status,'empty','Empty real DB must be explicit');
+assert.equal(questionBankCatalogState([],true).status,'loading','Never call loading an empty ASP catalog');
+assert.equal(questionBankCatalogState([],false,'Permission denied').status,'error','A Supabase failure is not proof an ASP Course is missing');
+assert.equal(newCourseSlug('ASP Course',[]),'asp','New official ASP Course must have canonical server identity');
+assert.throws(()=>newCourseSlug('ASP Course',[legacyAsp]),/already exists/,'Never create a duplicate of the real legacy ASP Course');
+assert.equal(newCourseSlug('Another Course',[unrelated]),'another-course');
+const workspaceSource=read('src/production/AdminToolsWorkspace.jsx');
+const bankSource=read('src/production/AdminCourseBank.jsx');
+assert(workspaceSource.includes('coursesError')&&workspaceSource.includes('coursesLoading'));
+assert(workspaceSource.includes('onGoToCourses')&&bankSource.includes('questionBankCatalogState(courses,coursesLoading,coursesError)'));
+assert(bankSource.includes('aspIdentityMismatch')&&bankSource.includes('Open Courses'));
+
 const rows=[['Question','Option A','Option B','Option C','Correct Answer','Explanation'],
  ['What is a safe electrical isolation step?','Verify zero energy','Ignore isolation','No action','A','Synthetic rationale']];
 const parsed=normalizeQuestionRows(rows,{courseId:'10000000-0000-0000-0000-000000000002',domainId:null,sourceName:'synthetic.xlsx'});
@@ -57,7 +79,7 @@ assert(workspace.includes('AdminCourseBank db={db} courses={courses}')&&workspac
 assert(sql.includes("p_domain_id uuid DEFAULT NULL,p_difficulty text DEFAULT '',p_usage text DEFAULT 'all'"),'Secure bank filters must be database-side');
 assert(sql.includes("v_difficulty:=")&&sql.includes("v_difficulty,'draft',false"),'Imported Difficulty must stay Draft');
 assert(sql.includes('New Lesson Quiz questions must be selected from the Course Question Bank'),'Database must prevent new quiz content outside the Bank');
-assert(bank.includes("selected.slug==='asp'")&&bank.includes("courses.find(c=>c.slug==='asp')"),'ASP must be the primary Question Bank course');
+assert(bank.includes("selected.slug==='asp'")&&bank.includes('preferredQuestionBankCourse(courses)'),'Real canonical ASP must be the primary Question Bank course');
 assert(bank.includes('Filter bank by domain')&&bank.includes('Filter bank by difficulty')&&bank.includes('Filter bank by usage'),'Admin requires course-specific domain / difficulty / usage filters');
 assert(bank.includes('unmappedLabels')&&bank.includes('Map spreadsheet labels to real Course Domains'),'Unmapped ASP11 source labels must require explicit manual mapping');
 assert(quiz.includes("usage:'eligible'")&&quiz.includes('Filter Lesson Quiz by domain'),'Lesson Quiz must use filtered Course Bank');
