@@ -182,6 +182,9 @@ jobs:
       - name: P34 single Save Lesson Quiz and secure Selected Mock frontend contracts
         run: npm run test:p34:one-save
 
+      - name: P34 pre-migration compatibility preserves legacy P30 Admin settings with truthful publish status
+        run: npm run test:p34:compatibility
+
       - name: P5 native fullscreen and exit policy contracts
         run: npm run test:p5
 
