@@ -49,5 +49,5 @@ assert.match(css,/\.qf-number-tabs\{[^}]*overflow-x:auto/s);
 assert.match(css,/\.qf-number-tab\.active/);
 assert.ok(!ui.includes('qf-unit-list')&&!ui.includes('qf-builder-list'),'Old vertical Unit list must not return');
 assert.ok(!ui.includes('qf-steps'),'Remove visual-heavy progress steps');
-assert.match(ui,/Demo preview · No file uploads/);
+assert.match(ui,/Qualification preview · Evidence submissions are not yet available/);
 console.log('P19 Qualifications frontend static routing, criteria mapping, learner/Admin separation, read-only demo and responsive CSS: PASS');
