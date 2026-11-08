@@ -331,7 +331,7 @@ export default function AdminCourseBank({db,courses=[],asp,onUpdate,onDirtyChang
        inspectState.data.published===0?<small>Linked questions are saved but hidden from learners. To show them in the Quiz: finish any unsaved edits, complete independent question review, then publish eligible entries in the Lesson Quiz editor.</small>:
        <small>These published questions should appear to an authorized learner in this Lesson's Quiz.</small>}
      </div>}
-    {inspectState.data?.pending>0&&<div className="p33-next-steps">
+    {mode==='bank'&&inspectState.data?.pending>0&&<div className="p33-next-steps">
      {dirtyCount>0&&<span className="p33-unsaved-note">{dirtyCount} unsaved edit{dirtyCount===1?'':'s'} — click Save All Changes first.</span>}
      <button type="button" className="at-outline" onClick={openQuestionReview} disabled={busy}>Review Draft questions</button>
      <small>After approval, open the Lesson Quiz and publish eligible linked questions.</small>
