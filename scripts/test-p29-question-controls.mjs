@@ -35,9 +35,9 @@ assert(!/(?:AS\s+\$\s*$|END\s+\$;)/m.test(sql),'P29 SQL cannot have a lone dolla
 assert((sql.match(/\$\$/g)||[]).length%2===0,'P29 SQL dollar-quote markers must be paired');
 
 for(const part of [
- 'Upload Question File','type="file"','accept=".xlsx,.csv"','Active: ',
- 'Mock Exam: ','Lesson Quiz','Select a lesson…','Add to Quiz',
- 'setQuestionBankFlags(db,q.id','attachBankToLesson(db,lessonId,q.id',
+ 'Upload Excel / CSV','type="file"','accept=".xlsx,.csv"','Active: ',
+ 'Mock Exam: ','Lesson Quiz','Select lesson…','Save All Changes',
+ 'stagedQuestionEdit(q,staged[q.id]','saveCourseBankBatch(db,courseId,payload)',
  'liveCourseTree(db,courseId)','bank.compatibilityMode',
  ])assert(bank.includes(part),'P29 admin UI missing '+part);
 for(const part of [
