@@ -1,3 +1,9 @@
+## 2026-11-08 — P39 unified Mock Exam & Practice learner tabs
+- Single learner desktop/mobile menu entry `Mock Exam & Practice`, two tabs in a new protected live Supabase Hub. Practice reuses all existing Quick 10, Timed, Custom, Domain and Level Up modes with customizable count and timer; Mock reuses the immutable ASP P9B/P10 200-question, 300-minute server-timed/graded exam only.
+- Replaced old demo AssessmentOverview active route, kept /practice compatibility redirect to Practice tab and /assessments/mock/live official deep link. The variable-size P34B Selected Mock is no longer presented as a learner exam. Standalone learner workspace also offers both tabs. My Practice history untouched.
+- Admin Question Bank now displays read-only official ASP P10 reserved /200 status, distinguishing staged Mock candidate checks from permanent P9B reservation; no unsafe one-Save official Mock rewriting. No SQL/production data edits.
+- P39 static security/navigation contract in CI, responsive CSS, docs and Blueprint updated. `docs/current/P39_UNIFIED_MOCK_EXAM_PRACTICE.md`.
+
 ## 2026-11-08 — P38 Premium Subscription Plans learner page (UI-only)
 - Translated the owner's approved light Technica mint/teal premium plans concept into responsive React/CSS with an illustrated laptop/book/education hero, a keyboard-accessible duration highlight selector, dynamic mint/deep-teal/lilac plan cards, improved benefits and activation disclosures.
 - All prices, currencies, plan titles, durations and published options remain sourced from real P21 Supabase records; featured 6-month term is only selected if it exists. Savings percentages appear only from valid same-currency comparison. No design-mockup prices, paid activation claims, stock images or screenshot backgrounds.
