@@ -21,7 +21,7 @@ END $p34a_preflight$;
 -- Practice, Level Up, Mock or another Lesson. No answer keys/IDs to learners.
 CREATE TABLE public.lms_p34_lesson_releases(
  quiz_question_id uuid PRIMARY KEY REFERENCES public.lms_p22_lesson_quiz_questions(id)
-   ON DELETE RESTRICT,
+   ON DELETE CASCADE,
  lesson_id uuid NOT NULL REFERENCES public.lms_lessons(id) ON DELETE RESTRICT,
  bank_question_id uuid NOT NULL REFERENCES public.lms_questions(id) ON DELETE RESTRICT,
  published_by uuid NOT NULL REFERENCES public.lms_profiles(id) ON DELETE RESTRICT,
