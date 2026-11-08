@@ -40,12 +40,11 @@ export function quizQuestionIdsChanged(previous,next){
 }
 // P30 adds Lesson Quiz links only. The existing independent ASP review remains
 // mandatory before a Draft link may become visible to subscribed learners.
-export function summarizeSavedLessonAssignments(payload,bankItems){
+export function summarizeSavedLessonAssignments(payload){
  const linked=payload.filter(row=>Boolean(row.addLessonId));
- const byId=new Map(bankItems.map(q=>[q.id,q]));
  return {
   assigned:linked.length,
-  published:linked.filter(row=>byId.get(row.questionId)?.approvalState==='approved').length,
-  draft:linked.filter(row=>byId.get(row.questionId)?.approvalState!=='approved').length
+  approved:linked.filter(row=>row.expectedApprovalState==='approved').length,
+  draft:linked.filter(row=>row.expectedApprovalState!=='approved').length
  };
 }
