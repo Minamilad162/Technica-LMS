@@ -21,7 +21,7 @@ for(const marker of ['inspectLessonQuizPublication(db,inspectLessonId)',
  'Saved Lesson Quiz publication status','Check learner quiz for',
  'Open Lesson Quiz','Published','Not published',
  'No saved questions are linked to this Lesson',
- 'Linked questions are saved but hidden from learners',
+ 'Questions are saved but not published',
  '/builder?courseId=','&lessonId='])
  assert(bank.includes(marker),'P32 Admin lesson status markup missing '+marker);
 assert(bank.includes('Save All Changes')&&bank.includes('stagedToBatch(staged)'));
