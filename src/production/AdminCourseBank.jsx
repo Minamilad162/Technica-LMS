@@ -10,7 +10,8 @@ import './courseQuestionBank.css';
 
 const fail=e=>e?.message||'The protected Question Bank request failed.';
 const initial=()=>({prompt:'',options:['','','',''],correct:0,explanation:''});
-function Status({value}){return <span title={value==='draft'?'Draft in Bank · can be published to a selected Lesson on Save':value==='approved'?'Approved question · learner visibility also requires a published Lesson Quiz link':'Reserved for Mock · excluded from Lesson Quiz'} className={'p28-status '+(value==='approved'?'approved':value==='mock'?'mock':'draft')}>{value}</span>;}
+function Status({value}){const label=value==='candidate'?'Mock candidate':value==='mock'?'Official Mock':value;
+ return <span title={value==='candidate'?'Candidate only · official 200-question ASP Mock reservation must be finalized separately':value==='draft'?'Draft in Bank · can be published to a selected Lesson on Save':value==='approved'?'Approved question · learner visibility also requires a published Lesson Quiz link':'Reserved for official Mock · excluded from Practice'} className={'p28-status '+(value==='candidate'?'draft':value==='approved'?'approved':value==='mock'?'mock':'draft')}>{label}</span>;}
 
 export default function AdminCourseBank({db,courses=[],asp,onUpdate,onDirtyChange,mode='bank',coursesLoading=false,coursesError='',onRefreshCourses,onGoToCourses}){
  const [courseId,setCourseId]=useState(''),[domains,setDomains]=useState([]),[domainId,setDomainId]=useState('');
@@ -139,8 +140,8 @@ export default function AdminCourseBank({db,courses=[],asp,onUpdate,onDirtyChang
       (result.published||0)+' Lesson Quiz question(s) published'+
       (result.linked?' · '+result.linked+' new Lesson link(s)':'')+
       (result.unpublished?' · '+result.unpublished+' disabled quiz item(s) unpublished':'')+
-      '. Mock-selected questions are available in the separate Selected Mock Test.'
-    :'Saved '+result.saved+' question settings using legacy P30. Draft Lesson links are NOT learner-published, and Mock selections are NOT yet available as a Selected Mock Test. Install P34A and P34B to enable one-save publication.');
+      '. Mock candidate flags are saved; the fixed official 200-question form still requires its finalized Question Bank reservation.'
+    :'Saved '+result.saved+' question settings using legacy P30. Draft Lesson links are NOT learner-published, and Mock candidate flags do NOT activate the fixed official 200-question Mock. Install P34A/P34B to enable Lesson Quiz one-save publishing.');
    refresh(true);
   }catch(e){setError('No partial changes saved. Your pending selections are retained. '+fail(e));}
   finally{setBusy(false);}
@@ -268,7 +269,7 @@ export default function AdminCourseBank({db,courses=[],asp,onUpdate,onDirtyChang
   </p>}
   {selected&&batchReady&&batchMode==='p30'&&<p role="status" className="at-disclaimer">
    P34A/P34B are not both installed on this Supabase database. Existing P30 Question Bank editing remains available.
-   <strong> Legacy saves do not make Draft Lesson Quiz questions or Selected Mock tests visible to learners.</strong>
+   <strong> Legacy saves do not publish Draft Lesson Quiz questions; Mock candidate flags alone cannot activate the fixed official exam.</strong>
    Apply the two P34 migrations to enable one-save publication.
   </p>}
   {selected&&!batchLoading&&!batchReady&&<p role="status" className="at-disclaimer">
@@ -312,7 +313,7 @@ export default function AdminCourseBank({db,courses=[],asp,onUpdate,onDirtyChang
   {selected&&<>
    <p className="p31-lesson-publish-note">
     <BookOpen size={16}/> Assigning a question to a Lesson Quiz links it to that Lesson.
-    {batchMode==='p34'?<><strong> Active, non-Mock questions publish immediately to the selected Lesson Quiz on Save All Changes</strong> — including imported Drafts. Mock ticks go to Selected Mock Test.</>:<>
+    {batchMode==='p34'?<><strong> Active, non-Mock questions publish immediately to the selected Lesson Quiz on Save All Changes</strong> — including imported Drafts. Mock flags identify candidates; only exactly 200 officially reserved ASP questions appear in the fixed Mock Exam.</>:<>
      <strong> Legacy P30 mode:</strong> editing is available, but Drafts cannot publish until P34A/P34B are installed.</>}
    </p>
    {!!lessons.length&&<div className="p32-publication-status at-surface" aria-label="Saved Lesson Quiz publication status">
@@ -349,7 +350,7 @@ export default function AdminCourseBank({db,courses=[],asp,onUpdate,onDirtyChang
    <div className="p30-table-card at-surface">
     <div className="p30-table-top">
      <strong>{selected.title} <span>· {bank.total} results</span></strong>
-     <p>Only question text is shown here. Difficulty, Active, Mock Exam and Lesson assignment are editable; nothing saves until Save All Changes.</p>
+     <p>Only question text is shown. Mock Exam checks stage candidates; official 200-question Mock reservation is separate and permanent. Settings save together.</p>
     </div>
     {loading?<div className="at-empty">Loading protected questions…</div>:!bank.items.length?<div className="at-empty">No questions match this filter. Change the filters or import a file.</div>:
     <div className="p30-table-scroll"><table className="p30-table">
@@ -394,7 +395,7 @@ export default function AdminCourseBank({db,courses=[],asp,onUpdate,onDirtyChang
          {lessons.filter(l=>!(q.linkedLessonIds||[]).includes(l.id)).map(l=><option key={l.id} value={l.id}>{l.label}</option>)}
         </select>
        </td>
-       <td data-label="Status"><Status value={q.mockExclusive?'mock':q.mockCandidate?'mock':q.approvalState}/></td>
+       <td data-label="Status"><Status value={q.mockExclusive?'mock':q.mockCandidate?'candidate':q.approvalState}/></td>
       </tr>;
      })}</tbody>
     </table></div>}
@@ -455,7 +456,7 @@ export default function AdminCourseBank({db,courses=[],asp,onUpdate,onDirtyChang
    </div>}
    {selected.slug==='asp'&&mode==='mock'&&<AdminMockPanel db={db} asp={asp||selected}/>}
    {selected.slug!=='asp'&&mode==='mock'&&!aspIdentityMismatch&&
-    <p className="at-disclaimer">Selected Mock questions appear in the separate Selected Mock Test after Save. The official 200-question ASP Mock remains unchanged.</p>}
+    <p className="at-disclaimer">ASP Mock Exam is fixed: only the 200 questions finalized in the official Mock reservation are delivered. Checking a new candidate does not alter that reserved form.</p>}
   </>}
  </div>;
 }
