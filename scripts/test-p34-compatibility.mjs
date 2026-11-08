@@ -13,7 +13,7 @@ for(const x of ["await call(db,'lms_p34_bank_capabilities')",
  assert(api.includes(x),'Missing P34 compatibility API contract: '+x);
 }
 for(const x of ["batchMode==='p30'","batchMode==='p34'","Save Settings (P30 Legacy)",
- "Legacy saves do not make Draft Lesson Quiz questions or Selected Mock tests visible",
+ "Legacy saves do not publish Draft Lesson Quiz questions",
  "batchMode!=='p34'","saveCourseBankBatch(db,courseId,payload,releaseLessonId||null,batchMode)"]){
  assert(bank.includes(x),'Legacy P30 must not masquerade as P34 direct publication: '+x);
 }
