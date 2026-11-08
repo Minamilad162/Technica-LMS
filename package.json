@@ -63,6 +63,7 @@
     "test:p19": "node scripts/test-p19-qualification-ui.mjs",
     "test:p26:qualification": "node scripts/test-p26-qualification-portfolio.mjs",
     "test:p34:materials": "node scripts/test-p34-unit-materials.mjs",
+    "test:p35:cards": "node scripts/test-p35-qualification-cards.mjs",
     "test:p20:performance": "node scripts/test-p20-performance.mjs",
     "test:p21:subscriptions": "node scripts/test-p21-subscriptions.mjs",
     "test:p22:learning": "node scripts/test-p22-course-lesson-explorer.mjs",

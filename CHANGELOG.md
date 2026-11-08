@@ -1,3 +1,9 @@
+### 2026-11-08 — P35 Premium Qualifications cards + larger UI text (SOURCE ONLY)
+
+- Redesigned all three My Qualifications cards with locally available Technica HSE photographs as strong darkened hero backgrounds, elegant brand name text (OTHM / ProQual), clear Level tags, larger qualification titles, Units count and Explore buttons. The images are existing site assets, not official awarding-body logos. Kept compact high-contrast premium styling and simplified content.
+- Improved type scale of numbered Unit tabs, lesson Material outline, Resources/Actions, Assessor/Verifier summary and checklist/feedback text; responsive mobile sizes, keyboard focus and reduced-motion preserved.
+- UI-only change, with P35 image/UX contract added to CI. No Supabase writes/migrations or behaviour changes to Qualifications assessment or ASP Course/Practice/Mock/Checkout.
+
 ### 2026-11-08 — P34 PDF-sourced Unit Materials embedded in Qualifications (SOURCE ONLY)
 
 - Reviewed connected Drive walkthrough transcript (course vs Unit resources at 06:12–09:33) and all three historical qualification PDFs. Built a 23-Unit code-keyed material map (OTHM L6 7, OTHM L7 6, ProQual NVQ L6 10) with verified PDF Unit Aims, Learning/Competence Outcomes and OTHM indicative study topics. No imaginary lesson PDFs or Assignment Briefs.
