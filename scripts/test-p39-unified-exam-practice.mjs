@@ -1,0 +1,75 @@
+import assert from 'node:assert/strict';
+import {readFileSync} from 'node:fs';
+import {MOCK_QUESTION_COUNT,MOCK_DURATION_SECONDS,validateMockReadiness}
+ from '../src/production/mockApi.js';
+const read=p=>readFileSync(new URL('../'+p,import.meta.url),'utf8');
+const app=read('src/App.jsx');
+const menu=read('src/components/Layout.jsx');
+const hub=read('src/production/LiveExamPracticeHub.jsx');
+const css=read('src/production/liveExamPracticeHub.css');
+const legacyPortal=read('src/production/LiveMockPortal.jsx');
+const practice=read('src/production/LivePractice.jsx');
+const mock=read('src/production/LiveMockExam.jsx');
+const bridge=read('src/production/LiveLearnerPortal.jsx');
+const workspace=read('src/production/LiveLearnerWorkspace.jsx');
+const bank=read('src/production/AdminCourseBank.jsx');
+const mockSql=read('supabase/migrations/202611050001_p10_mock_engine.sql');
+const oldForm=read('supabase/migrations/202611040005_p9b_controlled_mock_reservation_and_practice_approval.sql');
+const check=(body,phrase,what)=>assert(body.includes(phrase),what+': '+phrase);
+assert.equal(MOCK_QUESTION_COUNT,200);
+assert.equal(MOCK_DURATION_SECONDS,18000);
+assert.equal(validateMockReadiness({
+ ready:true,verifiedReserved:200,totalExclusiveFlags:200,required:200,durationSeconds:18000,
+ engineVersion:'p10-mock-v1'}).ready,true);
+assert.throws(()=>validateMockReadiness({
+ ready:true,verifiedReserved:199,totalExclusiveFlags:199,required:200,durationSeconds:18000,
+ engineVersion:'p10-mock-v1'}),/not ready/);
+check(app,'<LiveExamPracticeHub/>','Real /assessments hub active');
+check(app,'<Route path="/assessments"','Unified Mock & Practice route');
+check(app,'<Navigate to="/assessments?tab=practice" replace/>','Legacy /practice path redirects to Practice tab');
+assert(!app.includes('<AssessmentOverview/>'),'Old demo assessment overview must not be learner entrypoint');
+check(app,'<Route path="/assessments/mock/live"','Existing P10 direct link retained');
+check(menu,"['/assessments','Mock Exam & Practice',GraduationCap]",'Single sidebar link');
+assert(!menu.includes("['/practice','Practice',NotebookTabs]"),'Remove standalone learner Practice menu');
+assert(!menu.includes("['/assessments','Assessments'"),'Remove old Assessments label');
+check(menu,"['/assessments','Mock & Practice',NotebookTabs]",'Mobile menu single entry');
+check(bridge,"onPracticeRoute={()=>navigate('/assessments?tab=practice')}",'My Learning Practice quick link');
+for(const k of [
+ "examPracticeTab(params.get('tab'))","const TAB_IDS=['practice','mock']",
+ 'role="tablist"','role="tab"','aria-selected={tab===\'practice\'}',
+ 'aria-selected={tab===\'mock\'}','id="lep-tab-practice"','id="lep-tab-mock"',
+ 'Custom Practice','200 questions · 5 hours · fixed',
+ 'LivePractice','LiveMockExam','loadStructure(db,course.id)',
+ 'fetchLiveLearningCatalog(db)','mayReadLiveCourse(catalog,course)',
+ 'hasPlatformAccess(catalog.subscription)',"catalog?.courses.find(c=>c.slug==='asp')",
+ 'defaultMode="quick10"','onClick={()=>activate(\'mock\')}',
+ 'id={\'lep-panel-\'+tab}', 'No question-count or duration settings.'
+])check(hub,k,'Two-tab secure Supabase hub');
+assert(!hub.includes('LiveSelectedMockExam'),'Mock tab must not deliver variable selected-Mock engine');
+assert(!hub.includes('../data/mock'),'Mock must not load demo bank');
+assert(!hub.includes('assessmentSettings('),'Mock settings must never be customized');
+assert(!legacyPortal.includes('LiveSelectedMockExam'),'Legacy /mock/live route must be official only');
+assert(!legacyPortal.includes('mockMode'),'No third Selected Mock mode');
+check(legacyPortal,'<LiveMockExam','Existing deep link uses official P10 engine');
+for(const k of ['Quick 10','Timed Quiz','Build Your Own','Practice by Domain','Level Up',
+ 'setMinutes','setCount','startSecurePractice','startAdaptivePractice',
+ 'requestQuestionFullscreen','useQuestionFullscreenGuard'])
+ check(practice,k,'Old customizable Practice preserved');
+for(const k of ['getMockReadiness(db,course.id)','startOfficialMock(db,course.id,requestId)',
+ 'saveOfficialMock(db,attempt.attemptId','submitOfficialMock(db,attempt.attemptId)',
+ '200 fixed questions · 300 minutes','05:00','useQuestionFullscreenGuard'])
+ check(mock,k,'Official protected ASP 200/5h still used');
+for(const marker of ["DEFAULT 200 CHECK(question_count=200)","interval '300 minutes'",
+ "q.mock_exclusive AND q.approval_state='draft'",'lms_p10_mock_readiness(uuid)'])
+ check(mockSql,marker,'Server enforces official Mock invariants');
+check(oldForm,'Exactly 200 explicit question IDs required','P9B fixed Mock reservation unchanged');
+assert(!read('src/production/liveExamPracticeHub.css').includes('width:1900px'),'Responsive width not fixed');
+for(const m of ['@media(max-width:760px)','@media(max-width:520px)',
+ '.lep-tabs','.lep-content','prefers-reduced-motion'])check(css,m,'Responsive tab UI');
+check(workspace,"label:'Mock Exam & Practice'",'Alternate learner workspace menu');
+check(workspace,"preparationTab==='mock'",'Alternate learner workspace Mock tab');
+check(workspace,"<LiveMockExam", 'Alternate learner workspace P10 engine');
+check(bank,"q.mockExclusive?'mock':q.mockCandidate?'candidate'",'Bank distinguishes official reserved vs candidates');
+assert(!bank.includes('Mock-selected questions are available in the separate Selected Mock Test.'),
+ 'Question Bank must not promise hidden variable Selected Mock as the official exam');
+console.log('PASS P39 unified Mock Exam & Practice: one sidebar entry and two tabs; Practice customizable; P10 ASP always 200/300 from immutable reservation, no selected/old-demo exam.');
