@@ -1,3 +1,8 @@
+## 2026-11-08 — P40 Question Bank → official ASP Mock finalization
+- Inline **Finalize official Mock** loads 200 saved checked Question Bank candidates across pages, uses the existing P9B reviewed-answer/rights preflight and explicit audited permanent reservation. P10 readiness refreshes after reservation.
+- A saved checkbox is only a candidate until approved; fixed learner Mock 200/300, Practice customization, P34B historical data and entitlement/security rules unchanged. Source UI only, no migration or live Supabase data writes.
+- Added P40 regression within P39, Blueprint and Logic Registry updates; staging/browser verification still needed.
+
 ## 2026-11-08 — P39 unified Mock Exam & Practice learner tabs
 - Single learner desktop/mobile menu entry `Mock Exam & Practice`, two tabs in a new protected live Supabase Hub. Practice reuses all existing Quick 10, Timed, Custom, Domain and Level Up modes with customizable count and timer; Mock reuses the immutable ASP P9B/P10 200-question, 300-minute server-timed/graded exam only.
 - Replaced old demo AssessmentOverview active route, kept /practice compatibility redirect to Practice tab and /assessments/mock/live official deep link. The variable-size P34B Selected Mock is no longer presented as a learner exam. Standalone learner workspace also offers both tabs. My Practice history untouched.
