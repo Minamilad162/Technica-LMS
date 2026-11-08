@@ -2,7 +2,17 @@
 // The ASP P6A/P9B backend identifies the controlled Course by slug='asp'.
 const clean=x=>String(x||'').trim().toLowerCase().replace(/\s+/g,' ');
 const aspTitles=new Set(['asp','asp course','associated safety professional','associated safety professional course']);
-export const isAspCourseTitle=course=>aspTitles.has(clean(course?.title));
+// Exact common title variants. Ambiguous matches are never auto-repaired.
+export const isAspCourseTitle=course=>{
+ const title=clean(course?.title).replace(/[–—]/g,'-');
+ return aspTitles.has(title)||[
+  'asp - associated safety professional',
+  'asp: associated safety professional',
+  'asp (associated safety professional)',
+  'associated safety professional (asp)',
+  'associated safety professional - asp'
+ ].includes(title);
+};
 export const isOfficialAspCourse=course=>clean(course?.slug)==='asp';
 export function preferredQuestionBankCourse(courses=[]){
  const valid=Array.isArray(courses)?courses.filter(c=>c&&typeof c.id==='string'):[];
@@ -25,6 +35,6 @@ export function aspMissingReason(courses=[]){
  if(rows.some(isOfficialAspCourse))
   return 'The ASP Mock question form requires 200 verified and reserved questions.';
  if(rows.some(isAspCourseTitle))
-  return 'Your ASP course needs its internal course identifier checked by an administrator before the official Mock can start.';
- return 'The ASP Mock is not configured yet. An administrator needs to publish the ASP course and reserve its official 200-question form.';
+  return 'Your ASP course exists but uses a different internal identifier. An administrator can link the existing Course in Admin Tools → Question Bank without moving its questions.';
+ return 'No published ASP Course is available. The administrator must check its existing Course identity, publication status and saved Mock choices.';
 }
