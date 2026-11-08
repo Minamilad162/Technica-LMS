@@ -36,3 +36,18 @@
  .live-mock:fullscreen{padding:12px}
  .live-mock-submit{justify-self:stretch;width:100%}
 }
+
+/* P34: user-selected Mock pool is distinct from unchanged official 200-item form. */
+.p34-mock-mode{display:flex;align-items:center;flex-wrap:wrap;gap:9px;margin:14px 0;
+ padding:10px;border:1px solid #dae9e7;border-radius:13px;background:#f9fdfc}
+.p34-mock-mode>button{border:1px solid #d6e7e4;border-radius:10px;padding:11px 17px;
+ background:#fff;color:#4f6f78;font-weight:850;cursor:pointer;font-size:12px}
+.p34-mock-mode>button.selected{background:#087e75;color:#fff;border-color:#087e75;
+ box-shadow:0 4px 12px #0a837122}
+.p34-mock-mode>button:focus-visible{outline:2px solid #0b9c87;outline-offset:2px}
+.p34-mock-mode>label{display:flex;align-items:center;gap:8px;margin-left:auto;
+ font-size:12px;color:#3b666d;font-weight:800}
+.p34-mock-mode select{border:1px solid #d5e6e5;background:#fff;border-radius:8px;
+ padding:9px 12px;max-width:320px;color:#205a5f}
+@media(max-width:650px){.p34-mock-mode>button{flex:1;padding:10px 7px;white-space:nowrap}
+ .p34-mock-mode>label{margin-left:0;flex-basis:100%}.p34-mock-mode select{flex:1;min-width:0}}

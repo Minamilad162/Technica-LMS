@@ -35,8 +35,8 @@ for(const required of [
  'Save All Changes','Discard','unsaved','Upload Excel / CSV','Add Question',
  'Difficulty: ','Active: ','Mock Exam: ','Assign Lesson Quiz:',
  'onChange={e=>stage(q,','batchStage(','Save or discard pending edits',
- 'stagedToBatch(staged)','saveCourseBankBatch(db,courseId,payload)',
- 'onDirtyChange?.(dirtyCount>0)','beforeunload','p30-table',
+ 'stagedToBatch(staged)','saveCourseBankBatch(db,courseId,payload,releaseLessonId',
+ 'onDirtyChange?.(pendingCount>0)','beforeunload','p30-table',
  'p30-question-cell','p30-bulk-bar'
 ])assert(bank.includes(required),'Missing P30 compact single-save UX '+required);
 assert(!bank.includes('p28-answers'),'Per-row answers must not be rendered in the Question Bank list');
@@ -48,7 +48,7 @@ assert(workspace.includes('questionBankDirty')&&workspace.includes('p30-hero'),'
 assert(css.includes('.p30-switch')&&css.includes('.p30-table')&&css.includes('.p30-save-all'),
  'Responsive mockup-inspired Question Bank controls must be styled');
 for(const required of [
- 'lms_p30_save_question_bank','p_changes:rows','lms_p30_bank_capabilities',
+ 'lms_p34_save_question_bank','p_changes:rows','lms_p34_bank_capabilities',
  "response.requested!==rows.length"
 ])assert(api.includes(required),'Missing one-call API or capability guard '+required);
 for(const required of [

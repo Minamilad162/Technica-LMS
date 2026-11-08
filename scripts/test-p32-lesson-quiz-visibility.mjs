@@ -21,7 +21,7 @@ for(const marker of ['inspectLessonQuizPublication(db,inspectLessonId)',
  'Saved Lesson Quiz publication status','Check learner quiz for',
  'Open Lesson Quiz','Published','Not published',
  'No saved questions are linked to this Lesson',
- 'Linked questions are saved but hidden from learners',
+ 'Questions are saved but not published',
  '/builder?courseId=','&lessonId='])
  assert(bank.includes(marker),'P32 Admin lesson status markup missing '+marker);
 assert(bank.includes('Save All Changes')&&bank.includes('stagedToBatch(staged)'));
@@ -29,8 +29,8 @@ for(const marker of ['params.get(\'lessonId\')','setLessonId(realLesson.id)',
  "id={'lms-builder-lesson-'+lesson.id}","scrollIntoView({behavior:'smooth'"])
  assert(builder.includes(marker),'P32 deep link to exact Lesson editor missing '+marker);
 for(const marker of ['publishedCount=items.filter(q=>q.is_published).length',
- 'pendingCount=items.length-publishedCount','Learners will see 0 questions until you approve the Drafts',
- 'Review the question in the Course Bank','Not published · learner cannot see it yet',
+ 'pendingCount=items.length-publishedCount','Learners will see 0 questions',
+ 'To publish these saved linked questions','Not published · learner cannot see it yet',
  "q.is_published?'Unpublish':'Publish'"])
  assert(editor.includes(marker),'P32 Admin Lesson editor publication guidance missing '+marker);
 assert(css.includes('.p32-publication-status')&&css.includes('@media(max-width:760px)'));

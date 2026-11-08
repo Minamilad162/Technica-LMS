@@ -3,7 +3,6 @@ import {AlertCircle,BookOpen,CheckCircle2,FileQuestion,FileSpreadsheet,Plus,Refr
 import {importQuestionFile} from '../lib/questionImport.js';
 import {importCourseBank,listCourseBank,mappedImportRows,saveCourseBankBatch,getCourseBankBatchCapabilities,approveNonAspBankQuestion,reserveNonAspMockQuestion,inspectLessonQuizPublication} from './courseQuestionBankApi.js';
 import {stagedQuestionEdit,stagedToBatch,originalQuestionValues,BANK_DIFFICULTIES} from './questionBankDraft.js';
-import {summarizeSavedLessonAssignments} from './lessonQuizSyncApi.js';
 import {liveCourseTree} from './liveAuthoringApi.js';
 import {isAspCourseTitle,isOfficialAspCourse,preferredQuestionBankCourse,questionBankCatalogState} from './questionBankCourseSelection.js';
 import {AdminQuestionsPanel,AdminMockPanel} from './AdminToolsPanels.jsx';
@@ -11,7 +10,7 @@ import './courseQuestionBank.css';
 
 const fail=e=>e?.message||'The protected Question Bank request failed.';
 const initial=()=>({prompt:'',options:['','','',''],correct:0,explanation:''});
-function Status({value}){return <span title={value==='draft'?'Draft · not visible to learners until approved and published':value==='approved'?'Approved question · learner visibility also requires a published Lesson Quiz link':'Reserved for Mock · excluded from Lesson Quiz'} className={'p28-status '+(value==='approved'?'approved':value==='mock'?'mock':'draft')}>{value}</span>;}
+function Status({value}){return <span title={value==='draft'?'Draft in Bank · can be published to a selected Lesson on Save':value==='approved'?'Approved question · learner visibility also requires a published Lesson Quiz link':'Reserved for Mock · excluded from Lesson Quiz'} className={'p28-status '+(value==='approved'?'approved':value==='mock'?'mock':'draft')}>{value}</span>;}
 
 export default function AdminCourseBank({db,courses=[],asp,onUpdate,onDirtyChange,mode='bank',coursesLoading=false,coursesError='',onRefreshCourses,onGoToCourses}){
  const [courseId,setCourseId]=useState(''),[domains,setDomains]=useState([]),[domainId,setDomainId]=useState('');
@@ -24,12 +23,14 @@ export default function AdminCourseBank({db,courses=[],asp,onUpdate,onDirtyChang
  const [selectedIds,setSelectedIds]=useState([]);
  const [lessons,setLessons]=useState([]);
  const [inspectLessonId,setInspectLessonId]=useState('');
+ const [releaseLessonId,setReleaseLessonId]=useState('');
  const [inspectState,setInspectState]=useState({loading:false,data:null,error:''});
  const [reviewOpen,setReviewOpen]=useState(false);
  const reviewRef=useRef(null);
  const [batchReady,setBatchReady]=useState(false),[batchLoading,setBatchLoading]=useState(true);
  const [batchError,setBatchError]=useState('');
  const dirtyCount=Object.keys(staged).length;
+ const pendingCount=dirtyCount+(releaseLessonId?1:0);
  const selected=useMemo(()=>courses.find(c=>c.id===courseId),[courses,courseId]);
  const courseProblem=questionBankCatalogState(courses,coursesLoading,coursesError);
  const aspIdentityMismatch=!!selected&&isAspCourseTitle(selected)&&!isOfficialAspCourse(selected);
@@ -40,7 +41,7 @@ export default function AdminCourseBank({db,courses=[],asp,onUpdate,onDirtyChang
   let live=true;setBatchReady(false);setBatchLoading(true);setBatchError('');
   getCourseBankBatchCapabilities(db)
    .then(()=>{if(live)setBatchReady(true);})
-   .catch(e=>{if(live)setBatchError('P30 batch editor has not been verified on this database: '+fail(e));})
+   .catch(e=>{if(live)setBatchError('P34 One-Save publish migration is required on this database: '+fail(e));})
    .finally(()=>{if(live)setBatchLoading(false);});
   return()=>{live=false;};
  },[db]);
@@ -84,28 +85,28 @@ export default function AdminCourseBank({db,courses=[],asp,onUpdate,onDirtyChang
   return()=>{live=false;};
  },[db,courseId,query,offset,filterDomain,difficulty,usage,revision]);
  const refresh=(force=false)=>{
-  if(!force&&dirtyCount&&!window.confirm('Discard '+dirtyCount+' unsaved question edits and reload?'))return;
-  if(!force)setStaged({});
+  if(!force&&pendingCount&&!window.confirm('Discard '+pendingCount+' pending changes and reload?'))return;
+  if(!force){setStaged({});setReleaseLessonId('');}
   setRevision(n=>n+1);onUpdate?.();
  };
- useEffect(()=>{onDirtyChange?.(dirtyCount>0);},[dirtyCount,onDirtyChange]);
+ useEffect(()=>{onDirtyChange?.(pendingCount>0);},[pendingCount,onDirtyChange]);
  useEffect(()=>()=>onDirtyChange?.(false),[onDirtyChange]);
  useEffect(()=>{
-  if(!dirtyCount)return;
+  if(!pendingCount)return;
   const warn=e=>{e.preventDefault();e.returnValue='';};
   window.addEventListener('beforeunload',warn);
   return()=>window.removeEventListener('beforeunload',warn);
- },[dirtyCount]);
+ },[pendingCount]);
  useEffect(()=>{setSelectedIds([]);},[courseId,offset,query,filterDomain,difficulty,usage]);
  const moveCourse=id=>{
   if(id===courseId)return;
-  if(dirtyCount&&!window.confirm('Discard unsaved Question Bank edits before changing Course?'))return;
-  setStaged({});setSelectedIds([]);setCourseId(id);
+  if(pendingCount&&!window.confirm('Discard unsaved Question Bank actions before changing Course?'))return;
+  setStaged({});setReleaseLessonId('');setSelectedIds([]);setCourseId(id);
  };
  const stage=(q,field,value)=>{
   setError('');setNotice('');
   try{
-   if(!canEdit)throw Error(batchError||'Install the P30 batch editor migration first.');
+   if(!canEdit)throw Error(batchError||'Install P34 One-Save publishing on Supabase before editing.');
    const next=stagedQuestionEdit(q,staged[q.id],field,value);
    setStaged(prev=>{const result={...prev};if(next)result[q.id]=next;else delete result[q.id];return result;});
   }catch(e){setError(fail(e));}
@@ -125,32 +126,25 @@ export default function AdminCourseBank({db,courses=[],asp,onUpdate,onDirtyChang
    (skipped?' '+skipped+' protected/ineligible question(s) skipped.':''));
  };
  async function saveAll(){
-  if(!dirtyCount||busy||!selected||!canEdit)return;
+  if(!pendingCount||busy||!selected||!canEdit)return;
   setError('');setNotice('');setBusy(true);
   try{
    const payload=stagedToBatch(staged);
-   if(payload.length>500)throw Error('Save no more than 500 staged questions in one batch.');
-   const links=summarizeSavedLessonAssignments(payload);
-   const result=await saveCourseBankBatch(db,courseId,payload);
-   setStaged({});setSelectedIds([]);
-   const details=result.linked&&result.linked===links.assigned
-    ?' · '+links.approved+' Lesson Quiz question(s) published for eligible learners'+
-      (links.draft?' · '+links.draft+' Draft link(s) require question approval AND publishing in Course Builder → Lesson Quiz':'')
-    :result.linked?' · '+result.linked+' Lesson Quiz links added (verify their publication status in Course Builder)':'';
-   setNotice('Saved '+result.saved+' question(s) in one transaction'+details+
-    (result.unpublished?' · '+result.unpublished+' previously published quiz question(s) unpublished':'')+'.');
+   if(payload.length>500)throw Error('Maximum 500 staged questions in one save.');
+   const result=await saveCourseBankBatch(db,courseId,payload,releaseLessonId||null);
+   setStaged({});setReleaseLessonId('');setSelectedIds([]);
+   setNotice('Saved in one transaction: '+result.saved+' question setting(s), '+
+    (result.published||0)+' Lesson Quiz question(s) published'+
+    (result.linked?' · '+result.linked+' new Lesson link(s)':'')+
+    (result.unpublished?' · '+result.unpublished+' disabled quiz item(s) unpublished':'')+
+    '. Mock-selected questions are available in the separate Selected Mock Test.');
    refresh(true);
-  }catch(e){setError('Nothing was partially saved; your edits are still staged. '+fail(e));}
+  }catch(e){setError('No partial changes saved. Your pending selections are retained. '+fail(e));}
   finally{setBusy(false);}
  }
- const openQuestionReview=()=>{
-  if(selected?.slug==='asp')setReviewOpen(true);
-  else if(reviewRef.current)reviewRef.current.open=true;
-  requestAnimationFrame(()=>reviewRef.current?.scrollIntoView({behavior:'smooth',block:'start'}));
- };
  const discard=()=>{
-  if(dirtyCount&&window.confirm('Discard all '+dirtyCount+' unsaved edits?')){
-   setStaged({});setNotice('Unsaved edits discarded.');setError('');
+  if(pendingCount&&window.confirm('Discard all '+pendingCount+' unsaved actions?')){
+   setStaged({});setReleaseLessonId('');setNotice('Unsaved actions discarded.');setError('');
   }
  };
  // Independent legal/answer review for non-ASP remains an explicit separate
@@ -270,7 +264,7 @@ export default function AdminCourseBank({db,courses=[],asp,onUpdate,onDirtyChang
    Verify the original Course ID before uploading or changing questions; do not create a duplicate Course.
   </p>}
   {selected&&!batchLoading&&!batchReady&&<p role="status" className="at-disclaimer">
-   {batchError||'This database requires the P30 atomic batch-editor migration before inline controls are enabled.'}
+   {batchError||'This database requires P34 One-Save publish before inline controls are enabled.'}
    The Question Bank list remains visible, but unsaved inline edits cannot be saved yet.
   </p>}
   {selected&&bank.compatibilityMode&&<p role="status" className="at-disclaimer">
@@ -310,8 +304,7 @@ export default function AdminCourseBank({db,courses=[],asp,onUpdate,onDirtyChang
   {selected&&<>
    <p className="p31-lesson-publish-note">
     <BookOpen size={16}/> Assigning a question to a Lesson Quiz links it to that Lesson.
-    <strong> Approved + Active + non-Mock</strong> questions publish to the learner Knowledge Check on Save.
-    <strong> Draft</strong> links stay hidden until independent approval and publication in Course Builder.
+    <strong> Active, non-Mock questions publish immediately to the selected Lesson Quiz on Save All Changes</strong> — including imported Drafts. Questions ticked for Mock are included in the separate Selected Mock Test.
    </p>
    {!!lessons.length&&<div className="p32-publication-status at-surface" aria-label="Saved Lesson Quiz publication status">
     <div className="p32-publication-select">
@@ -328,13 +321,17 @@ export default function AdminCourseBank({db,courses=[],asp,onUpdate,onDirtyChang
       <strong>{inspectState.data.published} Published</strong>
       <span>{inspectState.data.pending} Not published</span>
       {inspectState.data.total===0?<small>No saved questions are linked to this Lesson. Select it in a question row and click Save All Changes.</small>:
-       inspectState.data.published===0?<small>Linked questions are saved but hidden from learners. To show them in the Quiz: finish any unsaved edits, complete independent question review, then publish eligible entries in the Lesson Quiz editor.</small>:
+       inspectState.data.published===0?<small>Questions are saved but not published. Tick Publish saved Lesson questions below, then click Save All Changes — no Review Draft step.</small>:
        <small>These published questions should appear to an authorized learner in this Lesson's Quiz.</small>}
      </div>}
     {mode==='bank'&&inspectState.data?.pending>0&&<div className="p33-next-steps">
-     {dirtyCount>0&&<span className="p33-unsaved-note">{dirtyCount} unsaved edit{dirtyCount===1?'':'s'} — click Save All Changes first.</span>}
-     <button type="button" className="at-outline" onClick={openQuestionReview} disabled={busy}>Review Draft questions</button>
-     <small>After approval, open the Lesson Quiz and publish eligible linked questions.</small>
+     <label className="p34-release-option">
+      <input type="checkbox" aria-label="Publish saved Lesson questions on Save All Changes"
+       checked={releaseLessonId===inspectLessonId} disabled={!canEdit||busy}
+       onChange={e=>setReleaseLessonId(e.target.checked?inspectLessonId:'')}/>
+      Publish {inspectState.data.pending} saved Lesson question(s) on Save All Changes
+     </label>
+     <small>One Save publishes these eligible linked questions to the learner Quiz. No separate Review Draft step.</small>
     </div>}
     <a className="at-outline p32-open-lesson" href={'/builder?courseId='+encodeURIComponent(courseId)+'&lessonId='+encodeURIComponent(inspectLessonId)}
      target="_blank" rel="noopener noreferrer" aria-label="Open the selected Lesson Quiz editor">
@@ -424,17 +421,17 @@ export default function AdminCourseBank({db,courses=[],asp,onUpdate,onDirtyChang
      </select>
     </div>
     <div className="p30-save-actions" role="status" aria-live="polite">
-     <span className={dirtyCount?'p30-unsaved':''}>{dirtyCount} unsaved</span>
-     <button type="button" className="at-outline" onClick={discard} disabled={!dirtyCount||busy}><Undo2 size={15}/> Discard</button>
+     <span className={pendingCount?'p30-unsaved':''}>{pendingCount} unsaved action{pendingCount===1?'':'s'}</span>
+     <button type="button" className="at-outline" onClick={discard} disabled={!pendingCount||busy}><Undo2 size={15}/> Discard</button>
      <button type="button" className="at-primary p30-save-all" onClick={()=>void saveAll()}
-      disabled={!dirtyCount||busy||!canEdit||dirtyCount>500}><Save size={16}/>
+      disabled={!pendingCount||busy||!canEdit||dirtyCount>500}><Save size={16}/>
       {busy?'Saving…':'Save All Changes'}</button>
     </div>
    </div>
    {dirtyCount>500&&<p role="alert" className="at-error">Maximum 500 edits per atomic save. Discard or reduce the staged changes before saving.</p>}
    {selected.slug!=='asp'&&mode==='bank'&&<details ref={reviewRef} className="p30-advanced-review">
-    <summary>Independent approval / non-ASP Mock-only review</summary>
-    <p>Approval is an audited, separate rights-and-answer verification action. Finish Save All Changes first.</p>
+    <summary>Optional Practice approval tools (not required for Lesson Quiz or Selected Mock)</summary>
+    <p>Only use these tools if you separately want to approve questions for normal Practice. Lesson Quiz and Selected Mock publishing already happens on Save All Changes.</p>
     {bank.items.filter(q=>q.approvalState==='draft'&&!q.mockExclusive).map(q=><div key={q.id} className="p30-review-row">
      <span>{q.prompt}</span>
      <button type="button" className="at-outline" disabled={busy||dirtyCount>0} onClick={()=>void action(q,'approve')}>Approve for Practice</button>
@@ -444,12 +441,12 @@ export default function AdminCourseBank({db,courses=[],asp,onUpdate,onDirtyChang
    </details>}
    {selected.slug==='asp'&&mode==='bank'&&<div ref={reviewRef} className="p30-advanced-review">
     <button type="button" className="at-outline" onClick={()=>setReviewOpen(v=>!v)}>
-     {reviewOpen?'Hide':'Open'} ASP rights & independent approval workbench</button>
+     {reviewOpen?'Hide':'Open'} optional ASP Practice rights review — not required for Lesson Quiz or Selected Mock</button>
     {reviewOpen&&<section className="p28-asp-review"><AdminQuestionsPanel db={db} asp={asp||selected} onUpdate={()=>refresh()}/></section>}
    </div>}
    {selected.slug==='asp'&&mode==='mock'&&<AdminMockPanel db={db} asp={asp||selected}/>}
    {selected.slug!=='asp'&&mode==='mock'&&!aspIdentityMismatch&&
-    <p className="at-disclaimer">Non-ASP Mock selection does not create an official assessment engine; it only reserves eligible questions from regular Practice.</p>}
+    <p className="at-disclaimer">Selected Mock questions appear in the separate Selected Mock Test after Save. The official 200-question ASP Mock remains unchanged.</p>}
   </>}
  </div>;
 }
