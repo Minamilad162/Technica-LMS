@@ -77,7 +77,7 @@ export default function AdminLessonQuizEditor({db,lessonId,courseId}){
    const action=db.from('lms_p22_lesson_quiz_questions').update(payload).eq('id',editing.id);
    const {data,error}=await action.select('id').single();
    if(error||!data?.id)throw Error('Could not save this question. Verify Admin permissions and P22 installation.');
-   await reload();setEditing(null);setNotice('Knowledge Check question saved.');
+   await reload();setEditing(null);setNotice('Lesson Quiz question saved.');
   }catch(err){setError(err.message||'Quiz question was not saved.');}
   finally{setSaving(false);}
  };
@@ -93,7 +93,7 @@ export default function AdminLessonQuizEditor({db,lessonId,courseId}){
   finally{setSaving(false);}
  };
  return <section className="p22-admin-quiz">
-  <div className="p22-admin-quiz-head"><div><strong><FileQuestion size={16}/> Lesson Knowledge Check</strong>
+  <div className="p22-admin-quiz-head"><div><strong><FileQuestion size={16}/> Lesson Quiz</strong>
    <small>{publishedCount} published to learners · {pendingCount} not published · {items.length} saved in this Lesson</small></div>
    <div className="p28-quiz-head-actions">
     {courseId&&<button type="button" className="btn" onClick={()=>{setPicker(v=>!v);setEditing(null);}} disabled={saving||loading}><FileQuestion size={14}/> Choose from Course Bank</button>}
@@ -102,8 +102,8 @@ export default function AdminLessonQuizEditor({db,lessonId,courseId}){
   {error&&<p className="live-authoring-alert" role="alert"><AlertCircle size={15}/>{error}</p>}
   {notice&&<p className="live-authoring-success" role="status"><CheckCircle2 size={15}/>{notice}</p>}
   {items.length>0&&publishedCount===0&&<p className="live-authoring-alert" role="status">
-   This Lesson has saved Quiz questions, but none are published. Learners will see 0 questions.
-   Review the Course Bank question first, then select Publish next to each eligible question below.
+   This Lesson has saved Quiz questions, but none are published. Learners will see 0 questions until you approve the Drafts and publish the eligible Quiz entries.
+   Review the question in the Course Bank, then click Publish below. Reopen the Learner Quiz to check.
   </p>}
   {picker&&<section className="p28-quiz-picker">
    <form onSubmit={e=>{e.preventDefault();setQuery(search.trim());setPage(0);}}>
@@ -135,7 +135,7 @@ export default function AdminLessonQuizEditor({db,lessonId,courseId}){
   </section>}
   {loading?<p>Loading quiz questions…</p>:items.length?<div className="p22-admin-quiz-rows">
    {items.map((q,i)=><div key={q.id}>
-    <div><b>{i+1}. {q.prompt}</b><small>{q.bank_question_id?'Course Bank · ':''}{q.is_published?'Published · visible in learner Knowledge Check':'Not published · learner cannot see it yet'}</small></div>
+    <div><b>{i+1}. {q.prompt}</b><small>{q.bank_question_id?'Course Bank · ':''}{q.is_published?'Published · visible in learner Quiz':'Not published · learner cannot see it yet'}</small></div>
     {q.bank_question_id?<button type="button" disabled={saving} onClick={()=>publishLinked(q)}>{q.is_published?'Unpublish':'Publish'}</button>:
      <button type="button" disabled={saving} onClick={()=>setEditing({...q,options:[...q.options]})}>Edit</button>}
     <button type="button" disabled={saving} aria-label={'Remove '+q.prompt} onClick={()=>remove(q)}><Trash2 size={14}/></button>
