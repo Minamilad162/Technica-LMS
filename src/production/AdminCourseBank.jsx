@@ -430,8 +430,8 @@ export default function AdminCourseBank({db,courses=[],asp,onUpdate,onDirtyChang
    </div>
    {dirtyCount>500&&<p role="alert" className="at-error">Maximum 500 edits per atomic save. Discard or reduce the staged changes before saving.</p>}
    {selected.slug!=='asp'&&mode==='bank'&&<details ref={reviewRef} className="p30-advanced-review">
-    <summary>Independent approval / non-ASP Mock-only review</summary>
-    <p>Approval is an audited, separate rights-and-answer verification action. Finish Save All Changes first.</p>
+    <summary>Optional Practice approval tools (not required for Lesson Quiz or Selected Mock)</summary>
+    <p>Only use these tools if you separately want to approve questions for normal Practice. Lesson Quiz and Selected Mock publishing already happens on Save All Changes.</p>
     {bank.items.filter(q=>q.approvalState==='draft'&&!q.mockExclusive).map(q=><div key={q.id} className="p30-review-row">
      <span>{q.prompt}</span>
      <button type="button" className="at-outline" disabled={busy||dirtyCount>0} onClick={()=>void action(q,'approve')}>Approve for Practice</button>
@@ -441,7 +441,7 @@ export default function AdminCourseBank({db,courses=[],asp,onUpdate,onDirtyChang
    </details>}
    {selected.slug==='asp'&&mode==='bank'&&<div ref={reviewRef} className="p30-advanced-review">
     <button type="button" className="at-outline" onClick={()=>setReviewOpen(v=>!v)}>
-     {reviewOpen?'Hide':'Open'} ASP rights & independent approval workbench</button>
+     {reviewOpen?'Hide':'Open'} optional ASP Practice rights review — not required for Lesson Quiz or Selected Mock</button>
     {reviewOpen&&<section className="p28-asp-review"><AdminQuestionsPanel db={db} asp={asp||selected} onUpdate={()=>refresh()}/></section>}
    </div>}
    {selected.slug==='asp'&&mode==='mock'&&<AdminMockPanel db={db} asp={asp||selected}/>}
