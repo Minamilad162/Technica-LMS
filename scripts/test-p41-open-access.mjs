@@ -51,6 +51,7 @@ const practice=read('src/production/LivePracticePortal.jsx');
 const workspace=read('src/production/LiveLearnerWorkspace.jsx');
 const plans=read('src/production/SubscriptionPlans.jsx');
 const app=read('src/App.jsx');
+const qualifications=read('src/qualification/QualificationsWorkspace.jsx');
 const layout=read('src/components/Layout.jsx');
 assert(hub.includes('catalog.openAccess===true'));
 assert(mock.includes('catalog.openAccess===true'));
@@ -63,5 +64,12 @@ assert(read('src/production/AdminSubscriptionsPanel.jsx').includes('Enable subsc
 assert(plans.includes("'Coming soon'"));
 assert(!layout.includes('Reset demo data'));
 assert(!app.includes("new URLSearchParams(l.search).get('legacyPreview')==='1'"));
+assert(app.includes('legacyBrowserQa?<HomePage/>:<LiveLearnerPortal initialScreen="learning"/>'),
+ 'Production Home must use live Supabase learner data, not fabricated demo cards');
+assert(app.includes('<Navigate to="/my-practice" replace/>'),
+ 'Legacy results links must show server-owned P11 history');
+assert(app.includes('<Navigate to="/admin-tools?tab=questions" replace/>'),
+ 'Legacy Bank must redirect into protected real Admin tools');
+assert(!qualifications.includes('Demo preview'),'Do not present qualification simulation as genuine submission');
 assert(read('src/production/LiveMockExam.jsx').includes('200 fixed questions · 300 minutes'));
 console.log('PASS P41 open-access policy: authenticated server setting, published only, old lock restored, immutable Mock/Practice, no fake billing/ASP mapping.');
