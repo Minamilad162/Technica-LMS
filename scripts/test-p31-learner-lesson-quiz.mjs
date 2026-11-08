@@ -73,8 +73,8 @@ assert(!ui.includes("db.from('lms_questions')"),'Learner must never read protect
 assert(!ui.includes('lms_p28_list_bank'), 'Learner must never use Admin list Bank RPC.');
 assert(portal.includes('<CourseLessonExplorer db={db} userId={user.id} courseId={chosen.id}'),
  'Actual learner course path must mount the same single-page Lesson component.');
-assert(admin.includes('summarizeSavedLessonAssignments(payload)'));
-assert(admin.includes('require question approval AND publishing in Course Builder'));
+assert(admin.includes('saveCourseBankBatch(db,courseId,payload,releaseLessonId'));
+assert(admin.includes('Active, non-Mock questions publish immediately to the selected Lesson Quiz'));
 assert(p30.includes("public.lms_p28_attach_lesson_question(v_lesson,v_id,v_q.approval_state='approved')"),
  'P30 persists the selected Lesson quiz question as published ONLY after approval.');
 assert(p22.includes("WHERE lesson_id=p_lesson_id AND is_published IS TRUE"),
