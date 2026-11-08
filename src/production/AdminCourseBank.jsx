@@ -218,7 +218,7 @@ export default function AdminCourseBank({db,courses=[],asp,onUpdate,mode='bank'}
         <input type="checkbox" aria-label={'Mock Exam: '+q.prompt}
          checked={q.mockExclusive||q.mockCandidate===true}
          disabled={busy||typeof q.mockCandidate!=='boolean'||q.mockExclusive||
-          (!q.mockCandidate&&(q.approvalState!=='draft'||q.linkedCount>0))}
+          (!q.mockCandidate&&(q.approvalState!=='draft'||q.linkedCount>0||!q.isActive))}
          onChange={e=>void changeFlags(q,'mock',e.target.checked)}/>
         Mock Exam
        </label>
