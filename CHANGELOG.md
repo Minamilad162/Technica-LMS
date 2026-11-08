@@ -1,3 +1,8 @@
+## 2026-11-08 — P33: visible Learner Quiz shortcut and Draft publication guidance
+- Owner screenshot: C04 Lesson 1 has 0 Published and 2 Not published Quiz links, questions marked DRAFT, plus 1 unsaved change. These links must not become learner-visible before independent review and publication.
+- Renamed the learner's same-page Knowledge Check shortcut to **Quiz**, showing published count even at zero; section title now Lesson Quiz. Video and Material remain mounted. Empty state explains why saved Drafts cannot appear yet.
+- Admin Question Bank lesson health strip explicitly guides Save All → Review Draft Questions → Open Lesson Quiz → Publish eligible items; existing P6A/non-ASP approval UI remains protected, no direct DB writes. Course Builder editor matches new Quiz wording. Tests/Blueprint updated.
+
 ## 2026-11-08 — P32: Lesson Quiz published visibility diagnosis
 - User's learner screenshot showed existing Knowledge Check section but 0 published questions. Repo confirms the P30/P28 Lesson selector creates a secure P22 link, while P22 learner RPC returns only Published quiz rows. Draft-source questions remain hidden pending independent approval + explicit publish; no evidence of the exact live lesson/question state was available.
 - Admin Question Bank now shows read-only actual-P22 per-Lesson Published and Not published totals and direct Open Lesson Quiz deep-link; Course Builder opens the exact Course/Domain/Topic/Lesson and scrolls to it.
