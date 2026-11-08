@@ -1,0 +1,39 @@
+/* P36: real platform subscription countdown, compact inside both learner headers. */
+.sc-countdown{display:flex;flex-direction:column;justify-content:center;gap:6px;min-width:160px;width:180px;max-width:190px;min-height:51px;padding:7px 12px;background:#f6faff;border:1px solid #dbe8f8;border-radius:12px;color:#1d446a;text-align:left;flex-shrink:0}
+button.sc-countdown{cursor:pointer}
+button.sc-countdown:hover{border-color:#8fc0e9;background:#f0f7ff}
+.sc-countdown:focus-visible{outline:3px solid #4489d1;outline-offset:2px}
+.sc-text{display:flex;align-items:center;gap:8px;min-width:0}
+.sc-text>svg{color:#298abf;flex-shrink:0}
+.sc-copy{display:grid;gap:1px;min-width:0;line-height:1.25}
+.sc-copy strong{display:block;font-size:12px;letter-spacing:-.01em;font-weight:830;color:#1d456d;white-space:nowrap}
+.sc-copy small{display:block;font-size:10px;font-weight:650;color:#7892aa;white-space:nowrap}
+.sc-track{display:block;width:100%;height:6px;background:#dfe9f4;border-radius:99px;overflow:hidden}
+.sc-track i{display:block;height:100%;background:linear-gradient(90deg,#23bfa1,#278ec7);border-radius:99px;transition:width .2s linear}
+.sc-none,.sc-loading,.sc-error,.sc-expired{background:#f8fafc;border-color:#e7ebf2}
+.sc-none .sc-copy strong,.sc-loading .sc-copy strong,.sc-error .sc-copy strong,.sc-expired .sc-copy strong{color:#6a7d91}
+.sc-none .sc-text>svg,.sc-error .sc-text>svg,.sc-expired .sc-text>svg{color:#8395a8}
+.sc-upcoming .sc-track i{background:#9ab2d6}
+.lj-top .sc-countdown{margin-left:auto}
+.lj-top .lj-account{margin-left:0}
+.top-actions .sc-countdown{margin-right:2px}
+@media(max-width:1100px){
+ .sc-countdown{width:151px;min-width:151px;padding:7px 9px}
+ .sc-copy strong{font-size:11.5px}
+ .lj-top .lj-account small{display:none}
+}
+@media(max-width:700px){
+ .sc-countdown{min-width:119px;width:119px;max-width:119px;min-height:42px;padding:5px 8px;gap:5px;border-radius:10px}
+ .sc-copy strong{font-size:10.5px}
+ .sc-copy small{display:none}
+ .sc-text{gap:5px}
+ .sc-text>svg{width:14px;height:14px}
+ .sc-track{height:5px}
+ .lj-top .sc-countdown{margin-left:auto}
+}
+@media(max-width:400px){
+ .sc-countdown{width:104px;min-width:104px;max-width:104px}
+ .sc-copy strong{font-size:10px}
+ .sc-text>svg{display:none}
+}
+@media(prefers-reduced-motion:reduce){.sc-track i{transition:none}}

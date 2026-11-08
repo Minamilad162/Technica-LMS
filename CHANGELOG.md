@@ -1,3 +1,9 @@
+### 2026-11-08 — P36 verified platform-subscription days-left bar in learner headers (FRONTEND ONLY)
+
+- Added a compact time-remaining bar with `N days left` near the learner username in both Technica headers. Uses actual P21 server-owned start/end/status, including calendar-month varying lengths; displays expiration, no active plan and unavailable backend states honestly.
+- Standard ReactRouter header reads verified learner's subscription through P21 RLS and refreshes on revisit/visibility and slow interval; standalone Supabase learner entrypoint uses the existing subscribed catalog read, with no extra database query. Not shown in admin or protected exam headers.
+- Added pure date policy, accessible progress bar, mobile CSS, P36 contract/regression tests and Blueprint §96. No entitlement, payment, SQL, RLS, schema or learner content changes.
+
 ### 2026-11-08 — P35 Premium Qualifications cards + larger UI text (SOURCE ONLY)
 
 - Redesigned all three My Qualifications cards with locally available Technica HSE photographs as strong darkened hero backgrounds, elegant brand name text (OTHM / ProQual), clear Level tags, larger qualification titles, Units count and Explore buttons. The images are existing site assets, not official awarding-body logos. Kept compact high-contrast premium styling and simplified content.
