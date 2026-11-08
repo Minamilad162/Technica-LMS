@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 const read=p=>readFileSync(new URL('../'+p,import.meta.url),'utf8');
 const explorer=read('src/production/CourseLessonExplorer.jsx');
+const quizLoader=read('src/production/lessonQuizSyncApi.js');
 const ui=read('src/production/LiveLearnerWorkspace.jsx');
 const viewer=read('src/production/ProtectedLessonViewer.jsx');
 const admin=read('src/production/AdminLessonQuizEditor.jsx');
@@ -21,7 +22,7 @@ for(const marker of [
  'cle-grid','cle-lesson-sidebar','cle-steps','cle-reading','cle-player-footer',
  'Video','Study Material','Knowledge Check','Lesson Attachments',
  "quizProgress[lesson]","progress[lesson]?.video_completed",
- 'lms_p22_complete_lesson_step','lms_p22_get_lesson_quiz',
+ 'lms_p22_complete_lesson_step','fetchLessonQuiz(db,active',
  'lms_p22_submit_lesson_quiz','lms_p22_my_steps',
  "stepDone(selected.id,'video')","stepDone(selected.id,'reading')",
  'questions.some(q=>!Number.isInteger(answers[q.id]))',
@@ -30,6 +31,9 @@ for(const marker of [
  'previewOnly','full||selected.isFreeIntro',
  'onSubscribe?.()'
 ])assert(explorer.includes(marker),'Missing P22 learner behavior: '+marker);
+assert(quizLoader.includes("db.rpc('lms_p22_get_lesson_quiz'")&&
+ quizLoader.includes('is_published')&&quizLoader.includes('correct_index'),
+ 'Published Lesson Quiz must use protected server-only answer-key-free API and Admin preview.');
 assert(!explorer.includes('.insert({user_id'),'No direct browser progress INSERT allowed');
 assert(!explorer.includes("getPublicUrl("),'Never expose public media URLs');
 assert(viewer.includes('onEnded={finishWatched}')&&viewer.includes('fraction>=.9')
