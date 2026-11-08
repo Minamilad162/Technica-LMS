@@ -90,10 +90,10 @@ for(const route of ['/course-catalog','/my-learning','/my-practice','/practice']
 assert(app.includes("LiveLearnerPortal initialScreen=\"courses\""));
 assert(app.includes("LiveLearnerPortal initialScreen=\"learning\""));
 assert(app.includes("LiveLearnerPortal initialScreen=\"history\""));
-assert(app.includes("LiveLearnerPortal initialScreen=\"practice\""));
+assert(app.includes('LiveExamPracticeHub')&&app.includes('Navigate to="/assessments?tab=practice" replace'),'Practice route must resolve to unified Practice tab');
 assert(app.includes("legacyPreview?<LegacyPreviewWarning><PracticePage"));
 assert(app.includes('path="/courses" element={<AdminOnly>'));
-for(const menu of ['/course-catalog','/my-learning','/practice','/my-practice'])
+for(const menu of ['/course-catalog','/my-learning','/assessments','/my-practice'])
  assert(layout.includes(menu),'P15 learner menu missing '+menu);
 assert(bridge.includes('db.auth.getUser()'),'Router bridge must verify real signed Supabase user');
 assert(bridge.includes('LiveLearnerWorkspace')&&bridge.includes('embedded'));
