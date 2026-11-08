@@ -1,3 +1,7 @@
+## 2026-11-08 — P34 transitional fallback guard (source-only)
+- If P34A/P34B are not yet installed, retain existing verified P30 Admin Question Bank settings via the original atomic P30 RPC. Show a prominent **P30 Legacy** warning and Save Settings label, explicitly stating that saved Draft Lesson links and Mock candidates are **not yet learner-published**; disallow the P34 release-only action. Full one-save publish activates only after BOTH Admin P34 capability probes succeed. No remote DB writes, no schema changes.
+- New compatibility CI regression protects old UI functions during separate Cloudflare/Supabase rollout.
+
 ## 2026-11-08 — P34: one Admin Save publishes Lesson Quiz & Selected Mock (source-only)
 - Replaced extra Review Draft Questions step for Lesson Quiz selection: selecting a real Lesson in Question Bank and Save All publishes eligible questions immediately, including imported Drafts, using narrow per-Lesson authorization receipts. Previously linked unpublished Lesson questions can also be released in one batch Save. The Bank's Draft state stays Draft for Practice and independent rights review; mock/disabled/archived cross-course questions remain excluded.
 - Added a separate **Selected Mock Test** sourced from active Mock candidate ticks in the same Course Bank, real server-side question snapshots, secure 5-hour timer, answer/flag/grading and no answer keys. Existing immutable Official ASP 200/300 and Practice exclusion remain unchanged. A learner switch distinguishes the two assessments.
