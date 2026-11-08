@@ -52,20 +52,31 @@ export async function reserveNonAspMockQuestion(db,id){
 }
 // Single atomic Admin RPC for all staged rows, NOT one request per switch.
 export async function getCourseBankBatchCapabilities(db){
- const x=await call(db,'lms_p34_bank_capabilities');
- if(x?.version!=='p34a-v1'||x.maxBatch!==500||x.atomic!==true
-  ||x.lessonQuizPublishOnSave!==true)
-  throw Error('One-Save Lesson Quiz publication is not installed on this database.');
- const mock=await call(db,'lms_p34b_admin_capabilities');
- if(mock?.version!=='p34b-v1'||mock.selectedMockOnSave!==true
-  ||mock.official200Unchanged!==true)
-  throw Error('The Selected Mock Test is not installed on this database.');
- return {...x,selectedMockOnSave:true};
+ let x=null;
+ try{x=await call(db,'lms_p34_bank_capabilities');}catch{/* Pre-P34 migration: preserve existing P30 Admin settings only. */}
+ if(x?.version==='p34a-v1'&&x.maxBatch===500&&x.atomic===true
+  &&x.lessonQuizPublishOnSave===true){
+  let mock=null;
+  try{mock=await call(db,'lms_p34b_admin_capabilities');}catch{}
+  if(mock?.version==='p34b-v1'&&mock.selectedMockOnSave===true
+   &&mock.official200Unchanged===true)
+   return {...x,mode:'p34',selectedMockOnSave:true};
+ }
+ // Keep preexisting P30 edit functions available until both additive P34 SQL
+ // migrations are installed. NEVER claim legacy saves publish Draft/Mock.
+ const previous=await call(db,'lms_p30_bank_capabilities');
+ if(previous?.version!=='p30-v1'||previous.maxBatch!==500||previous.atomic!==true)
+  throw Error('Question Bank capability unavailable; verify P30/P34 migration state.');
+ return {...previous,mode:'p30',legacy:true,selectedMockOnSave:false,
+  lessonQuizPublishOnSave:false};
 }
-export async function saveCourseBankBatch(db,courseId,rows,releaseLessonId=null){
+export async function saveCourseBankBatch(db,courseId,rows,releaseLessonId=null,mode='p34'){
  checkId(courseId);
  if(releaseLessonId)checkId(releaseLessonId);
- if(!Array.isArray(rows)||rows.length>500||(!rows.length&&!releaseLessonId))
+ if(!['p30','p34'].includes(mode))throw Error('Unverified Question Bank version.');
+ if(mode==='p30'&&releaseLessonId)
+  throw Error('P34 SQL must be installed before publishing saved Lesson questions.');
+ if(!Array.isArray(rows)||rows.length>500||(!rows.length&&(!releaseLessonId||mode==='p30')))
   throw Error('Choose question edits or an existing Lesson Quiz to publish.');
  const ids=new Set();
  for(const r of rows){
@@ -80,8 +91,10 @@ export async function saveCourseBankBatch(db,courseId,rows,releaseLessonId=null)
    ||(r.addLessonId&&!uuid.test(r.addLessonId)))
    throw Error('Invalid staged Question Bank change.');
  }
- const response=await call(db,'lms_p34_save_question_bank',{
-  p_course_id:courseId,p_changes:rows,p_release_lesson_id:releaseLessonId||null});
+ const response=mode==='p30'
+  ?await call(db,'lms_p30_save_question_bank',{p_course_id:courseId,p_changes:rows})
+  :await call(db,'lms_p34_save_question_bank',{
+    p_course_id:courseId,p_changes:rows,p_release_lesson_id:releaseLessonId||null});
  if(!response||response.requested!==rows.length||!Number.isInteger(response.saved)
   ||response.saved<0||response.saved>rows.length)
   throw Error('Question Bank Save response could not be verified.');
