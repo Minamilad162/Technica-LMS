@@ -162,6 +162,8 @@
  border-radius:50px;background:#cefaea;color:#007a65;font-weight:850;font-size:10px;white-space:nowrap}
 .sp-card.sp-featured .sp-price{color:#fff}
 .sp-card.sp-featured .sp-period{color:#d5f9f1}
+.sp-term-note{margin:-3px 0 1px;color:#7e9698;font-size:10px;font-weight:650;line-height:1.45}
+.sp-card.sp-featured .sp-term-note{color:#d0f4ee}
 .sp-card-callout{display:flex;align-items:center;gap:9px;min-height:44px;
  padding:10px 12px;background:#e4f9f0;border-radius:11px;color:#176c65;
  font-size:11px;line-height:1.5;font-weight:760}
