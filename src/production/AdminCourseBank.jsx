@@ -244,7 +244,7 @@ export default function AdminCourseBank({db,courses=[],asp,onUpdate,mode='bank'}
        <button type="button" className="at-outline" disabled={busy||!pickedLesson[q.id]||!q.isActive||q.mockExclusive||q.mockCandidate}
         onClick={()=>void assignLesson(q)}>Add to Quiz</button>
        {(q.linkedLessonIds||[]).length>0&&<small>Linked: {(q.linkedLessonIds||[]).map(id=>lessons.find(l=>l.id===id)?.label||'Lesson').join(' · ')}</small>}
-      </div>
+      </div>}
       {expanded===q.id&&<div className="p28-answers">{q.options.map((answer,i)=><p key={i} className={i===q.correctIndex?'correct':''}>
        <strong>{String.fromCharCode(65+i)}.</strong> {answer}{i===q.correctIndex?' ✓':''}</p>)}</div>}
       <div className="p28-actions">
