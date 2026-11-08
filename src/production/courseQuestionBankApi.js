@@ -94,6 +94,28 @@ export async function loadMarkedMockCandidateIds(db,courseId){
   ||data.ids.some(id=>!uuid.test(id)))throw Error('Unexpected Mock selection response.');
  return data.ids;
 }
+// Admin-only read-only diagnostic for one real Lesson's publication status.
+// P22 RLS rejects learners; no correct_index/options/answers are ever selected.
+export async function inspectLessonQuizPublication(db,lessonId){
+ checkId(lessonId);
+ await verifiedLiveAdmin(db);
+ const {data,error}=await db.from('lms_p22_lesson_quiz_questions')
+  .select('id,lesson_id,bank_question_id,is_published')
+  .eq('lesson_id',lessonId);
+ if(error)throw Error('Cannot inspect Lesson Quiz publication: '+(error.message||'verify P22 and Admin access'));
+ const rows=Array.isArray(data)?data:[];
+ if(rows.some(row=>row.lesson_id!==lessonId||!uuid.test(row.id||'')||
+   (row.bank_question_id&&!uuid.test(row.bank_question_id))||
+   typeof row.is_published!=='boolean'))
+  throw Error('Unexpected Lesson Quiz publication results.');
+ return {
+  total:rows.length,
+  published:rows.filter(q=>q.is_published).length,
+  pending:rows.filter(q=>!q.is_published).length,
+  linked:rows.filter(q=>q.bank_question_id).length,
+  rows
+ };
+}
 export async function attachBankToLesson(db,lessonId,questionId,publish=false){
  return call(db,'lms_p28_attach_lesson_question',{
   p_lesson_id:checkId(lessonId),p_question_id:checkId(questionId),p_publish:!!publish});
