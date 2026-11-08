@@ -65,7 +65,7 @@ for(const required of [
  "quizLoading||questions.length===0",
  "lms_p22_submit_lesson_quiz",
  "quizQuestionIdsChanged",
- "No published Knowledge Check questions",
+ "No published quiz questions yet.",
  "quizError",
  "questions.map((q,i)"
 ])assert(ui.includes(required),'P31 Lesson UI missing: '+required);
