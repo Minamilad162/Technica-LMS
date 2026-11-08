@@ -30,7 +30,7 @@ for(const marker of ['params.get(\'lessonId\')','setLessonId(realLesson.id)',
  assert(builder.includes(marker),'P32 deep link to exact Lesson editor missing '+marker);
 for(const marker of ['publishedCount=items.filter(q=>q.is_published).length',
  'pendingCount=items.length-publishedCount','Learners will see 0 questions until you approve the Drafts',
- 'Review the Course Bank question first','Not published · learner cannot see it yet',
+ 'Review the question in the Course Bank','Not published · learner cannot see it yet',
  "q.is_published?'Unpublish':'Publish'"])
  assert(editor.includes(marker),'P32 Admin Lesson editor publication guidance missing '+marker);
 assert(css.includes('.p32-publication-status')&&css.includes('@media(max-width:760px)'));
