@@ -201,7 +201,7 @@ export default function LiveSelectedMockExam({db,user,course,access}){
      </div>
      <div className="live-mock-actions">
       <button type="button" className="live-secondary" disabled={busy||left===0}
-       onClick={()=>save(null,!q.flagged)}><Flag size={17}/>
+       onClick={()=>save(q.selectedIndex,!q.flagged)}><Flag size={17}/>
         {q.flagged?'Unflag question':'Flag for review'}
        </button>
       <button type="button" className="live-secondary" disabled={busy||left===0||q.selectedIndex===null}
