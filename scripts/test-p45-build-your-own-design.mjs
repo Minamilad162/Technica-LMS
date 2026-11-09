@@ -65,8 +65,18 @@ for(const className of [
  '.byo-summary-metrics','.byo-start-button',
  '@container (max-width:1040px)','@container (max-width:600px)',
  '@media(max-width:700px)','@media(prefers-reduced-motion:reduce)',
- '#5f35e8','#3c6af2'
+ '#006673','#11a39a'
 ])assert(css.includes(className),'Missing approved design/responsive style: '+className);
+for(const oldAccent of ['#5f35e8','#3c6af2','#8345f5','#4025d6','#8541f6','#3967f2','#9251ff','#4526db','#7041e9']){
+ assert(!css.includes(oldAccent),'Old violet accent still leaks into redesigned Practice: '+oldAccent);
+}
+for(const newColor of [
+ '#0b263a','#006673','#11a39a','#dff7ec','#eef8f6','#e8f7f2','#dce8ec'
+])assert(css.includes(newColor),'Missing Technica navy/teal/mint token '+newColor);
+assert(css.includes('background:linear-gradient(150deg,#0d9b8c,#006673 74%)'),
+ 'Start CTA must use primary Technica teal');
+assert(css.includes('background:linear-gradient(114deg,#f7fbfa 0%,#eef8f6 48%,#e3f4f0 100%)'),
+ 'Hero must use premium light mint gradient');
 assert(ui.includes('grid-template-columns')===false,'Layout is authored in CSS only');
 assert(!ui.includes('<img'),'Do not embed screenshot as image');
 assert(app.includes("mode==='custom'?<LiveBuildYourOwn"),'Preserve original Practice route');
