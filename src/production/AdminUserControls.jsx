@@ -20,6 +20,12 @@ export default function AdminUserControls({db,userId,onChanged}){
   try{await setAdminUserBlocked(db,userId,!blocked,note);setNotice(blocked?'Account unblocked.':'Account blocked.');refresh();}
   catch(e){setError(e?.message||'Account update failed.');}finally{setBusy(false);}
  };
+ const saveNote=async()=>{
+  if(!data||!blocked||busy||note===data.blockNote)return;
+  setBusy(true);setError('');
+  try{await setAdminUserBlocked(db,userId,true,note);setNotice('Block note updated.');refresh();}
+  catch(e){setError(e?.message||'Could not update block note.');}finally{setBusy(false);}
+ };
  const activate=async()=>{
   if(!data||busy||blocked||!planId)return;
   const plan=data.plans.find(x=>x.id===planId);
@@ -44,7 +50,8 @@ export default function AdminUserControls({db,userId,onChanged}){
    <div className="auc-card"><h4><LockKeyhole size={17}/> Account access</h4>
     {blocked&&<div className="auc-preview"><b>Message displayed to this user</b><p>{data.blockNote||'Contact the LMS administrator for assistance.'}</p><small>Blocked {date(data.blockedAt)}</small></div>}
     <label htmlFor={'auc-note-'+userId}>Block note (optional · visible at sign-in)</label>
-    <textarea id={'auc-note-'+userId} rows={3} maxLength={500} value={note} onChange={e=>setNote(e.target.value)} disabled={busy||blocked} placeholder="Please contact Technica LMS support about your account."/>
+    <textarea id={'auc-note-'+userId} rows={3} maxLength={500} value={note} onChange={e=>setNote(e.target.value)} disabled={busy} placeholder="Please contact Technica LMS support about your account."/>
+    {blocked&&<button type="button" className="auc-button activate" disabled={busy||note===data.blockNote} onClick={saveNote}>Save block note</button>}
     <button type="button" className={'auc-button '+(blocked?'unblock':'block')} disabled={busy} onClick={toggle}>{blocked?<><Unlock size={16}/> Unblock user</>:<><LockKeyhole size={16}/> Block user</>}</button>
    </div>
    <div className="auc-card"><h4><CalendarClock size={17}/> Platform subscription</h4>
