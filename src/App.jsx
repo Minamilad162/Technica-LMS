@@ -25,6 +25,7 @@ const QualificationsWorkspace=React.lazy(()=>import('./qualification/Qualificati
 const LiveLearnerProgress=React.lazy(()=>import('./production/LiveLearnerProgress'));
 const LiveReleaseReadiness=React.lazy(()=>import('./production/LiveReleaseReadiness'));
 const LiveExamPracticeHub=React.lazy(()=>import('./production/LiveExamPracticeHub.jsx'));
+const LiveMyProfile=React.lazy(()=>import('./production/LiveMyProfile.jsx'));
 const ResultsPage=React.lazy(()=>import('./pages/ResultsPage'));
 const PracticeResultsPage=React.lazy(()=>import('./pages/PracticeResultsPage'));
 const LearnersPage=React.lazy(()=>import('./pages/LearnersPage'));
@@ -76,7 +77,8 @@ export default function App(){
  <Route path="/checkout/:courseId" element={<Navigate to="/subscription-plans" replace/>}/>
  <Route path="/my-learning" element={<RoutePage>{legacyPreview?<LegacyPreviewWarning><LearningLibrary/></LegacyPreviewWarning>:<LiveLearnerPortal initialScreen="learning"/>}</RoutePage>}/>
  <Route path="/qualifications" element={<RoutePage><QualificationsWorkspace/></RoutePage>}/>
- <Route path="/my-practice" element={<RoutePage><LiveLearnerPortal initialScreen="history"/></RoutePage>}/>
+ <Route path="/my-practice" element={<Navigate to="/assessments?tab=history" replace/>}/>
+ <Route path="/my-profile" element={<RoutePage><LiveMyProfile/></RoutePage>}/>
  <Route path="/my-progress" element={<RoutePage><LiveLearnerProgress/></RoutePage>}/>
  <Route path="/learning/course/:courseId" element={<RoutePage><LiveLearningCourse/></RoutePage>}/>
  <Route path="/learning/process-safety-foundations" element={legacyBrowserQa?<RoutePage><LegacyPreviewWarning><LearningPlayer/></LegacyPreviewWarning></RoutePage>:<Navigate to="/my-learning" replace/>}/>
@@ -93,8 +95,8 @@ export default function App(){
  <Route path="/assessments" element={<RoutePage><LiveExamPracticeHub/></RoutePage>}/>
  <Route path="/assessments/mock/live" element={<RoutePage standalone><LiveMockPortal/></RoutePage>}/>
  <Route path="/assessments/take" element={legacyBrowserQa?<RoutePage standalone><QuizPage kind="assessment"/></RoutePage>:<Navigate to="/assessments?tab=mock" replace/>}/>
- <Route path="/results" element={<Navigate to="/my-practice" replace/>}/>
- <Route path="/practice/results" element={<Navigate to="/my-practice" replace/>}/>
+ <Route path="/results" element={<Navigate to="/assessments?tab=history" replace/>}/>
+ <Route path="/practice/results" element={<Navigate to="/assessments?tab=history" replace/>}/>
  <Route path="/learners" element={<AdminOnly><Navigate to="/admin-tools?tab=users" replace/></AdminOnly>}/>
  <Route path="/question-bank" element={<AdminOnly><Navigate to="/admin-tools?tab=questions" replace/></AdminOnly>}/>
  <Route path="/asp-review" element={<AdminOnly><Navigate to="/admin-tools?tab=questions" replace/></AdminOnly>}/>
