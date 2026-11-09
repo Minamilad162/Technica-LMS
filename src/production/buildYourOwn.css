@@ -1,0 +1,44 @@
+.byo-panel{display:grid;gap:21px;padding:20px;border:1px solid #cfe8e3;border-radius:17px;background:linear-gradient(165deg,#f6fcfa 0%,#fff 65%);min-width:0}
+.byo-panel-heading{display:flex;align-items:flex-start;gap:12px}
+.byo-emblem{display:grid;place-items:center;width:42px;height:42px;border-radius:13px;background:#dff6ec;color:#09836e;flex-shrink:0}
+.byo-eyebrow{font-size:10px;letter-spacing:.1em;font-weight:900;color:#06967e}
+.byo-panel-heading h4{font-size:19px;margin:4px 0;color:#184750}
+.byo-panel-heading p{font-size:12px;color:#64818a;line-height:1.6;margin:0}
+.byo-field{display:grid;gap:10px}
+.byo-field-heading{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;align-items:center}
+.byo-field-heading strong{display:inline-flex;align-items:center;gap:8px;color:#1d4c58;font-size:13px}
+.byo-field-heading b{font-size:11px;color:#088b78}
+.byo-count-row{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+.byo-count-row>input{width:120px;max-width:100%;padding:12px 13px;border:1px solid #b9dcd7;border-radius:10px;color:#21555c;background:white;font-size:18px;font-weight:750}
+.byo-count-presets{display:flex;gap:8px;flex-wrap:wrap}
+.byo-count-presets button{padding:11px 17px;border:1px solid #d2e3e3;background:white;border-radius:10px;color:#365e68;font-weight:750}
+.byo-count-presets button.active{color:#047e6a;border-color:#29ac91;background:#e5f8f0}
+.byo-choice-block{display:grid;gap:10px}
+.byo-choice-block>strong{font-size:13px;color:#194950}
+.byo-choices{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
+.byo-choices-difficulty{grid-template-columns:repeat(auto-fit,minmax(155px,1fr))}
+.byo-choice{border:1px solid #d8e8e7;border-radius:12px;min-height:76px;background:#fff;padding:13px;display:flex;align-items:flex-start;gap:10px;text-align:left;justify-content:space-between;color:#365e64;transition:.15s}
+.byo-choice:hover{border-color:#3ba993}
+.byo-choice.selected{border-color:#11a187;background:#e9faf3;box-shadow:0 0 0 1px #11a1871a}
+.byo-choice>span{display:grid;gap:5px;min-width:0}
+.byo-choice b{font-size:12px;line-height:1.4}
+.byo-choice small{font-size:10px;line-height:1.5;color:#6b8790}
+.byo-choice svg{color:#088b72;flex-shrink:0}
+.byo-timer-inputs{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.byo-timer-inputs label,.byo-domain{display:grid;gap:8px;color:#305c64;font-size:12px;font-weight:750}
+.byo-timer-inputs label svg,.byo-domain svg{color:#129480}
+.byo-timer-inputs input,.byo-domain select{border:1px solid #cadfdf;background:white;color:#254b55;border-radius:10px;padding:11px;width:100%;max-width:320px}
+.byo-timer-inputs small{color:#718791;font-size:11px}
+.byo-camera{padding:16px;border-radius:13px;background:#f6fafb;border:1px solid #d9e7e8;display:flex;justify-content:space-between;align-items:center;gap:14px}
+.byo-camera>div{display:flex;align-items:flex-start;gap:10px}
+.byo-camera>div>svg{flex-shrink:0;color:#098f7b}
+.byo-camera strong{font-size:13px;color:#285359}
+.byo-camera p{margin:6px 0 0;color:#748891;font-size:11px;line-height:1.55}
+.byo-camera-switch{display:flex;gap:7px;align-items:center;color:#09826e;font-size:12px;font-weight:800}
+.byo-camera-switch input{width:20px;height:20px;accent-color:#139c83}
+.byo-summary{display:flex;align-items:center;gap:9px;flex-wrap:wrap;background:#e8f7f2;border:1px solid #cceade;padding:10px 13px;border-radius:11px;font-size:11px;color:#1e655e;font-weight:750}
+.byo-summary svg{color:#078d78}
+.byo-panel :is(input,select,button):focus-visible{outline:2px solid #078e79;outline-offset:2px}
+@media(max-width:700px){.byo-panel{padding:13px}.byo-choices{grid-template-columns:1fr 1fr}.byo-timer-inputs{grid-template-columns:1fr}.byo-count-row>input{width:100%}.byo-count-presets{width:100%}.byo-count-presets button{flex:1}.byo-camera{align-items:flex-start}}
+@media(max-width:425px){.byo-choices{grid-template-columns:1fr}.byo-choices-difficulty{grid-template-columns:repeat(2,minmax(0,1fr))}.byo-choice{min-height:69px}}
+@media(prefers-reduced-motion:reduce){.byo-choice{transition:none}}
