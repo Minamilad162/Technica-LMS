@@ -204,7 +204,7 @@ export default function LivePractice({db,user,course,domains=[],access,defaultMo
  return <div ref={containerRef} className="live-practice" aria-label="Secure practice engine">
   <div className="live-practice-top"><div><span className="live-eyebrow">SECURE PRACTICE</span><h3><ShieldCheck size={21}/> Secure Practice Center</h3><p>Questions are selected and scored in Supabase. Exiting fullscreen closes this attempt and returns to the course setup.</p></div>{attempt&&<button type="button" className="live-secondary" onClick={()=>{void sealAttempt(attempt.attemptId);void leaveIntentionally();}}>Leave questions</button>}</div>
   {!eligible?<div className="live-empty"><LockKeyhole size={22}/><b>Practice is not available</b><p>This course needs an active learning access policy and approved questions.</p></div>:!attempt?<>
-   <div className="live-mode-grid">{PRESETS.map(p=><button key={p.id} className={'live-mode-card '+(mode===p.id?'chosen':'')} onClick={()=>setMode(p.id)} type="button"><strong>{p.title}</strong><span>{p.desc}</span>{mode===p.id&&<Check size={17}/>}</button>)}</div>
+   <div className="live-mode-grid">{PRESETS.map(p=><button key={p.id} className={'live-mode-card '+(mode===p.id?'chosen':'')} onClick={()=>{setMode(p.id);setError('');setNotice('');}} type="button"><strong>{p.title}</strong><span>{p.desc}</span>{mode===p.id&&<Check size={17}/>}</button>)}</div>
    {mode==='custom'?<LiveBuildYourOwn key={course.id+'-'+user.id} db={db} user={user} course={course}
      domains={domains} access={eligible}/>:<>
    {['domain','levelup'].includes(mode)&&<div className="live-practice-controls">
