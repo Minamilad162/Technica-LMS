@@ -185,7 +185,8 @@ export default function LiveBuildYourOwn({db,user,course,domains=[],access}){
  return <section ref={rootRef} className="byo-session" aria-label="Build Your Own secured Practice">
   {!access?<div className="live-empty"><LockKeyhole size={23}/>Practice access is unavailable.</div>:
   !attempt?<div className="byo-setup">
-   <BuildYourOwnSettings value={settings} onChange={setSettings} domains={domains}
+   <BuildYourOwnSettings value={settings}
+     onChange={next=>{setSettings(next);setError('');setNotice('');}} domains={domains}
     onStart={()=>void start()} busy={busy} access={access}/>
   </div>:<>
    <header className="byo-session-bar">

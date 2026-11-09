@@ -1,3 +1,8 @@
+## 2026-11-09 — P47 Practice errors: P44 backend missing vs no eligible Practice bank
+- Production screenshot showed missing P44 `lms_p44_start_custom` in the PostgREST schema cache and a second stale P4 Quick 10 error showing 0 approved non-Mock questions. The UI now describes P44 activation/cache separately from genuine question eligibility; exact available/question count remains truthful and no question is fabricated or silently approved.
+- Switching modes and changing Build Your Own settings clear previous mode's error to prevent misleading mixed messages. Preserve the approved P45 structure, P46 colors, 1–100 configuration and server-only grading/timers and P10 fixed 200/5h.
+- Expanded P44 read-only SQL with actual function signatures, authenticated EXECUTE rights and per-course Draft/Mock/approved counts. No Supabase production migration or bank mutation performed; Technica DB access unavailable on current connected Supabase account. CI suite extended.
+
 ## 2026-11-09 — P46 harmonize Build Your Own colors with Technica LMS
 - Changed **only** `src/production/buildYourOwn.css` color tokens: premium pale-mint surfaces, navy text, teal selection states, number presets, radio outlines, camera toggle, footer and Start Practice CTA; artwork clipboard recolored to seafoam/turquoise with its small coral target retained.
 - Preserved the P45 exact layout, cards, dimensions, typography, icons, responsive rules and all P44 controlled Practice behavior. No CSS layout property, React source, assessment, database, existing attempts or Mock 200/300 changes.

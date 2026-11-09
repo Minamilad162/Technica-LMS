@@ -3,7 +3,7 @@ import {readFileSync} from 'node:fs';
 import {BUILD_COUNTS,BUILD_DIFFICULTIES,BUILD_TIMER_MODES,
  DEFAULT_BUILD_YOUR_OWN,prepareBuildYourOwn,remainingQuestionSeconds}
  from '../src/production/buildYourOwnConfig.js';
-import {startConfiguredPractice,answerConfiguredPractice,nextConfiguredPractice}
+import {startConfiguredPractice,answerConfiguredPractice,nextConfiguredPractice,practiceErrorMessage}
  from '../src/production/practiceApi.js';
 const read=p=>readFileSync(new URL('../'+p,import.meta.url),'utf8');
 assert.deepEqual(BUILD_COUNTS,[10,25,50,100]);
@@ -56,6 +56,26 @@ assert.deepEqual(calls[0].args,{
  p_per_question_seconds:60,p_difficulty:'high',p_feedback:'end',p_camera:true,p_domain_id:null
 });
 assert.equal(calls[1].args.p_selected_index,2);
+
+// P47: a published frontend cannot install the separately governed P44 migration.
+// Missing RPC and empty approved Practice bank must have different user-facing guidance.
+const missingP44={code:'PGRST202',message:'Could not find the function public.lms_p44_start_custom(p_camera, p_count, p_course_id, p_difficulty, p_domain_id, p_duration_seconds, p_feedback, p_per_question_seconds, p_request_id) in the schema cache'};
+assert.match(practiceErrorMessage('lms_p44_start_custom',missingP44),/P44 server setup/);
+assert(!practiceErrorMessage('lms_p44_start_custom',missingP44).includes('public.lms_p44_start_custom('));
+assert.match(practiceErrorMessage('lms_p44_start_custom',{code:'42883',message:'undefined function'}),/P44 server setup/);
+assert.match(practiceErrorMessage('lms_p4_start_practice',
+ {message:'Not enough approved non-mock questions: 0 eligible, 10 requested'}),/0 approved Practice questions/);
+assert.match(practiceErrorMessage('lms_p44_start_custom',
+ {message:'Not enough approved Practice questions: 0 available, 100 requested'}),/0 approved Practice questions/);
+assert.match(practiceErrorMessage('lms_p44_start_custom',
+ {message:'Not enough approved questions at selected difficulty: 7 available, 25 requested'}),/Only 7 approved Practice questions/);
+assert.equal(practiceErrorMessage('lms_p44_start_custom',
+ {message:'Session expired'}),'Session expired');
+await assert.rejects(()=>startConfiguredPractice(
+ {rpc:async()=>({data:null,error:missingP44})},
+ {courseId:'course',count:10,requestId:'req'}
+),/P44 server setup/);
+
 const config=read('src/production/BuildYourOwnSettings.jsx');
 const practice=read('src/production/LivePractice.jsx');
 const live=read('src/production/LiveBuildYourOwn.jsx');
@@ -67,6 +87,8 @@ for(const t of ['Number of Questions','After each question','At the end (summary
  assert(config.includes(t),'Build settings missing '+t);
 }
 assert(practice.includes("mode==='custom'?<LiveBuildYourOwn"));
+assert(practice.includes("setMode(p.id);setError('');setNotice('')"),'Switching Practice modes must clear stale Quick 10 errors');
+assert(live.includes("setSettings(next);setError('');setNotice('')"),'Changing custom settings must clear stale backend errors');
 assert(live.includes('useQuestionFullscreenGuard'));
 assert(live.includes('requestQuestionFullscreen(rootRef.current)'));
 assert(live.includes('abandonSecurePractice(db,target)'));

@@ -1,10 +1,30 @@
 import {ADAPTIVE_POLICY_VERSION,adaptiveCheckpoint,adaptiveMediumCheckpoint,adaptiveRequiredCorrect} from './adaptivePolicy.js';
 // RLS-gated, SECURITY DEFINER RPC: never exposes a complete answer bank.
 // User identity comes from Supabase Auth JWT, not user input.
+// P47: distinguish an uninstalled backend from an empty, unapproved question pool.
+// Return safe, actionable copy without exposing answers, question text or private IDs.
+export function practiceErrorMessage(name,error){
+ const raw=String(error?.message||'Practice request failed');
+ const code=String(error?.code||'');
+ if(name==='lms_p44_start_custom'&&
+   (code==='PGRST202'||code==='42883'||
+    (/lms_p44_start_custom/i.test(raw)&&
+     /schema cache|could not find|not found|does not exist/i.test(raw))))
+  return 'Build Your Own is not activated in the learning database yet. An administrator needs to verify the P44 server setup; if the function is installed, refresh the API schema.';
+ const shortage=raw.match(/Not enough approved (?:non-mock|Practice) questions:\s*(\d+)\s*(?:eligible|available),\s*(\d+)\s*requested/i)
+  ||raw.match(/Not enough approved questions at selected difficulty:\s*(\d+)\s*available,\s*(\d+)\s*requested/i);
+ if(shortage){
+  const available=Number(shortage[1]),requested=Number(shortage[2]);
+  return available===0
+   ?'This course currently has 0 approved Practice questions. An administrator must review and approve active, non-Mock questions before a session can start.'
+   :'Only '+available+' approved Practice questions are available for these settings, but '+requested+' were requested. Choose fewer questions or ask your administrator to approve more non-Mock questions.';
+ }
+ return raw;
+}
 async function rpc(db,name,args) {
-  const {data,error}=await db.rpc(name,args);
-  if(error)throw new Error(error.message||'Practice request failed');
-  return data;
+ const {data,error}=await db.rpc(name,args);
+ if(error)throw new Error(practiceErrorMessage(name,error));
+ return data;
 }
 export const startSecurePractice=(db,{courseId,mode,count,domainId=null,durationSeconds=0,requestId})=>
   rpc(db,'lms_p4_start_practice',{
