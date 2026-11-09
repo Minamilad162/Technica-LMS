@@ -68,7 +68,7 @@ assert(workspace.includes('screen===\'learning\'?<PremiumMyLearning'));
 assert(workspace.includes('activeCourses={enrolled} demoCourses={demoCourses}'));
 assert(workspace.includes("onPractice={openPractice} onHistory={openHistory}"));
 assert(portal.includes("onPracticeRoute={()=>navigate('/assessments?tab=practice')}"));
-assert(portal.includes("onHistoryRoute={()=>navigate('/my-practice')}"));
+assert(portal.includes("onHistoryRoute={()=>navigate('/assessments?tab=history')}"));
 assert(jsx.includes('Active Enrollments')&&jsx.includes('Course Previews'));
 assert(jsx.includes('Your learning progress'));
 assert(jsx.includes('Explore introductory lessons.'));

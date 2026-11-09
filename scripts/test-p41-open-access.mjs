@@ -66,7 +66,7 @@ assert(!layout.includes('Reset demo data'));
 assert(!app.includes("new URLSearchParams(l.search).get('legacyPreview')==='1'"));
 assert(app.includes('legacyBrowserQa?<HomePage/>:<LiveLearnerPortal initialScreen="learning"/>'),
  'Production Home must use live Supabase learner data, not fabricated demo cards');
-assert(app.includes('<Navigate to="/my-practice" replace/>'),
+assert(app.includes('<Navigate to="/assessments?tab=history" replace/>'),
  'Legacy results links must show server-owned P11 history');
 assert(app.includes('<Navigate to="/admin-tools?tab=questions" replace/>'),
  'Legacy Bank must redirect into protected real Admin tools');
