@@ -1,3 +1,9 @@
+## 2026-11-09 — P44 configurable Build Your Own Practice (1..100)
+- Rebuilt **Build Your Own** inside Practice with a premium responsive configurator: exact question count (max 100), answer reveal after each or at end, untimed/whole-test/per-question/both timers, Mixed/Easy/Medium/Hard/Adaptive difficulty, optional domain, optional camera self-preview.
+- Added independent secure P44 Practice start/answer/next RPC and a private server-owned state table. Only published/eligible approved active non-Mock, non-candidate questions are sampled. Server stores per-question deadlines, prevents answer changes and legacy P4 answer bypass, withholds correct keys except selected per-question immediate feedback or final review. Fixed original-tier 70% adaptive promotion remains hidden.
+- Fullscreen, watermark, P5 session seal/abandon, real server scoring, P4/P11 history preserved. Camera does not record/transmit or verify identity; live proctoring is a separate unimplemented feature.
+- Source-only additive migration **not executed against production**, plus SELECT-only preflight and Node/PostgreSQL CI security tests. Needs real Technica ledger/backup, approved migration install and authenticated browser/mobile camera/performance QA. Official fixed P10 Mock 200 questions/5 hours unchanged.
+
 ## 2026-11-09 — P42 fix for missing ASP Mock selected questions
 - Show actual saved Mock Exam selections across Question Bank pagination as N/200; auto-preflight only when exactly 200 are saved. Preserve explicit rights review and Admin confirmation before immutable P9B reservation.
 - Allow verified Admin to repair one existing ASP Course's noncanonical slug without new Course creation or moving question IDs; reject ambiguous/duplicate ASP records. Publication remains a separate Admin action.
