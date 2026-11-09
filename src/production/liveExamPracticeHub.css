@@ -102,3 +102,11 @@
  .lep-page .live-practice{padding:12px}
 }
 @media(prefers-reduced-motion:reduce){.lep-tabs button{transition:none}.lep-tabs button:hover{transform:none}}
+
+/* P49: third entry is verified P11 My Practice history, not another exam engine. */
+.lep-tabs{grid-template-columns:repeat(3,minmax(0,1fr))}
+.lep-tabs button{min-width:0}
+.lep-tabs button>span{min-width:0}
+.lep-tabs button small{white-space:normal;overflow-wrap:break-word}
+.lep-page .lj-embedded .lj-heading{margin-top:0}
+@media(max-width:700px){.lep-tabs{grid-template-columns:1fr;gap:9px}.lep-tabs button{min-height:62px;gap:12px}}

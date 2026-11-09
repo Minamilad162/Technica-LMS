@@ -1,7 +1,7 @@
 import React,{useEffect,useState} from 'react';
 import {useNavigate,useSearchParams} from 'react-router-dom';
 import {BookOpenCheck,CalendarClock,CheckCircle2,Clock3,GraduationCap,
- LockKeyhole,RefreshCw,ShieldCheck,SlidersHorizontal,Target,TriangleAlert} from 'lucide-react';
+ LockKeyhole,RefreshCw,ShieldCheck,SlidersHorizontal,Target,TriangleAlert,History} from 'lucide-react';
 import {getSupabaseClient} from '../lib/supabase.js';
 import {fetchLiveLearningCatalog,mayReadLiveCourse} from './liveLearningApi.js';
 import {loadStructure} from './lmsApi.js';
@@ -9,6 +9,8 @@ import {hasPlatformAccess} from './subscriptionApi.js';
 import {aspMissingReason} from './questionBankCourseSelection.js';
 import LivePractice from './LivePractice.jsx';
 import LiveMockExam from './LiveMockExam.jsx';
+// Reuse verified P11 My Practice history; never recreate scores from browser state.
+const LiveLearnerWorkspace=React.lazy(()=>import('./LiveLearnerWorkspace.jsx'));
 import './liveLearning.css';
 import './liveAuthoring.css';
 import './livePractice.css';
@@ -18,7 +20,7 @@ import './liveExamPracticeHub.css';
 // P39: two actual engines in one learner destination. Never use the old
 // browser-demo AssessmentOverview, variable-size P34B Selected Mock, or
 // unverified local question pools for the fixed official ASP Mock.
-const TAB_IDS=['practice','mock'];
+const TAB_IDS=['practice','mock','history'];
 export function examPracticeTab(value){
  return TAB_IDS.includes(value)?value:'practice';
 }
@@ -40,7 +42,7 @@ export default function LiveExamPracticeHub(){
  const activate=next=>{
   if(next===tab)return;
   const nextParams=new URLSearchParams(params);
-  if(next==='practice')nextParams.delete('tab');else nextParams.set('tab','mock');
+  if(next==='practice')nextParams.delete('tab');else nextParams.set('tab',next);
   setParams(nextParams,{replace:false});
  };
  useEffect(()=>{
@@ -105,23 +107,32 @@ export default function LiveExamPracticeHub(){
     onClick={()=>activate('mock')}>
     <GraduationCap size={24}/><span><strong>Mock Exam</strong><small>200 questions · 5 hours · fixed</small></span>
    </button>
+   <button type="button" role="tab" id="lep-tab-history" aria-controls="lep-panel-history"
+    aria-selected={tab==='history'} className={tab==='history'?'lep-tab-active':''}
+    onClick={()=>activate('history')}>
+    <History size={23}/><span><strong>My Practice</strong><small>Previous sessions &amp; results</small></span>
+   </button>
   </div>
   <section className="lep-content" role="tabpanel"
    id={'lep-panel-'+tab} aria-labelledby={'lep-tab-'+tab}>
    <div className="lep-section-heading">
-    <div><span className="lep-section-kicker">{tab==='practice'?'YOUR PRACTICE, YOUR RULES':'OFFICIAL ASP MOCK EXAM'}</span>
-     <h2>{tab==='practice'?'Build your practice session':'Fixed exam. Real preparation.'}</h2>
+    <div><span className="lep-section-kicker">{tab==='practice'?'YOUR PRACTICE, YOUR RULES':tab==='history'?'YOUR VERIFIED RESULTS':'OFFICIAL ASP MOCK EXAM'}</span>
+     <h2>{tab==='practice'?'Build your practice session':tab==='history'?'Your practice history':'Fixed exam. Real preparation.'}</h2>
      <p>{tab==='practice'
       ?'Choose your course, question count, practice mode and time limit in the same secure Practice you used before.'
+      :tab==='history'?'Review your own completed sessions, scores and adaptive progress.'
       :'The official ASP Mock always has exactly 200 reserved questions and 300 minutes. No question-count or duration settings.'}</p>
     </div>
-    <span className="lep-section-mark">{tab==='practice'?<SlidersHorizontal size={26}/>:<ShieldCheck size={26}/>}</span>
+    <span className="lep-section-mark">{tab==='practice'?<SlidersHorizontal size={26}/>:tab==='history'?<History size={26}/>:<ShieldCheck size={26}/>}</span>
    </div>
    {loading?<div className="live-learning-empty" role="status">Verifying your account and courses…</div>:
     error?<div className="live-learning-empty" role="alert"><TriangleAlert size={24}/>
      <b>Exam preparation unavailable</b><p>{error}</p>
      <button type="button" className="btn" onClick={()=>setRevision(v=>v+1)}>
       <RefreshCw size={16}/> Retry</button></div>:
+    tab==='history'?<React.Suspense fallback={<div className="live-learning-empty" role="status">Loading your practice results…</div>}>
+     <LiveLearnerWorkspace db={db} user={catalog.user} embedded initialScreen="history"/>
+    </React.Suspense>:
     tab==='practice'?<>
      {!catalog.courses.length?<div className="live-learning-empty">
       <BookOpenCheck size={24}/><b>No courses available</b><p>Published courses will appear here when available.</p>
