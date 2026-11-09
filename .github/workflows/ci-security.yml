@@ -363,7 +363,7 @@ jobs:
       - name: P41 server-controlled access switch on disposable PostgreSQL
         run: bash scripts/test-p41-postgres-smoke.sh
 
-      - name: P44 customizable Practice: 100 question count, answer-key timing, 70 percent adaptive, server timers
+      - name: P44 customizable Practice with 100-question maximum and server-governed timers and grading
         run: bash scripts/test-p44-postgres-smoke.sh
 
       - name: Test scope disclosure
