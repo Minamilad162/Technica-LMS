@@ -170,6 +170,9 @@ jobs:
       - name: P49 profile, plan countdown and verified My Practice history navigation
         run: npm run test:p49:profile
 
+      - name: P54 real notification inbox permissions, membership snapshots and block notes
+        run: npm run test:p54
+
       - name: P44 Build Your Own validated configuration, server-only protected questions and 100 cap
         run: npm run test:p44:build-your-own
 

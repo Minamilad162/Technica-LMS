@@ -1,0 +1,11 @@
+import assert from 'node:assert/strict';import fs from 'node:fs';const read=x=>fs.readFileSync(x,'utf8');
+const sql=read('supabase/migrations/202611090006_p54_role_scoped_notifications.sql');
+const layout=read('src/components/Layout.jsx');const app=read('src/App.jsx');
+const api=read('src/production/notificationsApi.js');const bell=read('src/production/NotificationBell.jsx');const page=read('src/production/NotificationsPage.jsx');
+for(const term of ['lms_p54_notification_reads','lms_platform_subscriptions','lms_subscription_requests','p52_user_blocked','p52_user_unblocked','lms_p1_actor_is_admin','auth.uid()','ON CONFLICT(user_id,event_key) DO NOTHING','REVOKE ALL ON TABLE','paymentVerified', 'starts_at','ends_at'])assert.ok(sql.includes(term),term);
+assert.ok(!sql.includes('CREATE TRIGGER')&&!sql.includes('INSERT INTO public.lms_platform_subscriptions'));
+assert.ok(api.includes('lms_p54_notifications')&&api.includes('lms_p54_mark_read'));
+assert.ok(layout.includes('NotificationBell')&&!layout.includes('state.notifications.some(n=>n.unread)'));
+assert.ok(app.includes('path="/notifications"'));
+for(const term of ['Mark as read','Starts','Ends','Admin note','Request status','payment not verified'])assert.ok(page.includes(term),term);
+assert.ok(bell.includes('unreadCount'));console.log('P54 real notifications contract PASS');
