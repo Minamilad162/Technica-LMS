@@ -4,12 +4,13 @@ import {abandonSecurePractice,answerSecurePractice,answerAdaptivePractice,finish
 import {requestQuestionFullscreen,isFullscreenActive,fullscreenStartError,leaveQuestionFullscreen} from '../lib/questionFullscreen';
 import {useQuestionFullscreenGuard} from '../lib/useQuestionFullscreenGuard';
 import LiveProtectedContent from './LiveProtectedContent';
+import LiveBuildYourOwn from './LiveBuildYourOwn.jsx';
 import './livePractice.css';
 
 const PRESETS=[
  {id:'quick10',title:'Quick 10',desc:'10 random questions · immediate feedback',count:10,time:0},
  {id:'timed25',title:'Timed Quiz',desc:'25 questions · 20 minutes · feedback at the end',count:25,time:1200},
- {id:'custom',title:'Build Your Own',desc:'Choose 1–50 questions · optional total timer',count:10,time:0},
+ {id:'custom',title:'Build Your Own',desc:'1–100 questions · timing, difficulty, feedback and camera',count:10,time:0},
  {id:'domain',title:'Practice by Domain',desc:'Choose a verified course domain · feedback at the end',count:10,time:0},
  {id:'levelup',title:'Level Up · Adaptive',desc:'1–50 questions · balanced stages · 70% to progress',count:10,time:0}
 ];
@@ -125,8 +126,8 @@ export default function LivePractice({db,user,course,domains=[],access,defaultMo
   if(processing.current)return;
   processing.current=true;setBusy(true);setError('');setNotice('');
   const chosen=PRESETS.find(p=>p.id===mode);
-  const total=['custom','domain','levelup'].includes(chosen.id)?Number(count):chosen.count;
-  const time=['custom','levelup'].includes(chosen.id)?Number(minutes)*60:chosen.time;
+  const total=['domain','levelup'].includes(chosen.id)?Number(count):chosen.count;
+  const time=chosen.id==='levelup'?Number(minutes)*60:chosen.time;
   if(!Number.isInteger(total)||total<1||total>50||!Number.isInteger(time)||time<0||time>10800){
    setError('Choose 1–50 questions and a valid total timer of 0–180 minutes.');setBusy(false);processing.current=false;return;
   }
@@ -135,6 +136,7 @@ export default function LivePractice({db,user,course,domains=[],access,defaultMo
    setError('Select a course domain first.');setBusy(false);processing.current=false;return;
   }
   try{
+   if(mode==='custom')throw Error('Build Your Own uses the configured Practice session.');
    const full=await requestQuestionFullscreen(containerRef.current);
    if(!full.ok){setError(fullscreenStartError(full));return;}
    closingRef.current=false;
@@ -203,9 +205,11 @@ export default function LivePractice({db,user,course,domains=[],access,defaultMo
   <div className="live-practice-top"><div><span className="live-eyebrow">SECURE PRACTICE</span><h3><ShieldCheck size={21}/> Secure Practice Center</h3><p>Questions are selected and scored in Supabase. Exiting fullscreen closes this attempt and returns to the course setup.</p></div>{attempt&&<button type="button" className="live-secondary" onClick={()=>{void sealAttempt(attempt.attemptId);void leaveIntentionally();}}>Leave questions</button>}</div>
   {!eligible?<div className="live-empty"><LockKeyhole size={22}/><b>Practice is not available</b><p>This course needs an active learning access policy and approved questions.</p></div>:!attempt?<>
    <div className="live-mode-grid">{PRESETS.map(p=><button key={p.id} className={'live-mode-card '+(mode===p.id?'chosen':'')} onClick={()=>setMode(p.id)} type="button"><strong>{p.title}</strong><span>{p.desc}</span>{mode===p.id&&<Check size={17}/>}</button>)}</div>
-   {['custom','domain','levelup'].includes(mode)&&<div className="live-practice-controls">
+   {mode==='custom'?<LiveBuildYourOwn key={course.id+'-'+user.id} db={db} user={user} course={course}
+     domains={domains} access={eligible}/>:<>
+   {['domain','levelup'].includes(mode)&&<div className="live-practice-controls">
       <label>Number of questions<input type="number" min={1} max={50} value={count} onChange={e=>setCount(e.target.value)}/></label>
-      {['custom','levelup'].includes(mode)&&<label>Time limit (minutes; 0 = untimed)<input type="number" min={0} max={180} value={minutes} onChange={e=>setMinutes(e.target.value)}/></label>}
+      {['levelup'].includes(mode)&&<label>Time limit (minutes; 0 = untimed)<input type="number" min={0} max={180} value={minutes} onChange={e=>setMinutes(e.target.value)}/></label>}
       {['domain','levelup'].includes(mode)&&<label>Domain<select value={domainId} onChange={e=>setDomainId(e.target.value)}><option value="">{mode==='levelup'?'All course domains':'Choose domain'}</option>{domains.map(d=><option key={d.id} value={d.id}>{d.title}</option>)}</select></label>}
    </div>}
    {mode==='levelup'&&<div className="live-adaptive-count-picks" role="group" aria-label="Adaptive session length">
@@ -223,6 +227,7 @@ export default function LivePractice({db,user,course,domains=[],access,defaultMo
       'Not ready: need '+readiness.requiredPerTier+' approved, non-Mock questions in EACH tier. Available Low '+readiness.low+', Medium '+readiness.medium+', High '+readiness.high+'.'}
    </div>:<p className="live-practice-note"><TriangleAlert size={16}/> The full Mock Exam is 200 questions in five hours. Adaptive sessions use approved, difficulty-rated questions.</p>}
    <button className="live-primary" disabled={busy||!eligible||(mode==='levelup'&&(!readyForCurrent||readinessBusy))} onClick={begin} type="button"><PlayCircle size={17}/>{busy?'Preparing your questions…':'Start practice'}</button>
+   </>}
   </>:<>
    <div className="live-attempt-bar"><b>{finished?'Review your result':(attempt.mode==='quick10'?'Quick 10':attempt.mode==='timed25'?'Timed Quiz':attempt.mode==='levelup'?'Level Up · Adaptive':'Custom Practice')}</b>
      <span><Target size={16}/>{answered} / {attempt.questionCount} answered</span>
