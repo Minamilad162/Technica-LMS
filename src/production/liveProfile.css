@@ -1,0 +1,59 @@
+/* P49 verified learner profile — responsive Technica teal/mint/white. */
+.lprofile{max-width:1280px;margin:0 auto;color:#153f4b;min-width:0;padding:12px 6px 45px}
+.lprofile *{box-sizing:border-box}
+.lprofile-hero{display:flex;align-items:center;gap:20px;flex-wrap:wrap;padding:28px clamp(18px,3vw,34px);
+ border-radius:22px;background:linear-gradient(110deg,#0b4353,#096a67 70%,#1ab395);
+ color:#fff;box-shadow:0 15px 32px #0d62651d}
+.lprofile-avatar{width:74px;height:74px;border-radius:21px;display:grid;place-items:center;
+ flex:0 0 74px;background:#ffffff29;border:1px solid #ffffff60;color:#fff;font-size:33px;font-weight:850}
+.lprofile-hero-copy{min-width:0;flex:1}.lprofile-eyebrow{font-size:10px;letter-spacing:.13em;
+ font-weight:850;color:#c4fff1}
+.lprofile-hero h1{font-size:clamp(24px,3vw,36px);line-height:1.2;margin:7px 0;color:#fff}
+.lprofile-hero p{display:flex;align-items:center;gap:7px;margin:0;color:#ddf8f4;
+ font-size:13px;overflow-wrap:anywhere}
+.lprofile-refresh{display:flex;align-items:center;gap:7px;border:1px solid #ffffff65;
+ background:#ffffff20;color:#fff;border-radius:10px;min-height:42px;padding:10px 13px;cursor:pointer}
+.lprofile-refresh:hover{background:#ffffff32}
+.lprofile-tabs{display:flex;gap:10px;flex-wrap:wrap;margin:20px 0 16px}
+.lprofile-tabs button{display:flex;align-items:center;gap:9px;min-height:49px;border:1px solid #dae9e8;
+ background:#fff;color:#53727c;border-radius:12px;padding:11px 17px;font-weight:780;font-size:13px;cursor:pointer}
+.lprofile-tabs button[aria-selected="true"]{border-color:#12ab96;background:#eafaf4;color:#087d72;
+ box-shadow:0 3px 15px #0a736d17}
+.lprofile :is(button,a):focus-visible{outline:3px solid #0c9e91;outline-offset:3px}
+.lprofile-panel{min-width:0}.lprofile-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px}
+.lprofile-card,.lprofile-shortcuts{background:#fff;border:1px solid #dceae9;border-radius:18px;
+ padding:clamp(18px,2.2vw,27px);box-shadow:0 9px 25px #0b454b0b}
+.lprofile-card-heading{display:flex;align-items:center;gap:11px;color:#078d80;
+ border-bottom:1px solid #e8eeee;padding-bottom:15px}
+.lprofile-card-heading h2,.lprofile-shortcuts h2{font-size:17px;margin:0;color:#204e59}
+.lprofile-details{margin:0}.lprofile-details>div{padding:14px 0;border-bottom:1px solid #edf2f1;
+ display:grid;gap:5px}.lprofile-details>div:last-child{border:0}
+.lprofile-details dt,.lprofile-plan span{font-size:11px;color:#728b91;font-weight:690}
+.lprofile-details dd{margin:0;font-size:14px;font-weight:780;color:#214852;overflow-wrap:anywhere}
+.lprofile-plan{display:grid;gap:5px;margin:17px 0}.lprofile-plan strong{font-size:19px;color:#0d6b69}
+.lprofile-days{display:flex;align-items:baseline;gap:9px;background:#edfaf5;padding:13px 16px;
+ border:1px solid #d8ece6;border-radius:12px;color:#187b6e}
+.lprofile-days strong{font-size:32px;line-height:1.15;font-weight:860}
+.lprofile-days span{font-size:13px;font-weight:760}
+.lprofile-no-plan{color:#68858a;font-size:13px;line-height:1.6}
+.lprofile-dates{display:flex;gap:15px;flex-wrap:wrap;margin:15px 0;color:#64818a;font-size:12px}
+.lprofile-dates span{display:grid;gap:5px}.lprofile-dates b{color:#214f58}
+.lprofile-card .sc-countdown{margin-top:14px;width:100%;max-width:none}
+.lprofile-card .sc-countdown.sc-active{width:100%;max-width:none}
+.lprofile-link{display:inline-flex;align-items:center;gap:5px;margin-top:16px;font-size:12px;color:#087f77;font-weight:790;text-decoration:none}
+.lprofile-shortcuts{margin-top:19px}.lprofile-shortcuts>div{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:14px}
+.lprofile-shortcuts a{display:flex;align-items:center;gap:9px;border-radius:11px;border:1px solid #deece9;
+ padding:13px 14px;color:#275e65;font-size:12px;font-weight:760;text-decoration:none;min-width:0}
+.lprofile-shortcuts a:hover{background:#f0faf6}.lprofile-shortcuts a svg:last-child{margin-left:auto}
+.lprofile-history .lj-shell{min-height:0}.lprofile-history .lj-heading{margin-top:0}
+.lprofile-status{padding:27px;border:1px dashed #d4e7e6;border-radius:16px;background:#fff;
+ color:#58747a;font-size:13px;line-height:1.65}
+.lprofile-status button{display:block;margin-top:12px;background:#087e77;border:0;border-radius:9px;padding:9px 13px;color:white}
+@media(max-width:780px){.lprofile-grid{grid-template-columns:1fr}
+ .lprofile-shortcuts>div{grid-template-columns:1fr 1fr}}
+@media(max-width:500px){.lprofile{padding:0 0 30px}
+ .lprofile-hero{gap:11px;padding:19px 16px}.lprofile-avatar{height:48px;width:48px;flex-basis:48px;border-radius:14px;font-size:25px}
+ .lprofile-hero h1{font-size:22px}.lprofile-refresh{width:100%;justify-content:center}
+ .lprofile-tabs{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+ .lprofile-tabs button{font-size:11px;padding:9px;justify-content:center}
+ .lprofile-shortcuts>div{grid-template-columns:1fr}.lprofile-hero p{font-size:11px}}
