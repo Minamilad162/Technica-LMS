@@ -1,3 +1,8 @@
+## 2026-11-09 — P48 readable Build Your Own option labels and summary layout
+- Kept all controls, names, hero artwork, five Practice difficulty choices, four timing modes, P46 brand colors and the single Start CTA. Corrected cramped text by allowing option labels to wrap inside their own buttons and using card-sized responsive grids (3+2 Difficulty, 2×2 Timing when narrow).
+- At constrained dashboard/sidebar widths, Session Summary displays readable 12px+ labels on a dedicated responsive 5/3/2-column row rather than squeezing five white-space-nowrap metrics beside Start Practice. Timer labels/values can wrap safely without colliding.
+- CSS-only change; no React behavior, SQL/migration, bank approval, practice scoring or P10 Mock change. P45 source regression extended. Browser/mobile visual verification remains separate from CI.
+
 ## 2026-11-09 — P47 Practice errors: P44 backend missing vs no eligible Practice bank
 - Production screenshot showed missing P44 `lms_p44_start_custom` in the PostgREST schema cache and a second stale P4 Quick 10 error showing 0 approved non-Mock questions. The UI now describes P44 activation/cache separately from genuine question eligibility; exact available/question count remains truthful and no question is fabricated or silently approved.
 - Switching modes and changing Build Your Own settings clear previous mode's error to prevent misleading mixed messages. Preserve the approved P45 structure, P46 colors, 1–100 configuration and server-only grading/timers and P10 fixed 200/5h.

@@ -78,6 +78,25 @@ assert(css.includes('background:linear-gradient(150deg,#0d9b8c,#006673 74%)'),
 assert(css.includes('background:linear-gradient(114deg,#f7fbfa 0%,#eef8f6 48%,#e3f4f0 100%)'),
  'Hero must use premium light mint gradient');
 assert(ui.includes('grid-template-columns')===false,'Layout is authored in CSS only');
+// P48: narrow cards must wrap labels instead of allowing adjacent option overlap.
+for(const rule of [
+ '.byo-pill{white-space:normal',
+ '.byo-pill>span:last-child{min-width:0;overflow-wrap:break-word}',
+ '.byo-difficulty-card,.byo-timing-card,.byo-answer-card{container-type:inline-size}',
+ '@container (max-width:520px)',
+ '.byo-difficulty-options{grid-template-columns:repeat(3,minmax(0,1fr))',
+ '.byo-timing-options{grid-template-columns:repeat(2,minmax(0,1fr))',
+ '@container (max-width:330px)',
+ '.byo-summary-metrics>span{min-width:0;white-space:normal',
+ '@container (max-width:1450px)',
+ '.byo-summary-metrics{order:2;flex:1 1 100%;display:grid',
+ 'grid-template-columns:repeat(5,minmax(0,1fr))',
+ '@container (max-width:920px)',
+ 'grid-template-columns:repeat(3,minmax(0,1fr))',
+ '@container (max-width:600px)',
+ 'grid-template-columns:repeat(2,minmax(0,1fr))'
+])assert(css.includes(rule),'P48 text reflow missing: '+rule);
+assert(!ui.includes('<img'),'No screenshot embedding while fixing text');
 assert(!ui.includes('<img'),'Do not embed screenshot as image');
 assert(app.includes("mode==='custom'?<LiveBuildYourOwn"),'Preserve original Practice route');
 assert(session.includes('startConfiguredPractice(db,'));
