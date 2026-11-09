@@ -1883,3 +1883,8 @@ The notification bell in the persistent responsive LMS header must use actual au
 **UI:** Header bell badge is actual unreadCount with periodic refresh when active and click-to-open latest real events; a View all link navigates to `/notifications`. Full page has clear Requested vs Activated vs Block/Unblock states, period dates where present, actor-supplied block note, exact event date, and scoped Mark read actions. Route remains stable when worker/domain changes. Pending Cloudflare deployment configuration and browser QA must not be presented as verified live.
 
 **Release:** P54 SQL applied to new Technica Account project `klmwiivitgbyjbynxwbg` only. Existing old DB/Worker env remain unchanged. Remote migration ledger versions are application timestamps; do not re-run existing migrations blindly. No users/plans/attempts/notifications seeded for testing.
+
+
+## P55 — Header logo navigates Home (2026-11-09)
+
+The shared Technica LMS header brand/logo on desktop, mobile and standalone layout is a keyboard-accessible internal React Router link to `/home`. Preserve the image, wordmark, styling, SPA navigation and all existing functionality. This is an internal route, not an absolute URL or a Cloudflare workers.dev domain; changing hostnames later does not change behavior. Auth/login page brand remains decorative because the user is not signed in. No database migration or backend modification.

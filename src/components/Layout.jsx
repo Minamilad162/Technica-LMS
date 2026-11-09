@@ -8,7 +8,7 @@ import useHeaderSubscription from '../production/useHeaderSubscription.js';
 import{useDemo}from'../lib/store';import{Avatar,DemoToast}from'./UI';
 const learnerItems=[['/home','Home',Home],['/course-catalog','Courses',LibraryBig],['/my-learning','My Learning',BookOpen],['/qualifications','Qualifications',GraduationCap],['/subscription-plans','Subscription',Bookmark],['/assessments','Mock Exam & Practice',GraduationCap],['/my-progress','My Progress',ChartNoAxesColumn]];
 const adminItems=[['/admin-tools','Admin Tools',LayoutDashboard],['/home','Learner Home',Home]];
-function Brand(){return <div className="brand" aria-label="Technica Consult LMS"><img className="brand-logo" src="/images/technica-logo.webp" alt="Technica Consult logo" width="40" height="30" decoding="async"/><span className="brand-name">TECHNICA CONSULT</span><span className="brand-lms">LMS</span></div>}
+function Brand(){return <NavLink to="/home" className="brand" aria-label="Technica Consult LMS — Go to Home" title="Go to Home" style={{textDecoration:"none",color:"inherit"}}><img className="brand-logo" src="/images/technica-logo.webp" alt="Technica Consult logo" width="40" height="30" decoding="async"/><span className="brand-name">TECHNICA CONSULT</span><span className="brand-lms">LMS</span></NavLink>}
 export default function Layout({children,standalone=false,onLogout}){
  const{state,update,notify,reset}=useDemo();const navigate=useNavigate();const location=useLocation();
  const[showSearch,setShowSearch]=useState(false);const[search,setSearch]=useState('');const[showAccount,setShowAccount]=useState(false);const[showMobileMore,setShowMobileMore]=useState(false);const[sideOpen,setSideOpen]=useState(false);
