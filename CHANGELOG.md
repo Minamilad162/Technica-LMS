@@ -1,3 +1,8 @@
+## 2026-11-09 — P46 harmonize Build Your Own colors with Technica LMS
+- Changed **only** `src/production/buildYourOwn.css` color tokens: premium pale-mint surfaces, navy text, teal selection states, number presets, radio outlines, camera toggle, footer and Start Practice CTA; artwork clipboard recolored to seafoam/turquoise with its small coral target retained.
+- Preserved the P45 exact layout, cards, dimensions, typography, icons, responsive rules and all P44 controlled Practice behavior. No CSS layout property, React source, assessment, database, existing attempts or Mock 200/300 changes.
+- Updated P45 regression to enforce branded teal/mint and reject previous purple accents; GitHub CI/Cloudflare verification tracked separately. No Supabase actions required.
+
 ## 2026-11-09 — P45 approved compact Build Your Own screenshot
 - Redesigned existing Build Your Own component in React/CSS to match owner's compact lavender/violet reference: graphic hero, 2x2 rounded settings cards, full-width Focus/Camera row and live Session Summary with ONE purple Start Practice button.
 - Controlled presets and stepper, difficulty/timer/feedback selections, optional domain/camera and dynamic summary remain real controls. Default matches reference (50 questions, 90 total minutes, mixed, end-only feedback, camera off).
