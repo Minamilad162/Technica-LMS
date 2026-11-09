@@ -3,7 +3,8 @@ import Layout from './components/Layout';
 import {useDemo} from './lib/store';
 import MotionSystem from './components/MotionSystem';
 import AuthPage,{DemoPolicyPage} from './pages/AuthPage';
-import {getAuthSession,restorePortalAccount,subscribeToPortalAuth} from './lib/portalAuth';
+import {getAuthSession,restorePortalAccount,subscribeToPortalAuth,signOutPortal,blockedPortalMessage} from './lib/portalAuth';
+import {getSupabaseClient} from './lib/supabase.js';
 // Route-level code splitting: do not fetch the question bank, calculator,
 // admin builders or mock engine when a learner visits Courses or My Learning.
 import HomePage from './pages/HomePage';
@@ -56,10 +57,33 @@ export default function App(){
   window.addEventListener('technica-demo-logout',fn);
   return()=>{active=false;unsubscribe();window.removeEventListener('technica-demo-logout',fn);};
  },[]);
+ useEffect(()=>{
+  if(!auth?.id||legacyBrowserQa)return;
+  let alive=true,inFlight=false;
+  const check=async()=>{
+   if(inFlight||!alive)return;inFlight=true;
+   try{
+    const db=getSupabaseClient({secureReviewEntry:true});
+    const {data,error}=await db.from('lms_profiles').select('account_status,block_note').eq('id',auth.id).maybeSingle();
+    if(!alive||error||!data)return;
+    if(data.account_status==='suspended'){
+     setAuthError(blockedPortalMessage(data.block_note));
+     await signOutPortal();
+     if(alive){setAuth(null);update({role:'learner'});}
+    }
+   }catch{/* Intermittent connectivity cannot assert that a learner is blocked. */}
+   finally{inFlight=false;}
+  };
+  const onVisible=()=>{if(document.visibilityState==='visible')void check();};
+  const timer=window.setInterval(()=>{void check();},15000);
+  window.addEventListener('focus',check);document.addEventListener('visibilitychange',onVisible);
+  void check();
+  return()=>{alive=false;window.clearInterval(timer);window.removeEventListener('focus',check);document.removeEventListener('visibilitychange',onVisible);};
+ },[auth?.id]);
  if(authLoading)return <div className="auth-page" role="status"><div className="auth-form-card" style={{maxWidth:420,textAlign:'center',padding:30}}>Verifying your Technica LMS session…</div></div>;
 
  if(!auth){return <Routes>
- <Route path="/login" element={<><MotionSystem/><AuthPage mode="login" onAuthenticated={setAuth}/></>}/>
+ <Route path="/login" element={<><MotionSystem/><AuthPage mode="login" onAuthenticated={setAuth} initialError={authError}/></>}/>
  <Route path="/signup" element={<Navigate to="/login" replace/>}/>
  <Route path="/forgot-password" element={<><MotionSystem/><AuthPage mode="forgot" onAuthenticated={setAuth}/></>}/>
  <Route path="/terms" element={<DemoPolicyPage kind="terms"/>}/>

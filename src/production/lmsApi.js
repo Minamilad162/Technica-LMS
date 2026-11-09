@@ -23,7 +23,7 @@ export async function loadIdentity(db,user) {
   // P20: profile + active role queries are independent. Parallelizing saves
   // one complete network round-trip for every authenticated LMS workspace.
   const [{data:profileData,error:profileError},{data:roleData,error:roleError}]=await Promise.all([
-   db.from('lms_profiles').select('full_name,account_status').eq('id',user.id).maybeSingle(),
+   db.from('lms_profiles').select('full_name,account_status,block_note').eq('id',user.id).maybeSingle(),
    db.from('lms_role_assignments').select('role,scope_course_id').eq('user_id',user.id).is('revoked_at',null)
   ]);
   const profile=value(profileData,profileError);

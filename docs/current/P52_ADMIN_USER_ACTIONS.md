@@ -1,0 +1,9 @@
+# P52–P53: Admin Tools / Users — block reason and manual subscription activation
+
+Applied to NEW Technica Account project `klmwiivitgbyjbynxwbg` only. The existing Cloudflare site may still point at the old database: do not claim the linked page is live until its deployment and env configuration are verified. No user was blocked and no plan was activated during migration.
+
+The User Directory keeps P13 user history and adds selected-user actions backed by admin-verified RPCs. P52 reuses account_status=suspended as Blocked, stores optional 500-character visible note and block audit metadata, rejects self-block/last-admin block, uses role checks and audit events. Manual P21-style grants require a real active user and published plan, serialize grants using P21 advisory lock, reject duplicate live subscriptions, snapshot name/price/currency/duration and server-calculated start/end, and audit as unpaid manual grant. P53 admin-only read exposes selected user's verified Auth email, status, note, published plans and existing active subscriptions. All three RPCs reject unauthenticated or non-admin callers.
+
+Portal login checks account status and shows a dedicated blocked warning including Admin note. Existing sessions recheck every 15 seconds and on focus/visibility; blocked sessions are signed out client-side while server P1/P4/P21/P41 checks deny protected access. Changing profile status does not instantly invalidate an already issued Supabase JWT at Auth infrastructure. Revoke is accessible via the existing P21 admin RPC; no automatic revocation of previous subscription history on block.
+
+No old database changes, no Cloudflare env cutover, and no data seeding. Source vs remote ledger difference: connector migration versions are application-time IDs, while GitHub uses readable source timestamps. Existing P28.2 is legacy-only and should never be replayed on this fresh database.

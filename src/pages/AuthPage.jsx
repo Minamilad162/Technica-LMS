@@ -14,11 +14,11 @@ function BenefitPanel(){
  </section>;
 }
 const message=e=>e?.message||'Unable to authenticate. Please try again.';
-export default function AuthPage({mode='login',onAuthenticated}){
+export default function AuthPage({mode='login',onAuthenticated,initialError=''}){
  const navigate=useNavigate(),location=useLocation(),{update}=useDemo();
  const forgot=mode==='forgot';
  const[email,setEmail]=useState(''),[password,setPassword]=useState(''),[visible,setVisible]=useState(false);
- const[loading,setLoading]=useState(false),[error,setError]=useState(''),[notice,setNotice]=useState('');
+ const[loading,setLoading]=useState(false),[error,setError]=useState(initialError),[notice,setNotice]=useState('');
  const from=location.state?.from?.pathname||'/home';
  const submit=async event=>{
   event.preventDefault();setError('');setNotice('');setLoading(true);
@@ -43,7 +43,9 @@ export default function AuthPage({mode='login',onAuthenticated}){
     <form onSubmit={submit} className="auth-form">
      <Field label="Email Address" icon={Mail} placeholder="name@company.com" type="email" autoComplete="email" value={email} onChange={e=>setEmail(e.target.value)} required maxLength={254}/>
      {!forgot&&<Field label="Password" icon={LockKeyhole} placeholder="Enter your password" type={visible?'text':'password'} autoComplete="current-password" value={password} onChange={e=>setPassword(e.target.value)} canReveal visible={visible} onReveal={()=>setVisible(v=>!v)} required minLength={1}/>}
-     {error&&<p className="auth-error" role="alert"><AlertCircle size={16}/>{error}</p>}
+     {error&&(error.startsWith('Your Technica LMS account is blocked.')?
+      <div className="auth-blocked-account" role="alert"><LockKeyhole size={23}/><div><strong>Account blocked</strong><p>{error}</p><small>If you believe this is a mistake, contact your Technica LMS administrator.</small></div></div>:
+      <p className="auth-error" role="alert"><AlertCircle size={16}/>{error}</p>)}
      {notice&&<div className="auth-notice" role="status"><ShieldCheck size={18}/><span>{notice}</span></div>}
      <button type="submit" className="auth-main-button" disabled={loading}>{loading?'Please wait…':forgot?'Send recovery email':'Sign In'} {!loading&&<ArrowRight size={19}/>}</button>
     </form>

@@ -10,6 +10,7 @@ import {fetchAdminFreeIntro,setAdminFreeIntro,setAdminPublished} from './learner
 import {verifiedLiveAdmin} from './liveAuthoringApi.js';
 import {CourseCover,CourseCoverManager} from './CourseCover.jsx';
 import AdminAnalyticsCharts from './AdminAnalyticsCharts.jsx';
+import AdminUserControls from './AdminUserControls.jsx';
 import {loadMarkedMockCandidateIds} from './courseQuestionBankApi.js';
 
 const pct=n=>n===null||n===undefined?'—':Number(n).toFixed(1).replace(/\.0$/,'')+'%';
@@ -368,6 +369,7 @@ export function AdminUsersPanel({db}){
      (!detail||detail.profile.id!==selected.id)?<p className="at-empty">Loading this user's authorized record…</p>:<>
       <div className="at-section-title"><div><span className="at-eyebrow">MEMBER PROFILE</span><h3>{detail.profile.name}</h3>
        <p>Joined {day(detail.profile.joinedAt)} · {detail.profile.status}</p></div></div>
+      <AdminUserControls db={db} userId={selected.id} onChanged={()=>setRefresh(n=>n+1)}/>
       <h4>Plans &amp; enrollment</h4>
       {detail.entitlements.map((e,i)=><div className="at-plan" key={e.courseId+i}>
        <div><b>{e.courseTitle}</b><span>{e.type} · {e.status}</span></div>

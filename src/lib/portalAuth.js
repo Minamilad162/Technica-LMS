@@ -20,11 +20,18 @@ function readQaAccount(){
 function client(){return getSupabaseClient({secureReviewEntry:true});}
 export function getAuthSession(){return browserQaMode?readQaAccount():trustedAccount;}
 export function clearTrustedPortalAccount(){trustedAccount=null;}
+export function blockedPortalMessage(note=''){
+ const reason=String(note||'').trim().slice(0,500);
+ return 'Your Technica LMS account is blocked. '+(reason||'Please contact your LMS administrator for assistance.');
+}
 export async function verifyPortalAccount(db,identityLoader=loadIdentity){
  const {data,error}=await db.auth.getUser();
  const user=data?.user;
  if(error||!user?.id||!user?.email)throw new Error('Please sign in with your registered email and password.');
  const result=await identityLoader(db,user);
+ if(result?.profile?.account_status==='suspended'){
+  const blocked=new Error(blockedPortalMessage(result.profile.block_note));blocked.code='LMS_ACCOUNT_BLOCKED';throw blocked;
+ }
  if(result?.profile?.account_status!=='active')throw new Error('Account is not active. Contact the LMS administrator.');
  const name=String(result.profile.full_name||user.user_metadata?.full_name||user.email.split('@')[0]).trim().slice(0,160);
  const account={id:user.id,name:name||'LMS User',email:user.email,role:result.isAdmin===true?'admin':'learner'};
@@ -38,7 +45,9 @@ export async function restorePortalAccount(){
   const {data,error}=await db.auth.getSession();
   if(error||!data?.session?.user){trustedAccount=null;return null;}
   return await verifyPortalAccount(db);
- }catch(error){trustedAccount=null;throw error;}
+ }catch(error){trustedAccount=null;
+  if(error?.code==='LMS_ACCOUNT_BLOCKED')await db.auth.signOut().catch(()=>{});
+  throw error;}
 }
 export async function loginWithEmailPassword(email,password){
  if(!email||!password)throw new Error('Enter your email and password.');
