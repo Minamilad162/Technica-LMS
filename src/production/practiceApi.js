@@ -68,3 +68,19 @@ export function safeRemainingSeconds(attempt,clock=Date.now()) {
   return Math.max(0,remaining);
 }
 export const practiceSessionKey=(userId,courseId)=>`technica-live-practice:${userId}:${courseId}`;
+
+// P44 configurable Practice. The ONLY start/answer/advance path for the new
+// 1..100-question Build Your Own; never silently fall back to P4 custom.
+export const startConfiguredPractice=(db,{courseId,count,requestId,durationSeconds=0,
+ perQuestionSeconds=0,difficulty='mixed',feedbackTiming='end',camera=false,domainId=null})=>
+ rpc(db,'lms_p44_start_custom',{
+  p_course_id:courseId,p_count:count,p_request_id:requestId,
+  p_duration_seconds:durationSeconds,p_per_question_seconds:perQuestionSeconds,
+  p_difficulty:difficulty,p_feedback:feedbackTiming,p_camera:camera,p_domain_id:domainId
+ });
+export const answerConfiguredPractice=(db,attemptId,questionId,selectedIndex)=>
+ rpc(db,'lms_p44_answer',{
+  p_attempt_id:attemptId,p_question_id:questionId,p_selected_index:selectedIndex
+ });
+export const nextConfiguredPractice=(db,attemptId)=>
+ rpc(db,'lms_p44_next',{p_attempt_id:attemptId});
