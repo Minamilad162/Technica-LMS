@@ -85,7 +85,7 @@ export default function App(){
 
  if(!auth){return <Routes>
  <Route path="/login" element={<><MotionSystem/><AuthPage mode="login" onAuthenticated={setAuth} initialError={authError}/></>}/>
- <Route path="/signup" element={<Navigate to="/login" replace/>}/>
+ <Route path="/signup" element={<><MotionSystem/><AuthPage mode="signup" onAuthenticated={setAuth}/></>}/>
  <Route path="/forgot-password" element={<><MotionSystem/><AuthPage mode="forgot" onAuthenticated={setAuth}/></>}/>
  <Route path="/terms" element={<DemoPolicyPage kind="terms"/>}/>
  <Route path="/privacy" element={<DemoPolicyPage kind="privacy"/>}/>

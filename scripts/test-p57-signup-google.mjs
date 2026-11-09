@@ -1,0 +1,16 @@
+import assert from 'node:assert/strict';import {readFileSync} from 'node:fs';
+const read=p=>readFileSync(p,'utf8');
+const auth=read('src/pages/AuthPage.jsx'),portal=read('src/lib/portalAuth.js'),client=read('src/lib/supabase.js'),app=read('src/App.jsx');
+assert.match(app,/path="\/signup" element=\{<><MotionSystem\/><AuthPage mode="signup"/);
+assert.match(auth,/Create Account/);assert.match(auth,/Confirm Password/);assert.match(auth,/Continue with Google/);
+assert.match(auth,/startGooglePortalAuth\(\)/);assert.match(auth,/signUpPortalAccount\(\{fullName,email,password\}\)/);
+assert.match(auth,/loginWithEmailPassword\(email,password\)/);
+assert.match(portal,/db\.auth\.signUp/);assert.match(portal,/db\.auth\.signInWithOAuth/);
+assert.match(portal,/provider:'google'/);assert.match(portal,/emailRedirectTo:portalAuthRedirectUrl\(\)/);
+assert.match(portal,/window\.location\.origin\+window\.location\.pathname/);
+assert.match(portal,/needsConfirmation:true/);
+assert.match(portal,/verifyPortalAccount\(db\)/);
+assert.match(portal,/result\.isAdmin===true/);assert.match(portal,/LMS_ACCOUNT_BLOCKED/);
+assert.match(client,/flowType:'pkce'/);assert.match(client,/detectSessionInUrl:true/);
+assert.doesNotMatch(portal,/lms_role_assignments.*insert|service_role|client_secret|supabase\.co\/auth\/v1\/callback/);
+console.log('P57 email signup and Google OAuth code contract PASS');

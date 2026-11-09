@@ -173,6 +173,9 @@ jobs:
       - name: P54 real notification inbox permissions, membership snapshots and block notes
         run: npm run test:p54
 
+      - name: P57 open Learner Signup and Google OAuth without client-granted roles
+        run: npm run test:p57
+
       - name: P56 authorized All Courses Practice and adaptive regression contract
         run: npm run test:p56
 

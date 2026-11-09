@@ -62,11 +62,49 @@ export async function loginWithEmailPassword(email,password){
   throw error;
  }
 }
+// The host and deployment base are derived from the current page, never a fixed workers.dev host.
+// This path must be allow-listed in Supabase Auth URL Configuration.
+export function portalAuthRedirectUrl(){
+ if(typeof window==='undefined')throw new Error('Auth redirect requires a browser.');
+ return window.location.origin+window.location.pathname;
+}
+export async function signUpPortalAccount({fullName,email,password}){
+ const normalizedEmail=String(email||'').trim().toLowerCase();
+ const displayName=String(fullName||'').trim();
+ if(!normalizedEmail.includes('@')||!displayName||displayName.length>160)
+  throw new Error('Enter a valid name and email address.');
+ if(typeof password!=='string'||password.length<12)
+  throw new Error('Use a password with at least 12 characters.');
+ const db=client();
+ const {data,error}=await db.auth.signUp({
+  email:normalizedEmail,password,
+  options:{emailRedirectTo:portalAuthRedirectUrl(),data:{full_name:displayName}}
+ });
+ if(error)throw new Error(error.message||'Could not create your account.');
+ // The P1 auth.users trigger creates an ordinary LMS profile; no browser-supplied Admin role.
+ // Confirmation-required email signups return a user but no authenticated session.
+ if(data?.session){
+  try{return {needsConfirmation:false,account:await verifyPortalAccount(db)};}
+  catch(e){await db.auth.signOut().catch(()=>{});throw e;}
+ }
+ return {needsConfirmation:true,account:null};
+}
+export async function startGooglePortalAuth(){
+ if(browserQaMode)throw new Error('Use a real Supabase Auth environment to continue with Google.');
+ const db=client();
+ const {data,error}=await db.auth.signInWithOAuth({
+  provider:'google',
+  options:{redirectTo:portalAuthRedirectUrl(),scopes:'openid email profile'}
+ });
+ if(error)throw new Error(error.message||'Google sign-in is unavailable. Contact the LMS administrator.');
+ if(!data?.url)throw new Error('Google could not start the secure sign-in flow.');
+ return data;
+}
 export async function requestPasswordReset(email){
  if(!email?.includes('@'))throw new Error('Enter a valid email address.');
  const db=client();
  const {error}=await db.auth.resetPasswordForEmail(email.trim().toLowerCase(),{
-  redirectTo:window.location.origin+window.location.pathname
+  redirectTo:portalAuthRedirectUrl()
  });
  if(error)throw new Error(error.message||'Password reset could not be sent.');
  return true;

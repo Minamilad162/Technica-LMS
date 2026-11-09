@@ -16,7 +16,7 @@ export function getSupabaseClient({secureReviewEntry=false}={}) {
   const url=import.meta.env.VITE_SUPABASE_URL;
   const key=import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY||import.meta.env.VITE_SUPABASE_ANON_KEY;
   if (!url || !key) throw new Error('Configure VITE_SUPABASE_URL and VITE_SUPABASE_PUBLISHABLE_KEY (or VITE_SUPABASE_ANON_KEY with a publishable value)');
-  if (!client) client=createClient(url,key,{auth:{persistSession:true,autoRefreshToken:true}});
+  if (!client) client=createClient(url,key,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true,flowType:'pkce'}});
   return client;
 }
 export const isDemoMode = import.meta.env?.VITE_DATA_MODE !== 'supabase';
