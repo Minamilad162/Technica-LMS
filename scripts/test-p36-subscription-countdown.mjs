@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
-import {subscriptionTimeLeft,formatEnd} from '../src/production/subscriptionCountdownPolicy.js';
+import {subscriptionTimeLeft,formatEnd,subscriptionPlanLabel} from '../src/production/subscriptionCountdownPolicy.js';
 const read=path=>readFileSync(new URL('../'+path,import.meta.url),'utf8');
 
 const DAY=86_400_000;
@@ -40,6 +40,10 @@ assert.equal(subscriptionTimeLeft({...record,status:'revoked'},start).state,'non
 assert.equal(subscriptionTimeLeft({...record,starts_at:'invalid'},start).state,'none');
 assert.equal(subscriptionTimeLeft({...record,ends_at:record.starts_at},start).state,'none');
 assert.equal(formatEnd(record.ends_at),'8 Feb 2027');
+assert.equal(subscriptionPlanLabel({...record,plan_name_snapshot:'ASP 3 Months',duration_months_snapshot:3}),'ASP 3 Months');
+assert.equal(subscriptionPlanLabel({...record,duration_months_snapshot:3}),'3-Month Plan');
+assert.equal(subscriptionPlanLabel({...record,status:'revoked',plan_name_snapshot:'ASP 3 Months'}),'');
+assert.equal(subscriptionTimeLeft(record,start+7*DAY).days,totalDays-7);
 
 const countdown=read('src/production/SubscriptionCountdown.jsx');
 const style=read('src/production/subscriptionCountdown.css');
@@ -58,6 +62,8 @@ assert.match(countdown,/setInterval\(tick,60_000\)/);
 assert.match(countdown,/addEventListener\('visibilitychange',visibility\)/);
 assert.match(countdown,/hasPlatformAccess\(subscription\)/);
 assert.match(countdown,/Until /);
+assert.match(countdown,/subscriptionPlanLabel/);
+assert.match(style,/\.sc-active \.sc-copy small/);
 assert.match(style,/\.sc-track i/);
 assert.match(style,/@media\(max-width:700px\)/);
 assert.match(style,/@media\(prefers-reduced-motion:reduce\)/);
