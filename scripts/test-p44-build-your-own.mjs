@@ -61,8 +61,8 @@ const practice=read('src/production/LivePractice.jsx');
 const live=read('src/production/LiveBuildYourOwn.jsx');
 const sql=read('supabase/migrations/202611090001_p44_configured_build_your_own.sql');
 const mock=read('src/production/LiveMockExam.jsx');
-for(const t of ['Number of questions','After each question','At the end',
- 'No timer','Whole test','Each question','Both timers','Mixed','Easy','Medium','Hard',
+for(const t of ['Number of Questions','After each question','At the end (summary)',
+ 'No timer','Total time','Per question','Both','Mixed','Easy','Medium','Hard',
  'Adaptive','Camera preview','not recorded']){
  assert(config.includes(t),'Build settings missing '+t);
 }

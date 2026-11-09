@@ -35,3 +35,6 @@
 @media(max-width:600px){.byo-session-bar{padding:11px}.byo-session-bar>button{width:100%}
 .byo-clocks{width:100%}.byo-clocks>span{flex:1}.byo-navigation>div{width:100%}.byo-navigation>div button{flex:1;justify-content:center}
 .byo-start-row button{width:100%;justify-content:center}.byo-camera-preview video{width:110px;height:82px}}
+
+/* P45 reference puts the sole start action inside the compact summary strip. */
+.byo-setup{gap:0}

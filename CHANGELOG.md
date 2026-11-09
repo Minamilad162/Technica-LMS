@@ -1,3 +1,8 @@
+## 2026-11-09 — P45 approved compact Build Your Own screenshot
+- Redesigned existing Build Your Own component in React/CSS to match owner's compact lavender/violet reference: graphic hero, 2x2 rounded settings cards, full-width Focus/Camera row and live Session Summary with ONE purple Start Practice button.
+- Controlled presets and stepper, difficulty/timer/feedback selections, optional domain/camera and dynamic summary remain real controls. Default matches reference (50 questions, 90 total minutes, mixed, end-only feedback, camera off).
+- CSS-built target/checklist decoration, keyboard/aria and responsive container rules; preserve P44 secure engine and fixed P10 Mock. No backend or production Supabase changes. Added P45 test and Blueprint.
+
 ## 2026-11-09 — P44 configurable Build Your Own Practice (1..100)
 - Rebuilt **Build Your Own** inside Practice with a premium responsive configurator: exact question count (max 100), answer reveal after each or at end, untimed/whole-test/per-question/both timers, Mixed/Easy/Medium/Hard/Adaptive difficulty, optional domain, optional camera self-preview.
 - Added independent secure P44 Practice start/answer/next RPC and a private server-owned state table. Only published/eligible approved active non-Mock, non-candidate questions are sampled. Server stores per-question deadlines, prevents answer changes and legacy P4 answer bypass, withholds correct keys except selected per-question immediate feedback or final review. Fixed original-tier 70% adaptive promotion remains hidden.

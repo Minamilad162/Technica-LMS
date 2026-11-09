@@ -74,6 +74,7 @@
     "test:p41:open-access": "node scripts/test-p41-open-access.mjs",
     "test:p42:mock-selection": "node scripts/test-p42-mock-selection.mjs",
     "test:p44:build-your-own": "node scripts/test-p44-build-your-own.mjs",
+    "test:p45:build-your-own-design": "node scripts/test-p45-build-your-own-design.mjs",
     "test:p22:learning": "node scripts/test-p22-course-lesson-explorer.mjs",
     "test:p23:lesson": "node scripts/test-p23-single-page-lesson.mjs",
     "test:p27:admin": "node scripts/test-p27-admin-analytics-preview.mjs",
