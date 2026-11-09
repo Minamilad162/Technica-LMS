@@ -185,13 +185,8 @@ export default function LiveBuildYourOwn({db,user,course,domains=[],access}){
  return <section ref={rootRef} className="byo-session" aria-label="Build Your Own secured Practice">
   {!access?<div className="live-empty"><LockKeyhole size={23}/>Practice access is unavailable.</div>:
   !attempt?<div className="byo-setup">
-   <BuildYourOwnSettings value={settings} onChange={setSettings} domains={domains}/>
-   <div className="byo-start-row">
-    <div><ShieldCheck size={17}/> Approved questions only. Reserved Mock questions are excluded.</div>
-    <button type="button" className="live-primary" disabled={busy} onClick={()=>void start()}>
-     <PlayCircle size={18}/>{busy?'Starting your practice…':'Start My Practice'}<ArrowRight size={16}/>
-    </button>
-   </div>
+   <BuildYourOwnSettings value={settings} onChange={setSettings} domains={domains}
+    onStart={()=>void start()} busy={busy} access={access}/>
   </div>:<>
    <header className="byo-session-bar">
     <div className="byo-progress-group"><span className="byo-session-kicker">BUILD YOUR OWN</span>

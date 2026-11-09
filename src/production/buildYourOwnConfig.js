@@ -1,7 +1,7 @@
 // P44 Build Your Own user choices. All constraints are revalidated on
 // protected server RPCs; this client module is UI validation only.
 export const DEFAULT_BUILD_YOUR_OWN=Object.freeze({
- count:10,timerMode:'none',totalMinutes:60,secondsPerQuestion:90,
+ count:50,timerMode:'whole',totalMinutes:90,secondsPerQuestion:90,
  feedbackTiming:'end',difficulty:'mixed',camera:false,domainId:''
 });
 export const BUILD_COUNTS=Object.freeze([10,25,50,100]);
