@@ -10,9 +10,10 @@ const app=read('src/production/LivePractice.jsx');
 const sql=read('supabase/migrations/202611090001_p44_configured_build_your_own.sql');
 const mock=read('src/production/LiveMockExam.jsx');
 
-const headings=['Build Your Own Practice','Number of Questions',
- 'Question Difficulty','Answer Display','Timing',
- 'Focus (Domain)','Camera (Optional)','Session Summary'];
+const headings=['<h3>Build Your Own Practice','aria-label="Number of Questions"',
+ 'aria-label="Question Difficulty"','aria-label="Answer Display"',
+ 'className="byo-settings-card byo-timing-card" aria-label="Timing"',
+ 'Focus (Domain)','Camera (Optional)','aria-label="Session Summary"'];
 const positions=headings.map(h=>ui.indexOf(h));
 assert(positions.every(p=>p>=0),'Every approved screenshot heading must be rendered');
 assert(positions.every((p,i)=>i===0||p>positions[i-1]),'Preserve reference card reading order');
