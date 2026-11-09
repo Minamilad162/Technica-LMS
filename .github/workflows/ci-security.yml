@@ -167,6 +167,9 @@ jobs:
       - name: P45 approved compact screenshot design regression
         run: npm run test:p45:build-your-own-design
 
+      - name: P49 profile, plan countdown and verified My Practice history navigation
+        run: npm run test:p49:profile
+
       - name: P44 Build Your Own validated configuration, server-only protected questions and 100 cap
         run: npm run test:p44:build-your-own
 

@@ -41,3 +41,21 @@ button.sc-countdown:hover{border-color:#8fc0e9;background:#f0f7ff}
 /* P37: the status is visible for every learner, including those without an active plan. */
 .sc-countdown[data-subscription-status="none"] .sc-track,
 .sc-countdown[data-subscription-status="expired"] .sc-track{background:#e9edf3}
+
+/* P49: compact header shows REAL plan name and total remaining days together. */
+.sc-countdown.sc-active{width:205px;max-width:220px;min-width:175px;min-height:62px}
+.sc-active .sc-copy{gap:2px}
+.sc-active .sc-copy strong{font-size:12px;line-height:1.25}
+.sc-active .sc-copy small{display:block;white-space:normal;overflow-wrap:anywhere;
+ font-size:10px;line-height:1.25;color:#527486;max-height:2.6em;overflow:hidden}
+@media(max-width:1100px){.sc-countdown.sc-active{width:175px;min-width:155px;max-width:175px}}
+@media(max-width:700px){
+ .sc-countdown.sc-active{width:132px;min-width:122px;max-width:132px;padding:5px 7px}
+ .sc-active .sc-copy strong{font-size:10.5px}
+ .sc-active .sc-copy small{font-size:9.5px;line-height:1.2;max-height:2.4em;display:block}
+}
+@media(max-width:400px){
+ .sc-countdown.sc-active{width:116px;min-width:110px;max-width:116px}
+ .sc-active .sc-copy strong{font-size:10px}
+ .sc-active .sc-copy small{font-size:9px}
+}

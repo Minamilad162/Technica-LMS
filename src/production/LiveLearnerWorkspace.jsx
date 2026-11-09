@@ -24,8 +24,7 @@ const nav=[
  {id:'learning',label:'My Learning',icon:BookOpenCheck,group:'Learning'},
  {id:'qualifications',label:'Qualifications',icon:GraduationCap,group:'Learning'},
  {id:'subscription',label:'Subscription',icon:ShoppingBag,group:'Learning'},
- {id:'practice',label:'Mock Exam & Practice',icon:Target,group:'Exam Preparation'},
- {id:'history',label:'My Practice',icon:ClipboardCheck,group:'Exam Preparation'}
+ {id:'practice',label:'Mock Exam & Practice',icon:Target,group:'Exam Preparation'}
 ];
 const formatDate=d=>d&&Number.isFinite(Date.parse(d))?new Date(d).toLocaleDateString('en-GB'):'—';
 const modeLabel={quick10:'Quick 10',timed25:'Timed Quiz',custom:'Custom',domain:'Domain Practice',
@@ -83,13 +82,13 @@ export default function LiveLearnerWorkspace({db,user,onSignOut,embedded=false,
   return()=>{live=false;};
  },[screen,db,practiceId,revision]);
  useEffect(()=>{
-  if(screen!=='history'||!enrolled.some(c=>c.id===historyId)){setReport(null);setReportError('');return;}
+  if(!(screen==='history'||screen==='practice'&&preparationTab==='history')||!enrolled.some(c=>c.id===historyId)){setReport(null);setReportError('');return;}
   let live=true;setReportLoading(true);setReport(null);setReportError('');
   getLearnerProgress(db,historyId).then(x=>{if(live)setReport(x);})
    .catch(()=>{if(live)setReportError('Your practice results are temporarily unavailable.');})
    .finally(()=>{if(live)setReportLoading(false);});
   return()=>{live=false;};
- },[screen,db,historyId,enrolled.length,revision]);
+ },[screen,preparationTab,db,historyId,enrolled.length,revision]);
  const openCourse=id=>{
   if(embedded&&onCourseRoute){onCourseRoute(id);return;}
   setSelectedId(id);setActiveLesson(null);setScreen('course');
@@ -114,8 +113,26 @@ export default function LiveLearnerWorkspace({db,user,onSignOut,embedded=false,
   if(embedded&&onPracticeRoute){onPracticeRoute();return;}setPreparationTab('practice');go('practice');
  };
  const openHistory=()=>{
-  if(embedded&&onHistoryRoute){onHistoryRoute();return;}go('history');
+  if(embedded&&onHistoryRoute){onHistoryRoute();return;}setPreparationTab('history');go('practice');
  };
+ const historyPanel=(
+   <div className="lj-history"><h2>My Practice History</h2>
+    {!!enrolled.length&&<label className="lj-picker">Course<select value={historyId} onChange={e=>setHistoryId(e.target.value)}>
+      {enrolled.map(c=><option value={c.id} key={c.id}>{c.title}</option>)}</select></label>}
+    {!enrolled.length?<div className="lj-empty">Your practice history will appear after your first completed session.</div>:
+     reportLoading?<div className="lj-empty" role="status">Loading your verified results…</div>:
+     reportError?<div className="lj-empty" role="alert">{reportError}</div>:
+     report?<><div className="lj-history-stats"><div><small>Completed practice sessions</small><strong>{report.practice.attempts}</strong></div>
+      <div><small>Answer accuracy</small><strong>{report.practice.answerAccuracyPercent===null?'—':report.practice.answerAccuracyPercent+'%'}</strong></div>
+      <div><small>Level Up sessions</small><strong>{report.practice.levelUpAttempts}</strong></div></div>
+      <div className="lj-history-list">{report.recentAttempts.map((a,i)=><div key={i}>
+       <b>{modeLabel[a.mode]||a.mode}</b><span>{formatDate(a.submittedAt)}</span>
+       <strong>{a.correctCount} / {a.questionCount} · {a.scorePercent}%</strong></div>)}
+       {!report.recentAttempts.length&&<p>No graded Practice or Mock attempts yet.</p>}</div>
+      
+     </>:<div className="lj-empty">Choose an enrolled course to see verified history.</div>}
+   </div>
+ );
  const screenTitle=screen==='courses'?'Explore Courses':screen==='learning'?'My Learning':
   screen==='qualifications'?'My Qualifications':
   screen==='subscription'||screen==='checkout'?'Subscription Plans':
@@ -196,9 +213,12 @@ export default function LiveLearnerWorkspace({db,user,onSignOut,embedded=false,
      <button type="button" role="tab" id="lj-prep-mock" aria-controls="lj-prep-panel"
       aria-selected={preparationTab==='mock'} className={preparationTab==='mock'?'lep-tab-active':''}
       onClick={()=>setPreparationTab('mock')}><GraduationCap size={23}/><span><strong>Mock Exam</strong><small>200 questions · 5 hours</small></span></button>
+     <button type="button" role="tab" id="lj-prep-history" aria-controls="lj-prep-panel"
+      aria-selected={preparationTab==='history'} className={preparationTab==='history'?'lep-tab-active':''}
+      onClick={()=>setPreparationTab('history')}><ClipboardCheck size={21}/><span><strong>My Practice</strong><small>Results and past sessions</small></span></button>
     </div>
     <div id="lj-prep-panel" role="tabpanel" aria-labelledby={'lj-prep-'+preparationTab}>
-    {preparationTab==='practice'?<>
+    {preparationTab==='history'?historyPanel:preparationTab==='practice'?<>
     <div className="lj-section-head"><h2>Choose your course</h2><p>Quick 10, Timed Quiz, Build Your Own, Domain Practice and adaptive Level Up are available in the secure engine.</p></div>
     {!enrolled.length?<div className="lj-empty"><LockKeyhole size={24}/><b>Practice is not available yet</b><p>No accessible courses are published. Contact the LMS administrator.</p><button className="lj-primary" onClick={()=>go('courses')}>Explore Courses <ArrowRight size={16}/></button></div>:
      <><label className="lj-picker">Course<select value={practiceId} onChange={e=>setPracticeId(e.target.value)}>
@@ -216,22 +236,7 @@ export default function LiveLearnerWorkspace({db,user,onSignOut,embedded=false,
        access={!!catalog.identity?.isAdmin||catalog.openAccess===true||isFullCourseEnrolled(catalog.entitlements,officialAsp.id,catalog.subscription)}/>}
     </div>
    </div>:
-   <div className="lj-history"><h2>My Practice History</h2>
-    {!!enrolled.length&&<label className="lj-picker">Course<select value={historyId} onChange={e=>setHistoryId(e.target.value)}>
-      {enrolled.map(c=><option value={c.id} key={c.id}>{c.title}</option>)}</select></label>}
-    {!enrolled.length?<div className="lj-empty">Your practice history will appear after your first completed session.</div>:
-     reportLoading?<div className="lj-empty" role="status">Loading your verified results…</div>:
-     reportError?<div className="lj-empty" role="alert">{reportError}</div>:
-     report?<><div className="lj-history-stats"><div><small>Completed practice sessions</small><strong>{report.practice.attempts}</strong></div>
-      <div><small>Answer accuracy</small><strong>{report.practice.answerAccuracyPercent===null?'—':report.practice.answerAccuracyPercent+'%'}</strong></div>
-      <div><small>Level Up sessions</small><strong>{report.practice.levelUpAttempts}</strong></div></div>
-      <div className="lj-history-list">{report.recentAttempts.map((a,i)=><div key={i}>
-       <b>{modeLabel[a.mode]||a.mode}</b><span>{formatDate(a.submittedAt)}</span>
-       <strong>{a.correctCount} / {a.questionCount} · {a.scorePercent}%</strong></div>)}
-       {!report.recentAttempts.length&&<p>No graded Practice or Mock attempts yet.</p>}</div>
-      
-     </>:<div className="lj-empty">Choose an enrolled course to see verified history.</div>}
-   </div>}
+   historyPanel}
   </React.Suspense>
   </main></div>
  </div>;

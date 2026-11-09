@@ -1,3 +1,9 @@
+## 2026-11-09 — P49 verified My Profile, plan days and unified practice history
+- Compact header now includes the actual active P21 subscription plan name and exact total remaining days, without month/week rounding. Open Access stays independent and does not invent subscriptions.
+- New My Profile account-menu destination shows trusted name/email/status, real plan, remaining days/start/end, and a second tab for verified P11 My Practice History. Responsive mobile profile link added.
+- My Practice moved out of desktop/mobile sidebar into third Mock Exam & Practice tab, sharing existing private P11 history renderer. Old /my-practice and results URLs redirect to that tab; standalone learner workspace follows the same three-tab grouping. Secure P4/P44 and P10 immutable 200/300 untouched.
+- Tests/Blueprint/Logic Registry updated. No Supabase data or schema mutation; signed-in responsive browser QA pending.
+
 ## 2026-11-09 — P48 readable Build Your Own option labels and summary layout
 - Kept all controls, names, hero artwork, five Practice difficulty choices, four timing modes, P46 brand colors and the single Start CTA. Corrected cramped text by allowing option labels to wrap inside their own buttons and using card-sized responsive grids (3+2 Difficulty, 2×2 Timing when narrow).
 - At constrained dashboard/sidebar widths, Session Summary displays readable 12px+ labels on a dedicated responsive 5/3/2-column row rather than squeezing five white-space-nowrap metrics beside Start Practice. Timer labels/values can wrap safely without colliding.

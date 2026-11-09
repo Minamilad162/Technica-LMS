@@ -18,3 +18,13 @@ export function subscriptionTimeLeft(row,at=Date.now()){
 export const formatEnd=value=>Number.isFinite(validTime(value))
  ?new Date(value).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'}):'';
 
+
+/** Display label only. Use verified P21 row snapshots, never a local purchase flag. */
+export function subscriptionPlanLabel(row){
+ if(!row||row.status!=='active')return '';
+ const name=typeof row.plan_name_snapshot==='string'?row.plan_name_snapshot.trim():'';
+ if(name)return name.slice(0,120);
+ const months=Number(row.duration_months_snapshot);
+ return Number.isSafeInteger(months)&&months>0&&months<=36
+  ?months+'-Month Plan':'Subscription plan';
+}
