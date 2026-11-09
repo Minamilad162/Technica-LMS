@@ -1,0 +1,7 @@
+import fs from 'node:fs';import assert from 'node:assert/strict';const read=p=>fs.readFileSync(p,'utf8');const sql=read('supabase/migrations/202611090007_p56_all_courses_practice_scoped_engine.sql');const api=read('src/production/practiceApi.js');const live=read('src/production/LivePractice.jsx');const custom=read('src/production/LiveBuildYourOwn.jsx');const hub=read('src/production/LiveExamPracticeHub.jsx');const portal=read('src/production/LivePracticePortal.jsx');const learning=read('src/production/LiveLearnerWorkspace.jsx');
+for(const key of ['lms_p56_attempt_courses','lms_p56_eligible_courses','lms_p56_attempt_accessible','lms_p56_start_all','lms_p56_all_readiness','public.lms_p4_can_practice','lms_practice_adaptive_state','lms_p44_custom_config','approval_state=\'approved\'','NOT q.mock_exclusive','NOT q.mock_candidate','thirds-fixed-correct-v2','PARTITION BY q.course_id'])assert.ok(sql.includes(key),key);
+assert.ok(!sql.includes('GRANT SELECT ON public.lms_questions TO authenticated'));
+for(const key of ['getAllCoursesAdaptiveReadiness','startAllCoursesPractice','startAllCoursesConfiguredPractice'])assert.ok(api.includes(key));
+assert.ok(live.includes('course.id===\'all\'')&&live.includes('startAllCoursesPractice'));assert.ok(custom.includes('startAllCoursesConfiguredPractice'));
+assert.ok(hub.includes('All Courses ·')&&portal.includes('All Courses ·')&&learning.includes('All Courses ·'));
+console.log('P56 all-course Practice contract PASS');

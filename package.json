@@ -89,7 +89,8 @@
     "test:p34:one-save": "node scripts/test-p34-one-save.mjs",
     "test:p34:compatibility": "node scripts/test-p34-compatibility.mjs",
     "test:p52": "node scripts/test-p52-admin-user-controls.mjs",
-    "test:p54": "node scripts/test-p54-notifications.mjs"
+    "test:p54": "node scripts/test-p54-notifications.mjs",
+    "test:p56": "node scripts/test-p56-all-courses-practice.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.58.0",

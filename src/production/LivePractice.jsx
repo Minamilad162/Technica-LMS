@@ -1,6 +1,6 @@
 import React,{useEffect,useMemo,useRef,useState} from 'react';
 import {BookOpen,Check,ChevronLeft,ChevronRight,Clock3,Flag,LockKeyhole,PlayCircle,RefreshCw,ShieldCheck,Target,TriangleAlert} from 'lucide-react';
-import {abandonSecurePractice,answerSecurePractice,answerAdaptivePractice,finishSecurePractice,getAdaptiveReadiness,practiceSessionKey,safeRemainingSeconds,startSecurePractice,startAdaptivePractice} from './practiceApi';
+import {abandonSecurePractice,answerSecurePractice,answerAdaptivePractice,finishSecurePractice,getAdaptiveReadiness,practiceSessionKey,safeRemainingSeconds,startSecurePractice,startAdaptivePractice,startAllCoursesPractice,getAllCoursesAdaptiveReadiness} from './practiceApi';
 import {requestQuestionFullscreen,isFullscreenActive,fullscreenStartError,leaveQuestionFullscreen} from '../lib/questionFullscreen';
 import {useQuestionFullscreenGuard} from '../lib/useQuestionFullscreenGuard';
 import LiveProtectedContent from './LiveProtectedContent';
@@ -65,6 +65,7 @@ export default function LivePractice({db,user,course,domains=[],access,defaultMo
  const remaining=safeRemainingSeconds(attempt,clock);
  const preset=PRESETS.find(p=>p.id===mode);
  const eligible=access;
+ const allCourses=course.id==='all';
  const readyForCurrent=Boolean(readiness?.ready&&readiness.requestedCount===Number(count)&&readiness.requestedDomainId===(domainId||null));
 
  useEffect(()=>{
@@ -93,13 +94,13 @@ export default function LivePractice({db,user,course,domains=[],access,defaultMo
   if(!Number.isInteger(desired)||desired<1||desired>50){setReadiness(null);return;}
   let active=true;setReadiness(null);setReadinessError('');setReadinessBusy(true);
   const timer=setTimeout(()=>{
-   getAdaptiveReadiness(db,course.id,desired,domainId||null)
+   (allCourses?getAllCoursesAdaptiveReadiness(db,desired):getAdaptiveReadiness(db,course.id,desired,domainId||null))
     .then(value=>{if(active)setReadiness({...value,requestedCount:desired,requestedDomainId:domainId||null});})
     .catch(e=>{if(active)setReadinessError(errorText(e));})
     .finally(()=>{if(active)setReadinessBusy(false);});
   },200);
   return()=>{active=false;clearTimeout(timer);};
- },[db,course.id,mode,count,domainId,eligible,attempt?.attemptId]);
+ },[db,course.id,mode,count,domainId,eligible,attempt?.attemptId,allCourses]);
  useEffect(()=>{
   if(!attempt||finished||remaining===null)return;
   const ticker=setInterval(()=>setClock(Date.now()),1000);
@@ -147,7 +148,8 @@ export default function LivePractice({db,user,course,domains=[],access,defaultMo
    if(!requestId){requestId=crypto.randomUUID();localStorage.setItem(pendingKey,requestId);}
    const request={courseId:course.id,mode,count:total,durationSeconds:time,
      domainId:mode==='domain'||mode==='levelup'?(domainId||null):null,requestId};
-   const next=mode==='levelup'?await startAdaptivePractice(db,request):
+   const next=allCourses?await startAllCoursesPractice(db,request):
+     mode==='levelup'?await startAdaptivePractice(db,request):
      await startSecurePractice(db,request);
    if(!isFullscreenActive(document,containerRef.current)){
     void sealAttempt(next.attemptId);
@@ -204,7 +206,8 @@ export default function LivePractice({db,user,course,domains=[],access,defaultMo
  return <div ref={containerRef} className="live-practice" aria-label="Secure practice engine">
   <div className="live-practice-top"><div><span className="live-eyebrow">SECURE PRACTICE</span><h3><ShieldCheck size={21}/> Secure Practice Center</h3><p>Questions are selected and scored in Supabase. Exiting fullscreen closes this attempt and returns to the course setup.</p></div>{attempt&&<button type="button" className="live-secondary" onClick={()=>{void sealAttempt(attempt.attemptId);void leaveIntentionally();}}>Leave questions</button>}</div>
   {!eligible?<div className="live-empty"><LockKeyhole size={22}/><b>Practice is not available</b><p>This course needs an active learning access policy and approved questions.</p></div>:!attempt?<>
-   <div className="live-mode-grid">{PRESETS.map(p=><button key={p.id} className={'live-mode-card '+(mode===p.id?'chosen':'')} onClick={()=>{setMode(p.id);setError('');setNotice('');}} type="button"><strong>{p.title}</strong><span>{p.desc}</span>{mode===p.id&&<Check size={17}/>}</button>)}</div>
+   <div className="live-mode-grid">{PRESETS.filter(p=>!allCourses||p.id!=='domain').map(p=><button key={p.id} className={'live-mode-card '+(mode===p.id?'chosen':'')} onClick={()=>{setMode(p.id);setError('');setNotice('');}} type="button"><strong>{p.title}</strong><span>{p.desc}</span>{mode===p.id&&<Check size={17}/>}</button>)}</div>
+   {allCourses&&<p className="live-practice-note" role="status"><BookOpen size={16}/> All Courses draws approved Practice questions across every Course your account can access. Practice by Domain requires a single Course; Mock Exam remains separate.</p>}
    {mode==='custom'?<LiveBuildYourOwn key={course.id+'-'+user.id} db={db} user={user} course={course}
      domains={domains} access={eligible}/>:<>
    {['domain','levelup'].includes(mode)&&<div className="live-practice-controls">

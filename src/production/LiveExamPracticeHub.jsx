@@ -63,12 +63,14 @@ export default function LiveExamPracticeHub(){
   return()=>{alive=false;};
  },[revision]);
  const {db,catalog,loading,error}=state;
- const course=catalog?.courses.find(c=>c.id===courseId)||null;
+ const allowedCourses=catalog?.courses.filter(c=>accessTo(catalog,c))||[];
+ const course=courseId==='all'?{id:'all',title:'All Courses',publication_state:'published'}:
+  catalog?.courses.find(c=>c.id===courseId)||null;
  const officialAsp=catalog?.courses.find(c=>c.slug==='asp')||null;
- const practiceAccess=accessTo(catalog,course);
+ const practiceAccess=courseId==='all'?allowedCourses.length>0:accessTo(catalog,course);
  const mockAccess=accessTo(catalog,officialAsp);
  useEffect(()=>{
-  if(tab!=='practice'||!db||!course||!practiceAccess){
+  if(tab!=='practice'||!db||!course||!practiceAccess||course.id==='all'){
    setDomains([]);setDomainError('');return;
   }
   let live=true;setDomains([]);setDomainError('');setDomainLoading(true);
@@ -139,11 +141,12 @@ export default function LiveExamPracticeHub(){
      </div>:<>
       <div className="lep-course-selector">
        <label htmlFor="lep-practice-course"><BookOpenCheck size={19}/> Practice course</label>
-       <select id="lep-practice-course" value={course?.id||''}
+       <select id="lep-practice-course" value={courseId}
         onChange={e=>setCourseId(e.target.value)}>
+        {allowedCourses.length>0&&<option value="all">All Courses · {allowedCourses.length} accessible</option>}
         {catalog.courses.map(c=><option key={c.id} value={c.id}>{c.title}</option>)}
        </select>
-       <span><CheckCircle2 size={15}/> Practice modes and difficulty logic preserved</span>
+       <span><CheckCircle2 size={15}/> {courseId==='all'?'Questions sampled securely from accessible Courses':'Practice modes and difficulty logic preserved'}</span>
       </div>
       {!course||!practiceAccess?<div className="live-learning-empty"><LockKeyhole size={24}/>
        <b>Course Practice is locked</b>

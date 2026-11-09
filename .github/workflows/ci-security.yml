@@ -173,6 +173,9 @@ jobs:
       - name: P54 real notification inbox permissions, membership snapshots and block notes
         run: npm run test:p54
 
+      - name: P56 authorized All Courses Practice and adaptive regression contract
+        run: npm run test:p56
+
       - name: P44 Build Your Own validated configuration, server-only protected questions and 100 cap
         run: npm run test:p44:build-your-own
 

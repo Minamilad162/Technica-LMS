@@ -28,7 +28,8 @@ export default function LivePracticePortal(){
    if(alive){setState({loading:false,error:'',catalog,db});setCourseId(old=>{
     const requested=catalog.courses.find(c=>c.id===requestedCourse||c.slug===requestedCourse);
     if(requested)return requested.id;
-    if(catalog.courses.some(c=>c.id===old))return old;
+    if(requestedCourse==='all'&&catalog.courses.length)return 'all';
+    if(old==='all'||catalog.courses.some(c=>c.id===old))return old;
     const enrolled=catalog.courses.find(c=>mayReadLiveCourse(catalog,c)&&(
      catalog.identity.isAdmin||catalog.openAccess===true||hasPlatformAccess(catalog.subscription)||catalog.entitlements.some(e=>e.course_id===c.id&&['paid','manual'].includes(e.entitlement_type))));
     return enrolled?.id||catalog.courses[0]?.id||'';
@@ -37,11 +38,14 @@ export default function LivePracticePortal(){
   return()=>{alive=false;};
  },[revision,requestedCourse]);
  const {db,catalog,loading,error}=state;
- const course=catalog?.courses.find(c=>c.id===courseId);
- const access=mayReadLiveCourse(catalog,course)&&
+ const availableCourses=catalog?.courses.filter(c=>mayReadLiveCourse(catalog,c)&&(
+  catalog?.identity?.isAdmin===true||catalog?.openAccess===true||hasPlatformAccess(catalog?.subscription)||
+  catalog?.entitlements?.some(e=>e.course_id===c.id&&e.status==='active'&&['paid','manual'].includes(e.entitlement_type))))||[];
+ const course=courseId==='all'?{id:'all',title:'All Courses'}:catalog?.courses.find(c=>c.id===courseId);
+ const access=courseId==='all'?availableCourses.length>0:mayReadLiveCourse(catalog,course)&&
   (catalog?.identity.isAdmin===true||catalog?.openAccess===true||hasPlatformAccess(catalog?.subscription)||catalog.entitlements.some(e=>e.course_id===courseId&&['paid','manual'].includes(e.entitlement_type)));
  useEffect(()=>{
-  if(!db||!courseId||!access){setDomains([]);return;}
+  if(!db||!courseId||!access||courseId==='all'){setDomains([]);return;}
   let active=true;setDomainLoading(true);setDomains([]);
   loadStructure(db,courseId).then(rows=>{if(active)setDomains(rows);})
    .catch(()=>{if(active)setDomains([]);})
@@ -57,6 +61,7 @@ export default function LivePracticePortal(){
    !catalog.courses.length?<div className="live-learning-empty">No authorized courses are visible in the live database yet.</div>:
    <><div className="live-authoring-course-selector"><label htmlFor="secure-practice-course">Course</label>
     <select id="secure-practice-course" value={courseId} onChange={e=>setCourseId(e.target.value)}>
+     {availableCourses.length>0&&<option value="all">All Courses · {availableCourses.length} accessible</option>}
      {catalog.courses.map(c=><option key={c.id} value={c.id}>{c.title} · {c.publication_state}</option>)}
     </select></div>
     {!access?<div className="live-learning-empty"><LockKeyhole size={22}/><b>Practice access unavailable</b><p>Course access is not ready yet. Refresh the page or contact your LMS administrator.</p></div>:

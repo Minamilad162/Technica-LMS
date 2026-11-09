@@ -104,3 +104,17 @@ export const answerConfiguredPractice=(db,attemptId,questionId,selectedIndex)=>
  });
 export const nextConfiguredPractice=(db,attemptId)=>
  rpc(db,'lms_p44_next',{p_attempt_id:attemptId});
+
+// P56: a single audited, securely graded session that samples across all
+// eligible courses; never download a merged bank into the browser.
+export const getAllCoursesAdaptiveReadiness=async(db,count)=>
+ validateAdaptiveReadiness(await rpc(db,'lms_p56_all_readiness',{p_count:count}),count);
+export const startAllCoursesPractice=(db,{mode,count,requestId,durationSeconds=0})=>
+ rpc(db,'lms_p56_start_all',{p_mode:mode,p_count:count,p_request_id:requestId,
+ p_duration_seconds:durationSeconds,p_per_question_seconds:0,p_difficulty:'mixed',
+ p_feedback:'end',p_camera:false});
+export const startAllCoursesConfiguredPractice=(db,{count,requestId,durationSeconds=0,
+ perQuestionSeconds=0,difficulty='mixed',feedbackTiming='end',camera=false})=>
+ rpc(db,'lms_p56_start_all',{p_mode:'custom',p_count:count,p_request_id:requestId,
+ p_duration_seconds:durationSeconds,p_per_question_seconds:perQuestionSeconds,
+ p_difficulty:difficulty,p_feedback:feedbackTiming,p_camera:camera});

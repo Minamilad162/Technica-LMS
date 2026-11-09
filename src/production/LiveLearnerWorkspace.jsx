@@ -47,7 +47,7 @@ export default function LiveLearnerWorkspace({db,user,onSignOut,embedded=false,
   let live=true;setLoading(true);setError('');
   fetchP15Catalog(db,user).then(x=>{if(live){setCatalog(x);
     setSelectedId(old=>x.courses.some(c=>c.id===old)?old:'');
-    setPracticeId(old=>x.courses.some(c=>c.id===old&&(x.openAccess||isFullCourseEnrolled(x.entitlements,c.id,x.subscription)))?
+    setPracticeId(old=>old==='all'||x.courses.some(c=>c.id===old&&(x.openAccess||isFullCourseEnrolled(x.entitlements,c.id,x.subscription)))?
      old:(x.courses.find(c=>x.openAccess||isFullCourseEnrolled(x.entitlements,c.id,x.subscription))?.id||''));
     setHistoryId(old=>x.courses.some(c=>c.id===old&&isFullCourseEnrolled(x.entitlements,c.id,x.subscription))?
      old:(x.courses.find(c=>x.openAccess||isFullCourseEnrolled(x.entitlements,c.id,x.subscription))?.id||''));}})
@@ -55,7 +55,7 @@ export default function LiveLearnerWorkspace({db,user,onSignOut,embedded=false,
    .finally(()=>{if(live)setLoading(false);});
   return()=>{live=false;};
  },[db,user.id,revision]);
- const enrolled=catalog?.courses.filter(c=>catalog.openAccess||isFullCourseEnrolled(catalog.entitlements,c.id,catalog.subscription))||[];
+ const enrolled=catalog?.courses.filter(c=>catalog.identity?.isAdmin||catalog.openAccess||isFullCourseEnrolled(catalog.entitlements,c.id,catalog.subscription))||[];
  const demoCourses=catalog?.openAccess?[]:catalog?.courses.filter(c=>!isFullCourseEnrolled(catalog.entitlements,c.id,catalog.subscription)&&(
   hasSimulatedEnrollment(user.id,c.id)||(localCheckoutEnabled()&&hasLocalDemoCheckout(user.id,c.id))))||[];
  const courseStatus=c=>catalog?.openAccess||isFullCourseEnrolled(catalog?.entitlements,c.id,catalog?.subscription)?'real':
@@ -75,7 +75,7 @@ export default function LiveLearnerWorkspace({db,user,onSignOut,embedded=false,
   return()=>{live=false;};
  },[db,chosen?.id,revision]);
  useEffect(()=>{
-  if(screen!=='practice'||!practiceId||!catalog){setPracticeTree([]);return;}
+  if(screen!=='practice'||!practiceId||!catalog||practiceId==='all'){setPracticeTree([]);return;}
   let live=true;setPracticeTree([]);setPracticeError('');
   loadStructure(db,practiceId).then(x=>{if(live)setPracticeTree(x);})
    .catch(()=>{if(live)setPracticeError('Verified Practice domains unavailable.');});
@@ -222,10 +222,11 @@ export default function LiveLearnerWorkspace({db,user,onSignOut,embedded=false,
     <div className="lj-section-head"><h2>Choose your course</h2><p>Quick 10, Timed Quiz, Build Your Own, Domain Practice and adaptive Level Up are available in the secure engine.</p></div>
     {!enrolled.length?<div className="lj-empty"><LockKeyhole size={24}/><b>Practice is not available yet</b><p>No accessible courses are published. Contact the LMS administrator.</p><button className="lj-primary" onClick={()=>go('courses')}>Explore Courses <ArrowRight size={16}/></button></div>:
      <><label className="lj-picker">Course<select value={practiceId} onChange={e=>setPracticeId(e.target.value)}>
+      <option value="all">All Courses · {enrolled.length} accessible</option>
       {enrolled.map(c=><option value={c.id} key={c.id}>{c.title}</option>)}</select></label>
       {practiceError&&<p className="lj-error">{practiceError}</p>}
-      {enrolled.find(c=>c.id===practiceId)&&<LivePractice key={user.id+'-'+practiceId}
-       db={db} user={user} course={enrolled.find(c=>c.id===practiceId)}
+      {(practiceId==='all'||enrolled.find(c=>c.id===practiceId))&&<LivePractice key={user.id+'-'+practiceId}
+       db={db} user={user} course={practiceId==='all'?{id:'all',title:'All Courses'}:enrolled.find(c=>c.id===practiceId)}
        domains={practiceTree} access={true} defaultMode="quick10"/>}
      </>}</>:
       !officialAsp?<div className="lj-empty"><LockKeyhole size={24}/><b>Official ASP Mock unavailable</b>

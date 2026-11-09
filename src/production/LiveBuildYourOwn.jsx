@@ -3,7 +3,7 @@ import {ArrowRight,Camera,Check,ChevronLeft,ChevronRight,Clock3,Eye,Flag,LockKey
 import BuildYourOwnSettings from './BuildYourOwnSettings.jsx';
 import {DEFAULT_BUILD_YOUR_OWN,prepareBuildYourOwn,remainingQuestionSeconds} from './buildYourOwnConfig.js';
 import {abandonSecurePractice,answerConfiguredPractice,finishSecurePractice,
- nextConfiguredPractice,practiceSessionKey,safeRemainingSeconds,startConfiguredPractice} from './practiceApi.js';
+ nextConfiguredPractice,practiceSessionKey,safeRemainingSeconds,startConfiguredPractice,startAllCoursesConfiguredPractice} from './practiceApi.js';
 import {requestQuestionFullscreen,isFullscreenActive,fullscreenStartError,leaveQuestionFullscreen} from '../lib/questionFullscreen.js';
 import {useQuestionFullscreenGuard} from '../lib/useQuestionFullscreenGuard.js';
 import LiveProtectedContent from './LiveProtectedContent.jsx';
@@ -111,7 +111,8 @@ export default function LiveBuildYourOwn({db,user,course,domains=[],access}){
    let requestId=localStorage.getItem(storageKey+':pending');
    if(!requestId){requestId=crypto.randomUUID();localStorage.setItem(storageKey+':pending',requestId);}
    closing.current=false;
-   const next=await startConfiguredPractice(db,{courseId:course.id,requestId,...config});
+   const next=course.id==='all'?await startAllCoursesConfiguredPractice(db,{requestId,...config}):
+    await startConfiguredPractice(db,{courseId:course.id,requestId,...config});
    if(!isFullscreenActive(document,rootRef.current)){
     void close(next.attemptId);throw Error('Fullscreen ended while preparing questions. Session closed.');
    }
