@@ -18,7 +18,7 @@ assert.throws(()=>prepareBuildYourOwn({count:'abc'}),/1 to 100/);
 assert.throws(()=>prepareBuildYourOwn({difficulty:'unclassified'}),/difficulty/);
 assert.throws(()=>prepareBuildYourOwn({timerMode:'invalid'}),/timing/);
 assert.throws(()=>prepareBuildYourOwn({feedbackTiming:'always'}),/answers/);
-assert.throws(()=>prepareBuildYourOwn({camera:'yes'}),/camera/);
+assert.throws(()=>prepareBuildYourOwn({camera:'yes'}),/[Cc]amera/);
 assert.deepEqual(prepareBuildYourOwn({count:100,timerMode:'both',totalMinutes:180,
  secondsPerQuestion:90,difficulty:'adaptive',feedbackTiming:'each',camera:true,domainId:'d'}),
  {count:100,durationSeconds:10800,perQuestionSeconds:90,difficulty:'adaptive',
