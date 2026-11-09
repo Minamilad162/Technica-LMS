@@ -119,7 +119,7 @@ export default function BuildYourOwnSettings({
      <div className="byo-difficulty-options" role="group" aria-label="Question difficulty">
       {difficultyChoices.map(choice=><SelectOption key={choice.id} option={choice}
        selected={value.difficulty===choice.id} onSelect={v=>set('difficulty',v)}
-       variant={'difficulty difficulty-'+choice.id}/>)}
+       variant={'difficulty-'+choice.id}/>)}
      </div>
     </section>
 
@@ -140,22 +140,22 @@ export default function BuildYourOwnSettings({
        showIcon={false} variant="timing"/>)}
      </div>
      {(total||each)&&<div className="byo-timing-values">
-      {total&&<label className="byo-timing-value">
+      {total&&<div className="byo-timing-value">
        <span><Timer size={25} strokeWidth={2.3}/> Total Exam Time</span>
        <span className="byo-timing-value-control">
         <NumberStepper value={value.totalMinutes} min={1} max={300}
          unit="Total exam time in minutes" onChange={n=>set('totalMinutes',n)}/>
         <em>minutes</em>
        </span>
-      </label>}
-      {each&&<label className="byo-timing-value">
+      </div>}
+      {each&&<div className="byo-timing-value">
        <span><Clock3 size={23} strokeWidth={2.3}/> Time Per Question</span>
        <span className="byo-timing-value-control">
         <NumberStepper value={value.secondsPerQuestion} min={10} max={600}
          unit="Time per question in seconds" onChange={n=>set('secondsPerQuestion',n)}/>
         <em>seconds</em>
        </span>
-      </label>}
+      </div>}
      </div>}
     </section>
    </div>
