@@ -1,0 +1,34 @@
+import assert from 'node:assert/strict';
+import {readFileSync} from 'node:fs';
+import {videoPlaybackErrorMessage} from '../src/production/videoPlaybackDiagnostics.js';
+const get=p=>readFileSync(p,'utf8');
+const viewer=get('src/production/ProtectedLessonViewer.jsx');
+const css=get('src/production/protectedLessonViewer.css');
+const upload=get('src/production/SecureLessonMedia.jsx');
+const edge=get('supabase/functions/technica-lesson-media/index.ts');
+for(const code of [1,2,3,4,undefined]){
+ const msg=videoPlaybackErrorMessage(code);
+ assert.ok(msg.length>15&&!msg.includes('http')&&!msg.includes('token'),'safe media diagnostics');
+}
+assert.match(videoPlaybackErrorMessage(3),/H\.264/);
+assert.match(videoPlaybackErrorMessage(4),/AAC/);
+assert.match(viewer,/onError=\{failedVideo\}/);
+assert.match(viewer,/onPlay=\{playingVideo\}/);
+assert.match(viewer,/current\.play\(\)/);
+assert.match(viewer,/slm-video-start-button/);
+assert.match(viewer,/role="alert"/);
+assert.match(viewer,/Retry secure playback/);
+assert.match(viewer,/Array\.from\(\{length:3\}/);
+assert.match(css,/\.slm-protected-viewer \.slm-media-content>\.slm-watermark\{/);
+assert.match(css,/pointer-events:none/);
+assert.match(css,/\.slm-video-start-overlay/);
+assert.match(css,/\.slm-video-error/);
+assert.match(upload,/H\.264 video \+ AAC audio/);
+assert.match(viewer,/authorizeLessonMedia\(db,lessonId,block\)/);
+assert.match(edge,/auth\.getUser\(token\)/);
+assert.match(viewer,/onWatched/);
+assert.match(viewer,/conceal\('tab-hidden'\)/);
+assert.match(viewer,/data-media-shielded/);
+assert.match(viewer,/disablePictureInPicture/);
+assert.match(viewer,/controlsList="nodownload noplaybackrate noremoteplayback"/);
+console.log('P61 protected preview video player diagnostics and watermark PASS');

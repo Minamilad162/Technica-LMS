@@ -2,6 +2,7 @@ import React,{useCallback,useEffect,useRef,useState} from 'react';
 import {AlertTriangle,FileText,LockKeyhole,Maximize,Minimize,RotateCcw,
  ShieldCheck} from 'lucide-react';
 import {authorizeLessonMedia} from './lessonMediaApi.js';
+import {videoPlaybackErrorMessage} from './videoPlaybackDiagnostics.js';
 import {PROTECTED_MEDIA_NOTICE,isGuardedMediaShortcut,isMobileMediaBrowser,
  requestQuestionFullscreen,shouldShieldMediaOnBlur} from '../lib/lessonMediaFullscreen.js';
 import './protectedLessonViewer.css';
@@ -15,7 +16,7 @@ function ViewerWatermark({identity}){
  const label='TECHNICA • '+(identity||'VERIFIED LEARNER')+' • '+
   time.toISOString().slice(0,16).replace('T',' ')+' UTC';
  return <div className="slm-watermark" aria-hidden="true">
-  {Array.from({length:12},(_,i)=><span key={i}>{label}</span>)}
+  {Array.from({length:3},(_,i)=><span key={i}>{label}</span>)}
  </div>;
 }
 let mediaPrintUsers=0;
@@ -33,6 +34,8 @@ export default function ProtectedLessonViewer({db,lessonId,block,viewerId='',onW
  const [state,setState]=useState('ready'),[url,setUrl]=useState(''),[error,setError]=useState('');
  const [reason,setReason]=useState(''),[nearViewport,setNearViewport]=useState(false);
  const [fullscreen,setFullscreen]=useState(false),[retry,setRetry]=useState(0);
+ const [playing,setPlaying]=useState(false),[starting,setStarting]=useState(false);
+ const [videoIssue,setVideoIssue]=useState('');
  const isVideo=block.block_type==='video',title=String(block.payload?.title||(isVideo?'Video':'PDF'));
  const conceal=useCallback(why=>{
   if(!active.current||!mounted.current)return;
@@ -48,6 +51,7 @@ export default function ProtectedLessonViewer({db,lessonId,block,viewerId='',onW
   }
   if(pdf.current){try{pdf.current.src='about:blank';}catch{}}
   currentSrc.current='';
+  setPlaying(false);setStarting(false);setVideoIssue('');
   setUrl('');setReason(why);setState('shielded');
  },[]);
  const resume=useCallback(()=>{
@@ -55,7 +59,8 @@ export default function ProtectedLessonViewer({db,lessonId,block,viewerId='',onW
   active.current=true;
   if(shell.current)shell.current.dataset.mediaShielded='false';
   if(curtain.current)curtain.current.hidden=true;
-  setError('');setReason('');setUrl('');setState('ready');setRetry(n=>n+1);
+  setError('');setVideoIssue('');setPlaying(false);setStarting(false);
+  setReason('');setUrl('');setState('ready');setRetry(n=>n+1);
  },[]);
  useEffect(()=>{
   mounted.current=true;active.current=true;
@@ -173,7 +178,31 @@ export default function ProtectedLessonViewer({db,lessonId,block,viewerId='',onW
    if(wasPlaying.current)v.play().catch(()=>{});
   }catch{}
  };
- const retryMedia=()=>{setError('');setUrl('');setRetry(n=>n+1);};
+ const retryMedia=()=>{setError('');setVideoIssue('');setPlaying(false);setStarting(false);
+  setUrl('');setRetry(n=>n+1);};
+ const startVideo=()=>{
+  const current=video.current;
+  if(!current||starting||videoIssue)return;
+  setStarting(true);
+  // Run directly in the click gesture: browsers can reject delayed play().
+  try{
+   const attempt=current.play();
+   if(attempt&&typeof attempt.catch==='function')attempt.catch(err=>{
+    if(err?.name!=='AbortError')setVideoIssue('The browser could not start video playback. Check the video encoding or try again.');
+    setStarting(false);
+   });
+  }catch{
+   setStarting(false);
+   setVideoIssue('The browser could not start video playback. Check the video encoding or try again.');
+  }
+ };
+ const failedVideo=()=>{
+  const code=video.current?.error?.code;
+  setVideoIssue(videoPlaybackErrorMessage(code));
+  setPlaying(false);setStarting(false);
+ };
+ const playingVideo=()=>{remember();setVideoIssue('');setPlaying(true);setStarting(false);};
+ const pausedVideo=()=>{remember();setPlaying(false);setStarting(false);};
  return <section ref={shell} className="slm-protected-viewer slm-viewer-active"
   data-media-phase={state} data-media-kind={block.block_type}
   data-media-shielded={state==='shielded'?'true':'false'}
@@ -189,12 +218,27 @@ export default function ProtectedLessonViewer({db,lessonId,block,viewerId='',onW
     isVideo?<video ref={video} key={url} src={url} controls playsInline preload="metadata"
       disablePictureInPicture disableRemotePlayback
       controlsList="nodownload noplaybackrate noremoteplayback"
-      onTimeUpdate={trackWatched} onPlay={remember} onPause={remember}
-      onSeeking={()=>{watched.current.last=null;}} onEnded={finishWatched}
+      onTimeUpdate={trackWatched} onPlay={playingVideo} onPause={pausedVideo}
+      onError={failedVideo} onEnded={()=>{finishWatched();setPlaying(false);}}
+      onSeeking={()=>{watched.current.last=null;}}
       onLoadedMetadata={restore} onContextMenu={e=>e.preventDefault()}/>:
      <iframe ref={pdf} key={url} title={'Protected PDF '+title}
       src={url+'#toolbar=0&navpanes=0&scrollbar=1'} loading="eager" referrerPolicy="no-referrer"/>}
    {!!url&&<ViewerWatermark identity={viewerId}/>}
+   {isVideo&&!!url&&!videoIssue&&!playing&&
+    <div className="slm-video-start-overlay">
+     <button type="button" className="slm-video-start-button" onClick={startVideo} disabled={starting}
+      aria-label={starting?'Starting protected lesson video':'Play protected lesson video'}>
+      <span className="slm-video-play-icon" aria-hidden="true">▶</span>
+      <span>{starting?'Starting video…':'Play lesson'}</span>
+     </button>
+    </div>}
+   {isVideo&&!!url&&videoIssue&&<div className="slm-video-error" role="alert">
+    <AlertTriangle size={22} aria-hidden="true"/>
+    <strong>Video playback unavailable</strong>
+    <p>{videoIssue}</p>
+    <button type="button" onClick={retryMedia}><RotateCcw size={15}/> Retry secure playback</button>
+   </div>}
    <div className="slm-viewer-toolbar">
     <span><ShieldCheck size={14}/> Private Lesson · Watermarked</span>
     <button type="button" onClick={toggleFullscreen}

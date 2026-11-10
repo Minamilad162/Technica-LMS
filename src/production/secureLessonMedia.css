@@ -37,3 +37,5 @@
 @media print{.slm-lesson-content,.slm-frame-wrap,.slm-upload-modal{display:none!important}}
 @media(max-width:650px){.slm-upload-modal{padding:17px}.slm-watermark{grid-template-columns:repeat(2,1fr)}.slm-frame-wrap{aspect-ratio:4/3}}
 @media(prefers-reduced-motion:reduce){.slm-*{animation:none!important;transition:none!important}}
+
+.slm-codec-hint{font-size:11px;line-height:1.55;color:#386d69;max-width:420px}

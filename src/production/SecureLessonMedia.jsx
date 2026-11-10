@@ -35,6 +35,7 @@ export function LessonMediaUploadModal({db,lessonId,lessonTitle='',kind,onClose,
     <b>{file?file.name:'Choose '+(isPdf?'PDF file':'MP4 or WebM video')}</b>
     <span>{file?(file.size/(1024*1024)).toFixed(1)+' MB':
      isPdf?'PDF up to 20 MB':'Video up to 50 MB · upload limit may be lower on your Supabase plan'}</span>
+    {!isPdf&&<small className="slm-codec-hint">For reliable Chrome, Android &amp; Safari playback, export MP4 using H.264 video + AAC audio (not HEVC/H.265).</small>}
    </button>
    <div className="slm-security-note"><ShieldCheck size={17}/>
     Private Storage · signed upload · Admin verification · student entitlement check · short-lived playback URLs · visible user watermark

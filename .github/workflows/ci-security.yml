@@ -185,6 +185,9 @@ jobs:
       - name: P60 protected media Edge origin and private-access release contract
         run: npm run test:p60
 
+      - name: P61 protected video preview playback, codec error and sparse watermark
+        run: npm run test:p61
+
       - name: P56 authorized All Courses Practice and adaptive regression contract
         run: npm run test:p56
 
