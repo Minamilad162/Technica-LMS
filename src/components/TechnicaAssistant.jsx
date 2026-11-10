@@ -20,17 +20,21 @@ export default function TechnicaAssistant({open,onOpenChange,isAdmin=false,onNav
  const results=useMemo(()=>searchTechnicaFaqs(all,filter,category),[all,filter,category]);
  const answer=all.find(f=>f.id===questionId)||null;
  const suggestions=useMemo(()=>unmatched?suggestTechnicaFaqs(all,unmatched):[],[all,unmatched]);
- useEffect(()=>{if(open&&!lastOpen.current){inputRef.current?.focus();}lastOpen.current=open;},[open]);
+ useEffect(()=>{
+  if(open&&!lastOpen.current)inputRef.current?.focus();
+  if(!open&&lastOpen.current)triggerRef.current?.focus();
+  lastOpen.current=open;
+ },[open]);
  useEffect(()=>{
   if(!open)return;
-  const escape=e=>{if(e.key==='Escape'){e.stopPropagation();onOpenChange(false);triggerRef.current?.focus();}};
+  const escape=e=>{if(e.key==='Escape'){e.stopPropagation();onOpenChange(false);}};
   document.addEventListener('keydown',escape);
   return()=>document.removeEventListener('keydown',escape);
  },[open,onOpenChange]);
  useEffect(()=>{
-  if(answer&&!all.some(f=>f.id===answer.id))setQuestionId(null);
- },[isAdmin]);
- const close=()=>{onOpenChange(false);triggerRef.current?.focus();};
+  if(questionId&&!all.some(f=>f.id===questionId))setQuestionId(null);
+ },[all,questionId]);
+ const close=()=>onOpenChange(false);
  const choose=faq=>{setQuestionId(faq.id);setUnmatched('');setFeedback('');setTyped('');};
  const goBack=()=>{setQuestionId(null);setUnmatched('');setFeedback('');};
  const submit=e=>{
