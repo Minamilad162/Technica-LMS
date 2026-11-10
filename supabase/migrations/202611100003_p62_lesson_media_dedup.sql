@@ -90,23 +90,10 @@ BEGIN
  THEN RAISE EXCEPTION 'P14 actual storage bytes or MIME mismatch'; END IF;
  IF EXISTS(SELECT 1 FROM public.lms_media_assets WHERE private_object_path=i.object_path)
  THEN RAISE EXCEPTION 'P14 object path already registered'; END IF;
- -- Serialize finalization within the same Lesson, including concurrent upload intents.
- -- Storage's single-part ETag is a content fingerprint; require exact bytes and MIME too.
+ -- Serialize finalization for simultaneous uploads to this Lesson.
  PERFORM pg_advisory_xact_lock(hashtextextended('lms:p62:lesson:'||i.lesson_id::text,0));
  v_etag=lower(btrim(coalesce(v_metadata->>'eTag',''),'"'));
- IF v_etag ~ '^[0-9a-f]{32}
- VALUES(i.course_id,i.kind,i.object_path,i.expected_mime) RETURNING id INTO v_asset_id;
- SELECT coalesce(max(position)+1,0) INTO v_position FROM public.lms_lesson_blocks
- WHERE lesson_id=i.lesson_id;
- INSERT INTO public.lms_lesson_blocks(lesson_id,block_type,payload,position)
- VALUES(i.lesson_id,i.kind,jsonb_build_object('assetId',v_asset_id,'title',i.display_name),v_position)
- RETURNING id INTO v_block_id;
- UPDATE public.lms_p14_media_upload_intents SET status='finalized',
- finalized_at=now(),asset_id=v_asset_id WHERE id=i.id;
- RETURN jsonb_build_object('assetId',v_asset_id,'blockId',v_block_id,
-   'kind',i.kind,'title',i.display_name);
-END; $function$
- THEN
+ IF v_etag ~ '^[0-9a-f]{32}$' THEN
   SELECT b.id INTO v_existing_block
   FROM public.lms_lesson_blocks b
   JOIN public.lms_media_assets a ON a.id::text=b.payload->>'assetId'
