@@ -1,3 +1,4 @@
+import PremiumLoading from '../components/PremiumLoading.jsx';
 import React,{useEffect,useState} from 'react';
 import {Link,useSearchParams} from 'react-router-dom';
 import {BookOpen,CalendarClock,ChevronRight,ClipboardCheck,GraduationCap,
@@ -71,12 +72,12 @@ export default function LiveMyProfile(){
     <ClipboardCheck size={19}/> My Practice
    </button>
   </div>
-  {loading?<div className="lprofile-status" role="status">Loading your verified profile…</div>:
+  {loading?<PremiumLoading variant="page"/>:
    error?<div className="lprofile-status" role="alert">{error}
     <button type="button" onClick={()=>setRevision(n=>n+1)}>Retry</button></div>:
    tab==='practice'?<section role="tabpanel" id="lprofile-section-practice"
     aria-labelledby="lprofile-tab-practice" className="lprofile-panel lprofile-history">
-    <React.Suspense fallback={<div className="lprofile-status" role="status">Loading your results…</div>}>
+    <React.Suspense fallback={<PremiumLoading variant="compact"/>}>
      <LiveLearnerWorkspace db={db} user={user} embedded initialScreen="history"/>
     </React.Suspense>
    </section>:

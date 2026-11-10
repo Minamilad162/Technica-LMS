@@ -1,3 +1,4 @@
+import PremiumLoading from '../components/PremiumLoading.jsx';
 import React,{useEffect,useMemo,useState} from 'react';
 import {ArrowLeft,ArrowRight,BookOpen,BookOpenCheck,CalendarDays,Check,CheckCircle2,
  ClipboardCheck,Clock3,Crown,GraduationCap,Headphones,Layers3,LockKeyhole,
@@ -123,7 +124,7 @@ export default function SubscriptionPlans({db,user,subscription,subscriptionErro
   {openAccess&&<p className="sp-notice" role="status"><CheckCircle2 size={18}/> Learning is currently available. Membership plans will be activated when enrollment opens.</p>}
    {notice&&<p className="sp-notice" role="status"><CheckCircle2 size={18}/>{notice}</p>}
 
-  {loading?<div className="sp-loading" role="status"><span className="sp-loader"/><strong>Loading membership options…</strong><small>Checking current published plans and prices</small></div>:
+  {loading?<PremiumLoading variant="page"/>:
    <div className="sp-grid" data-plan-count={plans.length}>{plans.map((plan,i)=>{
     const configured=plan.price_amount!==null&&plan.price_amount!==undefined&&!!plan.currency;
     const featured=plan.id===featuredId;

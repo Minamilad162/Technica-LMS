@@ -1,3 +1,4 @@
+import PremiumLoading from '../components/PremiumLoading.jsx';
 import React,{useEffect,useMemo,useState} from 'react';
 import {useNavigate} from 'react-router-dom';
 import {Activity,AlertTriangle,ArrowLeft,CheckCircle2,ChevronDown,ChevronUp,ClipboardList,Clock3,Copy,LockKeyhole,RefreshCw,ShieldCheck,XCircle} from 'lucide-react';
@@ -66,7 +67,7 @@ export default function LiveReleaseReadiness(){
      <Copy size={15}/> Copy checklist</button></div>
   </div>
   {message&&<p className="p12-notice" role="status">{message}</p>}
-  {loading?<div className="live-learning-empty" role="status"><Activity size={18}/> Checking the live ASP infrastructure without modifying data…</div>:
+  {loading?<PremiumLoading variant="page"/>:
    !rows.length?<div className="live-learning-empty" role="alert">Readiness results were not available. Launch remains blocked.</div>:
    <div className="p12-groups">{grouped.map(({zone,items})=><section key={zone} className="p12-group">
     <div className="p12-group-title"><h2>{zone}</h2><span>{items.length} check{items.length===1?'':'s'}</span></div>

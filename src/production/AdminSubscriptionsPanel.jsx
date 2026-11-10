@@ -1,3 +1,4 @@
+import PremiumLoading from '../components/PremiumLoading.jsx';
 import React,{useEffect,useState} from 'react';
 import {AlertTriangle,CalendarDays,CheckCircle2,Clock3,Plus,RefreshCw,
  ShieldCheck,Wallet,XCircle} from 'lucide-react';
@@ -91,7 +92,7 @@ export default function AdminSubscriptionsPanel({db}){
    <button className="at-outline" type="button" onClick={refresh}><RefreshCw size={15}/> Refresh</button></header>
   <div className="asub-access-mode" aria-label="Platform access mode">
    <div><ShieldCheck size={20}/><span><strong>Learning access</strong>
-    <small>{accessMode.loading?'Checking access policy…':!accessMode.installed?'Access policy setup required':
+    <small>{accessMode.loading?'Loading…':!accessMode.installed?'Access policy setup required':
       accessMode.openAccess?'Open to active learners — published content only':'Subscription rules active'}</small></span></div>
    <button type="button" className="at-primary" disabled={modeBusy||accessMode.loading||!accessMode.installed}
     onClick={()=>void setMode(!accessMode.openAccess)}>
@@ -103,7 +104,7 @@ export default function AdminSubscriptionsPanel({db}){
    Payment processing is not connected; approval below is explicitly a MANUAL grant.</div>
   {error&&<p className="at-error" role="alert"><AlertTriangle size={16}/>{error}</p>}
   {notice&&<p className="asub-notice" role="status"><CheckCircle2 size={16}/>{notice}</p>}
-  {loading?<div className="at-empty">Loading verified subscription records…</div>:
+  {loading?<PremiumLoading variant="compact"/>:
    data&&<>
     <div className="asub-metrics"><div><span><CalendarDays size={18}/></span><small>Configured Plans</small><strong>{data.plans.length}</strong></div>
      <div><span><Clock3 size={18}/></span><small>Pending Requests</small><strong>{requests.length}</strong></div>

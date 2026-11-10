@@ -1,3 +1,4 @@
+import PremiumLoading from '../components/PremiumLoading.jsx';
 import React,{useEffect,useMemo,useState} from 'react';
 import {useNavigate} from 'react-router-dom';
 import {AlertTriangle,ArrowLeft,BarChart3,BookOpen,CheckCircle2,ChevronDown,ChevronRight,Clock3,GraduationCap,LockKeyhole,RefreshCw,ShieldCheck,Target} from 'lucide-react';
@@ -68,7 +69,7 @@ export default function LiveLearnerProgress(){
   <div className="live-learning-security"><ShieldCheck size={16}/>
    Your own server-verified metrics only · No demo percentages, other learner records, or hidden answer keys.
   </div>
-  {loading?<div className="live-learning-empty" role="status">Checking your authenticated LMS courses…</div>:
+  {loading?<PremiumLoading variant="page"/>:
    error?<div className="live-learning-empty" role="alert"><AlertTriangle size={21}/><b>Progress unavailable</b><p>{error}</p><button className="btn" onClick={()=>setRevision(n=>n+1)}><RefreshCw size={16}/> Retry</button></div>:
    !courses.length?<div className="live-learning-empty"><LockKeyhole size={22}/><b>No accessible courses</b><p>Progress appears when you have an active, authorized course.</p></div>:<>
     <div className="p11-toolbar">
@@ -80,7 +81,7 @@ export default function LiveLearnerProgress(){
       <RefreshCw size={16}/> Refresh
      </button>
     </div>
-    {reportLoading?<div className="live-learning-empty" role="status">Reading verified course completion and assessment records…</div>:
+    {reportLoading?<PremiumLoading variant="compact"/>:
      reportError?<div className="live-learning-empty" role="alert"><AlertTriangle size={22}/><b>Analytics not ready</b>
        <p>{reportError}</p><small>P11 requires its separately approved Supabase migration. No demo values will be shown.</small>
       </div>:

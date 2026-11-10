@@ -1,3 +1,4 @@
+import PremiumLoading from '../components/PremiumLoading.jsx';
 import React,{useCallback,useEffect,useMemo,useState} from 'react';
 import {Activity,AlertTriangle,ArrowLeft,ArrowRight,BookOpen,FileText,Video,CheckCircle2,ChevronDown,ChevronRight,ClipboardCheck,FileQuestion,GraduationCap,Layers,LockKeyhole,Plus,RefreshCw,Search,ShieldCheck,Target,Users,Wallet,ExternalLink} from 'lucide-react';
 import {liveCourses,liveCourseTree,addDraftCourse,addAuthoringNode,updateAuthoringTitle,addReadingParagraph} from './liveAuthoringApi.js';
@@ -47,7 +48,7 @@ export function AdminDashboardPanel({db,onNavigate}){
    .finally(()=>{if(live)setLoading(false);});
   return()=>{live=false;};
  },[db,refresh]);
- if(loading)return <div className="at-empty">Loading real Supabase KPIs…</div>;
+ if(loading)return <PremiumLoading variant="page"/>;
  if(error)return <div className="at-alert"><AlertTriangle size={18}/><div><b>Dynamic analytics unavailable</b><p>{error} These figures need P13 installed on an approved environment.</p></div></div>;
  if(!report)return empty;
  const stats=[
@@ -342,7 +343,7 @@ export function AdminMockPanel({db,asp}){
      <FileQuestion size={14}/> Load checked Mock questions from Bank
     </button>
    </div></div>
-   {loading?<p className="at-empty">Loading protected ASP candidate list…</p>:
+   {loading?<PremiumLoading variant="compact"/>:
     <div className="at-candidate-list">{pool.items.map(q=><label className="at-candidate" key={q.id}>
      <input type="checkbox" checked={selected.includes(q.id)} disabled={processing||(!selected.includes(q.id)&&selected.length===200)}
        onChange={()=>toggle(q.id)}/><span><b>{q.sourceId}</b><span>{q.prompt}</span></span>

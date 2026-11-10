@@ -1,3 +1,4 @@
+import PremiumLoading from '../components/PremiumLoading.jsx';
 import React,{useEffect,useState} from 'react';
 import {useNavigate,useParams} from 'react-router-dom';
 import {AlertCircle,ArrowLeft,ArrowRight,BookOpen,CheckCircle2,ChevronDown,ChevronRight,FileText,GraduationCap,Layers3,LockKeyhole,RefreshCw,ShieldCheck} from 'lucide-react';
@@ -25,7 +26,7 @@ function useLiveLearningCatalog(){
 }
 const getCounts=tree=>({domains:tree.length,topics:tree.reduce((n,d)=>n+d.topics.length,0),lessons:tree.reduce((n,d)=>n+d.topics.reduce((a,t)=>a+t.lessons.length,0),0)});
 function Loading({loading,error,refresh}){
- if(loading)return <div className="live-learning-empty" role="status">Checking your Supabase course access…</div>;
+ if(loading)return <PremiumLoading variant="page"/>;
  if(error)return <div className="live-learning-empty" role="alert"><AlertCircle size={23}/><b>Learning library unavailable</b><p>{error}</p><button className="btn" onClick={refresh}><RefreshCw size={16}/> Retry</button></div>;
  return null;
 }
@@ -85,7 +86,7 @@ export function LiveLearningCourse(){
     <><div className="live-learning-metrics"><span><Layers3 size={17}/> {counts.domains} domains</span><span>{counts.topics} topics</span><span>{counts.lessons} lessons</span><span><CheckCircle2 size={17}/> {completed} verified completed</span></div>
     {data.progressError&&<p className="live-learning-note">{data.progressError}</p>}
     <div className="live-learning-note">Learning progress is read from verified server records only. Opening a lesson does not mark it complete; write-side progress validation is a separate P2 integration stage.</div>
-    {treeLoading?<div className="live-learning-empty" role="status">Loading authorized course structure…</div>:treeError?<div className="live-learning-empty" role="alert">{treeError}</div>:
+    {treeLoading?<PremiumLoading variant="compact"/>:treeError?<div className="live-learning-empty" role="alert">{treeError}</div>:
      !tree.length?<div className="live-learning-empty">No published learning structure is accessible yet.</div>:
      <div className="live-learning-domains">{tree.map((domain,di)=><section className="live-learning-domain" key={domain.id}>
       <h2>Domain {di+1}: {domain.title}</h2>{domain.topics.map((topic,ti)=><div key={topic.id} className="live-learning-topic">

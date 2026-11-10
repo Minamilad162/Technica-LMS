@@ -194,6 +194,9 @@ jobs:
       - name: P63 learner-visible Lesson publishing and subscription diagnostics
         run: npm run test:p63
 
+      - name: P64 premium loading without developer-facing auth and database status messages
+        run: npm run test:p64
+
       - name: P56 authorized All Courses Practice and adaptive regression contract
         run: npm run test:p56
 

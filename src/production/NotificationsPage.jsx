@@ -1,3 +1,4 @@
+import PremiumLoading from '../components/PremiumLoading.jsx';
 import React,{useEffect,useMemo,useState} from 'react';
 import {Bell,CheckCheck,CalendarDays,Clock3,LockKeyhole,RefreshCw,ShieldCheck,Wallet} from 'lucide-react';
 import {getSupabaseClient} from '../lib/supabase.js';
@@ -37,7 +38,7 @@ export default function NotificationsPage(){
     <button type="button" key={id} aria-pressed={tab===id} className={tab===id?'selected':''} onClick={()=>setTab(id)}>{label}</button>)}
   </nav>
   {error&&<div className="n54-error" role="alert">{error}</div>}
-  {loading&&<p className="n54-empty" role="status">Loading verified notifications…</p>}
+  {loading&&<PremiumLoading variant="compact"/>}
   {!loading&&!items.length&&<p className="n54-empty">There are no {tab==='all'?'notifications':tab} to show.</p>}
   <div className="n54-list">{!loading&&items.map(e=>{
    const d=e.details||{},active=e.type==='subscription_activated',request=e.type==='subscription_requested';

@@ -1,3 +1,4 @@
+import PremiumLoading from '../components/PremiumLoading.jsx';
 import React,{useEffect,useRef,useState} from 'react';
 import {ArrowLeft,ArrowRight,BookOpen,CheckCircle2,ChevronLeft,ChevronRight,
  CircleHelp,Flame,RefreshCw,RotateCcw,ShieldCheck,Sparkles,Target,TriangleAlert} from 'lucide-react';
@@ -63,7 +64,7 @@ export default function KillMistakesPage(){
   <div className="km-context"><span><ShieldCheck size={16}/> Verified grading • Your own mistakes only</span>
    <Link to="/assessments?tab=practice"><BookOpen size={16}/> Back to Practice <ArrowRight size={14}/></Link></div>
   {error&&<div className="km-alert km-alert-error" role="alert"><TriangleAlert size={18}/>{error}<button onClick={refresh}>Retry</button></div>}
-  {loading&&<div className="km-empty" role="status"><RefreshCw size={25}/> Loading your mistakes securely…</div>}
+  {loading&&<PremiumLoading variant="page"/>}
   {!loading&&feed&&remaining===0&&<div className="km-empty km-empty-win">
    <span className="km-empty-icon"><Sparkles size={34}/></span>
    <h2>All clear. Great work!</h2>

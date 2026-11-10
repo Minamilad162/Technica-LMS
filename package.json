@@ -97,7 +97,8 @@
     "test:p60": "node scripts/test-p60-edge-gateway-deployment.mjs",
     "test:p61": "node scripts/test-p61-protected-video-preview.mjs",
     "test:p62": "node scripts/test-p62-video-dedup.mjs",
-    "test:p63": "node scripts/test-p63-lesson-publication.mjs"
+    "test:p63": "node scripts/test-p63-lesson-publication.mjs",
+    "test:p64": "node scripts/test-p64-premium-loading.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.58.0",
