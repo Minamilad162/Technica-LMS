@@ -60,6 +60,23 @@ export function nestPublishedOutline(rows,courseId){
  if(rows.filter(r=>r.is_free_intro).length>1)throw Error('Only one published Intro is permitted.');
  return domains;
 }
+// Summarize status without ever treating a Draft as learner-visible.
+export function summarizeLessonPublication(tree){
+ if(!Array.isArray(tree))throw Error('Invalid Course publishing hierarchy.');
+ const seen=new Set(),draftIds=[];let published=0;
+ for(const domain of tree){
+  for(const topic of domain.topics||[]){
+   for(const lesson of topic.lessons||[]){
+    if(!isP15Id(lesson.id)||!['draft','published'].includes(lesson.publication_state)
+     ||seen.has(lesson.id))throw Error('Invalid Lesson publication state.');
+    seen.add(lesson.id);
+    if(lesson.publication_state==='published')published++;
+    else draftIds.push(lesson.id);
+   }
+  }
+ }
+ return {total:seen.size,published,draft:draftIds.length,draftIds};
+}
 export async function fetchP15Outline(db,courseId){
  if(!db||!isP15Id(courseId))throw Error('Choose a published Course.');
  const {data,error}=await db.rpc('lms_p15_course_outline',{p_course_id:courseId});

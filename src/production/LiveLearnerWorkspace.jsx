@@ -203,7 +203,13 @@ export default function LiveLearnerWorkspace({db,user,onSignOut,embedded=false,
     <div className="lcc-syllabus" ref={syllabusRef}>
      {outlineLoading?<div className="lj-empty" role="status">Loading published lessons…</div>:
       outlineError?<div className="lj-empty" role="alert"><LockKeyhole size={20}/>{outlineError}</div>:
-      !outline.length?<div className="lj-empty">No published lessons are available in this course yet.</div>:
+      !outline.length?<div className="lj-empty lj-lesson-awaiting-release" role="status">
+        <BookOpen size={25}/>
+        <b>Lessons are waiting for publication</b>
+        <p>{full?'Your subscription is active and this Course is available. The instructor has not published any Lessons yet. You do not need another plan.':
+         'This Course is published, but its Lessons are still being prepared. The instructor will publish them when ready.'}</p>
+        <button type="button" className="lj-quiet" onClick={refresh}><RefreshCw size={16}/> Check for published Lessons</button>
+       </div>:
       <CourseLessonExplorer db={db} userId={user.id} courseId={chosen.id}
        courseTitle={chosen.title} outline={outline} full={Boolean(full)} demo={Boolean(demoChosen)}
        onSubscribe={()=>startCheckout(chosen.id)}/>}

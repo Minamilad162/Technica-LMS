@@ -6,7 +6,7 @@ import {getAdminOverview,getAdminUsers,getAdminUserDetail,getAdminMockCandidates
 import {getMockReadiness} from './mockApi.js';
 import AdminQuestionReview from './AdminQuestionReview.jsx';
 import {LessonMediaUploadModal,SecureLessonContent} from './SecureLessonMedia.jsx';
-import {fetchAdminFreeIntro,setAdminFreeIntro,setAdminPublished} from './learnerJourneyApi.js';
+import {fetchAdminFreeIntro,setAdminFreeIntro,setAdminPublished,summarizeLessonPublication} from './learnerJourneyApi.js';
 import {verifiedLiveAdmin} from './liveAuthoringApi.js';
 import {CourseCover,CourseCoverManager} from './CourseCover.jsx';
 import AdminAnalyticsCharts from './AdminAnalyticsCharts.jsx';
@@ -100,6 +100,7 @@ export function AdminCoursesPanel({db}){
   .catch(e=>{if(live)setError(err(e));});return()=>{live=false;};
  },[db,course,revision]);
  const chosen=courses.find(x=>x.id===course);
+ const publication=useMemo(()=>summarizeLessonPublication(tree),[tree]);
  const previewHref=lessonId=>'#/admin/course-preview/'+encodeURIComponent(course)+
   '?view=draft'+(lessonId?'&lesson='+encodeURIComponent(lessonId):'');
  useEffect(()=>{
@@ -120,6 +121,26 @@ export function AdminCoursesPanel({db}){
    setNotice(label+' '+(state==='published'?'published':'returned to Draft')+' successfully.');
    setRevision(x=>x+1);
   }catch(x){setError(err(x));}finally{setBusy(false);}
+ };
+ const publishDraftLessons=async()=>{
+  if(busy||!chosen||chosen.publication_state!=='published'||!publication.draft)return;
+  const ids=[...publication.draftIds],count=ids.length;
+  if(!window.confirm('Publish '+count+' Draft Lesson'+(count===1?'':'s')+
+   ' in '+chosen.title+'? All approved content will be available to subscribed learners. Review the video, PDFs and Quiz first.'))return;
+  setBusy(true);setError('');setNotice('');
+  let completed=0;
+  try{
+   await verifiedLiveAdmin(db);
+   for(const id of ids){
+    await setAdminPublished(db,'lms_lessons',id,'published');
+    completed++;
+   }
+   setNotice(completed+' Lesson'+(completed===1?'':'s')+' published. Subscribers can now find the Lessons under Your lessons.');
+  }catch(e){
+   setError('Published '+completed+' of '+count+' Lesson(s). Remaining Lessons were not changed. '+err(e));
+  }finally{
+   setBusy(false);setRevision(n=>n+1);
+  }
  };
  const changeIntro=async()=>{
   if(busy||introEnabled===null)return;
@@ -180,6 +201,20 @@ export function AdminCoursesPanel({db}){
       <button className="at-outline" onClick={()=>start('domain')}><Plus size={15}/> Domain</button></div></div>
      <CourseCoverManager db={db} course={chosen} onSaved={()=>setRevision(n=>n+1)}/>
      {introError&&<p className="at-error" role="status">{introError}</p>}
+     <div className={'at-lesson-publication-summary '+(publication.draft?'pending':'ready')} role="status">
+      <span className="at-lesson-publication-icon">{publication.draft?<AlertTriangle size={20}/>:<CheckCircle2 size={20}/>}</span>
+      <div className="at-lesson-publication-copy"><strong>{publication.published} of {publication.total} Lessons published</strong>
+       <p>{chosen.publication_state!=='published'?
+        'This Course is Draft: publish the Course and the approved Lessons separately before learners can see them.':
+        publication.draft?
+         publication.draft+' Draft Lesson'+(publication.draft===1?' is':'s are')+' hidden from learners, even when their subscription is active.':
+        publication.total?'All published Lessons are now visible to eligible learners.':
+         'Add Lessons, review their content, and publish them to make them visible.'}</p></div>
+      {chosen.publication_state==='published'&&publication.draft>0&&
+       <button className="at-lesson-bulk-publish" type="button" disabled={busy} onClick={publishDraftLessons}>
+        <CheckCircle2 size={16}/>{busy?'Publishing…':'Publish '+publication.draft+' Draft Lesson'+(publication.draft===1?'':'s')}
+       </button>}
+     </div>
      <p className="at-intro-note">Free Intro is opt-in: publish Course and first Lesson, then enable preview.
       Only the approved first Lesson becomes free; the remaining media stays server-locked.</p>
      {tree.map(d=><div className="at-tree" key={d.id}><div className="at-tree-item">
@@ -191,7 +226,10 @@ export function AdminCoursesPanel({db}){
         <button className="at-icon" onClick={()=>start('rename','lms_topics:'+t.id,t.title)}>Edit</button>
         <button className="at-outline tiny" onClick={()=>start('lesson',t.id)}><Plus size={14}/> Lesson</button></div>
         {open[t.id]!==false&&(t.lessons||[]).map(l=><div key={l.id}>
-         <div className="at-lesson"><span><BookOpen size={14}/>{l.title}</span>
+         <div className="at-lesson"><span className="at-lesson-publish-title"><BookOpen size={14}/>{l.title}
+           <span className={'at-lesson-publication-badge '+(l.publication_state==='published'?'published':'draft')}>
+            {l.publication_state==='published'?'Published · Learner-visible':'Draft · Hidden from learners'}</span>
+          </span>
           <span className="slm-media-editor-actions">
            <button type="button" disabled={busy} onClick={()=>publish('lms_lessons',l.id,
             l.publication_state==='published'?'draft':'published')}>

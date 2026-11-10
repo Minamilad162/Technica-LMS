@@ -82,3 +82,8 @@
 .lj-lesson.locked>button:hover{background:#f4f9f9;color:#497c7a}
 .lj-lesson.locked>button:focus-visible{outline:2px solid #178d83;outline-offset:-2px}
 @media(max-width:580px){.lj-card-buttons{width:100%;justify-content:stretch}.lj-card-buttons button{flex:1}}
+
+.lj-lesson-awaiting-release{padding:43px 24px;gap:12px}
+.lj-lesson-awaiting-release>svg{color:#118b82}
+.lj-lesson-awaiting-release b{color:#214e59;font-size:19px}
+.lj-lesson-awaiting-release .lj-quiet{display:inline-flex;align-items:center;justify-content:center;gap:7px;margin-top:4px;border:1px solid #b6dcd6;border-radius:10px;padding:9px 13px;color:#0a7774;font-weight:750;cursor:pointer}

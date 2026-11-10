@@ -191,6 +191,9 @@ jobs:
       - name: P62 content-fingerprint Lesson media duplicate detection and secure finalization
         run: npm run test:p62
 
+      - name: P63 learner-visible Lesson publishing and subscription diagnostics
+        run: npm run test:p63
+
       - name: P56 authorized All Courses Practice and adaptive regression contract
         run: npm run test:p56
 
