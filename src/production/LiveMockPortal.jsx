@@ -1,3 +1,4 @@
+import PremiumLoading from '../components/PremiumLoading.jsx';
 import React,{useEffect,useState} from 'react';
 import {useNavigate} from 'react-router-dom';
 import {ArrowLeft,LockKeyhole,RefreshCw,ShieldCheck,TriangleAlert} from 'lucide-react';
@@ -42,7 +43,7 @@ export default function LiveMockPortal(){
    <p>Exactly 200 questions selected and officially reserved from the ASP Question Bank, with a fixed 5-hour limit.</p>
   </header>
   <div className="live-learning-security"><ShieldCheck size={17}/> The official reserved 200-question ASP form is fixed and excluded from regular Practice. Timer and grading stay on the server.</div>
-  {loading?<div className="live-learning-empty" role="status">Verifying exam entitlement and private Mock form…</div>:
+  {loading?<PremiumLoading variant="page"/>:
    error?<div className="live-learning-empty" role="alert"><TriangleAlert size={21}/><b>Mock unavailable</b>
      <p>{error}</p><button type="button" className="btn" onClick={()=>setReload(n=>n+1)}><RefreshCw size={16}/> Retry</button>
     </div>:

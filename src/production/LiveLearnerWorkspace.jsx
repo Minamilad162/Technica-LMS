@@ -1,3 +1,4 @@
+import PremiumLoading from '../components/PremiumLoading.jsx';
 import React,{useEffect,useRef,useState} from 'react';
 import {ArrowLeft,ArrowRight,BookOpen,BookOpenCheck,CheckCircle2,ChevronDown,ChevronRight,
  ClipboardCheck,GraduationCap,Layers3,LockKeyhole,LogOut,PlayCircle,RefreshCw,
@@ -124,7 +125,7 @@ export default function LiveLearnerWorkspace({db,user,onSignOut,embedded=false,
     {!!enrolled.length&&<label className="lj-picker">Course<select value={historyId} onChange={e=>setHistoryId(e.target.value)}>
       {enrolled.map(c=><option value={c.id} key={c.id}>{c.title}</option>)}</select></label>}
     {!enrolled.length?<div className="lj-empty">Your practice history will appear after your first completed session.</div>:
-     reportLoading?<div className="lj-empty" role="status">Loading your verified results…</div>:
+     reportLoading?<PremiumLoading variant="compact"/>:
      reportError?<div className="lj-empty" role="alert">{reportError}</div>:
      report?<><div className="lj-history-stats"><div><small>Completed practice sessions</small><strong>{report.practice.attempts}</strong></div>
       <div><small>Answer accuracy</small><strong>{report.practice.answerAccuracyPercent===null?'—':report.practice.answerAccuracyPercent+'%'}</strong></div>
@@ -171,8 +172,8 @@ export default function LiveLearnerWorkspace({db,user,onSignOut,embedded=false,
    <button type="button" className="lj-quiet" disabled={loading} onClick={refresh}><RefreshCw size={16}/> Refresh</button>
   </div>}
   {error&&<p className="lj-error" role="alert">{error}</p>}
-  <React.Suspense fallback={<div className="lj-empty" role="status">Preparing this section…</div>}>
-  {screen==="qualifications"?<QualificationsWorkspace/>:loading?<div className="lj-empty" role="status">Loading your published learning catalog…</div>:
+  <React.Suspense fallback={<PremiumLoading variant="page"/>}>
+  {screen==="qualifications"?<QualificationsWorkspace/>:loading?<PremiumLoading variant="page"/>:
    !catalog?<div className="lj-empty">Course catalog is unavailable. Check your LMS session.</div>:
    screen==='courses'?<section className="lj-grid" aria-label="Published courses">
     {catalog.courses.map(c=><LearnerCourseCard key={c.id} course={c} db={db}
@@ -201,7 +202,7 @@ export default function LiveLearnerWorkspace({db,user,onSignOut,embedded=false,
      onEnroll={()=>startCheckout(chosen.id)}
      onContinue={()=>syllabusRef.current?.scrollIntoView({behavior:'smooth',block:'start'})}/>
     <div className="lcc-syllabus" ref={syllabusRef}>
-     {outlineLoading?<div className="lj-empty" role="status">Loading published lessons…</div>:
+     {outlineLoading?<PremiumLoading variant="compact"/>:
       outlineError?<div className="lj-empty" role="alert"><LockKeyhole size={20}/>{outlineError}</div>:
       !outline.length?<div className="lj-empty lj-lesson-awaiting-release" role="status">
         <BookOpen size={25}/>

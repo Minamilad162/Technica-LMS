@@ -1,3 +1,4 @@
+import PremiumLoading from '../components/PremiumLoading.jsx';
 import React,{useEffect,useState} from 'react';
 import {useNavigate,useSearchParams} from 'react-router-dom';
 import {ArrowLeft,BookOpen,LockKeyhole,RefreshCw,ShieldCheck,TriangleAlert} from 'lucide-react';
@@ -56,7 +57,7 @@ export default function LivePracticePortal(){
   <div className="live-learning-breadcrumb"><button type="button" onClick={()=>navigate('/practice')}><ArrowLeft size={16}/> Practice Center</button></div>
   <header className="live-learning-header"><span className="eyebrow">PRACTICE CENTER</span><h1>Live Practice &amp; Level Up</h1><p>Real authorized questions are selected and graded on the server. Adaptive difficulty follows your correct answers proportionally to the session length.</p></header>
   <div className="live-learning-security"><ShieldCheck size={16}/> Your answers and results are saved securely.</div>
-  {loading?<div className="live-learning-empty" role="status">Checking verified Supabase courses…</div>:
+  {loading?<PremiumLoading variant="page"/>:
    error?<div className="live-learning-empty" role="alert"><TriangleAlert size={23}/><b>Secure Practice unavailable</b><p>{error}</p><button className="btn" onClick={()=>setRevision(n=>n+1)}><RefreshCw size={16}/> Retry</button></div>:
    !catalog.courses.length?<div className="live-learning-empty">No authorized courses are visible in the live database yet.</div>:
    <><div className="live-authoring-course-selector"><label htmlFor="secure-practice-course">Course</label>
@@ -65,7 +66,7 @@ export default function LivePracticePortal(){
      {catalog.courses.map(c=><option key={c.id} value={c.id}>{c.title} · {c.publication_state}</option>)}
     </select></div>
     {!access?<div className="live-learning-empty"><LockKeyhole size={22}/><b>Practice access unavailable</b><p>Course access is not ready yet. Refresh the page or contact your LMS administrator.</p></div>:
-      <>{domainLoading&&<p role="status" className="live-learning-note">Loading verified course domains…</p>}
+      <>{domainLoading&&<PremiumLoading variant="compact"/>}
        <LivePractice key={catalog.user.id+course.id+requestedMode} db={db} user={catalog.user} course={course} domains={domains} access={access} defaultMode={requestedMode}/></>}
    </>}
  </main>;

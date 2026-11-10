@@ -1,3 +1,4 @@
+import PremiumLoading from '../components/PremiumLoading.jsx';
 import React,{useCallback,useEffect,useState} from 'react';
 import {useNavigate,useSearchParams} from 'react-router-dom';
 import {AlertCircle,ArrowLeft,BookOpen,CheckCircle2,ChevronDown,ChevronRight,Database,FileText,Layers3,Pencil,Plus,RefreshCw,ShieldCheck} from 'lucide-react';
@@ -85,10 +86,11 @@ export default function LiveCourseBuilder(){
   }catch(e){setError(e.message||'Supabase rejected the operation. No local fallback was used.');}
   finally{setSaving(false);}
  };
- if(status!=='ready')return <div className="live-authoring-container"><div className="live-authoring-state" role={status==='error'?'alert':'status'}>
-  <Database size={27}/><h2>{status==='checking'?'Verifying Supabase Admin…':'Verified Admin access required'}</h2>
-  <p>{message||'Checking your active role and database access.'}</p>
-  {status==='error'&&<button className="btn" onClick={retry}><RefreshCw size={16}/> Retry</button>}
+ if(status==='checking')return <PremiumLoading variant="page"/>;
+ if(status!=='ready')return <div className="live-authoring-container"><div className="live-authoring-state" role="alert">
+  <Database size={27}/><h2>Admin access unavailable</h2>
+  <p>{message||'Your account cannot open this workspace.'}</p>
+  <button className="btn" onClick={retry}><RefreshCw size={16}/> Try again</button>
  </div></div>;
  const counts=countTree(tree);
  return <div className="page-enter builder-page live-authoring-container">
@@ -114,7 +116,7 @@ export default function LiveCourseBuilder(){
   </div>
   {error&&!editor&&<div className="live-authoring-alert" role="alert"><AlertCircle size={17}/>{error}</div>}
   {notice&&<div className="live-authoring-success" role="status"><CheckCircle2 size={17}/>{notice}</div>}
-  {loading?<div className="white-panel admin-empty" role="status">Loading real course catalog…</div>:
+  {loading?<PremiumLoading variant="page"/>:
    !course?<div className="white-panel admin-empty"><h3>{requested?'Requested course not found in Supabase.':'No live courses exist yet.'}</h3>
     <p>The older Demo course selection does not create a database course. Create a draft in Live Courses first.</p>
     <button className="btn" onClick={()=>navigate('/courses')}><ArrowLeft size={16}/> Open Live Courses</button>
@@ -125,7 +127,7 @@ export default function LiveCourseBuilder(){
      <button type="button" className="btn" disabled={loadingTree||loadedCourse!==courseId||saving} onClick={()=>openNode('domain')}><Plus size={17}/> Add domain</button>
     </div>
     <div className="hierarchy-counts"><span>{counts.domains} domains</span><span>{counts.topics} topics</span><span>{counts.lessons} lessons</span></div>
-    {loadingTree||loadedCourse!==courseId?<div className="hierarchy-empty" role="status">Loading course structure from Supabase…</div>:
+    {loadingTree||loadedCourse!==courseId?<PremiumLoading variant="compact"/>:
      !tree.length?<div className="hierarchy-empty"><BookOpen size={25}/><strong>No domains yet</strong><p>Create a Domain, add Topics and Lessons inside it. No Demo records will be copied automatically.</p></div>:null}
     {loadedCourse===courseId&&<div className="hierarchy-list">{tree.map((domain,di)=><article className="hierarchy-domain" key={domain.id}>
      <div className="hierarchy-domain-head">

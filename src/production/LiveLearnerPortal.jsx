@@ -1,3 +1,4 @@
+import PremiumLoading from '../components/PremiumLoading.jsx';
 import React,{useEffect,useState} from 'react';
 import {Link,useNavigate,useParams} from 'react-router-dom';
 import {getSupabaseClient} from '../lib/supabase.js';
@@ -22,8 +23,7 @@ export default function LiveLearnerPortal({initialScreen='courses'}){
    error:'Could not verify your Supabase session.'});});
   return()=>{alive=false;};
  },[]);
- if(state.loading)return <main className="live-learning"><div className="live-learning-empty" role="status">
-  Verifying your Supabase learning account…</div></main>;
+ if(state.loading)return <PremiumLoading variant="page"/>;
  if(state.error)return <main className="live-learning"><div className="live-learning-empty" role="alert">
   <strong>Secure learning unavailable</strong><p>{state.error}</p>
   <Link className="btn" to="/login">Sign in</Link></div></main>;

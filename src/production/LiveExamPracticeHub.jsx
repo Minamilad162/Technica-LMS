@@ -1,3 +1,4 @@
+import PremiumLoading from '../components/PremiumLoading.jsx';
 import React,{useEffect,useState} from 'react';
 import {useNavigate,useSearchParams} from 'react-router-dom';
 import {BookOpenCheck,CalendarClock,CheckCircle2,Clock3,GraduationCap,
@@ -127,12 +128,12 @@ export default function LiveExamPracticeHub(){
     </div>
     <span className="lep-section-mark">{tab==='practice'?<SlidersHorizontal size={26}/>:tab==='history'?<History size={26}/>:<ShieldCheck size={26}/>}</span>
    </div>
-   {loading?<div className="live-learning-empty" role="status">Verifying your account and courses…</div>:
+   {loading?<PremiumLoading variant="page"/>:
     error?<div className="live-learning-empty" role="alert"><TriangleAlert size={24}/>
      <b>Exam preparation unavailable</b><p>{error}</p>
      <button type="button" className="btn" onClick={()=>setRevision(v=>v+1)}>
       <RefreshCw size={16}/> Retry</button></div>:
-    tab==='history'?<React.Suspense fallback={<div className="live-learning-empty" role="status">Loading your practice results…</div>}>
+    tab==='history'?<React.Suspense fallback={<PremiumLoading variant="compact"/>}>
      <LiveLearnerWorkspace db={db} user={catalog.user} embedded initialScreen="history"/>
     </React.Suspense>:
     tab==='practice'?<>
@@ -153,7 +154,7 @@ export default function LiveExamPracticeHub(){
        <p>Course access is not available yet. Refresh the page or contact the LMS administrator.</p>
        <button type="button" className="btn" onClick={()=>navigate('/subscription-plans')}>View Subscription Plans</button>
       </div>:<>
-       {domainLoading&&<p className="live-learning-note" role="status">Loading course domains…</p>}
+       {domainLoading&&<PremiumLoading variant="compact"/>}
        {domainError&&<p className="live-learning-note" role="alert">Some domain options are unavailable: {domainError}</p>}
        <LivePractice key={catalog.user.id+course.id} db={db} user={catalog.user}
         course={course} domains={domains} access={practiceAccess} defaultMode="quick10"/>

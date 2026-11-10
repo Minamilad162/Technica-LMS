@@ -1,3 +1,4 @@
+import PremiumLoading from './components/PremiumLoading.jsx';
 import React,{useEffect,useState}from'react';import{Routes,Route,Navigate,useLocation}from'react-router-dom';
 import Layout from './components/Layout';
 import {useDemo} from './lib/store';
@@ -40,7 +41,7 @@ const CoursesPage=React.lazy(()=>import('./pages/CoursesPage'));
 const legacyBrowserQa=import.meta.env.DEV&&import.meta.env.VITE_LOCAL_QA_DEMO==='1';
 function LegacyPreviewWarning({children}){return <><section role="note" style={{margin:'16px 24px',padding:12,border:'1px solid #e5d5ae',borderRadius:10,background:'#fff9e8',fontSize:12,color:'#745a29'}}><strong>Local Demo preview only.</strong> Changes here are saved in this browser, NOT Supabase. Return to <a href="#/courses">Live Courses</a> or <a href="#/builder">Live Course Builder</a> to edit the database.</section>{children}</>;}
 function AdminOnly({children}){const {state}=useDemo();return getAuthSession()?.role==='admin'&&state.role==='admin'?children:<Navigate to='/home' replace/>}
-function RoutePage({children,standalone=false}){return <><MotionSystem/><Layout standalone={standalone} onLogout={()=>{window.dispatchEvent(new Event('technica-demo-logout'))}}><React.Suspense fallback={<div className="route-chunk-fallback" role="status">Loading the selected page…</div>}>{children}</React.Suspense></Layout></>}
+function RoutePage({children,standalone=false}){return <><MotionSystem/><Layout standalone={standalone} onLogout={()=>{window.dispatchEvent(new Event('technica-demo-logout'))}}><React.Suspense fallback={<PremiumLoading variant="page"/>}>{children}</React.Suspense></Layout></>}
 export default function App(){
  const l=useLocation(),{update}=useDemo();
  const legacyPreview=legacyBrowserQa; // Private historical QA never opens from a production query parameter.
@@ -82,7 +83,7 @@ export default function App(){
   void check();
   return()=>{alive=false;window.clearInterval(timer);window.removeEventListener('focus',check);document.removeEventListener('visibilitychange',onVisible);};
  },[auth?.id]);
- if(authLoading)return <div className="auth-page" role="status"><div className="auth-form-card" style={{maxWidth:420,textAlign:'center',padding:30}}>Verifying your Technica LMS session…</div></div>;
+ if(authLoading)return <PremiumLoading variant="fullscreen"/>;
 
  if(!auth){return <Routes>
  <Route path="/login" element={<><MotionSystem/><AuthPage mode="login" onAuthenticated={setAuth} initialError={authError}/></>}/>

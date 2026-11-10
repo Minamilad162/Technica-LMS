@@ -1,3 +1,4 @@
+import PremiumLoading from '../components/PremiumLoading.jsx';
 import React,{useEffect,useMemo,useState} from 'react';
 import {useNavigate,useParams,useSearchParams} from 'react-router-dom';
 import {AlertTriangle,ArrowLeft,BookOpen,Eye,LockKeyhole,RefreshCw,ShieldCheck} from 'lucide-react';
@@ -38,12 +39,13 @@ export default function AdminCoursePreview(){
   next.delete('lesson');
   setParams(next);
  };
- if(status!=='ready')return <div className="acp-access" role="status">
-  <LockKeyhole size={30}/><h2>Admin Course Preview</h2>
-  <p>{status==='checking'?'Verifying your real LMS Admin permissions…':message||'Admin access required.'}</p>
-  {status==='error'&&<button type="button" onClick={retry}>Retry</button>}
+ if(status==='checking')return <PremiumLoading variant="page"/>;
+ if(status!=='ready')return <div className="acp-access" role="alert">
+  <LockKeyhole size={30}/><h2>Admin Course Preview unavailable</h2>
+  <p>{message||'Your account cannot open this workspace.'}</p>
+  <button type="button" onClick={retry}>Try again</button>
  </div>;
- if(loading)return <div className="acp-access" role="status"><RefreshCw size={26}/>Loading the latest saved Course…</div>;
+ if(loading)return <PremiumLoading variant="page"/>;
  if(error||!course)return <div className="acp-access" role="alert"><AlertTriangle size={27}/>
   <h2>Preview unavailable</h2><p>{error||'Course not found.'}</p>
   <button type="button" onClick={()=>setReload(n=>n+1)}>Try again</button></div>;

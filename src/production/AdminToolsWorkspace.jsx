@@ -1,3 +1,4 @@
+import PremiumLoading from '../components/PremiumLoading.jsx';
 import React,{useCallback,useEffect,useState} from 'react';
 import {Activity,AlertTriangle,ArrowLeft,BookOpen,CheckCircle2,ClipboardCheck,FileQuestion,GraduationCap,Layers,LockKeyhole,RefreshCw,ShieldCheck,Users} from 'lucide-react';
 import {verifiedLiveAdmin,liveCourses} from './liveAuthoringApi.js';
@@ -33,7 +34,7 @@ export function AdminSystemPanel({db}){
    <p>Verified Supabase checks, staging evidence and outstanding launch gates.</p></div>
    <button className="at-outline" onClick={()=>setRevision(n=>n+1)}><RefreshCw size={15}/> Recheck</button></div>
   <div className="at-disclaimer"><LockKeyhole size={17}/> Production decision: <b>NO-GO</b>. Passing code checks do not replace content reviews, device QA, financial reconciliation or explicit release approval.</div>
-  {loading?<div className="at-empty">Checking runtime capabilities…</div>:
+  {loading?<PremiumLoading variant="compact"/>:
    error?<div className="at-error">{error}</div>:
    <div className="at-surface"><div className="at-system-stats">
     <span><b>{stats.passed}</b> passed</span><span><b>{stats.blocked}</b> blocked</span><span><b>{stats.pending}</b> pending</span></div>
@@ -80,10 +81,10 @@ export default function AdminToolsWorkspace({db,initialTab='overview',onExit,onT
   setQuestionBankDirty(false);setTab(id);onTabChange?.(id);
  };
  const asp=courses.find(c=>c.slug==='asp');
- if(state!=='ready')return <section className="at-access-state"><LockKeyhole size={34}/>
-  <h2>{state==='checking'?'Verifying your Admin account…':'Admin Tools access restricted'}</h2>
-  <p>{state==='blocked'?error:'Checking your live Supabase JWT, active LMS profile and assigned Admin role.'}</p>
-  {state==='blocked'&&<button className="at-primary" onClick={()=>setRevision(n=>n+1)}><RefreshCw size={16}/> Retry verification</button>}
+ if(state==='checking')return <PremiumLoading variant="page"/>;
+ if(state!=='ready')return <section className="at-access-state" role="alert"><LockKeyhole size={34}/>
+  <h2>Admin Tools access restricted</h2><p>{error||'Your account cannot open this workspace.'}</p>
+  <button className="at-primary" onClick={()=>setRevision(n=>n+1)}><RefreshCw size={16}/> Try again</button>
  </section>;
  return <div className="admin-tools-workspace">
   <header className={"at-hero "+(tab==='questions'?"p30-hero":"")}>
@@ -105,7 +106,7 @@ export default function AdminToolsWorkspace({db,initialTab='overview',onExit,onT
   <section id={'at-panel-'+tab} role="tabpanel" aria-labelledby={'at-tab-'+tab} className="at-panel">
    {tab==='overview'&&<AdminDashboardPanel db={db} onNavigate={change}/>}
    {tab==='courses'&&<AdminCoursesPanel db={db}/>}
-   {tab==='qualifications'&&<React.Suspense fallback={<div className="at-empty">Loading qualifications…</div>}><QualificationsWorkspace admin/></React.Suspense>}
+   {tab==='qualifications'&&<React.Suspense fallback={<PremiumLoading variant="compact"/>}><QualificationsWorkspace admin/></React.Suspense>}
    {tab==='questions'&&<AdminCourseBank db={db} courses={courses} asp={asp} mode="bank"
      coursesLoading={coursesLoading} coursesError={coursesError} onDirtyChange={bankDirtyChanged}
      onRefreshCourses={()=>setCatalogRevision(v=>v+1)} onGoToCourses={()=>change('courses')}/>}
@@ -113,7 +114,7 @@ export default function AdminToolsWorkspace({db,initialTab='overview',onExit,onT
      coursesLoading={coursesLoading} coursesError={coursesError} onDirtyChange={bankDirtyChanged}
      onRefreshCourses={()=>setCatalogRevision(v=>v+1)} onGoToCourses={()=>change('courses')}/>} 
    {tab==='users'&&<AdminUsersPanel db={db}/>}
-   {tab==='subscriptions'&&<React.Suspense fallback={<div className="at-empty">Loading subscription management…</div>}><AdminSubscriptionsPanel db={db}/></React.Suspense>}
+   {tab==='subscriptions'&&<React.Suspense fallback={<PremiumLoading variant="compact"/>}><AdminSubscriptionsPanel db={db}/></React.Suspense>}
    {tab==='system'&&<AdminSystemPanel db={db}/>}
   </section>
   <footer className="at-footer">Technica Consult LMS · Admin Tools · Actual Supabase records only · No demo data or fabricated payment amounts</footer>

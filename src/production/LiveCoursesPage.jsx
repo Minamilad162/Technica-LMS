@@ -1,3 +1,4 @@
+import PremiumLoading from '../components/PremiumLoading.jsx';
 import React,{useCallback,useEffect,useState} from 'react';
 import {useNavigate} from 'react-router-dom';
 import {AlertCircle,ArrowRight,BookOpen,CheckCircle2,ChevronDown,ChevronRight,Database,Layers3,Plus,RefreshCw,Pencil,ShieldCheck} from 'lucide-react';
@@ -46,10 +47,11 @@ export default function LiveCoursesPage(){
   }catch(err){setError(err.message||'The change could not be saved.');}
   finally{setSaving(false);}
  };
- if(status!=='ready')return <div className="live-authoring-container"><div className="live-authoring-state" role={status==='error'?'alert':'status'}>
-  <Database size={27}/><h2>{status==='checking'?'Verifying live Admin access…':'Supabase Admin connection required'}</h2>
-  <p>{message||'Checking your authenticated profile and server-issued Admin role.'}</p>
-  {status==='error'&&<button className="btn" onClick={retry}><RefreshCw size={16}/> Retry verification</button>}
+ if(status==='checking')return <PremiumLoading variant="page"/>;
+ if(status!=='ready')return <div className="live-authoring-container"><div className="live-authoring-state" role="alert">
+  <Database size={27}/><h2>Admin access unavailable</h2>
+  <p>{message||'Your account cannot open this workspace.'}</p>
+  <button className="btn" onClick={retry}><RefreshCw size={16}/> Try again</button>
  </div></div>;
  const visible=courses.filter(c=>filter==='all'||c.publication_state===filter);
  return <div className="page-enter admin-courses-page live-authoring-container">
@@ -61,7 +63,7 @@ export default function LiveCoursesPage(){
   {notice&&<div className="live-authoring-success" role="status"><CheckCircle2 size={17}/>{notice}</div>}
   <div className="admin-course-filters" role="group" aria-label="Filter live courses">{[['all','All courses'],['draft','Drafts'],['published','Published'],['archived','Archived']].map(([id,label])=>
    <button type="button" className={id===filter?'active':''} onClick={()=>setFilter(id)} key={id}>{label} <span>{id==='all'?courses.length:courses.filter(c=>c.publication_state===id).length}</span></button>)}</div>
-  {loading?<div className="white-panel admin-empty" role="status">Loading courses from Supabase…</div>:
+  {loading?<PremiumLoading variant="page"/>:
    <div className="admin-course-list">{visible.map(course=>{
     const isOpen=expanded===course.id;
     const detail=counts?.courseId===course.id?counts:null;
