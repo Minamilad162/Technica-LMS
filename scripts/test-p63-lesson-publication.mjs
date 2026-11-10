@@ -13,7 +13,7 @@ assert.deepEqual(summarizeLessonPublication([{id:d,topics:[{id:t,lessons:[
 assert.deepEqual(summarizeLessonPublication([]),{total:0,published:0,draft:0,draftIds:[]});
 assert.throws(()=>summarizeLessonPublication([{topics:[{lessons:[{id:a,publication_state:'published'},
  {id:a,publication_state:'draft'}]}]}]),/Invalid Lesson/);
-const active={status:'active',ends_at:new Date(Date.now()+92*86400000).toISOString()};
+const active={id:'50000000-0000-0000-0000-000000000001',status:'active',ends_at:new Date(Date.now()+92*86400000).toISOString()};
 assert.equal(isFullCourseEnrolled([],c,active),true);
 assert.deepEqual(nestPublishedOutline([],c),[]);
 const admin=read('src/production/AdminToolsPanels.jsx');
