@@ -13,7 +13,11 @@ const accepted={
  video:{'video/mp4':['mp4'],'video/webm':['webm']}
 };
 const uuid=/^[\da-f]{8}-[\da-f]{4}-[\da-f]{4}-[\da-f]{4}-[\da-f]{12}$/i;
-const configuredOrigins=(Deno.env.get('TECHNICA_MEDIA_ALLOWED_ORIGINS')||'')
+// One exact verified origin is permitted until the operator sets the configured
+// allowlist for the new custom domain in Supabase → Edge Function Secrets.
+// NEVER use a wildcard or reflect arbitrary browser Origin values.
+const TEMPORARY_LMS_ORIGIN='https://technica-lms.minamilad939.workers.dev';
+const configuredOrigins=(Deno.env.get('TECHNICA_MEDIA_ALLOWED_ORIGINS')||TEMPORARY_LMS_ORIGIN)
  .split(',').map(x=>x.trim()).filter(x=>/^https:\/\/[^/]+$/.test(x)||/^http:\/\/localhost:\d+$/.test(x));
 const supabaseUrl=Deno.env.get('SUPABASE_URL')||'';
 // Hosted Supabase now injects named-key JSON dictionaries. Prefer those over
