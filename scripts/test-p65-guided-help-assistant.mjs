@@ -1,0 +1,50 @@
+import assert from 'node:assert/strict';
+import {readFileSync} from 'node:fs';
+import {TECHNICA_FAQS,visibleTechnicaFaqs,TECHNICA_FAQ_CATEGORIES,searchTechnicaFaqs,suggestTechnicaFaqs} from '../src/components/technicaHelpFaq.js';
+const read=p=>readFileSync(p,'utf8');
+assert.equal(TECHNICA_FAQS.length,20,'exactly twenty approved FAQ questions');
+assert.equal(new Set(TECHNICA_FAQS.map(q=>q.id)).size,20,'stable unique IDs');
+for(const f of TECHNICA_FAQS){
+ assert.ok(typeof f.question==='string'&&f.question.length>=12&&typeof f.answer==='string'&&f.answer.length>=55,f.id);
+ assert.ok(TECHNICA_FAQ_CATEGORIES.includes(f.category),f.id);
+ assert.ok(f.audience===undefined||f.audience==='admin',f.id);
+ if(f.action){
+  assert.ok(f.action.path.startsWith('/')&&!f.action.path.startsWith('//'),f.id);
+  assert.ok(!f.action.path.includes('http')&&!f.action.path.includes('javascript:'),f.id);
+  assert.ok(typeof f.action.label==='string',f.id);
+ }
+}
+const learner=visibleTechnicaFaqs(false),admin=visibleTechnicaFaqs(true);
+assert.equal(learner.length,17);assert.equal(admin.length,20);
+assert.ok(learner.every(f=>f.audience!=='admin'));
+assert.equal(searchTechnicaFaqs(learner,'Kill Mistakes').length,1);
+assert.equal(searchTechnicaFaqs(learner,'forgot password').length,1);
+assert.ok(suggestTechnicaFaqs(learner,'video not playing').length>=1);
+assert.deepEqual(searchTechnicaFaqs(learner,'','Admin'),[]);
+assert.equal(searchTechnicaFaqs(admin,'','Admin').length,3);
+assert.equal(searchTechnicaFaqs(admin,'','All').length,20);
+const ui=read('src/components/TechnicaAssistant.jsx');
+const layout=read('src/components/Layout.jsx');
+const styles=read('src/components/technicaAssistant.css');
+assert.match(ui,/role="dialog" aria-modal="false"/);
+assert.match(ui,/aria-labelledby="technica-assistant-title"/);
+assert.match(ui,/document\.addEventListener\('keydown',escape\)/);
+assert.match(ui,/aria-label="Close assistant"/);
+assert.match(ui,/aria-label="Search frequently asked questions"/);
+assert.match(ui,/onSubmit=\{submit\}/);
+assert.match(ui,/role="group" aria-label="Help topic filters"/);
+assert.match(ui,/No matching questions/);
+assert.match(ui,/verified FAQ library rather than live AI chat/);
+assert.match(ui,/onNavigate\(path\)/);
+assert.match(ui,/visibleTechnicaFaqs\(isAdmin\)/);
+assert.match(layout,/import TechnicaAssistant from '\.\/TechnicaAssistant\.jsx'/);
+assert.match(layout,/setAssistantOpen\(true\);setSideOpen\(false\)/);
+assert.match(layout,/mobile-more[\s\S]*Help centre/);
+assert.match(layout,/<TechnicaAssistant open=\{assistantOpen\} onOpenChange=\{setAssistantOpen\} isAdmin=\{isAdmin\} onNavigate=\{nav\}\/>/);
+assert.match(layout,/!standalone&&<TechnicaAssistant/);
+assert.match(styles,/position:fixed/);
+assert.match(styles,/max-width:700px/);
+assert.match(styles,/safe-area-inset-bottom/);
+assert.match(styles,/prefers-reduced-motion:reduce/);
+assert.doesNotMatch(ui,/fetch\(|\.from\('lms_/);
+console.log('P65 Technica Assistant FAQ, roles, accessibility, UX & no-AI contracts PASS');

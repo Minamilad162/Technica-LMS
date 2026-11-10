@@ -197,6 +197,9 @@ jobs:
       - name: P64 premium loading without developer-facing auth and database status messages
         run: npm run test:p64
 
+      - name: P65 premium role-aware guided Help centre assistant and 20 verified FAQ answers
+        run: npm run test:p65
+
       - name: P56 authorized All Courses Practice and adaptive regression contract
         run: npm run test:p56
 
