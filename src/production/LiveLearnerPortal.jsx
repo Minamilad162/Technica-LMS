@@ -36,5 +36,6 @@ export default function LiveLearnerPortal({initialScreen='courses'}){
   onLearningRoute={()=>navigate('/my-learning')}
   onPracticeRoute={()=>navigate('/assessments?tab=practice')}
   onHistoryRoute={()=>navigate('/assessments?tab=history')}
+  onMistakesRoute={()=>navigate('/kill-mistakes')}
   onSignOut={()=>{void signOutPortal();}}/>;
 }

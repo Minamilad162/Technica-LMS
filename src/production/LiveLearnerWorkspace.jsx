@@ -1,7 +1,8 @@
 import React,{useEffect,useRef,useState} from 'react';
 import {ArrowLeft,ArrowRight,BookOpen,BookOpenCheck,CheckCircle2,ChevronDown,ChevronRight,
  ClipboardCheck,GraduationCap,Layers3,LockKeyhole,LogOut,PlayCircle,RefreshCw,
- ShieldCheck,ShoppingBag,Target,X} from 'lucide-react';
+ ShieldCheck,ShoppingBag,Target,Flame,X} from 'lucide-react';
+import {useNavigate} from 'react-router-dom';
 import {getLearnerProgress} from './learnerProgressApi.js';
 const CourseLessonExplorer=React.lazy(()=>import('./CourseLessonExplorer.jsx'));
 const LivePractice=React.lazy(()=>import('./LivePractice.jsx'));
@@ -24,14 +25,16 @@ const nav=[
  {id:'learning',label:'My Learning',icon:BookOpenCheck,group:'Learning'},
  {id:'qualifications',label:'Qualifications',icon:GraduationCap,group:'Learning'},
  {id:'subscription',label:'Subscription',icon:ShoppingBag,group:'Learning'},
- {id:'practice',label:'Mock Exam & Practice',icon:Target,group:'Exam Preparation'}
+ {id:'practice',label:'Mock Exam & Practice',icon:Target,group:'Exam Preparation'},
+ {id:'mistakes',label:'Kill Mistakes',icon:Flame,group:'Exam Preparation'}
 ];
 const formatDate=d=>d&&Number.isFinite(Date.parse(d))?new Date(d).toLocaleDateString('en-GB'):'—';
 const modeLabel={quick10:'Quick 10',timed25:'Timed Quiz',custom:'Custom',domain:'Domain Practice',
  levelup:'Level Up',asp_mock_200:'ASP Mock'};
 export default function LiveLearnerWorkspace({db,user,onSignOut,embedded=false,
  initialScreen='courses',initialCourseId='',onCheckoutRoute=null,onCourseRoute=null,onLearningRoute=null,
- onPracticeRoute=null,onHistoryRoute=null,onSubscriptionRoute=null}){
+ onPracticeRoute=null,onHistoryRoute=null,onSubscriptionRoute=null,onMistakesRoute=null}){
+ const navigate=useNavigate();
  const syllabusRef=useRef(null);
  const [screen,setScreen]=useState(initialScreen),[catalog,setCatalog]=useState(null),
   [loading,setLoading]=useState(true),[error,setError]=useState(''),[revision,setRevision]=useState(0),
@@ -104,6 +107,7 @@ export default function LiveLearnerWorkspace({db,user,onSignOut,embedded=false,
   go('learning');
  };
  const go=page=>{
+  if(page==='mistakes'){if(onMistakesRoute)onMistakesRoute();else navigate('/kill-mistakes');return;}
   if(page==='subscription'&&embedded&&onSubscriptionRoute){onSubscriptionRoute();return;}
   setScreen(page);setActiveLesson(null);
   if(page!=='course'&&page!=='checkout')setSelectedId('');

@@ -91,7 +91,8 @@
     "test:p52": "node scripts/test-p52-admin-user-controls.mjs",
     "test:p54": "node scripts/test-p54-notifications.mjs",
     "test:p56": "node scripts/test-p56-all-courses-practice.mjs",
-    "test:p57": "node scripts/test-p57-signup-google.mjs"
+    "test:p57": "node scripts/test-p57-signup-google.mjs",
+    "test:p58": "node scripts/test-p58-kill-mistakes.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.58.0",

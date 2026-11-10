@@ -28,6 +28,7 @@ const LiveReleaseReadiness=React.lazy(()=>import('./production/LiveReleaseReadin
 const LiveExamPracticeHub=React.lazy(()=>import('./production/LiveExamPracticeHub.jsx'));
 const LiveMyProfile=React.lazy(()=>import('./production/LiveMyProfile.jsx'));
 const NotificationsPage=React.lazy(()=>import('./production/NotificationsPage.jsx'));
+const KillMistakesPage=React.lazy(()=>import('./production/KillMistakesPage.jsx'));
 const ResultsPage=React.lazy(()=>import('./pages/ResultsPage'));
 const PracticeResultsPage=React.lazy(()=>import('./pages/PracticeResultsPage'));
 const LearnersPage=React.lazy(()=>import('./pages/LearnersPage'));
@@ -105,6 +106,7 @@ export default function App(){
  <Route path="/my-practice" element={<Navigate to="/assessments?tab=history" replace/>}/>
  <Route path="/my-profile" element={<RoutePage><LiveMyProfile/></RoutePage>}/>
  <Route path="/notifications" element={<RoutePage><NotificationsPage/></RoutePage>}/>
+ <Route path="/kill-mistakes" element={<RoutePage><KillMistakesPage/></RoutePage>}/>
  <Route path="/my-progress" element={<RoutePage><LiveLearnerProgress/></RoutePage>}/>
  <Route path="/learning/course/:courseId" element={<RoutePage><LiveLearningCourse/></RoutePage>}/>
  <Route path="/learning/process-safety-foundations" element={legacyBrowserQa?<RoutePage><LegacyPreviewWarning><LearningPlayer/></LegacyPreviewWarning></RoutePage>:<Navigate to="/my-learning" replace/>}/>
