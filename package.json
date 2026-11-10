@@ -95,7 +95,8 @@
     "test:p58": "node scripts/test-p58-kill-mistakes.mjs",
     "test:p59": "node scripts/test-p59-admin-user-directory.mjs",
     "test:p60": "node scripts/test-p60-edge-gateway-deployment.mjs",
-    "test:p61": "node scripts/test-p61-protected-video-preview.mjs"
+    "test:p61": "node scripts/test-p61-protected-video-preview.mjs",
+    "test:p62": "node scripts/test-p62-video-dedup.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.58.0",

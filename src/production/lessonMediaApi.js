@@ -131,6 +131,7 @@ export async function uploadLessonMedia(db,lessonId,file,kind,onStage=()=>{}){
  const done=await mediaRpc(db,{action:'finish-upload',intentId:begin.intentId});
  if(!isLessonId(done.blockId)||done.kind!==kind)
   throw Error('Upload was not confirmed by the secure lesson service.');
+ if(done.duplicate===true)onStage('This exact file is already attached; no extra Lesson block was created.');
  return done;
 }
 export async function authorizeLessonMedia(db,lessonId,block){
@@ -152,7 +153,16 @@ export async function loadLessonContent(db,lessonId){
   .select('id,lesson_id,block_type,payload,position')
   .eq('lesson_id',lessonId).order('position',{ascending:true});
  if(error)throw Error('Lesson access denied or content unavailable.');
- return (data||[]).filter(x=>['text','heading','pdf','video'].includes(x.block_type))
+ // P62: the same Storage bytes might have been uploaded more than once on
+ // separate attempts. Hide only duplicates verified by the ACL-bound DB RPC;
+ // never guess from filename, since two different videos can share a name.
+ let duplicateIds=[];
+ if(typeof db.rpc==='function'){
+  const dedup=await db.rpc('lms_p62_duplicate_media_ids',{p_lesson_id:lessonId});
+  if(!dedup.error&&Array.isArray(dedup.data))duplicateIds=dedup.data;
+ }
+ const hidden=new Set(duplicateIds.filter(x=>isLessonId(x)));
+ return (data||[]).filter(x=>!hidden.has(x.id)&&['text','heading','pdf','video'].includes(x.block_type))
   .map(x=>({...x,payload:x.block_type==='pdf'||x.block_type==='video'?
    {title:String(x.payload?.title||x.block_type.toUpperCase()).slice(0,160)}:x.payload}));
 }

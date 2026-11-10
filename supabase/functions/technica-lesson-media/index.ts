@@ -129,7 +129,14 @@ Deno.serve(async(req)=>{
    p_intent_id:intent.id
   });
   if(finalError||!result?.blockId)return failure(400,'Storage file was not verified or finalized',origin);
-  return response(200,{blockId:result.blockId,kind:result.kind,title:result.title},origin);
+  if(result.duplicate===true&&typeof result.cleanupPath==='string'){
+   // P62: another finalized upload already owns the exact same media bytes.
+   // Remove only this new redundant object after the DB transaction commits.
+   const {error:cleanupError}=await admin.storage.from(BUCKET).remove([result.cleanupPath]);
+   if(cleanupError)console.warn('P62 duplicate object cleanup could not be completed');
+  }
+  return response(200,{blockId:result.blockId,kind:result.kind,title:result.title,
+   duplicate:result.duplicate===true},origin);
  }
  if(action==='view'){
   if(!okUuid(body.lessonId)||!okUuid(body.blockId))
