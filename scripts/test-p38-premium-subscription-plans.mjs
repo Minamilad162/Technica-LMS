@@ -36,7 +36,7 @@ for(const marker of [
  'onClick={()=>focusPlan(plan.id)}','focusedPlanId===plan.id',
  'sp-grid','sp-featured','sp-selected','sp-recommended',
  'sp-card-callout','sp-benefits','sp-feature-bar','sp-trust-row',
- 'sp-policy','sp-active','sp-pending','sp-alert','sp-loading',
+ 'sp-policy','sp-active','sp-pending','sp-alert',
  'displayPlanPrice(plan)','listSubscriptionPlans(db)','listMySubscriptionRequests(db,user.id)',
  'requestPlatformPlan(db,plan.id)','No payment was collected',
  'Admin-reviewed request','No card payment at this step',
@@ -46,6 +46,7 @@ for(const marker of [
  const value=marker==='Request this plan'?'Request this plan':marker;
  assert(ui.includes(value),'P38 Premium UI missing '+marker);
 }
+assert(ui.includes('<PremiumLoading variant="page"/>'),'P64 requires the shared premium loading display for subscription fetches.');
 assert(!ui.includes('$29.99')&&!ui.includes('$49.99')&&!ui.includes('$69.99'),'No hardcoded mockup price');
 assert(!ui.includes('Secure Payment'),'Do not claim online payments while offline Admin-reviewed');
 assert(!ui.includes('Most Popular'),'Do not claim popularity without product data');
