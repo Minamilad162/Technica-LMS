@@ -163,6 +163,7 @@ export default function ProtectedLessonViewer({db,lessonId,block,viewerId='',onW
   data.last=at;
  };
  const finishWatched=()=>{
+  setPlaying(false);
   const v=video.current,data=watched.current;
   if(data.reported||!v||!Number.isFinite(v.duration)||v.duration<=0)return;
   const duration=Math.ceil(v.duration),fraction=data.seconds.size/Math.max(1,duration);
@@ -219,7 +220,7 @@ export default function ProtectedLessonViewer({db,lessonId,block,viewerId='',onW
       disablePictureInPicture disableRemotePlayback
       controlsList="nodownload noplaybackrate noremoteplayback"
       onTimeUpdate={trackWatched} onPlay={playingVideo} onPause={pausedVideo}
-      onError={failedVideo} onEnded={()=>{finishWatched();setPlaying(false);}}
+      onError={failedVideo} onEnded={finishWatched}
       onSeeking={()=>{watched.current.last=null;}}
       onLoadedMetadata={restore} onContextMenu={e=>e.preventDefault()}/>:
      <iframe ref={pdf} key={url} title={'Protected PDF '+title}
