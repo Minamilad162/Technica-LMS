@@ -44,6 +44,12 @@ export function verifyUserList(x){
    x.users.length>Math.max(0,x.total-x.offset))throw Error('Invalid Admin learner directory.');
  const ids=new Set();
  for(const u of x.users){
+  if(('email' in u&&(typeof u.email!=='string'||!u.email.includes('@')))||
+   ('provider' in u&&!['google','email'].includes(u.provider))||
+   ('planStatus' in u&&!['free','active'].includes(u.planStatus))||
+   ('planName' in u&&u.planName!==null&&typeof u.planName!=='string')||
+   ('planEndsAt' in u&&u.planEndsAt!==null&&!validDate(u.planEndsAt)))
+   throw Error('Invalid verified identity or platform plan summary.');
   if(!uuid.test(u.id||'')||ids.has(u.id)||typeof u.name!=='string'||
    !['active','suspended'].includes(u.status)||!validDate(u.joinedAt)||
    !['activePlans','lessonsCompleted','practiceAttempts','mockAttempts'].every(k=>count(u[k])))

@@ -179,6 +179,9 @@ jobs:
       - name: P58 learner-owned Kill Mistakes from graded Practice, Mock and Lesson Quiz
         run: npm run test:p58
 
+      - name: P59 verified Google identities, Free/active platform plans and user controls visibility
+        run: npm run test:p59
+
       - name: P56 authorized All Courses Practice and adaptive regression contract
         run: npm run test:p56
 

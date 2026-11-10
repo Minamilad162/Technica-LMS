@@ -13,6 +13,7 @@ export default function AdminUserControls({db,userId,onChanged}){
  },[db,userId,revision]);
  const refresh=()=>{setRevision(n=>n+1);onChanged?.();};
  const blocked=data?.status==='suspended';
+ const activeSubscription=data?.subscriptions?.[0]||null;
  const toggle=async()=>{
   if(!data||busy)return;
   if(!window.confirm(blocked?'Unblock this account and restore access?':'Block this account? The learner will see your note and lose protected access.'))return;
@@ -55,17 +56,22 @@ export default function AdminUserControls({db,userId,onChanged}){
     <button type="button" className={'auc-button '+(blocked?'unblock':'block')} disabled={busy} onClick={toggle}>{blocked?<><Unlock size={16}/> Unblock user</>:<><LockKeyhole size={16}/> Block user</>}</button>
    </div>
    <div className="auc-card"><h4><CalendarClock size={17}/> Platform subscription</h4>
+    <div className={'auc-plan-status '+(activeSubscription?'auc-plan-status-active':'auc-plan-status-free')}>
+      <div><small>CURRENT PLAN</small><strong>{activeSubscription?.planName||'Free · No subscription'}</strong>
+        <span>{activeSubscription?'Active until '+date(activeSubscription.endsAt):'This user has no active platform subscription.'}</span></div>
+      <span className="auc-state">{activeSubscription?'Active plan':'Free'}</span>
+    </div>
     {data.subscriptions.length?data.subscriptions.map(s=><div className="auc-sub" key={s.id}>
      <span><strong>{s.planName}</strong><small>{date(s.startsAt)} – {date(s.endsAt)}</small></span>
      <button type="button" onClick={()=>revoke(s.id)} disabled={busy}>Revoke</button>
     </div>):<p className="auc-muted">No active subscription.</p>}
-    <label htmlFor={'auc-plan-'+userId}>Activate a published plan</label>
+    <label htmlFor={'auc-plan-'+userId}>Assign / activate a plan for this user</label>
     <select id={'auc-plan-'+userId} value={planId} onChange={e=>setPlanId(e.target.value)}
      disabled={busy||blocked||data.subscriptions.length>0}><option value="">Choose a plan…</option>
      {data.plans.map(p=><option key={p.id} value={p.id}>{p.name} · {p.months} months</option>)}</select>
     <button type="button" className="auc-button activate" onClick={activate}
      disabled={busy||blocked||!planId||data.subscriptions.length>0}><Wallet size={16}/> Activate plan</button>
-    <p className="auc-muted">{blocked?'Unblock this account before activation.':data.subscriptions.length?'Revoke the existing subscription before replacing it.':'Manual activation grants access; it does not confirm payment.'}</p>
+    <p className="auc-muted">{blocked?'Unblock this account before activation.':data.subscriptions.length?'Revoke the existing subscription before replacing it.':'Activation starts today with server-calculated expiry. This is a manual grant, not a verified payment.'}</p>
    </div>
   </div>}
  </section>;

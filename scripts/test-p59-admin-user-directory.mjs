@@ -1,0 +1,12 @@
+import assert from 'node:assert/strict';import fs from 'node:fs';
+const read=p=>fs.readFileSync(p,'utf8');
+const sql=read('supabase/migrations/202611100002_p59_google_profile_names_and_admin_plan_status.sql');
+const ui=read('src/production/AdminToolsPanels.jsx');
+const controls=read('src/production/AdminUserControls.jsx');
+const api=read('src/production/adminToolsApi.js');
+for(const s of ['lms_p13_admin_users','lms_p13_admin_user_detail','lms_p53_admin_user_controls','lms_p1_on_auth_signup','auth.identities','lms_platform_subscriptions','planStatus','planName','planEndsAt','u.email','raw_user_meta_data'])assert.ok(sql.includes(s),'P59 server missing '+s);
+for(const s of ['Search by name or email','Google account','Free · No plan','Signed up with Google','Free · No subscription','AdminUserControls key={selected.id}','No course-specific enrollments'])assert.ok(ui.includes(s),'P59 UI missing '+s);
+assert.ok(ui.indexOf('<AdminUserControls key={selected.id}')<ui.indexOf('detailError?<p className="at-error">'),'Controls must render before learner report error state');
+for(const s of ['Block user','Unblock user','Save block note','Activate plan','Free · No subscription','Active until'])assert.ok(controls.includes(s),'Admin actions missing '+s);
+assert.ok(api.includes("Invalid verified identity or platform plan summary."));
+console.log('P59 Admin Users identity/plan/action UI contracts PASS');

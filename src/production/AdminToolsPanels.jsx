@@ -333,6 +333,7 @@ export function AdminUsersPanel({db}){
  const [data,setData]=useState(null),[selected,setSelected]=useState(null),[detail,setDetail]=useState(null);
  const [loading,setLoading]=useState(true),[error,setError]=useState(''),[detailError,setDetailError]=useState('');
  const [refresh,setRefresh]=useState(0);
+ const currentUser=(data?.users||[]).find(u=>u.id===selected?.id)||selected;
  useEffect(()=>{let active=true;setLoading(true);setError('');
   getAdminUsers(db,{search:query,limit:15,offset:page*15}).then(x=>{if(active)setData(x);})
    .catch(e=>{if(active)setError(err(e));}).finally(()=>{if(active)setLoading(false);});
@@ -348,34 +349,52 @@ export function AdminUsersPanel({db}){
    <p>Real account status, enrolled plans, completion and assessments · no sample learners.</p></div>
    <button className="at-outline" onClick={()=>setRefresh(n=>n+1)}><RefreshCw size={15}/> Refresh</button></div>
   <form className="at-user-search" onSubmit={e=>{e.preventDefault();setPage(0);setQuery(search.trim());}}>
-   <Search size={18}/><input value={search} maxLength={80} placeholder="Find learners by name" onChange={e=>setSearch(e.target.value)}/>
+   <Search size={18}/><input value={search} maxLength={80} placeholder="Search by name or email" onChange={e=>setSearch(e.target.value)}/>
    <button className="at-primary">Search</button></form>
   {error&&<p role="alert" className="at-error">{error}</p>}
   <div className="at-user-layout">
    <div className="at-surface"><div className="at-user-list-head"><b>{num(data?.total)} registered profiles</b><span>Page {page+1}</span></div>
     {loading?<p className="at-empty">Loading protected learner directory…</p>:
      (data?.users||[]).map(u=><button type="button" className={'at-user-row '+(selected?.id===u.id?'active':'')}
-       key={u.id} onClick={()=>setSelected(u)}><span className="at-user-avatar">{(u.name||'?').slice(0,1).toUpperCase()}</span>
-       <span className="at-user-info"><b>{u.name||'Unnamed learner'}</b><small>{u.activePlans} active plan(s) · {u.lessonsCompleted} lessons</small></span>
-       <span className={'at-user-state '+u.status}>{u.status}</span><ChevronRight size={15}/></button>)}
+       key={u.id} onClick={()=>setSelected(u)} aria-label={'Manage '+(u.name||u.email||'learner')}>
+        <span className="at-user-avatar">{(u.name||u.email||'?').slice(0,1).toUpperCase()}</span>
+        <span className="at-user-info"><b>{u.name||u.email?.split('@')[0]||'Learner'}</b>
+         <small className="at-user-email">{u.email||'Email unavailable'}</small>
+         <span className="at-user-labels"><span className="at-provider-pill">{u.provider==='google'?'Google account':'Email account'}</span>
+          <span className={'at-plan-pill '+(u.planStatus==='active'?'has-plan':'no-plan')}>
+           {u.planStatus==='active'?(u.planName||'Active plan'):'Free · No plan'}</span></span>
+         <small>{u.lessonsCompleted} completed lessons{u.planStatus==='active'&&u.planEndsAt?' · Expires '+day(u.planEndsAt):''}</small>
+        </span>
+        <span className={'at-user-state '+u.status}>{u.status==='suspended'?'blocked':'active'}</span>
+        <ChevronRight size={15}/></button>)}
     {!loading&&!(data?.users||[]).length&&empty}
     <div className="at-paging"><button className="at-outline" disabled={page===0||loading} onClick={()=>setPage(n=>n-1)}>Previous</button>
      <span>{data?Math.min(data.total,(page+1)*15):'—'} / {num(data?.total)}</span>
      <button className="at-outline" disabled={loading||!data||data.total<=(page+1)*15} onClick={()=>setPage(n=>n+1)}>Next</button></div>
    </div>
    <section className="at-surface at-user-detail">
+    {selected&&<div className="at-user-control-lead">
+     <div className="at-section-title at-user-profile-heading"><div>
+      <span className="at-eyebrow">MEMBER PROFILE</span><h3>{currentUser?.name||currentUser?.email?.split('@')[0]||'Learner'}</h3>
+      <p>{currentUser?.email||'Verified user'} · Joined {day(currentUser?.joinedAt)}</p>
+      <div className="at-user-labels at-profile-pills">
+       <span className="at-provider-pill">{currentUser?.provider==='google'?'Signed up with Google':'Email/password account'}</span>
+       <span className={'at-plan-pill '+(currentUser?.planStatus==='active'?'has-plan':'no-plan')}>
+        {currentUser?.planStatus==='active'?(currentUser.planName||'Active subscription'):'Free · No subscription'}</span>
+       <span className={'at-user-state '+currentUser?.status}>{currentUser?.status==='suspended'?'Blocked':'Active'}</span>
+      </div>
+     </div></div>
+     <AdminUserControls key={selected.id} db={db} userId={selected.id} onChanged={()=>setRefresh(n=>n+1)}/>
+    </div>}
     {!selected?<div className="at-empty"><Users size={24}/> Select a learner to view their subscriptions, progress and exam results.</div>:
      detailError?<p className="at-error">{detailError}</p>:
      (!detail||detail.profile.id!==selected.id)?<p className="at-empty">Loading this user's authorized record…</p>:<>
-      <div className="at-section-title"><div><span className="at-eyebrow">MEMBER PROFILE</span><h3>{detail.profile.name}</h3>
-       <p>Joined {day(detail.profile.joinedAt)} · {detail.profile.status}</p></div></div>
-      <AdminUserControls db={db} userId={selected.id} onChanged={()=>setRefresh(n=>n+1)}/>
-      <h4>Plans &amp; enrollment</h4>
+      <h4>Course-specific enrollments</h4>
       {detail.entitlements.map((e,i)=><div className="at-plan" key={e.courseId+i}>
        <div><b>{e.courseTitle}</b><span>{e.type} · {e.status}</span></div>
        <dl><div><dt>Started</dt><dd>{day(e.startsAt)}</dd></div><div><dt>Ends</dt><dd>{e.endsAt?day(e.endsAt):'No recorded end'}</dd></div>
         <div><dt>Amount paid</dt><dd>Not recorded</dd></div></dl></div>)}
-      {!detail.entitlements.length&&<p className="at-empty">No enrollment records found.</p>}
+      {!detail.entitlements.length&&<p className="at-empty">No course-specific enrollments. Platform subscriptions can be assigned above.</p>}
       <h4>Learning by course</h4>
       <div className="at-progress-cards">{detail.courseProgress.map(c=><div key={c.courseId}>
        <b>{c.courseTitle}</b><span>{c.lessonsCompleted} lessons · {c.practiceCompleted} Practice · {c.mockCompleted} Mock</span></div>)}
@@ -397,7 +416,7 @@ export function AdminUsersPanel({db}){
       </div>)}
        {!detail.recentAssessments.length&&<p className="at-empty">No submitted or expired assessments recorded.</p>}
       </div>
-      <p className="at-disclaimer"><Wallet size={15}/> No transaction ledger is installed, so amount paid, currency and payment status cannot be verified from entitlements alone.</p>
+      <p className="at-disclaimer"><Wallet size={15}/> An activated subscription grants access but does not prove a payment has been received.</p>
      </>}
    </section>
   </div>
