@@ -111,6 +111,10 @@ export default function ProtectedLessonViewer({db,lessonId,block,viewerId='',onW
   };
   const onPrint=()=>conceal('print-request');
   const onPageHide=()=>conceal('tab-hidden');
+  const onLessonResume=e=>{
+   if(e.detail?.lessonId===lessonId&&shieldReason.current==='capture-shortcut'&&
+    element?.dataset.mediaShielded==='true')resume();
+  };
   const onFullscreen=()=>setFullscreen(doc.fullscreenElement===element);
   doc.addEventListener('visibilitychange',onVisibility);
   doc.addEventListener('fullscreenchange',onFullscreen);
@@ -120,6 +124,7 @@ export default function ProtectedLessonViewer({db,lessonId,block,viewerId='',onW
   window.addEventListener('keyup',onShortcut,true);
   window.addEventListener('beforeprint',onPrint);
   window.addEventListener('pagehide',onPageHide);
+  window.addEventListener('technica:lesson-resume',onLessonResume);
   return()=>{
    mounted.current=false;active.current=false;
    doc.removeEventListener('visibilitychange',onVisibility);
@@ -130,9 +135,10 @@ export default function ProtectedLessonViewer({db,lessonId,block,viewerId='',onW
    window.removeEventListener('keyup',onShortcut,true);
    window.removeEventListener('beforeprint',onPrint);
    window.removeEventListener('pagehide',onPageHide);
+   window.removeEventListener('technica:lesson-resume',onLessonResume);
    if(doc.fullscreenElement===element)doc.exitFullscreen?.().catch?.(()=>{});
   };
- },[conceal,resume]);
+ },[conceal,resume,lessonId]);
  useEffect(()=>{
   // Keep print protection active even while an immediate capture/print event
   // changes the viewer into its black privacy state.

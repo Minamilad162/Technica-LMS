@@ -236,7 +236,7 @@ export default function CourseLessonExplorer({db,userId='',courseId,courseTitle,
      </div>)}
     </section>;})}
   </div>:<LiveProtectedContent as="div" className="cle-player" kind="lesson-surface"
-   identity={adminPreview?'ADMIN PREVIEW':userId.slice(0,8)}>
+   lessonId={selected.id} identity={adminPreview?'ADMIN PREVIEW':userId.slice(0,8)}>
    <div className="cle-player-head" ref={playerHeadingRef}>
     <button className="cle-back" type="button" onClick={()=>setActive(null)}><ArrowLeft size={17}/> All lessons</button>
     <div><span>{adminPreview?'ADMIN COURSE PREVIEW':'LEARNING JOURNEY'}</span><h2>{selected.title}</h2></div>

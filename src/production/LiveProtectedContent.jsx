@@ -15,7 +15,7 @@ import {
  * browser accessibility focus or the surrounding LMS workspace.
  */
 let activeProtectedContainers=0;
-export default function LiveProtectedContent({as:Tag='div',className='',kind='questions',identity:identitySource,children}){
+export default function LiveProtectedContent({as:Tag='div',className='',kind='questions',identity:identitySource,lessonId='',children}){
  const ref=useRef(null),timeout=useRef(null),shieldRef=useRef(null);
  const keyShield=useRef(false),focusShield=useRef(false);
  const enabledFocusShield=shouldFocusShield(kind);
@@ -178,10 +178,17 @@ export default function LiveProtectedContent({as:Tag='div',className='',kind='qu
   keyShield.current=false;focusShield.current=false;
   if(timeout.current){clearTimeout(timeout.current);timeout.current=null;}
   syncCurtain();
+  // Restore the *same* scoped private video/PDF viewer in one action. No
+  // blanket media unlock; each viewer reauthorizes via the existing service.
+  if(kind==='lesson-surface'&&lessonId){
+   window.dispatchEvent(new CustomEvent('technica:lesson-resume',{detail:{lessonId}}));
+  }
  };
  const shield=<div ref={shieldRef} hidden
    className={'tc-capture-curtain'+(kind==='lesson-surface'?' tc-lesson-curtain':'')}
-   data-capture-curtain="browser-best-effort" data-reason="none" aria-hidden="true">
+   data-capture-curtain="browser-best-effort" data-reason="none"
+   aria-hidden={kind==='lesson-surface'?undefined:'true'}
+   role={kind==='lesson-surface'?'alert':undefined}>
    <span>PROTECTED LEARNING CONTENT</span>
    {kind==='lesson-surface'&&<button type="button" className="tc-lesson-resume" onClick={resumeLesson}>Resume lesson</button>}
   </div>;

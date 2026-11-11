@@ -36,3 +36,9 @@ assert(player.includes('fraction>=.9'));
 assert(!api.includes('.getPublicUrl('));
 console.log('P67 browser privacy, black curtain, PDF/video and lesson-wide capture deterrence PASS');
 console.log('LIMITATION: OS-native screenshots and recording cannot be universally blocked by browser JavaScript.');
+
+assert.match(surface,/window\.dispatchEvent\(new CustomEvent\('technica:lesson-resume'/);
+assert.match(player,/window\.addEventListener\('technica:lesson-resume',onLessonResume\)/);
+assert.match(player,/e\.detail\?\.lessonId===lessonId/);
+assert.match(explorer,/lessonId=\{selected\.id\} identity=/);
+assert.match(legacy,/lessonId=\{lesson\.id\} identity=/);
