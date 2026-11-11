@@ -29,6 +29,7 @@ const privacyMessage={
 export default function ProtectedLessonViewer({db,lessonId,block,viewerId='',onWatched}){
  const shell=useRef(null),video=useRef(null),pdf=useRef(null),curtain=useRef(null);
  const mounted=useRef(true),active=useRef(false),currentSrc=useRef('');
+ const shieldReason=useRef('');
  const lastTime=useRef(0),wasPlaying=useRef(false);
  const watched=useRef({last:null,seconds:new Set(),reported:false});
  const [state,setState]=useState('ready'),[url,setUrl]=useState(''),[error,setError]=useState('');
@@ -39,7 +40,7 @@ export default function ProtectedLessonViewer({db,lessonId,block,viewerId='',onW
  const isVideo=block.block_type==='video',title=String(block.payload?.title||(isVideo?'Video':'PDF'));
  const conceal=useCallback(why=>{
   if(!active.current||!mounted.current)return;
-  active.current=false;
+  active.current=false;shieldReason.current=why;
   if(shell.current)shell.current.dataset.mediaShielded='true';
   if(curtain.current)curtain.current.hidden=false;
   if(video.current){
@@ -56,7 +57,7 @@ export default function ProtectedLessonViewer({db,lessonId,block,viewerId='',onW
  },[]);
  const resume=useCallback(()=>{
   if(typeof document==='undefined'||document.visibilityState==='hidden')return;
-  active.current=true;
+  active.current=true;shieldReason.current='';
   if(shell.current)shell.current.dataset.mediaShielded='false';
   if(curtain.current)curtain.current.hidden=true;
   setError('');setVideoIssue('');setPlaying(false);setStarting(false);
@@ -93,9 +94,10 @@ export default function ProtectedLessonViewer({db,lessonId,block,viewerId='',onW
   const onVisibility=()=>{
    if(doc.visibilityState==='hidden')conceal('tab-hidden');
    else if(doc.visibilityState==='visible'&&doc.hasFocus()&&
-     element?.dataset.mediaShielded==='true')resume();
+     element?.dataset.mediaShielded==='true'&&shieldReason.current!=='capture-shortcut')resume();
   };
-  const onFocus=()=>{if(doc.visibilityState==='visible'&&element?.dataset.mediaShielded==='true')resume();};
+  const onFocus=()=>{if(doc.visibilityState==='visible'&&element?.dataset.mediaShielded==='true'&&
+   shieldReason.current!=='capture-shortcut')resume();};
   const onBlur=()=>{
    if(shouldShieldMediaOnBlur({mobile:isMobileMediaBrowser(window),
     activeTag:String(doc.activeElement?.tagName||'').toLowerCase(),
@@ -115,6 +117,7 @@ export default function ProtectedLessonViewer({db,lessonId,block,viewerId='',onW
   window.addEventListener('focus',onFocus);
   window.addEventListener('blur',onBlur);
   window.addEventListener('keydown',onShortcut,true);
+  window.addEventListener('keyup',onShortcut,true);
   window.addEventListener('beforeprint',onPrint);
   window.addEventListener('pagehide',onPageHide);
   return()=>{
@@ -124,6 +127,7 @@ export default function ProtectedLessonViewer({db,lessonId,block,viewerId='',onW
    window.removeEventListener('focus',onFocus);
    window.removeEventListener('blur',onBlur);
    window.removeEventListener('keydown',onShortcut,true);
+   window.removeEventListener('keyup',onShortcut,true);
    window.removeEventListener('beforeprint',onPrint);
    window.removeEventListener('pagehide',onPageHide);
    if(doc.fullscreenElement===element)doc.exitFullscreen?.().catch?.(()=>{});

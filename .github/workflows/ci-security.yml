@@ -203,6 +203,9 @@ jobs:
       - name: P66 Build Your Own compact density and unchanged Practice behavior
         run: npm run test:p66
 
+      - name: P67 Course Lesson-wide blackout, PDF and video browser capture deterrence
+        run: npm run test:p67
+
       - name: P56 authorized All Courses Practice and adaptive regression contract
         run: npm run test:p56
 

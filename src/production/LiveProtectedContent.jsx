@@ -1,4 +1,5 @@
 import React,{useEffect,useMemo,useRef,useState}from'react';
+import {createPortal} from 'react-dom';
 import '../contentProtection.css';
 import {
  PROTECTION_HOLD_MS,WATERMARK_POSITIONS,formatWatermarkLabel,
@@ -39,6 +40,9 @@ export default function LiveProtectedContent({as:Tag='div',className='',kind='qu
   keyShield.current=true;
   syncCurtain();
   if(timeout.current)clearTimeout(timeout.current);
+  // A capture-like shortcut on a Lesson requires manual Resume.
+  // Existing Practice and exam question shields keep the short hold.
+  if(kind==='lesson-surface'){timeout.current=null;return;}
   timeout.current=setTimeout(()=>{
    keyShield.current=false;
    syncCurtain();
@@ -83,6 +87,8 @@ export default function LiveProtectedContent({as:Tag='div',className='',kind='qu
    // blur the window while the webpage is still fully visible. Never blackout
    // mobile on blur alone. Desktop retains the proven focus-loss behavior.
    if(!shouldBlackoutForBlur(kind,isMobile()))return;
+   // Native PDF iframe focus is a legitimate blur, not a window switch.
+   if(kind==='lesson-surface'&&String(document.activeElement?.tagName||'').toLowerCase()==='iframe')return;
    focusShield.current=true;
    syncCurtain();
   };
@@ -167,6 +173,18 @@ export default function LiveProtectedContent({as:Tag='div',className='',kind='qu
    if(e.type==='copy'||e.type==='cut')e.clipboardData?.clearData?.();
   }
  };
+ const resumeLesson=()=>{
+  if(document.visibilityState==='hidden')return;
+  keyShield.current=false;focusShield.current=false;
+  if(timeout.current){clearTimeout(timeout.current);timeout.current=null;}
+  syncCurtain();
+ };
+ const shield=<div ref={shieldRef} hidden
+   className={'tc-capture-curtain'+(kind==='lesson-surface'?' tc-lesson-curtain':'')}
+   data-capture-curtain="browser-best-effort" data-reason="none" aria-hidden="true">
+   <span>PROTECTED LEARNING CONTENT</span>
+   {kind==='lesson-surface'&&<button type="button" className="tc-lesson-resume" onClick={resumeLesson}>Resume lesson</button>}
+  </div>;
  return <>
   <Tag className={['tc-protected-content',className].filter(Boolean).join(' ')}
    data-protected-kind={kind} ref={ref}
@@ -179,8 +197,7 @@ export default function LiveProtectedContent({as:Tag='div',className='',kind='qu
       <span key={i} className="tc-watermark-cell">{label}</span>)}
    </div>
   </Tag>
-  <div ref={shieldRef} hidden className="tc-capture-curtain" data-capture-curtain="browser-best-effort" data-reason="none" aria-hidden="true">
-   <span>PROTECTED LEARNING CONTENT</span>
-  </div>
+  {kind==='lesson-surface'&&typeof document!=='undefined'
+   ?createPortal(shield,document.body):shield}
  </>;
 }

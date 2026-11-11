@@ -100,7 +100,8 @@
     "test:p63": "node scripts/test-p63-lesson-publication.mjs",
     "test:p64": "node scripts/test-p64-premium-loading.mjs",
     "test:p65": "node scripts/test-p65-guided-help-assistant.mjs",
-    "test:p66": "node scripts/test-p66-compact-build-your-own.mjs"
+    "test:p66": "node scripts/test-p66-compact-build-your-own.mjs",
+    "test:p67": "node scripts/test-p67-lesson-capture-deterrence.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.58.0",

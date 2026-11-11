@@ -157,3 +157,9 @@
 html.tc-quiz-exit-lock :is(.quiz-page,.live-practice .live-question,.live-practice .live-question-nav,.learn-quiz-content){
  visibility:hidden!important;
 }
+
+/* P67 — Lesson curtain above all page transforms, including PDF and text. */
+.tc-capture-curtain.tc-lesson-curtain:not([hidden]){display:flex!important;flex-direction:column;gap:13px;pointer-events:auto!important}
+.tc-lesson-curtain .tc-lesson-resume{pointer-events:auto;cursor:pointer;border:1px solid #8fd6bf;border-radius:10px;color:#0a443d;background:#baf1dc;padding:11px 17px;font:750 12px/1.2 ui-sans-serif,system-ui,sans-serif;letter-spacing:0}
+.tc-lesson-curtain .tc-lesson-resume:focus-visible{outline:3px solid #69d6be;outline-offset:3px}
+@media print{.tc-lesson-curtain{display:none!important}}

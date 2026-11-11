@@ -2,6 +2,7 @@ import React,{useEffect,useMemo,useRef,useState} from 'react';
 import {ArrowLeft,ArrowRight,BookOpen,CheckCircle2,ChevronDown,ChevronRight,FileText,Layers3,LockKeyhole,Paperclip,PlayCircle,ShieldCheck,Video} from 'lucide-react';
 import {loadLessonContent} from './lessonMediaApi.js';
 import {fetchLessonQuiz,quizQuestionIdsChanged} from './lessonQuizSyncApi.js';
+import LiveProtectedContent from './LiveProtectedContent.jsx';
 import './courseLessonExplorer.css';
 
 const ProtectedLessonViewer=React.lazy(()=>import('./ProtectedLessonViewer.jsx'));
@@ -234,7 +235,8 @@ export default function CourseLessonExplorer({db,userId='',courseId,courseTitle,
        </button>;})}</div>
      </div>)}
     </section>;})}
-  </div>:<div className="cle-player">
+  </div>:<LiveProtectedContent as="div" className="cle-player" kind="lesson-surface"
+   identity={adminPreview?'ADMIN PREVIEW':userId.slice(0,8)}>
    <div className="cle-player-head" ref={playerHeadingRef}>
     <button className="cle-back" type="button" onClick={()=>setActive(null)}><ArrowLeft size={17}/> All lessons</button>
     <div><span>{adminPreview?'ADMIN COURSE PREVIEW':'LEARNING JOURNEY'}</span><h2>{selected.title}</h2></div>
@@ -336,6 +338,6 @@ export default function CourseLessonExplorer({db,userId='',courseId,courseTitle,
      </footer>
     </main>
    </div>
-  </div>}
+  </LiveProtectedContent>}
  </div>;
 }
