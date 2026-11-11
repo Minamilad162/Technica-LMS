@@ -1,4 +1,4 @@
-import React,{useEffect,useMemo,useRef,useState}from'react';
+import React,{useEffect,useLayoutEffect,useMemo,useRef,useState}from'react';
 import {createPortal} from 'react-dom';
 import '../contentProtection.css';
 import {
@@ -49,7 +49,9 @@ export default function LiveProtectedContent({as:Tag='div',className='',kind='qu
    timeout.current=null;
   },PROTECTION_HOLD_MS);
  };
- useEffect(()=>{
+ // Register scoped print/privacy listeners before first Lesson paint.
+ // Native OS screenshot and recording are not intercepted by this web API.
+ useLayoutEffect(()=>{
   activeProtectedContainers++;
   document.documentElement.classList.add('tc-has-protected-content');
   const onBeforePrint=()=>document.documentElement.classList.add('tc-print-in-progress');

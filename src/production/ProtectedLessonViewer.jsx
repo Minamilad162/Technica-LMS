@@ -5,6 +5,7 @@ import {authorizeLessonMedia} from './lessonMediaApi.js';
 import {videoPlaybackErrorMessage} from './videoPlaybackDiagnostics.js';
 import {PROTECTED_MEDIA_NOTICE,isGuardedMediaShortcut,isMobileMediaBrowser,
  requestQuestionFullscreen,shouldShieldMediaOnBlur} from '../lib/lessonMediaFullscreen.js';
+import {formatWatermarkLabel,getContentProtectionSession,mediaWatermarkTiles,watermarkIdentity} from '../lib/contentProtection.js';
 import './protectedLessonViewer.css';
 
 // Authorized Lessons display INLINE without an additional Open/Fullscreen gate.
@@ -12,11 +13,12 @@ import './protectedLessonViewer.css';
 // Browser events cannot detect all OS screenshots/recordings.
 function ViewerWatermark({identity}){
  const [time,setTime]=useState(()=>new Date());
- useEffect(()=>{const timer=setInterval(()=>setTime(new Date()),60000);return()=>clearInterval(timer);},[]);
- const label='TECHNICA • '+(identity||'VERIFIED LEARNER')+' • '+
-  time.toISOString().slice(0,16).replace('T',' ')+' UTC';
+ const [sessionId]=useState(getContentProtectionSession);
+ useEffect(()=>{const timer=setInterval(()=>setTime(new Date()),45000);return()=>clearInterval(timer);},[]);
+ const label=formatWatermarkLabel({identity:watermarkIdentity(identity),sessionId,time});
+ const positions=mediaWatermarkTiles({sessionId,time});
  return <div className="slm-watermark" aria-hidden="true">
-  {Array.from({length:3},(_,i)=><span key={i}>{label}</span>)}
+  {positions.map(({top,left},i)=><span key={i} style={{top:top+'%',left:left+'%'}}>{label}</span>)}
  </div>;
 }
 let mediaPrintUsers=0;

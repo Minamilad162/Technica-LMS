@@ -110,9 +110,7 @@ html.tc-has-protected-media{scrollbar-color:#18434c transparent}
  letter-spacing:.015em;color:#d0fff3;text-shadow:0 1px 4px #0c202bc9;
  transform:rotate(-16deg);opacity:.23
 }
-.slm-protected-viewer .slm-watermark span:nth-child(1){top:24%;left:8%}
-.slm-protected-viewer .slm-watermark span:nth-child(2){top:51%;left:42%;transform:translateX(-35%) rotate(-16deg)}
-.slm-protected-viewer .slm-watermark span:nth-child(3){bottom:21%;right:9%}
+/* P69: JS places three pointer-transparent watermarks at time-varying positions. */
 .slm-video-start-overlay{position:absolute;z-index:5;inset:56px 12px 60px;
  display:flex;align-items:center;justify-content:center;pointer-events:none}
 .slm-video-start-button{pointer-events:auto;display:flex;align-items:center;
@@ -137,7 +135,7 @@ html.tc-has-protected-media{scrollbar-color:#18434c transparent}
  font-size:12px;font-weight:800;cursor:pointer}
 @media(max-width:650px){
  .slm-protected-viewer .slm-watermark span{max-width:120px;font-size:8px;opacity:.19}
- .slm-protected-viewer .slm-watermark span:nth-child(3){display:none}
+ .slm-protected-viewer .slm-watermark span:nth-child(3){display:block;opacity:.12}
  .slm-video-start-overlay{inset:45px 8px 55px}
  .slm-video-start-button{gap:9px;font-size:12px;padding:9px 12px}
  .slm-video-play-icon{width:34px;height:34px}

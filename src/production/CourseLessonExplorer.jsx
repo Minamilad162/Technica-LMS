@@ -236,7 +236,7 @@ export default function CourseLessonExplorer({db,userId='',courseId,courseTitle,
      </div>)}
     </section>;})}
   </div>:<LiveProtectedContent as="div" className="cle-player" kind="lesson-surface"
-   lessonId={selected.id} identity={adminPreview?'ADMIN PREVIEW':userId.slice(0,8)}>
+   lessonId={selected.id} identity={adminPreview?'ADMIN PREVIEW':userId}>
    <div className="cle-player-head" ref={playerHeadingRef}>
     <button className="cle-back" type="button" onClick={()=>setActive(null)}><ArrowLeft size={17}/> All lessons</button>
     <div><span>{adminPreview?'ADMIN COURSE PREVIEW':'LEARNING JOURNEY'}</span><h2>{selected.title}</h2></div>
@@ -279,7 +279,7 @@ export default function CourseLessonExplorer({db,userId='',courseId,courseTitle,
         <div className="cle-activity-title"><h3 id={'cle-video-title-'+selected.id}>Watch &amp; learn</h3><small>{adminPreview?'Admin preview · playback does not save progress':stepDone(selected.id,'video')?'Completed ✓':'Watch each video until the end'}</small></div>
         {section.video.length?<React.Suspense fallback={<div className="cle-notice">Opening protected player…</div>}>
          {section.video.map(b=><ProtectedLessonViewer key={b.id} db={db} lessonId={selected.id}
-          block={b} viewerId={adminPreview?'ADMIN PREVIEW':userId.slice(0,8)} onWatched={()=>{
+          block={b} viewerId={adminPreview?'ADMIN PREVIEW':userId} onWatched={()=>{
            if(adminPreview)return;
            watchedVideos.current.add(b.id);
            if(section.video.every(v=>watchedVideos.current.has(v.id)))void saveStep('video');
@@ -298,7 +298,7 @@ export default function CourseLessonExplorer({db,userId='',courseId,courseTitle,
          <React.Suspense fallback={<div className="cle-notice">Loading protected attachments…</div>}>
           {section.attachments.map(b=><div key={b.id} className="cle-resource">
            <strong><Paperclip size={16}/>{b.payload?.title||'Protected PDF'}</strong>
-           <ProtectedLessonViewer db={db} lessonId={selected.id} block={b} viewerId={adminPreview?'ADMIN PREVIEW':userId.slice(0,8)}/>
+           <ProtectedLessonViewer db={db} lessonId={selected.id} block={b} viewerId={adminPreview?'ADMIN PREVIEW':userId}/>
           </div>)}
          </React.Suspense>
         </div>}

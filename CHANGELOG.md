@@ -1,3 +1,9 @@
+## 2026-11-11 — P69 automatic free no-install web content protection
+- Learner continues to open video/PDF from the same authorized Lesson; its browser privacy/print listeners register before first paint, without setup, paid services or native-app requirement.
+- Three sparse video/PDF watermarks now share the established per-tab session ID, UTC timestamp and signed-in user identity with the enclosing Lesson. They move every 45 seconds, remain pointer-transparent and respect small screens.
+- Keep private storage, 120-second entitlement-gated media links, lesson progress and PDF native viewer compatibility. P68 Windows pilot stays optional. Existing P61 and new P69 tests share the P67 CI workflow step.
+- No live data, Supabase schema, Edge, Cloudflare or hosting changes. Browser deterrence is not CDM DRM and cannot guarantee black OS captures, prohibit PDF save or stop extraction.
+
 ## 2026-11-09 — P49 verified My Profile, plan days and unified practice history
 - Compact header now includes the actual active P21 subscription plan name and exact total remaining days, without month/week rounding. Open Access stays independent and does not invent subscriptions.
 - New My Profile account-menu destination shows trusted name/email/status, real plan, remaining days/start/end, and a second tab for verified P11 My Practice History. Responsive mobile profile link added.

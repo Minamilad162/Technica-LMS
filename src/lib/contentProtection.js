@@ -85,3 +85,19 @@ export function formatWatermarkLabel({identity,sessionId,time}){
  const dateStr=Number.isFinite(date.getTime())?date.toISOString().slice(0,16).replace('T',' '):'';
  return 'TECHNICA · '+identity+' · '+sessionId+' · '+dateStr+' UTC';
 }
+
+/**
+ * P69: bounded, moving visual attribution marks; never native DRM/capture prevention.
+ */
+export function mediaWatermarkTiles({sessionId='',time=new Date()}={}){
+ const timestamp=time instanceof Date?time.getTime():new Date(time).getTime();
+ const phase=Number.isFinite(timestamp)?Math.floor(timestamp/45000):0;
+ const seed=Array.from(String(sessionId)).reduce((n,char)=>(n*31+char.charCodeAt(0))%9973,7);
+ const positions=[
+  [[16,12],[43,48],[74,17]],
+  [[23,53],[57,13],[76,62]],
+  [[14,59],[49,19],[69,43]],
+  [[20,24],[53,57],[78,12]]
+ ];
+ return positions[(phase+seed)%positions.length].map(([top,left])=>({top,left}));
+}

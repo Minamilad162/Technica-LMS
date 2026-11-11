@@ -203,8 +203,10 @@ jobs:
       - name: P66 Build Your Own compact density and unchanged Practice behavior
         run: npm run test:p66
 
-      - name: P67 Course Lesson-wide blackout, PDF and video browser capture deterrence
-        run: npm run test:p67
+      - name: P67/P69 zero-setup Lesson protection and session watermark
+        run: |
+          npm run test:p67
+          npm run test:p69
 
       - name: P68 native Windows secure-viewer capture-exclusion pilot policy contracts
         run: npm run test:p68

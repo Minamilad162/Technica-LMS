@@ -99,9 +99,9 @@ export function LiveLearningCourse(){
           {done?<CheckCircle2 size={18}/>:<FileText size={18}/>}<span>{di+1}.{ti+1}.{li+1} · {lesson.title}</span>{current?<ChevronDown size={17}/>:<ChevronRight size={17}/>}
          </button>
          {current&&<LiveProtectedContent as="div" className="live-learning-lesson-text" kind="lesson-surface"
-           lessonId={lesson.id} identity={data?.user?.id?.slice(0,8)||'LEARNER'}>
+           lessonId={lesson.id} identity={data?.user?.id||'LEARNER'}>
            <SecureLessonContent db={getSupabaseClient({secureReviewEntry:true})}
-            lessonId={lesson.id} viewerId={data?.user?.id?.slice(0,8)||'LEARNER'}/>
+            lessonId={lesson.id} viewerId={data?.user?.id||'LEARNER'}/>
            <small>{done?'Verified completed in database':'Viewing a PDF/video alone does not mark a Lesson complete; the P2 verified progress workflow applies.'}</small>
          </LiveProtectedContent>}
         </div>;

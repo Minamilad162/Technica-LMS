@@ -97,3 +97,8 @@ The v1.1.8 correction adds a real clipboard selection test, stronger print style
 **Regression:** extend \`scripts/test-content-protection.mjs\` for desktop/coarse-pointer/mobile/viewport cases; extend real Chromium QA to desktop 1366 and simulated touch phone widths 375/390/430, including focus on the calculator Math field, keyboard opening/dismissal \`blur\`, VisualViewport resize, minimize/restore, background visibility, desktop focus-loss black screenshot and no JavaScript crashes. Do NOT describe a simulated mobile test as proof of actual phone OS screenshots.
 
 **Risk/tradeoff:** A mobile snipping UI that only blurs the browser (without hiding the tab) will no longer trigger black. This is intentional to avoid blocking legitimate typing. The user's desired all-device black screenshots cannot be achieved in an ordinary public website; first-party backend controls and visible watermarks remain the nonintrusive deterrent.
+
+
+## P69 — Zero-install automatic web content deterrence (2026-11-11)
+
+No required native application, paid DRM/license integration or learner setup. P14 Edge private media and P67 all-Lesson privacy remain; P69 attaches scoped privacy/print handlers before first Lesson paint, unifies video/PDF overlays with the current learner/tab session code and UTC watermark, and moves three faint marks at 45s intervals. No server data or access rules changed. Not CDM/EME DRM: signed URLs and PDF native Save may be used to retrieve files, and OS-native screenshots/recordings remain outside browser control. Device acceptance is pending.
