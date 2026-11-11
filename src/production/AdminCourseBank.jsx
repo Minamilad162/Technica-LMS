@@ -153,7 +153,7 @@ export default function AdminCourseBank({db,courses=[],asp,onUpdate,onDirtyChang
       (result.published||0)+' Lesson Quiz question(s) published'+
       (result.linked?' · '+result.linked+' new Lesson link(s)':'')+
       (result.unpublished?' · '+result.unpublished+' disabled quiz item(s) unpublished':'')+
-      '. Saved Mock question flags automatically feed this Course's Mock pool; 200 eligible questions are required for the fixed exam.'
+      '. Saved Mock question flags automatically feed this Course Mock pool; 200 eligible questions are required for the fixed exam.'
     :'Saved '+result.saved+' question settings using legacy P30. Draft Lesson links are NOT learner-published, and Mock candidate flags do NOT activate the fixed official 200-question Mock. Install P34A/P34B to enable Lesson Quiz one-save publishing.');
    refresh(true);
   }catch(e){setError('No partial changes saved. Your pending selections are retained. '+fail(e));}

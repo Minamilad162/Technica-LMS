@@ -2052,3 +2052,6 @@ Observed browser error: `P14_EDGE_NETWORK` at `Authorizing Admin upload` for a 4
 
 
 **P71 regression follow-up (2026-11-12):** Existing P34 static/unit fixture tested a legacy text error `not configured`. P71 intentionally uses a more precise fail-closed `Mock Exam configuration does not match the secure Course Question Bank`; updated the two string regex assertions without loosening the legacy/fixed-200 validation. A new CI run is required; no database writes.
+
+
+**P71 build fix (2026-11-12):** Source-only frontend string contained a literal apostrophe inside the single-quoted `Save All Changes` success message (Course's). Removed that apostrophe without altering persistence, authorization or selection behavior. The production Vite build must rerun and pass; disposable PostgreSQL and P71 selection contract had already passed. No live Supabase write.
