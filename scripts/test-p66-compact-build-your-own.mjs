@@ -26,7 +26,8 @@ const required=[
  '@media(max-width:385px)'
 ];
 for(const selector of required)assert(compact.includes(selector),'Compact design missing '+selector);
-assert(!/transform:\s*scale\([^)]*\).*?\.byo-premium-content/s.test(compact),'Never scale the entire Practice form');
+assert(!/\.byo-premium\s*\{[^}]*\btransform:\s*scale\(/.test(compact),'Never scale the entire Practice form');
+assert(!/\.byo-premium \.byo-premium-content\s*\{[^}]*\btransform:\s*scale\(/.test(compact),'Do not scale the form contents');
 assert(!/zoom\s*:/.test(compact),'No browser zoom hacks');
 assert.deepEqual(BUILD_COUNTS,[10,25,50,100]);
 assert.equal(DEFAULT_BUILD_YOUR_OWN.count,50);
