@@ -1,3 +1,8 @@
+## 2026-11-12 — P71 database activation for fixed Course Mock
+- After read-only migration ledger/function/grant check and exact-200 Question Bank validation, applied existing P71 function-only migration to Technica Account Supabase. Ledger version `20261111233907`.
+- Postflight verified new readiness version, fixed-200 server start, authenticated-only permissions, existing 200 eligible questions and no selected-Mock attempts. No business data rows were written.
+- The P71 frontend already passed CI and production build in `3e99d92`. Refresh Mock Exam & Practice to fetch readiness; a real signed-in learner exam remains to be checked.
+
 ## 2026-11-12 — P71 directly sync saved Mock Exam questions to Course Mock
 - Removed hidden ASP-only dependency from primary learner Mock Exam tab. Learner selects any authorized published Course (including real Course 1); the tab displays exactly that Course's saved Mock selection count via existing authenticated P34B readiness RPC.
 - Admin Exams & Mock tab defaults to the saved Mock-only Question Bank filter and shows marked questions immediately on visit, no separate candidate load. Historical ASP reservation tools are preserved but are not the new Course Mock workflow.
