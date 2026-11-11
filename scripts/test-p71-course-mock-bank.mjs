@@ -31,8 +31,22 @@ assert.match(bank,/setUsage\(mode==='mock'\?'mock':'all'\)/);
 assert.match(bank,/Saved selections for/);
 assert.match(learner,/LiveSelectedMockExam key=/);
 assert.match(view,/readiness\?\.selectedCount/);
-assert.match(view,/200 Mock questions selected/);
-assert.match(view,/Refresh Mock questions/);
+assert.match(view,/LIVE QUESTION BANK/);
+assert.match(view,/getSelectedMockReadiness\(db,course.id\)/);
+assert.match(view,/document.addEventListener\('visibilitychange',visible\)/);
+assert.match(view,/window.addEventListener\('focus',visible\)/);
+assert.match(view,/className="live-mock-start"/);
+assert.match(view,/Start Mock Exam/);
+assert.doesNotMatch(view,/Refresh Mock questions|setInterval\(.*Readiness/,
+ 'No manual refresh button or polling for Mock setup');
+assert.doesNotMatch(hub,/className="lep-mock-promise"/,
+ 'Remove duplicate static mock overview cards');
+assert.doesNotMatch(view,/Grading &amp; timer|<b>Server<\/b>/,
+ 'Remove mock placeholder Server stat');
+const liveMockCss=read('src/production/liveMock.css');
+assert.match(liveMockCss,/\.live-mock \.live-mock-start\{/);
+assert.match(liveMockCss,/\.live-mock \.live-mock-start:disabled/);
+assert.match(liveMockCss,/@media\(max-width:650px\)/);
 assert.match(api,/engineUpgradePending:legacy/);
 assert.match(api,/if\(v\.questionCount!==200/);
 assert.match(sql,/CREATE OR REPLACE FUNCTION public\.lms_p34_selected_mock_readiness/);
@@ -43,5 +57,5 @@ assert.match(sql,/'engineVersion','p71-fixed-bank-mock-v1'/);
 assert.match(sql,/search_path=''/);
 assert.match(sql,/NOT EXISTS\(SELECT 1 FROM public\.lms_practice_attempt_items/);
 assert.doesNotMatch(sql,/UPDATE\s+public\.lms_questions|DELETE\s+FROM\s+public\.lms_p9b_mock_items/);
-console.log('P71 PASS: saved Question Bank marks automatically source Course Mock; UI blocks until fixed 200/300 server gate.');
+console.log('P71/P72 PASS: live bank readiness auto-reloads on focus, without demo cards or manual refresh; Mock stays fixed 200/300.');
 console.log('Production SQL install and actual device/learner attempt verification remain pending approval.');

@@ -110,3 +110,6 @@
 .lep-tabs button small{white-space:normal;overflow-wrap:break-word}
 .lep-page .lj-embedded .lj-heading{margin-top:0}
 @media(max-width:700px){.lep-tabs{grid-template-columns:1fr;gap:9px}.lep-tabs button{min-height:62px;gap:12px}}
+
+/* P72: the Mock module owns its live, single-source readiness header. */
+.lep-page .live-mock{margin-top:18px}

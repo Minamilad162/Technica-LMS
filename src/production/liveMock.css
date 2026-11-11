@@ -51,3 +51,84 @@
  padding:9px 12px;max-width:320px;color:#205a5f}
 @media(max-width:650px){.p34-mock-mode>button{flex:1;padding:10px 7px;white-space:nowrap}
  .p34-mock-mode>label{margin-left:0;flex-basis:100%}.p34-mock-mode select{flex:1;min-width:0}}
+
+/* P72: Clean, course-backed Mock setup. No fixed demo tiles or manual refresh.
+   All values originate from the authenticated readiness response except the
+   syllabus-required 200 questions / five-hour duration. */
+.live-mock .live-mock-setup{gap:19px}
+.live-mock-readiness{
+ position:relative;overflow:hidden;display:flex;align-items:center;gap:18px;flex-wrap:wrap;
+ padding:22px 24px 28px;border:1px solid #d8ebe5;border-radius:19px;
+ background:linear-gradient(116deg,#f2fbf8 0%,#fff 66%,#f3fcfa 100%);
+ box-shadow:0 8px 25px #0c6d640b;
+}
+.live-mock-readiness-main{display:flex;align-items:center;gap:16px;min-width:0;flex:1 1 290px}
+.live-mock-readiness-icon{width:53px;height:53px;border-radius:16px;flex:none;
+ display:grid;place-items:center;background:#e0f8ed;color:#078a73}
+.live-mock-readiness.is-pending .live-mock-readiness-icon{background:#edf3f5;color:#66808b}
+.live-mock-readiness.is-error .live-mock-readiness-icon{background:#fff1e9;color:#ba6835}
+.live-mock-readiness-copy{min-width:0;display:grid;gap:5px}
+.live-mock-readiness-eyebrow{font-size:10px;letter-spacing:.14em;font-weight:900;color:#168875}
+.live-mock-readiness-copy strong{font-size:clamp(18px,2.4vw,26px);
+ letter-spacing:-.04em;line-height:1.2;color:#1c4851}
+.live-mock-readiness-copy p{margin:0;color:#5d7e83;font-size:12px;line-height:1.5}
+.live-mock-readiness-duration{display:grid;align-items:center;grid-template-columns:auto auto;
+ gap:3px 8px;white-space:nowrap;padding:10px 14px;border-radius:12px;
+ background:white;border:1px solid #dfefeb;color:#168b7a}
+.live-mock-readiness-duration strong{font-size:16px;color:#21535c}
+.live-mock-readiness-duration span{grid-column:2;color:#789097;font-size:10px}
+.live-mock-readiness-track{position:absolute;bottom:0;left:0;right:0;height:5px;background:#d9ede8}
+.live-mock-readiness-track>span{display:block;height:100%;border-radius:0 8px 8px 0;
+ background:linear-gradient(90deg,#118d87,#2dc6a3);transition:width .3s ease}
+.live-mock .live-mock-accept{align-items:center;padding:15px 17px;
+ background:#f9fcfb;border-radius:13px;font-size:12px;color:#4e7276}
+.live-mock .live-mock-accept input{margin:0;flex:none;accent-color:#008e7d}
+.live-mock .live-mock-start{
+ appearance:none;display:flex;align-items:center;justify-content:space-between;gap:15px;
+ width:min(100%,490px);min-height:82px;justify-self:center;margin:4px auto 0;
+ padding:14px 20px;border:1px solid #129b88;border-radius:18px;
+ background:linear-gradient(112deg,#075564,#0a8b80 60%,#18b69b);
+ box-shadow:0 13px 27px #078c782c, inset 0 1px #ffffff4a;
+ color:white;text-align:left;cursor:pointer;position:relative;overflow:hidden;
+ transition:transform .2s ease,box-shadow .2s ease,filter .2s ease;
+}
+.live-mock .live-mock-start::before{content:'';position:absolute;inset:0;
+ background:linear-gradient(110deg,transparent 15%,#ffffff12 55%,transparent 90%);
+ pointer-events:none}
+.live-mock .live-mock-start-icon{display:grid;place-items:center;width:48px;height:48px;
+ flex:none;border-radius:14px;background:#ffffff20;border:1px solid #ffffff35}
+.live-mock .live-mock-start-label{position:relative;display:grid;flex:1;gap:6px;min-width:0}
+.live-mock .live-mock-start-label strong{font-size:17px;font-weight:850;letter-spacing:-.025em;line-height:1.2}
+.live-mock .live-mock-start-label small{font-size:11px;color:#d1faf0;font-weight:550;line-height:1.4}
+.live-mock .live-mock-start-label small span{padding:0 3px}
+.live-mock .live-mock-start-arrow{flex:none;transition:transform .2s}
+.live-mock .live-mock-start:hover:not(:disabled){transform:translateY(-2px);
+ box-shadow:0 18px 31px #078c7840, inset 0 1px #ffffff60;filter:saturate(1.1)}
+.live-mock .live-mock-start:hover:not(:disabled) .live-mock-start-arrow{transform:translateX(3px)}
+.live-mock .live-mock-start:active:not(:disabled){transform:translateY(0)}
+.live-mock .live-mock-start:focus-visible{outline:3px solid #20bfa6;outline-offset:4px}
+.live-mock .live-mock-start:disabled{background:#eef4f3;border-color:#dce8e5;
+ box-shadow:none;color:#849da1;cursor:not-allowed}
+.live-mock .live-mock-start:disabled .live-mock-start-icon{
+ background:#e5efec;border-color:#d7e4e1}
+.live-mock .live-mock-start:disabled .live-mock-start-label small{color:#8aa2a7}
+.live-mock .live-mock-start:disabled::before{display:none}
+.live-mock-session-notice{display:flex;align-items:flex-start;gap:9px;margin:1px 0 0;
+ padding:12px 15px;border:1px solid #f3dfc8;background:#fff8f0;border-radius:12px;
+ color:#916339;font-size:12px;line-height:1.55}
+.live-mock-session-notice svg{flex:none;margin-top:1px}
+@media(max-width:650px){
+ .live-mock-readiness{padding:17px 16px 23px;gap:12px}
+ .live-mock-readiness-main{gap:11px;flex-basis:100%}
+ .live-mock-readiness-icon{width:44px;height:44px;border-radius:12px}
+ .live-mock-readiness-duration{margin-left:54px;padding:7px 10px}
+ .live-mock .live-mock-start{width:100%;min-height:78px;padding:12px 14px;gap:10px}
+ .live-mock .live-mock-start-icon{width:43px;height:43px;border-radius:12px}
+ .live-mock .live-mock-start-label strong{font-size:15px}
+ .live-mock .live-mock-start-label small{font-size:10px}
+}
+@media(prefers-reduced-motion:reduce){
+ .live-mock .live-mock-start,
+ .live-mock .live-mock-start-arrow,
+ .live-mock-readiness-track>span{transition:none}
+}

@@ -1,5 +1,5 @@
 import React,{useEffect,useMemo,useRef,useState} from 'react';
-import {AlertTriangle,ArrowLeft,ArrowRight,CheckCircle2,Clock3,Flag,LockKeyhole,PlayCircle,RefreshCw,Send,ShieldCheck} from 'lucide-react';
+import {AlertTriangle,ArrowLeft,ArrowRight,CheckCircle2,Clock3,Flag,LockKeyhole,PlayCircle,Send,ShieldCheck} from 'lucide-react';
 import {abandonSelectedMock,getSelectedMockReadiness,getSelectedMock,selectedMockSecondsLeft,
  saveSelectedMock,startSelectedMock,submitSelectedMock} from './selectedMockApi.js';
 import {requestQuestionFullscreen,isFullscreenActive,fullscreenStartError,leaveQuestionFullscreen} from '../lib/questionFullscreen';
@@ -42,13 +42,29 @@ export default function LiveSelectedMockExam({db,user,course,access}){
    setMessage('Fullscreen or tab access was lost. This Mock has been closed.');
   }
  });
+ // P72: The bank is always server-sourced. Re-check when the learner returns
+ // to this tab/window, without a manual refresh button or demo placeholders.
  useEffect(()=>{
-  let alive=true;
+  let alive=true,inFlight=false;
   setReadiness(null);setReadyError('');
   if(!access)return;
-  getSelectedMockReadiness(db,course.id).then(x=>{if(alive)setReadiness(x);})
-   .catch(e=>{if(alive)setReadyError(errorMessage(e));});
-  return()=>{alive=false;};
+  const reload=()=>{
+   if(document.visibilityState==='hidden'||inFlight||activeCall.current)return;
+   inFlight=true;
+   getSelectedMockReadiness(db,course.id)
+    .then(value=>{if(alive){setReadiness(value);setReadyError('');}})
+    .catch(e=>{if(alive)setReadyError(errorMessage(e));})
+    .finally(()=>{inFlight=false;});
+  };
+  const visible=()=>{if(document.visibilityState==='visible')reload();};
+  reload();
+  document.addEventListener('visibilitychange',visible);
+  window.addEventListener('focus',visible);
+  return()=>{
+   alive=false;
+   document.removeEventListener('visibilitychange',visible);
+   window.removeEventListener('focus',visible);
+  };
  },[db,course.id,access]);
  useEffect(()=>{
   setAttempt(null);setAt(0);setAccepted(false);setError('');setMessage('');
@@ -82,11 +98,7 @@ export default function LiveSelectedMockExam({db,user,course,access}){
   }).catch(e=>{setError('Time expired. Score finalization requires a connection: '+errorMessage(e));setAttempt(null);})
    .finally(()=>{activeCall.current=false;});
  },[attempt?.attemptId,left,attempt?.state]);
- const refreshReadiness=()=>{
-  setReadiness(null);setReadyError('');
-  getSelectedMockReadiness(db,course.id).then(setReadiness).catch(e=>setReadyError(errorMessage(e)));
- };
- const begin=async()=>{
+  const begin=async()=>{
   if(activeCall.current||busy||!access||!readiness?.ready||!accepted)return;
   activeCall.current=true;setBusy(true);setError('');setMessage('');
   try{
@@ -145,11 +157,22 @@ export default function LiveSelectedMockExam({db,user,course,access}){
  const active=attempt?.state==='in_progress';
  const q=active?attempt.questions?.[at]:null;
  const pending=access&&!readiness&&!readyError;
+ const selectedCount=readiness?.selectedCount??0;
+ const questionTarget=readiness?.requiredCount??200;
+ const isReady=readiness?.ready===true;
+ const completion=Math.min(100,Math.round(100*selectedCount/questionTarget));
+ const statusText=pending?'Verifying your Course Question Bank…':
+  readyError?'Could not verify exam readiness: '+readyError:
+  readiness?.engineUpgradePending?'Course Mock activation is not yet available.':
+  isReady?'Your exam is ready. Enter secure fullscreen to begin.':
+  !selectedCount?'Your instructor has not selected any Mock questions yet.':
+  selectedCount>questionTarget?'Too many Mock questions are selected. Contact your instructor.':
+  `${questionTarget-selectedCount} more saved Mock questions are needed to enable this exam.`;
  return <section ref={ref} className="live-practice live-mock" aria-label="Course Mock Exam">
   <header className="live-practice-top">
-   <div><span className="live-eyebrow">SAVED COURSE QUESTION BANK · FIXED MOCK</span>
+   <div><span className="live-eyebrow">YOUR VERIFIED COURSE ASSESSMENT</span>
     <h3><ShieldCheck size={21}/> Mock Exam · {course.title}</h3>
-    <p>Exactly 200 saved Mock questions · fixed 300 minutes · secure grading · excluded from Practice.</p>
+    <p>200 questions · 5-hour time limit · secure fullscreen exam.</p>
    </div>
    {active&&<button type="button" className="live-secondary" disabled={busy}
     onClick={()=>{void leaveAttempt(attempt.attemptId);void leaveIntentionally();}}>
@@ -158,29 +181,40 @@ export default function LiveSelectedMockExam({db,user,course,access}){
   </header>
   {!access?<div className="live-practice-note"><LockKeyhole size={18}/> Paid/manual ASP enrollment or verified Admin access is required.</div>:
    !attempt?<div className="live-mock-setup">
-    <div className="live-mock-stats"><div><b>{readiness?.selectedCount??'–'} / 200</b><span>Saved Mock questions</span></div>
-     <div><b>05:00</b><span>Hours</span></div>
-     <div><b>Server</b><span>Grading &amp; timer</span></div></div>
-    <p className="live-practice-note"><AlertTriangle size={17}/>
-     {pending?'Reading saved Mock selections for this Course…':
-      readyError?'Not available: '+readyError:
-      readiness?.ready?'Exactly 200 saved Mock questions are ready for the 5-hour exam.':
-      !readiness?.selectedCount?'No saved Mock questions for this Course yet.':
-      readiness.selectedCount>200
-       ?`Too many Mock questions: uncheck ${readiness.selectedCount-200} and save in the Question Bank.`
-       :`${readiness.selectedCount} of 200 Mock questions selected. ${200-readiness.selectedCount} more needed before the exam can start.`}
-    </p>
-    {readiness?.engineUpgradePending&&<p className="live-practice-note" role="status">
-      Saved selections are visible, but the fixed-200 server gate still needs activation. This exam cannot start until it is installed.</p>}
-    <button type="button" className="live-secondary" disabled={busy||pending} onClick={refreshReadiness}>
-     <RefreshCw size={15}/> Refresh Mock questions</button>
+    <div className={'live-mock-readiness '+(isReady?'is-ready':readyError?'is-error':'is-pending')}
+     role="status" aria-live="polite">
+     <div className="live-mock-readiness-main">
+      <div className="live-mock-readiness-icon" aria-hidden="true">
+       {isReady?<CheckCircle2 size={24}/>:readyError?<AlertTriangle size={24}/>:<ShieldCheck size={24}/>}
+      </div>
+      <div className="live-mock-readiness-copy">
+       <span className="live-mock-readiness-eyebrow">LIVE QUESTION BANK</span>
+       <strong>{pending?'Checking questions…':selectedCount+' / '+questionTarget+' questions selected'}</strong>
+       <p>{statusText}</p>
+      </div>
+     </div>
+     <div className="live-mock-readiness-duration" aria-label="Five-hour exam duration">
+      <Clock3 size={19}/><strong>5 hours</strong><span>Fixed duration</span>
+     </div>
+     <div className="live-mock-readiness-track" aria-hidden="true">
+      <span style={{width:completion+'%'}}/>
+     </div>
+    </div>
     <label className="live-mock-accept"><input type="checkbox" checked={accepted}
      onChange={e=>setAccepted(e.target.checked)}/>
-     I understand the exam is 300 minutes, my answers are autosaved on the server,
-     and leaving fullscreen or hiding the tab closes this attempt.</label>
-    <button type="button" className="live-primary" disabled={busy||!accepted||!readiness?.ready}
-     onClick={begin}><PlayCircle size={18}/> {busy?'Starting…':'Start Mock Exam'}</button>
-    {message&&<p className="live-practice-note" role="status">{message}</p>}
+     <span>I understand this exam lasts 5 hours. Answers are saved securely, and leaving fullscreen or hiding this tab closes the attempt.</span>
+    </label>
+    <button type="button" className="live-mock-start" disabled={busy||!access||!accepted||!isReady}
+     onClick={begin} aria-label={busy?'Preparing Mock Exam':'Start Mock Exam'}>
+     <span className="live-mock-start-icon"><PlayCircle size={23}/></span>
+     <span className="live-mock-start-label">
+      <strong>{busy?'Preparing your exam…':'Start Mock Exam'}</strong>
+      <small>200 questions <span aria-hidden="true">·</span> 5 hours <span aria-hidden="true">·</span> Secure fullscreen</small>
+     </span>
+     <ArrowRight size={20} className="live-mock-start-arrow"/>
+    </button>
+    {message&&<p className="live-mock-session-notice" role="status">
+     <AlertTriangle size={16}/>{message}</p>}
    </div>:
    attempt.state!=='in_progress'?<div className="live-mock-result" role="status">
     <CheckCircle2 size={32}/><h3>{attempt.state==='expired'?'Time expired':'Mock completed'}</h3>
@@ -189,7 +223,7 @@ export default function LiveSelectedMockExam({db,user,course,access}){
     <p>Question content and answer keys remain private after submission.</p>
     <button type="button" className="live-secondary" onClick={()=>{setAttempt(null);setAt(0);setAccepted(false);setMessage('');setReadiness(null);
       getSelectedMockReadiness(db,course.id).then(setReadiness).catch(e=>setReadyError(errorMessage(e)));}}>
-     <RefreshCw size={16}/> Return to exam setup
+     <ArrowLeft size={16}/> Return to exam setup
     </button>
    </div>:<>
     <div className="live-attempt-bar"><b>Mock Exam</b>

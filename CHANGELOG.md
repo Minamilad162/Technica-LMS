@@ -1,3 +1,10 @@
+## 2026-11-12 — P72 clean live Mock setup and premium Start action
+- Removed duplicate static Course Mock tiles and fake-looking Server stat; kept the real signed-in Supabase Mock readiness count and the fixed five-hour exam requirement.
+- Replaced the setup panel with a single compact, course-backed readiness/progress band and clear eligibility/status message. No sample/demo questions, numbers or scores are introduced.
+- Removed the manual Refresh Mock questions button; readiness checks automatically on mount and on returning to the browser tab/window, without polling.
+- Redesigned Start Mock Exam as a prominent responsive gradient CTA with shielded Fullscreen context, accessible disabled/focus/loading states and subtle hover motion. Preserved the real fullscreen/session-loss warning and acknowledged rules.
+- No changes to question pool, P71 SQL, server grading, timing, subscriptions or historical attempts. UI verification pending CI and physical browser checks.
+
 ## 2026-11-12 — P71 database activation for fixed Course Mock
 - After read-only migration ledger/function/grant check and exact-200 Question Bank validation, applied existing P71 function-only migration to Technica Account Supabase. Ledger version `20261111233907`.
 - Postflight verified new readiness version, fixed-200 server start, authenticated-only permissions, existing 200 eligible questions and no selected-Mock attempts. No business data rows were written.

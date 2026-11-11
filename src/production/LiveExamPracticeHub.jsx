@@ -178,11 +178,7 @@ export default function LiveExamPracticeHub(){
        <b>Mock Exam requires active access</b><p>Subscribe or contact your instructor to access this Course's Mock Exam.</p>
        <button type="button" className="btn" onClick={()=>navigate('/subscription-plans')}>View Subscription Plans</button>
       </div>:<>
-       <div className="lep-mock-promise">
-        <div><BookOpenCheck size={19}/><strong>{mockCourse.title} Question Bank</strong><span>200 saved Mock-only questions required</span></div>
-        <div><Clock3 size={19}/><strong>05:00 hours</strong><span>Fixed server-controlled exam timer</span></div>
-        <div><ShieldCheck size={19}/><strong>No customization</strong><span>Private answers and server grading</span></div>
-       </div>
+       {/* Live readiness and fixed duration render once in the secure Mock module. */}
        <LiveSelectedMockExam key={catalog.user.id+mockCourse.id} db={db} user={catalog.user} course={mockCourse} access={mockAccess}/>
       </>}
     </>}
