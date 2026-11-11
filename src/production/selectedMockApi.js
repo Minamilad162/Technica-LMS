@@ -1,5 +1,5 @@
-// P34B. A configurable Mock from Admin-selected Mock candidates.
-// Does NOT modify or substitute the immutable P9B/P10 official 200-item exam.
+// P71: Course Mock uses saved Question Bank flags with a fixed-200 gate.
+// P9B/P10 historical ASP reserved forms and all answer keys remain protected.
 import {officialMockSecondsLeft} from './mockApi.js';
 const uuid=/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 async function rpc(db,name,args){
@@ -9,14 +9,19 @@ async function rpc(db,name,args){
  return data;
 }
 export function validateSelectedMockReadiness(x){
- if(!x||x.engineVersion!=='p34b-selected-mock-v1'
+ const fixed=x?.engineVersion==='p71-fixed-bank-mock-v1';
+ const legacy=x?.engineVersion==='p34b-selected-mock-v1';
+ if(!x||(!legacy&&!fixed)
   ||x.durationSeconds!==18000||x.maxPerAttempt!==200
   ||x.officialMockUnchanged!==true||typeof x.ready!=='boolean'
   ||!Number.isSafeInteger(x.selectedCount)||x.selectedCount<0
   ||x.deliveredCount!==Math.min(x.selectedCount,200)
-  ||x.ready!==(x.selectedCount>0))
-  throw Error('Selected Mock is not configured on this database.');
- return x;
+  ||x.ready!==(fixed?x.selectedCount===200:x.selectedCount>0)
+  ||(fixed&&(x.requiredCount!==200||x.source!=='question_bank_mock_flags')))
+  throw Error('Mock Exam configuration does not match the secure Course Question Bank.');
+ // Legacy P34B still provides accurate count-only display, but cannot
+ // start variable-size Mock attempts through the new fixed-200 learner UI.
+ return {...x,ready:fixed&&x.ready,engineUpgradePending:legacy,requiredCount:200};
 }
 export async function getSelectedMockReadiness(db,courseId){
  if(!uuid.test(courseId||''))throw Error('Select the actual Course.');
@@ -37,7 +42,7 @@ export function validateSelectedMockPayload(v){
   throw Error('Invalid Selected Mock server deadline.');
  if(!Array.isArray(v.questions))throw Error('Invalid Mock question payload.');
  if(v.state==='in_progress'){
-  if(v.questions.length!==v.questionCount||v.correctCount!==null||v.scorePercent!==null)
+  if(v.questionCount!==200||v.questions.length!==v.questionCount||v.correctCount!==null||v.scorePercent!==null)
    throw Error('Selected Mock answer keys leaked or question count mismatched.');
   const seen=new Set();
   for(let i=0;i<v.questionCount;i++){
@@ -71,6 +76,8 @@ export function validateSelectedMockPayload(v){
 export async function startSelectedMock(db,courseId,requestId){
  if(!uuid.test(courseId||'')||!uuid.test(requestId||''))
   throw Error('Course and request IDs required.');
+ const readiness=await getSelectedMockReadiness(db,courseId);
+ if(!readiness.ready)throw Error('Exactly 200 saved Mock questions and the fixed-200 server gate are required.');
  return validateSelectedMockPayload(await rpc(db,'lms_p34_start_selected_mock',
   {p_course_id:courseId,p_request_id:requestId}));
 }

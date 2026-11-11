@@ -104,7 +104,8 @@
     "test:p67": "node scripts/test-p67-lesson-capture-deterrence.mjs",
     "test:p68": "node desktop/secure-viewer/test.cjs",
     "test:p69": "node scripts/test-p69-auto-protection.mjs",
-    "test:p70": "node scripts/test-p70-fullscreen-lesson-video.mjs"
+    "test:p70": "node scripts/test-p70-fullscreen-lesson-video.mjs",
+    "test:p71": "node scripts/test-p71-course-mock-bank.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.58.0",

@@ -9,7 +9,7 @@ import {loadStructure} from './lmsApi.js';
 import {hasPlatformAccess} from './subscriptionApi.js';
 import {aspMissingReason} from './questionBankCourseSelection.js';
 import LivePractice from './LivePractice.jsx';
-import LiveMockExam from './LiveMockExam.jsx';
+import LiveSelectedMockExam from './LiveSelectedMockExam.jsx';
 // Reuse verified P11 My Practice history; never recreate scores from browser state.
 const LiveLearnerWorkspace=React.lazy(()=>import('./LiveLearnerWorkspace.jsx'));
 import './liveLearning.css';
@@ -36,7 +36,7 @@ export default function LiveExamPracticeHub(){
  const navigate=useNavigate(),[params,setParams]=useSearchParams();
  const tab=examPracticeTab(params.get('tab'));
  const [state,setState]=useState({loading:true,catalog:null,db:null,error:''});
- const [courseId,setCourseId]=useState('');
+ const [courseId,setCourseId]=useState(''),[mockCourseId,setMockCourseId]=useState('');
  const [domains,setDomains]=useState([]),[domainLoading,setDomainLoading]=useState(false);
  const [domainError,setDomainError]=useState('');
  const [revision,setRevision]=useState(0);
@@ -56,8 +56,9 @@ export default function LiveExamPracticeHub(){
    .then(catalog=>{
     if(!alive)return;
     setState({loading:false,catalog,db,error:''});
-    setCourseId(old=>catalog.courses.some(c=>c.id===old)?old:
-      (catalog.courses.find(c=>c.slug==='asp')||catalog.courses[0])?.id||'');
+    setCourseId(old=>catalog.courses.some(c=>c.id===old)?old:catalog.courses[0]?.id||'');
+    setMockCourseId(old=>catalog.courses.some(c=>c.id===old)?old:
+     catalog.courses.find(c=>accessTo(catalog,c))?.id||catalog.courses[0]?.id||'');
    })
    .catch(e=>{if(alive)setState({loading:false,catalog:null,db,
     error:e?.message||'Unable to verify your learning catalog.'});});
@@ -67,9 +68,9 @@ export default function LiveExamPracticeHub(){
  const allowedCourses=catalog?.courses.filter(c=>accessTo(catalog,c))||[];
  const course=courseId==='all'?{id:'all',title:'All Courses',publication_state:'published'}:
   catalog?.courses.find(c=>c.id===courseId)||null;
- const officialAsp=catalog?.courses.find(c=>c.slug==='asp')||null;
+ const mockCourse=catalog?.courses.find(c=>c.id===mockCourseId)||null;
  const practiceAccess=courseId==='all'?allowedCourses.length>0:accessTo(catalog,course);
- const mockAccess=accessTo(catalog,officialAsp);
+ const mockAccess=accessTo(catalog,mockCourse);
  useEffect(()=>{
   if(tab!=='practice'||!db||!course||!practiceAccess||course.id==='all'){
    setDomains([]);setDomainError('');return;
@@ -85,7 +86,7 @@ export default function LiveExamPracticeHub(){
    <div className="lep-hero-copy">
     <span className="lep-eyebrow"><GraduationCap size={17}/> TECHNICA EXAM PREPARATION</span>
     <h1>Mock Exam <em>&amp; Practice</em></h1>
-    <p>Train your way, or test your readiness with the official timed ASP Mock Exam.
+    <p>Train your way, or take your Course's timed Mock Exam using saved Question Bank selections.
      One place for both learning experiences.</p>
     <div className="lep-hero-tags">
      <span><SlidersHorizontal size={15}/> Custom Practice</span>
@@ -119,12 +120,12 @@ export default function LiveExamPracticeHub(){
   <section className="lep-content" role="tabpanel"
    id={'lep-panel-'+tab} aria-labelledby={'lep-tab-'+tab}>
    <div className="lep-section-heading">
-    <div><span className="lep-section-kicker">{tab==='practice'?'YOUR PRACTICE, YOUR RULES':tab==='history'?'YOUR VERIFIED RESULTS':'OFFICIAL ASP MOCK EXAM'}</span>
+    <div><span className="lep-section-kicker">{tab==='practice'?'YOUR PRACTICE, YOUR RULES':tab==='history'?'YOUR VERIFIED RESULTS':'COURSE MOCK EXAM'}</span>
      <h2>{tab==='practice'?'Build your practice session':tab==='history'?'Your practice history':'Fixed exam. Real preparation.'}</h2>
      <p>{tab==='practice'
       ?'Choose your course, question count, practice mode and time limit in the same secure Practice you used before.'
       :tab==='history'?'Review your own completed sessions, scores and adaptive progress.'
-      :'The official ASP Mock always has exactly 200 reserved questions and 300 minutes. No question-count or duration settings.'}</p>
+      :'Mock Exam uses the questions saved as Mock in the selected Course. Exactly 200 are required for the fixed 300-minute exam; no additional reservation step.'}</p>
     </div>
     <span className="lep-section-mark">{tab==='practice'?<SlidersHorizontal size={26}/>:tab==='history'?<History size={26}/>:<ShieldCheck size={26}/>}</span>
    </div>
@@ -160,27 +161,30 @@ export default function LiveExamPracticeHub(){
         course={course} domains={domains} access={practiceAccess} defaultMode="quick10"/>
       </>}
      </>}
-    </>:!officialAsp?<div className="live-learning-empty"><LockKeyhole size={25}/>
-     <b>ASP Mock setup is incomplete</b>
-     <p>{aspMissingReason(catalog.courses)}</p>
-     {catalog.identity?.isAdmin&&<button type="button" className="btn"
-      onClick={()=>navigate('/admin-tools?tab=questions')}>Open ASP Question Bank</button>}
-    </div>:officialAsp.publication_state!=='published'?<div className="live-learning-empty"><LockKeyhole size={24}/>
-     <b>ASP Course is not published</b><p>Your saved Mock choices remain intact. To enable this official 200-question exam, publish the existing ASP Course and finalize the reviewed form.</p>
-     {catalog.identity?.isAdmin&&<button type="button" className="btn"
-      onClick={()=>navigate('/admin-tools?tab=courses')}>Open Admin Courses</button>}
-    </div>:!mockAccess?<div className="live-learning-empty"><LockKeyhole size={24}/>
-     <b>Mock Exam requires active access</b>
-     <p>Course access settings are unavailable. Refresh or contact the LMS administrator.</p>
-     <button type="button" className="btn" onClick={()=>navigate('/subscription-plans')}>View Subscription Plans</button>
+    </>:!mockCourse?<div className="live-learning-empty"><LockKeyhole size={24}/>
+     <b>No Course Mock available</b><p>Publish a Course and select its Mock questions in Question Bank.</p>
     </div>:<>
-     <div className="lep-mock-promise">
-      <div><BookOpenCheck size={19}/><strong>ASP Question Bank</strong><span>200 officially reserved questions</span></div>
-      <div><Clock3 size={19}/><strong>05:00 hours</strong><span>Fixed server-controlled exam timer</span></div>
-      <div><ShieldCheck size={19}/><strong>No customization</strong><span>Private answers and server grading</span></div>
+     <div className="lep-course-selector">
+      <label htmlFor="lep-mock-course"><BookOpenCheck size={19}/> Mock Exam course</label>
+      <select id="lep-mock-course" value={mockCourseId} onChange={e=>setMockCourseId(e.target.value)}>
+       {catalog.courses.map(c=><option key={c.id} value={c.id}>{c.title}</option>)}
+      </select>
+      <span><CheckCircle2 size={15}/> Saved Mock questions from this Course only</span>
      </div>
-     <LiveMockExam key={catalog.user.id+officialAsp.id} db={db} user={catalog.user}
-      course={officialAsp} access={mockAccess}/>
+     {mockCourse.publication_state!=='published'?<div className="live-learning-empty"><LockKeyhole size={24}/>
+       <b>Course not published</b><p>The saved Mock questions remain in Question Bank. Publish this Course to enable its exam.</p>
+       {catalog.identity?.isAdmin&&<button type="button" className="btn" onClick={()=>navigate('/admin-tools?tab=courses')}>Open Admin Courses</button>}
+      </div>:!mockAccess?<div className="live-learning-empty"><LockKeyhole size={24}/>
+       <b>Mock Exam requires active access</b><p>Subscribe or contact your instructor to access this Course's Mock Exam.</p>
+       <button type="button" className="btn" onClick={()=>navigate('/subscription-plans')}>View Subscription Plans</button>
+      </div>:<>
+       <div className="lep-mock-promise">
+        <div><BookOpenCheck size={19}/><strong>{mockCourse.title} Question Bank</strong><span>200 saved Mock-only questions required</span></div>
+        <div><Clock3 size={19}/><strong>05:00 hours</strong><span>Fixed server-controlled exam timer</span></div>
+        <div><ShieldCheck size={19}/><strong>No customization</strong><span>Private answers and server grading</span></div>
+       </div>
+       <LiveSelectedMockExam key={catalog.user.id+mockCourse.id} db={db} user={catalog.user} course={mockCourse} access={mockAccess}/>
+      </>}
     </>}
   </section>
  </main>;

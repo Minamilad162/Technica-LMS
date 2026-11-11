@@ -60,21 +60,31 @@ const cid='bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb';
 const qid='cccccccc-cccc-4ccc-8ccc-cccccccccccc';
 const ready={ready:true,selectedCount:1,deliveredCount:1,maxPerAttempt:200,durationSeconds:18000,
  engineVersion:'p34b-selected-mock-v1',officialMockUnchanged:true};
-assert.equal(validateSelectedMockReadiness(ready).ready,true);
+assert.equal(validateSelectedMockReadiness(ready).ready,false);
+assert.equal(validateSelectedMockReadiness(ready).engineUpgradePending,true);
+assert.equal(validateSelectedMockReadiness({
+ ...ready,engineVersion:'p71-fixed-bank-mock-v1',ready:true,
+ selectedCount:200,deliveredCount:200,requiredCount:200,
+ source:'question_bank_mock_flags'
+}).ready,true);
 assert.throws(()=>validateSelectedMockReadiness({...ready,ready:false}),/not configured/);
 assert.throws(()=>validateSelectedMockReadiness({...ready,officialMockUnchanged:false}),/not configured/);
-const attempt={attemptId:rid,courseId:cid,questionCount:1,
+const questions=Array.from({length:200},(_,i)=>({
+ id:'cccccccc-cccc-4ccc-8ccc-'+String(i+1).padStart(12,'0'),
+ position:i+1,prompt:'Which action is safe?',
+ options:['Verify authorization','Ignore hazard'],selectedIndex:null,flagged:false
+}));
+const attempt={attemptId:rid,courseId:cid,questionCount:200,
  mode:'selected_mock',state:'in_progress',durationSeconds:18000,
  serverNow:now,startedAt:now,deadlineAt:end,submittedAt:null,
  answeredCount:0,flaggedCount:0,correctCount:null,scorePercent:null,
- questions:[{id:qid,position:1,prompt:'Which action is safe?',
-  options:['Verify authorization','Ignore hazard'],selectedIndex:null,flagged:false}]};
-assert.equal(validateSelectedMockPayload(attempt).questions.length,1);
+ questions};
+assert.equal(validateSelectedMockPayload(attempt).questions.length,200);
 assert.throws(()=>validateSelectedMockPayload({...attempt,questions:
- [{...attempt.questions[0],correct_index:0}]}),/reveal answer keys/);
+ attempt.questions.map((q,i)=>i===0?{...q,correct_index:0}:q)}),/reveal answer keys/);
 assert.throws(()=>validateSelectedMockPayload({...attempt,questionCount:2}),/answer keys leaked or question count mismatched/);
-assert.deepEqual(validateSelectedMockPayload({...attempt,state:'submitted',correctCount:1,scorePercent:100,
+assert.deepEqual(validateSelectedMockPayload({...attempt,state:'submitted',correctCount:1,scorePercent:0.5,
  submittedAt:now,questions:[]}).questions,[]);
-assert.throws(()=>validateSelectedMockPayload({...attempt,state:'submitted',correctCount:1,scorePercent:100,
+assert.throws(()=>validateSelectedMockPayload({...attempt,state:'submitted',correctCount:1,scorePercent:0.5,
  submittedAt:now}),/Closed Mock cannot expose/);
 console.log('PASS P34 frontend and SQL contracts: single Save publishes lesson-only Draft links, no Review Draft, selected Mock protected, official Mock untouched.');

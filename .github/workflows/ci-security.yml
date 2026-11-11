@@ -157,8 +157,10 @@ jobs:
       - name: P38 premium Subscription Plans UI and real-price presentation
         run: npm run test:p38:subscription-ui
 
-      - name: P39 unified Mock Exam and Practice menu with real P10 200/5h delivery
-        run: npm run test:p39:exam-practice
+      - name: P39/P71 fixed Course Mock from saved bank plus protected Practice
+        run: |
+          npm run test:p39:exam-practice
+          npm run test:p71
 
       - name: P41 Open Access published-only and learner presentation contract
         run: npm run test:p41:open-access

@@ -1,3 +1,10 @@
+## 2026-11-12 — P71 directly sync saved Mock Exam questions to Course Mock
+- Removed hidden ASP-only dependency from primary learner Mock Exam tab. Learner selects any authorized published Course (including real Course 1); the tab displays exactly that Course's saved Mock selection count via existing authenticated P34B readiness RPC.
+- Admin Exams & Mock tab defaults to the saved Mock-only Question Bank filter and shows marked questions immediately on visit, no separate candidate load. Historical ASP reservation tools are preserved but are not the new Course Mock workflow.
+- Fixed Mock remains 200 questions / 300 minutes: UI shows N/200 and cannot launch a partial exam. The existing P34B readiness is used for count-only display until the additive P71 fixed-200 RPC migration is installed; old variable-size server readiness cannot unlock the new learner exam.
+- Added **source-only** P71 SQL to harden existing server readiness and start RPCs with exact-200 validation, same owner/entitlement checks, snapshot/answer isolation and historical P9B/P10 preservation. No SQL was applied to live production.
+- Updated regression tests, blueprint and one existing GitHub Actions CI step. Course data, candidate flags, prior attempts and all production rows are untouched.
+
 ## 2026-11-12 — P70 fullscreen-only Lesson video playback
 - A learner's first Play click now requests native fullscreen on the protected video wrapper before attempting playback; normal inline video controls are hidden. Fullscreen denied/unsupported means no playback, with a browser-specific explanation.
 - When a learner closes fullscreen with Esc/exit (or another fullscreen replaces the protected wrapper), pause immediately, clear the signed video source and show an opaque player blackout. Browser focus cannot silently resume fullscreen-exit content. Return to Lesson restores authorization, but playback requires another explicit Play click.

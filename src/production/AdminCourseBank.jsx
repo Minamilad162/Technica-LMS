@@ -13,13 +13,13 @@ import './courseQuestionBank.css';
 
 const fail=e=>e?.message||'The protected Question Bank request failed.';
 const initial=()=>({prompt:'',options:['','','',''],correct:0,explanation:''});
-function Status({value}){const label=value==='candidate'?'Mock candidate':value==='mock'?'Official Mock':value;
- return <span title={value==='candidate'?'Candidate only · official 200-question ASP Mock reservation must be finalized separately':value==='draft'?'Draft in Bank · can be published to a selected Lesson on Save':value==='approved'?'Approved question · learner visibility also requires a published Lesson Quiz link':'Reserved for official Mock · excluded from Practice'} className={'p28-status '+(value==='candidate'?'draft':value==='approved'?'approved':value==='mock'?'mock':'draft')}>{label}</span>;}
+function Status({value}){const label=value==='candidate'?'Selected for Mock':value==='mock'?'Official Mock':value;
+ return <span title={value==='candidate'?'Saved Mock selection automatically enters the Course Mock pool after Save All':value==='draft'?'Draft in Bank · can be published to a selected Lesson on Save':value==='approved'?'Approved question · learner visibility also requires a published Lesson Quiz link':'Reserved for official Mock · excluded from Practice'} className={'p28-status '+(value==='candidate'?'draft':value==='approved'?'approved':value==='mock'?'mock':'draft')}>{label}</span>;}
 
 export default function AdminCourseBank({db,courses=[],asp,onUpdate,onDirtyChange,mode='bank',coursesLoading=false,coursesError='',onRefreshCourses,onGoToCourses}){
  const [courseId,setCourseId]=useState(''),[domains,setDomains]=useState([]),[domainId,setDomainId]=useState('');
  const [search,setSearch]=useState(''),[query,setQuery]=useState(''),[offset,setOffset]=useState(0);
- const [filterDomain,setFilterDomain]=useState(''),[difficulty,setDifficulty]=useState(''),[usage,setUsage]=useState('all');
+ const [filterDomain,setFilterDomain]=useState(''),[difficulty,setDifficulty]=useState(''),[usage,setUsage]=useState(mode==='mock'?'mock':'all');
  const [bank,setBank]=useState({total:0,items:[]}),[busy,setBusy]=useState(false),[loading,setLoading]=useState(false);
  const [error,setError]=useState(''),[notice,setNotice]=useState(''),[revision,setRevision]=useState(0);
  const [pending,setPending]=useState(null),[uploadCount,setUploadCount]=useState(0);
@@ -52,7 +52,7 @@ export default function AdminCourseBank({db,courses=[],asp,onUpdate,onDirtyChang
   return()=>{live=false;};
  },[db]);
  useEffect(()=>{setOffset(0);setSearch('');setQuery('');setPending(null);setManual(null);
-  setError('');setNotice('');setDomainId('');setFilterDomain('');setDifficulty('');setUsage('all');setDomains([]);setLessons([]);setSelectedIds([]);
+  setError('');setNotice('');setDomainId('');setFilterDomain('');setDifficulty('');setUsage(mode==='mock'?'mock':'all');setDomains([]);setLessons([]);setSelectedIds([]);
   if(!courseId)return;
   let live=true;
   Promise.all([
@@ -153,7 +153,7 @@ export default function AdminCourseBank({db,courses=[],asp,onUpdate,onDirtyChang
       (result.published||0)+' Lesson Quiz question(s) published'+
       (result.linked?' · '+result.linked+' new Lesson link(s)':'')+
       (result.unpublished?' · '+result.unpublished+' disabled quiz item(s) unpublished':'')+
-      '. Mock candidate flags are saved; the fixed official 200-question form still requires its finalized Question Bank reservation.'
+      '. Saved Mock question flags automatically feed this Course's Mock pool; 200 eligible questions are required for the fixed exam.'
     :'Saved '+result.saved+' question settings using legacy P30. Draft Lesson links are NOT learner-published, and Mock candidate flags do NOT activate the fixed official 200-question Mock. Install P34A/P34B to enable Lesson Quiz one-save publishing.');
    refresh(true);
   }catch(e){setError('No partial changes saved. Your pending selections are retained. '+fail(e));}
@@ -360,7 +360,7 @@ export default function AdminCourseBank({db,courses=[],asp,onUpdate,onDirtyChang
   {selected&&<>
    <p className="p31-lesson-publish-note">
     <BookOpen size={16}/> Assigning a question to a Lesson Quiz links it to that Lesson.
-    {batchMode==='p34'?<><strong> Active, non-Mock questions publish immediately to the selected Lesson Quiz on Save All Changes</strong> — including imported Drafts. Mock flags identify candidates; only exactly 200 officially reserved ASP questions appear in the fixed Mock Exam.</>:<>
+    {batchMode==='p34'?<><strong> Active, non-Mock questions publish immediately to the selected Lesson Quiz on Save All Changes</strong> — including imported Drafts. Saved Mock marks automatically feed the selected Course's Mock pool; exactly 200 eligible questions are needed to start.</>:<>
      <strong> Legacy P30 mode:</strong> editing is available, but Drafts cannot publish until P34A/P34B are installed.</>}
    </p>
    {!!lessons.length&&<div className="p32-publication-status at-surface" aria-label="Saved Lesson Quiz publication status">
@@ -397,7 +397,7 @@ export default function AdminCourseBank({db,courses=[],asp,onUpdate,onDirtyChang
    <div className="p30-table-card at-surface">
     <div className="p30-table-top">
      <strong>{selected.title} <span>· {bank.total} results</span></strong>
-     <p>Only question text is shown. Mock Exam checks stage candidates; official 200-question Mock reservation is separate and permanent. Settings save together.</p>
+     <p>Only question text is shown. Save a Mock Exam switch to include this question in the Course Mock pool automatically. The fixed exam needs 200 saved questions.</p>
     </div>
     {loading?<div className="at-empty">Loading protected questions…</div>:!bank.items.length?<div className="at-empty">No questions match this filter. Change the filters or import a file.</div>:
     <div className="p30-table-scroll"><table className="p30-table">
@@ -501,9 +501,12 @@ export default function AdminCourseBank({db,courses=[],asp,onUpdate,onDirtyChang
      {reviewOpen?'Hide':'Open'} ASP rights review for Practice and official Mock reservation</button>
     {reviewOpen&&<section className="p28-asp-review"><AdminQuestionsPanel db={db} asp={asp||selected} onUpdate={()=>refresh()}/></section>}
    </div>}
-   {selected.slug==='asp'&&mode==='mock'&&<AdminMockPanel db={db} asp={asp||selected}/>}
-   {selected.slug!=='asp'&&mode==='mock'&&!aspIdentityMismatch&&
-    <p className="at-disclaimer">ASP Mock Exam is fixed: only the 200 questions finalized in the official Mock reservation are delivered. Checking a new candidate does not alter that reserved form.</p>}
+   {selected.slug==='asp'&&mode==='mock'&&<details className="p30-advanced-review">
+     <summary>Legacy ASP reserved Mock tools (not required for Course Mock)</summary>
+     <AdminMockPanel db={db} asp={asp||selected}/>
+    </details>}
+   {mode==='mock'&&!aspIdentityMismatch&&
+     <p className="at-disclaimer" role="status">Saved selections for {selected.title}: {bank.total} Mock question(s) shown automatically. The fixed Course Mock opens with exactly 200 eligible questions; no additional reservation is needed.</p>}
   </>}
  </div>;
 }

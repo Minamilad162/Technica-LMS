@@ -12,7 +12,7 @@ const countdown=seconds=>{
  const n=Math.max(0,Math.ceil(seconds||0));
  return [Math.floor(n/3600),Math.floor(n%3600/60),n%60].map(x=>String(x).padStart(2,'0')).join(':');
 };
-const errorMessage=e=>e?.message||'Selected Mock request failed.';
+const errorMessage=e=>e?.message||'Mock Exam request failed.';
 
 export default function LiveSelectedMockExam({db,user,course,access}){
  const [readiness,setReadiness]=useState(null),[readyError,setReadyError]=useState('');
@@ -82,6 +82,10 @@ export default function LiveSelectedMockExam({db,user,course,access}){
   }).catch(e=>{setError('Time expired. Score finalization requires a connection: '+errorMessage(e));setAttempt(null);})
    .finally(()=>{activeCall.current=false;});
  },[attempt?.attemptId,left,attempt?.state]);
+ const refreshReadiness=()=>{
+  setReadiness(null);setReadyError('');
+  getSelectedMockReadiness(db,course.id).then(setReadiness).catch(e=>setReadyError(errorMessage(e)));
+ };
  const begin=async()=>{
   if(activeCall.current||busy||!access||!readiness?.ready||!accepted)return;
   activeCall.current=true;setBusy(true);setError('');setMessage('');
@@ -129,7 +133,7 @@ export default function LiveSelectedMockExam({db,user,course,access}){
  };
  const submit=async()=>{
   if(!attempt||attempt.state!=='in_progress'||busy||activeCall.current)return;
-  if(!window.confirm(`Submit your Selected Mock Test? ${attempt.questionCount-attempt.answeredCount} questions are unanswered. This cannot be undone.`))return;
+  if(!window.confirm(`Submit your Mock Exam? ${attempt.questionCount-attempt.answeredCount} questions are unanswered. This cannot be undone.`))return;
   activeCall.current=true;setBusy(true);setError('');
   try{
    const outcome=await submitSelectedMock(db,attempt.attemptId);
@@ -141,11 +145,11 @@ export default function LiveSelectedMockExam({db,user,course,access}){
  const active=attempt?.state==='in_progress';
  const q=active?attempt.questions?.[at]:null;
  const pending=access&&!readiness&&!readyError;
- return <section ref={ref} className="live-practice live-mock" aria-label="Selected Mock Test">
+ return <section ref={ref} className="live-practice live-mock" aria-label="Course Mock Exam">
   <header className="live-practice-top">
-   <div><span className="live-eyebrow">P34B · ADMIN-SELECTED MOCK TEST</span>
-    <h3><ShieldCheck size={21}/> Selected Mock Test</h3>
-    <p>Questions selected by the Admin · 300 minutes maximum · private server grading · no Practice or official 200-question Mock mixing.</p>
+   <div><span className="live-eyebrow">SAVED COURSE QUESTION BANK · FIXED MOCK</span>
+    <h3><ShieldCheck size={21}/> Mock Exam · {course.title}</h3>
+    <p>Exactly 200 saved Mock questions · fixed 300 minutes · secure grading · excluded from Practice.</p>
    </div>
    {active&&<button type="button" className="live-secondary" disabled={busy}
     onClick={()=>{void leaveAttempt(attempt.attemptId);void leaveIntentionally();}}>
@@ -154,21 +158,28 @@ export default function LiveSelectedMockExam({db,user,course,access}){
   </header>
   {!access?<div className="live-practice-note"><LockKeyhole size={18}/> Paid/manual ASP enrollment or verified Admin access is required.</div>:
    !attempt?<div className="live-mock-setup">
-    <div className="live-mock-stats"><div><b>{readiness?.deliveredCount||0}</b><span>Questions</span></div>
+    <div className="live-mock-stats"><div><b>{readiness?.selectedCount??'–'} / 200</b><span>Saved Mock questions</span></div>
      <div><b>05:00</b><span>Hours</span></div>
      <div><b>Server</b><span>Grading &amp; timer</span></div></div>
     <p className="live-practice-note"><AlertTriangle size={17}/>
-     {pending?'Checking the Mock questions marked by your instructor…':
+     {pending?'Reading saved Mock selections for this Course…':
       readyError?'Not available: '+readyError:
-      readiness?.ready?'The Admin-selected Mock question pool is ready for your timed test.':
-      `Your instructor has not selected any Mock questions for this Course yet.`}
+      readiness?.ready?'Exactly 200 saved Mock questions are ready for the 5-hour exam.':
+      !readiness?.selectedCount?'No saved Mock questions for this Course yet.':
+      readiness.selectedCount>200
+       ?`Too many Mock questions: uncheck ${readiness.selectedCount-200} and save in the Question Bank.`
+       :`${readiness.selectedCount} of 200 Mock questions selected. ${200-readiness.selectedCount} more needed before the exam can start.`}
     </p>
+    {readiness?.engineUpgradePending&&<p className="live-practice-note" role="status">
+      Saved selections are visible, but the fixed-200 server gate still needs activation. This exam cannot start until it is installed.</p>}
+    <button type="button" className="live-secondary" disabled={busy||pending} onClick={refreshReadiness}>
+     <RefreshCw size={15}/> Refresh Mock questions</button>
     <label className="live-mock-accept"><input type="checkbox" checked={accepted}
      onChange={e=>setAccepted(e.target.checked)}/>
      I understand the exam is 300 minutes, my answers are autosaved on the server,
      and leaving fullscreen or hiding the tab closes this attempt.</label>
     <button type="button" className="live-primary" disabled={busy||!accepted||!readiness?.ready}
-     onClick={begin}><PlayCircle size={18}/> {busy?'Starting…':'Start Selected Mock Test'}</button>
+     onClick={begin}><PlayCircle size={18}/> {busy?'Starting…':'Start Mock Exam'}</button>
     {message&&<p className="live-practice-note" role="status">{message}</p>}
    </div>:
    attempt.state!=='in_progress'?<div className="live-mock-result" role="status">
@@ -181,7 +192,7 @@ export default function LiveSelectedMockExam({db,user,course,access}){
      <RefreshCw size={16}/> Return to exam setup
     </button>
    </div>:<>
-    <div className="live-attempt-bar"><b>Selected Mock Test</b>
+    <div className="live-attempt-bar"><b>Mock Exam</b>
      <span><Clock3 size={16}/>{countdown(left)} remaining</span>
      <span>{attempt.answeredCount} / {attempt.questionCount} answered</span>
      <span>{attempt.flaggedCount} flagged</span>

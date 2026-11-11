@@ -45,13 +45,14 @@ for(const k of [
  'role="tablist"','role="tab"','aria-selected={tab===\'practice\'}',
  'aria-selected={tab===\'mock\'}','id="lep-tab-practice"','id="lep-tab-mock"',
  'Custom Practice','200 questions · 5 hours · fixed','My Practice','lep-tab-history',
- 'LivePractice','LiveMockExam','loadStructure(db,course.id)',
+ 'LivePractice','LiveSelectedMockExam','loadStructure(db,course.id)',
  'fetchLiveLearningCatalog(db)','mayReadLiveCourse(catalog,course)',
- 'hasPlatformAccess(catalog.subscription)',"catalog?.courses.find(c=>c.slug==='asp')",
+ 'hasPlatformAccess(catalog.subscription)',"catalog?.courses.find(c=>c.id===mockCourseId)",
  'defaultMode="quick10"','onClick={()=>activate(\'mock\')}',
- 'id={\'lep-panel-\'+tab}', 'No question-count or duration settings.'
+ 'id={\'lep-panel-\'+tab}', 'Exactly 200 are required'
 ])check(hub,k,'Three-tab secure Supabase hub');
-assert(!hub.includes('LiveSelectedMockExam'),'Mock tab must not deliver variable selected-Mock engine');
+assert(hub.includes('LiveSelectedMockExam')&&!hub.includes('<LiveMockExam'),
+ 'Course Mock tab uses fixed-200 selected-bank engine, not the historical ASP reserved form');
 assert(!hub.includes('../data/mock'),'Mock must not load demo bank');
 assert(!hub.includes('assessmentSettings('),'Mock settings must never be customized');
 assert(!legacyPortal.includes('LiveSelectedMockExam'),'Legacy /mock/live route must be official only');
@@ -91,4 +92,4 @@ check(reservationUi,'reserveAspMock(db,course.id,selected,phrase)','Explicit Adm
 check(oldForm,'v_check:=public.lms_p9b_mock_preflight','Server rechecks under locks');
 assert(!finalizer.includes('lms_p9b_reserve_mock('),'Cannot bypass protected P9B');
 console.log('PASS P40 saved Question Bank candidates require reviewed exact-200 P9B reservation.');
-console.log('PASS P39 unified Mock Exam & Practice: one sidebar entry and three tabs; Practice customizable; P10 ASP always 200/300 from immutable reservation, no selected/old-demo exam.');
+console.log('PASS P39/P71: Course Mock tab uses saved Bank selection with 200/300; immutable P10 legacy stays unchanged.');

@@ -7,7 +7,7 @@ import {useNavigate} from 'react-router-dom';
 import {getLearnerProgress} from './learnerProgressApi.js';
 const CourseLessonExplorer=React.lazy(()=>import('./CourseLessonExplorer.jsx'));
 const LivePractice=React.lazy(()=>import('./LivePractice.jsx'));
-const LiveMockExam=React.lazy(()=>import('./LiveMockExam.jsx'));
+const LiveSelectedMockExam=React.lazy(()=>import('./LiveSelectedMockExam.jsx'));
 import {fetchP15Catalog,fetchP15Outline,hasLocalDemoCheckout,
  isFullCourseEnrolled,localCheckoutEnabled,recordLocalDemoCheckout} from './learnerJourneyApi.js';
 import {loadStructure} from './lmsApi.js';
@@ -65,7 +65,7 @@ export default function LiveLearnerWorkspace({db,user,onSignOut,embedded=false,
  const courseStatus=c=>catalog?.openAccess||isFullCourseEnrolled(catalog?.entitlements,c.id,catalog?.subscription)?'real':
   demoCourses.some(d=>d.id===c.id)?'demo':'available';
  const chosen=catalog?.courses.find(c=>c.id===selectedId);
- const officialAsp=catalog?.courses.find(c=>c.slug==='asp')||null;
+ const mockCourse=enrolled.find(c=>c.id===practiceId)||enrolled[0]||null;
  const full=chosen&&(catalog?.openAccess||isFullCourseEnrolled(catalog?.entitlements,chosen.id,catalog?.subscription));
  const demoChosen=chosen&&!full&&(hasSimulatedEnrollment(user.id,chosen.id)||
   (localCheckoutEnabled()&&hasLocalDemoCheckout(user.id,chosen.id)));
@@ -167,7 +167,7 @@ export default function LiveLearnerWorkspace({db,user,onSignOut,embedded=false,
       screen==='learning'?'Your courses, progress and next lessons in one place.':
       screen==='course'?'Your course content, organized for focused learning.':
       screen==='subscription'||screen==='checkout'?'Discover our learning plans.':
-      screen==='practice'?'Customize your Practice, or take the fixed 200-question, 5-hour ASP Mock.':
+      screen==='practice'?'Customize Practice, or take a fixed 200-question, 5-hour Mock from saved Course Question Bank selections.':
       'Your own verified practice and Mock results.'}</p></div>
    <button type="button" className="lj-quiet" disabled={loading} onClick={refresh}><RefreshCw size={16}/> Refresh</button>
   </div>}
@@ -240,12 +240,14 @@ export default function LiveLearnerWorkspace({db,user,onSignOut,embedded=false,
        db={db} user={user} course={practiceId==='all'?{id:'all',title:'All Courses'}:enrolled.find(c=>c.id===practiceId)}
        domains={practiceTree} access={true} defaultMode="quick10"/>}
      </>}</>:
-      !officialAsp?<div className="lj-empty"><LockKeyhole size={24}/><b>Official ASP Mock unavailable</b>
-       <p>{aspMissingReason(catalog.courses)}</p></div>:
-      officialAsp.publication_state!=='published'?<div className="lj-empty"><LockKeyhole size={24}/>
-       <b>ASP Course is not published</b><p>Your saved Mock selections are intact. Publish the Course and finalize 200 reviewed questions before the official exam becomes available.</p></div>:
-      <LiveMockExam key={user.id+'-'+officialAsp.id} db={db} user={user} course={officialAsp}
-       access={!!catalog.identity?.isAdmin||catalog.openAccess===true||isFullCourseEnrolled(catalog.entitlements,officialAsp.id,catalog.subscription)}/>}
+      !mockCourse?<div className="lj-empty"><LockKeyhole size={24}/><b>Course Mock unavailable</b>
+       <p>Publish a Course and save 200 Mock-only Question Bank selections.</p></div>:
+      <><label className="lj-picker">Mock Exam course
+       <select value={mockCourse.id} onChange={e=>setPracticeId(e.target.value)}>
+        {enrolled.map(c=><option key={c.id} value={c.id}>{c.title}</option>)}
+       </select></label>
+       <LiveSelectedMockExam key={user.id+'-'+mockCourse.id} db={db} user={user}
+        course={mockCourse} access={true}/></>}
     </div>
    </div>:
    historyPanel}

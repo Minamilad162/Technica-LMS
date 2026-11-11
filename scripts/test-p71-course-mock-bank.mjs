@@ -1,0 +1,47 @@
+import assert from 'node:assert/strict';
+import {readFileSync} from 'node:fs';
+import {validateSelectedMockReadiness,validateSelectedMockPayload} from '../src/production/selectedMockApi.js';
+const read=p=>readFileSync(p,'utf8');
+const base={engineVersion:'p71-fixed-bank-mock-v1',durationSeconds:18000,
+ maxPerAttempt:200,officialMockUnchanged:true,requiredCount:200,
+ source:'question_bank_mock_flags'};
+const partial=validateSelectedMockReadiness({...base,ready:false,selectedCount:5,deliveredCount:5});
+assert.equal(partial.ready,false);
+assert.equal(partial.selectedCount,5);
+const full=validateSelectedMockReadiness({...base,ready:true,selectedCount:200,deliveredCount:200});
+assert.equal(full.ready,true);
+assert.throws(()=>validateSelectedMockReadiness({...base,ready:true,selectedCount:5,deliveredCount:5}));
+assert.throws(()=>validateSelectedMockReadiness({...base,ready:false,selectedCount:201,deliveredCount:200,requiredCount:20}));
+const old=validateSelectedMockReadiness({...base,engineVersion:'p34b-selected-mock-v1',
+ ready:true,selectedCount:5,deliveredCount:5});
+assert.equal(old.ready,false);
+assert.equal(old.engineUpgradePending,true);
+const hub=read('src/production/LiveExamPracticeHub.jsx');
+const bank=read('src/production/AdminCourseBank.jsx');
+const learner=read('src/production/LiveLearnerWorkspace.jsx');
+const view=read('src/production/LiveSelectedMockExam.jsx');
+const api=read('src/production/selectedMockApi.js');
+const sql=read('supabase/migrations/202611120001_p71_fixed_course_mock_from_bank.sql');
+assert.match(hub,/LiveSelectedMockExam key=/);
+assert.match(hub,/id="lep-mock-course"/);
+assert.match(hub,/catalog\?\.courses\.find\(c=>c\.id===mockCourseId\)/);
+assert.doesNotMatch(hub,/officialAsp|<LiveMockExam/);
+assert.match(bank,/useState\(mode==='mock'\?'mock':'all'\)/);
+assert.match(bank,/setUsage\(mode==='mock'\?'mock':'all'\)/);
+assert.match(bank,/Saved selections for/);
+assert.match(learner,/LiveSelectedMockExam key=/);
+assert.match(view,/readiness\?\.selectedCount/);
+assert.match(view,/200 Mock questions selected/);
+assert.match(view,/Refresh Mock questions/);
+assert.match(api,/engineUpgradePending:legacy/);
+assert.match(api,/if\(v\.questionCount!==200/);
+assert.match(sql,/CREATE OR REPLACE FUNCTION public\.lms_p34_selected_mock_readiness/);
+assert.match(sql,/CREATE OR REPLACE FUNCTION public\.lms_p34_start_selected_mock/);
+assert.match(sql,/IF v_count<>200 THEN/);
+assert.match(sql,/'ready',v_count=200/);
+assert.match(sql,/'engineVersion','p71-fixed-bank-mock-v1'/);
+assert.match(sql,/search_path=''/);
+assert.match(sql,/NOT EXISTS\(SELECT 1 FROM public\.lms_practice_attempt_items/);
+assert.doesNotMatch(sql,/UPDATE\s+public\.lms_questions|DELETE\s+FROM\s+public\.lms_p9b_mock_items/);
+console.log('P71 PASS: saved Question Bank marks automatically source Course Mock; UI blocks until fixed 200/300 server gate.');
+console.log('Production SQL install and actual device/learner attempt verification remain pending approval.');
