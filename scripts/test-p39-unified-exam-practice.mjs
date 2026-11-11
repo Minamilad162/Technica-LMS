@@ -75,7 +75,7 @@ for(const m of ['@media(max-width:760px)','@media(max-width:520px)',
  '.lep-tabs','.lep-content','prefers-reduced-motion'])check(css,m,'Responsive tab UI');
 check(workspace,"label:'Mock Exam & Practice'",'Alternate learner workspace menu');
 check(workspace,"preparationTab==='mock'",'Alternate learner workspace Mock tab');
-check(workspace,"<LiveMockExam", 'Alternate learner workspace P10 engine');
+check(workspace,"<LiveSelectedMockExam", 'Alternate learner workspace uses Course Mock from saved bank');
 check(bank,"q.mockExclusive?'mock':q.mockCandidate?'candidate'",'Bank distinguishes official reserved vs candidates');
 assert(!bank.includes('Mock-selected questions are available in the separate Selected Mock Test.'),
  'Question Bank must not promise hidden variable Selected Mock as the official exam');
