@@ -79,7 +79,7 @@ assert(res.includes('reserveAspMock(db,course.id,selected,phrase)'));
 assert(res.includes("PHRASE='RESERVE 200 ASP MOCK QUESTIONS'"));
 assert(hub.includes('mockCourse.publication_state!==\'published\''));
 assert(portal.includes('viewingCourse.publication_state!==\'published\''));
-assert(workspace.includes('officialAsp.publication_state!==\'published\''));
+assert(workspace.includes('<LiveSelectedMockExam')&&!workspace.includes('<LiveMockExam'));
 assert(hub.includes('<LiveSelectedMockExam')&&!hub.includes('<LiveMockExam'));
 assert(mock.includes('startOfficialMock(db,course.id,requestId)'));
 assert(mockApi.includes("MOCK_QUESTION_COUNT=200")&&mockApi.includes("MOCK_DURATION_SECONDS=18000"));

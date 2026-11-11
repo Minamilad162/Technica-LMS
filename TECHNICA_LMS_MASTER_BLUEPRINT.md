@@ -2043,3 +2043,6 @@ Observed browser error: `P14_EDGE_NETWORK` at `Authorizing Admin upload` for a 4
 
 
 **P71 regression follow-up (2026-11-12):** Initial CI encountered one stale P39 assertion expecting `<LiveMockExam` in the alternative Learner Workspace. That workspace now intentionally uses `<LiveSelectedMockExam` for its course-scoped Mock tab; retained P10 legacy engine is still tested separately. The assertion was updated without changing runtime behavior or any database rows. CI rerun required.
+
+
+**P71 static regression follow-up (2026-11-12):** After the new Course Mock tab passed P39/P71, P42 still expected the deprecated ASP-only publication string inside the alternative learner workspace. Now P42 correctly asserts that both learner entrypoints use the selected Course Mock while the historical P10 engine remains unchanged. No database changes; full CI rerun needed.
