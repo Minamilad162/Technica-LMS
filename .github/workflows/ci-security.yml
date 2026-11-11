@@ -200,6 +200,9 @@ jobs:
       - name: P65 premium role-aware guided Help centre assistant and 20 verified FAQ answers
         run: npm run test:p65
 
+      - name: P66 Build Your Own compact density and unchanged Practice behavior
+        run: npm run test:p66
+
       - name: P56 authorized All Courses Practice and adaptive regression contract
         run: npm run test:p56
 

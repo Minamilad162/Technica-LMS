@@ -310,3 +310,126 @@
  .byo-summary-metrics>span{font-size:12px}
  .byo-start-button{order:4;width:100%}
 }
+
+/* P66 — compact 100%-zoom density for Build Your Own Practice.
+   Visual-only refinement; all P44 settings, limits, P45 card order, summary,
+   camera controls and trusted Start Practice handler are unchanged.
+   Do not scale/zoom the entire component: inputs must stay sharp and clickable. */
+.byo-premium{border-radius:18px;box-shadow:0 7px 24px #0b263a09}
+.byo-premium .byo-hero{min-height:94px;padding:15px 21px;gap:14px}
+.byo-premium .byo-hero-intro{gap:13px}
+.byo-premium .byo-hero-logo{width:50px;height:50px;flex-basis:50px;border-radius:12px}
+.byo-premium .byo-hero-logo svg{width:27px;height:27px}
+.byo-premium .byo-hero-intro h3{font-size:clamp(21px,2vw,26px);line-height:1.2;letter-spacing:-.035em;margin:0 0 3px}
+.byo-premium .byo-hero-intro p{font-size:12px;line-height:1.5}
+.byo-premium .byo-hero-art{right:4px;top:4px;transform:scale(.62);transform-origin:right top;opacity:.72;filter:none}
+.byo-premium .byo-premium-content{padding:13px 15px 15px;gap:12px;border-radius:19px 19px 0 0}
+.byo-premium .byo-card-grid{gap:12px 13px}
+.byo-premium .byo-settings-card{padding:13px 14px;border-radius:15px;min-height:0;box-shadow:inset 0 1px 0 #fff}
+.byo-premium .byo-card-title{min-height:22px;gap:8px;margin-bottom:10px}
+.byo-premium .byo-card-title-main{gap:8px}
+.byo-premium .byo-card-title-main svg{width:19px;height:19px;filter:none}
+.byo-premium .byo-card-title h5{font-size:14px;line-height:1.3;letter-spacing:-.015em;font-weight:800}
+.byo-premium .byo-card-tag{font-size:10px;padding:3px 8px;border-radius:10px}
+.byo-premium .byo-count-config{gap:9px}
+.byo-premium .byo-count-presets{padding:2px;border-radius:12px;box-shadow:none}
+.byo-premium .byo-count-presets button{min-height:40px;font-size:14px;border-radius:9px;box-shadow:none}
+.byo-premium .byo-count-divider{height:34px}
+.byo-premium .byo-number-stepper{min-height:42px;width:87px;padding:3px 5px;border-radius:11px;gap:2px;box-shadow:none}
+.byo-premium .byo-number-stepper input{font-size:15px;font-weight:790}
+.byo-premium .byo-stepper-buttons button{width:20px;height:18px}
+.byo-premium .byo-stepper-buttons svg{width:15px;height:15px}
+.byo-premium .byo-difficulty-options{gap:5px;padding:0;background:transparent;border:0;border-radius:0;box-shadow:none}
+.byo-premium .byo-answer-options,.byo-premium .byo-timing-options{gap:7px}
+.byo-premium .byo-pill{min-height:40px;gap:5px;padding:6px 7px;font-size:11px;font-weight:720;line-height:1.3;border-radius:10px;box-shadow:none}
+.byo-premium .byo-pill svg{width:15px;height:15px}
+.byo-premium .byo-pill.is-active{box-shadow:inset 0 0 0 1px #0f998726}
+.byo-premium .byo-pill-answer,.byo-premium .byo-pill-timing{
+ min-height:40px;padding:7px 10px;gap:7px;justify-content:flex-start;font-size:11px}
+.byo-premium .byo-radio{width:16px;height:16px;flex-basis:16px;border-width:1.5px}
+.byo-premium .byo-pill.is-active .byo-radio{border-width:5px;box-shadow:none}
+.byo-premium .byo-answer-card .byo-card-title,.byo-premium .byo-timing-card .byo-card-title{margin-bottom:10px}
+.byo-premium .byo-timing-values{margin-top:10px;gap:8px}
+.byo-premium .byo-timing-value{flex:1 1 160px;gap:7px;row-gap:6px}
+.byo-premium .byo-timing-value>span:first-child{font-size:11px;gap:7px;line-height:1.35;font-weight:740}
+.byo-premium .byo-timing-value>span:first-child svg{width:16px;height:16px}
+.byo-premium .byo-timing-value-control{padding-right:8px;gap:5px;border-radius:10px}
+.byo-premium .byo-timing-value-control .byo-number-stepper{width:75px;min-height:36px;border-radius:9px}
+.byo-premium .byo-timing-value-control .byo-number-stepper input{font-size:14px}
+.byo-premium .byo-timing-value-control .byo-stepper-buttons button{height:15px}
+.byo-premium .byo-timing-value-control em{font-size:10px;font-weight:680}
+.byo-premium .byo-bottom-card{min-height:0;padding:12px 15px;gap:14px;border-radius:15px}
+.byo-premium .byo-focus-field{gap:7px}
+.byo-premium .byo-bottom-title,.byo-premium .byo-camera-label strong{font-size:13px;gap:8px;line-height:1.4;letter-spacing:0}
+.byo-premium .byo-bottom-title svg,.byo-premium .byo-camera-label>svg{width:19px;height:19px}
+.byo-premium .byo-select-shell select{min-height:40px;padding:8px 32px 8px 11px;font-size:12px;border-radius:9px}
+.byo-premium .byo-select-shell>svg{width:15px;height:15px;right:12px}
+.byo-premium .byo-camera-field{gap:9px}
+.byo-premium .byo-camera-label{gap:8px}
+.byo-premium .byo-camera-label p{font-size:11px;margin:3px 0 0;line-height:1.35}
+.byo-premium .byo-camera-label small{font-size:9px;margin-top:2px;line-height:1.3}
+.byo-premium .byo-switch-wrap{font-size:11px;gap:7px;min-height:34px}
+.byo-premium .byo-switch-track{width:44px;height:24px;padding:3px}
+.byo-premium .byo-switch-track span{width:18px;height:18px}
+.byo-premium .byo-switch-wrap input:checked+.byo-switch-track span{transform:translateX(20px)}
+.byo-premium .byo-session-summary{min-height:0;gap:9px;padding:10px 12px;border-radius:15px;row-gap:9px}
+.byo-premium .byo-summary-heading{gap:8px}
+.byo-premium .byo-summary-heading svg{width:19px;height:19px;filter:none}
+.byo-premium .byo-summary-heading strong{font-size:13px;line-height:1.35;font-weight:800}
+.byo-premium .byo-summary-metrics{gap:5px}
+.byo-premium .byo-summary-metrics>span{min-height:30px;padding:5px 7px;font-size:10px;gap:5px;border-left:0}
+.byo-premium .byo-summary-metrics svg{width:15px;height:15px}
+.byo-premium .byo-start-button{min-height:43px;padding:0 16px;gap:8px;font-size:13px;font-weight:810;border-radius:11px;box-shadow:0 5px 14px #0b897827}
+.byo-premium .byo-start-button svg{width:16px;height:16px}
+
+/* Keep the space-efficient two-column layout on ordinary laptops rather than
+   collapsing at 1040px. Each card's own container rules still wrap options. */
+@container (min-width:780px) and (max-width:1040px){
+ .byo-premium .byo-card-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@container (max-width:1040px){
+ .byo-premium .byo-hero-art{opacity:.35}
+}
+@container (max-width:780px){
+ .byo-premium .byo-card-grid{grid-template-columns:minmax(0,1fr)}
+ .byo-premium .byo-hero-art{display:none}
+}
+/* Individual option cards, not browser width: avoid squashed labels alongside
+   the LMS sidebar, without creating oversized touch targets. */
+@container (max-width:520px){
+ .byo-premium .byo-difficulty-options{grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}
+ .byo-premium .byo-timing-options{grid-template-columns:repeat(2,minmax(0,1fr));gap:6px}
+ .byo-premium .byo-difficulty-options .byo-pill,
+ .byo-premium .byo-answer-options .byo-pill,
+ .byo-premium .byo-timing-options .byo-pill{min-height:40px;font-size:11px;padding:6px 7px}
+}
+@container (max-width:330px){
+ .byo-premium .byo-difficulty-options{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .byo-premium .byo-answer-options{grid-template-columns:1fr}
+}
+@container (max-width:600px){
+ .byo-premium .byo-premium-content{padding:10px;gap:9px}
+ .byo-premium .byo-settings-card{padding:11px 12px}
+ .byo-premium .byo-bottom-card{grid-template-columns:minmax(0,1fr);gap:10px;padding:12px}
+ .byo-premium .byo-bottom-divider{width:100%;height:1px}
+ .byo-premium .byo-summary-metrics{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .byo-premium .byo-start-button{order:4;width:100%;min-height:44px}
+}
+@media(max-width:700px){
+ .byo-premium{border-radius:14px}
+ .byo-premium .byo-hero{min-height:80px;padding:13px 15px}
+ .byo-premium .byo-hero-logo{width:42px;height:42px;flex-basis:42px;border-radius:10px}
+ .byo-premium .byo-hero-logo svg{width:22px;height:22px}
+ .byo-premium .byo-hero-intro h3{font-size:20px}
+ .byo-premium .byo-hero-intro p{font-size:11px}
+ .byo-premium .byo-card-title h5{font-size:13px}
+ .byo-premium .byo-count-presets button{min-height:42px}
+ .byo-premium .byo-answer-options{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media(max-width:385px){
+ .byo-premium .byo-count-config{flex-wrap:wrap}
+ .byo-premium .byo-count-presets{flex:1 1 100%}
+ .byo-premium .byo-count-divider{display:none}
+ .byo-premium .byo-answer-options{grid-template-columns:minmax(0,1fr)}
+ .byo-premium .byo-start-button{width:100%}
+}
