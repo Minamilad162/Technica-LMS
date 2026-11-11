@@ -29,8 +29,8 @@ assert(portal.includes("onHistoryRoute={()=>navigate('/assessments?tab=history')
 for(const id of ['practice','mock','history'])assert(hub.includes('id="lep-tab-'+id+'"'));
 assert(hub.includes("const TAB_IDS=['practice','mock','history']"));
 assert(hub.includes('initialScreen="history"'));
-assert(hub.includes('<LiveMockExam')&&hub.includes('<LivePractice'));
-assert(!hub.includes('LiveSelectedMockExam'));
+assert(hub.includes('<LiveSelectedMockExam')&&hub.includes('<LivePractice'));
+assert(!hub.includes('<LiveMockExam'),'Mock tab must not use the legacy ASP-only engine');
 assert(workspace.includes("preparationTab==='history'?historyPanel"));
 assert(workspace.includes('getLearnerProgress(db,historyId)'));
 assert(workspace.includes('report.recentAttempts.map'));

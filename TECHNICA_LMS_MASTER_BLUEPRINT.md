@@ -2046,3 +2046,6 @@ Observed browser error: `P14_EDGE_NETWORK` at `Authorizing Admin upload` for a 4
 
 
 **P71 static regression follow-up (2026-11-12):** After the new Course Mock tab passed P39/P71, P42 still expected the deprecated ASP-only publication string inside the alternative learner workspace. Now P42 correctly asserts that both learner entrypoints use the selected Course Mock while the historical P10 engine remains unchanged. No database changes; full CI rerun needed.
+
+
+**P71 P49 compatibility fix (2026-11-12):** The existing My Profile/Practice navigation test asserted that the unified Mock Tab used the P10 ASP-only player. Updated these two static expectations to the new P71 Course-selected fixed-200 Mock, leaving the Profile and My Practice UI unchanged. No Supabase data writes or legacy P10 removal.
