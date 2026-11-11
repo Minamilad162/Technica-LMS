@@ -67,8 +67,8 @@ assert.equal(validateSelectedMockReadiness({
  selectedCount:200,deliveredCount:200,requiredCount:200,
  source:'question_bank_mock_flags'
 }).ready,true);
-assert.throws(()=>validateSelectedMockReadiness({...ready,ready:false}),/not configured/);
-assert.throws(()=>validateSelectedMockReadiness({...ready,officialMockUnchanged:false}),/not configured/);
+assert.throws(()=>validateSelectedMockReadiness({...ready,ready:false}),/does not match the secure Course Question Bank/);
+assert.throws(()=>validateSelectedMockReadiness({...ready,officialMockUnchanged:false}),/does not match the secure Course Question Bank/);
 const questions=Array.from({length:200},(_,i)=>({
  id:'cccccccc-cccc-4ccc-8ccc-'+String(i+1).padStart(12,'0'),
  position:i+1,prompt:'Which action is safe?',

@@ -2049,3 +2049,6 @@ Observed browser error: `P14_EDGE_NETWORK` at `Authorizing Admin upload` for a 4
 
 
 **P71 P49 compatibility fix (2026-11-12):** The existing My Profile/Practice navigation test asserted that the unified Mock Tab used the P10 ASP-only player. Updated these two static expectations to the new P71 Course-selected fixed-200 Mock, leaving the Profile and My Practice UI unchanged. No Supabase data writes or legacy P10 removal.
+
+
+**P71 regression follow-up (2026-11-12):** Existing P34 static/unit fixture tested a legacy text error `not configured`. P71 intentionally uses a more precise fail-closed `Mock Exam configuration does not match the secure Course Question Bank`; updated the two string regex assertions without loosening the legacy/fixed-200 validation. A new CI run is required; no database writes.
