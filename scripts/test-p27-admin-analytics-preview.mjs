@@ -107,7 +107,7 @@ for(const mark of [
  "lms_p22_submit_lesson_quiz",
  "lms_p22_complete_lesson_step",
  "Preview only · Quiz submission and learner progress are disabled.",
- "adminPreview?'ADMIN PREVIEW':userId.slice(0,8)"
+ "adminPreview?'ADMIN PREVIEW':userId"
 ])assert(explorer.includes(mark),'Admin read-only Preview contract missing '+mark);
 assert(lessonQuizApi.includes(".select('id,prompt,options,is_published,position')")&&
  lessonQuizApi.includes("lms_p22_get_lesson_quiz"),
