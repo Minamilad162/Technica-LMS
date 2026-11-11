@@ -4,13 +4,15 @@ import {AlertTriangle,FileText,LockKeyhole,Maximize,Minimize,RotateCcw,
 import {authorizeLessonMedia} from './lessonMediaApi.js';
 import {videoPlaybackErrorMessage} from './videoPlaybackDiagnostics.js';
 import {PROTECTED_MEDIA_NOTICE,isGuardedMediaShortcut,isMobileMediaBrowser,
- requestQuestionFullscreen,shouldShieldMediaOnBlur} from '../lib/lessonMediaFullscreen.js';
+ requestQuestionFullscreen,shouldShieldMediaOnBlur,canPlayVideoInFullscreen,
+ videoFullscreenError} from '../lib/lessonMediaFullscreen.js';
 import {formatWatermarkLabel,getContentProtectionSession,mediaWatermarkTiles,watermarkIdentity} from '../lib/contentProtection.js';
 import './protectedLessonViewer.css';
 
-// Authorized Lessons display INLINE without an additional Open/Fullscreen gate.
-// Native fullscreen is an optional player control, not access authorization.
-// Browser events cannot detect all OS screenshots/recordings.
+// P70: video playback requires an entered Fullscreen on the protected wrapper.
+// Request is made synchronously from the learner's Play gesture; denied and
+// exited fullscreen must fail closed. PDFs retain their inline viewer.
+// Fullscreen is NOT DRM or an OS screenshot/recording block.
 function ViewerWatermark({identity}){
  const [time,setTime]=useState(()=>new Date());
  const [sessionId]=useState(getContentProtectionSession);
@@ -26,25 +28,31 @@ const privacyMessage={
  'tab-hidden':'Media was concealed while the learning tab was in the background.',
  'focus-loss':'Media was concealed while the window lost focus.',
  'capture-shortcut':'A protected-content shortcut was detected.',
- 'print-request':'Printing protected learning material is not available.'
+ 'print-request':'Printing protected learning material is not available.',
+ 'fullscreen-exit':'Video was stopped when fullscreen closed. Return to the lesson and tap Play to re-enter fullscreen.'
 };
 export default function ProtectedLessonViewer({db,lessonId,block,viewerId='',onWatched}){
  const shell=useRef(null),video=useRef(null),pdf=useRef(null),curtain=useRef(null);
  const mounted=useRef(true),active=useRef(false),currentSrc=useRef('');
  const shieldReason=useRef('');
+ const enteredFullscreen=useRef(false);
  const lastTime=useRef(0),wasPlaying=useRef(false);
  const watched=useRef({last:null,seconds:new Set(),reported:false});
  const [state,setState]=useState('ready'),[url,setUrl]=useState(''),[error,setError]=useState('');
  const [reason,setReason]=useState(''),[nearViewport,setNearViewport]=useState(false);
  const [fullscreen,setFullscreen]=useState(false),[retry,setRetry]=useState(0);
  const [playing,setPlaying]=useState(false),[starting,setStarting]=useState(false);
- const [videoIssue,setVideoIssue]=useState('');
+ const [videoIssue,setVideoIssue]=useState(''),[startHint,setStartHint]=useState('');
  const isVideo=block.block_type==='video',title=String(block.payload?.title||(isVideo?'Video':'PDF'));
  const conceal=useCallback(why=>{
   if(!active.current||!mounted.current)return;
   active.current=false;shieldReason.current=why;
+  enteredFullscreen.current=false;
   if(shell.current)shell.current.dataset.mediaShielded='true';
-  if(curtain.current)curtain.current.hidden=false;
+  if(curtain.current){
+   curtain.current.dataset.shieldReason=why;
+   curtain.current.hidden=false;
+  }
   if(video.current){
    try{
     lastTime.current=video.current.currentTime;
@@ -61,8 +69,11 @@ export default function ProtectedLessonViewer({db,lessonId,block,viewerId='',onW
   if(typeof document==='undefined'||document.visibilityState==='hidden')return;
   active.current=true;shieldReason.current='';
   if(shell.current)shell.current.dataset.mediaShielded='false';
-  if(curtain.current)curtain.current.hidden=true;
-  setError('');setVideoIssue('');setPlaying(false);setStarting(false);
+  if(curtain.current){
+   curtain.current.hidden=true;
+   curtain.current.dataset.shieldReason='none';
+  }
+  setError('');setVideoIssue('');setStartHint('');setPlaying(false);setStarting(false);
   setReason('');setUrl('');setState('ready');setRetry(n=>n+1);
  },[]);
  useEffect(()=>{
@@ -96,10 +107,11 @@ export default function ProtectedLessonViewer({db,lessonId,block,viewerId='',onW
   const onVisibility=()=>{
    if(doc.visibilityState==='hidden')conceal('tab-hidden');
    else if(doc.visibilityState==='visible'&&doc.hasFocus()&&
-     element?.dataset.mediaShielded==='true'&&shieldReason.current!=='capture-shortcut')resume();
+     element?.dataset.mediaShielded==='true'&&
+     !['capture-shortcut','fullscreen-exit'].includes(shieldReason.current))resume();
   };
   const onFocus=()=>{if(doc.visibilityState==='visible'&&element?.dataset.mediaShielded==='true'&&
-   shieldReason.current!=='capture-shortcut')resume();};
+   !['capture-shortcut','fullscreen-exit'].includes(shieldReason.current))resume();};
   const onBlur=()=>{
    if(shouldShieldMediaOnBlur({mobile:isMobileMediaBrowser(window),
     activeTag:String(doc.activeElement?.tagName||'').toLowerCase(),
@@ -117,7 +129,18 @@ export default function ProtectedLessonViewer({db,lessonId,block,viewerId='',onW
    if(e.detail?.lessonId===lessonId&&shieldReason.current==='capture-shortcut'&&
     element?.dataset.mediaShielded==='true')resume();
   };
-  const onFullscreen=()=>setFullscreen(doc.fullscreenElement===element);
+  const onFullscreen=()=>{
+   const entered=doc.fullscreenElement===element;
+   setFullscreen(entered);
+   if(!isVideo)return;
+   if(entered){enteredFullscreen.current=true;return;}
+   // ESC, the native exit control and fullscreen replacement all stop video
+   // synchronously, remove its source and show an opaque black cover.
+   if(enteredFullscreen.current){
+    enteredFullscreen.current=false;
+    conceal('fullscreen-exit');
+   }
+  };
   doc.addEventListener('visibilitychange',onVisibility);
   doc.addEventListener('fullscreenchange',onFullscreen);
   window.addEventListener('focus',onFocus);
@@ -140,7 +163,7 @@ export default function ProtectedLessonViewer({db,lessonId,block,viewerId='',onW
    window.removeEventListener('technica:lesson-resume',onLessonResume);
    if(doc.fullscreenElement===element)doc.exitFullscreen?.().catch?.(()=>{});
   };
- },[conceal,resume,lessonId]);
+ },[conceal,resume,lessonId,isVideo]);
  useEffect(()=>{
   // Keep print protection active even while an immediate capture/print event
   // changes the viewer into its black privacy state.
@@ -166,6 +189,7 @@ export default function ProtectedLessonViewer({db,lessonId,block,viewerId='',onW
   if(v){lastTime.current=v.currentTime;wasPlaying.current=!v.paused;}
  };
  const trackWatched=()=>{
+  if(!active.current)return;
   remember();
   const v=video.current;if(!v||!Number.isFinite(v.currentTime))return;
   const data=watched.current,at=v.currentTime,previous=data.last;
@@ -185,37 +209,49 @@ export default function ProtectedLessonViewer({db,lessonId,block,viewerId='',onW
   }
  };
  const restore=()=>{
+  // On token reauthorization preserve playback position, never auto-play
+  // while inline after a fullscreen exit, visibility loss or capture curtain.
   const v=video.current;if(!v||!lastTime.current)return;
-  try{
-   v.currentTime=lastTime.current;
-   if(wasPlaying.current)v.play().catch(()=>{});
-  }catch{}
+  try{v.currentTime=lastTime.current;}catch{}
  };
- const retryMedia=()=>{setError('');setVideoIssue('');setPlaying(false);setStarting(false);
+ const retryMedia=()=>{setError('');setVideoIssue('');setStartHint('');setPlaying(false);setStarting(false);
   setUrl('');setRetry(n=>n+1);};
- const startVideo=()=>{
-  const current=video.current;
-  if(!current||starting||videoIssue)return;
-  setStarting(true);
-  // Run directly in the click gesture: browsers can reject delayed play().
+ const startVideo=async()=>{
+  const current=video.current,element=shell.current;
+  if(!isVideo||!current||!element||starting||videoIssue||state!=='ready')return;
+  setStarting(true);setStartHint('');
+  // The fullscreen REQUEST must start inside the Play click, before any
+  // network request or await. The player must never start before confirmation.
+  const result=await requestQuestionFullscreen(element);
+  if(!result.ok||!canPlayVideoInFullscreen(document,element)||!active.current){
+   setStarting(false);
+   setStartHint(videoFullscreenError(result));
+   return;
+  }
   try{
    const attempt=current.play();
-   if(attempt&&typeof attempt.catch==='function')attempt.catch(err=>{
-    if(err?.name!=='AbortError')setVideoIssue('The browser could not start video playback. Check the video encoding or try again.');
-    setStarting(false);
-   });
-  }catch{
-   setStarting(false);
-   setVideoIssue('The browser could not start video playback. Check the video encoding or try again.');
-  }
+   if(attempt&&typeof attempt.then==='function')await attempt;
+  }catch(err){
+   // Some browsers consume user activation on requestFullscreen; a second
+   // user Play click while already fullscreen can start the video safely.
+   if(err?.name==='NotAllowedError')setStartHint('Fullscreen is open. Tap Play once more to start video.');
+   else if(err?.name!=='AbortError')
+    setVideoIssue('The browser could not start video playback. Check the video encoding or try again.');
+  }finally{setStarting(false);}
  };
  const failedVideo=()=>{
   const code=video.current?.error?.code;
   setVideoIssue(videoPlaybackErrorMessage(code));
   setPlaying(false);setStarting(false);
  };
- const playingVideo=()=>{remember();setVideoIssue('');setPlaying(true);setStarting(false);};
- const pausedVideo=()=>{remember();setPlaying(false);setStarting(false);};
+ const playingVideo=()=>{
+  if(!canPlayVideoInFullscreen(document,shell.current)||!active.current){
+   video.current?.pause();
+   setPlaying(false);return;
+  }
+  remember();setStartHint('');setVideoIssue('');setPlaying(true);setStarting(false);
+ };
+ const pausedVideo=()=>{if(active.current)remember();setPlaying(false);setStarting(false);};
  return <section ref={shell} className="slm-protected-viewer slm-viewer-active"
   data-media-phase={state} data-media-kind={block.block_type}
   data-media-shielded={state==='shielded'?'true':'false'}
@@ -228,7 +264,7 @@ export default function ProtectedLessonViewer({db,lessonId,block,viewerId='',onW
     <button type="button" onClick={retryMedia}>Retry</button></div>:
     !url?<div className="slm-media-loading" role="status">
      <LockKeyhole size={18}/>{nearViewport?'Loading protected '+(isVideo?'video':'PDF')+'…':'Preparing protected lesson…'}</div>:
-    isVideo?<video ref={video} key={url} src={url} controls playsInline preload="metadata"
+    isVideo?<video ref={video} key={url} src={url} controls={fullscreen} playsInline preload="metadata"
       disablePictureInPicture disableRemotePlayback
       controlsList="nodownload noplaybackrate noremoteplayback"
       onTimeUpdate={trackWatched} onPlay={playingVideo} onPause={pausedVideo}
@@ -243,8 +279,9 @@ export default function ProtectedLessonViewer({db,lessonId,block,viewerId='',onW
      <button type="button" className="slm-video-start-button" onClick={startVideo} disabled={starting}
       aria-label={starting?'Starting protected lesson video':'Play protected lesson video'}>
       <span className="slm-video-play-icon" aria-hidden="true">▶</span>
-      <span>{starting?'Starting video…':'Play lesson'}</span>
+      <span>{starting?'Opening fullscreen…':fullscreen?'Play lesson':'Play in fullscreen'}</span>
      </button>
+     {startHint&&<p className="slm-video-start-hint" role="alert">{startHint}</p>}
     </div>}
    {isVideo&&!!url&&videoIssue&&<div className="slm-video-error" role="alert">
     <AlertTriangle size={22} aria-hidden="true"/>
@@ -254,19 +291,20 @@ export default function ProtectedLessonViewer({db,lessonId,block,viewerId='',onW
    </div>}
    <div className="slm-viewer-toolbar">
     <span><ShieldCheck size={14}/> Private Lesson · Watermarked</span>
-    <button type="button" onClick={toggleFullscreen}
+    {!isVideo&&<button type="button" onClick={toggleFullscreen}
       aria-label={fullscreen?'Exit fullscreen':'View fullscreen (optional)'}>
       {fullscreen?<Minimize size={16}/>:<Maximize size={16}/>}
-      {fullscreen?'Exit Fullscreen':'Fullscreen (optional)'}</button>
+      {fullscreen?'Exit Fullscreen':'Fullscreen (optional)'}</button>}
    </div>
   </div>
   <div ref={curtain} className="slm-screen-curtain" hidden={state!=='shielded'}
+   data-shield-reason={reason||'none'}
    role={state==='shielded'?'alert':'status'} aria-live="polite">
    <div className="slm-screen-core">
     <span className="slm-screen-title">{PROTECTED_MEDIA_NOTICE}</span>
     <p>{privacyMessage[reason]||'Protected content is concealed.'}</p>
     <button type="button" className="slm-shield-resume" onClick={resume}>
-     <RotateCcw size={15}/> Resume lesson</button>
+     <RotateCcw size={15}/>{reason==='fullscreen-exit'?'Return to lesson':'Resume lesson'}</button>
    </div>
   </div>
  </section>;

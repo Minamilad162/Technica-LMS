@@ -105,3 +105,13 @@ Command / environment / commit / timestamp / duration / PASS-FAIL-SKIPPED / obse
 - Quick 10: 10 questions, untimed, per-question answer feedback. Timed Quiz: 25 questions, 1200-second total timer, delayed answer feedback. Domain picker: 25 selected-domain questions with no crossover.
 - Missed Questions and Weakest Subject only use real latest attempt for same selected course; when there are no wrong answers these cards must be disabled (never fallback to unrelated entire bank). Build Your Own retains learner-selected count/timer/pool/domain inputs; Admin Assessment stays fixed.
 - Run \`npm run test:practice-modes\`, real Chromium desktop/mobile test \`scripts/test-practice-modes-browser.mjs\`, P1/Postgres, old ASP bank/test/calculator/learning and bundle build. Treat PSEE and other unclassified demo courses as lacking protected full-feature quiz metadata.
+
+
+## P70 fullscreen-only Lesson video acceptance (2026-11-12)
+
+- Run `npm run test:p19:media`, `npm run test:p61`, `npm run test:p67`, `npm run test:p69`, `npm run test:p70`, `npm run test:p23:lesson` and production build.
+- On actual desktop Chrome/Edge and Android Chrome, click **Play in fullscreen**. Confirm wrapper fullscreen entry BEFORE video playback and no inline native controls, while watermark remains visible.
+- Close with ESC/browser control: video pauses, source is removed, player is black, no auto-restart on focus or token refresh. Select Return to lesson, then Play to resume position only while fullscreen.
+- Deny fullscreen permission or use a browser without the wrapper Fullscreen API: playback fails closed with accessible user explanation, not inline fallback.
+- Confirm PDF iframe, links, Lesson Quiz, watched 90% coverage, Course hierarchy, subscription/Intro gates, React error handling and mobile responsive UI unchanged.
+- Explicit physical iPhone Safari/Android Chromium/desktop QA is required; native fullscreen and screenshot prevention cannot be established from Node assertions or CI alone.

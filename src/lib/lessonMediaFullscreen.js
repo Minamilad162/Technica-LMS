@@ -19,13 +19,24 @@ export function isMobileMediaBrowser(win){
   userAgent:win.navigator?.userAgent||''
  });
 }
-export function mediaFullscreenPolicy(doc,element){
- // Fullscreen is an optional viewing preference, not a prerequisite to access.
- return isNativeFullscreenAvailable(doc,element)?'optional':'inline';
+export function mediaFullscreenPolicy(doc,element,kind='video'){
+ // P70: only video playback requires browser-controlled fullscreen.
+ // PDF/reading remain inline and do not claim screenshot-proof rendering.
+ if(kind!=='video')return isNativeFullscreenAvailable(doc,element)?'optional':'inline';
+ return isNativeFullscreenAvailable(doc,element)?'required':'blocked';
 }
-export function canRenderAuthorizedMedia({phase,doc}={}){
- // P14/P15 server-side authorization is always required for a real URL.
- return phase==='ready'&&doc?.visibilityState!=='hidden';
+export function canPlayVideoInFullscreen(doc,element){
+ return !!element && doc?.fullscreenElement===element && doc?.visibilityState!=='hidden';
+}
+export function canRenderAuthorizedMedia({phase,doc,element,kind='pdf'}={}){
+ // Rendering PDFs inline is still allowed. Video playback is separately gated.
+ return phase==='ready'&&doc?.visibilityState!=='hidden'&&
+   (kind!=='video'||canPlayVideoInFullscreen(doc,element));
+}
+export function videoFullscreenError(result){
+ return result?.reason==='unsupported'
+  ?'This browser cannot open protected video in true fullscreen. Use a supported desktop browser, Android Chrome or supported iPad browser; iPhone browsers may not support this full-lesson fullscreen mode.'
+  :'Fullscreen was denied or interrupted. Allow fullscreen and tap Play again. Video will not play inline.';
 }
 export function shouldShieldMediaOnBlur({mobile=false,activeTag='',visibility='visible'}={}){
  // PDF iframe focus and iOS soft keyboards generate legitimate blur.

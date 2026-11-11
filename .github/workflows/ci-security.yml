@@ -143,8 +143,10 @@ jobs:
       - name: P24 Qualifications and Evidence Mapping frontend contract
         run: npm run test:p19
 
-      - name: P19-M protected course media fullscreen and blackout regressions
-        run: npm run test:p19:media
+      - name: P19-M/P70 protected video fullscreen gating, exit blackout and PDF regression
+        run: |
+          npm run test:p19:media
+          npm run test:p70
 
       - name: P20 direct Lesson media and site loading/performance contracts
         run: npm run test:p20:performance

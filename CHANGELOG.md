@@ -1,3 +1,9 @@
+## 2026-11-12 — P70 fullscreen-only Lesson video playback
+- A learner's first Play click now requests native fullscreen on the protected video wrapper before attempting playback; normal inline video controls are hidden. Fullscreen denied/unsupported means no playback, with a browser-specific explanation.
+- When a learner closes fullscreen with Esc/exit (or another fullscreen replaces the protected wrapper), pause immediately, clear the signed video source and show an opaque player blackout. Browser focus cannot silently resume fullscreen-exit content. Return to Lesson restores authorization, but playback requires another explicit Play click.
+- Video progress and position are retained; removed legacy autoplay-on-token-reauthorization that could restart inline. PDF retains its existing inline rendering and optional fullscreen; Practice/Mock/exam rules unchanged.
+- Added P70 policy/guard regression beside existing P19 media CI step; updated P19 formerly optional video fullscreen assertions. No Supabase migrations, third-party DRM, new dependency, paid service or data writes. Fullscreen does not guarantee screenshot blocking. iPhone Safari may lack wrapper fullscreen and remains blocked by this strict requirement; verify on physical devices.
+
 ## 2026-11-11 — P69 automatic free no-install web content protection
 - Learner continues to open video/PDF from the same authorized Lesson; its browser privacy/print listeners register before first paint, without setup, paid services or native-app requirement.
 - Three sparse video/PDF watermarks now share the established per-tab session ID, UTC timestamp and signed-in user identity with the enclosing Lesson. They move every 45 seconds, remain pointer-transparent and respect small screens.

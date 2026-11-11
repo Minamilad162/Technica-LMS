@@ -10,9 +10,10 @@ const el={ownerDocument:doc,requestFullscreen:async()=>{doc.fullscreenElement=el
 doc.documentElement=el;
 const desktop={innerWidth:1400,navigator:{maxTouchPoints:0,userAgent:'Mozilla desktop'},matchMedia:()=>({matches:false})};
 const mobile={innerWidth:390,navigator:{maxTouchPoints:5,userAgent:'Mozilla/5.0 (iPhone)'},matchMedia:()=>({matches:true})};
-assert.equal(mediaFullscreenPolicy(doc,el,desktop),'optional');
-assert.equal(mediaFullscreenPolicy({...doc,fullscreenEnabled:false},el,mobile),'inline');
-assert.equal(mediaFullscreenPolicy({...doc,fullscreenEnabled:false},el,desktop),'inline');
+assert.equal(mediaFullscreenPolicy(doc,el,'video'),'required');
+assert.equal(mediaFullscreenPolicy({...doc,fullscreenEnabled:false},el,'video'),'blocked');
+assert.equal(mediaFullscreenPolicy({...doc,fullscreenEnabled:false},el,'video'),'blocked');
+assert.equal(mediaFullscreenPolicy(doc,el,'pdf'),'optional');
 assert.equal(isMobileMediaBrowser(desktop),false);
 assert.equal(isMobileMediaBrowser(mobile),true);
 assert.equal(canRenderAuthorizedMedia({phase:'ready',doc,element:el}),true,
@@ -42,7 +43,8 @@ assert(v.includes("authorizeLessonMedia(db,lessonId,block)"));
 assert(v.indexOf("authorizeLessonMedia(db,lessonId,block)")>v.indexOf("if(!nearViewport||state!=='ready'||document.visibilityState==='hidden')"));
 assert(!v.includes('Open Protected Video')&&!v.includes('onClick={enter}'),
  'No forced open-protected button');
-assert(v.includes("Fullscreen (optional)")&&v.includes("onClick={toggleFullscreen}"));
+assert(v.includes("Fullscreen (optional)")&&v.includes("onClick={toggleFullscreen}"),
+ 'PDF retains optional fullscreen; video is gated at Play');
 assert(v.includes('requestQuestionFullscreen(element)'), 'Optional native Fullscreen preserved');
 assert(v.includes("conceal('tab-hidden')")&&v.includes("conceal('focus-loss')"));
 assert(v.includes("conceal('capture-shortcut')")&&v.includes("conceal('print-request')"));
