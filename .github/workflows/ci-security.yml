@@ -206,6 +206,9 @@ jobs:
       - name: P67 Course Lesson-wide blackout, PDF and video browser capture deterrence
         run: npm run test:p67
 
+      - name: P68 native Windows secure-viewer capture-exclusion pilot policy contracts
+        run: npm run test:p68
+
       - name: P56 authorized All Courses Practice and adaptive regression contract
         run: npm run test:p56
 

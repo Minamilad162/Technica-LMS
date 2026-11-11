@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'; script-src 'unsafe-inline'; media-src blob:; frame-src blob:; img-src data:;">
+<title>Technica Secure Viewer | Capture Protection Pilot</title>
+<style>
+:root{font:14px/1.5 system-ui,-apple-system,'Segoe UI',sans-serif;color:#143b45;background:#f6faf9}
+*{box-sizing:border-box}body{margin:0;min-height:100vh;background:radial-gradient(ellipse at 100% 0%,#b9ebe02d,transparent 45%),#f6faf9}
+.header{display:flex;align-items:center;justify-content:space-between;gap:20px;padding:16px clamp(24px,4vw,60px);border-bottom:1px solid #d8e9e4;background:white}
+.brand{display:flex;align-items:center;gap:12px}.mark{display:grid;place-items:center;width:45px;height:45px;border-radius:14px;background:linear-gradient(135deg,#006c68,#15a593);font-size:23px;color:#fff;font-weight:800;box-shadow:0 5px 15px #00606025}.brand-name{font-weight:850;letter-spacing:.02em}.brand-name small{display:block;font-size:10px;letter-spacing:.17em;color:#0a9a88;font-weight:800}
+.status{display:flex;align-items:center;gap:8px;color:#196c57;background:#e4f9ee;border:1px solid #bcebd3;border-radius:30px;padding:7px 13px;font-weight:750;font-size:12px}.dot{width:8px;height:8px;border-radius:50%;background:#25ad74}
+.main{max-width:1160px;margin:auto;padding:28px clamp(22px,4vw,48px) 50px}
+.eyebrow{font-size:11px;font-weight:850;letter-spacing:.2em;color:#058b7c}.title{font-size:clamp(29px,4vw,43px);letter-spacing:-.05em;line-height:1.1;margin:11px 0}.subtitle{max-width:850px;color:#63828b;font-size:14px;line-height:1.8;margin:0 0 18px}
+.bar{display:flex;align-items:center;justify-content:space-between;gap:15px;background:#e5f6f1;border:1px solid #c9e8dd;padding:14px 18px;border-radius:14px;margin:20px 0 22px;flex-wrap:wrap}
+.bar strong{color:#135b52}.bar span{color:#527e77;font-size:12px}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;background:linear-gradient(120deg,#00766f,#15a898);color:#fff;text-decoration:none;padding:11px 16px;border-radius:10px;font-weight:750;border:0;cursor:pointer;box-shadow:0 6px 16px #006d6d26}.btn:hover{filter:brightness(.93)}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:18px}.card{background:#fff;border:1px solid #dbeae7;border-radius:17px;overflow:hidden;box-shadow:0 8px 28px #0d4a4a08}.card-head{padding:16px 19px 13px;display:flex;gap:11px;align-items:center;border-bottom:1px solid #eef5f3}.card-icon{display:grid;place-items:center;width:35px;height:35px;color:#087d76;background:#e4f7f0;border-radius:11px;font-size:17px}.card-head b{font-size:14px}.card-head small{display:block;color:#75918e;font-size:11px;margin-top:2px}.card-body{padding:15px}
+video,iframe{display:block;width:100%;height:260px;border:1px solid #e1ede9;border-radius:11px;background:#102d39}video{object-fit:cover}.pdf{background:#e7f0ed}.caption{font-size:11px;line-height:1.6;color:#65837f;margin:11px 0 0}
+.note{margin-top:24px;padding:15px 19px;background:#fff;border:1px solid #dce8e6;border-radius:13px;color:#627b83;font-size:12px;line-height:1.75}.note strong{color:#174f54}.steps{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:15px}.step{padding:12px;background:#f2f8f7;border:1px solid #e0ece9;border-radius:10px}.step b{display:block;color:#0a7771;margin-bottom:4px}.step span{font-size:11px;color:#668083}
+@media(max-width:790px){.grid{grid-template-columns:1fr}.header{padding:14px 20px}.status{font-size:10px}.steps{grid-template-columns:1fr}.main{padding:22px 16px}.subtitle{font-size:12px}}
+</style>
+</head>
+<body>
+<header class="header"><div class="brand"><span class="mark">TC</span><div class="brand-name">TECHNICA CONSULT<small>SECURE LEARNING PILOT</small></div></div><div class="status"><span class="dot"></span>Windows capture exclusion requested</div></header>
+<main class="main">
+<div class="eyebrow">NATIVE WINDOWS PROTECTION · PROOF OF CONCEPT</div>
+<h1 class="title">Windows screen capture test</h1>
+<p class="subtitle">This window requests Windows-native capture exclusion <strong>before</strong> displaying learning content. Try the built-in Snipping Tool or a normal screen recorder while this application is visible. The protected window should be absent or blank in supported capture paths. This is an experiment, not a guarantee or licensed media DRM.</p>
+<div class="bar"><div><strong>Test on Windows 10 2004+ / Windows 11</strong><br><span>No real student content is packaged in this demo.</span></div><a class="btn" href="https://technica-lms.minamilad939.workers.dev/">Open live Technica LMS →</a></div>
+<div class="grid">
+ <section class="card"><div class="card-head"><div class="card-icon">▶</div><div><b>Video panel</b><small>Animated browser video element generated locally for the capture test</small></div></div><div class="card-body"><video id="testVideo" muted autoplay playsinline controls></video><p class="caption">This is a locally generated test video, not a real lesson. Native window capture exclusion applies to the entire app surface.</p></div></section>
+ <section class="card"><div class="card-head"><div class="card-icon">▤</div><div><b>PDF panel</b><small>Locally generated sample PDF inside this protected window</small></div></div><div class="card-body"><iframe id="testPdf" class="pdf" title="Sample PDF for Windows capture test"></iframe><p class="caption">The same native window rule protects PDF pixels shown inside this window. PDF support in embedded Chromium should be verified on the actual Windows build.</p></div></section>
+</div>
+<div class="note"><strong>Quick test:</strong> keep this window visible and try the capture combinations below. Record whether the captured image/video hides the protected window. Then choose <strong>Open live Technica LMS</strong> and test authorized video/PDF after signing in with email and password.<div class="steps"><div class="step"><b>1 · Win + Shift + S</b><span>Capture the protected window with Windows Snipping Tool.</span></div><div class="step"><b>2 · Screen recording</b><span>Try a standard Windows screen capture or recording tool.</span></div><div class="step"><b>3 · Open LMS</b><span>Check private Lesson video and PDF using the same protected window.</span></div></div><p style="margin-bottom:0">Google OAuth is not implemented in this embedded desktop pilot. Google blocks sign-in from embedded browsers; use an existing email/password LMS account for the test. The original website remains available in Chrome and is <strong>not</strong> protected by this Windows app. No data is migrated or changed by this pilot.</p></div>
+</main>
+<script>
+// Draw animated source frames, then feed them to a REAL <video> element without
+// needing to distribute a private lesson recording or external media.
+(function makeVideo(){
+ const v=document.getElementById('testVideo');const c=document.createElement('canvas');
+ c.width=760;c.height=460;const g=c.getContext('2d');let n=0;
+ function frame(){
+  n+=.022;const grd=g.createLinearGradient(0,0,c.width,c.height);grd.addColorStop(0,'#032d37');grd.addColorStop(1,'#006f65');g.fillStyle=grd;g.fillRect(0,0,c.width,c.height);
+  for(let i=0;i<22;i++){const x=(i*107+Math.cos(n+i)*30)%760,y=(i*71+Math.sin(n+i*.7)*34)%460;g.beginPath();g.arc(x,y,2+(i%5),0,Math.PI*2);g.fillStyle='#8ef8d84a';g.fill()}
+  const x=380+Math.sin(n)*145,y=213+Math.cos(n*.7)*58;
+  g.beginPath();g.arc(x,y,73,0,Math.PI*2);g.strokeStyle='#7cf6d8';g.lineWidth=7;g.stroke();
+  g.fillStyle='#ffffff';g.font='800 39px sans-serif';g.textAlign='center';g.fillText('TECHNICA',380,86);
+  g.font='24px sans-serif';g.fillText('PRIVATE LESSON · CAPTURE TEST',380,126);
+  g.font='21px sans-serif';g.fillText('Animated video surface',380,397);
+  requestAnimationFrame(frame);
+ }
+ frame();if(c.captureStream){v.srcObject=c.captureStream(20);v.play().catch(()=>{});}
+})();
+// Small, valid PDF fixture assembled entirely in-memory for demonstration.
+(function makePdf(){
+ const objects=[
+ '<< /Type /Catalog /Pages 2 0 R >>',
+ '<< /Type /Pages /Kids [3 0 R] /Count 1 >>',
+ '<< /Type /Page /Parent 2 0 R /MediaBox [0 0 600 780] /Resources << /Font << /F1 4 0 R >> >> /Contents 5 0 R >>',
+ '<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>',
+ ];
+ const txt='BT /F1 26 Tf 55 685 Td (Technica Consult) Tj 0 -42 Td /F1 16 Tf (Protected PDF capture test) Tj 0 -32 Td (Sample file - no learner data) Tj ET';
+ objects.push('<< /Length '+txt.length+' >>\nstream\n'+txt+'\nendstream');
+ let pdf='%PDF-1.4\n', offsets=[0];
+ for(let i=0;i<objects.length;i++){offsets.push(pdf.length);pdf+=(i+1)+' 0 obj\n'+objects[i]+'\nendobj\n';}
+ const start=pdf.length;pdf+='xref\n0 '+(objects.length+1)+'\n0000000000 65535 f \n';
+ for(let i=1;i<offsets.length;i++)pdf+=String(offsets[i]).padStart(10,'0')+' 00000 n \n';
+ pdf+='trailer\n<< /Size '+(objects.length+1)+' /Root 1 0 R >>\nstartxref\n'+start+'\n%%EOF';
+ const blob=new Blob([pdf],{type:'application/pdf'});
+ document.getElementById('testPdf').src=URL.createObjectURL(blob);
+})();
+</script>
+</body>
+</html>

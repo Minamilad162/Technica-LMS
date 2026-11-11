@@ -1,0 +1,41 @@
+name: Secure Viewer Windows pilot
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'desktop/secure-viewer/**'
+      - '.github/workflows/secure-viewer-windows.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: secure-viewer-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  windows-portable:
+    runs-on: windows-latest
+    timeout-minutes: 25
+    defaults:
+      run:
+        working-directory: desktop/secure-viewer
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install isolated pilot dependencies
+        run: npm install --no-audit --no-fund
+      - name: Verify exact origin allowlist and protection-first startup
+        run: npm test
+      - name: Build unsigned portable Windows pilot
+        run: npm run dist:win
+      - uses: actions/upload-artifact@v4
+        with:
+          name: technica-windows-protection-pilot
+          path: desktop/secure-viewer/dist/*.exe
+          if-no-files-found: error
+          retention-days: 7
