@@ -21,7 +21,7 @@ for(const [file,needle] of [[explorer,'kind="lesson-surface"'],[legacy,'kind="le
  [surface,'onClick={resumeLesson}'],[surface,"document.activeElement?.tagName"],
  [surface,"window.addEventListener('keyup',onCaptureKey,true)"],
  [player,"window.addEventListener('keyup',onShortcut,true)"],
- [player,"shieldReason.current!=='capture-shortcut'"],
+ [player,"!['capture-shortcut','fullscreen-exit'].includes(shieldReason.current)"],
  [player,"pdf.current.src='about:blank'"],
  [player,"video.current.pause();video.current.removeAttribute('src');video.current.load()"],
  [css,'.tc-capture-curtain.tc-lesson-curtain:not([hidden])'],
