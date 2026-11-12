@@ -22,6 +22,7 @@ const learner=read('src/production/LiveLearnerWorkspace.jsx');
 const view=read('src/production/LiveSelectedMockExam.jsx');
 const api=read('src/production/selectedMockApi.js');
 const sql=read('supabase/migrations/202611120001_p71_fixed_course_mock_from_bank.sql');
+const liveMockCss=read('src/production/liveMock.css');
 assert.match(hub,/LiveSelectedMockExam key=/);
 assert.match(hub,/id="lep-mock-course"/);
 assert.match(hub,/catalog\?\.courses\.find\(c=>c\.id===mockCourseId\)/);
@@ -63,7 +64,7 @@ assert.doesNotMatch(hub,/className="lep-mock-promise"/,
  'Remove duplicate static mock overview cards');
 assert.doesNotMatch(view,/Grading &amp; timer|<b>Server<\/b>/,
  'Remove mock placeholder Server stat');
-const liveMockCss=read('src/production/liveMock.css');
+
 assert.match(liveMockCss,/\.live-mock \.live-mock-start\{/);
 assert.match(liveMockCss,/\.live-mock \.live-mock-start:disabled/);
 assert.match(liveMockCss,/@media\(max-width:650px\)/);
