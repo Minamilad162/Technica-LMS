@@ -1,3 +1,10 @@
+## 2026-11-12 — P75 align Mock blackout mechanics with course Video
+- Improved P73 full-exam browser concealment to mirror ProtectedLessonViewer's immediate `data-media-shielded` style change. On a browser-delivered capture/print shortcut, the Mock first hides readable pixels synchronously and then unmounts question/answer/timer/navigation React children beneath a pre-mounted persistent black curtain until deliberate Resume inside fullscreen.
+- Mock now uses the same `isGuardedMediaShortcut` policy as course Video (including Ctrl+S/P); beforeprint and pagehide also conceal the Mock. Course Video behavior itself and P71/P72 server scoring, 200-question/300-minute rules, CSS responsiveness, Practice and subscriptions are unchanged.
+- No new dependencies, Supabase migrations, paid DRM, learner installs or production data writes.
+- **Important:** Native screenshot or independent screen recorder with no browser event can still capture visible HTML. User's observed black video capture may arise from platform/video compositing; P75 does not guarantee the same native outcome for exam text.
+- P67/P71 static regressions updated; CI and actual Windows/mobile capture acceptance remain independent.
+
 ## 2026-11-12 — P74 owner screenshot repro and limited shortcut hardening
 - Record a confirmed acceptance gap: unrestricted OS-native screenshots/recordings of a browser-based Mock remain possible, including on re-entry. The entire P73 blackout is best-effort only; NOT screenshot DRM.
 - Isolated Playwright Chromium fixture showed why: a capture without a DOM keyboard event exposed test content both on initial entry and re-entry, while a received Ctrl+Shift+6 shortcut blacked the surface after the event. This is not a signed-in production-device acceptance test.

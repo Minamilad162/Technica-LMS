@@ -1,5 +1,6 @@
 import React,{useEffect,useLayoutEffect,useMemo,useRef,useState}from'react';
 import {createPortal} from 'react-dom';
+import {isGuardedMediaShortcut} from '../lib/lessonMediaFullscreen.js';
 import '../contentProtection.css';
 import {
  PROTECTION_HOLD_MS,WATERMARK_POSITIONS,formatWatermarkLabel,
@@ -18,6 +19,8 @@ let activeProtectedContainers=0;
 export default function LiveProtectedContent({as:Tag='div',className='',kind='questions',identity:identitySource,lessonId='',children}){
  const ref=useRef(null),timeout=useRef(null),shieldRef=useRef(null);
  const keyShield=useRef(false),focusShield=useRef(false);
+ const [mockConcealed,setMockConcealed]=useState(false);
+ const isMock=kind==='mock-exam-surface';
  const enabledFocusShield=shouldFocusShield(kind);
  // Keep exam captures shielded until the learner explicitly resumes in
  // fullscreen, just like the lesson curtain. Browser signals are best-effort.
@@ -36,6 +39,13 @@ export default function LiveProtectedContent({as:Tag='div',className='',kind='qu
   const el=shieldRef.current;
   if(!el)return;
   const visible=keyShield.current||focusShield.current;
+  // Like ProtectedLessonViewer.conceal(), first hide the actual sensitive
+  // content synchronously via a DOM attribute. React then removes question
+  // elements so the black curtain is not the only protective layer.
+  if(isMock){
+   if(ref.current)ref.current.dataset.mediaShielded=visible?'true':'false';
+   setMockConcealed(previous=>previous===visible?previous:visible);
+  }
   el.hidden=!visible;
   el.dataset.reason=focusShield.current?'focus-loss':keyShield.current?'keyboard-shortcut':'none';
  };
@@ -57,7 +67,12 @@ export default function LiveProtectedContent({as:Tag='div',className='',kind='qu
  useLayoutEffect(()=>{
   activeProtectedContainers++;
   document.documentElement.classList.add('tc-has-protected-content');
-  const onBeforePrint=()=>document.documentElement.classList.add('tc-print-in-progress');
+  const onBeforePrint=()=>{
+   document.documentElement.classList.add('tc-print-in-progress');
+   // Match the video viewer: printing actively conceals Mock content rather
+   // than depending solely on the browser's print-media styling.
+   if(isMock)cloak();
+  };
   const onAfterPrint=()=>document.documentElement.classList.remove('tc-print-in-progress');
   const onClipboard=e=>{
    if(shouldBlockClipboardEvent(e,ref.current,window.getSelection(),document.activeElement)){
@@ -67,9 +82,10 @@ export default function LiveProtectedContent({as:Tag='div',className='',kind='qu
    }
   };
   const onCaptureKey=e=>{
-   if(isPotentialCaptureShortcut(e)){
-    // Keydown and keyup are both tried because some browsers only deliver
-    // one. Many OS-native capture tools deliver NEITHER; never claim protection.
+   if(isMock?isGuardedMediaShortcut(e):isPotentialCaptureShortcut(e)){
+    // Match video: capture-like shortcuts and Ctrl+P/Ctrl+S become a
+    // persistent black Mock until explicit fullscreen-only Resume.
+    // OS-native capture may deliver neither event: this is not DRM.
     if(e.cancelable)e.preventDefault();
     cloak();
    }
@@ -117,6 +133,11 @@ export default function LiveProtectedContent({as:Tag='div',className='',kind='qu
     syncCurtain();
    }
   };
+  const onPageHide=()=>{
+   if(!isMock)return;
+   focusShield.current=true;
+   syncCurtain();
+  };
   const onReturnPointer=()=>{
    // Mobile Safari occasionally skips focus when returning to an already
    // foregrounded tab. A real pointer action restores a legible screen.
@@ -140,6 +161,7 @@ export default function LiveProtectedContent({as:Tag='div',className='',kind='qu
   }
   window.addEventListener('beforeprint',onBeforePrint);
   window.addEventListener('afterprint',onAfterPrint);
+  if(isMock)window.addEventListener('pagehide',onPageHide);
   return()=>{
    document.removeEventListener('copy',onClipboard,true);
    document.removeEventListener('cut',onClipboard,true);
@@ -156,13 +178,14 @@ export default function LiveProtectedContent({as:Tag='div',className='',kind='qu
    }
    window.removeEventListener('beforeprint',onBeforePrint);
    window.removeEventListener('afterprint',onAfterPrint);
+   if(isMock)window.removeEventListener('pagehide',onPageHide);
    document.documentElement.classList.remove('tc-print-in-progress');
    activeProtectedContainers=Math.max(0,activeProtectedContainers-1);
    if(activeProtectedContainers===0)document.documentElement.classList.remove('tc-has-protected-content');
    if(timeout.current)clearTimeout(timeout.current);
    keyShield.current=false;focusShield.current=false;
   };
- },[enabledFocusShield,kind]);
+ },[enabledFocusShield,kind,isMock]);
  useEffect(()=>{
   const node=ref.current;
   if(!node)return;
@@ -203,11 +226,13 @@ export default function LiveProtectedContent({as:Tag='div',className='',kind='qu
   </div>;
  return <>
   <Tag className={['tc-protected-content',className].filter(Boolean).join(' ')}
-   data-protected-kind={kind} ref={ref}
+   data-protected-kind={kind}
+   data-media-shielded={isMock?(mockConcealed?'true':'false'):undefined}
+   ref={ref}
    onCopyCapture={block} onCutCapture={block}
    onContextMenuCapture={block} onDragStartCapture={block}
    >
-   {children}
+   {isMock&&mockConcealed?null:children}
    <div className="tc-watermark-layer" data-watermark={identity} aria-hidden="true">
     {Array.from({length:WATERMARK_POSITIONS},(_,i)=>
       <span key={i} className="tc-watermark-cell">{label}</span>)}

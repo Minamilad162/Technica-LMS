@@ -187,3 +187,23 @@ html.tc-quiz-exit-lock .live-mock .live-mock-protected-surface{
  visibility:hidden!important;
 }
 @media print{.tc-mock-curtain{display:none!important}}
+
+
+/* P75: mirror video viewer's fail-closed content concealment in Mock.
+   When a recognized browser event arrives, immediately hide ALL exam
+   content using the DOM dataset before React unmounts sensitive question
+   elements. The mock curtain stays inside the browser fullscreen top layer.
+   Does not prevent OS screenshots made without DOM events. */
+.tc-protected-content[data-protected-kind="mock-exam-surface"][data-media-shielded="true"]{
+ background:#03060b!important;min-height:100dvh;overflow:hidden;
+}
+.tc-protected-content[data-protected-kind="mock-exam-surface"][data-media-shielded="true"]
+ > :not(.tc-capture-curtain){
+ visibility:hidden!important;
+}
+.tc-capture-curtain.tc-mock-curtain:not([hidden]){
+ background:#03060b!important;inset:0;position:fixed;z-index:2147483600;
+}
+@media print{
+ .tc-protected-content[data-protected-kind="mock-exam-surface"]{display:none!important}
+}

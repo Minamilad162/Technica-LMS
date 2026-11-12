@@ -38,6 +38,8 @@ assert.equal(isPotentialCaptureShortcut({key:'',code:''}),false,
  'OS-native capture with no DOM keyboard event cannot be inferred');
 for(const [file,needle] of [[explorer,'kind="lesson-surface"'],[legacy,'kind="lesson-surface"'],
  [surface,'createPortal(shield,document.body)'],[surface,'Resume lesson'],
+ [surface,"if(isMock?isGuardedMediaShortcut(e):isPotentialCaptureShortcut(e))"],
+ [surface,"{isMock&&mockConcealed?null:children}"],
  [surface,'onClick={resumeLesson}'],[surface,"document.activeElement?.tagName"],
  [surface,"window.addEventListener('keyup',onCaptureKey,true)"],
  [player,"window.addEventListener('keyup',onShortcut,true)"],

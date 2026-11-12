@@ -49,6 +49,16 @@ const captureCss=read('src/contentProtection.css');
 assert.match(protection,/kind==='mock-exam-surface'/);
 assert.match(protection,/if\(manualCaptureResume\)\{timeout.current=null;return;\}/);
 assert.match(protection,/tc-mock-curtain/);
+assert.match(protection,/isGuardedMediaShortcut\(e\)/,
+ 'Mock must use video viewer shortcut policy including Ctrl+S/P');
+assert.match(protection,/ref.current.dataset.mediaShielded=visible\?'true':'false'/,
+ 'Mock must hide question pixels synchronously, like ProtectedLessonViewer');
+assert.match(protection,/setMockConcealed\(previous=>previous===visible\?previous:visible\)/);
+assert.match(protection,/isMock&&mockConcealed\?null:children/,
+ 'Conceal must unmount answer/question DOM while blacked out');
+assert.match(protection,/if\(isMock\)cloak\(\)/,
+ 'Mock print event must conceal actual question DOM');
+assert.match(protection,/if\(isMock\)window.addEventListener\('pagehide',onPageHide\)/);
 assert.match(protection,/Resume exam/);
 assert.match(protection,/!document.fullscreenElement\?\.contains\(ref.current\)/);
 assert.match(policy,/kind==='mock-exam-surface'/);
@@ -60,6 +70,11 @@ assert.match(view,/kind="mock-exam-surface"/,
  'Re-entered exam must install the entire Mock guard again');
 assert.match(protection,/document.addEventListener\('visibilitychange',onVisibility\)/);
 assert.match(captureCss,/\.tc-capture-curtain.tc-mock-curtain:not\(\[hidden\]\)/);
+assert.match(captureCss,/\[data-protected-kind="mock-exam-surface"\]\[data-media-shielded="true"\]/);
+const video=read('src/production/ProtectedLessonViewer.jsx');
+assert.match(video,/if\(shell.current\)shell.current.dataset.mediaShielded='true'/,
+ 'P75 copies the video DOM-level concealment semantics without modifying video');
+assert.match(video,/video.current.pause\(\);video.current.removeAttribute\('src'\);video.current.load\(\)/);
 assert.match(captureCss,/html.tc-quiz-exit-lock \.live-mock \.live-mock-protected-surface/);
 assert.match(liveMockCss,/\.live-mock-protected-surface\{/);
 assert.doesNotMatch(view,/Refresh Mock questions|setInterval\(.*Readiness/,
@@ -82,5 +97,5 @@ assert.match(sql,/'engineVersion','p71-fixed-bank-mock-v1'/);
 assert.match(sql,/search_path=''/);
 assert.match(sql,/NOT EXISTS\(SELECT 1 FROM public\.lms_practice_attempt_items/);
 assert.doesNotMatch(sql,/UPDATE\s+public\.lms_questions|DELETE\s+FROM\s+public\.lms_p9b_mock_items/);
-console.log('P71/P72/P73 PASS: fixed Course Mock 200/300 and full-attempt browser capture curtain, not just the question.');
+console.log('P71/P72/P73/P75 PASS: Mock copies video concealment policy and removes question DOM on captured-browser events.');
 console.log('Production SQL install and actual device/learner attempt verification remain pending approval.');

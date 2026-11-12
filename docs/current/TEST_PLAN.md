@@ -131,3 +131,12 @@ Command / environment / commit / timestamp / duration / PASS-FAIL-SKIPPED / obse
 **Acceptance is FAIL for native Windows/phone screenshots and arbitrary OS screen recorders.** Fullscreen does not establish DRM. Automated Chromium fixture tested capture without DOM key events (visible), Ctrl+Shift+6 keyboard event delivered to page (black after event), then capture after a fresh entry without DOM key event (visible). These results do not constitute live LMS authentication/media validation. Under the current ordinary browser and zero-install requirement, no trustworthy end-to-end assertion can guarantee native black captures. Preserve this as an explicitly unresolved requirement.
 
 Limited regression: P67 recognizes owner-reported browser-delivered Ctrl+Shift+6 even when keyboard layout emits `key='^',code='Digit6'`, excludes unmodified `6`, and recognizes that no DOM event cannot be handled; P71 verifies the full exam wrap is present and pre-paint listeners attach on each mount. Existing P73 fullscreen and server abandonment rules must not regress. Hardware/device tests should separately cover initial and re-entered Mock and always report native capture outcome rather than inferred protection success.
+
+
+## P75 — parity with working Lesson Video browser blackout (2026-11-12)
+
+- With a nonproduction, expendable Mock attempt (200 Question Bank entries), verify Start enters fullscreen and the entire active Mock can be used normally before any capture.
+- Trigger actual browser-delivered keyboard capture/save/print shortcut; content wrapper immediately gets `data-media-shielded=true`, all prompt/option/timer/nav React content unmounts and pre-mounted dark curtain persists through focus regain. The screen is legible again only after `Resume exam` while in original fullscreen. This is browser blackout on detected events, **not evidence that an OS screenshot was blocked**.
+- Leave fullscreen or hide tab: existing `useQuestionFullscreenGuard` closes server attempt; confirm no stale exam content appears after restoring/reentering.
+- Real Windows PrintScreen, Win+Shift+S and independent recording must be tested separately; if the browser receives no event, content can still be captured. Compare video and Mock on same hardware, noting difference between a decoded video surface and HTML text.
+- Verify P67 Lesson protection, P71 Course Mock fixed 200/300 and autosave/grading, P72 premium setup, accessibility/mobile and CI/Build. Never create a production Mock attempt to run QA.
