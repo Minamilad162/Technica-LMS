@@ -1,3 +1,9 @@
+## 2026-11-12 — P74 owner screenshot repro and limited shortcut hardening
+- Record a confirmed acceptance gap: unrestricted OS-native screenshots/recordings of a browser-based Mock remain possible, including on re-entry. The entire P73 blackout is best-effort only; NOT screenshot DRM.
+- Isolated Playwright Chromium fixture showed why: a capture without a DOM keyboard event exposed test content both on initial entry and re-entry, while a received Ctrl+Shift+6 shortcut blacked the surface after the event. This is not a signed-in production-device acceptance test.
+- Add detection for browser-received Ctrl+Shift+6 / shifted physical Digit6 and regressions verifying that normal digit entry does not trigger it and full-exam shield attaches upon mount. Does not alter server attempts, 200/300 timing, answer access, Supabase or new expenses.
+- Absolute requirement 'always black in OS screenshots/recording, no client install or paid DRM' remains UNMET. No further web-only claims of complete screenshot blocking should be made.
+
 ## 2026-11-12 — P73 full Mock Exam browser capture blackout (best-effort)
 - Fixed P71 selected Mock capturing only the question: one protected wrapper now spans the full active Mock (timer, question, choices, flags, navigator, submit) in mandatory fullscreen.
 - Reuses existing pre-paint browser capture-shortcut, copy/print/focus/visibility policies and session-attributed watermarking with the authenticated learner ID; a recognized capture shortcut shows a persistent opaque black cover until explicit Resume exam in the same fullscreen.

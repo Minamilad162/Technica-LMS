@@ -19,6 +19,23 @@ assert.equal(shouldFocusShield('lesson-material'),false);
 assert.equal(shouldShieldMediaOnBlur({mobile:false,activeTag:'iframe',visibility:'visible'}),false);
 for(const event of [{key:'PrintScreen'},{key:'s',metaKey:true,shiftKey:true},{key:'4',metaKey:true,shiftKey:true}])
  assert(isPotentialCaptureShortcut(event)&&isGuardedMediaShortcut(event));
+for(const event of [
+ {key:'6',code:'Digit6',ctrlKey:true,shiftKey:true},
+ {key:'^',code:'Digit6',ctrlKey:true,shiftKey:true},
+ {key:'6',code:'',ctrlKey:true,shiftKey:true},
+]){
+ assert(isPotentialCaptureShortcut(event),
+  'P74 browser-delivered Ctrl+Shift+6 must be recognized, even with shifted key layout');
+}
+for(const event of [
+ {key:'6',code:'Digit6',ctrlKey:false,shiftKey:true},
+ {key:'6',code:'Digit6',ctrlKey:true,shiftKey:false},
+ {key:'6',code:'Digit6',ctrlKey:true,shiftKey:true,repeat:true},
+]){
+ assert.equal(isPotentialCaptureShortcut(event),false,'Do not black normal/held digit input');
+}
+assert.equal(isPotentialCaptureShortcut({key:'',code:''}),false,
+ 'OS-native capture with no DOM keyboard event cannot be inferred');
 for(const [file,needle] of [[explorer,'kind="lesson-surface"'],[legacy,'kind="lesson-surface"'],
  [surface,'createPortal(shield,document.body)'],[surface,'Resume lesson'],
  [surface,'onClick={resumeLesson}'],[surface,"document.activeElement?.tagName"],

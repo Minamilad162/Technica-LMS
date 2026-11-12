@@ -63,7 +63,12 @@ export function isPotentialCaptureShortcut(event){
  const print=key==='printscreen'||code==='printscreen'||Number(event.keyCode)===44;
  const macCapture=!!event.metaKey&&!!event.shiftKey&&['3','4','5'].includes(key);
  const winSnip=!!event.metaKey&&!!event.shiftKey&&key==='s';
- return print||macCapture||winSnip;
+ // P74: owner-reported Ctrl+Shift+6 shortcut. The physical Digit6 code
+ // is needed because Shift can change KeyboardEvent.key to '^' by layout.
+ // This only works when the browser receives the event, not for OS capture.
+ const reportedCtrlShift6=!!event.ctrlKey&&!!event.shiftKey&&
+  (key==='6'||code==='digit6');
+ return print||macCapture||winSnip||reportedCtrlShift6;
 }
 export function getContentProtectionSession(){
  try{

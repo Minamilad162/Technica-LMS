@@ -124,3 +124,10 @@ Command / environment / commit / timestamp / duration / PASS-FAIL-SKIPPED / obse
 3. Confirm clipboard/print blocking and learner/session watermark still apply to the whole active exam. On tab hide, fullscreen loss, route exit, confirm the server abandon workflow remains intact and the full exam stays hidden during cleanup.
 4. Check real Windows, Android and iOS screenshot/recording behavior without claiming all native captures are detectable; use external screen recorder as a **negative guarantee** test. No browser-only technique can reliably black independent OS-native screenshots or a separate screen recorder.
 5. Confirm P67 Lesson surface, standalone Practice question protection and P72 Mock setup/button remain unchanged. Run `npm run test:p67`, `npm run test:p71`, `npm run build` and the existing CI validation group before promoting.
+
+
+## P74 owner capture reproduction / acceptance blocker (2026-11-12)
+
+**Acceptance is FAIL for native Windows/phone screenshots and arbitrary OS screen recorders.** Fullscreen does not establish DRM. Automated Chromium fixture tested capture without DOM key events (visible), Ctrl+Shift+6 keyboard event delivered to page (black after event), then capture after a fresh entry without DOM key event (visible). These results do not constitute live LMS authentication/media validation. Under the current ordinary browser and zero-install requirement, no trustworthy end-to-end assertion can guarantee native black captures. Preserve this as an explicitly unresolved requirement.
+
+Limited regression: P67 recognizes owner-reported browser-delivered Ctrl+Shift+6 even when keyboard layout emits `key='^',code='Digit6'`, excludes unmodified `6`, and recognizes that no DOM event cannot be handled; P71 verifies the full exam wrap is present and pre-paint listeners attach on each mount. Existing P73 fullscreen and server abandonment rules must not regress. Hardware/device tests should separately cover initial and re-entered Mock and always report native capture outcome rather than inferred protection success.

@@ -54,6 +54,10 @@ assert.match(protection,/!document.fullscreenElement\?\.contains\(ref.current\)/
 assert.match(policy,/kind==='mock-exam-surface'/);
 assert.match(protection,/window.addEventListener\('keydown',onKeyDown,true\)/);
 assert.match(protection,/window.addEventListener\('keyup',onCaptureKey,true\)/);
+assert.match(protection,/useLayoutEffect\(\(\)=>\{/,
+ 'Mock full-screen curtain must register browser signals before paint on each mount');
+assert.match(view,/kind="mock-exam-surface"/,
+ 'Re-entered exam must install the entire Mock guard again');
 assert.match(protection,/document.addEventListener\('visibilitychange',onVisibility\)/);
 assert.match(captureCss,/\.tc-capture-curtain.tc-mock-curtain:not\(\[hidden\]\)/);
 assert.match(captureCss,/html.tc-quiz-exit-lock \.live-mock \.live-mock-protected-surface/);
