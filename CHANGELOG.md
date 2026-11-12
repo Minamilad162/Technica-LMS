@@ -1,3 +1,9 @@
+## 2026-11-12 — P77 live function activation recorded
+- GitHub CI validation + disposable PostgreSQL all PASS at commit `81f0628`, run 43222034565.
+- Verified Technica Account Supabase ledger and existing functions, then installed P77 function-only migration (version `20261112125618`). Postflight confirmed four secured RPC functions are authenticated-only, search_path locked, import Approved/Active and safe Mock conversion installed.
+- Existing production bank remains 2,500 questions including 200 Mock Drafts and 2,300 old non-Mock Drafts, **zero auto-promoted**. The explicit count-confirmed Admin activation button is the only path to release these historical Drafts for Practice.
+- GitHub code and DB functions are deployed separately; Cloudflare frontend deployment and live learner Practice test have not been independently checked. No database business data was mutated.
+
 ## 2026-11-12 — P77 auto-Approved Practice question imports and safe Mock switching
 - New Excel/CSV/manual Question Bank imports enter as Active + Approved and become available to normal Practice without a second approval step. Existing Practice RPCs continue selecting only approved, active non-Mock questions; Mock is a separate explicit Admin choice.
 - A never-used, unlinked Approved question can move to Mock via Save All, atomically becoming Draft Mock-only. Already-served Practice or delivered Mock rows are locked against incompatible reclassification; answer keys and historical attempt snapshots remain protected.
