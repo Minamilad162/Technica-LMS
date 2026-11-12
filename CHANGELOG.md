@@ -1,3 +1,10 @@
+## 2026-11-12 — P77 auto-Approved Practice question imports and safe Mock switching
+- New Excel/CSV/manual Question Bank imports enter as Active + Approved and become available to normal Practice without a second approval step. Existing Practice RPCs continue selecting only approved, active non-Mock questions; Mock is a separate explicit Admin choice.
+- A never-used, unlinked Approved question can move to Mock via Save All, atomically becoming Draft Mock-only. Already-served Practice or delivered Mock rows are locked against incompatible reclassification; answer keys and historical attempt snapshots remain protected.
+- Existing Course 1's 2,300 Active imported non-Mock Drafts stay unchanged until an Admin confirms a one-time exact-count activation in Question Bank. The existing 200 Mock candidates are never auto-approved or moved.
+- Added source-only P77 migration with dedicated Admin import/legacy preview/explicit activation RPCs; revised original P29 flag RPC preserving grants. Added JS and disposable PG tests in existing CI jobs, no new workflow.
+- No database writes occurred by generating the code; live Supabase install and Cloudflare deployment pending verification.
+
 ## 2026-11-12 — P76 premium active Mock Exam controls and compact right navigator
 - Reorganized only the active Course Mock fullscreen into a spacious question/answer column and a sticky 282px right-hand navigator, with its 200 question buttons internally scrollable instead of extending the page height.
 - Redesigned Previous, Next question, Flag for review (with clearly marked toggled state), Clear answer, and Submit Mock Exam as cohesive Technica teal/amber buttons with accessible disabled/hover/focus states.

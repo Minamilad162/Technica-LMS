@@ -1,7 +1,7 @@
 import React,{useEffect,useMemo,useRef,useState} from 'react';
 import {AlertCircle,BookOpen,CheckCircle2,FileQuestion,FileSpreadsheet,Plus,RefreshCw,Search,ShieldCheck,Save,Undo2,Upload,SlidersHorizontal} from 'lucide-react';
 import {importQuestionFile} from '../lib/questionImport.js';
-import {importCourseBank,listCourseBank,mappedImportRows,saveCourseBankBatch,getCourseBankBatchCapabilities,approveNonAspBankQuestion,reserveNonAspMockQuestion,inspectLessonQuizPublication} from './courseQuestionBankApi.js';
+import {importCourseBank,listCourseBank,mappedImportRows,saveCourseBankBatch,getCourseBankBatchCapabilities,approveNonAspBankQuestion,reserveNonAspMockQuestion,inspectLessonQuizPublication,existingPracticeImportPreview,activateExistingPracticeImports} from './courseQuestionBankApi.js';
 import {stagedQuestionEdit,stagedToBatch,originalQuestionValues,BANK_DIFFICULTIES} from './questionBankDraft.js';
 import {liveCourseTree} from './liveAuthoringApi.js';
 import {isAspCourseTitle,isOfficialAspCourse,preferredQuestionBankCourse,questionBankCatalogState} from './questionBankCourseSelection.js';
@@ -30,6 +30,7 @@ export default function AdminCourseBank({db,courses=[],asp,onUpdate,onDirtyChang
  const [releaseLessonId,setReleaseLessonId]=useState('');
  const [inspectState,setInspectState]=useState({loading:false,data:null,error:''});
  const [reviewOpen,setReviewOpen]=useState(false),[repairingAsp,setRepairingAsp]=useState(false);
+ const [legacyPractice,setLegacyPractice]=useState({count:0,loading:false,error:''});
  const [officialMock,setOfficialMock]=useState({loading:false,data:null,error:''});
  const reviewRef=useRef(null);
  const [batchReady,setBatchReady]=useState(false),[batchLoading,setBatchLoading]=useState(true);
@@ -90,6 +91,15 @@ export default function AdminCourseBank({db,courses=[],asp,onUpdate,onDirtyChang
    .finally(()=>{if(live)setLoading(false);});
   return()=>{live=false;};
  },[db,courseId,query,offset,filterDomain,difficulty,usage,revision]);
+ // P77 read-only preview. No existing business data changes on page load.
+ useEffect(()=>{
+  if(!courseId||mode!=='bank'){setLegacyPractice({count:0,loading:false,error:''});return;}
+  let live=true;setLegacyPractice({count:0,loading:true,error:''});
+  existingPracticeImportPreview(db,courseId)
+   .then(v=>{if(live)setLegacyPractice({count:v.count,loading:false,error:''});})
+   .catch(e=>{if(live)setLegacyPractice({count:0,loading:false,error:fail(e)});});
+  return()=>{live=false;};
+ },[db,courseId,mode,revision]);
  // Count-only verification of permanent P9B/P10 fixed 200-question ASP form.
  useEffect(()=>{
   if(!courseId||selected?.slug!=='asp'){setOfficialMock({loading:false,data:null,error:''});return;}
@@ -170,6 +180,18 @@ export default function AdminCourseBank({db,courses=[],asp,onUpdate,onDirtyChang
   }catch(e){setError(fail(e));}
   finally{setRepairingAsp(false);}
  };
+ const activateOldPractice=async()=>{
+  if(!selected||!legacyPractice.count||busy||pendingCount)return;
+  const expected=legacyPractice.count;
+  if(!window.confirm('Activate '+expected+' previously imported Draft questions for Practice in '+selected.title+'? Only active, unused, non-Mock file-imported questions will be Approved. Mock selections and old attempts remain unchanged.'))return;
+  setBusy(true);setError('');setNotice('');
+  try{
+   const result=await activateExistingPracticeImports(db,selected.id,expected);
+   setNotice(result.activated+' existing imported questions are now Approved for Practice.');
+   setUsage('practice');setOffset(0);refresh(true);
+  }catch(e){setError('No partial activation saved: '+fail(e));refresh(true);}
+  finally{setBusy(false);}
+ };
  const discard=()=>{
   if(pendingCount&&window.confirm('Discard all '+pendingCount+' unsaved actions?')){
    setStaged({});setReleaseLessonId('');setNotice('Unsaved actions discarded.');setError('');
@@ -201,13 +223,13 @@ export default function AdminCourseBank({db,courses=[],asp,onUpdate,onDirtyChang
    const data=await importQuestionFile(file,courseId,domainId);
    if(!data.questions.length)throw Error('No valid questions found. Check the required columns.');
    const mapped=mappedImportRows(data.questions,domainId||null,domains);
-   // Import creates Draft questions only. Admin must confirm the row count.
+   // P77: validated imported questions become Active + Approved after Admin confirms count.
    setPending({courseId,filename:file.name,rows:mapped,problems:data.problems,sheets:data.sheets,unmappedLabels:[...new Set(mapped.map(q=>q.unmappedDomainLabel).filter(Boolean))]});
   }catch(e){setError(fail(e));}
  }
  async function upload(){
   if(!pending||pending.courseId!==courseId||busy||aspIdentityMismatch||dirtyCount)return;
-  if(!window.confirm('Import '+pending.rows.length+' valid questions as DRAFT into '+selected.title+'? '+pending.rows.filter(q=>!q.domainId).length+' will remain unassigned to a Domain until human review. Existing questions and Mock reservations will not be modified.'))return;
+  if(!window.confirm('Import '+pending.rows.length+' validated questions as Active + Approved for Practice in '+selected.title+'? '+pending.rows.filter(q=>!q.domainId).length+' lack a Domain, so Domain Practice and Level Up still need classification. Existing questions and Mock reservations will not change.'))return;
   setBusy(true);setError('');setNotice('');
   let inserted=0,skipped=0;
   try{
@@ -215,7 +237,7 @@ export default function AdminCourseBank({db,courses=[],asp,onUpdate,onDirtyChang
     const result=await importCourseBank(db,courseId,pending.rows.slice(start,start+50));
     inserted+=result.inserted||0;skipped+=result.skipped||0;setUploadCount(start+Math.min(50,pending.rows.length-start));
    }
-   setNotice(inserted+' Draft questions imported · '+skipped+' duplicates skipped. Review before publication.');
+   setNotice(inserted+' Active + Approved Practice questions imported · '+skipped+' duplicates skipped. An unused question can later be selected for Mock and saved separately.');
    setPending(null);setOffset(0);refresh();
   }catch(e){setError('Import stopped after '+inserted+' inserted / '+skipped+' skipped. Rerun the same file safely: '+fail(e));refresh();}
   finally{setBusy(false);}
@@ -231,7 +253,7 @@ export default function AdminCourseBank({db,courses=[],asp,onUpdate,onDirtyChang
     reference:'Admin manual entry'};
    const results=mappedImportRows([{...row,correct:row.correctIndex,reference:row.reference,difficulty:'unclassified',domainLabel:''}],domainId||null,domains);
    const outcome=await importCourseBank(db,courseId,results);
-   setNotice(outcome.inserted?'Manual question saved as Draft.':'Matching question already exists; nothing overwritten.');
+   setNotice(outcome.inserted?'Manual question is Active + Approved for Practice.':'Matching question already exists; nothing overwritten.');
    setManual(null);refresh();
   }catch(e){setError(fail(e));}finally{setBusy(false);}
  }
@@ -259,7 +281,7 @@ export default function AdminCourseBank({db,courses=[],asp,onUpdate,onDirtyChang
      <button type="submit" aria-label="Apply question search">Search</button>
     </form>
    </div>
-   {mode==='bank'&&<p className="p30-toolbar-hint">Upload to the selected Course. Question settings can be edited in the table and saved together.</p>}
+   {mode==='bank'&&<p className="p30-toolbar-hint">Imported questions become Active + Approved for Practice immediately. Mark an unused question Mock and Save All Changes to move it out of Practice.</p>}
    <div className="p30-filter-line">
     <label>Domain <select value={filterDomain} aria-label="Filter bank by domain" onChange={e=>{setFilterDomain(e.target.value);setOffset(0);}}>
      <option value="">All Domains</option>{domains.map(d=><option value={d.id} key={d.id}>{d.title}</option>)}
@@ -329,7 +351,12 @@ export default function AdminCourseBank({db,courses=[],asp,onUpdate,onDirtyChang
   {selected&&!bank.compatibilityMode&&bank.items.length>0&&typeof bank.items[0].isActive!=='boolean'&&<p role="status" className="at-disclaimer">
    Active/Mock settings require the guarded P29 schema. No edits will be sent to Supabase until it is installed.
   </p>}
-  {selected&&error&&<p role="alert" className="at-error"><AlertCircle size={16}/>{error}</p>}
+  {selected&&mode==='bank'&&legacyPractice.count>0&&<div className="at-disclaimer p77-practice-activation" role="status">
+    <BookOpen size={18}/><span><strong>{legacyPractice.count} previously imported Draft questions</strong> can be activated for Practice in {selected.title}. This does not change the selected Mock questions.</span>
+    <button type="button" className="at-primary" disabled={busy||pendingCount>0||legacyPractice.loading}
+     onClick={()=>void activateOldPractice()}>Activate existing for Practice</button>
+   </div>}
+   {selected&&error&&<p role="alert" className="at-error"><AlertCircle size={16}/>{error}</p>}
   {selected&&notice&&<p role="status" className="at-success"><CheckCircle2 size={16}/>{notice}</p>}
   {selected&&pending&&<div className="p30-upload-preview at-surface">
    <h3>Import preview · {pending.filename}</h3>
@@ -344,10 +371,10 @@ export default function AdminCourseBank({db,courses=[],asp,onUpdate,onDirtyChang
    {!!pending.problems.length&&<details><summary>Import validation notes</summary>{pending.problems.slice(0,20).map((p,i)=><p key={i}>{p}</p>)}</details>}
    <div className="p30-import-actions"><button type="button" className="at-outline" disabled={busy} onClick={()=>setPending(null)}>Cancel Import</button>
     <button type="button" className="at-primary" disabled={busy||aspIdentityMismatch} onClick={upload}>
-     {busy?'Importing '+uploadCount+'/'+pending.rows.length:'Import '+pending.rows.length+' as Draft'}</button></div>
+     {busy?'Importing '+uploadCount+'/'+pending.rows.length:'Import '+pending.rows.length+' to Practice'}</button></div>
   </div>}
   {selected&&manual&&<form className="p28-manual at-surface" onSubmit={addManual}>
-   <h3>Add a new Draft question</h3>
+   <h3>Add a new Practice question</h3>
    <label>Question<textarea value={manual.prompt} onChange={e=>setManual(v=>({...v,prompt:e.target.value}))} rows={2} required/></label>
    {manual.options.map((answer,i)=><label key={i}>Option {String.fromCharCode(65+i)}
     <span><input type="radio" checked={manual.correct===i} onChange={()=>setManual(v=>({...v,correct:i}))}/>
@@ -355,7 +382,7 @@ export default function AdminCourseBank({db,courses=[],asp,onUpdate,onDirtyChang
    </label>)}
    <label>Explanation (optional)<textarea value={manual.explanation} onChange={e=>setManual(v=>({...v,explanation:e.target.value}))} rows={2}/></label>
    <div className="p30-import-actions"><button type="button" className="at-outline" onClick={()=>setManual(null)}>Cancel</button>
-    <button type="submit" className="at-primary" disabled={busy}>Create Draft Question</button></div>
+    <button type="submit" className="at-primary" disabled={busy}>Create Practice Question</button></div>
   </form>}
   {selected&&<>
    <p className="p31-lesson-publish-note">
@@ -408,7 +435,7 @@ export default function AdminCourseBank({db,courses=[],asp,onUpdate,onDirtyChang
      <tbody>{bank.items.map(q=>{
       const v={...originalQuestionValues(q),...(staged[q.id]?.next||{})};
       const protectedRow=busy||!canEdit||q.mockExclusive||q.approvalState==='archived';
-      const mockDisabled=protectedRow||(!v.mockCandidate&&(q.approvalState!=='draft'||q.linkedCount>0||!v.isActive));
+      const mockDisabled=protectedRow||(!v.mockCandidate&&(!['draft','approved'].includes(q.approvalState)||q.linkedCount>0||!v.isActive));
       const lessonDisabled=protectedRow||!v.isActive||v.mockCandidate;
       const lessonNames=(q.linkedLessonIds||[]).map(id=>lessons.find(l=>l.id===id)?.label?.split(' / ').pop()||'Lesson');
       return <tr key={q.id} className={(staged[q.id]?'p30-edited ':'')+(selectedIds.includes(q.id)?'p30-selected':'')}>
@@ -431,7 +458,7 @@ export default function AdminCourseBank({db,courses=[],asp,onUpdate,onDirtyChang
         <span aria-hidden="true"/></label></td>
        <td data-label="Mock Exam"><label className="p30-switch p30-mock-switch">
         <input type="checkbox" aria-label={'Mock Exam: '+q.prompt} checked={q.mockExclusive||v.mockCandidate}
-         disabled={mockDisabled} title={q.mockExclusive?'Official Mock reservation is immutable':'Only unused Drafts may become Mock candidates'}
+         disabled={mockDisabled} title={q.mockExclusive?'Official Mock reservation is immutable':'Only unused, unlinked Practice questions may become Mock; server blocks questions already served'}
          onChange={e=>stage(q,'mockCandidate',e.target.checked)}/>
         <span aria-hidden="true"/></label></td>
        <td data-label="Lesson Quiz">
@@ -488,7 +515,7 @@ export default function AdminCourseBank({db,courses=[],asp,onUpdate,onDirtyChang
    {dirtyCount>500&&<p role="alert" className="at-error">Maximum 500 edits per atomic save. Discard or reduce the staged changes before saving.</p>}
    {selected.slug!=='asp'&&mode==='bank'&&<details ref={reviewRef} className="p30-advanced-review">
     <summary>Optional review tools for Practice and official Mock reservation</summary>
-    <p>Only use these tools if you separately want to approve questions for normal Practice. The fixed official Mock requires its finalized reserved 200-question form.</p>
+    <p>Legacy Drafts can be approved individually here. New imports become Approved for Practice automatically; Mock selection is limited to unused questions.</p>
     {bank.items.filter(q=>q.approvalState==='draft'&&!q.mockExclusive).map(q=><div key={q.id} className="p30-review-row">
      <span>{q.prompt}</span>
      <button type="button" className="at-outline" disabled={busy||dirtyCount>0} onClick={()=>void action(q,'approve')}>Approve for Practice</button>

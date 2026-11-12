@@ -69,7 +69,7 @@ for(const fragment of ['verifiedLiveAdmin(db)','p_course_id:courseId','p_items:r
  assert(api.includes(fragment),'Missing verified P28 API '+fragment);
 assert(!sql.includes("to_regclass('public.lms_p9b_mock_items')"),'P9B must not block non-ASP Course Bank migration');
 assert(sql.includes('P28 missing prerequisites:'),'Admin requires exact missing P1/P4/P22 diagnostics');
-assert(bank.includes('importQuestionFile(file,courseId,domainId)')&&bank.includes('Upload Excel / CSV')&&bank.includes('as Draft'));
+assert(bank.includes('importQuestionFile(file,courseId,domainId)')&&bank.includes('Upload Excel / CSV')&&bank.includes('to Practice'));
 assert(bank.includes("selected.slug!=='asp'")&&bank.includes("selected.slug==='asp'"));
 assert(bank.includes('reserveNonAspMockQuestion')&&bank.includes('approveNonAspBankQuestion'));
 assert(quiz.includes('Choose from Course Bank')&&quiz.includes('attachBankToLesson(db,lessonId,q.id'));
@@ -85,4 +85,4 @@ assert(bank.includes('unmappedLabels')&&bank.includes('Map spreadsheet Domains b
 assert(quiz.includes("usage:'eligible'")&&quiz.includes('Filter Lesson Quiz by domain'),'Lesson Quiz must use filtered Course Bank');
 assert(!quiz.includes('Manual question</button>'),'New Lesson questions must originate from Course Bank, not a separate pool');
 assert(!sql.includes('UPDATE public.lms_questions SET approval_state=\'approved\' WHERE course_id'));
-console.log('PASS P28 static: scoped per-course Excel/CSV draft import; Admin-only RPC; Lesson quiz bank links; server-enforced non-ASP Mock/Quiz/Practice exclusion; no ASP Mock rule regression. Disposable PG and signed-in staging still required.');
+console.log('PASS P28: legacy P28 import remains Draft; Admin P77 import becomes Approved / Active for Practice.');

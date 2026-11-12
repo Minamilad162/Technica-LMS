@@ -40,7 +40,31 @@ export async function listCourseBank(db,courseId,{search='',limit=50,offset=0,do
 export async function importCourseBank(db,courseId,rows){
  checkId(courseId);
  if(!Array.isArray(rows)||rows.length<1||rows.length>50)throw Error('Import must contain 1–50 rows per batch.');
- return call(db,'lms_p28_import_bank',{p_course_id:courseId,p_items:rows});
+ const result=await call(db,'lms_p77_import_bank',{p_course_id:courseId,p_items:rows});
+ if(!result||result.state!=='approved'||result.isActive!==true)
+  throw Error('P77 auto-approved Practice import is not active on this database. Existing rows were not modified.');
+ return result;
+}
+// Preview only: never activate old imported Drafts on page load.
+export async function existingPracticeImportPreview(db,courseId){
+ checkId(courseId);
+ const x=await call(db,'lms_p77_existing_practice_preview',{p_course_id:courseId});
+ if(!x||x.version!=='p77-v1'||x.courseId!==courseId||
+  !Number.isInteger(x.count)||x.count<0||x.autoApproveNewImports!==true)
+  throw Error('P77 automatic Practice import requires an installed database migration.');
+ return x;
+}
+export async function activateExistingPracticeImports(db,courseId,expectedCount){
+ checkId(courseId);
+ if(!Number.isInteger(expectedCount)||expectedCount<1||expectedCount>10000)
+  throw Error('Choose an exact verified number of imported Draft questions.');
+ const data=await call(db,'lms_p77_activate_existing_practice',{
+  p_course_id:courseId,p_expected_count:expectedCount,
+  p_confirmation:'ACTIVATE EXISTING PRACTICE IMPORTS'
+ });
+ if(data?.courseId!==courseId||data.activated!==expectedCount||data.mockUnchanged!==true)
+  throw Error('Existing Practice activation could not be verified.');
+ return data;
 }
 export async function approveNonAspBankQuestion(db,id){
  return call(db,'lms_p28_approve_nonasp',{p_question_id:checkId(id),

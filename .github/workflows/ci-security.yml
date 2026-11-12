@@ -230,8 +230,10 @@ jobs:
       - name: P27 verified Admin pie charts, safe draft Course Preview and learner nonregression
         run: npm run test:p27:admin
 
-      - name: P28 per-Course Excel Question Bank and Lesson Quiz / Mock exclusion contract
-        run: npm run test:p28:bank
+      - name: P28/P77 Course import and automatic Practice contract
+        run: |
+          npm run test:p28:bank
+          npm run test:p77
 
       - name: P29 per-question Active/Mock Exam and Course Lesson Quiz selection contract
         run: npm run test:p29:bank
@@ -419,6 +421,8 @@ jobs:
 
       - name: P44 customizable Practice with 100-question maximum and server-governed timers and grading
         run: bash scripts/test-p44-postgres-smoke.sh
+      - name: P77 Active/Approved import, selected Mock isolation and legacy opt-in (disposable PG)
+        run: bash scripts/test-p77-postgres-smoke.sh
 
       - name: Test scope disclosure
         run: echo "Ephemeral local PostgreSQL smoke only; live Supabase Auth, Storage, Data API and device tests still pending."

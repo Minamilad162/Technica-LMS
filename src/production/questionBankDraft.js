@@ -17,8 +17,8 @@ export function canStageQuestion(q,field,value,current){
    throw Error('Approved question difficulty requires independent review.');
  }
  if(field==='mockCandidate'&&value===true){
-  if(q.approvalState!=='draft'||q.linkedCount>0)
-   throw Error('Mock Exam candidates must be unused Draft questions not linked to Lessons.');
+  if(!['draft','approved'].includes(q.approvalState)||q.linkedCount>0)
+   throw Error('Mock Exam requires an unused, unlinked Draft or Approved question. Questions already served in Practice cannot move to Mock.');
   if(!next.isActive)throw Error('Enable this question before selecting it for Mock Exam.');
  }
  if(field==='addLessonId'&&value){

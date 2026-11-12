@@ -149,3 +149,11 @@ Limited regression: P67 recognizes owner-reported browser-delivered Ctrl+Shift+6
 - Test Previous and Next on first and last question, flag/unflag (amber indicator), clear selected answer, pending RPC busy/disabled states, focus/keyboard traversal, long prompt/option text and no horizontal overflow.
 - On phones/tablets 390px/430px/<=960px, the picker moves below the question and stays compact/collapsed until Jump to question, closes after selection, and action buttons remain tappable. Verify no timer reset, no accidental submit, and returning from the right-side picker preserves viewport and saved choices.
 - Confirm P73-P75 full-exam capture deterrence and forced fullscreen wrapper are unchanged; screenshot-black guarantee is still **not met** in ordinary browser.
+
+
+## P77 Excel Bank import → Practice tests (2026-11-12)
+
+- Source-only migration, read-only live ledger/function preflight, then disposable PostgreSQL. New valid rows become Active + Approved non-Mock, repeat import is idempotent, and learners/anon cannot call Admin import or activation. Wrong Domain/answer indices fail without partial import.
+- Server Practice reads only approved active non-Mock rows. Stage a previously unused Approved row for Mock: it becomes Draft Mock-only; then unmark unused Mock to restore Approved Practice. An already-served Practice question or Lesson-linked item must not enter Mock; already-served Mock must not return to Practice.
+- Old file-imported Drafts: count-only preview, explicit Admin confirmation and expected count, no auto business-row changes on install or page load. Verify counted activation and Audit, excluding 200 Mock questions and historic snapshots. Confirm P71 fixed 200/300 and Level Up tier gate.
+- Regression suite groups P77 static with existing P28, disposable PG after P44, then production build. Production migration and live 2,300-row activation require separate authorization/verification; never run disposable tests against live Supabase.

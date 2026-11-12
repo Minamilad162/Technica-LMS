@@ -19,8 +19,10 @@ next=stagedQuestionEdit(draft,next,'isActive',false);
 assert.equal(next.next.isActive,false);
 assert.equal(next.next.mockCandidate,false,'Deactivating a pending Mock candidate must clear the candidate tick');
 assert.throws(()=>stagedQuestionEdit({...draft,isActive:false},null,'mockCandidate',true),/Enable/);
-assert.throws(()=>stagedQuestionEdit({...draft,linkedCount:2},null,'mockCandidate',true),/unused Draft/);
+assert.throws(()=>stagedQuestionEdit({...draft,linkedCount:2},null,'mockCandidate',true),/unused, unlinked/);
 assert.throws(()=>stagedQuestionEdit({...draft,approvalState:'approved'},null,'difficulty','medium'),/independent review/);
+assert.equal(stagedQuestionEdit({...draft,approvalState:'approved'},null,'mockCandidate',true).next.mockCandidate,true,
+ 'New imported Approved question can be tagged Mock only when unused according to the server');
 assert.throws(()=>stagedQuestionEdit({...draft,mockExclusive:true},null,'isActive',false),/reserved/);
 assert.throws(()=>stagedQuestionEdit(draft,next,'addLessonId','uuid-test'),/Only Active/);
 const q2={...draft,id:'d2'};
