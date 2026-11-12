@@ -163,3 +163,27 @@ html.tc-quiz-exit-lock :is(.quiz-page,.live-practice .live-question,.live-practi
 .tc-lesson-curtain .tc-lesson-resume{pointer-events:auto;cursor:pointer;border:1px solid #8fd6bf;border-radius:10px;color:#0a443d;background:#baf1dc;padding:11px 17px;font:750 12px/1.2 ui-sans-serif,system-ui,sans-serif;letter-spacing:0}
 .tc-lesson-curtain .tc-lesson-resume:focus-visible{outline:3px solid #69d6be;outline-offset:3px}
 @media print{.tc-lesson-curtain{display:none!important}}
+
+/* P73 — fullscreen Mock capture *deterrence*, NOT native screenshot DRM.
+   Black screen remains on recognized shortcuts until the learner taps
+   Resume exam. Unlike a body portal, this node lives inside the fullscreen
+   target so it can paint above the secure exam in browser fullscreen. */
+.tc-capture-curtain.tc-mock-curtain:not([hidden]){
+ display:flex!important;flex-direction:column;gap:13px;
+ pointer-events:auto!important;
+ background:#03060b!important;color:#f4f8f8!important;
+}
+.tc-mock-curtain .tc-lesson-resume{
+ pointer-events:auto;cursor:pointer;background:#baf1dc;color:#074f48;
+ padding:12px 19px;border-radius:10px;border:1px solid #8fd6bf;
+ font:750 12px/1.2 ui-sans-serif,system-ui,sans-serif;letter-spacing:0;
+}
+.tc-mock-curtain .tc-lesson-resume:focus-visible{
+ outline:3px solid #69d6be;outline-offset:3px;
+}
+/* The existing fullscreen-exit hook already invalidates the attempt on
+   server. Hide the entire exam while route/React cleanup is in progress. */
+html.tc-quiz-exit-lock .live-mock .live-mock-protected-surface{
+ visibility:hidden!important;
+}
+@media print{.tc-mock-curtain{display:none!important}}

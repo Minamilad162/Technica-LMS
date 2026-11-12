@@ -19,6 +19,9 @@ export default function LiveProtectedContent({as:Tag='div',className='',kind='qu
  const ref=useRef(null),timeout=useRef(null),shieldRef=useRef(null);
  const keyShield=useRef(false),focusShield=useRef(false);
  const enabledFocusShield=shouldFocusShield(kind);
+ // Keep exam captures shielded until the learner explicitly resumes in
+ // fullscreen, just like the lesson curtain. Browser signals are best-effort.
+ const manualCaptureResume=kind==='lesson-surface'||kind==='mock-exam-surface';
  const[minute,setMinute]=useState(()=>new Date());
  const[sessionId]=useState(getContentProtectionSession);
  const identity=watermarkIdentity(identitySource);
@@ -40,9 +43,9 @@ export default function LiveProtectedContent({as:Tag='div',className='',kind='qu
   keyShield.current=true;
   syncCurtain();
   if(timeout.current)clearTimeout(timeout.current);
-  // A capture-like shortcut on a Lesson requires manual Resume.
-  // Existing Practice and exam question shields keep the short hold.
-  if(kind==='lesson-surface'){timeout.current=null;return;}
+  // The full Lesson and full Mock Exam hold their black curtain until a
+  // deliberate Resume; standalone Practice questions keep the short hold.
+  if(manualCaptureResume){timeout.current=null;return;}
   timeout.current=setTimeout(()=>{
    keyShield.current=false;
    syncCurtain();
@@ -177,6 +180,8 @@ export default function LiveProtectedContent({as:Tag='div',className='',kind='qu
  };
  const resumeLesson=()=>{
   if(document.visibilityState==='hidden')return;
+  // A Mock screen can only be revealed inside the required exam fullscreen.
+  if(kind==='mock-exam-surface'&&!document.fullscreenElement?.contains(ref.current))return;
   keyShield.current=false;focusShield.current=false;
   if(timeout.current){clearTimeout(timeout.current);timeout.current=null;}
   syncCurtain();
@@ -187,12 +192,14 @@ export default function LiveProtectedContent({as:Tag='div',className='',kind='qu
   }
  };
  const shield=<div ref={shieldRef} hidden
-   className={'tc-capture-curtain'+(kind==='lesson-surface'?' tc-lesson-curtain':'')}
+   className={'tc-capture-curtain'+(kind==='lesson-surface'?' tc-lesson-curtain':
+     kind==='mock-exam-surface'?' tc-mock-curtain':'')}
    data-capture-curtain="browser-best-effort" data-reason="none"
-   aria-hidden={kind==='lesson-surface'?undefined:'true'}
-   role={kind==='lesson-surface'?'alert':undefined}>
-   <span>PROTECTED LEARNING CONTENT</span>
-   {kind==='lesson-surface'&&<button type="button" className="tc-lesson-resume" onClick={resumeLesson}>Resume lesson</button>}
+   aria-hidden={manualCaptureResume?undefined:'true'}
+   role={manualCaptureResume?'alert':undefined}>
+   <span>{kind==='mock-exam-surface'?'PROTECTED MOCK EXAM':'PROTECTED LEARNING CONTENT'}</span>
+   {manualCaptureResume&&<button type="button" className="tc-lesson-resume" onClick={resumeLesson}>
+    {kind==='mock-exam-surface'?'Resume exam':'Resume lesson'}</button>}
   </div>;
  return <>
   <Tag className={['tc-protected-content',className].filter(Boolean).join(' ')}

@@ -7,6 +7,9 @@ const explorer=read('src/production/CourseLessonExplorer.jsx'),legacy=read('src/
  surface=read('src/production/LiveProtectedContent.jsx'),player=read('src/production/ProtectedLessonViewer.jsx'),
  css=read('src/contentProtection.css'),api=read('src/production/lessonMediaApi.js');
 assert.equal(shouldFocusShield('lesson-surface'),true);
+assert.equal(shouldFocusShield('mock-exam-surface'),true);
+assert.equal(shouldBlackoutForBlur('mock-exam-surface',false),true);
+assert.equal(shouldBlackoutForVisibility('mock-exam-surface','hidden'),true);
 assert.equal(shouldBlackoutForBlur('lesson-surface',false),true);
 assert.equal(shouldBlackoutForBlur('lesson-surface',true),false,'Mobile keyboard must not black out reading');
 assert.equal(shouldBlackoutForVisibility('lesson-surface','hidden'),true);

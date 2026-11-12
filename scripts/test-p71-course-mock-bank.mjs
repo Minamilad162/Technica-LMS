@@ -37,6 +37,26 @@ assert.match(view,/document.addEventListener\('visibilitychange',visible\)/);
 assert.match(view,/window.addEventListener\('focus',visible\)/);
 assert.match(view,/className="live-mock-start"/);
 assert.match(view,/Start Mock Exam/);
+assert.match(view,/kind="mock-exam-surface" identity=\{\{id:user.id\}\}/);
+assert.doesNotMatch(view,/kind="exam-question"/,
+ 'Active Mock uses one full-exam capture curtain, not only a question wrapper');
+assert.match(view,/requestQuestionFullscreen\(ref.current\)/);
+assert.match(view,/useQuestionFullscreenGuard/);
+const protection=read('src/production/LiveProtectedContent.jsx');
+const policy=read('src/lib/contentProtection.js');
+const captureCss=read('src/contentProtection.css');
+assert.match(protection,/kind==='mock-exam-surface'/);
+assert.match(protection,/if\(manualCaptureResume\)\{timeout.current=null;return;\}/);
+assert.match(protection,/tc-mock-curtain/);
+assert.match(protection,/Resume exam/);
+assert.match(protection,/!document.fullscreenElement\?\.contains\(ref.current\)/);
+assert.match(policy,/kind==='mock-exam-surface'/);
+assert.match(protection,/window.addEventListener\('keydown',onKeyDown,true\)/);
+assert.match(protection,/window.addEventListener\('keyup',onCaptureKey,true\)/);
+assert.match(protection,/document.addEventListener\('visibilitychange',onVisibility\)/);
+assert.match(captureCss,/\.tc-capture-curtain.tc-mock-curtain:not\(\[hidden\]\)/);
+assert.match(captureCss,/html.tc-quiz-exit-lock \.live-mock \.live-mock-protected-surface/);
+assert.match(liveMockCss,/\.live-mock-protected-surface\{/);
 assert.doesNotMatch(view,/Refresh Mock questions|setInterval\(.*Readiness/,
  'No manual refresh button or polling for Mock setup');
 assert.doesNotMatch(hub,/className="lep-mock-promise"/,
@@ -57,5 +77,5 @@ assert.match(sql,/'engineVersion','p71-fixed-bank-mock-v1'/);
 assert.match(sql,/search_path=''/);
 assert.match(sql,/NOT EXISTS\(SELECT 1 FROM public\.lms_practice_attempt_items/);
 assert.doesNotMatch(sql,/UPDATE\s+public\.lms_questions|DELETE\s+FROM\s+public\.lms_p9b_mock_items/);
-console.log('P71/P72 PASS: live bank readiness auto-reloads on focus, without demo cards or manual refresh; Mock stays fixed 200/300.');
+console.log('P71/P72/P73 PASS: fixed Course Mock 200/300 and full-attempt browser capture curtain, not just the question.');
 console.log('Production SQL install and actual device/learner attempt verification remain pending approval.');

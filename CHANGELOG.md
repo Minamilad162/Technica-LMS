@@ -1,3 +1,10 @@
+## 2026-11-12 — P73 full Mock Exam browser capture blackout (best-effort)
+- Fixed P71 selected Mock capturing only the question: one protected wrapper now spans the full active Mock (timer, question, choices, flags, navigator, submit) in mandatory fullscreen.
+- Reuses existing pre-paint browser capture-shortcut, copy/print/focus/visibility policies and session-attributed watermarking with the authenticated learner ID; a recognized capture shortcut shows a persistent opaque black cover until explicit Resume exam in the same fullscreen.
+- The mock curtain is rendered inside the fullscreen target so it can appear above fullscreen content. Fullscreen/tab exit still abandons the attempt and now immediately hides the entire exam during cleanup.
+- No new paid DRM, dependency, Supabase migration or business-data write. This is browser content deterrence: native screenshots and independent screen recorders can still capture when the browser receives no capture signal.
+- Extend P67/P71 tests and blueprint; verify GitHub CI and device/browser behavior separately.
+
 ## 2026-11-12 — P72 clean live Mock setup and premium Start action
 - Removed duplicate static Course Mock tiles and fake-looking Server stat; kept the real signed-in Supabase Mock readiness count and the fixed five-hour exam requirement.
 - Replaced the setup panel with a single compact, course-backed readiness/progress band and clear eligibility/status message. No sample/demo questions, numbers or scores are introduced.

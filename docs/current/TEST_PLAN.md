@@ -115,3 +115,12 @@ Command / environment / commit / timestamp / duration / PASS-FAIL-SKIPPED / obse
 - Deny fullscreen permission or use a browser without the wrapper Fullscreen API: playback fails closed with accessible user explanation, not inline fallback.
 - Confirm PDF iframe, links, Lesson Quiz, watched 90% coverage, Course hierarchy, subscription/Intro gates, React error handling and mobile responsive UI unchanged.
 - Explicit physical iPhone Safari/Android Chromium/desktop QA is required; native fullscreen and screenshot prevention cannot be established from Node assertions or CI alone.
+
+
+## P73 Fullscreen Mock capture-deterrence acceptance (2026-11-12)
+
+1. In an authorized, expendable **nonproduction** attempt, click Start Mock; confirm the server-granted 200/300 attempt opens only after fullscreen succeeds and all question controls remain operable.
+2. In fullscreen on desktop Chrome/Edge, dispatch a genuine keyboard PrintScreen or browser-delivered screen capture shortcut. If the browser delivers the event, verify the **whole** exam (including timer, nav, question, flags) becomes a solid black cover immediately, persists past the former 1.25s hold, and can only be manually revealed via Resume exam while still in fullscreen.
+3. Confirm clipboard/print blocking and learner/session watermark still apply to the whole active exam. On tab hide, fullscreen loss, route exit, confirm the server abandon workflow remains intact and the full exam stays hidden during cleanup.
+4. Check real Windows, Android and iOS screenshot/recording behavior without claiming all native captures are detectable; use external screen recorder as a **negative guarantee** test. No browser-only technique can reliably black independent OS-native screenshots or a separate screen recorder.
+5. Confirm P67 Lesson surface, standalone Practice question protection and P72 Mock setup/button remain unchanged. Run `npm run test:p67`, `npm run test:p71`, `npm run build` and the existing CI validation group before promoting.
