@@ -1,3 +1,10 @@
+## 2026-11-12 — P76 premium active Mock Exam controls and compact right navigator
+- Reorganized only the active Course Mock fullscreen into a spacious question/answer column and a sticky 282px right-hand navigator, with its 200 question buttons internally scrollable instead of extending the page height.
+- Redesigned Previous, Next question, Flag for review (with clearly marked toggled state), Clear answer, and Submit Mock Exam as cohesive Technica teal/amber buttons with accessible disabled/hover/focus states.
+- Right-hand navigation includes live answered progress and current/answered/flagged status legend; Submit remains a separate deliberate action and keeps the original confirmation before calling the secured RPC.
+- On <=960px, the right panel stacks and its question grid stays collapsed until Jump to question is clicked, then closes after question selection. Existing 200/300 fixed mock, answer autosave, progress, fullscreen closure, anti-copy blackout and user watermark remain unchanged.
+- Extended existing P71 CI layout assertions without a new workflow; no database migration, live learner attempt or new dependency. Device visual QA and release deployment must be verified independently.
+
 ## 2026-11-12 — P75 align Mock blackout mechanics with course Video
 - Improved P73 full-exam browser concealment to mirror ProtectedLessonViewer's immediate `data-media-shielded` style change. On a browser-delivered capture/print shortcut, the Mock first hides readable pixels synchronously and then unmounts question/answer/timer/navigation React children beneath a pre-mounted persistent black curtain until deliberate Resume inside fullscreen.
 - Mock now uses the same `isGuardedMediaShortcut` policy as course Video (including Ctrl+S/P); beforeprint and pagehide also conceal the Mock. Course Video behavior itself and P71/P72 server scoring, 200-question/300-minute rules, CSS responsiveness, Practice and subscriptions are unchanged.

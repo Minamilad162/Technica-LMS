@@ -38,6 +38,34 @@ assert.match(view,/document.addEventListener\('visibilitychange',visible\)/);
 assert.match(view,/window.addEventListener\('focus',visible\)/);
 assert.match(view,/className="live-mock-start"/);
 assert.match(view,/Start Mock Exam/);
+const examLayout=read('src/production/liveMock.css');
+assert.match(view,/className="live-mock-exam-layout"/);
+assert.match(view,/className="live-mock-exam-main"/);
+assert.match(view,/<aside className="live-mock-sidebar" aria-label="Mock Exam question navigator">/);
+assert.match(view,/className="live-mock-step live-mock-step-next"/);
+assert.match(view,/className="live-mock-step live-mock-step-previous"/);
+assert.match(view,/className="live-mock-submit"/);
+assert.match(view,/className=\{`live-mock-action-flag \$\{q.flagged\?'is-flagged':''\}\`\}/);
+assert.match(view,/aria-pressed=\{q.flagged\}/);
+assert.match(view,/role="progressbar" aria-label="Mock Exam questions answered"/);
+assert.match(view,/aria-expanded=\{navigatorOpen\} aria-controls="live-mock-question-grid"/);
+assert.match(view,/onClick=\{\(\)=>\{setAt\(index\);setNavigatorOpen\(false\);\}\}/);
+assert.ok(view.indexOf('className="live-mock-exam-main"')<
+  view.indexOf('<aside className="live-mock-sidebar"'),
+  'question and actions occupy main column, question picker is beside them');
+assert.ok(view.indexOf('<aside className="live-mock-sidebar"')<
+  view.indexOf('className="live-mock-submit"'),
+  'Submit Mock Exam belongs to the question navigator, not a long footer');
+assert.match(examLayout,/grid-template-columns:minmax\(0,1fr\) 282px/);
+assert.match(examLayout,/position:sticky;top:12px/);
+assert.match(examLayout,/max-height:none;overflow-y:auto;overscroll-behavior:contain/);
+assert.match(examLayout,/@media\(max-width:960px\)/);
+assert.match(examLayout,/\.live-mock-dots\.is-open\{display:grid\}/);
+assert.match(examLayout,/\.live-mock-step-next\{/);
+assert.match(examLayout,/\.live-mock-action-flag\.is-flagged\{/);
+assert.match(examLayout,/\.live-mock-submit\{/);
+assert.doesNotMatch(view,/className="live-primary live-mock-submit"/,
+ 'Mock Submit uses its own premium design instead of generic site primary');
 assert.match(view,/kind="mock-exam-surface" identity=\{\{id:user.id\}\}/);
 assert.doesNotMatch(view,/kind="exam-question"/,
  'Active Mock uses one full-exam capture curtain, not only a question wrapper');
@@ -97,5 +125,5 @@ assert.match(sql,/'engineVersion','p71-fixed-bank-mock-v1'/);
 assert.match(sql,/search_path=''/);
 assert.match(sql,/NOT EXISTS\(SELECT 1 FROM public\.lms_practice_attempt_items/);
 assert.doesNotMatch(sql,/UPDATE\s+public\.lms_questions|DELETE\s+FROM\s+public\.lms_p9b_mock_items/);
-console.log('P71/P72/P73/P75 PASS: Mock copies video concealment policy and removes question DOM on captured-browser events.');
+console.log('P71-P76 PASS: fixed bank Mock, protected fullscreen exam, premium controls and compact sidebar question navigator.');
 console.log('Production SQL install and actual device/learner attempt verification remain pending approval.');

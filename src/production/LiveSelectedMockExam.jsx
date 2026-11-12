@@ -1,5 +1,5 @@
 import React,{useEffect,useMemo,useRef,useState} from 'react';
-import {AlertTriangle,ArrowLeft,ArrowRight,CheckCircle2,Clock3,Flag,LockKeyhole,PlayCircle,Send,ShieldCheck} from 'lucide-react';
+import {AlertTriangle,ArrowLeft,ArrowRight,CheckCircle2,ChevronDown,Clock3,Flag,LayoutGrid,LockKeyhole,PlayCircle,Send,ShieldCheck} from 'lucide-react';
 import {abandonSelectedMock,getSelectedMockReadiness,getSelectedMock,selectedMockSecondsLeft,
  saveSelectedMock,startSelectedMock,submitSelectedMock} from './selectedMockApi.js';
 import {requestQuestionFullscreen,isFullscreenActive,fullscreenStartError,leaveQuestionFullscreen} from '../lib/questionFullscreen';
@@ -18,7 +18,7 @@ export default function LiveSelectedMockExam({db,user,course,access}){
  const [readiness,setReadiness]=useState(null),[readyError,setReadyError]=useState('');
  const [attempt,setAttempt]=useState(null),[at,setAt]=useState(0),[now,setNow]=useState(Date.now());
  const [busy,setBusy]=useState(false),[error,setError]=useState(''),[message,setMessage]=useState('');
- const [accepted,setAccepted]=useState(false);
+ const [accepted,setAccepted]=useState(false),[navigatorOpen,setNavigatorOpen]=useState(false);
  const activeCall=useRef(false),closing=useRef(false),ref=useRef(null);
  const sessionKey=useMemo(()=>`technica-p34-selected-mock:${user.id}:${course.id}`,[user.id,course.id]);
  const leaveAttempt=async id=>{
@@ -118,7 +118,7 @@ export default function LiveSelectedMockExam({db,user,course,access}){
    localStorage.setItem(sessionKey,payload.attemptId);
    localStorage.removeItem(pendingKey);
    if(payload.state!=='in_progress'){setAttempt(payload);void leaveIntentionally();return;}
-   setAttempt({...payload,observedAtEpoch:Date.now()});setAt(0);
+   setAttempt({...payload,observedAtEpoch:Date.now()});setAt(0);setNavigatorOpen(false);
   }catch(e){setError(errorMessage(e));void leaveQuestionFullscreen(document);}
   finally{setBusy(false);activeCall.current=false;}
  };
@@ -233,41 +233,83 @@ export default function LiveSelectedMockExam({db,user,course,access}){
      <span>{attempt.flaggedCount} flagged</span>
      {message&&<small role="status">{message}</small>}
     </div>
-    {q&&<div className="live-question">
-     <div className="live-question-label">QUESTION {at+1} OF {attempt.questionCount}</div>
-     <h4>{q.prompt}</h4>
-     <div className="live-answer-list">
-      {q.options.map((option,i)=><button type="button" key={i}
-       className={`live-answer ${q.selectedIndex===i?'chosen':''}`}
-       aria-pressed={q.selectedIndex===i} disabled={busy||left===0}
-       onClick={()=>save(i,q.flagged)}><b>{String.fromCharCode(65+i)}</b>
-        <span>{option}</span>{q.selectedIndex===i&&<CheckCircle2 size={18}/>}
-       </button>)}
-     </div>
-     <div className="live-mock-actions">
-      <button type="button" className="live-secondary" disabled={busy||left===0}
-       onClick={()=>save(q.selectedIndex,!q.flagged)}><Flag size={17}/>
-        {q.flagged?'Unflag question':'Flag for review'}
+    <div className="live-mock-exam-layout">
+     <div className="live-mock-exam-main">
+      {q&&<div className="live-question">
+       <div className="live-question-label">QUESTION {at+1} OF {attempt.questionCount}</div>
+       <h4>{q.prompt}</h4>
+       <div className="live-answer-list">
+        {q.options.map((option,i)=><button type="button" key={i}
+         className={`live-answer ${q.selectedIndex===i?'chosen':''}`}
+         aria-pressed={q.selectedIndex===i} disabled={busy||left===0}
+         onClick={()=>save(i,q.flagged)}><b>{String.fromCharCode(65+i)}</b>
+          <span>{option}</span>{q.selectedIndex===i&&<CheckCircle2 size={18}/>}
+         </button>)}
+       </div>
+       <div className="live-mock-actions">
+        <button type="button" className={`live-mock-action-flag ${q.flagged?'is-flagged':''}`}
+         aria-pressed={q.flagged} disabled={busy||left===0}
+         onClick={()=>save(q.selectedIndex,!q.flagged)}>
+         <Flag size={16}/>{q.flagged?'Flagged for review':'Flag for review'}
+        </button>
+        <button type="button" className="live-mock-action-clear"
+         disabled={busy||left===0||q.selectedIndex===null}
+         onClick={()=>save(null,q.flagged)}>Clear answer</button>
+       </div>
+      </div>}
+      <div className="live-question-nav">
+       <button type="button" className="live-mock-step live-mock-step-previous"
+        disabled={busy||at===0} onClick={()=>setAt(n=>n-1)}>
+        <ArrowLeft size={17}/> Previous
        </button>
-      <button type="button" className="live-secondary" disabled={busy||left===0||q.selectedIndex===null}
-       onClick={()=>save(null,q.flagged)}>Clear answer</button>
+       <span className="live-mock-step-position">{at+1} <span>of</span> {attempt.questionCount}</span>
+       <button type="button" className="live-mock-step live-mock-step-next"
+        disabled={busy||at===attempt.questionCount-1}
+        onClick={()=>setAt(n=>n+1)}>Next question <ArrowRight size={17}/></button>
+      </div>
      </div>
-    </div>}
-    <div className="live-question-nav">
-     <button type="button" className="live-secondary" disabled={busy||at===0}
-      onClick={()=>setAt(n=>n-1)}><ArrowLeft size={16}/> Previous</button>
-     <button type="button" className="live-secondary" disabled={busy||at===attempt.questionCount-1}
-      onClick={()=>setAt(n=>n+1)}>Next <ArrowRight size={16}/></button>
+     <aside className="live-mock-sidebar" aria-label="Mock Exam question navigator">
+      <div className="live-mock-sidebar-head">
+       <div><span className="live-mock-sidebar-kicker">EXAM NAVIGATOR</span>
+        <h4>Questions</h4></div>
+       <span className="live-mock-sidebar-count">{attempt.questionCount}</span>
+      </div>
+      <div className="live-mock-sidebar-progress">
+       <div><span>Completed</span><b>{attempt.answeredCount} / {attempt.questionCount}</b></div>
+       <div className="live-mock-sidebar-track" role="progressbar" aria-label="Mock Exam questions answered"
+        aria-valuemin={0} aria-valuemax={attempt.questionCount} aria-valuenow={attempt.answeredCount}>
+        <span style={{width:100*attempt.answeredCount/attempt.questionCount+'%'}}/>
+       </div>
+      </div>
+      <button type="button" className="live-mock-navigator-toggle"
+       aria-expanded={navigatorOpen} aria-controls="live-mock-question-grid"
+       onClick={()=>setNavigatorOpen(open=>!open)}>
+       <LayoutGrid size={16}/> Jump to question <ChevronDown size={16} className={navigatorOpen?'is-open':''}/>
+      </button>
+      <div id="live-mock-question-grid"
+       className={`live-mock-dots ${navigatorOpen?'is-open':''}`}
+       role="navigation" aria-label="Choose Mock question">
+       {attempt.questions.map((item,index)=><button type="button" key={item.id}
+        aria-label={`Question ${index+1}${item.selectedIndex!==null?', answered':''}${item.flagged?', flagged':''}`}
+        aria-current={at===index?'step':undefined}
+        className={`${at===index?'current ':''}${item.selectedIndex!==null?'answered ':''}${item.flagged?'flagged':''}`}
+        disabled={busy||left===0} onClick={()=>{setAt(index);setNavigatorOpen(false);}}>
+        {index+1}</button>)}
+      </div>
+      <div className="live-mock-sidebar-legend" aria-label="Question status legend">
+       <span><i className="current"/>Current</span>
+       <span><i className="answered"/>Answered</span>
+       <span><i className="flagged"/>Flagged</span>
+      </div>
+      <button type="button" className="live-mock-submit" disabled={busy||left===0}
+       onClick={submit}>
+       <span className="live-mock-submit-icon"><Send size={18}/></span>
+       <span><strong>{busy?'Please wait…':'Submit Mock Exam'}</strong>
+        <small>Review and confirm submission</small></span>
+       <ArrowRight size={18}/>
+      </button>
+     </aside>
     </div>
-    <div className="live-mock-dots" role="navigation" aria-label="Choose Mock question">
-     {attempt.questions.map((item,index)=><button type="button" key={item.id}
-      aria-label={`Question ${index+1}${item.flagged?', flagged':''}`}
-      aria-current={at===index?'step':undefined}
-      className={`${at===index?'current ':''}${item.selectedIndex!==null?'answered ':''}${item.flagged?'flagged':''}`}
-      onClick={()=>setAt(index)}>{index+1}</button>)}
-    </div>
-    <button type="button" className="live-primary live-mock-submit" disabled={busy}
-     onClick={submit}><Send size={17}/> Review &amp; submit exam</button>
    </LiveProtectedContent>}
   {error&&<p className="live-error" role="alert"><AlertTriangle size={16}/>{error}</p>}
  </section>;

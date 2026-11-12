@@ -140,3 +140,12 @@ Limited regression: P67 recognizes owner-reported browser-delivered Ctrl+Shift+6
 - Leave fullscreen or hide tab: existing `useQuestionFullscreenGuard` closes server attempt; confirm no stale exam content appears after restoring/reentering.
 - Real Windows PrintScreen, Win+Shift+S and independent recording must be tested separately; if the browser receives no event, content can still be captured. Compare video and Mock on same hardware, noting difference between a decoded video surface and HTML text.
 - Verify P67 Lesson protection, P71 Course Mock fixed 200/300 and autosave/grading, P72 premium setup, accessibility/mobile and CI/Build. Never create a production Mock attempt to run QA.
+
+
+## P76 active Mock Exam compact premium workbench (2026-11-12)
+
+- Run existing `npm run test:p71`, P67 protected-content regression, Production Build and disposable PostgreSQL gate. No live learner/mock attempt is created for UI tests.
+- In desktop Chrome/Edge fullscreen at >=1280px, confirm question and answers occupy the large left column; 200 numbered question links stay in the sticky right sidebar's internal scroll area, not below the question. All 200 IDs are navigable, right progress/legend reflect actual answer/flag status, and the separate Submit Mock Exam CTA confirms before server submit.
+- Test Previous and Next on first and last question, flag/unflag (amber indicator), clear selected answer, pending RPC busy/disabled states, focus/keyboard traversal, long prompt/option text and no horizontal overflow.
+- On phones/tablets 390px/430px/<=960px, the picker moves below the question and stays compact/collapsed until Jump to question, closes after selection, and action buttons remain tappable. Verify no timer reset, no accidental submit, and returning from the right-side picker preserves viewport and saved choices.
+- Confirm P73-P75 full-exam capture deterrence and forced fullscreen wrapper are unchanged; screenshot-black guarantee is still **not met** in ordinary browser.
