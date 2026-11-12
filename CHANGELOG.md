@@ -1,3 +1,9 @@
+## 2026-11-12 — P78 existing Question Bank difficulty classification in Supabase
+- Classified the original 2,500 Course 1 question UUIDs in place, with a guarded exact-2,500 PostgreSQL transaction and prior rollback-only rehearsal. No duplicate questions and no new import.
+- Distribution: Low 989, Medium 1,457, High 54; zero remaining Unclassified. Scores, answers, Mock reservation, subscription, and attempt data were not changed.
+- Heuristic AI-authored labels are provisional, not professionally calibrated. Event lms_audit_events.id=273 records 47 lower-confidence UUIDs for review.
+- 200 selected Mock questions remain Mock. The 2,300 old imported non-Mock questions are still Draft; activating those for Practice is an independent Admin action. All actual Domain IDs are still missing.
+
 ## 2026-11-12 — P77 live function activation recorded
 - GitHub CI validation + disposable PostgreSQL all PASS at commit `81f0628`, run 43222034565.
 - Verified Technica Account Supabase ledger and existing functions, then installed P77 function-only migration (version `20261112125618`). Postflight confirmed four secured RPC functions are authenticated-only, search_path locked, import Approved/Active and safe Mock conversion installed.
