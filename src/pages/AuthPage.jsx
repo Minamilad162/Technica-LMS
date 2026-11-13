@@ -88,10 +88,10 @@ export default function AuthPage({mode='login',onAuthenticated,initialError=''})
     </div>}
     {!forgot&&<div className="auth-notice" style={{marginTop:18}}><ShieldCheck size={18}/><span>New registrations receive Learner access only. Subscriptions and Admin permissions require separate authorization.</span></div>}
    </div>
-   <p className="auth-legal">Secure authentication through Supabase. By continuing, you agree to our <Link to="/terms">Terms</Link> and <Link to="/privacy">Privacy Policy</Link>.</p>
+   <p className="auth-legal">Review our <Link to="/terms">Terms</Link> and <Link to="/privacy">Privacy Policy</Link> before continuing.</p>
   </section></div>
  </div>;
 }
 export function DemoPolicyPage({kind}){
- return <div className="auth-page auth-policy-page"><div className="auth-policy-card"><img width="84" src="/images/technica-icon.png" alt="Technica Consult"/><h1>{kind==='terms'?'Terms of Service':'Privacy Policy'}</h1><p>This Technica LMS pilot uses Supabase Authentication to verify identities. Some course and exam screens still use local demonstration content and are not a production-protected question bank.</p><Link className="auth-main-button" to="/login"><ArrowLeft size={17}/> Back to Sign In</Link></div></div>;
+ return <div className="auth-page auth-policy-page"><div className="auth-policy-card"><img width="84" src="/images/technica-icon.png" alt="Technica Consult"/><h1>{kind==='terms'?'Terms of Service':'Privacy Policy'}</h1><p>Our policies are being finalized. For questions about your account, personal data or learning access, please contact Technica Consult support. This page is not yet a complete legal policy.</p><Link className="auth-main-button" to="/login"><ArrowLeft size={17}/> Back to Sign In</Link></div></div>;
 }
