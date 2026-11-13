@@ -195,7 +195,7 @@ export default function LiveLearnerWorkspace({db,user,onSignOut,embedded=false,
     <div className="lj-course-actions"><button className="lj-quiet" type="button" onClick={()=>go('courses')}>
      <ArrowLeft size={16}/> All Courses</button>
      {full?<span className="lj-enrolled"><CheckCircle2 size={16}/> {catalog?.openAccess?'Course available':'Verified enrollment'}</span>:
-      demoChosen?<span className="lcc-access-status lcc-status-demo"><ShieldCheck size={15}/> Demo Access · No Charge</span>:
+      demoChosen?<span className="lcc-access-status lcc-status-demo"><ShieldCheck size={15}/> Preview Access · No Charge</span>:
       <span className="lcc-access-status lcc-status-available"><LockKeyhole size={15}/> Subscription required</span>}
     </div>
     <CourseDetailHero db={db} course={chosen} status={full?'real':demoChosen?'demo':'available'} openAccess={catalog?.openAccess===true}
