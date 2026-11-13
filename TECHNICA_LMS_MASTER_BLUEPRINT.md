@@ -2146,3 +2146,8 @@ Observed browser error: `P14_EDGE_NETWORK` at `Authorizing Admin upload` for a 4
 - Remove the **Settings** button from sidebar support menu (both learner/admin). Profile and workspace switching remain available via account dropdown.
 - Remove **Learner Home** from admin sidebar; remove redundant **Learning** admin mobile bottom navigation entry and **Learner dashboard** admin mobile More entry. Learner workspace is still accessible via account dropdown; do not remove routes or permissions.
 - No backend or Supabase changes. Verify desktop/mobile navigation and role switching; preserve all other routes.
+
+
+## P80 — Premium exam and practice button design (2026-11-13)
+
+Approved visual-only harmonization for live Practice and fixed Mock Exam controls: shared teal/navy primary and secondary actions, selectable practice modes and answer options, question number navigation, flagged/clear/submit buttons, accessible focus and disabled states, mobile touch sizing, reduced-motion support. Scope CSS under `.live-practice` and `.live-mock`; do not modify selection, timing, protected full-screen, grading, or database data. Verify rendered desktop/mobile visuals and build in CI before claiming deployed verification.
