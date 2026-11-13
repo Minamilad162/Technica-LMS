@@ -80,7 +80,7 @@ export function summarizeLessonPublication(tree){
 export async function fetchP15Outline(db,courseId){
  if(!db||!isP15Id(courseId))throw Error('Choose a published Course.');
  const {data,error}=await db.rpc('lms_p15_course_outline',{p_course_id:courseId});
- if(error)throw Error('Course outline is unavailable until P15 is installed on authorized Staging.');
+ if(error)throw Error('Course outline is currently unavailable. Please try again or contact support.');
  return nestPublishedOutline(data||[],courseId);
 }
 export async function fetchAdminFreeIntro(db,courseId){
