@@ -2139,3 +2139,10 @@ Observed browser error: `P14_EDGE_NETWORK` at `Authorizing Admin upload` for a 4
 **Verified results:** Low 989, Medium 1,457, High 54, Unclassified 0. Mock 200 unchanged (Low 64, Medium 128, High 8); non-Mock 2,300 (Low 925, Medium 1,329, High 46). Still Active 2,500; normal Draft 2,300; Practice Approved 0; all 2,500 have null domain_id. Separate Admin activation of the legacy Draft Practice items under P77 and proper Domain mapping are necessary for existing learners' Domain or adaptive Practice. Neither was performed in this request.
 
 **Governance:** This was a data-only one-time update, not a schema migration or question reimport. Never replay blindly; all later level corrections must use exact IDs and an audit. No CI/build required for a data-only categorization; independent database verification passed.
+
+
+## Navigation simplification — 2026-11-13 (approved)
+
+- Remove the **Settings** button from sidebar support menu (both learner/admin). Profile and workspace switching remain available via account dropdown.
+- Remove **Learner Home** from admin sidebar; remove redundant **Learning** admin mobile bottom navigation entry and **Learner dashboard** admin mobile More entry. Learner workspace is still accessible via account dropdown; do not remove routes or permissions.
+- No backend or Supabase changes. Verify desktop/mobile navigation and role switching; preserve all other routes.
