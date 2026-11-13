@@ -2151,3 +2151,11 @@ Observed browser error: `P14_EDGE_NETWORK` at `Authorizing Admin upload` for a 4
 ## P80 — Premium exam and practice button design (2026-11-13)
 
 Approved visual-only harmonization for live Practice and fixed Mock Exam controls: shared teal/navy primary and secondary actions, selectable practice modes and answer options, question number navigation, flagged/clear/submit buttons, accessible focus and disabled states, mobile touch sizing, reduced-motion support. Scope CSS under `.live-practice` and `.live-mock`; do not modify selection, timing, protected full-screen, grading, or database data. Verify rendered desktop/mobile visuals and build in CI before claiming deployed verification.
+
+
+## Question Bank UI cleanup — 2026-11-13 (approved)
+
+- Removed the duplicate non-ASP `Optional review tools for Practice and official Mock reservation` section and its old individual approve/reserve buttons.
+- The Question Bank's existing Active and Mock Exam switches, bulk actions and Save All Changes remain the single management interface.
+- Retained ASP rights review and Exams & Mock workflows, along with all database records and rules. No migration or live data modification.
+- Build and visual QA remain to be verified.
