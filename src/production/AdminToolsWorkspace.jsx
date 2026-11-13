@@ -30,7 +30,7 @@ export function AdminSystemPanel({db}){
  const stats=summarizeReleaseReadiness(rows);
  return <div className="at-stack at-animate">
   <div className="at-section-title"><div><span className="at-eyebrow">SECURITY &amp; RELEASE</span><h2>System Tools</h2>
-   <p>Review access, security and service status.</p></div>
+</div>
    <button className="at-outline" onClick={()=>setRevision(n=>n+1)}><RefreshCw size={15}/> Recheck</button></div>
   <div className="at-disclaimer"><LockKeyhole size={17}/> <b>Release checks:</b> Resolve outstanding issues before launch.</div>
   {loading?<PremiumLoading variant="compact"/>:
@@ -89,7 +89,7 @@ export default function AdminToolsWorkspace({db,initialTab='overview',onExit,onT
    <div className="at-hero-content">
     <div className="at-eyebrow"><ShieldCheck size={15}/> ADMIN WORKSPACE</div>
     <h1>{tab==='questions'?<>Question <span>Bank</span></>:<>Admin <span>Tools</span></>}</h1>
-    <p>{tab==='questions'?'Upload, review and classify questions, then assign them to Lessons, Practice and Mock Exams.':'Manage learning, questions, exams and students in one place.'}</p>
+
    </div>
    <div className="at-hero-art" aria-hidden="true"><div className="at-orbit at-orbit-one"/><div className="at-orbit at-orbit-two"/><GraduationCap size={45}/></div>
    {onExit&&<button type="button" className="at-back" onClick={onExit}><ArrowLeft size={16}/> Back to courses</button>}
