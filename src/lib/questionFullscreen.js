@@ -32,6 +32,6 @@ export async function leaveQuestionFullscreen(doc) {
 }
 export function fullscreenStartError(result) {
  return result?.reason==='unsupported'
- ?'This browser cannot open protected questions in true fullscreen. Use a supported desktop browser, Android Chrome or supported iPad browser. On iPhone, fullscreen for a normal webpage is not available.'
- :'Fullscreen permission was denied or interrupted. Allow fullscreen and tap Start again; the questions have not opened.';
+ ?'Secure fullscreen is unavailable in this browser.'
+ :'Fullscreen could not start. Check browser permissions and try again.';
 }
