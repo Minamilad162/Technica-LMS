@@ -18,7 +18,7 @@ const pct=n=>n===null||n===undefined?'—':Number(n).toFixed(1).replace(/\.0$/,'
 const day=s=>s?new Date(s).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'}):'Not set';
 const num=v=>typeof v==='number'?v.toLocaleString():'—';
 const err=e=>e?.message||'Authenticated request failed.';
-const empty=<div className="at-empty">No verified records yet. The dashboard never uses Demo statistics.</div>;
+const empty=<div className="at-empty">No records are available yet.</div>;
 export function TrendChart({trend=[],kind='registrations'}){
  const max=Math.max(1,...trend.map(x=>x[kind]||0));
  const w=620,h=172,p=24;
@@ -62,7 +62,7 @@ export function AdminDashboardPanel({db,onNavigate}){
   ['Practice / Mock completed',report.kpis.practiceCompleted+' / '+report.kpis.mockCompleted,ClipboardCheck]
  ];
  return <div className="at-stack at-animate">
-  <div className="at-section-title"><div><span className="at-eyebrow">SYSTEM PERFORMANCE</span><h2>Real-time overview</h2><p>Counts and trends generated from your authenticated Supabase records.</p></div><button className="at-outline" onClick={()=>setRefresh(n=>n+1)}><RefreshCw size={15}/> Refresh</button></div>
+  <div className="at-section-title"><div><span className="at-eyebrow">SYSTEM PERFORMANCE</span><h2>Real-time overview</h2><p>Your latest learning and activity overview.</p></div><button className="at-outline" onClick={()=>setRefresh(n=>n+1)}><RefreshCw size={15}/> Refresh</button></div>
   <div className="at-kpis">{stats.map(([label,value,Icon])=><article className="at-kpi" key={label}>
    <span className="at-kpi-icon"><Icon size={18}/></span><small>{label}</small><strong>{num(value)}</strong></article>)}</div>
   <AdminAnalyticsCharts report={report} onNavigate={onNavigate}/>
@@ -80,7 +80,7 @@ export function AdminDashboardPanel({db,onNavigate}){
    </section>
   </div>
   <div className="at-disclaimer"><Wallet size={17}/> Verified revenue: <b>Not tracked</b>. Paid entitlement is not proof of money received; no billing ledger exists in P1.</div>
-  <div className="at-footnote">Updated {day(report.generatedAt)} · Read-only reporting · Live Supabase Admin JWT required ·
+  <div className="at-footnote">Updated {day(report.generatedAt)} ·
    P13 course grants exclude P21 platform memberships; chart totals are not revenue or live subscription counts.</div>
  </div>;
 }
@@ -108,7 +108,7 @@ export function AdminCoursesPanel({db}){
   if(!course){setIntroEnabled(null);setIntroError('');return;}
   let live=true;setIntroEnabled(null);setIntroError('');
   fetchAdminFreeIntro(db,course).then(x=>{if(live)setIntroEnabled(x);})
-   .catch(()=>{if(live)setIntroError('Free Intro management requires the P15 Staging migration.');});
+   .catch(()=>{if(live)setIntroError('Intro lesson settings are unavailable. Contact the system administrator.');});
   return()=>{live=false;};
  },[db,course,revision]);
  const publish=async(table,id,state)=>{
@@ -174,7 +174,7 @@ export function AdminCoursesPanel({db}){
       tree.flatMap(d=>d.topics||[]).find(t=>t.id===f.parentId)?.lessons||[];
     await addAuthoringNode(db,editor,peers);
    }
-   setNotice('Saved securely in Supabase. Course changes remain Draft unless separately published.');
+   setNotice('Course saved. Publish it when you're ready.');
    setEditing(null);setRevision(n=>n+1);
   }catch(x){setError(err(x));}finally{setBusy(false);}
  }
@@ -385,7 +385,7 @@ export function AdminUsersPanel({db}){
  },[db,selected?.id,refresh]);
  return <div className="at-stack at-animate">
   <div className="at-section-title"><div><span className="at-eyebrow">LEARNERS &amp; SUBSCRIPTIONS</span><h2>User Directory</h2>
-   <p>Real account status, enrolled plans, completion and assessments · no sample learners.</p></div>
+   <p>Manage learners, subscriptions and progress.</p></div>
    <button className="at-outline" onClick={()=>setRefresh(n=>n+1)}><RefreshCw size={15}/> Refresh</button></div>
   <form className="at-user-search" onSubmit={e=>{e.preventDefault();setPage(0);setQuery(search.trim());}}>
    <Search size={18}/><input value={search} maxLength={80} placeholder="Search by name or email" onChange={e=>setSearch(e.target.value)}/>
