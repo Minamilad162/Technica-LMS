@@ -2,7 +2,9 @@
 // no protected lesson-media reads, and no credit-card collection.
 const uuid=/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const key=(uid,cid)=>'technica-p16-checkout-preview:'+uid+':'+cid;
-export const simulationEnabled=()=>import.meta.env?.VITE_DISABLE_CHECKOUT_DEMO!=='1';
+export const simulationEnabled=()=>import.meta.env?.DEV===true
+ &&import.meta.env?.VITE_LOCAL_QA_DEMO==='1'
+ &&import.meta.env?.VITE_DISABLE_CHECKOUT_DEMO!=='1';
 export function hasSimulatedEnrollment(uid,cid){
  if(!simulationEnabled()||!uuid.test(uid||'')||!uuid.test(cid||''))return false;
  try{return sessionStorage.getItem(key(uid,cid))==='completed';}
