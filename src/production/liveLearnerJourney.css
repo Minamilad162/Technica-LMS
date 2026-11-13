@@ -87,3 +87,18 @@
 .lj-lesson-awaiting-release>svg{color:#118b82}
 .lj-lesson-awaiting-release b{color:#214e59;font-size:19px}
 .lj-lesson-awaiting-release .lj-quiet{display:inline-flex;align-items:center;justify-content:center;gap:7px;margin-top:4px;border:1px solid #b6dcd6;border-radius:10px;padding:9px 13px;color:#0a7774;font-weight:750;cursor:pointer}
+
+
+/* P82: learner catalog, learning cards, course detail and lesson controls. */
+.lj-shell,.lj-main,.lj-course,.lj-embedded{min-width:0;max-width:100%}
+@media(max-width:700px){
+ .lj-embedded .lj-main{padding-inline:0;min-width:0}
+ .lj-shell :is(.lj-grid,.lj-card-buttons){min-width:0}
+ .lj-shell .lj-grid{grid-template-columns:minmax(0,1fr)}
+ .lj-shell :is(.lj-card,.lj-course,.lj-heading){min-width:0;max-width:100%}
+ .lj-shell .lj-heading h1{font-size:clamp(24px,6vw,30px)}
+ .lj-shell :is(.lj-primary,.lj-quiet){min-height:44px}
+ .lj-shell :is(.lj-picker,.lj-course-actions,.lj-card-buttons){flex-wrap:wrap;gap:9px}
+ .lj-shell :is(select,input,textarea){font-size:16px;max-width:100%}
+ .lj-shell .lj-history-list{min-width:0}
+}
