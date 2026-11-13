@@ -399,7 +399,7 @@ export default function AdminCourseBank({db,courses=[],asp,onUpdate,onDirtyChang
        onChange={e=>setReleaseLessonId(e.target.checked?inspectLessonId:'')}/>
       Publish {inspectState.data.pending} saved Lesson question(s) on Save All Changes
      </label>
-     <small>One Save publishes these eligible linked questions to the learner Quiz. No separate Review Draft step.</small>
+
     </div>}
     <a className="at-outline p32-open-lesson" href={'/builder?courseId='+encodeURIComponent(courseId)+'&lessonId='+encodeURIComponent(inspectLessonId)}
      target="_blank" rel="noopener noreferrer" aria-label="Open the selected Lesson Quiz editor">
@@ -408,7 +408,7 @@ export default function AdminCourseBank({db,courses=[],asp,onUpdate,onDirtyChang
    <div className="p30-table-card at-surface">
     <div className="p30-table-top">
      <strong>{selected.title} <span>· {bank.total} results</span></strong>
-     <p>Only question text is shown. Save a Mock Exam switch to include this question in the Course Mock pool automatically. The fixed exam needs 200 saved questions.</p>
+
     </div>
     {loading?<div className="at-empty">Loading protected questions…</div>:!bank.items.length?<div className="at-empty">No questions match this filter. Change the filters or import a file.</div>:
     <div className="p30-table-scroll"><table className="p30-table">
