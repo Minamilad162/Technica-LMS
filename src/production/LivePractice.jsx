@@ -207,7 +207,6 @@ export default function LivePractice({db,user,course,domains=[],access,defaultMo
   <div className="live-practice-top"><div><span className="live-eyebrow">SECURE PRACTICE</span><h3><ShieldCheck size={21}/> Practice Center</h3></div>{attempt&&<button type="button" className="live-secondary" onClick={()=>{void sealAttempt(attempt.attemptId);void leaveIntentionally();}}>Leave questions</button>}</div>
   {!eligible?<div className="live-empty"><LockKeyhole size={22}/><b>Practice is not available</b><p>This course needs an active learning access policy and approved questions.</p></div>:!attempt?<>
    <div className="live-mode-grid">{PRESETS.filter(p=>!allCourses||p.id!=='domain').map(p=><button key={p.id} className={'live-mode-card '+(mode===p.id?'chosen':'')} onClick={()=>{setMode(p.id);setError('');setNotice('');}} type="button"><strong>{p.title}</strong><span>{p.desc}</span>{mode===p.id&&<Check size={17}/>}</button>)}</div>
-   {allCourses&&<p className="live-practice-note" role="status"><BookOpen size={16}/> All Courses draws approved Practice questions across every Course your account can access. Practice by Domain requires a single Course; Mock Exam remains separate.</p>}
    {mode==='custom'?<LiveBuildYourOwn key={course.id+'-'+user.id} db={db} user={user} course={course}
      domains={domains} access={eligible}/>:<>
    {['domain','levelup'].includes(mode)&&<div className="live-practice-controls">
@@ -228,7 +227,7 @@ export default function LivePractice({db,user,course,domains=[],access,defaultMo
      !readiness?'Choose your practice length.':
      readiness.ready?'Your session is ready. Questions will adapt as you progress.':
       'Not enough questions are available for this session. Try a different length or course.'}
-   </div>:<p className="live-practice-note"><TriangleAlert size={16}/> The official Mock Exam has 200 questions and a five-hour time limit.</p>}
+   </div>:null}
    <button className="live-primary" disabled={busy||!eligible||(mode==='levelup'&&(!readyForCurrent||readinessBusy))} onClick={begin} type="button"><PlayCircle size={17}/>{busy?'Preparing your questions…':'Start practice'}</button>
    </>}
   </>:<>
