@@ -164,7 +164,7 @@ export default function AdminCourseBank({db,courses=[],asp,onUpdate,onDirtyChang
       (result.linked?' · '+result.linked+' new Lesson link(s)':'')+
       (result.unpublished?' · '+result.unpublished+' disabled quiz item(s) unpublished':'')+
       '. Saved Mock question flags automatically feed this Course Mock pool; 200 eligible questions are required for the fixed exam.'
-    :'Saved '+result.saved+' question settings using legacy P30. Draft Lesson links are NOT learner-published, and Mock candidate flags do NOT activate the fixed official 200-question Mock. Install P34A/P34B to enable Lesson Quiz one-save publishing.');
+    :'Saved '+result.saved+' question settings. Some lesson and Mock publishing options may be unavailable.');
    refresh(true);
   }catch(e){setError('No partial changes saved. Your pending selections are retained. '+fail(e));}
   finally{setBusy(false);}
@@ -299,7 +299,7 @@ export default function AdminCourseBank({db,courses=[],asp,onUpdate,onDirtyChang
     Your existing questions and Course ID will remain unchanged.</p>
    <button type="button" className="at-primary" disabled={repairingAsp||busy||pendingCount}
     onClick={()=>void fixExistingAsp()}>{repairingAsp?'Verifying existing Course…':'Link existing ASP Course to Mock'}</button>
-   <small>Admin-only action. This does not publish courses, approve questions or reserve the Mock.</small>
+   
   </div>}
   {selected?.slug==='asp'&&mode==='bank'&&<div className="p39-official-mock-status" role="status">
    <ShieldCheck size={18}/>
@@ -321,19 +321,19 @@ export default function AdminCourseBank({db,courses=[],asp,onUpdate,onDirtyChang
    <button type="button" className="at-outline" onClick={()=>onGoToCourses?.()}>Open Courses</button>
   </div>}
   {selected&&batchReady&&batchMode==='p30'&&<p role="status" className="at-disclaimer">
-   P34A/P34B are not both installed on this Supabase database. Existing P30 Question Bank editing remains available.
-   <strong> Legacy saves do not publish Draft Lesson Quiz questions; Mock candidate flags alone cannot activate the fixed official exam.</strong>
-   Apply the two P34 migrations to enable one-save publication.
+   Some publishing options are temporarily unavailable.
+   <strong> Contact your administrator to enable lesson and Mock publishing.</strong>
+   
   </p>}
   {selected&&!batchLoading&&!batchReady&&<p role="status" className="at-disclaimer">
-   {batchError||'This database requires P34 One-Save publish before inline controls are enabled.'}
+   {batchError||'Question editing is temporarily unavailable.'}
    The Question Bank list remains visible, but unsaved inline edits cannot be saved yet.
   </p>}
   {selected&&bank.compatibilityMode&&<p role="status" className="at-disclaimer">
-   The installed Question Bank is the older P28 version. Apply P28.2 and P29 before changing question settings; this list may not apply advanced filters.
+   Some advanced filters are currently unavailable.
   </p>}
   {selected&&!bank.compatibilityMode&&bank.items.length>0&&typeof bank.items[0].isActive!=='boolean'&&<p role="status" className="at-disclaimer">
-   Active/Mock settings require the guarded P29 schema. No edits will be sent to Supabase until it is installed.
+   Active and Mock settings are currently unavailable.
   </p>}
   {selected&&mode==='bank'&&legacyPractice.count>0&&<div className="at-disclaimer p77-practice-activation" role="status">
     <BookOpen size={18}/><span><strong>{legacyPractice.count} previously imported Draft questions</strong> can be activated for Practice in {selected.title}. This does not change the selected Mock questions.</span>
@@ -371,8 +371,8 @@ export default function AdminCourseBank({db,courses=[],asp,onUpdate,onDirtyChang
   {selected&&<>
    <p className="p31-lesson-publish-note">
     <BookOpen size={16}/> Assigning a question to a Lesson Quiz links it to that Lesson.
-    {batchMode==='p34'?<><strong> Active, non-Mock questions publish immediately to the selected Lesson Quiz on Save All Changes</strong> — including imported Drafts. Saved Mock marks automatically feed the selected Course's Mock pool; exactly 200 eligible questions are needed to start.</>:<>
-     <strong> Legacy P30 mode:</strong> editing is available, but Drafts cannot publish until P34A/P34B are installed.</>}
+    {batchMode==='p34'?<><strong> Save changes to update your Lesson Quiz and Mock Exam selections.</strong></>:<>
+     <strong> Lesson Quiz publishing is currently unavailable.</strong></>}
    </p>
    {!!lessons.length&&<div className="p32-publication-status at-surface" aria-label="Saved Lesson Quiz publication status">
     <div className="p32-publication-select">
