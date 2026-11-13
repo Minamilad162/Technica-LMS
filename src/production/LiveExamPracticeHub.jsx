@@ -148,7 +148,7 @@ export default function LiveExamPracticeHub(){
         {allowedCourses.length>0&&<option value="all">All Courses · {allowedCourses.length} accessible</option>}
         {catalog.courses.map(c=><option key={c.id} value={c.id}>{c.title}</option>)}
        </select>
-       <span><CheckCircle2 size={15}/> {courseId==='all'?'Practice across your courses':'Choose your preferred practice mode'}</span>
+       
       </div>
       {!course||!practiceAccess?<div className="live-learning-empty"><LockKeyhole size={24}/>
        <b>Course Practice is locked</b>
