@@ -3,7 +3,6 @@ import React,{useCallback,useEffect,useState} from 'react';
 import {Activity,AlertTriangle,ArrowLeft,BookOpen,CheckCircle2,ClipboardCheck,FileQuestion,GraduationCap,Layers,LockKeyhole,RefreshCw,ShieldCheck,Users} from 'lucide-react';
 import {verifiedLiveAdmin,liveCourses} from './liveAuthoringApi.js';
 import {checkReleaseReadiness,summarizeReleaseReadiness} from './releaseReadiness.js';
-import StagingQaEvidencePanel from './StagingQaEvidencePanel.jsx';
 import {AdminDashboardPanel,AdminCoursesPanel,AdminQuestionsPanel,AdminMockPanel,AdminUsersPanel} from './AdminToolsPanels.jsx';
 import './supabaseApp.css';
 import './adminTools.css';
@@ -31,9 +30,9 @@ export function AdminSystemPanel({db}){
  const stats=summarizeReleaseReadiness(rows);
  return <div className="at-stack at-animate">
   <div className="at-section-title"><div><span className="at-eyebrow">SECURITY &amp; RELEASE</span><h2>System Tools</h2>
-   <p>Verified Supabase checks, staging evidence and outstanding launch gates.</p></div>
+   <p>Review access, security and service status.</p></div>
    <button className="at-outline" onClick={()=>setRevision(n=>n+1)}><RefreshCw size={15}/> Recheck</button></div>
-  <div className="at-disclaimer"><LockKeyhole size={17}/> Production decision: <b>NO-GO</b>. Passing code checks do not replace content reviews, device QA, financial reconciliation or explicit release approval.</div>
+  <div className="at-disclaimer"><LockKeyhole size={17}/> <b>Release checks:</b> Resolve outstanding issues before launch.</div>
   {loading?<PremiumLoading variant="compact"/>:
    error?<div className="at-error">{error}</div>:
    <div className="at-surface"><div className="at-system-stats">
@@ -45,7 +44,6 @@ export function AdminSystemPanel({db}){
      <em className={'at-system-state '+x.status}>{x.status}</em>
     </div>)}</div>
    </div>}
-  {rows.some(x=>x.id==='admin'&&x.status==='pass')&&<StagingQaEvidencePanel/>}
  </div>;
 }
 export default function AdminToolsWorkspace({db,initialTab='overview',onExit,onTabChange}){
@@ -89,10 +87,9 @@ export default function AdminToolsWorkspace({db,initialTab='overview',onExit,onT
  return <div className="admin-tools-workspace">
   <header className={"at-hero "+(tab==='questions'?"p30-hero":"")}>
    <div className="at-hero-content">
-    <div className="at-eyebrow"><ShieldCheck size={15}/> VERIFIED ADMIN WORKSPACE</div>
+    <div className="at-eyebrow"><ShieldCheck size={15}/> ADMIN WORKSPACE</div>
     <h1>{tab==='questions'?<>Question <span>Bank</span></>:<>Admin <span>Tools</span></>}</h1>
-    <p>{tab==='questions'?'Upload, review and classify questions, then assign them to Lessons, Practice and Mock Exams.':'One place to manage learning, questions, exams, people and the system. Every action is permission-checked by Supabase.'}</p>
-    <div className="at-hero-pills"><span>Live database</span><span>Course scoped</span><span>Protected actions</span></div>
+    <p>{tab==='questions'?'Upload, review and classify questions, then assign them to Lessons, Practice and Mock Exams.':'Manage learning, questions, exams and students in one place.'}</p>
    </div>
    <div className="at-hero-art" aria-hidden="true"><div className="at-orbit at-orbit-one"/><div className="at-orbit at-orbit-two"/><GraduationCap size={45}/></div>
    {onExit&&<button type="button" className="at-back" onClick={onExit}><ArrowLeft size={16}/> Back to courses</button>}
@@ -117,6 +114,6 @@ export default function AdminToolsWorkspace({db,initialTab='overview',onExit,onT
    {tab==='subscriptions'&&<React.Suspense fallback={<PremiumLoading variant="compact"/>}><AdminSubscriptionsPanel db={db}/></React.Suspense>}
    {tab==='system'&&<AdminSystemPanel db={db}/>}
   </section>
-  <footer className="at-footer">Technica Consult LMS · Admin Tools · Actual Supabase records only · No demo data or fabricated payment amounts</footer>
+  <footer className="at-footer">Technica Consult LMS · Administration</footer>
  </div>;
 }
