@@ -237,7 +237,6 @@ export default function LiveBuildYourOwn({db,user,course,domains=[],access}){
     <div className="byo-result">
      <h3>Your practice results</h3>
      <p>{attempt.correctCount} correct of {attempt.questionCount} requested questions · {attempt.scorePercent}%</p>
-     <small>Review the answer and explanation for each delivered question below.</small>
     </div>
     <nav className="byo-navigation" aria-label="Review questions">
      <button type="button" className="live-secondary" disabled={reviewIndex===0}
@@ -248,7 +247,6 @@ export default function LiveBuildYourOwn({db,user,course,domains=[],access}){
     </nav>
     <button type="button" className="live-primary" onClick={restart}>Build another practice</button>
    </div>:<div className="byo-navigation">
-    <span>{attempt.feedbackTiming==='each'?'Answer feedback after each question':'Answer review after finishing'}</span>
     <div>
      <button className="live-secondary" type="button" disabled={busy} onClick={()=>void finish(true)}>Finish early</button>
      <button className="live-primary" type="button" disabled={busy||totalRemaining===0}
