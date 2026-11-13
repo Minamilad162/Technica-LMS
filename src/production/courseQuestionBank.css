@@ -240,3 +240,36 @@
 .p42-asp-repair button{width:max-content;max-width:100%;min-height:40px}
 .p42-asp-repair small{display:block;line-height:1.5;color:#648388}
 @media(max-width:560px){.p42-asp-repair button{width:100%}}
+
+
+/* P82 — readable Question Bank controls with intentional horizontal table scroll. */
+.p30-bank,.p30-bank .p30-toolbar,.p30-bank .p30-table-card{min-width:0;max-width:100%}
+.p30-bank .p30-table-scroll{max-width:100%;overflow-x:auto;overscroll-behavior-x:contain;-webkit-overflow-scrolling:touch}
+.p30-bank .p30-table{min-width:760px}
+.p30-bank .p30-question-cell{min-width:230px}
+@media(max-width:780px){
+ .p30-bank .p30-toolbar-main,.p30-bank .p30-filter-line,
+ .p30-bank .p30-bulk-actions,.p30-bank .p30-save-actions{
+  display:flex;flex-wrap:wrap;align-items:stretch;gap:9px
+ }
+ .p30-bank .p30-toolbar-main>*,
+ .p30-bank .p30-filter-line>label{flex:1 1 180px;min-width:0}
+ .p30-bank .p30-search{flex:1 1 100%;min-width:0}
+ .p30-bank :is(select,input:not([type="checkbox"])) {max-width:100%}
+ .p30-bank :is(.at-outline,.at-primary,.p30-upload-btn){min-height:44px}
+ .p30-bank .p30-table-pages{display:flex;flex-wrap:wrap;gap:8px;align-items:center;justify-content:center}
+ .p30-bank .p30-table-pages span{flex-basis:100%;text-align:center}
+ .p30-bank .p30-save-actions{justify-content:space-between}
+}
+@media(max-width:560px){
+ .p30-bank .p30-toolbar-main>*,
+ .p30-bank .p30-filter-line>label{flex-basis:100%}
+ .p30-bank .p30-stats{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .p30-bank .p30-stats>div{min-width:0}
+ .p30-bank .p30-bulk-actions>button,
+ .p30-bank .p30-bulk-actions>select{flex:1 1 calc(50% - 9px);min-width:0}
+ .p30-bank .p30-save-actions>button{flex:1 1 auto}
+ .p30-bank .p30-save-all{flex-basis:100%;justify-content:center}
+ .p30-bank .p30-table{min-width:720px}
+ .p30-bank .p30-table-scroll{border-radius:10px}
+}
