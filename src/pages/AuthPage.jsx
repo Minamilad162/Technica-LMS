@@ -42,7 +42,7 @@ export default function AuthPage({mode='login',onAuthenticated,initialError=''})
     }else if(result.account){
      update({name:result.account.name,role:result.account.role});
      onAuthenticated(result.account);
-     navigate('/home',{replace:true});
+     navigate('/course-catalog',{replace:true});
     }
    }
    else{
