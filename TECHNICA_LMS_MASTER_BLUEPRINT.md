@@ -2199,3 +2199,12 @@ Applied:
 - Removed redundant descriptive paragraphs in Question Bank and subscription-plan screen; important access, error, payment and approval statuses remain visible.
 - Updated the P39 source contract test to assert the core fixed Mock semantics, not wording removed by this copy cleanup.
 - No database or grading/auth logic changes. Browser support limits remain real; iOS Safari cannot satisfy a strict standard-element fullscreen requirement, so platform adaptation is still a separate product decision. No visual/mobile/CI runtime validation completed in this session.
+
+
+## P85 — Immediate learner sign-up workflow (2026-11-13)
+
+- On the portal signup form, a successful Supabase `signUp()` returning an authenticated session calls `verifyPortalAccount()` (database profile and role), then immediately navigates to `/course-catalog` without asking for a second login. The separate SupabaseApp entry already reacts to `SIGNED_IN` through `onAuthStateChange` and does not require another login when the session exists.
+- **Operational prerequisite not controllable through current connected DB/GitHub actions:** disable **Confirm email** in the *actual Supabase Auth project serving the deployed site*: Dashboard → Authentication → Sign In / Providers → Email → Confirm email OFF. With this off, Supabase automatically confirms new email/password signups and returns a session; with it on, no frontend change can safely mint a session or skip verification.
+- Keep signup enabled, 12-character password policy, secure role derivation from `lms_role_assignments`, and no Admin assignment for public signup. Password reset may still send email; that is distinct from signup confirmation.
+- Verify email/password signup with a disposable learner account on the real deployment, check new `auth.users` + `lms_profiles`, confirm learner-only role, initial navigation, reload and sign out. Never use a service-role key or modify `auth.users` from SQL to skip confirmation.
+- Pending: Supabase dashboard setting and live end-to-end test. No direct Auth configuration or production user data writes performed.
