@@ -44,12 +44,12 @@ for(const k of [
  "examPracticeTab(params.get('tab'))","const TAB_IDS=['practice','mock','history']",
  'role="tablist"','role="tab"','aria-selected={tab===\'practice\'}',
  'aria-selected={tab===\'mock\'}','id="lep-tab-practice"','id="lep-tab-mock"',
- 'Custom Practice','200 questions · 5 hours · fixed','My Practice','lep-tab-history',
+ 'Mock Exam','My Practice','lep-tab-history',
  'LivePractice','LiveSelectedMockExam','loadStructure(db,course.id)',
  'fetchLiveLearningCatalog(db)','mayReadLiveCourse(catalog,course)',
  'hasPlatformAccess(catalog.subscription)',"catalog?.courses.find(c=>c.id===mockCourseId)",
  'defaultMode="quick10"','onClick={()=>activate(\'mock\')}',
- 'id={\'lep-panel-\'+tab}', 'Exactly 200 are required'
+ 'id={\'lep-panel-\'+tab}'
 ])check(hub,k,'Three-tab secure Supabase hub');
 assert(hub.includes('LiveSelectedMockExam')&&!hub.includes('<LiveMockExam'),
  'Course Mock tab uses fixed-200 selected-bank engine, not the historical ASP reserved form');
