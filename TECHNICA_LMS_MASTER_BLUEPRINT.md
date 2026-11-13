@@ -2188,3 +2188,14 @@ Applied:
 - Added `npm run test:p83:production-ui` source regression checks for QA checkout gating, removal of duplicate review UI/internal labels, and responsive mobile rule presence. This is a static source test, not device screenshot testing.
 - Read-only source checks passed on latest remote files. The connected browser was unavailable from this session and the execution environment could not download the GitHub repository, so full Vite build, automated Node suite and real-device manual QA have **not** been executed or represented as passing.
 - **Production release gates still open:** actual Qualifications evidence storage/reviewer submission workflow, complete legal policies, authenticated small-screen UX checks, and build/CI validation. Do not weaken real backend checks or mark these complete with cosmetic copy changes.
+
+
+## P84 — Production mode UI cleanup (2026-11-13)
+
+- Removed verbose Practice explanation panels and redundant description text beneath session setup; the iPhone true-fullscreen incompatibility text was shortened to a concise error emitted only when a learner actually attempts an unsupported fullscreen session. **Do not silently bypass or pretend fullscreen is available on unsupported browsers.**
+- Build Your Own setup retains only essential labels, controls, results and a compact camera privacy disclosure (**local preview, not recorded**). The Session Summary and Start Practice button remain.
+- Simplified active Practice, Mock and My Practice tabs, headers and learner course page descriptions; removed promotional or redundant hero notes and repetitive UI instructions.
+- Removed development-only Demo/Supabase banners and the legacy Builder demo-preview link from active Course Builder, keeping the working real course authoring workflow.
+- Removed redundant descriptive paragraphs in Question Bank and subscription-plan screen; important access, error, payment and approval statuses remain visible.
+- Updated the P39 source contract test to assert the core fixed Mock semantics, not wording removed by this copy cleanup.
+- No database or grading/auth logic changes. Browser support limits remain real; iOS Safari cannot satisfy a strict standard-element fullscreen requirement, so platform adaptation is still a separate product decision. No visual/mobile/CI runtime validation completed in this session.
