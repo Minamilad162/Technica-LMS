@@ -93,7 +93,7 @@ export default function BuildYourOwnSettings({
    <div className="byo-hero-intro">
     <span className="byo-hero-logo"><SlidersHorizontal size={40} strokeWidth={2.1}/></span>
     <div><h3>Build Your Own Practice</h3>
-     <p>Customize your practice session exactly the way you want.</p></div>
+</div>
    </div>
    <HeaderArt/>
   </header>
@@ -175,8 +175,7 @@ export default function BuildYourOwnSettings({
     <div className="byo-bottom-divider" aria-hidden="true"/>
     <div className="byo-camera-field">
      <div className="byo-camera-label"><Camera size={32} strokeWidth={2.3}/>
-      <div><strong>Camera (Optional)</strong><p>Live camera preview during the practice</p>
-       <small>Preview only — not recorded or sent to an examiner.</small></div>
+      <div><strong>Camera (Optional)</strong><small>Local preview only · not recorded</small></div>
      </div>
      <label className="byo-switch-wrap">
       <input type="checkbox" checked={value.camera}
