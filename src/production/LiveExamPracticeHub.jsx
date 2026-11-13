@@ -86,13 +86,6 @@ export default function LiveExamPracticeHub(){
    <div className="lep-hero-copy">
     <span className="lep-eyebrow"><GraduationCap size={17}/> TECHNICA EXAM PREPARATION</span>
     <h1>Mock Exam <em>&amp; Practice</em></h1>
-    <p>Train your way, or take your Course's timed Mock Exam using saved Question Bank selections.
-     One place for both learning experiences.</p>
-    <div className="lep-hero-tags">
-     <span><SlidersHorizontal size={15}/> Custom Practice</span>
-     <span><ShieldCheck size={15}/> Server-graded Questions</span>
-     <span><Clock3 size={15}/> Fixed 5-hour Mock</span>
-    </div>
    </div>
    <div className="lep-hero-decoration" aria-hidden="true">
     <span className="lep-float lep-float-one"><Target size={31}/></span>
@@ -122,10 +115,6 @@ export default function LiveExamPracticeHub(){
    <div className="lep-section-heading">
     <div><span className="lep-section-kicker">{tab==='practice'?'YOUR PRACTICE, YOUR RULES':tab==='history'?'YOUR VERIFIED RESULTS':'COURSE MOCK EXAM'}</span>
      <h2>{tab==='practice'?'Build your practice session':tab==='history'?'Your practice history':'Fixed exam. Real preparation.'}</h2>
-     <p>{tab==='practice'
-      ?'Choose your course, question count, practice mode and time limit in the same secure Practice you used before.'
-      :tab==='history'?'Review your own completed sessions, scores and adaptive progress.'
-      :'Mock Exam uses the questions saved as Mock in the selected Course. Exactly 200 are required for the fixed 300-minute exam; no additional reservation step.'}</p>
     </div>
     <span className="lep-section-mark">{tab==='practice'?<SlidersHorizontal size={26}/>:tab==='history'?<History size={26}/>:<ShieldCheck size={26}/>}</span>
    </div>
