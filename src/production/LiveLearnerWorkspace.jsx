@@ -163,12 +163,7 @@ export default function LiveLearnerWorkspace({db,user,onSignOut,embedded=false,
   </aside>
   <main className="lj-main">{screen!=="qualifications"&&<div className="lj-heading">
    <div><span className="lj-eyebrow">TECHNICA LEARNING PLATFORM</span>
-    <h1>{screenTitle}</h1><p>{screen==='courses'?'Explore published courses and start learning.':
-      screen==='learning'?'Your courses, progress and next lessons in one place.':
-      screen==='course'?'Your course content, organized for focused learning.':
-      screen==='subscription'||screen==='checkout'?'Discover our learning plans.':
-      screen==='practice'?'Customize Practice, or take a fixed 200-question, 5-hour Mock from saved Course Question Bank selections.':
-      'Your own verified practice and Mock results.'}</p></div>
+    <h1>{screenTitle}</h1></div>
    <button type="button" className="lj-quiet" disabled={loading} onClick={refresh}><RefreshCw size={16}/> Refresh</button>
   </div>}
   {error&&<p className="lj-error" role="alert">{error}</p>}
@@ -220,17 +215,17 @@ export default function LiveLearnerWorkspace({db,user,onSignOut,embedded=false,
     <div className="lep-tabs" role="tablist" aria-label="Exam preparation mode">
      <button type="button" role="tab" id="lj-prep-practice" aria-controls="lj-prep-panel"
       aria-selected={preparationTab==='practice'} className={preparationTab==='practice'?'lep-tab-active':''}
-      onClick={()=>setPreparationTab('practice')}><Target size={21}/><span><strong>Practice</strong><small>Custom questions and time</small></span></button>
+      onClick={()=>setPreparationTab('practice')}><Target size={21}/><span><strong>Practice</strong></span></button>
      <button type="button" role="tab" id="lj-prep-mock" aria-controls="lj-prep-panel"
       aria-selected={preparationTab==='mock'} className={preparationTab==='mock'?'lep-tab-active':''}
-      onClick={()=>setPreparationTab('mock')}><GraduationCap size={23}/><span><strong>Mock Exam</strong><small>200 questions · 5 hours</small></span></button>
+      onClick={()=>setPreparationTab('mock')}><GraduationCap size={23}/><span><strong>Mock Exam</strong></span></button>
      <button type="button" role="tab" id="lj-prep-history" aria-controls="lj-prep-panel"
       aria-selected={preparationTab==='history'} className={preparationTab==='history'?'lep-tab-active':''}
-      onClick={()=>setPreparationTab('history')}><ClipboardCheck size={21}/><span><strong>My Practice</strong><small>Results and past sessions</small></span></button>
+      onClick={()=>setPreparationTab('history')}><ClipboardCheck size={21}/><span><strong>My Practice</strong></span></button>
     </div>
     <div id="lj-prep-panel" role="tabpanel" aria-labelledby={'lj-prep-'+preparationTab}>
     {preparationTab==='history'?historyPanel:preparationTab==='practice'?<>
-    <div className="lj-section-head"><h2>Choose your course</h2><p>Quick 10, Timed Quiz, Build Your Own, Domain Practice and adaptive Level Up are available in the secure engine.</p></div>
+    <div className="lj-section-head"><h2>Choose your course</h2></div>
     {!enrolled.length?<div className="lj-empty"><LockKeyhole size={24}/><b>Practice is not available yet</b><p>No accessible courses are published. Contact the LMS administrator.</p><button className="lj-primary" onClick={()=>go('courses')}>Explore Courses <ArrowRight size={16}/></button></div>:
      <><label className="lj-picker">Course<select value={practiceId} onChange={e=>setPracticeId(e.target.value)}>
       <option value="all">All Courses · {enrolled.length} accessible</option>
