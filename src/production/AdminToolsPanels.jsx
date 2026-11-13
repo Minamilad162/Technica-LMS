@@ -49,13 +49,13 @@ export function AdminDashboardPanel({db,onNavigate}){
   return()=>{live=false;};
  },[db,refresh]);
  if(loading)return <PremiumLoading variant="page"/>;
- if(error)return <div className="at-alert"><AlertTriangle size={18}/><div><b>Dynamic analytics unavailable</b><p>{error} These figures need P13 installed on an approved environment.</p></div></div>;
+ if(error)return <div className="at-alert"><AlertTriangle size={18}/><div><b>Dynamic analytics unavailable</b><p>{error} Please contact the system administrator.</p></div></div>;
  if(!report)return empty;
  const stats=[
   ['Registered accounts',report.kpis.users,Users],
   ['Active accounts',report.kpis.activeAccounts,ShieldCheck],
   ['Learners engaged · 30 days',report.kpis.engaged30Days,Activity],
-  ['Legacy Course grants',report.kpis.activeEnrollments,GraduationCap],
+  ['Course-specific access',report.kpis.activeEnrollments,GraduationCap],
   ['Courses / published',report.kpis.courses+' / '+report.kpis.publishedCourses,BookOpen],
   ['Approved Practice questions',report.kpis.practiceApproved,CheckCircle2],
   ['Exclusive Mock questions',report.kpis.mockReserved,LockKeyhole],
@@ -72,16 +72,16 @@ export function AdminDashboardPanel({db,onNavigate}){
      <option value="registrations">New accounts</option><option value="practice">Practice completions</option><option value="mock">Mock completions</option>
     </select></div>
     <TrendChart trend={report.trend} kind={metric}/></section>
-   <section className="at-surface"><div className="at-section-title"><div><h3>Legacy Course access</h3><p>Course-scoped grants only · excludes platform-wide subscriptions</p></div><button className="at-text-button" onClick={()=>onNavigate('courses')}>Manage <ArrowRight size={14}/></button></div>
+   <section className="at-surface"><div className="at-section-title"><div><h3>Course-specific access</h3><p>Access assigned directly to a course, excluding subscriptions</p></div><button className="at-text-button" onClick={()=>onNavigate('courses')}>Manage <ArrowRight size={14}/></button></div>
     <div className="at-course-bars">{report.courses.map(c=><div className="at-course-bar" key={c.id}>
-      <div><b>{c.title}</b><span>{c.enrollments} legacy grants · {c.questions} questions</span></div>
+      <div><b>{c.title}</b><span>{c.enrollments} learners · {c.questions} questions</span></div>
       <div className="at-track"><span style={{width:(c.enrollments/(Math.max(1,...report.courses.map(x=>x.enrollments))))*100+'%'}}/></div>
      </div>)}{!report.courses.length&&empty}</div>
    </section>
   </div>
-  <div className="at-disclaimer"><Wallet size={17}/> Verified revenue: <b>Not tracked</b>. Paid entitlement is not proof of money received; no billing ledger exists in P1.</div>
+  <div className="at-disclaimer"><Wallet size={17}/> Revenue: <b>Not available</b>. Subscription access does not confirm a payment.</div>
   <div className="at-footnote">Updated {day(report.generatedAt)} ·
-   P13 course grants exclude P21 platform memberships; chart totals are not revenue or live subscription counts.</div>
+   Course-specific access figures exclude platform subscriptions.</div>
  </div>;
 }
 const formDefaults={kind:'',parentId:'',title:'',summary:'',position:0};
