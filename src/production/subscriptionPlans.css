@@ -302,3 +302,16 @@
  .sp-card:hover,.sp-card .sp-subscribe:hover:not(:disabled){transform:none}
  .sp-loader{animation:none}
 }
+
+
+/* P82: subscription choice cards and checkout actions fit small screens. */
+.sp-page,.sp-grid,.sp-card{min-width:0;max-width:100%}
+@media(max-width:700px){
+ .sp-page .sp-hero{grid-template-columns:minmax(0,1fr);padding:20px 16px;border-radius:17px}
+ .sp-page .sp-hero h1{font-size:clamp(24px,6vw,33px);line-height:1.16}
+ .sp-page .sp-grid{grid-template-columns:minmax(0,1fr);gap:14px}
+ .sp-page .sp-card{padding:clamp(15px,4vw,23px)}
+ .sp-page :is(.sp-subscribe,.sp-duration-selector button){min-height:44px}
+ .sp-page .sp-duration-selector{flex-wrap:wrap;gap:8px;max-width:100%}
+ .sp-page :is(input,select){max-width:100%;font-size:16px}
+}
