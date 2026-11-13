@@ -48,7 +48,7 @@ export default function AdminCourseBank({db,courses=[],asp,onUpdate,onDirtyChang
   let live=true;setBatchReady(false);setBatchMode('unverified');setBatchLoading(true);setBatchError('');
   getCourseBankBatchCapabilities(db)
    .then(c=>{if(live){setBatchMode(c.mode);setBatchReady(true);}})
-   .catch(e=>{if(live)setBatchError('P34 One-Save publish migration is required on this database: '+fail(e));})
+   .catch(e=>{if(live)setBatchError('Question editing is temporarily unavailable: '+fail(e));})
    .finally(()=>{if(live)setBatchLoading(false);});
   return()=>{live=false;};
  },[db]);
@@ -87,7 +87,7 @@ export default function AdminCourseBank({db,courses=[],asp,onUpdate,onDirtyChang
   if(!courseId)return;let live=true;setLoading(true);setError('');
   listCourseBank(db,courseId,{search:query,offset,limit:50,domainId:filterDomain||null,difficulty,usage})
    .then(data=>{if(live)setBank(data);})
-   .catch(e=>{if(live){setBank({total:0,items:[]});setError('P28 Question Bank unavailable: '+fail(e));}})
+   .catch(e=>{if(live){setBank({total:0,items:[]});setError('Question Bank unavailable: '+fail(e));}})
    .finally(()=>{if(live)setLoading(false);});
   return()=>{live=false;};
  },[db,courseId,query,offset,filterDomain,difficulty,usage,revision]);
@@ -131,7 +131,7 @@ export default function AdminCourseBank({db,courses=[],asp,onUpdate,onDirtyChang
  const stage=(q,field,value)=>{
   setError('');setNotice('');
   try{
-   if(!canEdit)throw Error(batchError||'Install P34 One-Save publishing on Supabase before editing.');
+   if(!canEdit)throw Error(batchError||'Question editing is unavailable. Contact the administrator.');
    const next=stagedQuestionEdit(q,staged[q.id],field,value);
    setStaged(prev=>{const result={...prev};if(next)result[q.id]=next;else delete result[q.id];return result;});
   }catch(e){setError(fail(e));}
@@ -266,7 +266,6 @@ export default function AdminCourseBank({db,courses=[],asp,onUpdate,onDirtyChang
      <button type="submit" aria-label="Apply question search">Search</button>
     </form>
    </div>
-   {mode==='bank'&&<p className="p30-toolbar-hint">Imported questions become Active + Approved for Practice immediately. Mark an unused question Mock and Save All Changes to move it out of Practice.</p>}
    <div className="p30-filter-line">
     <label>Domain <select value={filterDomain} aria-label="Filter bank by domain" onChange={e=>{setFilterDomain(e.target.value);setOffset(0);}}>
      <option value="">All Domains</option>{domains.map(d=><option value={d.id} key={d.id}>{d.title}</option>)}
