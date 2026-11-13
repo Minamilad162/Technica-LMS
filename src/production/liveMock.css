@@ -312,3 +312,52 @@
  .live-mock .live-mock-sidebar-track>span{transition:none!important}
  .live-mock .live-mock-exam-layout button:hover{transform:none!important}
 }
+
+
+/* P80 — premium exam-specific navigation/flags/submit; override legacy visual-only rules. */
+.live-mock .live-mock-step{
+ border-radius:13px;min-height:46px;border-color:#d2e4e1;
+ background:linear-gradient(180deg,#fff,#f6fbfa);
+ color:#205665;box-shadow:0 4px 12px #0b52610d;
+}
+.live-mock .live-mock-step-next{
+ background:linear-gradient(115deg,#084b5c,#087e79 58%,#10a88d);
+ border-color:#09877b;color:#fff;box-shadow:0 9px 18px #0b807528;
+}
+.live-mock .live-mock-step-next:hover:not(:disabled){
+ background:linear-gradient(115deg,#073d4d,#08766e 58%,#0d9c83);
+}
+.live-mock .live-mock-action-flag,.live-mock .live-mock-action-clear,
+.live-mock .live-mock-navigator-toggle{
+ border-radius:12px;min-height:43px;font-weight:800;
+ box-shadow:0 3px 10px #0b526109;
+}
+.live-mock .live-mock-sidebar .live-mock-dots button{
+ border-radius:10px;min-height:37px;font-weight:850;
+ box-shadow:0 2px 6px #0a586508;
+}
+.live-mock .live-mock-sidebar .live-mock-dots button.current{
+ background:linear-gradient(115deg,#085c69,#0da58b);
+ color:#fff;box-shadow:0 5px 12px #0b8b7930;
+}
+.live-mock .live-mock-submit{
+ border-radius:15px;background:linear-gradient(115deg,#084b5b,#087b79 58%,#11ab8f);
+ box-shadow:0 10px 22px #0b817429;
+}
+.live-mock .live-mock-start{border-radius:18px}
+.live-mock .p34-mock-mode>button{
+ border-radius:12px;min-height:42px;
+ transition:background .16s,border-color .16s,transform .16s,box-shadow .16s;
+}
+.live-mock .p34-mock-mode>button:hover:not(:disabled){transform:translateY(-1px);border-color:#75c2b0}
+.live-mock .p34-mock-mode>button.selected{
+ background:linear-gradient(115deg,#0b5f6c,#0a9a83);border-color:#0a8e80;
+ box-shadow:0 6px 15px #0c847225;
+}
+@media(max-width:650px){
+ .live-mock .live-mock-step{min-height:43px;padding:10px 11px}
+ .live-mock .live-mock-submit{min-height:58px}
+}
+@media(prefers-reduced-motion:reduce){
+ .live-mock .live-mock-step,.live-mock .live-mock-submit,.live-mock .p34-mock-mode>button{transition:none}
+}
