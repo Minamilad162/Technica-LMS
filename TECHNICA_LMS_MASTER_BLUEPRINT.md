@@ -2159,3 +2159,22 @@ Approved visual-only harmonization for live Practice and fixed Mock Exam control
 - The Question Bank's existing Active and Mock Exam switches, bulk actions and Save All Changes remain the single management interface.
 - Retained ASP rights review and Exams & Mock workflows, along with all database records and rules. No migration or live data modification.
 - Build and visual QA remain to be verified.
+
+
+## P82 — Production-facing copy and responsive polish (2026-11-13)
+
+Approved change: remove internal implementation/version/demo explanations from ordinary learner and admin-facing screens. Prefer concise task-based UI labels and helpful error messages; do not hide genuine access restrictions or failed service checks. The Admin System Tools tab retains release checks rather than implying formal production signoff.
+
+Applied:
+- Admin Tools hero, dashboard status, Questions and user messaging simplified; removed staging evidence display from the operational admin UI (underlying QA tooling is not deleted).
+- Question Bank internal migration diagnostics converted into readable service and publishing warnings. Existing update/approval, Mock reservation, and Save All semantics are unchanged.
+- Practice and Mock readiness copy simplified; technical scoring thresholds no longer exposed in learner instructions. Rules and server-side scoring are unchanged.
+- Learner course access uses **Preview Access · No Charge** for the still-simulated access path, rather than falsely presenting it as a paid subscription.
+- Responsive CSS added to global app shell, Admin tabs, Question Bank horizontally scrollable grid, exam hub, learner course navigation, profile, subscriptions and qualifications. Targets include >=44px principal touch areas, 16px mobile text inputs (iOS zoom prevention), readable headings, flexible layouts, safe bottom spacing, reduced-motion handling.
+
+**Important remaining production caveats**:
+- Qualifications evidence submission still uses browser-only simulated state; do not relabel that action as an actual server submission until a persisted backend/reviewer workflow is implemented.
+- Any simulation-based checkout access and explicit legacy QA paths must be separately gated/retired before production payment launch.
+- CI/build, real-device visual verification (small Android, iPhone and tablet), and authenticated account flow QA were not run in this editing environment; the responsive rules require browser QA before claiming full release readiness.
+- No changes to Supabase data, migrations, RLS, question bank classification, or exam engines.
+
