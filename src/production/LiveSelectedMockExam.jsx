@@ -188,7 +188,7 @@ export default function LiveSelectedMockExam({db,user,course,access}){
        {isReady?<CheckCircle2 size={24}/>:readyError?<AlertTriangle size={24}/>:<ShieldCheck size={24}/>}
       </div>
       <div className="live-mock-readiness-copy">
-       <span className="live-mock-readiness-eyebrow">LIVE QUESTION BANK</span>
+       <span className="live-mock-readiness-eyebrow">EXAM STATUS</span>
        <strong>{pending?'Checking questions…':selectedCount+' / '+questionTarget+' questions selected'}</strong>
        <p>{statusText}</p>
       </div>
