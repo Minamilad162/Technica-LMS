@@ -2178,3 +2178,13 @@ Applied:
 - CI/build, real-device visual verification (small Android, iPhone and tablet), and authenticated account flow QA were not run in this editing environment; the responsive rules require browser QA before claiming full release readiness.
 - No changes to Supabase data, migrations, RLS, question bank classification, or exam engines.
 
+
+
+## P83 — Production UI follow-up and QA safeguards (2026-11-13)
+
+- Reviewed production-facing terminology in live Admin reporting, sign-in policy notice, and learner access errors. Replaced technical migration/release code references with user-facing explanations while retaining accurate limitations.
+- **Important security/UX fix:** `checkoutSimulationApi.simulationEnabled()` previously defaulted to enabled when `VITE_DISABLE_CHECKOUT_DEMO` was absent. Now requires both `import.meta.env.DEV===true` and explicit `VITE_LOCAL_QA_DEMO==='1'`. Hosted production bundles cannot use the browser-only simulated checkout completion marker. Database entitlements and subscription requests remain unchanged.
+- Policy screen remains explicitly marked **not a complete legal policy**; do not present it as finalized Terms/Privacy until the business supplies reviewed legal text.
+- Added `npm run test:p83:production-ui` source regression checks for QA checkout gating, removal of duplicate review UI/internal labels, and responsive mobile rule presence. This is a static source test, not device screenshot testing.
+- Read-only source checks passed on latest remote files. The connected browser was unavailable from this session and the execution environment could not download the GitHub repository, so full Vite build, automated Node suite and real-device manual QA have **not** been executed or represented as passing.
+- **Production release gates still open:** actual Qualifications evidence storage/reviewer submission workflow, complete legal policies, authenticated small-screen UX checks, and build/CI validation. Do not weaken real backend checks or mark these complete with cosmetic copy changes.
