@@ -161,12 +161,12 @@ export default function LiveSelectedMockExam({db,user,course,access}){
  const questionTarget=readiness?.requiredCount??200;
  const isReady=readiness?.ready===true;
  const completion=Math.min(100,Math.round(100*selectedCount/questionTarget));
- const statusText=pending?'Verifying your Course Question Bank…':
-  readyError?'Could not verify exam readiness: '+readyError:
+ const statusText=pending?'Preparing exam…':
+  readyError?'Unable to prepare the exam: '+readyError:
   readiness?.engineUpgradePending?'Course Mock activation is not yet available.':
   isReady?'Your exam is ready. Enter secure fullscreen to begin.':
-  !selectedCount?'Your instructor has not selected any Mock questions yet.':
-  selectedCount>questionTarget?'Too many Mock questions are selected. Contact your instructor.':
+  !selectedCount?'This exam is not available yet.':
+  selectedCount>questionTarget?'This exam needs an update. Contact your instructor.':
   `${questionTarget-selectedCount} more saved Mock questions are needed to enable this exam.`;
  return <section ref={ref} className="live-practice live-mock" aria-label="Course Mock Exam">
   <header className="live-practice-top">
@@ -179,7 +179,7 @@ export default function LiveSelectedMockExam({db,user,course,access}){
     <LockKeyhole size={16}/> Exit &amp; close exam
    </button>}
   </header>
-  {!access?<div className="live-practice-note"><LockKeyhole size={18}/> Paid/manual ASP enrollment or verified Admin access is required.</div>:
+  {!access?<div className="live-practice-note"><LockKeyhole size={18}/> An active subscription is required to take this exam.</div>:
    !attempt?<div className="live-mock-setup">
     <div className={'live-mock-readiness '+(isReady?'is-ready':readyError?'is-error':'is-pending')}
      role="status" aria-live="polite">
