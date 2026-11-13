@@ -172,7 +172,7 @@ export default function LiveSelectedMockExam({db,user,course,access}){
   <header className="live-practice-top">
    <div><span className="live-eyebrow">YOUR VERIFIED COURSE ASSESSMENT</span>
     <h3><ShieldCheck size={21}/> Mock Exam · {course.title}</h3>
-    <p>200 questions · 5-hour time limit · secure fullscreen exam.</p>
+
    </div>
    {active&&<button type="button" className="live-secondary" disabled={busy}
     onClick={()=>{void leaveAttempt(attempt.attemptId);void leaveIntentionally();}}>
