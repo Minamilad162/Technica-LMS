@@ -82,8 +82,8 @@ export default function LiveCourseBuilder(){
     const topic=domain?.topics.find(t=>t.id===editor.topicId);
     await addAuthoringNode(db,{...editor,courseId:course.id},editor.kind==='domain'?tree:editor.kind==='topic'?childrenOf(domain,'topics'):childrenOf(topic,'lessons'));
    }
-   setNotice('Saved successfully in the actual Supabase database.');setEditor(null);refresh();
-  }catch(e){setError(e.message||'Supabase rejected the operation. No local fallback was used.');}
+   setNotice('Saved successfully.');setEditor(null);refresh();
+  }catch(e){setError(e.message||'Unable to save changes.');}
   finally{setSaving(false);}
  };
  if(status==='checking')return <PremiumLoading variant="page"/>;
@@ -96,8 +96,8 @@ export default function LiveCourseBuilder(){
  return <div className="page-enter builder-page live-authoring-container">
   <div className="breadcrumb"><button type="button" className="inline-breadcrumb" onClick={()=>navigate('/courses')}>Courses</button><ChevronRight size={14}/>{course?.title||'Select a course'}</div>
   <div className="builder-header live-authoring-builder-header"><div className="live-authoring-builder-icon"><Layers3 size={26}/></div>
-   <div className="builder-name"><span className="eyebrow">LIVE COURSE BUILDER · SUPABASE</span><h1>{course?.title||'Course Builder'}</h1>
-    <p className="page-subtitle">Course → Domain → Topic → Lesson, stored with stable IDs in your real database.</p></div>
+   <div className="builder-name"><span className="eyebrow">COURSE BUILDER</span><h1>{course?.title||'Course Builder'}</h1>
+    </div>
    <div className="builder-head-actions"><span className="draft-tag"><FileText size={14}/>{course?.publication_state||'No course'}</span>
     <button className="btn btn-secondary" type="button" onClick={refresh} disabled={loading||loadingTree}><RefreshCw size={15}/> Refresh</button>
     {course&&<a href={'#/admin/course-preview/'+encodeURIComponent(course.id)+'?view=draft'}
@@ -105,9 +105,8 @@ export default function LiveCourseBuilder(){
        <BookOpen size={15}/> Preview Course ↗</a>}
     {course&&<button className="btn btn-secondary" onClick={openDetails}><Pencil size={15}/> Edit course</button>}</div>
   </div>
-  <div className="live-authoring-banner"><ShieldCheck size={17}/><span>Connected to real Supabase tables · No automatic migration from Demo · No delete or publish in this phase</span></div>
   <div className="live-authoring-course-selector">
-   <label htmlFor="live-builder-course">Select a database course</label>
+   <label htmlFor="live-builder-course">Select course</label>
    <select id="live-builder-course" disabled={loading} value={courseId||''} onChange={e=>setParams({courseId:e.target.value})}>
     {!courseId&&<option value="">Choose a live course</option>}
     {courses.map(c=><option key={c.id} value={c.id}>{c.title} ({c.publication_state})</option>)}
@@ -117,18 +116,17 @@ export default function LiveCourseBuilder(){
   {error&&!editor&&<div className="live-authoring-alert" role="alert"><AlertCircle size={17}/>{error}</div>}
   {notice&&<div className="live-authoring-success" role="status"><CheckCircle2 size={17}/>{notice}</div>}
   {loading?<PremiumLoading variant="page"/>:
-   !course?<div className="white-panel admin-empty"><h3>{requested?'Requested course not found in Supabase.':'No live courses exist yet.'}</h3>
-    <p>The older Demo course selection does not create a database course. Create a draft in Live Courses first.</p>
+   !course?<div className="white-panel admin-empty"><h3>{requested?'Requested course not found.':'No courses yet.'}</h3>
     <button className="btn" onClick={()=>navigate('/courses')}><ArrowLeft size={16}/> Open Live Courses</button>
    </div>:
    <div className="hierarchy-editor">
     <div className="hierarchy-heading"><div><h3><Layers3 size={21}/> Learning structure</h3>
-     <p>Real Supabase records with server-enforced Admin RLS. Creating or renaming is saved immediately after confirmation.</p></div>
+</div>
      <button type="button" className="btn" disabled={loadingTree||loadedCourse!==courseId||saving} onClick={()=>openNode('domain')}><Plus size={17}/> Add domain</button>
     </div>
     <div className="hierarchy-counts"><span>{counts.domains} domains</span><span>{counts.topics} topics</span><span>{counts.lessons} lessons</span></div>
     {loadingTree||loadedCourse!==courseId?<PremiumLoading variant="compact"/>:
-     !tree.length?<div className="hierarchy-empty"><BookOpen size={25}/><strong>No domains yet</strong><p>Create a Domain, add Topics and Lessons inside it. No Demo records will be copied automatically.</p></div>:null}
+     !tree.length?<div className="hierarchy-empty"><BookOpen size={25}/><strong>No domains yet</strong></div>:null}
     {loadedCourse===courseId&&<div className="hierarchy-list">{tree.map((domain,di)=><article className="hierarchy-domain" key={domain.id}>
      <div className="hierarchy-domain-head">
       <button type="button" className="hierarchy-disclosure" aria-label={`Toggle domain ${domain.title}`} aria-expanded={opened[domain.id]??true} onClick={()=>toggle(domain.id)}>{opened[domain.id]??true?<ChevronDown size={18}/>:<ChevronRight size={18}/>}</button>
@@ -161,18 +159,15 @@ export default function LiveCourseBuilder(){
       <button type="button" className="hierarchy-add" onClick={()=>openNode('topic',{domainId:domain.id})}><Plus size={16}/> Add topic to {domain.title}</button>
      </div>}
     </article>)}</div>}
-    <p className="hierarchy-note">Only actual saved Supabase objects are displayed here. No automatic sync of the previous 5 demo ASP domains, PDF/video browser files, lesson quizzes or question bank occurs.</p>
    </div>}
-  <div className="live-authoring-secondary"><p>Previously accepted local-only authoring tools remain available as an explicitly labeled preview, not a Supabase save operation.</p><button className="btn btn-secondary" type="button" onClick={()=>navigate('/builder?courseId=asp&legacyPreview=1')}>Open legacy Builder demo preview</button></div>
   {editor&&<Modal title={editor.kind==='details'?'Edit real course details':editor.kind==='rename'?'Rename '+editor.table.replace('lms_','').slice(0,-1):editor.kind==='text'?'Add lesson reading text':'Add '+editor.kind} onClose={()=>{if(!saving)setEditor(null);}}>
     <form className="simple-fields" onSubmit={save}>
      <label>{editor.kind==='text'?'Reading paragraph':editor.kind==='details'?'Course title':'Title'}
       {editor.kind==='text'?<textarea autoFocus required maxLength={20000} rows={6} value={editor.title} onChange={e=>setEditor(v=>({...v,title:e.target.value}))}/>:
        <input autoFocus required maxLength={180} value={editor.title} onChange={e=>setEditor(v=>({...v,title:e.target.value}))}/>}</label>
      {editor.kind==='details'&&<label>Summary<textarea rows={3} maxLength={2000} value={editor.summary||''} onChange={e=>setEditor(v=>({...v,summary:e.target.value}))}/></label>}
-     <small>The change will be saved to Supabase only when you click Save. No publication state is changed.</small>
      {error&&<p className="live-authoring-alert" role="alert">{error}</p>}
-     <div className="modal-actions"><button type="button" className="btn btn-secondary" disabled={saving} onClick={()=>setEditor(null)}>Cancel</button><button type="submit" className="btn" disabled={saving}>{saving?'Saving…':'Save to Supabase'}</button></div>
+     <div className="modal-actions"><button type="button" className="btn btn-secondary" disabled={saving} onClick={()=>setEditor(null)}>Cancel</button><button type="submit" className="btn" disabled={saving}>{saving?'Saving…':'Save'}</button></div>
     </form>
    </Modal>}
  </div>;
