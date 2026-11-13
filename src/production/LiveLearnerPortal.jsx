@@ -13,14 +13,14 @@ export default function LiveLearnerPortal({initialScreen='courses'}){
  useEffect(()=>{
   let alive=true,db;
   try{db=getSupabaseClient({secureReviewEntry:true});}
-  catch{setState({loading:false,db:null,user:null,error:'A real Supabase connection is required.'});return;}
+  catch{setState({loading:false,db:null,user:null,error:'We're unable to connect right now. Please try again.'});return;}
   db.auth.getUser().then(({data,error})=>{
    if(!alive)return;
    if(error||!data?.user?.id)setState({loading:false,db:null,user:null,
-    error:'A valid signed-in Technica LMS account is required for published courses.'});
+    error:'Please sign in to access your courses.'});
    else setState({loading:false,db,user:data.user,error:''});
   }).catch(()=>{if(alive)setState({loading:false,db:null,user:null,
-   error:'Could not verify your Supabase session.'});});
+   error:'Your session could not be verified. Please sign in again.'});});
   return()=>{alive=false;};
  },[]);
  if(state.loading)return <PremiumLoading variant="page"/>;
