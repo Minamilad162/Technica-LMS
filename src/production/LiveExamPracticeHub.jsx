@@ -148,7 +148,7 @@ export default function LiveExamPracticeHub(){
         {allowedCourses.length>0&&<option value="all">All Courses · {allowedCourses.length} accessible</option>}
         {catalog.courses.map(c=><option key={c.id} value={c.id}>{c.title}</option>)}
        </select>
-       <span><CheckCircle2 size={15}/> {courseId==='all'?'Questions sampled securely from accessible Courses':'Practice modes and difficulty logic preserved'}</span>
+       <span><CheckCircle2 size={15}/> {courseId==='all'?'Practice across your courses':'Choose your preferred practice mode'}</span>
       </div>
       {!course||!practiceAccess?<div className="live-learning-empty"><LockKeyhole size={24}/>
        <b>Course Practice is locked</b>
@@ -162,14 +162,14 @@ export default function LiveExamPracticeHub(){
       </>}
      </>}
     </>:!mockCourse?<div className="live-learning-empty"><LockKeyhole size={24}/>
-     <b>No Course Mock available</b><p>Publish a Course and select its Mock questions in Question Bank.</p>
+     <b>No Mock Exam available</b><p>There is no available Mock Exam for this course.</p>
     </div>:<>
      <div className="lep-course-selector">
       <label htmlFor="lep-mock-course"><BookOpenCheck size={19}/> Mock Exam course</label>
       <select id="lep-mock-course" value={mockCourseId} onChange={e=>setMockCourseId(e.target.value)}>
        {catalog.courses.map(c=><option key={c.id} value={c.id}>{c.title}</option>)}
       </select>
-      <span><CheckCircle2 size={15}/> Saved Mock questions from this Course only</span>
+      
      </div>
      {mockCourse.publication_state!=='published'?<div className="live-learning-empty"><LockKeyhole size={24}/>
        <b>Course not published</b><p>The saved Mock questions remain in Question Bank. Publish this Course to enable its exam.</p>
