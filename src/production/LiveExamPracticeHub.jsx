@@ -104,17 +104,17 @@ export default function LiveExamPracticeHub(){
    <button type="button" role="tab" id="lep-tab-practice" aria-controls="lep-panel-practice"
     aria-selected={tab==='practice'} className={tab==='practice'?'lep-tab-active':''}
     onClick={()=>activate('practice')}>
-    <Target size={23}/><span><strong>Practice</strong><small>Customize questions &amp; time</small></span>
+    <Target size={23}/><span><strong>Practice</strong></span>
    </button>
    <button type="button" role="tab" id="lep-tab-mock" aria-controls="lep-panel-mock"
     aria-selected={tab==='mock'} className={tab==='mock'?'lep-tab-active':''}
     onClick={()=>activate('mock')}>
-    <GraduationCap size={24}/><span><strong>Mock Exam</strong><small>200 questions · 5 hours · fixed</small></span>
+    <GraduationCap size={24}/><span><strong>Mock Exam</strong></span>
    </button>
    <button type="button" role="tab" id="lep-tab-history" aria-controls="lep-panel-history"
     aria-selected={tab==='history'} className={tab==='history'?'lep-tab-active':''}
     onClick={()=>activate('history')}>
-    <History size={23}/><span><strong>My Practice</strong><small>Previous sessions &amp; results</small></span>
+    <History size={23}/><span><strong>My Practice</strong></span>
    </button>
   </div>
   <section className="lep-content" role="tabpanel"
