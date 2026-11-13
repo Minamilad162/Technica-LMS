@@ -50,7 +50,7 @@ export default function LiveExamPracticeHub(){
   let alive=true,db;
   try{db=getSupabaseClient({secureReviewEntry:true});}
   catch(e){setState({loading:false,catalog:null,db:null,
-   error:e?.message||'A real Supabase connection is required.'});return;}
+   error:e?.message||'Unable to connect. Please try again.'});return;}
   setState({loading:true,catalog:null,db,error:''});
   fetchLiveLearningCatalog(db)
    .then(catalog=>{
