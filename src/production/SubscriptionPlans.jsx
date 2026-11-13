@@ -79,7 +79,7 @@ export default function SubscriptionPlans({db,user,subscription,subscriptionErro
   <header className="sp-hero">
    <div className="sp-hero-copy"><span className="sp-eyebrow"><Sparkles size={15}/> PREMIUM TECHNICA MEMBERSHIP</span>
     <h1>Choose Your <em>Learning Plan</em></h1>
-    <p>Flexible learning plans for every stage of your professional development.</p>
+    
     <div className="sp-hero-points">
      <span><Crown size={16}/> Full Platform Access</span>
      <span><Zap size={16}/> Learn & Practice</span>
@@ -107,7 +107,7 @@ export default function SubscriptionPlans({db,user,subscription,subscriptionErro
    <div className="sp-plan-heading-copy">
     <span className="sp-eyebrow"><Star size={14}/> YOUR LEARNING, YOUR PACE</span>
     <h2>Choose a subscription duration</h2>
-    <p>Every plan includes the full published Technica LMS experience.</p>
+    
    </div>
    {!loading&&plans.length>0&&<div className="sp-duration-selector" role="group" aria-label="Highlight a subscription duration">
     {plans.map(plan=><button type="button" key={plan.id}
