@@ -1,7 +1,7 @@
 import React,{useEffect,useMemo,useRef,useState} from 'react';
 import {AlertCircle,BookOpen,CheckCircle2,FileQuestion,FileSpreadsheet,Plus,RefreshCw,Search,ShieldCheck,Save,Undo2,Upload,SlidersHorizontal} from 'lucide-react';
 import {importQuestionFile} from '../lib/questionImport.js';
-import {importCourseBank,listCourseBank,mappedImportRows,saveCourseBankBatch,getCourseBankBatchCapabilities,approveNonAspBankQuestion,reserveNonAspMockQuestion,inspectLessonQuizPublication,existingPracticeImportPreview,activateExistingPracticeImports} from './courseQuestionBankApi.js';
+import {importCourseBank,listCourseBank,mappedImportRows,saveCourseBankBatch,getCourseBankBatchCapabilities,inspectLessonQuizPublication,existingPracticeImportPreview,activateExistingPracticeImports} from './courseQuestionBankApi.js';
 import {stagedQuestionEdit,stagedToBatch,originalQuestionValues,BANK_DIFFICULTIES} from './questionBankDraft.js';
 import {liveCourseTree} from './liveAuthoringApi.js';
 import {isAspCourseTitle,isOfficialAspCourse,preferredQuestionBankCourse,questionBankCatalogState} from './questionBankCourseSelection.js';
@@ -197,21 +197,6 @@ export default function AdminCourseBank({db,courses=[],asp,onUpdate,onDirtyChang
    setStaged({});setReleaseLessonId('');setNotice('Unsaved actions discarded.');setError('');
   }
  };
- // Independent legal/answer review for non-ASP remains an explicit separate
- // approval workflow, not part of draft inline metadata edits.
- async function action(q,kind){
-  if(busy||dirtyCount)return;
-  const message=kind==='approve'
-   ?'Confirm the correct answer, independent review and commercial content rights for this non-ASP Draft?'
-   :'Reserve this unused non-ASP Draft as Mock-only? Existing Lesson links must be removed first.';
-  if(!window.confirm(message))return;
-  setBusy(true);setError('');setNotice('');
-  try{
-   if(kind==='approve')await approveNonAspBankQuestion(db,q.id);
-   else await reserveNonAspMockQuestion(db,q.id);
-   setNotice('Independent question review action saved.');refresh(true);
-  }catch(e){setError(fail(e));}finally{setBusy(false);}
- }
  const visibleIds=bank.items.map(q=>q.id);
  const allVisibleSelected=!!visibleIds.length&&visibleIds.every(id=>selectedIds.includes(id));
  const toggleSelectAll=checked=>setSelectedIds(checked?visibleIds:[]);
@@ -513,16 +498,6 @@ export default function AdminCourseBank({db,courses=[],asp,onUpdate,onDirtyChang
     </div>
    </div>
    {dirtyCount>500&&<p role="alert" className="at-error">Maximum 500 edits per atomic save. Discard or reduce the staged changes before saving.</p>}
-   {selected.slug!=='asp'&&mode==='bank'&&<details ref={reviewRef} className="p30-advanced-review">
-    <summary>Optional review tools for Practice and official Mock reservation</summary>
-    <p>Legacy Drafts can be approved individually here. New imports become Approved for Practice automatically; Mock selection is limited to unused questions.</p>
-    {bank.items.filter(q=>q.approvalState==='draft'&&!q.mockExclusive).map(q=><div key={q.id} className="p30-review-row">
-     <span>{q.prompt}</span>
-     <button type="button" className="at-outline" disabled={busy||dirtyCount>0} onClick={()=>void action(q,'approve')}>Approve for Practice</button>
-     <button type="button" className="at-outline" disabled={busy||dirtyCount>0||q.linkedCount>0}
-      onClick={()=>void action(q,'mock')}>Reserve Mock-only</button>
-    </div>)}
-   </details>}
    {selected.slug==='asp'&&mode==='bank'&&<div ref={reviewRef} className="p30-advanced-review">
     <button type="button" className="at-outline" onClick={()=>setReviewOpen(v=>!v)}>
      {reviewOpen?'Hide':'Open'} ASP rights review for Practice and official Mock reservation</button>
