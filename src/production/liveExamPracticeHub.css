@@ -113,3 +113,26 @@
 
 /* P72: the Mock module owns its live, single-source readiness header. */
 .lep-page .live-mock{margin-top:18px}
+
+
+/* P82 — legible mobile exam hub; consistent touch sizing across three tabs. */
+.lep-page{min-width:0;max-width:100%}
+.lep-page .lep-content{min-width:0}
+@media(max-width:700px){
+ .lep-page{padding:13px 11px 35px}
+ .lep-page .lep-hero{border-radius:18px;padding:22px 18px}
+ .lep-page .lep-hero h1{font-size:clamp(26px,7vw,34px);line-height:1.17}
+ .lep-page .lep-hero-copy>p{font-size:13px;line-height:1.62}
+ .lep-page .lep-tabs{grid-template-columns:1fr;gap:9px}
+ .lep-page .lep-tabs button{
+  min-height:70px;padding:12px 14px;border-radius:14px;gap:13px
+ }
+ .lep-page .lep-tabs button strong{font-size:15px}
+ .lep-page .lep-tabs button small{font-size:12px;line-height:1.45}
+ .lep-page .lep-course-selector{display:grid;gap:10px;padding:13px}
+ .lep-page .lep-course-selector select{width:100%;min-width:0;min-height:46px;font-size:16px}
+ .lep-page .lep-course-selector>span{font-size:12px}
+ .lep-page .lep-content{padding:14px;border-radius:16px}
+ .lep-page .lep-section-heading h2{font-size:22px}
+ .lep-page .live-practice{margin-top:14px}
+}
