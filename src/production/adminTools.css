@@ -189,3 +189,36 @@
 .at-lesson-publication-badge.draft{background:#fff1d7;color:#925d25}
 .at-lesson-publication-badge.published{background:#e2f8ee;color:#197952}
 @media(max-width:780px){.at-lesson-publication-summary{align-items:flex-start}.at-lesson-bulk-publish{width:100%;justify-content:center}}
+
+
+/* P82 — compact responsive admin workspace across all tabs. */
+.admin-tools-workspace,.at-panel,.at-surface,.at-stack{min-width:0;max-width:100%}
+.admin-tools-workspace .at-tabs{scrollbar-width:thin;overscroll-behavior-x:contain}
+.admin-tools-workspace :is(input,select,textarea){min-width:0;max-width:100%}
+.admin-tools-workspace :is(.at-primary,.at-outline){min-height:42px}
+@media(max-width:850px){
+ .admin-tools-workspace .at-hero{padding:clamp(19px,4vw,28px);min-width:0}
+ .admin-tools-workspace .at-hero h1{font-size:clamp(25px,5.4vw,36px)}
+ .admin-tools-workspace .at-tabs{
+  display:flex;overflow-x:auto;flex-wrap:nowrap;gap:7px;
+  scroll-snap-type:x proximity;padding:7px 1px 12px
+ }
+ .admin-tools-workspace .at-tabs .at-tab{flex:0 0 auto;min-height:44px;scroll-snap-align:start}
+ .admin-tools-workspace .at-panel{padding-inline:0}
+ .admin-tools-workspace :is(.at-section-title,.at-toolbar){
+  flex-wrap:wrap;min-width:0;gap:10px
+ }
+}
+@media(max-width:600px){
+ .admin-tools-workspace{width:100%;min-width:0}
+ .admin-tools-workspace .at-hero{border-radius:17px;padding:19px 16px}
+ .admin-tools-workspace .at-hero-art{display:none}
+ .admin-tools-workspace .at-hero p{font-size:13px;line-height:1.6}
+ .admin-tools-workspace .at-tabs .at-tab{font-size:12px;padding:10px 13px;gap:7px}
+ .admin-tools-workspace .at-surface{border-radius:14px}
+ .admin-tools-workspace :is(.at-primary,.at-outline){font-size:12px}
+ .admin-tools-workspace :is(.at-modal,.at-access-state){max-width:100%}
+ .admin-tools-workspace :is(.at-system-check,.at-lesson-publication-summary){min-width:0}
+ .admin-tools-workspace .at-section-title h2{font-size:21px}
+ .admin-tools-workspace .at-footer{font-size:11px}
+}
