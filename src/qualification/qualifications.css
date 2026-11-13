@@ -237,3 +237,20 @@
  .qf-workspace .qf-number-tab{font-size:13px;min-width:42px;width:42px;flex-basis:42px;height:39px}
 }
 @media(prefers-reduced-motion:reduce){.qf-course-card,.qf-course-hero img,.qf-course-foot button,.qf-course-foot button svg{transition:none!important}}
+
+
+/* P82: qualification pages remain readable on compact touch screens. */
+.qf-workspace{max-width:100%;min-width:0}
+.qf-workspace :is(.qf-card,.qf-pane-content,.qf-columns,.qf-file-row){min-width:0}
+.qf-workspace .qf-matrix-scroll{max-width:100%;overflow-x:auto;-webkit-overflow-scrolling:touch}
+@media(max-width:700px){
+ .qf-workspace{padding-inline:clamp(10px,3vw,16px)}
+ .qf-workspace :is(.qf-unit-strip,.qf-number-tabs,.qf-pane-tabs){
+  max-width:100%;overflow-x:auto;overscroll-behavior-x:contain;scrollbar-width:thin
+ }
+ .qf-workspace .qf-number-tab,.qf-workspace .qf-button{min-height:44px}
+ .qf-workspace .qf-course-grid{grid-template-columns:1fr}
+ .qf-workspace .qf-columns{grid-template-columns:minmax(0,1fr)}
+ .qf-workspace .qf-card{padding:clamp(13px,3.5vw,18px)}
+ .qf-workspace :is(input,select,textarea){max-width:100%;font-size:16px}
+}
