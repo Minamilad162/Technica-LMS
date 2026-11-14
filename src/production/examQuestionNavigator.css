@@ -1,0 +1,49 @@
+/* P86 — restored compact, responsive, right-side exam question map. */
+.tc-exam-workbench{display:grid;grid-template-columns:minmax(0,1fr) 270px;gap:16px;align-items:start;max-width:1290px;width:100%;margin-inline:auto;min-width:0}
+.tc-exam-workbench-main{display:grid;gap:13px;min-width:0}
+.tc-exam-workbench-main>.live-question{min-width:0;width:100%;max-width:none;margin:0}
+.tc-exam-workbench .live-question-nav{min-width:0;max-width:none;width:100%;margin:0}
+.tc-exam-map{display:flex;flex-direction:column;gap:12px;position:sticky;top:12px;min-width:0;padding:16px;border:1px solid #dbe9e7;border-radius:17px;background:#fff;box-shadow:0 11px 27px #164c590d;max-height:min(720px,calc(100dvh - 150px))}
+.tc-exam-map-head{display:flex;align-items:center;justify-content:space-between;gap:9px}
+.tc-exam-map-head h4{margin:3px 0 0;font-size:18px;color:#23464f}
+.tc-exam-map-kicker{font-size:10px;font-weight:900;letter-spacing:.1em;color:#159381}
+.tc-exam-map-count{display:grid;place-items:center;min-width:36px;min-height:33px;padding:0 8px;background:#e7f8f1;color:#168475;font-weight:850;border-radius:10px}
+.tc-exam-map-progress{display:flex;justify-content:space-between;gap:8px;font-size:11px;color:#567980}
+.tc-exam-map-progress b{color:#166b61}
+.tc-exam-map-track{height:5px;background:#e7f1ee;border-radius:99px;overflow:hidden}
+.tc-exam-map-track>span{display:block;height:100%;background:linear-gradient(90deg,#147e79,#30bfa3);transition:width .18s}
+.tc-exam-map-grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:7px;align-content:start;min-height:80px;overflow-y:auto;overscroll-behavior:contain;scrollbar-width:thin;scrollbar-color:#add2c8 transparent;border-block:1px solid #edf3f1;padding:11px 4px 11px 0}
+.tc-exam-map-grid button{position:relative;min-height:36px;min-width:0;padding:3px;border-radius:9px;background:#f8fbfb;border:1px solid #dbe7e7;color:#3b6470;font-size:11px;font-weight:800;cursor:pointer}
+.tc-exam-map-grid button:hover:not(:disabled){border-color:#6cbbaa;background:#eaf8f3}
+.tc-exam-map-grid button.answered{background:#e4f7ee;border-color:#88d4ae;color:#176b57}
+.tc-exam-map-grid button.flagged{box-shadow:inset 0 -3px 0 #e7ad50}
+.tc-exam-map-grid button.current{background:linear-gradient(120deg,#0b6672,#0e9b84);border-color:#0a8b7b;color:#fff;box-shadow:0 4px 10px #118a7e30}
+.tc-exam-map-grid button:disabled{cursor:not-allowed;opacity:.4}
+.tc-exam-map-grid button svg{position:absolute;right:1px;top:1px;fill:#edb656;color:#bb7928}
+.tc-exam-map-legend{display:flex;flex-wrap:wrap;gap:9px 13px;font-size:10px;color:#607f85;font-weight:700}
+.tc-exam-map-legend span{display:inline-flex;align-items:center;gap:5px}
+.tc-exam-map-legend i{width:9px;height:9px;border:1px solid #93aaa6;border-radius:3px;display:inline-block}
+.tc-exam-map-legend .current{background:#0b897e;border-color:#0b897e}
+.tc-exam-map-legend .answered{background:#b8ecd4;border-color:#5abb9a}
+.tc-exam-map-legend .flagged{background:#f6d69a;border-color:#deaa56}
+.tc-exam-map-toggle{display:none;align-items:center;gap:8px;width:100%;min-height:44px;padding:10px 12px;border:1px solid #d5e9e4;border-radius:11px;background:#f3fbf8;color:#276d68;font-weight:800;font-size:12px}
+.tc-exam-map-toggle svg:last-child{margin-left:auto;transition:transform .15s}
+.tc-exam-map-toggle .is-open{transform:rotate(180deg)}
+.tc-exam-flag{display:inline-flex;justify-content:center;align-items:center;gap:8px;min-height:43px;padding:10px 15px;border:1px solid #d4e6e4;border-radius:12px;color:#37616b;background:#f7fbfa;font-size:12px;font-weight:800}
+.tc-exam-flag.is-flagged{color:#995b13;background:#fff6e6;border-color:#ecc883}
+.tc-exam-flag.is-flagged svg{fill:#f3c16d}
+.tc-exam-flag:focus-visible,.tc-exam-map button:focus-visible{outline:3px solid #0ab99a;outline-offset:2px}
+.tc-exam-question-tools{display:flex;justify-content:flex-start;gap:9px;flex-wrap:wrap;margin-top:12px}
+@media(max-width:960px){
+ .tc-exam-workbench{grid-template-columns:minmax(0,1fr);gap:14px}
+ .tc-exam-map{position:static;max-height:none;padding:13px;gap:10px}
+ .tc-exam-map-toggle{display:flex}
+ .tc-exam-map-grid{display:none;min-height:0;max-height:220px}
+ .tc-exam-map-grid.is-open{display:grid}
+}
+@media(max-width:600px){
+ .tc-exam-workbench{gap:11px}
+ .tc-exam-map-grid{grid-template-columns:repeat(6,minmax(0,1fr))}
+ .tc-exam-flag{width:100%}
+}
+@media(prefers-reduced-motion:reduce){.tc-exam-map *{transition:none!important}}
