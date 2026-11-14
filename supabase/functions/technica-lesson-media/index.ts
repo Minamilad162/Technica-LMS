@@ -13,12 +13,14 @@ const accepted={
  video:{'video/mp4':['mp4'],'video/webm':['webm']}
 };
 const uuid=/^[\da-f]{8}-[\da-f]{4}-[\da-f]{4}-[\da-f]{4}-[\da-f]{12}$/i;
-// One exact verified origin is permitted until the operator sets the configured
-// allowlist for the new custom domain in Supabase → Edge Function Secrets.
+// Always allow the canonical production domain. The configured list controls
+// additional deployment origins, with the legacy preview as the default.
 // NEVER use a wildcard or reflect arbitrary browser Origin values.
 const TEMPORARY_LMS_ORIGIN='https://technica-lms.minamilad939.workers.dev';
-const configuredOrigins=(Deno.env.get('TECHNICA_MEDIA_ALLOWED_ORIGINS')||TEMPORARY_LMS_ORIGIN)
- .split(',').map(x=>x.trim()).filter(x=>/^https:\/\/[^/]+$/.test(x)||/^http:\/\/localhost:\d+$/.test(x));
+const PRODUCTION_LMS_ORIGIN='https://lms-courses.technicaconsult.com';
+const configuredOrigins=[PRODUCTION_LMS_ORIGIN,
+ ...(Deno.env.get('TECHNICA_MEDIA_ALLOWED_ORIGINS')||TEMPORARY_LMS_ORIGIN).split(',').map(x=>x.trim())
+].filter(x=>/^https:\/\/[^/]+$/.test(x)||/^http:\/\/localhost:\d+$/.test(x));
 const supabaseUrl=Deno.env.get('SUPABASE_URL')||'';
 // Hosted Supabase now injects named-key JSON dictionaries. Prefer those over
 // legacy JWT-style anon/service_role keys; otherwise @supabase/server gateway
