@@ -47,3 +47,20 @@
  .tc-exam-flag{width:100%}
 }
 @media(prefers-reduced-motion:reduce){.tc-exam-map *{transition:none!important}}
+
+/* Match the accepted premium P76 Mock question surface, without touching grading. */
+.live-mock .tc-exam-workbench-main>.live-question{
+ padding:clamp(17px,2vw,25px);
+ border:1px solid #dceae8;
+ border-radius:18px;
+ background:#fff;
+ box-shadow:0 9px 25px #164c5909;
+}
+.live-mock .tc-exam-workbench-main>.live-question h4{
+ margin:11px 0 18px;
+ color:#183c47;
+ font-size:clamp(17px,1.55vw,22px);
+ line-height:1.55;
+}
+.tc-exam-map-grid button:focus-visible,
+.tc-exam-map-toggle:focus-visible{outline:3px solid #0ab99a;outline-offset:2px}
