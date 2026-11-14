@@ -38,9 +38,9 @@ assert.equal(isPotentialCaptureShortcut({key:'',code:''}),false,
  'OS-native capture with no DOM keyboard event cannot be inferred');
 for(const [file,needle] of [[explorer,'kind="lesson-surface"'],[legacy,'kind="lesson-surface"'],
  [surface,'createPortal(shield,document.body)'],[surface,'Resume lesson'],
- [surface,"if(isMock?isGuardedMediaShortcut(e):isPotentialCaptureShortcut(e))"],
- [surface,"{isMock&&mockConcealed?null:children}"],
- [surface,'onClick={resumeLesson}'],[surface,"document.activeElement?.tagName"],
+ [surface,"if(isQuestionSession?isGuardedMediaShortcut(e):isPotentialCaptureShortcut(e))"],
+ [surface,"{isQuestionSession&&sessionConcealed?null:children}"],
+ [surface,'onClick={resumeContent}'],[surface,"document.activeElement?.tagName"],
  [surface,"window.addEventListener('keyup',onCaptureKey,true)"],
  [player,"window.addEventListener('keyup',onShortcut,true)"],
  [player,"!['capture-shortcut','fullscreen-exit'].includes(shieldReason.current)"],
@@ -64,3 +64,18 @@ assert.match(player,/window\.addEventListener\('technica:lesson-resume',onLesson
 assert.match(player,/e\.detail\?\.lessonId===lessonId/);
 assert.match(explorer,/lessonId=\{selected\.id\} identity=/);
 assert.match(legacy,/lessonId=\{lesson\.id\} identity=/);
+
+for(const [name,kind] of [
+ ['LivePractice','practice-session-surface'],['LiveBuildYourOwn','practice-session-surface'],
+ ['LiveMockExam','mock-exam-surface'],['LiveSelectedMockExam','mock-exam-surface'],
+]){
+ const view=read('src/production/'+name+'.jsx');
+ const start=view.indexOf('kind="'+kind+'"');
+ const end=view.indexOf('</LiveProtectedContent>',start);
+ assert.ok(start>=0&&end>start,name+' must mount a session privacy curtain');
+ for(const control of ['<ScientificCalculator','live-question'])
+  assert.ok(view.slice(start,end).includes(control),name+' must conceal '+control);
+}
+assert.equal(shouldFocusShield('practice-session-surface'),true);
+assert.match(surface,/if\(isQuestionSession\|\|document.visibilityState==='hidden'\)return;/);
+assert.match(surface,/document.addEventListener\('fullscreenchange',checkFullscreen\)/);

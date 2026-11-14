@@ -9,7 +9,7 @@ export const WATERMARK_POSITIONS=9;
 /** Use lost-focus blackout only for exam question surfaces, not iframe video. */
 export function shouldFocusShield(kind){
  return kind==='exam-question'||kind==='lesson-quiz'||
-  kind==='lesson-surface'||kind==='mock-exam-surface';
+  kind==='lesson-surface'||kind==='mock-exam-surface'||kind==='practice-session-surface';
 }
 
 /**

@@ -314,11 +314,11 @@ export default function LiveSelectedMockExam({db,user,course,access}){
       </button>
      </aside>
     </div>
-   </LiveProtectedContent>}
-  {attempt?.state==='in_progress'&&<ScientificCalculator context="Mock Exam" inline
+   <ScientificCalculator context="Mock Exam" inline
    currentQuestion={at+1} questionCount={attempt.questionCount}
    canPrevious={at>0} onPrevious={()=>setAt(i=>Math.max(0,i-1))}
-   onNext={()=>setAt(i=>Math.min(attempt.questionCount-1,i+1))}/>}
+   onNext={()=>setAt(i=>Math.min(attempt.questionCount-1,i+1))}/>
+   </LiveProtectedContent>}
   {error&&<p className="live-error" role="alert"><AlertTriangle size={16}/>{error}</p>}
  </section>;
 }

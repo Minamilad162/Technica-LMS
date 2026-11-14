@@ -2279,3 +2279,14 @@ Approved UI behavior restored across Quick 10, Timed Practice, Domain Practice, 
 - **Required dashboard configuration (not changed through GitHub):** In the exact Supabase project serving the deployed application, open Authentication → URL Configuration; set **Site URL** to the real production custom subdomain (HTTPS) and add `https://<actual-subdomain>/**` and, preferably, the exact root `https://<actual-subdomain>/` to **Redirect URLs**. Preserve only intentional localhost and preview URLs. Never guess the hostname. Existing Supabase confirmation/recovery email templates may refer to `{{ .SiteURL }}`; review template usage of `{{ .RedirectTo }}` separately when needed.
 - Cloudflare Worker **Custom Domains** must route the new hostname to the intended production Worker without an incompatible Redirect Rule or alternate deployment mapping. Google provider callback stays at the Supabase Auth callback URL, not the frontend domain; do not change Google Client redirect URI to the website itself.
 - Added `npm run test:p91:auth-domain` source-level regression. Live Google round-trip, email password sign-in, recovery link, and final Cloudflare build/deploy checks remain unverified in this environment.
+
+## P92 — Consistent blackout in Mock Exam and Practice (2026-11-14)
+
+| Surface | Browser protection | Release verification |
+|---|---|---|
+| Course Mock, ASP Mock, Practice and Build Your Own | One full-session privacy curtain, applied before paint and held until deliberate Resume | Production build and focused regression tests passed locally. Deployed and physical-device checks pending. |
+
+- In the previous implementation, Practice, Build Your Own and ASP Mock masked the question only. Practice also cleared the shortcut curtain automatically after 1,250 ms. Course Mock focus recovery could reveal the session automatically.
+- Use the same protected session boundary for questions, answers, timer, flags, navigator and calculator. Recognized capture/print events and desktop focus loss conceal the contents until Resume. Initially absent or lost fullscreen also conceals active sessions. Server-side attempt closure remains governed by the existing fullscreen and tab visibility guard. Build Your Own review keeps privacy controls outside fullscreen, and its existing local camera stream reattaches if the player remounts on Resume.
+- Decision retained from P74: OS capture with no relevant event remains outside the web page’s controls. The Windows Secure Viewer remains a separate pilot for native capture exclusion. Browser-device verification and Cloudflare deployment are separate from a passing Vite build.
+- Regression evidence: P67, P71, P39, P44, P86, P90 and content-protection checks passed. P71’s readiness assertion now uses the current visible status label. Local Chromium launch was blocked by the execution environment. No production attempts were created. Roll back via a revert of the P92 commit if needed.

@@ -1,4 +1,4 @@
-import React,{useEffect,useMemo,useRef,useState} from 'react';
+import React,{useCallback,useEffect,useMemo,useRef,useState} from 'react';
 import {Calculator,ArrowRight,Camera,Check,ChevronLeft,ChevronRight,Clock3,Eye,Flag,LockKeyhole,PlayCircle,ShieldCheck,Target,TriangleAlert} from 'lucide-react';
 import BuildYourOwnSettings from './BuildYourOwnSettings.jsx';
 import ScientificCalculator from '../components/ScientificCalculator.jsx';
@@ -27,13 +27,12 @@ export default function LiveBuildYourOwn({db,user,course,domains=[],access}){
  const [inspectedPosition,setInspectedPosition]=useState(null),[flaggedQuestions,setFlaggedQuestions]=useState({});
  const [error,setError]=useState(''),[notice,setNotice]=useState(''),[clock,setClock]=useState(Date.now());
  const processing=useRef(false),closing=useRef(false),rootRef=useRef(null);
- const streamRef=useRef(null),videoRef=useRef(null),attemptRef=useRef(null);
+ const streamRef=useRef(null),attemptRef=useRef(null);
  const storageKey=useMemo(()=>practiceSessionKey(user.id,course.id)+':configured',[user.id,course.id]);
  const stopCamera=()=>{
   const stream=streamRef.current;
   streamRef.current=null;
   stream?.getTracks()?.forEach(track=>track.stop());
-  if(videoRef.current)videoRef.current.srcObject=null;
  };
  const close=async id=>{
   if(closing.current)return;
@@ -76,12 +75,12 @@ export default function LiveBuildYourOwn({db,user,course,domains=[],access}){
     void abandonSecurePractice(db,attemptRef.current.attemptId).catch(()=>{});
   };
  },[db,storageKey,access]);
- useEffect(()=>{
-  if(videoRef.current&&streamRef.current){
-   videoRef.current.srcObject=streamRef.current;
-   void videoRef.current.play().catch(()=>{});
+ const attachCameraPreview=useCallback(video=>{
+  if(video&&streamRef.current){
+   video.srcObject=streamRef.current;
+   void video.play().catch(()=>{});
   }
- },[attempt?.attemptId,attempt?.state]);
+ },[]);
  const finished=!!attempt&&attempt.state!=='in_progress';
  const currentPosition=attempt?.currentPosition||1;
  const displayPosition=finished?reviewIndex+1:(inspectedPosition||currentPosition);
@@ -208,7 +207,8 @@ export default function LiveBuildYourOwn({db,user,course,domains=[],access}){
    <BuildYourOwnSettings value={settings}
      onChange={next=>{setSettings(next);setError('');setNotice('');}} domains={domains}
     onStart={()=>void start()} busy={busy} access={access}/>
-  </div>:<>
+  </div>:<LiveProtectedContent key={finished?"review":attempt.attemptId}
+   kind="practice-session-surface" requireFullscreen={!finished} identity={{id:user.id}}>
    <header className="byo-session-bar">
     <div className="byo-progress-group"><span className="byo-session-kicker">BUILD YOUR OWN</span>
      <strong>{finished?'Practice complete':'Question '+currentPosition+' of '+attempt.questionCount}</strong>
@@ -232,13 +232,12 @@ export default function LiveBuildYourOwn({db,user,course,domains=[],access}){
    </header>
    {attempt.cameraEnabled&&!finished&&<div className="byo-camera-preview">
     <Camera size={15}/><span>Local camera preview · not recorded</span>
-    <video ref={videoRef} autoPlay muted playsInline aria-label="Your optional camera preview"/>
+    <video ref={attachCameraPreview} autoPlay muted playsInline aria-label="Your optional camera preview"/>
    </div>}
    <ScientificCalculator context="Build Your Own Practice" inline
     currentQuestion={displayPosition} questionCount={attempt.questionCount}/>
    <div className="tc-exam-workbench"><div className="tc-exam-workbench-main">
-   {current&&<LiveProtectedContent as="div" kind="exam-question"
-    className="live-question byo-question" identity={{id:user.id}}>
+   {current&&<div className="live-question byo-question">
     <span className="live-question-label">QUESTION {displayPosition} OF {attempt.questionCount}</span>
     <h4>{current.prompt}</h4>
     <div className="live-answer-list">{current.options.map((option,index)=>{
@@ -257,7 +256,7 @@ export default function LiveBuildYourOwn({db,user,course,domains=[],access}){
       <b>{current.selectedIndex===revealed.correctIndex?'Correct answer':'Answer review'}</b>
       <p>{revealed.explanation||'No explanation available for this question.'}</p>
      </div>}
-   </LiveProtectedContent>}
+   </div>}
    {current&&!finished&&<div className="tc-exam-question-tools">
     <button type="button" className={"tc-exam-flag "+(flaggedQuestions[current.id]?"is-flagged":"")}
      aria-pressed={!!flaggedQuestions[current.id]}
@@ -298,7 +297,7 @@ export default function LiveBuildYourOwn({db,user,course,domains=[],access}){
     onJump={i=>finished?setReviewIndex(i):setInspectedPosition(i+1===currentPosition?null:i+1)}
     disabled={busy}/>
    </div>
-  </>}
+  </LiveProtectedContent>}
   {error&&<p className="live-error" role="alert"><TriangleAlert size={17}/>{error}</p>}
   {notice&&<p className="live-notice" role="status">{notice}</p>}
  </section>;

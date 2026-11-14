@@ -235,7 +235,7 @@ export default function LivePractice({db,user,course,domains=[],access,defaultMo
    </div>:null}
    <button className="live-primary" disabled={busy||!eligible||(mode==='levelup'&&(!readyForCurrent||readinessBusy))} onClick={begin} type="button"><PlayCircle size={17}/>{busy?'Preparing your questions…':'Start practice'}</button>
    </>}
-  </>:<>
+  </>:<LiveProtectedContent kind="practice-session-surface" identity={{id:user.id}}>
    <div className="live-attempt-bar"><b>{finished?'Review your result':(attempt.mode==='quick10'?'Quick 10':attempt.mode==='timed25'?'Timed Quiz':attempt.mode==='levelup'?'Level Up · Adaptive':'Custom Practice')}</b>
      <span><Target size={16}/>{answered} / {attempt.questionCount} answered</span>
      {remaining!==null&&<span><Clock3 size={16}/>{formatTime(remaining)} remaining</span>}
@@ -249,7 +249,7 @@ export default function LivePractice({db,user,course,domains=[],access,defaultMo
      canPrevious={selected>0} onPrevious={()=>setSelected(i=>Math.max(0,i-1))}
      onNext={()=>setSelected(i=>Math.min(attempt.questions.length-1,i+1))}/>
    <div className="tc-exam-workbench"><div className="tc-exam-workbench-main">
-   {current&&<LiveProtectedContent as="div" className="live-question" kind="exam-question" identity={{id:user.id}}>
+   {current&&<div className="live-question">
      <div className="live-question-label">QUESTION {selected+1} OF {attempt.questionCount}</div>
      <h4>{current.prompt}</h4>
      <div className="live-answer-list">{current.options.map((option,index)=>{
@@ -262,7 +262,7 @@ export default function LivePractice({db,user,course,domains=[],access,defaultMo
        </button>;
      })}</div>
      {typeof revealed?.correctIndex==='number'&&<div className="live-practice-feedback"><b>{current.selectedIndex===revealed.correctIndex?'Correct answer':'Answer review'}</b><p>{revealed.explanation||'No explanation provided.'}</p></div>}
-   </LiveProtectedContent>}
+   </div>}
    {current&&!finished&&<div className="tc-exam-question-tools">
     <button type="button" className={"tc-exam-flag "+(flaggedQuestions[current.id]?"is-flagged":"")}
      aria-pressed={!!flaggedQuestions[current.id]}
@@ -281,7 +281,7 @@ export default function LivePractice({db,user,course,domains=[],access,defaultMo
     onJump={setSelected} disabled={busy}/>
    </div>
    {finished?<button className="live-primary" onClick={startOver}>New practice session</button>:<button className="live-primary" type="button" disabled={busy||(attempt.mode==='levelup'&&answered<attempt.questionCount&&remaining!==0)} onClick={finish}>{attempt.mode==='levelup'&&answered<attempt.questionCount?'Answer all adaptive questions to finish':'Finish & calculate score'}</button>}
-  </>}
+  </LiveProtectedContent>}
   {error&&<p className="live-error" role="alert"><TriangleAlert size={17}/>{error}</p>}
   {notice&&<p className="live-notice" role="status">{notice}</p>}
  </div>;
