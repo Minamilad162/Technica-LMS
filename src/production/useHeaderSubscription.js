@@ -19,8 +19,15 @@ export default function useHeaderSubscription(userId,enabled=true){
    try{
     const db=getSupabaseClient({secureReviewEntry:true});
     if(!db)throw new Error('Real subscription connection unavailable.');
-    const [subscription,policy]=await Promise.all([fetchMyPlatformSubscription(db,userId).catch(()=>null),fetchLearningAccessMode(db)]);
-    if(active)setResult({subscription,openAccess:policy.openAccess,loading:false,error:''});
+    const [plan,policy]=await Promise.allSettled([
+     fetchMyPlatformSubscription(db,userId),fetchLearningAccessMode(db)
+    ]);
+    if(active)setResult({
+     subscription:plan.status==='fulfilled'?plan.value:null,
+     openAccess:policy.status==='fulfilled'&&policy.value.openAccess,
+     loading:false,
+     error:plan.status==='rejected'||policy.status==='rejected'?'Subscription status unavailable':''
+    });
    }catch(_error){
     if(active)setResult({subscription:null,openAccess:false,loading:false,error:'Subscription status unavailable'});
    }finally{inFlight=false;}

@@ -1,3 +1,7 @@
+## 2026-11-14 — P96 learner header
+- Clarify open access and active subscription countdowns.
+- Dismiss the account menu on outside taps and Escape.
+
 ## 2026-11-14 — P95 mobile Mock and Practice watermark
 - Open Mock in a focused viewport when native fullscreen is unavailable.
 - Make the learner and session watermark more legible on mobile Practice captures.

@@ -2318,3 +2318,9 @@ Approved UI behavior restored across Quick 10, Timed Practice, Domain Practice, 
 
 - Supersedes the Mock fullscreen-only policy in P94 on browsers that lack Element Fullscreen. Preserve native fullscreen where supported, tab and route exit closure, verified question selection, 200 questions, 300 minutes and server-side scoring. Video retains its existing policy.
 - Mobile browser screenshots can capture visible questions without emitting a detectable browser event. The watermark identifies the session in captured content. Real-device and deployment checks are pending. No database migration. Revert P95 to restore the prior presentation.
+
+## P96 — Learner header plan status and account menu (2026-11-14)
+
+- The header displays the verified active plan name and remaining days rounded up from its stored expiry. Open access without an active plan has an explicit label and no countdown bar. A failed subscription read remains distinguishable from an empty result.
+- Outside pointer presses dismiss the account menu. Escape dismisses it and returns focus to the trigger.
+- Verified locally with the P36 and P37 checks and Vite build. The reported account had no subscription row and open learning access was enabled. No database changes. Revert the source commit to roll back.

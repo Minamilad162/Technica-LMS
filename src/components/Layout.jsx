@@ -1,5 +1,5 @@
 import TechnicaAssistant from './TechnicaAssistant.jsx';
-import React,{useState} from 'react';
+import React,{useEffect,useRef,useState} from 'react';
 import{NavLink,useLocation,useNavigate}from'react-router-dom';
 import{Home,BookOpen,NotebookTabs,GraduationCap,TriangleAlert,Bookmark,ChartNoAxesColumn,Users,HelpCircle,BookMarked,Database,Files,ClipboardCheck,Trophy,Search,Bell,ChevronDown,LogOut,Menu,X,LibraryBig,FileQuestion,BookOpenText,PanelLeftClose,ClipboardList,MoreHorizontal,UserRound,LayoutDashboard,ShieldCheck,ArrowRight,RotateCcw,Flame}from'lucide-react';
 import{signOutPortal,getAuthSession}from'../lib/portalAuth';
@@ -13,6 +13,24 @@ function Brand(){return <NavLink to="/home" className="brand" aria-label="Techni
 export default function Layout({children,standalone=false,onLogout}){
  const{state,update,notify,reset}=useDemo();const navigate=useNavigate();const location=useLocation();
  const[showSearch,setShowSearch]=useState(false);const[search,setSearch]=useState('');const[assistantOpen,setAssistantOpen]=useState(false);const[showAccount,setShowAccount]=useState(false);const[showMobileMore,setShowMobileMore]=useState(false);const[sideOpen,setSideOpen]=useState(false);
+ const accountButton=useRef(null),accountMenu=useRef(null);
+ useEffect(()=>{
+  if(!showAccount||standalone)return;
+  const closeOutside=event=>{
+   if(!accountButton.current?.contains(event.target)&&!accountMenu.current?.contains(event.target))setShowAccount(false);
+  };
+  const closeOnEscape=event=>{
+   if(event.key!=='Escape')return;
+   setShowAccount(false);
+   accountButton.current?.focus();
+  };
+  document.addEventListener('pointerdown',closeOutside,true);
+  document.addEventListener('keydown',closeOnEscape);
+  return()=>{
+   document.removeEventListener('pointerdown',closeOutside,true);
+   document.removeEventListener('keydown',closeOnEscape);
+  };
+ },[showAccount,standalone]);
  const account=getAuthSession();const adminSession=account?.role==='admin';const isAdmin=adminSession&&state.role==='admin';const items=isAdmin?adminItems:learnerItems;
  const headerSubscription=useHeaderSubscription(account?.id,!standalone&&!isAdmin);
  const termTargets=[{name:'My Profile',path:'/my-profile',kind:'Account'},{name:'ASP Course',path:'/assessments?tab=practice',kind:'Course'},{name:'PSM Foundations',path:'/my-learning',kind:'Course'},{name:'Management of Change',path:'/assessments?tab=practice',kind:'Topic'},{name:'Process Hazard Analysis',path:'/assessments?tab=practice',kind:'Topic'},{name:'Practice tests',path:'/assessments?tab=practice',kind:'Practice'},{name:'Learning overview',path:'/my-progress',kind:'Reports'},{name:'Course builder',path:'/admin-tools?tab=courses',kind:'Admin'},{name:'Admin Courses',path:'/admin-tools?tab=courses',kind:'Admin'},{name:'Courses',path:'/course-catalog',kind:'Course'},{name:'Subscription Plans',path:'/subscription-plans',kind:'Course'},{name:'My Practice',path:'/assessments?tab=history',kind:'History'},{name:'Kill Mistakes',path:'/kill-mistakes',kind:'Practice'},{name:'Qualifications',path:'/qualifications',kind:'Qualification'},{name:'Mock Exam & Practice',path:'/assessments',kind:'Exam'},{name:'Results review',path:'/results',kind:'Assessment'}].filter(x=>(isAdmin||x.kind!=='Admin')&&x.name.toLowerCase().includes(search.toLowerCase()));
@@ -24,8 +42,8 @@ export default function Layout({children,standalone=false,onLogout}){
   <div className="main-shell"><header className="topbar" data-header-subscription-ready={!standalone&&!isAdmin?"true":"false"}>{!standalone&&<button className="hamburger icon-btn" onClick={()=>setSideOpen(true)} aria-label="Open menu"><Menu size={21}/></button>}<div className={`mobile-brand ${standalone?'standalone-brand':''}`}><Brand/></div>{standalone&&<div className="desktop-brand"><Brand/></div>}
   {!standalone&&<div className="top-search"><Search size={19}/><input placeholder="Search courses, topics or questions..." value={search} onFocus={()=>setShowSearch(true)} onChange={e=>{setSearch(e.target.value);setShowSearch(true)}} aria-label="Search courses, topics or questions"/>{showSearch&&search&&<div className="search-dropdown">{termTargets.length?termTargets.map(item=><button key={item.name} onClick={()=>nav(item.path)}><Search size={14}/><span>{item.name}</span><small>{item.kind}</small><ArrowRight size={14}/></button>):<p>No matching results</p>}</div>}</div>}
   {standalone&&<div className="top-session-name">{location.pathname.includes('practice')?'Practice session':'ASP Course Assessment'}</div>}
-  <div className="top-actions">{standalone?<><span className="saved-just"> <ShieldCheck size={17}/> Saved automatically</span><button className="top-exit" onClick={()=>{window.dispatchEvent(new Event('technica-quiz-leave'));navigate(location.pathname.includes('practice')?'/practice':'/assessments',{replace:true});}}><LogOut size={17}/> Exit</button></>:<>{!isAdmin&&<span className="top-subscription-slot"><SubscriptionCountdown subscription={headerSubscription.subscription} openAccess={headerSubscription.openAccess} loading={headerSubscription.loading} error={headerSubscription.error} onOpenPlans={()=>nav('/subscription-plans')} compact/></span>}<NotificationBell account={account} onOpen={()=>nav('/notifications')}/><button className="account-button" onClick={()=>setShowAccount(x=>!x)}><Avatar name={state.name}/><span className="account-text"><b>{state.name.split(' ')[0]}</b><small>{isAdmin?'Administrator':'Learner'}</small></span><ChevronDown size={17}/></button></>}
-  </div>{showAccount&&!standalone&&<div className="floating-menu account-menu">
+  <div className="top-actions">{standalone?<><span className="saved-just"> <ShieldCheck size={17}/> Saved automatically</span><button className="top-exit" onClick={()=>{window.dispatchEvent(new Event('technica-quiz-leave'));navigate(location.pathname.includes('practice')?'/practice':'/assessments',{replace:true});}}><LogOut size={17}/> Exit</button></>:<>{!isAdmin&&<span className="top-subscription-slot"><SubscriptionCountdown subscription={headerSubscription.subscription} openAccess={headerSubscription.openAccess} loading={headerSubscription.loading} error={headerSubscription.error} onOpenPlans={()=>nav('/subscription-plans')} compact/></span>}<NotificationBell account={account} onOpen={()=>nav('/notifications')}/><button ref={accountButton} type="button" className="account-button" aria-expanded={showAccount} aria-controls={showAccount?"header-account-menu":undefined} onClick={()=>setShowAccount(x=>!x)}><Avatar name={state.name}/><span className="account-text"><b>{state.name.split(' ')[0]}</b><small>{isAdmin?'Administrator':'Learner'}</small></span><ChevronDown size={17}/></button></>}
+  </div>{showAccount&&!standalone&&<div ref={accountMenu} id="header-account-menu" className="floating-menu account-menu">
    <div className="account-menu-heading"><strong>{account?.name||state.name}</strong><small>{account?.email||'Technica LMS'}</small></div>
    <button onClick={()=>{nav('/my-profile');setShowAccount(false)}}><UserRound size={17}/>My Profile</button>
    <button onClick={()=>{update({role:'learner'});nav('/home');setShowAccount(false)}} className={!isAdmin?'selected':''}><BookOpen size={17}/>Learner workspace</button>{adminSession&&<button onClick={()=>{update({role:'admin'});nav('/admin-tools');setShowAccount(false)}} className={isAdmin?'selected':''}><LayoutDashboard size={17}/>Admin workspace</button>}<div className="menu-line"/><button onClick={signOut}><LogOut size={17}/>Sign out</button></div>}</header>

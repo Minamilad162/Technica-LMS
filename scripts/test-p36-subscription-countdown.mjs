@@ -60,7 +60,7 @@ assert.match(countdown,/No active plan/);
 assert.match(countdown,/Plan expired/);
 assert.match(countdown,/setInterval\(tick,60_000\)/);
 assert.match(countdown,/addEventListener\('visibilitychange',visibility\)/);
-assert.match(countdown,/hasPlatformAccess\(subscription\)/);
+assert.match(countdown,/const active=info.state==='active'/);
 assert.match(countdown,/Until /);
 assert.match(countdown,/subscriptionPlanLabel/);
 assert.match(style,/\.sc-active \.sc-copy small/);
