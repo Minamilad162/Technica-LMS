@@ -5,6 +5,8 @@ import {abandonOfficialMock,getMockReadiness,getOfficialMock,officialMockSeconds
 import {requestQuestionFullscreen,isFullscreenActive,fullscreenStartError,leaveQuestionFullscreen} from '../lib/questionFullscreen';
 import {useQuestionFullscreenGuard} from '../lib/useQuestionFullscreenGuard';
 import LiveProtectedContent from './LiveProtectedContent';
+import ScientificCalculator from '../components/ScientificCalculator.jsx';
+import ExamQuestionNavigator from './ExamQuestionNavigator.jsx';
 import './livePractice.css';
 import './liveMock.css';
 
@@ -187,6 +189,7 @@ export default function LiveMockExam({db,user,course,access}){
      <span>{attempt.flaggedCount} flagged</span>
      {message&&<small role="status">{message}</small>}
     </div>
+    <div className="tc-exam-workbench"><div className="tc-exam-workbench-main">
     {q&&<LiveProtectedContent as="div" className="live-question" kind="exam-question"
      identity={{id:user.id}}>
      <div className="live-question-label">QUESTION {at+1} OF 200</div>
@@ -201,7 +204,7 @@ export default function LiveMockExam({db,user,course,access}){
      </div>
      <div className="live-mock-actions">
       <button type="button" className="live-secondary" disabled={busy||left===0}
-       onClick={()=>save(null,!q.flagged)}><Flag size={17}/>
+       onClick={()=>save(q.selectedIndex,!q.flagged)}><Flag size={17}/>
         {q.flagged?'Unflag question':'Flag for review'}
        </button>
       <button type="button" className="live-secondary" disabled={busy||left===0||q.selectedIndex===null}
@@ -214,16 +217,18 @@ export default function LiveMockExam({db,user,course,access}){
      <button type="button" className="live-secondary" disabled={busy||at===199}
       onClick={()=>setAt(n=>n+1)}>Next <ArrowRight size={16}/></button>
     </div>
-    <div className="live-mock-dots" role="navigation" aria-label="Choose Mock question">
-     {attempt.questions.map((item,index)=><button type="button" key={item.id}
-      aria-label={`Question ${index+1}${item.flagged?', flagged':''}`}
-      aria-current={at===index?'step':undefined}
-      className={`${at===index?'current ':''}${item.selectedIndex!==null?'answered ':''}${item.flagged?'flagged':''}`}
-      onClick={()=>setAt(index)}>{index+1}</button>)}
     </div>
+    <ExamQuestionNavigator questions={attempt.questions} total={attempt.questionCount}
+      currentIndex={at} isFlagged={item=>!!item.flagged} disabled={busy||left===0}
+      onJump={setAt}/>
+   </div>
     <button type="button" className="live-primary live-mock-submit" disabled={busy}
      onClick={submit}><Send size={17}/> Review &amp; submit exam</button>
    </>}
+  {attempt?.state==='in_progress'&&<ScientificCalculator context="ASP Mock Exam" portalTarget={ref.current}
+    currentQuestion={at+1} questionCount={attempt.questionCount}
+    canPrevious={at>0} onPrevious={()=>setAt(i=>Math.max(0,i-1))}
+    onNext={()=>setAt(i=>Math.min(attempt.questionCount-1,i+1))}/>}
   {error&&<p className="live-error" role="alert"><AlertTriangle size={16}/>{error}</p>}
  </section>;
 }
