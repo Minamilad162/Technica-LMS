@@ -18,5 +18,18 @@ for(const path of ['/home','/practice','/analytics','/builder','/assessments','/
 const imgs=readdirSync(join(root,'public/images')).filter(f=>f.endsWith('.webp'));
 if(imgs.length<10)throw Error('Missing industrial art assets');
 requireFile('supabase/001_lms_schema_PROPOSED.sql');
+
+const readSource=p=>readFileSync(join(root,p),'utf8');
+// Release protection for previously broken Cloudflare JSX builds and exam controls.
+const portal=readSource('src/production/LiveLearnerPortal.jsx');
+const admin=readSource('src/production/AdminToolsPanels.jsx');
+if(portal.includes("error:'We're unable"))throw Error('Invalid quote in learner portal: use a safely quoted string.');
+if(admin.includes("setNotice('Course saved. Publish it when you're"))throw Error('Invalid quote in admin success notice.');
+for(const path of ['src/production/LivePractice.jsx','src/production/LiveBuildYourOwn.jsx',
+ 'src/production/LiveSelectedMockExam.jsx','src/production/LiveMockExam.jsx']){
+ const source=readSource(path);
+ if(!source.includes('ScientificCalculator')||!source.includes('tc-exam-calc-trigger'))
+  throw Error('Missing floating calculator or fallback trigger: '+path);
+}
 console.log(`PASS: ${pages.length} core screen components, ${refs.length} original reference images, ${imgs.length} local images, core routes and planned Supabase schema.`);
 console.log('Note: this is a source integrity check, not a Vite production build or browser test.');
