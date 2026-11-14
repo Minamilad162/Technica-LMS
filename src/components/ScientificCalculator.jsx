@@ -50,7 +50,7 @@ function ExactOutput({exact}){
  if(exact.type==='radical')return <span className="tc-exact-radical">{exact.coefficient===1?'':exact.coefficient}<span>√{exact.radicand}</span></span>;
  return exact.value;
 }
-export default function ScientificCalculator({context='Quiz',onNext=null,onPrevious=null,canPrevious=false,currentQuestion=null,questionCount=null,portalTarget=null}){
+export default function ScientificCalculator({context='Quiz',onNext=null,onPrevious=null,canPrevious=false,currentQuestion=null,questionCount=null,portalTarget=null,inline=false}){
  const[open,setOpen]=useState(false),[minimized,setMinimized]=useState(false);
  const[expression,setExpression]=useState(''),[result,setResult]=useState('0');
  const[answer,setAnswer]=useState(0),[memory,setMemory]=useState(0),[history,setHistory]=useState([]);
@@ -207,7 +207,7 @@ export default function ScientificCalculator({context='Quiz',onNext=null,onPrevi
      setError('');
    }catch(e){setError(e.message)}
  }
- return createPortal(<>
+ const calculatorSurface=<>
   <button className={'tc-calc-launch '+(open?'is-open':'')} type="button"
    aria-label={open?'Hide scientific calculator':'Open scientific calculator'} aria-expanded={open}
    title="Scientific calculator" onClick={()=>{setOpen(o=>!o);setMinimized(false)}}>
@@ -348,5 +348,6 @@ export default function ScientificCalculator({context='Quiz',onNext=null,onPrevi
      </div>}
    </div>}
   </section>}
- </>,portalTarget||document.body);
+ </>;
+ return inline?calculatorSurface:createPortal(calculatorSurface,portalTarget||document.body);
 }
