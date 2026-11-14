@@ -43,7 +43,7 @@ assert(quiz.includes('isFullscreenActive(document)'));
 assert(store.includes('function abortSession(kind)'));
 assert(hook.includes("'fullscreenchange'")&&hook.includes("'visibilitychange'"));
 assert(hook.includes('leaveIntentionally'));
-assert(live.includes('requestQuestionFullscreen(containerRef.current)'));
+assert(live.includes('startPracticePresentation(containerRef.current)'));
 assert(live.includes('useQuestionFullscreenGuard'));
 assert(live.includes('LiveProtectedContent'));
 assert(live.includes('abandonSecurePractice'));

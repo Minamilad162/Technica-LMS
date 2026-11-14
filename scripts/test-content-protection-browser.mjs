@@ -245,6 +245,31 @@ try{
    assert.equal(await page.locator('.learn-quiz-content').count(),0,'Leaving fullscreen must return to previous lesson');
 
   });
+  await check(device.name+' live session curtain locks again after a fresh fullscreen entry',async()=>{
+   await page.route(ROOT+'/live-session-fixture',route=>route.fulfill({
+    contentType:'text/html',body:`<div id="root"></div>
+    <script type="module" src="/scripts/fixtures/live-session-protection.jsx"></script>`
+   }));
+   for(let attempt=0;attempt<2;attempt++){
+    await page.goto(ROOT+'/live-session-fixture');
+    await page.getByRole('button',{name:'Start fixture'}).click();
+    await page.getByRole('heading',{name:'Protected fixture question'}).waitFor();
+    await page.evaluate(()=>window.dispatchEvent(new KeyboardEvent('keyup',{key:'PrintScreen'})));
+    const resume=page.getByRole('button',{name:'Resume practice'});
+    await resume.waitFor();
+    assert.equal(await page.locator('h1').count(),0);
+    assert.equal(await page.getByText('Question navigator').count(),0);
+    await page.evaluate(()=>window.dispatchEvent(new Event('focus')));
+    assert.equal(await resume.isVisible(),true);
+    await resume.click();
+    await page.getByRole('heading',{name:'Protected fixture question'}).waitFor();
+    await page.evaluate(()=>document.exitFullscreen());
+    await resume.waitFor();
+    assert.equal(await page.locator('h1').count(),0);
+    await resume.click();
+    assert.equal(await page.locator('h1').count(),0);
+   }
+  });
   await check(device.name+' no JavaScript crashes',async()=>assert.deepEqual(errors,[]));
   await context.close();
  }

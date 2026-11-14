@@ -32,7 +32,7 @@ assert.match(bank,/setUsage\(mode==='mock'\?'mock':'all'\)/);
 assert.match(bank,/Saved selections for/);
 assert.match(learner,/LiveSelectedMockExam key=/);
 assert.match(view,/readiness\?\.selectedCount/);
-assert.match(view,/LIVE QUESTION BANK/);
+assert.match(view,/EXAM STATUS/);
 assert.match(view,/getSelectedMockReadiness\(db,course.id\)/);
 assert.match(view,/document.addEventListener\('visibilitychange',visible\)/);
 assert.match(view,/window.addEventListener\('focus',visible\)/);
@@ -76,17 +76,17 @@ const policy=read('src/lib/contentProtection.js');
 const captureCss=read('src/contentProtection.css');
 assert.match(protection,/kind==='mock-exam-surface'/);
 assert.match(protection,/if\(manualCaptureResume\)\{timeout.current=null;return;\}/);
-assert.match(protection,/tc-mock-curtain/);
+assert.match(protection,/tc-session-curtain/);
 assert.match(protection,/isGuardedMediaShortcut\(e\)/,
  'Mock must use video viewer shortcut policy including Ctrl+S/P');
 assert.match(protection,/ref.current.dataset.mediaShielded=visible\?'true':'false'/,
  'Mock must hide question pixels synchronously, like ProtectedLessonViewer');
-assert.match(protection,/setMockConcealed\(previous=>previous===visible\?previous:visible\)/);
-assert.match(protection,/isMock&&mockConcealed\?null:children/,
+assert.match(protection,/setSessionConcealed\(previous=>previous===visible\?previous:visible\)/);
+assert.match(protection,/isQuestionSession&&sessionConcealed\?null:children/,
  'Conceal must unmount answer/question DOM while blacked out');
-assert.match(protection,/if\(isMock\)cloak\(\)/,
+assert.match(protection,/if\(isQuestionSession\)cloak\(\)/,
  'Mock print event must conceal actual question DOM');
-assert.match(protection,/if\(isMock\)window.addEventListener\('pagehide',onPageHide\)/);
+assert.match(protection,/window.addEventListener\('pagehide',onPageHide\)/);
 assert.match(protection,/Resume exam/);
 assert.match(protection,/!document.fullscreenElement\?\.contains\(ref.current\)/);
 assert.match(policy,/kind==='mock-exam-surface'/);
@@ -97,13 +97,13 @@ assert.match(protection,/useLayoutEffect\(\(\)=>\{/,
 assert.match(view,/kind="mock-exam-surface"/,
  'Re-entered exam must install the entire Mock guard again');
 assert.match(protection,/document.addEventListener\('visibilitychange',onVisibility\)/);
-assert.match(captureCss,/\.tc-capture-curtain.tc-mock-curtain:not\(\[hidden\]\)/);
-assert.match(captureCss,/\[data-protected-kind="mock-exam-surface"\]\[data-media-shielded="true"\]/);
+assert.match(captureCss,/\.tc-capture-curtain.tc-session-curtain:not\(\[hidden\]\)/);
+assert.match(captureCss,/\[data-media-shielded\]\[data-media-shielded="true"\]/);
 const video=read('src/production/ProtectedLessonViewer.jsx');
 assert.match(video,/if\(shell.current\)shell.current.dataset.mediaShielded='true'/,
  'P75 copies the video DOM-level concealment semantics without modifying video');
 assert.match(video,/video.current.pause\(\);video.current.removeAttribute\('src'\);video.current.load\(\)/);
-assert.match(captureCss,/html.tc-quiz-exit-lock \.live-mock \.live-mock-protected-surface/);
+assert.match(captureCss,/html.tc-quiz-exit-lock \.tc-protected-content\[data-media-shielded\]/);
 assert.match(liveMockCss,/\.live-mock-protected-surface\{/);
 assert.doesNotMatch(view,/Refresh Mock questions|setInterval\(.*Readiness/,
  'No manual refresh button or polling for Mock setup');

@@ -16,15 +16,15 @@ import {
  * browser accessibility focus or the surrounding LMS workspace.
  */
 let activeProtectedContainers=0;
-export default function LiveProtectedContent({as:Tag='div',className='',kind='questions',identity:identitySource,lessonId='',children}){
+export default function LiveProtectedContent({as:Tag='div',className='',kind='questions',identity:identitySource,lessonId='',requireFullscreen=true,children}){
  const ref=useRef(null),timeout=useRef(null),shieldRef=useRef(null);
  const keyShield=useRef(false),focusShield=useRef(false);
- const [mockConcealed,setMockConcealed]=useState(false);
- const isMock=kind==='mock-exam-surface';
+ const [sessionConcealed,setSessionConcealed]=useState(false);
+ const isQuestionSession=kind==='mock-exam-surface'||kind==='practice-session-surface';
  const enabledFocusShield=shouldFocusShield(kind);
  // Keep exam captures shielded until the learner explicitly resumes in
  // fullscreen, just like the lesson curtain. Browser signals are best-effort.
- const manualCaptureResume=kind==='lesson-surface'||kind==='mock-exam-surface';
+ const manualCaptureResume=kind==='lesson-surface'||isQuestionSession;
  const[minute,setMinute]=useState(()=>new Date());
  const[sessionId]=useState(getContentProtectionSession);
  const identity=watermarkIdentity(identitySource);
@@ -42,9 +42,9 @@ export default function LiveProtectedContent({as:Tag='div',className='',kind='qu
   // Like ProtectedLessonViewer.conceal(), first hide the actual sensitive
   // content synchronously via a DOM attribute. React then removes question
   // elements so the black curtain is not the only protective layer.
-  if(isMock){
+  if(isQuestionSession){
    if(ref.current)ref.current.dataset.mediaShielded=visible?'true':'false';
-   setMockConcealed(previous=>previous===visible?previous:visible);
+   setSessionConcealed(previous=>previous===visible?previous:visible);
   }
   el.hidden=!visible;
   el.dataset.reason=focusShield.current?'focus-loss':keyShield.current?'keyboard-shortcut':'none';
@@ -53,8 +53,7 @@ export default function LiveProtectedContent({as:Tag='div',className='',kind='qu
   keyShield.current=true;
   syncCurtain();
   if(timeout.current)clearTimeout(timeout.current);
-  // The full Lesson and full Mock Exam hold their black curtain until a
-  // deliberate Resume; standalone Practice questions keep the short hold.
+  // Lessons and full question sessions hold their curtain until Resume.
   if(manualCaptureResume){timeout.current=null;return;}
   timeout.current=setTimeout(()=>{
    keyShield.current=false;
@@ -62,16 +61,19 @@ export default function LiveProtectedContent({as:Tag='div',className='',kind='qu
    timeout.current=null;
   },PROTECTION_HOLD_MS);
  };
- // Register scoped print/privacy listeners before first Lesson paint.
+ // Register scoped print and privacy listeners before the first paint.
  // Native OS screenshot and recording are not intercepted by this web API.
  useLayoutEffect(()=>{
   activeProtectedContainers++;
   document.documentElement.classList.add('tc-has-protected-content');
+  const checkFullscreen=()=>{
+   if(requireFullscreen&&!document.fullscreenElement?.contains(ref.current))cloak();
+  };
   const onBeforePrint=()=>{
    document.documentElement.classList.add('tc-print-in-progress');
-   // Match the video viewer: printing actively conceals Mock content rather
+   // Match the video viewer: printing actively conceals question sessions rather
    // than depending solely on the browser's print-media styling.
-   if(isMock)cloak();
+   if(isQuestionSession)cloak();
   };
   const onAfterPrint=()=>document.documentElement.classList.remove('tc-print-in-progress');
   const onClipboard=e=>{
@@ -82,9 +84,9 @@ export default function LiveProtectedContent({as:Tag='div',className='',kind='qu
    }
   };
   const onCaptureKey=e=>{
-   if(isMock?isGuardedMediaShortcut(e):isPotentialCaptureShortcut(e)){
+   if(isQuestionSession?isGuardedMediaShortcut(e):isPotentialCaptureShortcut(e)){
     // Match video: capture-like shortcuts and Ctrl+P/Ctrl+S become a
-    // persistent black Mock until explicit fullscreen-only Resume.
+    // persistent blackout until an explicit Resume.
     // OS-native capture may deliver neither event: this is not DRM.
     if(e.cancelable)e.preventDefault();
     cloak();
@@ -114,7 +116,7 @@ export default function LiveProtectedContent({as:Tag='div',className='',kind='qu
    syncCurtain();
   };
   const onFocus=()=>{
-   if(document.visibilityState==='hidden')return;
+   if(isQuestionSession||document.visibilityState==='hidden')return;
    focusShield.current=false;
    syncCurtain();
   };
@@ -122,13 +124,15 @@ export default function LiveProtectedContent({as:Tag='div',className='',kind='qu
    if(!enabledFocusShield)return;
    // Page Visibility is different from focus. This is privacy on genuine
    // backgrounding, NOT screenshot detection or prevention on mobile.
-   focusShield.current=shouldBlackoutForVisibility(kind,document.visibilityState);
+   const hidden=shouldBlackoutForVisibility(kind,document.visibilityState);
+   if(isQuestionSession&&!hidden)return;
+   focusShield.current=hidden;
    syncCurtain();
   };
   const onViewportChange=()=>{
    // A soft keyboard can resize VisualViewport and move focus. Reset only
    // accidental stale shields while the browser is still in the foreground.
-   if(isMobile()&&document.visibilityState==='visible'&&focusShield.current){
+   if(!isQuestionSession&&isMobile()&&document.visibilityState==='visible'&&focusShield.current){
     focusShield.current=false;
     syncCurtain();
    }
@@ -141,7 +145,7 @@ export default function LiveProtectedContent({as:Tag='div',className='',kind='qu
   const onReturnPointer=()=>{
    // Mobile Safari occasionally skips focus when returning to an already
    // foregrounded tab. A real pointer action restores a legible screen.
-   if(document.visibilityState==='visible'&&focusShield.current){
+   if(!isQuestionSession&&document.visibilityState==='visible'&&focusShield.current){
     focusShield.current=false;
     syncCurtain();
    }
@@ -161,7 +165,12 @@ export default function LiveProtectedContent({as:Tag='div',className='',kind='qu
   }
   window.addEventListener('beforeprint',onBeforePrint);
   window.addEventListener('afterprint',onAfterPrint);
-  if(isMock)window.addEventListener('pagehide',onPageHide);
+  if(isQuestionSession){
+   window.addEventListener('pagehide',onPageHide);
+   document.addEventListener('fullscreenchange',checkFullscreen);
+   checkFullscreen();
+   if(document.visibilityState==='hidden')onPageHide();
+  }
   return()=>{
    document.removeEventListener('copy',onClipboard,true);
    document.removeEventListener('cut',onClipboard,true);
@@ -178,14 +187,17 @@ export default function LiveProtectedContent({as:Tag='div',className='',kind='qu
    }
    window.removeEventListener('beforeprint',onBeforePrint);
    window.removeEventListener('afterprint',onAfterPrint);
-   if(isMock)window.removeEventListener('pagehide',onPageHide);
+   if(isQuestionSession){
+    window.removeEventListener('pagehide',onPageHide);
+    document.removeEventListener('fullscreenchange',checkFullscreen);
+   }
    document.documentElement.classList.remove('tc-print-in-progress');
    activeProtectedContainers=Math.max(0,activeProtectedContainers-1);
    if(activeProtectedContainers===0)document.documentElement.classList.remove('tc-has-protected-content');
    if(timeout.current)clearTimeout(timeout.current);
    keyShield.current=false;focusShield.current=false;
   };
- },[enabledFocusShield,kind,isMock]);
+ },[enabledFocusShield,kind,isQuestionSession,requireFullscreen]);
  useEffect(()=>{
   const node=ref.current;
   if(!node)return;
@@ -201,10 +213,10 @@ export default function LiveProtectedContent({as:Tag='div',className='',kind='qu
    if(e.type==='copy'||e.type==='cut')e.clipboardData?.clearData?.();
   }
  };
- const resumeLesson=()=>{
+ const resumeContent=()=>{
   if(document.visibilityState==='hidden')return;
-  // A Mock screen can only be revealed inside the required exam fullscreen.
-  if(kind==='mock-exam-surface'&&!document.fullscreenElement?.contains(ref.current))return;
+  // Active sessions can only be revealed inside their required fullscreen.
+  if(isQuestionSession&&requireFullscreen&&!document.fullscreenElement?.contains(ref.current))return;
   keyShield.current=false;focusShield.current=false;
   if(timeout.current){clearTimeout(timeout.current);timeout.current=null;}
   syncCurtain();
@@ -216,23 +228,23 @@ export default function LiveProtectedContent({as:Tag='div',className='',kind='qu
  };
  const shield=<div ref={shieldRef} hidden
    className={'tc-capture-curtain'+(kind==='lesson-surface'?' tc-lesson-curtain':
-     kind==='mock-exam-surface'?' tc-mock-curtain':'')}
+     isQuestionSession?' tc-session-curtain':'')}
    data-capture-curtain="browser-best-effort" data-reason="none"
    aria-hidden={manualCaptureResume?undefined:'true'}
    role={manualCaptureResume?'alert':undefined}>
-   <span>{kind==='mock-exam-surface'?'PROTECTED MOCK EXAM':'PROTECTED LEARNING CONTENT'}</span>
-   {manualCaptureResume&&<button type="button" className="tc-lesson-resume" onClick={resumeLesson}>
-    {kind==='mock-exam-surface'?'Resume exam':'Resume lesson'}</button>}
+   <span>{isQuestionSession?'PROTECTED QUESTION SESSION':'PROTECTED LEARNING CONTENT'}</span>
+   {manualCaptureResume&&<button type="button" className="tc-lesson-resume" onClick={resumeContent}>
+    {kind==='mock-exam-surface'?'Resume exam':isQuestionSession?'Resume practice':'Resume lesson'}</button>}
   </div>;
  return <>
   <Tag className={['tc-protected-content',className].filter(Boolean).join(' ')}
    data-protected-kind={kind}
-   data-media-shielded={isMock?(mockConcealed?'true':'false'):undefined}
+   data-media-shielded={isQuestionSession?(sessionConcealed?'true':'false'):undefined}
    ref={ref}
    onCopyCapture={block} onCutCapture={block}
    onContextMenuCapture={block} onDragStartCapture={block}
    >
-   {isMock&&mockConcealed?null:children}
+   {isQuestionSession&&sessionConcealed?null:children}
    <div className="tc-watermark-layer" data-watermark={identity} aria-hidden="true">
     {Array.from({length:WATERMARK_POSITIONS},(_,i)=>
       <span key={i} className="tc-watermark-cell">{label}</span>)}

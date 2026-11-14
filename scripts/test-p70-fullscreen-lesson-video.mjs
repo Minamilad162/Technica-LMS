@@ -36,6 +36,9 @@ assert.match(viewer,/!isVideo&&<button type="button" onClick=\{toggleFullscreen\
 assert.match(css,/data-shield-reason="fullscreen-exit"/);
 assert.match(css,/data-media-kind=video/);
 assert.match(viewer,/Return to lesson/);
+assert.match(viewer,/Resume video/);
+assert.match(viewer,/const onFocus=\(\)=>\{[\s\S]*?if\(isVideo\|\|doc.visibilityState/);
+assert.match(viewer,/if\(doc.visibilityState==='hidden'\)conceal\('tab-hidden'\);\s*else if\(doc.hasFocus\(\)\)onFocus\(\);/);
 assert.match(viewer,/role="alert"/);
 console.log('P70 fullscreen-gated Lesson video and exit blackout contracts PASS');
 console.log('Native browser/device fullscreen and capture behavior still need real hardware QA.');

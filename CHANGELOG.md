@@ -1,3 +1,13 @@
+## 2026-11-14 — P94 mobile Practice startup
+- Practice and Build Your Own open in a focused page when the browser lacks native Element Fullscreen.
+
+## 2026-11-14 — P93 deliberate resume for protected lesson video
+- Keep protected video concealed when focus or visibility returns. Resume restores the authorized player at its saved position and playback requires an explicit fullscreen Play action.
+
+## 2026-11-14 — P92 consistent privacy curtain in Mock Exam and Practice
+- Apply full-session blackout to Course Mock, ASP Mock, Practice and Build Your Own on supported browser signals. Resume requires a deliberate action and active attempts require fullscreen.
+- Verify with the production build and focused source checks. Native screenshot and deployed-device verification remain pending.
+
 ## 2026-11-12 — P78 existing Question Bank difficulty classification in Supabase
 - Classified the original 2,500 Course 1 question UUIDs in place, with a guarded exact-2,500 PostgreSQL transaction and prior rollback-only rehearsal. No duplicate questions and no new import.
 - Distribution: Low 989, Medium 1,457, High 54; zero remaining Unclassified. Scores, answers, Mock reservation, subscription, and attempt data were not changed.

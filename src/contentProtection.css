@@ -164,46 +164,46 @@ html.tc-quiz-exit-lock :is(.quiz-page,.live-practice .live-question,.live-practi
 .tc-lesson-curtain .tc-lesson-resume:focus-visible{outline:3px solid #69d6be;outline-offset:3px}
 @media print{.tc-lesson-curtain{display:none!important}}
 
-/* P73 — fullscreen Mock capture *deterrence*, NOT native screenshot DRM.
+/* Fullscreen question-session capture deterrence.
    Black screen remains on recognized shortcuts until the learner taps
-   Resume exam. Unlike a body portal, this node lives inside the fullscreen
+   Resume. Unlike a body portal, this node lives inside the fullscreen
    target so it can paint above the secure exam in browser fullscreen. */
-.tc-capture-curtain.tc-mock-curtain:not([hidden]){
+.tc-capture-curtain.tc-session-curtain:not([hidden]){
  display:flex!important;flex-direction:column;gap:13px;
  pointer-events:auto!important;
  background:#03060b!important;color:#f4f8f8!important;
 }
-.tc-mock-curtain .tc-lesson-resume{
+.tc-session-curtain .tc-lesson-resume{
  pointer-events:auto;cursor:pointer;background:#baf1dc;color:#074f48;
  padding:12px 19px;border-radius:10px;border:1px solid #8fd6bf;
  font:750 12px/1.2 ui-sans-serif,system-ui,sans-serif;letter-spacing:0;
 }
-.tc-mock-curtain .tc-lesson-resume:focus-visible{
+.tc-session-curtain .tc-lesson-resume:focus-visible{
  outline:3px solid #69d6be;outline-offset:3px;
 }
 /* The existing fullscreen-exit hook already invalidates the attempt on
    server. Hide the entire exam while route/React cleanup is in progress. */
-html.tc-quiz-exit-lock .live-mock .live-mock-protected-surface{
+html.tc-quiz-exit-lock .tc-protected-content[data-media-shielded]{
  visibility:hidden!important;
 }
-@media print{.tc-mock-curtain{display:none!important}}
+@media print{.tc-session-curtain{display:none!important}}
 
 
-/* P75: mirror video viewer's fail-closed content concealment in Mock.
+/* Mirror the video viewer’s immediate concealment in question sessions.
    When a recognized browser event arrives, immediately hide ALL exam
    content using the DOM dataset before React unmounts sensitive question
-   elements. The mock curtain stays inside the browser fullscreen top layer.
+   elements. The curtain stays inside the browser fullscreen top layer.
    Does not prevent OS screenshots made without DOM events. */
-.tc-protected-content[data-protected-kind="mock-exam-surface"][data-media-shielded="true"]{
+.tc-protected-content[data-media-shielded][data-media-shielded="true"]{
  background:#03060b!important;min-height:100dvh;overflow:hidden;
 }
-.tc-protected-content[data-protected-kind="mock-exam-surface"][data-media-shielded="true"]
+.tc-protected-content[data-media-shielded][data-media-shielded="true"]
  > :not(.tc-capture-curtain){
  visibility:hidden!important;
 }
-.tc-capture-curtain.tc-mock-curtain:not([hidden]){
- background:#03060b!important;inset:0;position:fixed;z-index:2147483600;
+.tc-capture-curtain.tc-session-curtain:not([hidden]){
+ background:#03060b!important;inset:0;position:fixed;z-index:2147483647;
 }
 @media print{
- .tc-protected-content[data-protected-kind="mock-exam-surface"]{display:none!important}
+ .tc-protected-content[data-media-shielded]{display:none!important}
 }

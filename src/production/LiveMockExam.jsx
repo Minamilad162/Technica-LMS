@@ -182,7 +182,7 @@ export default function LiveMockExam({db,user,course,access}){
       getMockReadiness(db,course.id).then(setReadiness).catch(e=>setReadyError(errorMessage(e)));}}>
      <RefreshCw size={16}/> Return to exam setup
     </button>
-   </div>:<>
+   </div>:<LiveProtectedContent kind="mock-exam-surface" identity={{id:user.id}}>
     <div className="live-attempt-bar"><b>ASP Official Mock</b>
      <span><Clock3 size={16}/>{countdown(left)} remaining</span>
      <span>{attempt.answeredCount} / 200 answered</span>
@@ -193,8 +193,7 @@ export default function LiveMockExam({db,user,course,access}){
      {message&&<small role="status">{message}</small>}
     </div>
     <div className="tc-exam-workbench"><div className="tc-exam-workbench-main">
-    {q&&<LiveProtectedContent as="div" className="live-question" kind="exam-question"
-     identity={{id:user.id}}>
+    {q&&<div className="live-question">
      <div className="live-question-label">QUESTION {at+1} OF 200</div>
      <h4>{q.prompt}</h4>
      <div className="live-answer-list">
@@ -213,7 +212,7 @@ export default function LiveMockExam({db,user,course,access}){
       <button type="button" className="live-secondary" disabled={busy||left===0||q.selectedIndex===null}
        onClick={()=>save(null,q.flagged)}>Clear answer</button>
      </div>
-    </LiveProtectedContent>}
+    </div>}
     <div className="live-question-nav">
      <button type="button" className="live-secondary" disabled={busy||at===0}
       onClick={()=>setAt(n=>n-1)}><ArrowLeft size={16}/> Previous</button>
@@ -227,11 +226,11 @@ export default function LiveMockExam({db,user,course,access}){
    </div>
     <button type="button" className="live-primary live-mock-submit" disabled={busy}
      onClick={submit}><Send size={17}/> Review &amp; submit exam</button>
-   </>}
-  {attempt?.state==='in_progress'&&<ScientificCalculator context="ASP Mock Exam" inline
+    <ScientificCalculator context="ASP Mock Exam" inline
     currentQuestion={at+1} questionCount={attempt.questionCount}
     canPrevious={at>0} onPrevious={()=>setAt(i=>Math.max(0,i-1))}
-    onNext={()=>setAt(i=>Math.min(attempt.questionCount-1,i+1))}/>}
+    onNext={()=>setAt(i=>Math.min(attempt.questionCount-1,i+1))}/>
+   </LiveProtectedContent>}
   {error&&<p className="live-error" role="alert"><AlertTriangle size={16}/>{error}</p>}
  </section>;
 }
