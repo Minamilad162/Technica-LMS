@@ -2299,3 +2299,12 @@ Approved UI behavior restored across Quick 10, Timed Practice, Domain Practice, 
 
 - Supersedes automatic video focus/visibility restore described in P20. Resume from the player or the matching lesson curtain requests a fresh authorized URL. Reuse the saved timestamp and require a separate Play action in fullscreen. The PDF keeps its existing resume policy.
 - OS screenshots or recorders that provide no browser signal can still capture readable frames. This update adds no native capture exclusion or database changes. Rollback is a revert of the P93 commit.
+
+## P94 — Practice on browsers without Element Fullscreen (2026-11-14)
+
+| Surface | Presentation | Verification |
+|---|---|---|
+| Live Practice and Build Your Own | Native fullscreen where supported. A fixed, scrollable practice viewport when the API is unavailable. | Build and Practice/Mock source and presentation checks passed locally. Physical iPhone and deployment QA pending. |
+
+- Supersedes P84’s Practice startup restriction only when the browser lacks Element Fullscreen. A denied native request remains an error. Mock and video continue to require native fullscreen.
+- The fallback keeps the privacy curtain, watermark, timers, navigation and existing server abandonment on backgrounding/route exit. It does not add OS capture protection. No database migration. Revert P94 to restore the previous startup policy.

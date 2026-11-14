@@ -206,3 +206,27 @@
  .tc-exam-calc-trigger{min-height:44px;padding:10px 13px}
  .live-attempt-bar .tc-exam-calc-trigger{margin-left:auto}
 }
+
+/* Practice can occupy the web viewport on browsers without Element Fullscreen. */
+html:has([data-practice-presentation="focused"]),body:has([data-practice-presentation="focused"]){
+ overflow:hidden;
+}
+:is(.live-practice,.byo-session)[data-practice-presentation="focused"]{
+ position:fixed;
+ inset:0;
+ z-index:2147483646;
+ box-sizing:border-box;
+ width:100%;
+ height:100dvh;
+ max-width:none;
+ max-height:100dvh;
+ margin:0;
+ padding:clamp(13px,3vw,35px);
+ padding-bottom:max(24px,env(safe-area-inset-bottom));
+ border:0;
+ border-radius:0;
+ overflow-y:auto;
+ overscroll-behavior:contain;
+ background:#f7fbfa;
+ align-content:start;
+}

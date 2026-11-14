@@ -7,7 +7,8 @@ import {practiceQuestionOutcome} from './practiceQuestionReview.js';
 import {DEFAULT_BUILD_YOUR_OWN,prepareBuildYourOwn,remainingQuestionSeconds} from './buildYourOwnConfig.js';
 import {abandonSecurePractice,answerConfiguredPractice,finishSecurePractice,
  nextConfiguredPractice,practiceSessionKey,safeRemainingSeconds,startConfiguredPractice,startAllCoursesConfiguredPractice} from './practiceApi.js';
-import {requestQuestionFullscreen,isFullscreenActive,fullscreenStartError,leaveQuestionFullscreen} from '../lib/questionFullscreen.js';
+import {fullscreenStartError,leaveQuestionFullscreen} from '../lib/questionFullscreen.js';
+import {isPracticePresentationActive,startPracticePresentation} from '../lib/practicePresentation.js';
 import {useQuestionFullscreenGuard} from '../lib/useQuestionFullscreenGuard.js';
 import LiveProtectedContent from './LiveProtectedContent.jsx';
 import './liveBuildYourOwn.css';
@@ -47,14 +48,16 @@ export default function LiveBuildYourOwn({db,user,course,domains=[],access}){
   try{await abandonSecurePractice(db,target);localStorage.removeItem(key);}
   catch{setNotice('Session closed locally. Server closure will retry when your connection returns.');}
  };
+ const presentation=useRef(null);
  const {leaveIntentionally}=useQuestionFullscreenGuard({
   active:!!attempt&&attempt.state==='in_progress',
+  requireFullscreen:presentation.current!=='focused',
   targetRef:rootRef,
   onUnexpectedExit:()=>{
    const id=attemptRef.current?.attemptId;
    void close(id);
    void leaveQuestionFullscreen(document);
-   setNotice('Fullscreen was exited. Your question session has been closed.');
+   setNotice('Your practice session has been closed.');
   }
  });
  useEffect(()=>{
@@ -118,8 +121,9 @@ export default function LiveBuildYourOwn({db,user,course,domains=[],access}){
   catch(e){setError(message(e));return;}
   processing.current=true;setBusy(true);setError('');setNotice('');
   try{
-   const fullscreen=await requestQuestionFullscreen(rootRef.current);
+   const fullscreen=await startPracticePresentation(rootRef.current);
    if(!fullscreen.ok)throw Error(fullscreenStartError(fullscreen));
+   presentation.current=fullscreen.mode;
    if(config.camera){
     if(!navigator.mediaDevices?.getUserMedia)throw Error('Your browser cannot access a camera. Turn off Camera preview to continue.');
     try{streamRef.current=await navigator.mediaDevices.getUserMedia({
@@ -131,8 +135,8 @@ export default function LiveBuildYourOwn({db,user,course,domains=[],access}){
    closing.current=false;
    const next=course.id==='all'?await startAllCoursesConfiguredPractice(db,{requestId,...config}):
     await startConfiguredPractice(db,{courseId:course.id,requestId,...config});
-   if(!isFullscreenActive(document,rootRef.current)){
-    void close(next.attemptId);throw Error('Fullscreen ended while preparing questions. Session closed.');
+   if(!isPracticePresentationActive(rootRef.current,presentation.current)){
+    void close(next.attemptId);throw Error('Practice was interrupted while preparing questions. Session closed.');
    }
    if(next.state!=='in_progress')throw Error('This practice session is no longer active. Start a new one.');
    localStorage.setItem(storageKey,JSON.stringify({attemptId:next.attemptId}));
@@ -165,7 +169,7 @@ export default function LiveBuildYourOwn({db,user,course,domains=[],access}){
   processing.current=true;setBusy(true);setError('');
   try{
    const result=await answerConfiguredPractice(db,attempt.attemptId,current.id,index);
-   if(closing.current||!isFullscreenActive(document,rootRef.current))return;
+   if(closing.current||!isPracticePresentationActive(rootRef.current,presentation.current))return;
    const next={...result,observedAtEpoch:Date.now()};
    attemptRef.current=next;setAttempt(next);
    if(result.feedback?.questionId===current.id)
@@ -178,7 +182,7 @@ export default function LiveBuildYourOwn({db,user,course,domains=[],access}){
   processing.current=true;setBusy(true);setError('');
   try{
    const result=await nextConfiguredPractice(db,attempt.attemptId);
-   if(closing.current||!isFullscreenActive(document,rootRef.current))return;
+   if(closing.current||!isPracticePresentationActive(rootRef.current,presentation.current))return;
    const next={...result,observedAtEpoch:Date.now()};
    attemptRef.current=next;setAttempt(next);setInspectedPosition(null);
    if(next.state!=='in_progress'){
@@ -201,14 +205,14 @@ export default function LiveBuildYourOwn({db,user,course,domains=[],access}){
   setFeedback({});setReviewIndex(0);setInspectedPosition(null);setFlaggedQuestions({});setError('');setNotice('');
   localStorage.removeItem(storageKey);localStorage.removeItem(storageKey+':pending');
  };
- return <section ref={rootRef} className="byo-session" aria-label="Build Your Own secured Practice">
+ return <section ref={rootRef} className="byo-session" data-practice-presentation={attempt?presentation.current:undefined} aria-label="Build Your Own secured Practice">
   {!access?<div className="live-empty"><LockKeyhole size={23}/>Practice access is unavailable.</div>:
   !attempt?<div className="byo-setup">
    <BuildYourOwnSettings value={settings}
      onChange={next=>{setSettings(next);setError('');setNotice('');}} domains={domains}
     onStart={()=>void start()} busy={busy} access={access}/>
   </div>:<LiveProtectedContent key={finished?"review":attempt.attemptId}
-   kind="practice-session-surface" requireFullscreen={!finished} identity={{id:user.id}}>
+   kind="practice-session-surface" requireFullscreen={!finished&&presentation.current!=='focused'} identity={{id:user.id}}>
    <header className="byo-session-bar">
     <div className="byo-progress-group"><span className="byo-session-kicker">BUILD YOUR OWN</span>
      <strong>{finished?'Practice complete':'Question '+currentPosition+' of '+attempt.questionCount}</strong>

@@ -1,3 +1,6 @@
+## 2026-11-14 — P94 mobile Practice startup
+- Practice and Build Your Own open in a focused page when the browser lacks native Element Fullscreen.
+
 ## 2026-11-14 — P93 deliberate resume for protected lesson video
 - Keep protected video concealed when focus or visibility returns. Resume restores the authorized player at its saved position and playback requires an explicit fullscreen Play action.
 

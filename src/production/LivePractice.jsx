@@ -1,7 +1,8 @@
 import React,{useEffect,useMemo,useRef,useState} from 'react';
 import {Calculator,BookOpen,Check,ChevronLeft,ChevronRight,Clock3,Flag,LockKeyhole,PlayCircle,RefreshCw,ShieldCheck,Target,TriangleAlert} from 'lucide-react';
 import {abandonSecurePractice,answerSecurePractice,answerAdaptivePractice,finishSecurePractice,getAdaptiveReadiness,practiceSessionKey,safeRemainingSeconds,startSecurePractice,startAdaptivePractice,startAllCoursesPractice,getAllCoursesAdaptiveReadiness} from './practiceApi';
-import {requestQuestionFullscreen,isFullscreenActive,fullscreenStartError,leaveQuestionFullscreen} from '../lib/questionFullscreen';
+import {fullscreenStartError,leaveQuestionFullscreen} from '../lib/questionFullscreen';
+import {isPracticePresentationActive,startPracticePresentation} from '../lib/practicePresentation.js';
 import {useQuestionFullscreenGuard} from '../lib/useQuestionFullscreenGuard';
 import LiveProtectedContent from './LiveProtectedContent';
 import LiveBuildYourOwn from './LiveBuildYourOwn.jsx';
@@ -54,14 +55,16 @@ export default function LivePractice({db,user,course,domains=[],access,defaultMo
    setNotice('Questions are closed. Server closure is pending connection recovery.');
   }
  };
+ const presentation=useRef(null);
  const {leaveIntentionally}=useQuestionFullscreenGuard({
   active:!!attempt,
+  requireFullscreen:presentation.current!=='focused',
   targetRef:containerRef,
   onUnexpectedExit:()=>{
    const id=attempt?.attemptId;
    void sealAttempt(id);
    void leaveQuestionFullscreen(document);
-   setNotice('Fullscreen exited. You have been returned to the practice setup.');
+   setNotice('Practice closed. You have been returned to the setup.');
   }
  });
  const current=attempt?.questions?.[selected]||null;
@@ -116,7 +119,7 @@ export default function LivePractice({db,user,course,domains=[],access,defaultMo
   processing.current=true;setBusy(true);setError('');
   try{
    const next=await finishSecurePractice(db,attempt.attemptId);
-   if(!closingRef.current&&isFullscreenActive(document,containerRef.current)){
+   if(!closingRef.current&&isPracticePresentationActive(containerRef.current,presentation.current)){
     setAttempt({...next,observedAtEpoch:Date.now()});
     setNotice('Your result has been saved.');
    }
@@ -142,8 +145,9 @@ export default function LivePractice({db,user,course,domains=[],access,defaultMo
   }
   try{
    if(mode==='custom')throw Error('Build Your Own uses the configured Practice session.');
-   const full=await requestQuestionFullscreen(containerRef.current);
+   const full=await startPracticePresentation(containerRef.current);
    if(!full.ok){setError(fullscreenStartError(full));return;}
+   presentation.current=full.mode;
    closingRef.current=false;
    // Keep the same request UUID across retries, so a transient network failure
    // cannot accidentally start a duplicate attempt.
@@ -155,9 +159,9 @@ export default function LivePractice({db,user,course,domains=[],access,defaultMo
    const next=allCourses?await startAllCoursesPractice(db,request):
      mode==='levelup'?await startAdaptivePractice(db,request):
      await startSecurePractice(db,request);
-   if(!isFullscreenActive(document,containerRef.current)){
+   if(!isPracticePresentationActive(containerRef.current,presentation.current)){
     void sealAttempt(next.attemptId);
-    setNotice('Fullscreen was closed while preparing questions. Returned to setup.');
+    setNotice('Practice was interrupted while preparing questions. Returned to setup.');
     return;
    }
    if(next.state==='abandoned'){
@@ -183,7 +187,7 @@ export default function LivePractice({db,user,course,domains=[],access,defaultMo
    const reply=attempt.mode==='levelup'
     ?await answerAdaptivePractice(db,attempt.attemptId,current.id,optionIndex)
     :await answerSecurePractice(db,attempt.attemptId,current.id,optionIndex);
-   if(closingRef.current||!isFullscreenActive(document,containerRef.current))return;
+   if(closingRef.current||!isPracticePresentationActive(containerRef.current,presentation.current))return;
    if(attempt.mode==='levelup'){
     // Only the server grades, determines tier and assigns the next question.
     // Never show correctIndex, explanation or live tier before submission.
@@ -208,7 +212,7 @@ export default function LivePractice({db,user,course,domains=[],access,defaultMo
  };
  const answered=attempt?.questions?.filter(q=>q.selectedIndex!==null&&q.selectedIndex!==undefined).length||0;
  const revealed=finished?current:feedback[current?.id];
- return <div ref={containerRef} className="live-practice" aria-label="Secure practice engine">
+ return <div ref={containerRef} className="live-practice" data-practice-presentation={attempt?presentation.current:undefined} aria-label="Secure practice engine">
   <div className="live-practice-top"><div><span className="live-eyebrow">SECURE PRACTICE</span><h3><ShieldCheck size={21}/> Practice Center</h3></div>{attempt&&<button type="button" className="live-secondary" onClick={()=>{void sealAttempt(attempt.attemptId);void leaveIntentionally();}}>Leave questions</button>}</div>
   {!eligible?<div className="live-empty"><LockKeyhole size={22}/><b>Practice is not available</b><p>This course needs an active learning access policy and approved questions.</p></div>:!attempt?<>
    <div className="live-mode-grid">{PRESETS.filter(p=>!allCourses||p.id!=='domain').map(p=><button key={p.id} className={'live-mode-card '+(mode===p.id?'chosen':'')} onClick={()=>{setMode(p.id);setError('');setNotice('');}} type="button"><strong>{p.title}</strong><span>{p.desc}</span>{mode===p.id&&<Check size={17}/>}</button>)}</div>
@@ -235,7 +239,7 @@ export default function LivePractice({db,user,course,domains=[],access,defaultMo
    </div>:null}
    <button className="live-primary" disabled={busy||!eligible||(mode==='levelup'&&(!readyForCurrent||readinessBusy))} onClick={begin} type="button"><PlayCircle size={17}/>{busy?'Preparing your questions…':'Start practice'}</button>
    </>}
-  </>:<LiveProtectedContent kind="practice-session-surface" identity={{id:user.id}}>
+  </>:<LiveProtectedContent kind="practice-session-surface" requireFullscreen={presentation.current!=='focused'} identity={{id:user.id}}>
    <div className="live-attempt-bar"><b>{finished?'Review your result':(attempt.mode==='quick10'?'Quick 10':attempt.mode==='timed25'?'Timed Quiz':attempt.mode==='levelup'?'Level Up · Adaptive':'Custom Practice')}</b>
      <span><Target size={16}/>{answered} / {attempt.questionCount} answered</span>
      {remaining!==null&&<span><Clock3 size={16}/>{formatTime(remaining)} remaining</span>}
