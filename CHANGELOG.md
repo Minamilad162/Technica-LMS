@@ -1,3 +1,7 @@
+## 2026-11-14 — P95 mobile Mock and Practice watermark
+- Open Mock in a focused viewport when native fullscreen is unavailable.
+- Make the learner and session watermark more legible on mobile Practice captures.
+
 ## 2026-11-14 — P94 mobile Practice startup
 - Practice and Build Your Own open in a focused page when the browser lacks native Element Fullscreen.
 

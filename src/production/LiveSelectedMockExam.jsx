@@ -2,7 +2,8 @@ import React,{useEffect,useMemo,useRef,useState} from 'react';
 import {Calculator,AlertTriangle,ArrowLeft,ArrowRight,CheckCircle2,ChevronDown,Clock3,Flag,LayoutGrid,LockKeyhole,PlayCircle,Send,ShieldCheck} from 'lucide-react';
 import {abandonSelectedMock,getSelectedMockReadiness,getSelectedMock,selectedMockSecondsLeft,
  saveSelectedMock,startSelectedMock,submitSelectedMock} from './selectedMockApi.js';
-import {requestQuestionFullscreen,isFullscreenActive,fullscreenStartError,leaveQuestionFullscreen} from '../lib/questionFullscreen';
+import {fullscreenStartError,leaveQuestionFullscreen} from '../lib/questionFullscreen';
+import {isPracticePresentationActive,startPracticePresentation} from '../lib/practicePresentation.js';
 import {useQuestionFullscreenGuard} from '../lib/useQuestionFullscreenGuard';
 import LiveProtectedContent from './LiveProtectedContent';
 import ScientificCalculator from '../components/ScientificCalculator.jsx';
@@ -34,13 +35,15 @@ export default function LiveSelectedMockExam({db,user,course,access}){
    setMessage('Exam questions hidden. Server closure needs a connection to complete.');
   }
  };
+ const presentation=useRef(null);
  const {leaveIntentionally}=useQuestionFullscreenGuard({
   active:attempt?.state==='in_progress',targetRef:ref,
+  requireFullscreen:presentation.current!=='focused',
   onUnexpectedExit:()=>{
    const id=attempt?.attemptId;
    void leaveAttempt(id);
    void leaveQuestionFullscreen(document);
-   setMessage('Fullscreen or tab access was lost. This Mock has been closed.');
+   setMessage('This Mock was closed because you left the exam view.');
   }
  });
  // P72: The bank is always server-sourced. Re-check when the learner returns
@@ -103,17 +106,18 @@ export default function LiveSelectedMockExam({db,user,course,access}){
   if(activeCall.current||busy||!access||!readiness?.ready||!accepted)return;
   activeCall.current=true;setBusy(true);setError('');setMessage('');
   try{
-   // User gesture starts native fullscreen BEFORE any backend request.
-   const fullscreen=await requestQuestionFullscreen(ref.current);
+   // Start the exam view from the click before any backend request.
+   const fullscreen=await startPracticePresentation(ref.current);
    if(!fullscreen.ok){setError(fullscreenStartError(fullscreen));return;}
+   presentation.current=fullscreen.mode;
    closing.current=false;
    const pendingKey=sessionKey+':pending';
    let requestId=localStorage.getItem(pendingKey);
    if(!requestId){requestId=crypto.randomUUID();localStorage.setItem(pendingKey,requestId);}
    const payload=await startSelectedMock(db,course.id,requestId);
-   if(!isFullscreenActive(document,ref.current)){
+   if(!isPracticePresentationActive(ref.current,presentation.current)){
     void leaveAttempt(payload.attemptId);
-    setMessage('Fullscreen exited. Mock questions remain closed.');
+    setMessage('The exam view was interrupted. Start a new attempt.');
     return;
    }
    localStorage.setItem(sessionKey,payload.attemptId);
@@ -125,12 +129,12 @@ export default function LiveSelectedMockExam({db,user,course,access}){
  };
  const save=async(index,flag)=>{
   const q=attempt?.questions?.[at];
-  if(!q||busy||activeCall.current||left<=0||!isFullscreenActive(document,ref.current))return;
+  if(!q||busy||activeCall.current||left<=0||!isPracticePresentationActive(ref.current,presentation.current))return;
   activeCall.current=true;setBusy(true);setError('');
   const selectedIndex=index,flagged=flag;
   try{
    await saveSelectedMock(db,attempt.attemptId,q.id,selectedIndex,flagged);
-   if(!closing.current&&isFullscreenActive(document,ref.current)){
+   if(!closing.current&&isPracticePresentationActive(ref.current,presentation.current)){
     setAttempt(old=>{
      if(!old||old.state!=='in_progress')return old;
      const questions=old.questions.map(item=>item.id===q.id
@@ -165,11 +169,12 @@ export default function LiveSelectedMockExam({db,user,course,access}){
  const statusText=pending?'Preparing exam…':
   readyError?'Unable to prepare the exam: '+readyError:
   readiness?.engineUpgradePending?'Course Mock activation is not yet available.':
-  isReady?'Your exam is ready. Enter secure fullscreen to begin.':
+  isReady?'Your exam is ready.':
   !selectedCount?'This exam is not available yet.':
   selectedCount>questionTarget?'This exam needs an update. Contact your instructor.':
   `${questionTarget-selectedCount} more saved Mock questions are needed to enable this exam.`;
- return <section ref={ref} className="live-practice live-mock" aria-label="Course Mock Exam">
+ return <section ref={ref} className="live-practice live-mock"
+  data-practice-presentation={attempt?.state==='in_progress'?presentation.current:undefined} aria-label="Course Mock Exam">
   <header className="live-practice-top">
    <div><span className="live-eyebrow">YOUR VERIFIED COURSE ASSESSMENT</span>
     <h3><ShieldCheck size={21}/> Mock Exam · {course.title}</h3>
@@ -203,14 +208,14 @@ export default function LiveSelectedMockExam({db,user,course,access}){
     </div>
     <label className="live-mock-accept"><input type="checkbox" checked={accepted}
      onChange={e=>setAccepted(e.target.checked)}/>
-     <span>I understand this exam lasts 5 hours. Answers are saved securely, and leaving fullscreen or hiding this tab closes the attempt.</span>
+     <span>I understand this exam lasts 5 hours. Answers are saved securely, and leaving the exam view or hiding this tab closes the attempt.</span>
     </label>
     <button type="button" className="live-mock-start" disabled={busy||!access||!accepted||!isReady}
      onClick={begin} aria-label={busy?'Preparing Mock Exam':'Start Mock Exam'}>
      <span className="live-mock-start-icon"><PlayCircle size={23}/></span>
      <span className="live-mock-start-label">
       <strong>{busy?'Preparing your exam…':'Start Mock Exam'}</strong>
-      <small>200 questions <span aria-hidden="true">·</span> 5 hours <span aria-hidden="true">·</span> Secure fullscreen</small>
+      <small>200 questions <span aria-hidden="true">·</span> 5 hours <span aria-hidden="true">·</span> Focused exam</small>
      </span>
      <ArrowRight size={20} className="live-mock-start-arrow"/>
     </button>
@@ -227,7 +232,7 @@ export default function LiveSelectedMockExam({db,user,course,access}){
      <ArrowLeft size={16}/> Return to exam setup
     </button>
    </div>:<LiveProtectedContent as="div" className="live-mock-protected-surface"
-    kind="mock-exam-surface" identity={{id:user.id}}>
+    kind="mock-exam-surface" identity={{id:user.id}} requireFullscreen={presentation.current!=='focused'}>
     <div className="live-attempt-bar"><b>Mock Exam</b>
      <span><Clock3 size={16}/>{countdown(left)} remaining</span>
      <span>{attempt.answeredCount} / {attempt.questionCount} answered</span>

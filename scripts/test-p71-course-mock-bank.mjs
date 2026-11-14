@@ -69,7 +69,7 @@ assert.doesNotMatch(view,/className="live-primary live-mock-submit"/,
 assert.match(view,/kind="mock-exam-surface" identity=\{\{id:user.id\}\}/);
 assert.doesNotMatch(view,/kind="exam-question"/,
  'Active Mock uses one full-exam capture curtain, not only a question wrapper');
-assert.match(view,/requestQuestionFullscreen\(ref.current\)/);
+assert.match(view,/startPracticePresentation\(ref.current\)/);
 assert.match(view,/useQuestionFullscreenGuard/);
 const protection=read('src/production/LiveProtectedContent.jsx');
 const policy=read('src/lib/contentProtection.js');

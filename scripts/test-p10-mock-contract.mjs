@@ -99,7 +99,7 @@ const ui=file('src/production/LiveMockExam.jsx');
 const portal=file('src/production/LiveMockPortal.jsx');
 for(const str of ["path=\"/assessments/mock/live\"","<LiveMockPortal/>"])
  assert(app.includes(str));
-for(const str of ['requestQuestionFullscreen','useQuestionFullscreenGuard',
+for(const str of ['startPracticePresentation','useQuestionFullscreenGuard',
  'getMockReadiness','saveOfficialMock','submitOfficialMock','abandonOfficialMock',
  'LiveProtectedContent','200','300','server'])
  assert(ui.includes(str),'P10 live UI missing '+str);

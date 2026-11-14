@@ -2308,3 +2308,13 @@ Approved UI behavior restored across Quick 10, Timed Practice, Domain Practice, 
 
 - Supersedes P84’s Practice startup restriction only when the browser lacks Element Fullscreen. A denied native request remains an error. Mock and video continue to require native fullscreen.
 - The fallback keeps the privacy curtain, watermark, timers, navigation and existing server abandonment on backgrounding/route exit. It does not add OS capture protection. No database migration. Revert P94 to restore the previous startup policy.
+
+## P95 — Mobile Mock and Practice attribution (2026-11-14)
+
+| Surface | Change | Verification |
+|---|---|---|
+| Course and official ASP Mock | Use the focused viewport when Element Fullscreen is unavailable. | P10 and P71 checks passed locally. |
+| Live Practice and Build Your Own | Higher-contrast, wrapped learner and session watermark on touch and narrow viewports. | P44, P67, P86 and production build passed locally. |
+
+- Supersedes the Mock fullscreen-only policy in P94 on browsers that lack Element Fullscreen. Preserve native fullscreen where supported, tab and route exit closure, verified question selection, 200 questions, 300 minutes and server-side scoring. Video retains its existing policy.
+- Mobile browser screenshots can capture visible questions without emitting a detectable browser event. The watermark identifies the session in captured content. Real-device and deployment checks are pending. No database migration. Revert P95 to restore the prior presentation.

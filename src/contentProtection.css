@@ -207,3 +207,19 @@ html.tc-quiz-exit-lock .tc-protected-content[data-media-shielded]{
 @media print{
  .tc-protected-content[data-media-shielded]{display:none!important}
 }
+
+/* Repeat identifiable attribution across mobile question content and keep controls usable. */
+@media (max-width: 700px), (pointer: coarse){
+ .tc-protected-content[data-protected-kind="practice-session-surface"] > .tc-watermark-layer{
+  z-index:5;
+  opacity:.27;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  grid-template-rows:repeat(5,minmax(35px,1fr));
+ }
+ .tc-protected-content[data-protected-kind="practice-session-surface"] > .tc-watermark-layer .tc-watermark-cell{
+  white-space:normal;
+  overflow-wrap:anywhere;
+  text-align:center;
+  font-size:10px;
+ }
+}

@@ -2,7 +2,8 @@ import React,{useEffect,useMemo,useRef,useState} from 'react';
 import {Calculator,AlertTriangle,ArrowLeft,ArrowRight,CheckCircle2,Clock3,Flag,LockKeyhole,PlayCircle,RefreshCw,Send,ShieldCheck} from 'lucide-react';
 import {abandonOfficialMock,getMockReadiness,getOfficialMock,officialMockSecondsLeft,
  saveOfficialMock,startOfficialMock,submitOfficialMock} from './mockApi.js';
-import {requestQuestionFullscreen,isFullscreenActive,fullscreenStartError,leaveQuestionFullscreen} from '../lib/questionFullscreen';
+import {fullscreenStartError,leaveQuestionFullscreen} from '../lib/questionFullscreen';
+import {isPracticePresentationActive,startPracticePresentation} from '../lib/practicePresentation.js';
 import {useQuestionFullscreenGuard} from '../lib/useQuestionFullscreenGuard';
 import LiveProtectedContent from './LiveProtectedContent';
 import ScientificCalculator from '../components/ScientificCalculator.jsx';
@@ -35,13 +36,15 @@ export default function LiveMockExam({db,user,course,access}){
    setMessage('Exam questions hidden. Server closure needs a connection to complete.');
   }
  };
+ const presentation=useRef(null);
  const {leaveIntentionally}=useQuestionFullscreenGuard({
   active:attempt?.state==='in_progress',targetRef:ref,
+  requireFullscreen:presentation.current!=='focused',
   onUnexpectedExit:()=>{
    const id=attempt?.attemptId;
    void leaveAttempt(id);
    void leaveQuestionFullscreen(document);
-   setMessage('Fullscreen or tab access was lost. This Mock has been closed.');
+   setMessage('This Mock was closed because you left the exam view.');
   }
  });
  useEffect(()=>{
@@ -88,17 +91,18 @@ export default function LiveMockExam({db,user,course,access}){
   if(activeCall.current||busy||!access||!readiness?.ready||!accepted)return;
   activeCall.current=true;setBusy(true);setError('');setMessage('');
   try{
-   // User gesture starts native fullscreen BEFORE any backend request.
-   const fullscreen=await requestQuestionFullscreen(ref.current);
+   // Start the exam view from the click before any backend request.
+   const fullscreen=await startPracticePresentation(ref.current);
    if(!fullscreen.ok){setError(fullscreenStartError(fullscreen));return;}
+   presentation.current=fullscreen.mode;
    closing.current=false;
    const pendingKey=sessionKey+':pending';
    let requestId=localStorage.getItem(pendingKey);
    if(!requestId){requestId=crypto.randomUUID();localStorage.setItem(pendingKey,requestId);}
    const payload=await startOfficialMock(db,course.id,requestId);
-   if(!isFullscreenActive(document,ref.current)){
+   if(!isPracticePresentationActive(ref.current,presentation.current)){
     void leaveAttempt(payload.attemptId);
-    setMessage('Fullscreen exited. Mock questions remain closed.');
+    setMessage('The exam view was interrupted. Start a new attempt.');
     return;
    }
    localStorage.setItem(sessionKey,payload.attemptId);
@@ -110,12 +114,12 @@ export default function LiveMockExam({db,user,course,access}){
  };
  const save=async(index,flag)=>{
   const q=attempt?.questions?.[at];
-  if(!q||busy||activeCall.current||left<=0||!isFullscreenActive(document,ref.current))return;
+  if(!q||busy||activeCall.current||left<=0||!isPracticePresentationActive(ref.current,presentation.current))return;
   activeCall.current=true;setBusy(true);setError('');
   const selectedIndex=index,flagged=flag;
   try{
    await saveOfficialMock(db,attempt.attemptId,q.id,selectedIndex,flagged);
-   if(!closing.current&&isFullscreenActive(document,ref.current)){
+   if(!closing.current&&isPracticePresentationActive(ref.current,presentation.current)){
     setAttempt(old=>{
      if(!old||old.state!=='in_progress')return old;
      const questions=old.questions.map(item=>item.id===q.id
@@ -143,7 +147,8 @@ export default function LiveMockExam({db,user,course,access}){
  const active=attempt?.state==='in_progress';
  const q=active?attempt.questions?.[at]:null;
  const pending=access&&!readiness&&!readyError;
- return <section ref={ref} className="live-practice live-mock" aria-label="Official ASP Mock Exam">
+ return <section ref={ref} className="live-practice live-mock"
+  data-practice-presentation={attempt?.state==='in_progress'?presentation.current:undefined} aria-label="Official ASP Mock Exam">
   <header className="live-practice-top">
    <div><span className="live-eyebrow">P10 · OFFICIAL ASP MOCK EXAM</span>
     <h3><ShieldCheck size={21}/> ASP Mock Exam</h3>
@@ -168,7 +173,7 @@ export default function LiveMockExam({db,user,course,access}){
     <label className="live-mock-accept"><input type="checkbox" checked={accepted}
      onChange={e=>setAccepted(e.target.checked)}/>
      I understand the exam is 300 minutes, my answers are autosaved on the server,
-     and leaving fullscreen or hiding the tab closes this attempt.</label>
+     and leaving the exam view or hiding the tab closes this attempt.</label>
     <button type="button" className="live-primary" disabled={busy||!accepted||!readiness?.ready}
      onClick={begin}><PlayCircle size={18}/> {busy?'Starting…':'Start official 5-hour Mock'}</button>
     {message&&<p className="live-practice-note" role="status">{message}</p>}
@@ -182,7 +187,7 @@ export default function LiveMockExam({db,user,course,access}){
       getMockReadiness(db,course.id).then(setReadiness).catch(e=>setReadyError(errorMessage(e)));}}>
      <RefreshCw size={16}/> Return to exam setup
     </button>
-   </div>:<LiveProtectedContent kind="mock-exam-surface" identity={{id:user.id}}>
+   </div>:<LiveProtectedContent kind="mock-exam-surface" identity={{id:user.id}} requireFullscreen={presentation.current!=='focused'}>
     <div className="live-attempt-bar"><b>ASP Official Mock</b>
      <span><Clock3 size={16}/>{countdown(left)} remaining</span>
      <span>{attempt.answeredCount} / 200 answered</span>
