@@ -8,7 +8,7 @@ import './examQuestionNavigator.css';
  */
 export default function ExamQuestionNavigator({
  questions=[],total=questions.length,currentIndex=0,onJump,
- isFlagged=()=>false,getOutcome=()=>null,canVisit=()=>true,disabled=false,title='Questions'
+ isFlagged=()=>false,getOutcome=()=>null,showOutcomes=false,canVisit=()=>true,disabled=false,title='Questions'
 }){
  const [open,setOpen]=useState(false);
  const gridId=useId();
@@ -48,8 +48,8 @@ export default function ExamQuestionNavigator({
   </div>
   <div className="tc-exam-map-legend"><span><i className="current"/>Current</span>
    <span><i className="answered"/>Answered</span>
-   <span><i className="correct"/>Correct</span>
-   <span><i className="incorrect"/>Incorrect</span>
+   {showOutcomes&&<><span><i className="correct"/>Correct</span>
+   <span><i className="incorrect"/>Incorrect</span></>}
    <span><i className="flagged"/>Flagged</span></div>
  </aside>;
 }
