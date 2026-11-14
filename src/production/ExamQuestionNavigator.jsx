@@ -12,7 +12,10 @@ export default function ExamQuestionNavigator({
 }){
  const [open,setOpen]=useState(false);
  const gridId=useId();
- const slots=Array.from({length:total},(_,i)=>questions.find(q=>q?.position===i+1)||questions[i]||null);
+ const hasPositions=questions.some(q=>Number.isInteger(q?.position));
+ const slots=Array.from({length:total},(_,i)=>hasPositions
+  ?questions.find(q=>q?.position===i+1)||null
+  :questions[i]||null);
  const answered=slots.filter(q=>q&&q.selectedIndex!==null&&q.selectedIndex!==undefined).length;
  const flagged=slots.filter(q=>q&&isFlagged(q)).length;
  return <aside className="tc-exam-map" aria-label="Question navigator">
