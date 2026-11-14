@@ -254,3 +254,27 @@
    z-index:auto;
  }
 }
+
+/* P86: original scientific calculator stays visible inside native exam fullscreen,
+   rather than being portaled behind the browser's fullscreen top layer. */
+:is(.live-practice,.live-mock,.byo-session):fullscreen .tc-calc-launch,
+:is(.live-practice,.live-mock,.byo-session):-webkit-full-screen .tc-calc-launch{
+ bottom:clamp(15px,2.8vh,30px);
+ right:clamp(12px,2.5vw,24px);
+}
+:is(.live-practice,.live-mock,.byo-session):fullscreen .tc-calc-window,
+:is(.live-practice,.live-mock,.byo-session):-webkit-full-screen .tc-calc-window{
+ bottom:78px;
+}
+@media(max-width:700px){
+ :is(.live-practice,.live-mock,.byo-session):fullscreen .tc-calc-launch,
+ :is(.live-practice,.live-mock,.byo-session):-webkit-full-screen .tc-calc-launch{
+  bottom:max(13px,env(safe-area-inset-bottom,0px));
+  right:12px;
+ }
+ :is(.live-practice,.live-mock,.byo-session):fullscreen .tc-calc-window,
+ :is(.live-practice,.live-mock,.byo-session):-webkit-full-screen .tc-calc-window{
+  bottom:calc(65px + env(safe-area-inset-bottom,0px))!important;
+  max-height:min(67dvh,570px);
+ }
+}
