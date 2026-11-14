@@ -38,3 +38,15 @@
 
 /* P45 reference puts the sole start action inside the compact summary strip. */
 .byo-setup{gap:0}
+
+/* P90 — Practice Previous/Next and separate finish action. */
+.byo-question-nav{display:flex;align-items:center;gap:9px;justify-content:space-between}
+.byo-question-nav>span{font-weight:850;color:#40616c;font-size:12px}
+.byo-question-nav>.byo-finish-early{margin-left:auto}
+.byo-question-nav>.live-secondary,.byo-question-nav>.live-primary{min-height:44px}
+@media(max-width:650px){
+ .byo-question-nav{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:9px}
+ .byo-question-nav>span{grid-column:1/-1;grid-row:1;text-align:center}
+ .byo-question-nav>.byo-finish-early{margin-left:0;grid-column:1/-1}
+ .byo-question-nav>button{width:100%;min-width:0;justify-content:center}
+}
