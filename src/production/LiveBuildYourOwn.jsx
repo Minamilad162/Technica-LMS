@@ -90,9 +90,22 @@ export default function LiveBuildYourOwn({db,user,course,domains=[],access}){
  const totalRemaining=safeRemainingSeconds(attempt,clock);
  const perQuestionRemaining=remainingQuestionSeconds(attempt,clock);
  const answered=attempt?.questions?.filter(q=>q.selectedIndex!==null&&q.selectedIndex!==undefined).length||0;
- const marked=feedback[current?.id];
+ const marked=attempt?.feedbackTiming==='each'?feedback[current?.id]:null;
  const revealed=finished?current:marked;
  const wasAnswered=current?.selectedIndex!==null&&current?.selectedIndex!==undefined;
+ const deliveredPositions=attempt?.questions?.filter(q=>Number.isInteger(q?.position)&&typeof q.prompt==='string'&&q.prompt.length>0)
+  .map(q=>q.position).sort((a,b)=>a-b)||[];
+ const previousPosition=[...deliveredPositions].reverse().find(n=>n<displayPosition);
+ const nextVisitedPosition=deliveredPositions.find(n=>n>displayPosition);
+ const goPrevious=()=>{
+  if(finished){setReviewIndex(i=>Math.max(0,i-1));return;}
+  if(previousPosition!==undefined)setInspectedPosition(previousPosition);
+ };
+ const goNext=()=>{
+  if(finished){setReviewIndex(i=>Math.min((attempt?.questions?.length||1)-1,i+1));return;}
+  if(!isCurrentQuestion){setInspectedPosition(nextVisitedPosition===currentPosition||nextVisitedPosition===undefined?null:nextVisitedPosition);return;}
+  void advance();
+ };
  useEffect(()=>{
   if(!attempt||finished||(!attempt.deadlineAt&&!attempt.questionDeadlineAt))return;
   const tick=setInterval(()=>setClock(Date.now()),1000);
@@ -264,17 +277,24 @@ export default function LiveBuildYourOwn({db,user,course,domains=[],access}){
       onClick={()=>setReviewIndex(n=>Math.min(attempt.questions.length-1,n+1))}>Next <ChevronRight size={16}/></button>
     </nav>
     <button type="button" className="live-primary" onClick={restart}>Build another practice</button>
-   </div>:<div className="byo-navigation">
-    <div>
-     <button className="live-secondary" type="button" disabled={busy} onClick={()=>void finish(true)}>Finish early</button>
-     <button className="live-primary" type="button" disabled={busy||totalRemaining===0}
-      onClick={()=>isCurrentQuestion?void advance():setInspectedPosition(null)}>{!isCurrentQuestion?'Return to current':currentPosition>=attempt.questionCount?'Finish & review':
+   </div>:<nav className="byo-navigation byo-question-nav" aria-label="Practice question navigation">
+    <button className="live-secondary" type="button" disabled={busy||previousPosition===undefined}
+     onClick={goPrevious}><ChevronLeft size={16}/> Previous</button>
+    <span>{displayPosition} of {attempt.questionCount}</span>
+    <button className="live-primary" type="button" disabled={busy||totalRemaining===0}
+     onClick={goNext}>{!isCurrentQuestion?'Next':currentPosition>=attempt.questionCount?'Finish & review':
        wasAnswered?'Next question':'Skip question'} <ChevronRight size={16}/></button>
-    </div>
-   </div>}
+    <button className="live-secondary byo-finish-early" type="button" disabled={busy}
+     onClick={()=>void finish(true)}>Finish early</button>
+   </nav>}
    </div>
    <ExamQuestionNavigator questions={attempt.questions} total={attempt.questionCount}
     currentIndex={displayPosition-1} isFlagged={q=>!!flaggedQuestions[q.id]}
+    getOutcome={q=>{
+     const review=finished?q:attempt.feedbackTiming==='each'?feedback[q.id]:null;
+     if(typeof review?.correctIndex!=='number'||q.selectedIndex===null||q.selectedIndex===undefined)return null;
+     return q.selectedIndex===review.correctIndex?'correct':'incorrect';
+    }}
     canVisit={(q,i)=>finished||(i+1<=currentPosition&&typeof q.prompt==='string'&&q.prompt.length>0)}
     onJump={i=>finished?setReviewIndex(i):setInspectedPosition(i+1===currentPosition?null:i+1)}
     disabled={busy}/>
