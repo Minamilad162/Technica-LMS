@@ -13,7 +13,7 @@ export default function LiveLearnerPortal({initialScreen='courses'}){
  useEffect(()=>{
   let alive=true,db;
   try{db=getSupabaseClient({secureReviewEntry:true});}
-  catch{setState({loading:false,db:null,user:null,error:'We're unable to connect right now. Please try again.'});return;}
+  catch{setState({loading:false,db:null,user:null,error:"Unable to connect right now. Please try again."});return;}
   db.auth.getUser().then(({data,error})=>{
    if(!alive)return;
    if(error||!data?.user?.id)setState({loading:false,db:null,user:null,
