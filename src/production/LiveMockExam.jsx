@@ -225,7 +225,7 @@ export default function LiveMockExam({db,user,course,access}){
     <button type="button" className="live-primary live-mock-submit" disabled={busy}
      onClick={submit}><Send size={17}/> Review &amp; submit exam</button>
    </>}
-  {attempt?.state==='in_progress'&&<ScientificCalculator context="ASP Mock Exam" portalTarget={ref.current}
+  {attempt?.state==='in_progress'&&<ScientificCalculator context="ASP Mock Exam" inline
     currentQuestion={at+1} questionCount={attempt.questionCount}
     canPrevious={at>0} onPrevious={()=>setAt(i=>Math.max(0,i-1))}
     onNext={()=>setAt(i=>Math.min(attempt.questionCount-1,i+1))}/>}
