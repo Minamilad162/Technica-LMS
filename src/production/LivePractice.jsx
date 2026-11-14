@@ -240,7 +240,7 @@ export default function LivePractice({db,user,course,domains=[],access,defaultMo
      {remaining!==null&&<span><Clock3 size={16}/>{formatTime(remaining)} remaining</span>}
      {finished&&<strong>{attempt.scorePercent}% · {attempt.correctCount}/{attempt.questionCount} correct</strong>}
    </div>
-   <ScientificCalculator context="Practice" portalTarget={containerRef.current}
+   <ScientificCalculator context="Practice" inline
      currentQuestion={selected+1} questionCount={attempt.questionCount}
      canPrevious={selected>0} onPrevious={()=>setSelected(i=>Math.max(0,i-1))}
      onNext={()=>setSelected(i=>Math.min(attempt.questions.length-1,i+1))}/>
