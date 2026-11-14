@@ -1,5 +1,5 @@
 import React,{useEffect,useMemo,useRef,useState} from 'react';
-import {BookOpen,Check,ChevronLeft,ChevronRight,Clock3,Flag,LockKeyhole,PlayCircle,RefreshCw,ShieldCheck,Target,TriangleAlert} from 'lucide-react';
+import {Calculator,BookOpen,Check,ChevronLeft,ChevronRight,Clock3,Flag,LockKeyhole,PlayCircle,RefreshCw,ShieldCheck,Target,TriangleAlert} from 'lucide-react';
 import {abandonSecurePractice,answerSecurePractice,answerAdaptivePractice,finishSecurePractice,getAdaptiveReadiness,practiceSessionKey,safeRemainingSeconds,startSecurePractice,startAdaptivePractice,startAllCoursesPractice,getAllCoursesAdaptiveReadiness} from './practiceApi';
 import {requestQuestionFullscreen,isFullscreenActive,fullscreenStartError,leaveQuestionFullscreen} from '../lib/questionFullscreen';
 import {useQuestionFullscreenGuard} from '../lib/useQuestionFullscreenGuard';
@@ -238,6 +238,9 @@ export default function LivePractice({db,user,course,domains=[],access,defaultMo
    <div className="live-attempt-bar"><b>{finished?'Review your result':(attempt.mode==='quick10'?'Quick 10':attempt.mode==='timed25'?'Timed Quiz':attempt.mode==='levelup'?'Level Up · Adaptive':'Custom Practice')}</b>
      <span><Target size={16}/>{answered} / {attempt.questionCount} answered</span>
      {remaining!==null&&<span><Clock3 size={16}/>{formatTime(remaining)} remaining</span>}
+    <button type="button" className="tc-exam-calc-trigger"
+     onClick={()=>window.dispatchEvent(new Event('technica:calculator-open'))}
+     aria-label="Open floating scientific calculator"><Calculator size={17}/> Calculator</button>
      {finished&&<strong>{attempt.scorePercent}% · {attempt.correctCount}/{attempt.questionCount} correct</strong>}
    </div>
    <ScientificCalculator context="Practice" inline
