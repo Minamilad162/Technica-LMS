@@ -1,5 +1,5 @@
 import React,{useEffect,useMemo,useRef,useState} from 'react';
-import {AlertTriangle,ArrowLeft,ArrowRight,CheckCircle2,ChevronDown,Clock3,Flag,LayoutGrid,LockKeyhole,PlayCircle,Send,ShieldCheck} from 'lucide-react';
+import {Calculator,AlertTriangle,ArrowLeft,ArrowRight,CheckCircle2,ChevronDown,Clock3,Flag,LayoutGrid,LockKeyhole,PlayCircle,Send,ShieldCheck} from 'lucide-react';
 import {abandonSelectedMock,getSelectedMockReadiness,getSelectedMock,selectedMockSecondsLeft,
  saveSelectedMock,startSelectedMock,submitSelectedMock} from './selectedMockApi.js';
 import {requestQuestionFullscreen,isFullscreenActive,fullscreenStartError,leaveQuestionFullscreen} from '../lib/questionFullscreen';
@@ -231,6 +231,9 @@ export default function LiveSelectedMockExam({db,user,course,access}){
     <div className="live-attempt-bar"><b>Mock Exam</b>
      <span><Clock3 size={16}/>{countdown(left)} remaining</span>
      <span>{attempt.answeredCount} / {attempt.questionCount} answered</span>
+    <button type="button" className="tc-exam-calc-trigger"
+     onClick={()=>window.dispatchEvent(new Event('technica:calculator-open'))}
+     aria-label="Open floating scientific calculator"><Calculator size={17}/> Calculator</button>
      <span>{attempt.flaggedCount} flagged</span>
      {message&&<small role="status">{message}</small>}
     </div>
