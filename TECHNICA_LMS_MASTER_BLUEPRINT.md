@@ -2225,3 +2225,14 @@ Applied:
 - Added `npm run test:p86:exam-tools` source contract checks; updated P44 regression assertion to guard actual response feedback rather than discarded explainer copy.
 - **Release verification gate:** run `npm run build`, `npm run test:p86:exam-tools`, `npm run test:p44:build-your-own`, `npm run test:p39:exam-practice`, all calculator test scripts and browser checks at desktop + mobile widths, including selected Mock fullscreen. Native iPhone browser fullscreen limitation remains platform-defined; do not imply screenshot DRM.
 - **Permanent regression prevention:** UI copy cleanup must never delete or unmount functional controls; inspect live routes, preserve the last-approved component, and audit both server-backed and legacy paths before merging.
+
+
+## P87 — Floating Calculator visibility restoration (2026-11-14)
+
+- Root issue addressed: live exam pages were rendering the existing calculator via a portal whose target depended on the fullscreen host. The calculator's floating launcher could be layered behind UI/other floating widgets; the visible dock has now been explicitly positioned away from the bottom-right Chat assistant.
+- Added an `inline` render mode to the **same** `ScientificCalculator.jsx` component so it mounts directly inside the active fullscreen exam host without a portal. The legacy Quiz/Lesson Quiz default remains the original document-body portal; all advanced calculation and UI internals are unchanged.
+- Enabled `inline` in live Practice, Build Your Own, Course Mock and ASP Official Mock. Kept the P86 flags/navigator and original grading, answer-selection, adaptive/difficulty/timer/protected-surface paths intact.
+- Production-facing FLOAT decimal precision mode, FIX 0–9, DEG/RAD/GRAD, MathPrint, physical keypad, memory, drag, minimize/close and history remain available.
+- New exam-only CSS docks the launcher at the lower left, above exam content and away from the chatbot, and keeps a responsive calculator panel within the native fullscreen layer. Original Lesson/Quiz presentation is unaffected.
+- Updated `test:p86:exam-tools` source guards to assert inline mounting, FLOAT precision and visible exam dock.
+- **Still required before production acceptance**: actual Vite build and regression tests, desktop/Android/iPad fullscreen interaction tests, and screenshot-based QA. No browser attached to this session and no live deployment verification. Native iPhone fullscreen constraints remain unchanged.
