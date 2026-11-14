@@ -1,6 +1,8 @@
 import React,{useEffect,useMemo,useRef,useState} from 'react';
 import {ArrowRight,Camera,Check,ChevronLeft,ChevronRight,Clock3,Eye,Flag,LockKeyhole,PlayCircle,ShieldCheck,Target,TriangleAlert} from 'lucide-react';
 import BuildYourOwnSettings from './BuildYourOwnSettings.jsx';
+import ScientificCalculator from '../components/ScientificCalculator.jsx';
+import ExamQuestionNavigator from './ExamQuestionNavigator.jsx';
 import {DEFAULT_BUILD_YOUR_OWN,prepareBuildYourOwn,remainingQuestionSeconds} from './buildYourOwnConfig.js';
 import {abandonSecurePractice,answerConfiguredPractice,finishSecurePractice,
  nextConfiguredPractice,practiceSessionKey,safeRemainingSeconds,startConfiguredPractice,startAllCoursesConfiguredPractice} from './practiceApi.js';
@@ -21,6 +23,7 @@ export default function LiveBuildYourOwn({db,user,course,domains=[],access}){
  const [settings,setSettings]=useState(()=>({...DEFAULT_BUILD_YOUR_OWN}));
  const [attempt,setAttempt]=useState(null),[feedback,setFeedback]=useState({});
  const [reviewIndex,setReviewIndex]=useState(0),[busy,setBusy]=useState(false);
+ const [inspectedPosition,setInspectedPosition]=useState(null),[flaggedQuestions,setFlaggedQuestions]=useState({});
  const [error,setError]=useState(''),[notice,setNotice]=useState(''),[clock,setClock]=useState(Date.now());
  const processing=useRef(false),closing=useRef(false),rootRef=useRef(null);
  const streamRef=useRef(null),videoRef=useRef(null),attemptRef=useRef(null);
@@ -35,7 +38,7 @@ export default function LiveBuildYourOwn({db,user,course,domains=[],access}){
   if(closing.current)return;
   closing.current=true;
   const target=id||attemptRef.current?.attemptId;
-  setAttempt(null);attemptRef.current=null;setFeedback({});setReviewIndex(0);
+  setAttempt(null);attemptRef.current=null;setFeedback({});setReviewIndex(0);setInspectedPosition(null);setFlaggedQuestions({});
   stopCamera();
   localStorage.removeItem(storageKey);localStorage.removeItem(storageKey+':pending');
   if(!target)return;
@@ -80,8 +83,10 @@ export default function LiveBuildYourOwn({db,user,course,domains=[],access}){
  },[attempt?.attemptId,attempt?.state]);
  const finished=!!attempt&&attempt.state!=='in_progress';
  const currentPosition=attempt?.currentPosition||1;
+ const displayPosition=finished?reviewIndex+1:(inspectedPosition||currentPosition);
+ const isCurrentQuestion=finished||displayPosition===currentPosition;
  const current=finished?attempt?.questions?.[reviewIndex]||null:
-  attempt?.questions?.find(q=>q.position===currentPosition)||null;
+  attempt?.questions?.find(q=>q.position===displayPosition)||null;
  const totalRemaining=safeRemainingSeconds(attempt,clock);
  const perQuestionRemaining=remainingQuestionSeconds(attempt,clock);
  const answered=attempt?.questions?.filter(q=>q.selectedIndex!==null&&q.selectedIndex!==undefined).length||0;
@@ -120,7 +125,7 @@ export default function LiveBuildYourOwn({db,user,course,domains=[],access}){
    localStorage.setItem(storageKey,JSON.stringify({attemptId:next.attemptId}));
    localStorage.removeItem(storageKey+':pending');
    const fresh={...next,observedAtEpoch:Date.now()};
-   attemptRef.current=fresh;setAttempt(fresh);setReviewIndex(0);setFeedback({});
+   attemptRef.current=fresh;setAttempt(fresh);setReviewIndex(0);setInspectedPosition(null);setFlaggedQuestions({});setFeedback({});
   }catch(e){
    setError(message(e));stopCamera();void leaveQuestionFullscreen(document);
   }finally{processing.current=false;setBusy(false);}
@@ -142,7 +147,7 @@ export default function LiveBuildYourOwn({db,user,course,domains=[],access}){
   finally{processing.current=false;setBusy(false);}
  };
  const answer=async(index)=>{
-  if(!attempt||finished||!current||busy||processing.current||wasAnswered||
+  if(!attempt||finished||!current||!isCurrentQuestion||busy||processing.current||wasAnswered||
    totalRemaining===0||perQuestionRemaining===0)return;
   processing.current=true;setBusy(true);setError('');
   try{
@@ -162,7 +167,7 @@ export default function LiveBuildYourOwn({db,user,course,domains=[],access}){
    const result=await nextConfiguredPractice(db,attempt.attemptId);
    if(closing.current||!isFullscreenActive(document,rootRef.current))return;
    const next={...result,observedAtEpoch:Date.now()};
-   attemptRef.current=next;setAttempt(next);
+   attemptRef.current=next;setAttempt(next);setInspectedPosition(null);
    if(next.state!=='in_progress'){
     stopCamera();setReviewIndex(0);
     localStorage.removeItem(storageKey);localStorage.removeItem(storageKey+':pending');
@@ -180,7 +185,7 @@ export default function LiveBuildYourOwn({db,user,course,domains=[],access}){
   stopCamera();
   void leaveIntentionally();
   closing.current=false;attemptRef.current=null;setAttempt(null);
-  setFeedback({});setReviewIndex(0);setError('');setNotice('');
+  setFeedback({});setReviewIndex(0);setInspectedPosition(null);setFlaggedQuestions({});setError('');setNotice('');
   localStorage.removeItem(storageKey);localStorage.removeItem(storageKey+':pending');
  };
  return <section ref={rootRef} className="byo-session" aria-label="Build Your Own secured Practice">
@@ -212,16 +217,19 @@ export default function LiveBuildYourOwn({db,user,course,domains=[],access}){
     <Camera size={15}/><span>Local camera preview · not recorded</span>
     <video ref={videoRef} autoPlay muted playsInline aria-label="Your optional camera preview"/>
    </div>}
+   <ScientificCalculator context="Build Your Own Practice" portalTarget={rootRef.current}
+    currentQuestion={displayPosition} questionCount={attempt.questionCount}/>
+   <div className="tc-exam-workbench"><div className="tc-exam-workbench-main">
    {current&&<LiveProtectedContent as="div" kind="exam-question"
     className="live-question byo-question" identity={{id:user.id}}>
-    <span className="live-question-label">QUESTION {finished?reviewIndex+1:currentPosition} OF {attempt.questionCount}</span>
+    <span className="live-question-label">QUESTION {displayPosition} OF {attempt.questionCount}</span>
     <h4>{current.prompt}</h4>
     <div className="live-answer-list">{current.options.map((option,index)=>{
      const chosen=current.selectedIndex===index;
      const correct=typeof revealed?.correctIndex==='number'&&revealed.correctIndex===index;
      const incorrect=chosen&&typeof revealed?.correctIndex==='number'&&!correct;
      return <button type="button" key={index}
-      disabled={finished||busy||wasAnswered||totalRemaining===0||perQuestionRemaining===0}
+      disabled={finished||busy||!isCurrentQuestion||wasAnswered||totalRemaining===0||perQuestionRemaining===0}
       onClick={()=>void answer(index)}
       className={'live-answer '+(chosen?'chosen ':'')+(correct?'correct ':'')+(incorrect?'incorrect':'')}>
       <b>{String.fromCharCode(65+index)}</b><span>{String(option)}</span>{correct&&<Check size={17}/>}
@@ -233,6 +241,13 @@ export default function LiveBuildYourOwn({db,user,course,domains=[],access}){
       <p>{revealed.explanation||'No explanation available for this question.'}</p>
      </div>}
    </LiveProtectedContent>}
+   {current&&!finished&&<div className="tc-exam-question-tools">
+    <button type="button" className={"tc-exam-flag "+(flaggedQuestions[current.id]?"is-flagged":"")}
+     aria-pressed={!!flaggedQuestions[current.id]}
+     onClick={()=>setFlaggedQuestions(flags=>({...flags,[current.id]:!flags[current.id]}))}>
+     <Flag size={17}/>{flaggedQuestions[current.id]?"Flagged for review":"Flag for review"}
+    </button>
+   </div>}
    {finished?<div className="byo-finish-area">
     <div className="byo-result">
      <h3>Your practice results</h3>
@@ -250,10 +265,17 @@ export default function LiveBuildYourOwn({db,user,course,domains=[],access}){
     <div>
      <button className="live-secondary" type="button" disabled={busy} onClick={()=>void finish(true)}>Finish early</button>
      <button className="live-primary" type="button" disabled={busy||totalRemaining===0}
-      onClick={()=>void advance()}>{currentPosition>=attempt.questionCount?'Finish & review':
+      onClick={()=>isCurrentQuestion?void advance():setInspectedPosition(null)}>{!isCurrentQuestion?'Return to current':currentPosition>=attempt.questionCount?'Finish & review':
        wasAnswered?'Next question':'Skip question'} <ChevronRight size={16}/></button>
     </div>
    </div>}
+   </div>
+   <ExamQuestionNavigator questions={attempt.questions} total={attempt.questionCount}
+    currentIndex={displayPosition-1} isFlagged={q=>!!flaggedQuestions[q.id]}
+    canVisit={(q,i)=>finished||(i+1<=currentPosition&&typeof q.prompt==='string'&&q.prompt.length>0)}
+    onJump={i=>finished?setReviewIndex(i):setInspectedPosition(i+1===currentPosition?null:i+1)}
+    disabled={busy}/>
+   </div>
   </>}
   {error&&<p className="live-error" role="alert"><TriangleAlert size={17}/>{error}</p>}
   {notice&&<p className="live-notice" role="status">{notice}</p>}
