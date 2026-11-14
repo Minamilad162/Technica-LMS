@@ -278,3 +278,35 @@
   max-height:min(67dvh,570px);
  }
 }
+
+
+/* P87: float above the exam surface, away from the bottom-right help/chat bubble.
+   This applies only to live exam hosts; classic lesson/Quiz calculator is unchanged. */
+:is(.live-practice,.live-mock,.byo-session)>.tc-calc-launch{
+ position:fixed!important;
+ left:clamp(12px,2vw,24px)!important;
+ right:auto!important;
+ bottom:clamp(16px,3vh,28px)!important;
+ z-index:2147483000!important;
+ visibility:visible;
+ opacity:1;
+ pointer-events:auto;
+}
+:is(.live-practice,.live-mock,.byo-session)>.tc-calc-window{
+ position:fixed!important;
+ left:clamp(12px,2vw,24px);
+ right:auto!important;
+ bottom:83px;
+ z-index:2147482999!important;
+ visibility:visible;
+}
+@media(max-width:700px){
+ :is(.live-practice,.live-mock,.byo-session)>.tc-calc-launch{
+  left:12px!important;
+  bottom:max(16px,env(safe-area-inset-bottom,0px))!important;
+  min-height:46px;
+ }
+ :is(.live-practice,.live-mock,.byo-session)>.tc-calc-window{
+  bottom:calc(72px + env(safe-area-inset-bottom,0px))!important;
+ }
+}
