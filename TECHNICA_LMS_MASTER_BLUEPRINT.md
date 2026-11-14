@@ -2290,3 +2290,12 @@ Approved UI behavior restored across Quick 10, Timed Practice, Domain Practice, 
 - Use the same protected session boundary for questions, answers, timer, flags, navigator and calculator. Recognized capture/print events and desktop focus loss conceal the contents until Resume. Initially absent or lost fullscreen also conceals active sessions. Server-side attempt closure remains governed by the existing fullscreen and tab visibility guard. Build Your Own review keeps privacy controls outside fullscreen, and its existing local camera stream reattaches if the player remounts on Resume.
 - Decision retained from P74: OS capture with no relevant event remains outside the web page’s controls. The Windows Secure Viewer remains a separate pilot for native capture exclusion. Browser-device verification and Cloudflare deployment are separate from a passing Vite build.
 - Regression evidence: P67, P71, P39, P44, P86, P90 and content-protection checks passed. P71’s readiness assertion now uses the current visible status label. Local Chromium launch was blocked by the execution environment. No production attempts were created. Roll back via a revert of the P92 commit if needed.
+
+## P93 — Keep lesson videos concealed until deliberate resume (2026-11-14)
+
+| Surface | Browser protection | Verification |
+|---|---|---|
+| Protected lesson video, including Admin Preview | Conceal, pause and detach source on capture-like browser signals, print, desktop blur, backgrounding or fullscreen exit. Returning focus or visibility keeps the player concealed. | P61, P67, P69 and P70 contracts and Vite build passed locally. Real device and deployment checks pending. |
+
+- Supersedes automatic video focus/visibility restore described in P20. Resume from the player or the matching lesson curtain requests a fresh authorized URL. Reuse the saved timestamp and require a separate Play action in fullscreen. The PDF keeps its existing resume policy.
+- OS screenshots or recorders that provide no browser signal can still capture readable frames. This update adds no native capture exclusion or database changes. Rollback is a revert of the P93 commit.

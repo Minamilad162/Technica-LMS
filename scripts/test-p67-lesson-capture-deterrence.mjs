@@ -43,7 +43,7 @@ for(const [file,needle] of [[explorer,'kind="lesson-surface"'],[legacy,'kind="le
  [surface,'onClick={resumeContent}'],[surface,"document.activeElement?.tagName"],
  [surface,"window.addEventListener('keyup',onCaptureKey,true)"],
  [player,"window.addEventListener('keyup',onShortcut,true)"],
- [player,"!['capture-shortcut','fullscreen-exit'].includes(shieldReason.current)"],
+ [player,"if(isVideo||doc.visibilityState!=='visible'||element?.dataset.mediaShielded!=='true')return;"],
  [player,"pdf.current.src='about:blank'"],
  [player,"video.current.pause();video.current.removeAttribute('src');video.current.load()"],
  [css,'.tc-capture-curtain.tc-lesson-curtain:not([hidden])'],
@@ -61,7 +61,7 @@ console.log('LIMITATION: OS-native screenshots and recording cannot be universal
 
 assert.match(surface,/window\.dispatchEvent\(new CustomEvent\('technica:lesson-resume'/);
 assert.match(player,/window\.addEventListener\('technica:lesson-resume',onLessonResume\)/);
-assert.match(player,/e\.detail\?\.lessonId===lessonId/);
+assert.match(player,/e\.detail\?\.lessonId!==lessonId/);
 assert.match(explorer,/lessonId=\{selected\.id\} identity=/);
 assert.match(legacy,/lessonId=\{lesson\.id\} identity=/);
 

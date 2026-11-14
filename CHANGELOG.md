@@ -1,3 +1,6 @@
+## 2026-11-14 — P93 deliberate resume for protected lesson video
+- Keep protected video concealed when focus or visibility returns. Resume restores the authorized player at its saved position and playback requires an explicit fullscreen Play action.
+
 ## 2026-11-14 — P92 consistent privacy curtain in Mock Exam and Practice
 - Apply full-session blackout to Course Mock, ASP Mock, Practice and Build Your Own on supported browser signals. Resume requires a deliberate action and active attempts require fullscreen.
 - Verify with the production build and focused source checks. Native screenshot and deployed-device verification remain pending.

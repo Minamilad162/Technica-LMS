@@ -104,14 +104,15 @@ export default function ProtectedLessonViewer({db,lessonId,block,viewerId='',onW
  useEffect(()=>{
   mounted.current=true;
   const doc=document,element=shell.current;
+  const onFocus=()=>{
+   // Video remains concealed until the learner explicitly chooses Resume.
+   if(isVideo||doc.visibilityState!=='visible'||element?.dataset.mediaShielded!=='true')return;
+   if(shieldReason.current!=='capture-shortcut')resume();
+  };
   const onVisibility=()=>{
    if(doc.visibilityState==='hidden')conceal('tab-hidden');
-   else if(doc.visibilityState==='visible'&&doc.hasFocus()&&
-     element?.dataset.mediaShielded==='true'&&
-     !['capture-shortcut','fullscreen-exit'].includes(shieldReason.current))resume();
+   else if(doc.hasFocus())onFocus();
   };
-  const onFocus=()=>{if(doc.visibilityState==='visible'&&element?.dataset.mediaShielded==='true'&&
-   !['capture-shortcut','fullscreen-exit'].includes(shieldReason.current))resume();};
   const onBlur=()=>{
    if(shouldShieldMediaOnBlur({mobile:isMobileMediaBrowser(window),
     activeTag:String(doc.activeElement?.tagName||'').toLowerCase(),
@@ -126,8 +127,8 @@ export default function ProtectedLessonViewer({db,lessonId,block,viewerId='',onW
   const onPrint=()=>conceal('print-request');
   const onPageHide=()=>conceal('tab-hidden');
   const onLessonResume=e=>{
-   if(e.detail?.lessonId===lessonId&&shieldReason.current==='capture-shortcut'&&
-    element?.dataset.mediaShielded==='true')resume();
+   if(e.detail?.lessonId!==lessonId||element?.dataset.mediaShielded!=='true')return;
+   if(isVideo||shieldReason.current==='capture-shortcut')resume();
   };
   const onFullscreen=()=>{
    const entered=doc.fullscreenElement===element;
@@ -304,7 +305,7 @@ export default function ProtectedLessonViewer({db,lessonId,block,viewerId='',onW
     <span className="slm-screen-title">{PROTECTED_MEDIA_NOTICE}</span>
     <p>{privacyMessage[reason]||'Protected content is concealed.'}</p>
     <button type="button" className="slm-shield-resume" onClick={resume}>
-     <RotateCcw size={15}/>{reason==='fullscreen-exit'?'Return to lesson':'Resume lesson'}</button>
+     <RotateCcw size={15}/>{reason==='fullscreen-exit'?'Return to lesson':isVideo?'Resume video':'Resume lesson'}</button>
    </div>
   </div>
  </section>;
