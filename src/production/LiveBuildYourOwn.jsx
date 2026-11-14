@@ -1,5 +1,5 @@
 import React,{useEffect,useMemo,useRef,useState} from 'react';
-import {ArrowRight,Camera,Check,ChevronLeft,ChevronRight,Clock3,Eye,Flag,LockKeyhole,PlayCircle,ShieldCheck,Target,TriangleAlert} from 'lucide-react';
+import {Calculator,ArrowRight,Camera,Check,ChevronLeft,ChevronRight,Clock3,Eye,Flag,LockKeyhole,PlayCircle,ShieldCheck,Target,TriangleAlert} from 'lucide-react';
 import BuildYourOwnSettings from './BuildYourOwnSettings.jsx';
 import ScientificCalculator from '../components/ScientificCalculator.jsx';
 import ExamQuestionNavigator from './ExamQuestionNavigator.jsx';
@@ -200,6 +200,9 @@ export default function LiveBuildYourOwn({db,user,course,domains=[],access}){
      <strong>{finished?'Practice complete':'Question '+currentPosition+' of '+attempt.questionCount}</strong>
      <small>{answered}/{attempt.questionCount} answered</small>
     </div>
+    <button type="button" className="tc-exam-calc-trigger"
+     onClick={()=>window.dispatchEvent(new Event('technica:calculator-open'))}
+     aria-label="Open floating scientific calculator"><Calculator size={17}/> Calculator</button>
     <div className="byo-clocks">
      {totalRemaining!==null&&!finished&&<span><Clock3 size={17}/><b>{formatTime(totalRemaining)}</b><small>Test remaining</small></span>}
      {perQuestionRemaining!==null&&!finished&&<span className={perQuestionRemaining<=10?'urgent':''}>
