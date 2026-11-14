@@ -2255,3 +2255,17 @@ Applied:
 - Failed Cloudflare builds explain why the deployed Practice/Mock UI remained stale (old Supabase explanation, old number strip and no calculator toolbar). Do not assume latest GitHub code is live without a successful Workers build/deployment.
 - Verification gate: inspect newest Cloudflare production build for the fix commit or newer, verify it succeeds, then exercise Practice and Mock fullscreen Calculator, Flag and Navigator. Full Vite build was not available in this GitHub-only environment; do not claim one passed.
 - Release process rule: every copy/JSX edit must pass `npm run build` before relying on Cloudflare auto deploy; preserve functional exam controls and run focused P86 regression.
+
+
+## P90 — Practice navigation and feedback-aware question map (2026-11-14)
+
+Approved UI behavior restored across Quick 10, Timed Practice, Domain Practice, Level Up and Build Your Own:
+- Keep **Previous / Next** available in the question workspace and **Flag for Review** on the current question, alongside the compact right-side question map (collapsible on mobile). Highlight Current question via a ring.
+- Question map precedence: **Flagged amber/yellow** (even when answered), then **server-confirmed Correct green**, **server-confirmed Incorrect red**, **answered without revealed grade neutral**, and unanswered neutral. Flags remain recognizable with the icon and accessibility label. A colored legend is shown only when authorized feedback is available or the session has finished.
+- **Quick 10** uses immediate feedback returned from P4 to color the map. **Timed/Domain** and **Level Up** show no correct/incorrect colors until completion; the adaptive engine never exposes intermediate correct indices.
+- **Build Your Own (P44):** if `feedbackTiming='each'`, show green/red from the exact server response per question; if `feedbackTiming='end'`, show no correctness color until finished and scored. The shared `practiceQuestionOutcome` helper explicitly enforces this timing; it never guesses the answer key.
+- **P44 navigation constraint:** the learner can visit previous **delivered** questions with Previous or the map and use Next to move toward the current question. Old delivered answers are read-only; at the active current question Next advances by the existing P44 server RPC. Unissued adaptive questions stay inaccessible. The existing per-question timers, camera preview, grading rules, and Question Bank selection are untouched.
+- Flag markers on Practice remain local to the current live attempt, with no schema change; Mock has its own persistent server flag logic and existing premium navigator.
+- CSS keeps accessible 44px targets and small-screen responsive navigation without removing the Floating Calculator, fullscreen guard, Mock exam features or prior premium styling.
+- Added `npm run test:p90:practice-review` regression suite (source checks plus behavior assertions for immediate/deferred feedback and final review).
+- **Release validation still pending:** execute build and P86/P90 checks, verify successful Cloudflare Workers deployment, and perform authenticated live fullscreen QA for Quick 10, P44 each/end, Level Up and Course Mock. No database writes or migrations involved.
