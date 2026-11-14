@@ -5,6 +5,8 @@ on:
     branches: [main]
     paths:
       - 'src/components/ProtectedContent.jsx'
+      - 'src/production/LiveProtectedContent.jsx'
+      - 'scripts/fixtures/live-session-protection.jsx'
       - 'src/lib/contentProtection.js'
       - 'src/contentProtection.css'
       - 'src/pages/QuizPage.jsx'
@@ -20,7 +22,7 @@ permissions:
 
 jobs:
   chromium-protection:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
