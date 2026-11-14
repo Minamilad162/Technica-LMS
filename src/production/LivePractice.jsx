@@ -5,6 +5,8 @@ import {requestQuestionFullscreen,isFullscreenActive,fullscreenStartError,leaveQ
 import {useQuestionFullscreenGuard} from '../lib/useQuestionFullscreenGuard';
 import LiveProtectedContent from './LiveProtectedContent';
 import LiveBuildYourOwn from './LiveBuildYourOwn.jsx';
+import ScientificCalculator from '../components/ScientificCalculator.jsx';
+import ExamQuestionNavigator from './ExamQuestionNavigator.jsx';
 import './livePractice.css';
 
 const PRESETS=[
@@ -25,6 +27,7 @@ const errorText=e=>e?.message||'Practice request failed';
 export default function LivePractice({db,user,course,domains=[],access,defaultMode='quick10'}) {
  const [mode,setMode]=useState(defaultMode),[count,setCount]=useState(10),[minutes,setMinutes]=useState(0),[domainId,setDomainId]=useState('');
  const [attempt,setAttempt]=useState(null),[selected,setSelected]=useState(0),[feedback,setFeedback]=useState({});
+ const [flaggedQuestions,setFlaggedQuestions]=useState({});
  const [busy,setBusy]=useState(false),[error,setError]=useState(''),[notice,setNotice]=useState(''),[clock,setClock]=useState(Date.now());
  const [readiness,setReadiness]=useState(null),[readinessBusy,setReadinessBusy]=useState(false),[readinessError,setReadinessError]=useState('');
  const processing=useRef(false);
@@ -35,7 +38,7 @@ export default function LivePractice({db,user,course,domains=[],access,defaultMo
   closingRef.current=true;
   setAttempt(null);
   setFeedback({});
-  setSelected(0);
+  setSelected(0);setFlaggedQuestions({});
   localStorage.removeItem(storageKey);
   localStorage.removeItem(storageKey+':pending');
   if(!id)return;
@@ -69,7 +72,7 @@ export default function LivePractice({db,user,course,domains=[],access,defaultMo
  const readyForCurrent=Boolean(readiness?.ready&&readiness.requestedCount===Number(count)&&readiness.requestedDomainId===(domainId||null));
 
  useEffect(()=>{
-  setAttempt(null);setSelected(0);setFeedback({});setError('');setNotice('');closingRef.current=false;
+  setAttempt(null);setSelected(0);setFeedback({});setFlaggedQuestions({});setError('');setNotice('');closingRef.current=false;
   if(!eligible)return;
   let saved;
   try{saved=JSON.parse(localStorage.getItem(storageKey)||'null');}catch{}
@@ -164,7 +167,7 @@ export default function LivePractice({db,user,course,domains=[],access,defaultMo
    }
    localStorage.setItem(storageKey,JSON.stringify({attemptId:next.attemptId}));
    localStorage.removeItem(pendingKey);
-   setAttempt({...next,observedAtEpoch:Date.now()});setSelected(0);setFeedback({});
+   setAttempt({...next,observedAtEpoch:Date.now()});setSelected(0);setFeedback({});setFlaggedQuestions({});
   }catch(e){setError(errorText(e));void leaveQuestionFullscreen(document);}
   finally{setBusy(false);processing.current=false;}
  };
@@ -199,7 +202,7 @@ export default function LivePractice({db,user,course,domains=[],access,defaultMo
   void leaveIntentionally();
   closingRef.current=true;
   localStorage.removeItem(storageKey);localStorage.removeItem(storageKey+':pending');
-  setAttempt(null);setSelected(0);setFeedback({});setError('');setNotice('');
+  setAttempt(null);setSelected(0);setFeedback({});setFlaggedQuestions({});setError('');setNotice('');
  };
  const answered=attempt?.questions?.filter(q=>q.selectedIndex!==null&&q.selectedIndex!==undefined).length||0;
  const revealed=finished?current:feedback[current?.id];
@@ -236,6 +239,11 @@ export default function LivePractice({db,user,course,domains=[],access,defaultMo
      {remaining!==null&&<span><Clock3 size={16}/>{formatTime(remaining)} remaining</span>}
      {finished&&<strong>{attempt.scorePercent}% · {attempt.correctCount}/{attempt.questionCount} correct</strong>}
    </div>
+   <ScientificCalculator context="Practice" portalTarget={containerRef.current}
+     currentQuestion={selected+1} questionCount={attempt.questionCount}
+     canPrevious={selected>0} onPrevious={()=>setSelected(i=>Math.max(0,i-1))}
+     onNext={()=>setSelected(i=>Math.min(attempt.questions.length-1,i+1))}/>
+   <div className="tc-exam-workbench"><div className="tc-exam-workbench-main">
    {current&&<LiveProtectedContent as="div" className="live-question" kind="exam-question" identity={{id:user.id}}>
      <div className="live-question-label">QUESTION {selected+1} OF {attempt.questionCount}</div>
      <h4>{current.prompt}</h4>
@@ -250,10 +258,19 @@ export default function LivePractice({db,user,course,domains=[],access,defaultMo
      })}</div>
      {typeof revealed?.correctIndex==='number'&&<div className="live-practice-feedback"><b>{current.selectedIndex===revealed.correctIndex?'Correct answer':'Answer review'}</b><p>{revealed.explanation||'No explanation provided.'}</p></div>}
    </LiveProtectedContent>}
+   {current&&!finished&&<div className="tc-exam-question-tools">
+    <button type="button" className={"tc-exam-flag "+(flaggedQuestions[current.id]?"is-flagged":"")}
+     aria-pressed={!!flaggedQuestions[current.id]}
+     onClick={()=>setFlaggedQuestions(flags=>({...flags,[current.id]:!flags[current.id]}))}>
+     <Flag size={17}/>{flaggedQuestions[current.id]?"Flagged for review":"Flag for review"}
+    </button></div>}
    <div className="live-question-nav">
      <button type="button" className="live-secondary" disabled={selected===0} onClick={()=>setSelected(v=>Math.max(0,v-1))}><ChevronLeft size={16}/> Previous</button>
-     <div className="live-dots">{attempt.questions.map((q,i)=><button type="button" key={q.id} aria-label={'Question '+(i+1)} className={(selected===i?'active ':'')+(q.selectedIndex!==null&&q.selectedIndex!==undefined?'answered':'')} onClick={()=>setSelected(i)}>{i+1}</button>)}</div>
      <button type="button" className="live-secondary" disabled={selected>=attempt.questions.length-1} onClick={()=>setSelected(v=>Math.min(attempt.questions.length-1,v+1))}>Next <ChevronRight size={16}/></button>
+   </div></div>
+   <ExamQuestionNavigator questions={attempt.questions} total={attempt.questionCount}
+    currentIndex={selected} isFlagged={q=>!!flaggedQuestions[q.id]}
+    onJump={setSelected} disabled={busy}/>
    </div>
    {finished?<button className="live-primary" onClick={startOver}>New practice session</button>:<button className="live-primary" type="button" disabled={busy||(attempt.mode==='levelup'&&answered<attempt.questionCount&&remaining!==0)} onClick={finish}>{attempt.mode==='levelup'&&answered<attempt.questionCount?'Answer all adaptive questions to finish':'Finish & calculate score'}</button>}
   </>}
