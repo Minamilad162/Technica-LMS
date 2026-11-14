@@ -2208,3 +2208,20 @@ Applied:
 - Keep signup enabled, 12-character password policy, secure role derivation from `lms_role_assignments`, and no Admin assignment for public signup. Password reset may still send email; that is distinct from signup confirmation.
 - Verify email/password signup with a disposable learner account on the real deployment, check new `auth.users` + `lms_profiles`, confirm learner-only role, initial navigation, reload and sign out. Never use a service-role key or modify `auth.users` from SQL to skip confirmation.
 - Pending: Supabase dashboard setting and live end-to-end test. No direct Auth configuration or production user data writes performed.
+
+
+## P86 — Restore the last-approved Calculator, Flag and Question Navigator (2026-11-14)
+
+**Regression reported:** production cleanup/design changes left the existing TI-30XS MultiView-inspired Scientific Calculator disconnected from live question engines and removed/inconsistently presented Flag for Review and the numbered Question Navigator outside one Mock path.
+
+**Restored without rolling back new UX/features:**
+- Reuse `src/components/ScientificCalculator.jsx` as the single calculator implementation, with the full accepted physical keypad, MathPrint, fractions/roots/powers, trig, memory, lists, statistics, graph-free function table, drag/minimize, and responsive mobile floating sheet. Added an optional `portalTarget` to keep the unchanged calculator inside the native fullscreen top layer; legacy Quiz/Lesson Quiz still use document.body. Load its CSS in both Vite app entrypoints.
+- Add an accessible, compact `ExamQuestionNavigator` with numbered cells, current/answered/flagged state and mobile collapse, right of questions on desktop.
+- Live Practice (Quick 10, Timed Quiz, Domain, Level Up and multi-course) now has the original calculator, visible per-question flags and a navigator. Flags are per in-progress client attempt only; P4/P8/P56 grading RPCs and adaptive delivery remain unchanged. Previously delivered adaptive questions can be inspected, not retroactively changed.
+- Build Your Own P44 retains all four time modes, difficulty configuration, feedback, optional camera and one-by-one adaptive server progression. Calculator/Flag/Navigator return; previously delivered items can be reviewed without violating P44's current-position-only answer rule. Pending/unissued items cannot be opened. Flags on these Practice paths are client-session UI markers, not persisted to new database columns.
+- Fixed Course Mock (P71): preserve the existing P76 right-sidebar 200-question navigator and server-persisted flag; restore fullscreen calculator.
+- Historical ASP Official Mock (P10): replace unwieldy bottom grid with same compact right-side map and restore fullscreen calculator. Fix a regression where flagging used `save(null,!q.flagged)` and accidentally cleared an existing answer; now it sends the existing selected index.
+- Neither 200/5-hour Mock rules, server deadlines, answer-key protection, approved question selection, advanced practice modes, nor premium control design were reverted. No migration/production data change.
+- Added `npm run test:p86:exam-tools` source contract checks; updated P44 regression assertion to guard actual response feedback rather than discarded explainer copy.
+- **Release verification gate:** run `npm run build`, `npm run test:p86:exam-tools`, `npm run test:p44:build-your-own`, `npm run test:p39:exam-practice`, all calculator test scripts and browser checks at desktop + mobile widths, including selected Mock fullscreen. Native iPhone browser fullscreen limitation remains platform-defined; do not imply screenshot DRM.
+- **Permanent regression prevention:** UI copy cleanup must never delete or unmount functional controls; inspect live routes, preserve the last-approved component, and audit both server-backed and legacy paths before merging.
