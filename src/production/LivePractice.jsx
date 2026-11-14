@@ -274,6 +274,13 @@ export default function LivePractice({db,user,course,domains=[],access,defaultMo
    </div></div>
    <ExamQuestionNavigator questions={attempt.questions} total={attempt.questionCount}
     currentIndex={selected} isFlagged={q=>!!flaggedQuestions[q.id]}
+    getOutcome={q=>{
+     // Results become available only when immediate server feedback exists
+     // or after final submission. Level Up never exposes interim grades.
+     const review=finished?q:attempt.mode==='quick10'?feedback[q.id]:null;
+     if(typeof review?.correctIndex!=='number'||q.selectedIndex===null||q.selectedIndex===undefined)return null;
+     return q.selectedIndex===review.correctIndex?'correct':'incorrect';
+    }}
     onJump={setSelected} disabled={busy}/>
    </div>
    {finished?<button className="live-primary" onClick={startOver}>New practice session</button>:<button className="live-primary" type="button" disabled={busy||(attempt.mode==='levelup'&&answered<attempt.questionCount&&remaining!==0)} onClick={finish}>{attempt.mode==='levelup'&&answered<attempt.questionCount?'Answer all adaptive questions to finish':'Finish & calculate score'}</button>}
