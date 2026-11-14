@@ -19,7 +19,7 @@ const mockApi=read('src/production/mockApi.js');
 for(const marker of ['CalculatorPhysicalKeypad','MathTemplateEditor','evaluateScientific',
  'exactScientific','oneVariableStats','twoVariableStats','makeFunctionTable',
  'freshVariables','makeListState','createPortal','portalTarget||document.body',
- 'tc-calc-window','tc-calc-minimized']){
+ 'tc-calc-window','tc-calc-minimized','inline?calculatorSurface']){
  assert.ok(calc.includes(marker),'Calculator regression: '+marker);
 }
 assert.match(calc,/import '\.\.\/scientificCalculator\.css'/);
@@ -34,7 +34,7 @@ for(const [name,src,ref] of [
  ['Course Mock',selected,'ref.current'],
  ['ASP Mock',official,'ref.current']]){
  assert.ok(src.includes('ScientificCalculator'),name+' lost the calculator');
- assert.ok(src.includes('portalTarget={'+ref+'}'),name+' portal must stay in fullscreen layer');
+ assert.match(src,/<ScientificCalculator[^>]*inline/,name+' calculator must mount in exam fullscreen DOM');
  assert.ok(src.includes('useQuestionFullscreenGuard'),name+' fullscreen guard was lost');
 }
 for(const [name,src] of [['Practice',practice],['Build Your Own',custom],['ASP Mock',official]]){
