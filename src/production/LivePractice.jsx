@@ -275,6 +275,7 @@ export default function LivePractice({db,user,course,domains=[],access,defaultMo
    </div></div>
    <ExamQuestionNavigator questions={attempt.questions} total={attempt.questionCount}
     currentIndex={selected} isFlagged={q=>!!flaggedQuestions[q.id]}
+    showOutcomes={finished||attempt.mode==='quick10'}
     getOutcome={q=>practiceQuestionOutcome({question:q,feedback:feedback[q.id],
      feedbackTiming:attempt.mode==='quick10'?'each':'end',finished})}
     onJump={setSelected} disabled={busy}/>
