@@ -64,3 +64,39 @@
 }
 .tc-exam-map-grid button:focus-visible,
 .tc-exam-map-toggle:focus-visible{outline:3px solid #0ab99a;outline-offset:2px}
+
+/* P90 — question review states. Flag is intentionally higher priority than
+   revealed correctness; the current state is an inset ring, not a recolor. */
+.tc-exam-map-grid button.correct,
+.tc-exam-map-grid button.correct:hover:not(:disabled){
+ background:#e3f7ea;border-color:#51b88a;color:#146747;
+}
+.tc-exam-map-grid button.incorrect,
+.tc-exam-map-grid button.incorrect:hover:not(:disabled){
+ background:#ffebeb;border-color:#de8b8f;color:#a02d39;
+}
+.tc-exam-map-grid button.flagged,
+.tc-exam-map-grid button.flagged:hover:not(:disabled){
+ background:#fff2cf;border-color:#e8b45e;color:#835416;
+ box-shadow:inset 0 0 0 1px #e8b45e38;
+}
+.tc-exam-map-grid button.current{
+ outline:3px solid #0b8178;outline-offset:1px;
+ box-shadow:0 3px 10px #118a7e22;
+}
+.tc-exam-map-grid button.current.correct{background:#e3f7ea;color:#146747}
+.tc-exam-map-grid button.current.incorrect{background:#ffebeb;color:#a02d39}
+.tc-exam-map-grid button.current.flagged{background:#fff2cf;color:#835416}
+.tc-exam-map-legend .correct{background:#d2f4dd;border-color:#51b88a}
+.tc-exam-map-legend .incorrect{background:#ffd4d6;border-color:#de8b8f}
+.tc-exam-map-legend .flagged{background:#ffdf99;border-color:#e2ad4f}
+.tc-exam-workbench-main .live-question-nav{
+ display:flex;gap:10px;justify-content:space-between;align-items:center;
+}
+.tc-exam-workbench-main .live-question-nav>button{
+ min-width:126px;min-height:45px;
+}
+@media(max-width:600px){
+ .tc-exam-workbench-main .live-question-nav{display:flex;flex-wrap:wrap;gap:8px}
+ .tc-exam-workbench-main .live-question-nav>button{flex:1 1 120px;min-width:0}
+}
