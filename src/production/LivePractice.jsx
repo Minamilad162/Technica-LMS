@@ -175,7 +175,8 @@ export default function LivePractice({db,user,course,domains=[],access,defaultMo
  const answer=async(optionIndex)=>{
   if(!current||finished||busy||processing.current||remaining===0)return;
   if(attempt.mode==='quick10'&&feedback[current.id])return;
-  if(attempt.mode==='levelup'&&current.selectedIndex!==null&&current.selectedIndex!==undefined)return;
+  if(attempt.mode==='levelup'&&(selected!==attempt.questions.length-1||
+    current.selectedIndex!==null&&current.selectedIndex!==undefined))return;
   processing.current=true;setBusy(true);setError('');
   try{
    const reply=attempt.mode==='levelup'
@@ -251,7 +252,7 @@ export default function LivePractice({db,user,course,domains=[],access,defaultMo
        const chosen=current.selectedIndex===index;
        const correct=typeof revealed?.correctIndex==='number'&&revealed.correctIndex===index;
        const incorrect=chosen&&typeof revealed?.correctIndex==='number'&&!correct;
-       return <button type="button" key={index} disabled={finished||busy||remaining===0||(attempt.mode==='quick10'&&!!feedback[current.id])||(attempt.mode==='levelup'&&current.selectedIndex!==null&&current.selectedIndex!==undefined)}
+       return <button type="button" key={index} disabled={finished||busy||remaining===0||(attempt.mode==='quick10'&&!!feedback[current.id])||(attempt.mode==='levelup'&&(selected!==attempt.questions.length-1||current.selectedIndex!==null&&current.selectedIndex!==undefined))}
          onClick={()=>answer(index)} className={'live-answer '+(chosen?'chosen ':'')+(correct?'correct ':'')+(incorrect?'incorrect':'')}>
          <b>{String.fromCharCode(65+index)}</b><span>{String(option)}</span>{correct&&<Check size={17}/>}
        </button>;
