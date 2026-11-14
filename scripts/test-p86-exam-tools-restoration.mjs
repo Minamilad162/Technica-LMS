@@ -70,6 +70,16 @@ assert.ok(custom.includes('setInspectedPosition(null)'));
 for(const rpc of ['startConfiguredPractice','answerConfiguredPractice','nextConfiguredPractice','finishSecurePractice']){
  assert.ok(custom.includes(rpc+'(db,'),'P44 server route was lost: '+rpc);
 }
+// Fullscreen must expose a second, in-flow Calculator action. This is not
+// a second math engine: it opens the same floating calculator instance.
+for(const [name,src] of [['Practice',practice],['Build Your Own',custom],
+ ['Course Mock',selected],['ASP Mock',official]]){
+ assert.ok(src.includes('tc-exam-calc-trigger'),name+' lost visible fullscreen Calculator action');
+ assert.ok(src.includes("technica:calculator-open"),name+' trigger disconnected');
+}
+assert.ok(calc.includes("window.addEventListener('technica:calculator-open',openFromExam)"));
+assert.ok(calc.includes("setOpen(true);setMinimized(false);setCoords(null)"));
+assert.match(read('src/production/livePractice.css'),/\.tc-exam-calc-trigger\{/);
 assert.ok(practiceApi.includes("'lms_p44_next'"));
 assert.ok(selectedApi.includes('v.questionCount!==200'));
 assert.ok(mockApi.includes('200'));
