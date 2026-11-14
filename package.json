@@ -108,7 +108,8 @@
     "test:p71": "node scripts/test-p71-course-mock-bank.mjs",
     "test:p77": "node scripts/test-p77-auto-practice-import.mjs",
     "test:p83:production-ui": "node scripts/test-p83-production-ui.mjs",
-    "test:p86:exam-tools": "node scripts/test-p86-exam-tools-restoration.mjs"
+    "test:p86:exam-tools": "node scripts/test-p86-exam-tools-restoration.mjs",
+    "test:p90:practice-review": "node scripts/test-p90-practice-review.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.58.0",
