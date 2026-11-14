@@ -2236,3 +2236,13 @@ Applied:
 - New exam-only CSS docks the launcher at the lower left, above exam content and away from the chatbot, and keeps a responsive calculator panel within the native fullscreen layer. Original Lesson/Quiz presentation is unaffected.
 - Updated `test:p86:exam-tools` source guards to assert inline mounting, FLOAT precision and visible exam dock.
 - **Still required before production acceptance**: actual Vite build and regression tests, desktop/Android/iPad fullscreen interaction tests, and screenshot-based QA. No browser attached to this session and no live deployment verification. Native iPhone fullscreen constraints remain unchanged.
+
+
+## P88 — Fullscreen Floating Calculator access fallback (2026-11-14)
+
+- Reported regression: Calculator still inaccessible during actual native fullscreen Practice and Mock sessions despite previous P86/P87 inline mounting and floating dock CSS.
+- Added a visible **Calculator** action to the in-flow question session header on four live engines: Quick/Timed/Domain/Adaptive Practice, P44 Build Your Own, Course Mock, and historic ASP Mock.
+- Each action dispatches `technica:calculator-open`; the existing **same** ScientificCalculator instance handles it by opening/restoring its full floating window. No new calculator engine or duplicate state is created; FLOAT/FIX 0–9, MathPrint, advanced functions, history, memory, desktop drag, minimize, and responsive panel remain unchanged.
+- This gives a usable fallback even if a browser hides or stacks the fixed floating launch button inside native fullscreen. Kept the bottom-left dock and P86 premium navigator, flagged questions and protected exam flows.
+- Strengthened regression source test `npm run test:p86:exam-tools` to require a wired in-flow header trigger on all four engines and the shared calculator event handler.
+- **Status**: committed to main; source wiring checked. Cloudflare worker deployment / browser-device fullscreen result **not yet verified** (no connected browser context, no Cloudflare deployment action). Must not claim a live fix until the deployed build and real fullscreen interaction are checked.
