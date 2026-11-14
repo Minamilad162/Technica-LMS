@@ -68,6 +68,14 @@ export default function ScientificCalculator({context='Quiz',onNext=null,onPrevi
  const root=useRef(null),textField=useRef(null),drag=useRef(null),mathEditor=useRef(null);
  const rngRef=useRef(null),[randSeed,setRandSeed]=useState(''),[seeded,setSeeded]=useState(false);
  const random=useCallback(()=>rngRef.current?rngRef.current():Math.random(),[]);
+ // A visible fallback control in each exam header opens the very same floating
+ // calculator if browser fullscreen layering conceals the dock.
+ useEffect(()=>{
+   if(!inline)return;
+   const openFromExam=()=>{setOpen(true);setMinimized(false);setCoords(null);};
+   window.addEventListener('technica:calculator-open',openFromExam);
+   return()=>window.removeEventListener('technica:calculator-open',openFromExam);
+ },[inline]);
  const[mathDoc,setMathDoc]=useState(()=>createMathDocument());
  const insert=useCallback(s=>{
    if(viewMode==='MATH'){mathEditor.current?.insertText(s)}
@@ -215,7 +223,7 @@ export default function ScientificCalculator({context='Quiz',onNext=null,onPrevi
   </button>
   {open&&<section ref={root} className={'tc-calc-window '+(minimized?'tc-calc-minimized':'')} role="region"
    aria-label={'Scientific calculator for '+context}
-   style={coords&&window.innerWidth>700?{left:coords.left,top:coords.top,right:'auto',bottom:'auto'}:undefined}>
+   style={inline?{position:'fixed',zIndex:2147483001,...(coords&&window.innerWidth>700?{left:coords.left,top:coords.top,right:'auto',bottom:'auto'}:{})}:(coords&&window.innerWidth>700?{left:coords.left,top:coords.top,right:'auto',bottom:'auto'}:undefined)}>
    <header className="tc-calc-window-header" onPointerDown={dragStart} onPointerMove={dragMove}
      onPointerUp={()=>drag.current=null} onLostPointerCapture={()=>drag.current=null} title="Drag to move">
      <Grip size={15}/><strong>TECHNICA <span>SCIENTIFIC</span></strong>
