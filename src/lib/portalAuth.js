@@ -92,12 +92,29 @@ export async function signUpPortalAccount({fullName,email,password}){
 export async function startGooglePortalAuth(){
  if(browserQaMode)throw new Error('Use a real Supabase Auth environment to continue with Google.');
  const db=client();
+ const expectedRedirect=portalAuthRedirectUrl();
+ // Inspect the generated authorization URL *before* navigating away.
+ // Supabase may fall back to the configured Site URL when an origin is not allow-listed.
  const {data,error}=await db.auth.signInWithOAuth({
   provider:'google',
-  options:{redirectTo:portalAuthRedirectUrl(),scopes:'openid email profile'}
+  options:{redirectTo:expectedRedirect,scopes:'openid email profile',skipBrowserRedirect:true}
  });
  if(error)throw new Error(error.message||'Google sign-in is unavailable. Contact the LMS administrator.');
  if(!data?.url)throw new Error('Google could not start the secure sign-in flow.');
+ let authorizationUrl;
+ try{authorizationUrl=new URL(data.url);}
+ catch{throw new Error('Google sign-in returned an invalid authorization URL.');}
+ const configuredReturn=authorizationUrl.searchParams.get('redirect_to');
+ if(!configuredReturn||configuredReturn!==expectedRedirect){
+  throw new Error('Google sign-in is not configured for this domain. Ask your LMS administrator to add this website to Supabase Auth Redirect URLs and update the Site URL.');
+ }
+ // Only the Supabase authorization endpoint produced by the configured client
+ // may start the sign-in flow. Never navigate to a supplied external return origin.
+ const supabaseHost=new URL(import.meta.env.VITE_SUPABASE_URL).origin;
+ if(authorizationUrl.origin!==supabaseHost||!authorizationUrl.pathname.startsWith('/auth/v1/authorize')){
+  throw new Error('Google sign-in returned an unexpected authorization endpoint.');
+ }
+ window.location.assign(authorizationUrl.href);
  return data;
 }
 export async function requestPasswordReset(email){
