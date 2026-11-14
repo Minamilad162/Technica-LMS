@@ -8,7 +8,7 @@ import './examQuestionNavigator.css';
  */
 export default function ExamQuestionNavigator({
  questions=[],total=questions.length,currentIndex=0,onJump,
- isFlagged=()=>false,canVisit=()=>true,disabled=false,title='Questions'
+ isFlagged=()=>false,getOutcome=()=>null,canVisit=()=>true,disabled=false,title='Questions'
 }){
  const [open,setOpen]=useState(false);
  const gridId=useId();
@@ -32,15 +32,24 @@ export default function ExamQuestionNavigator({
     const active=currentIndex===i;
     const flaggedQuestion=!!q&&isFlagged(q);
     const answeredQuestion=!!q&&q.selectedIndex!==null&&q.selectedIndex!==undefined;
+    // Only use grading information actually returned by the server.
+    // 'At the end' never reveals correctness before a finished attempt.
+    const outcome=answeredQuestion?getOutcome(q):null;
+    const visibleOutcome=outcome==='correct'||outcome==='incorrect'?outcome:null;
     const visitable=!!q&&canVisit(q,i)&&!disabled;
+    const status=flaggedQuestion?'flagged':visibleOutcome||(answeredQuestion?'answered':'unanswered');
     return <button type="button" key={q?.id||i} disabled={!visitable}
-     aria-current={active?'step':undefined} aria-label={'Question '+(i+1)+(answeredQuestion?', answered':'')+(flaggedQuestion?', flagged':'')}
-     className={(active?'current ':'')+(answeredQuestion?'answered ':'')+(flaggedQuestion?'flagged ':'')}
+     aria-current={active?'step':undefined}
+     aria-label={'Question '+(i+1)+(answeredQuestion?', answered':'')+
+      (visibleOutcome?', '+visibleOutcome:'')+(flaggedQuestion?', flagged':'')}
+     className={'tc-exam-map-number '+status+(active?' current':'')}
      onClick={()=>{onJump?.(i);setOpen(false);}}>{i+1}{flaggedQuestion&&<Flag size={9} aria-hidden="true"/>}</button>;
    })}
   </div>
   <div className="tc-exam-map-legend"><span><i className="current"/>Current</span>
    <span><i className="answered"/>Answered</span>
+   <span><i className="correct"/>Correct</span>
+   <span><i className="incorrect"/>Incorrect</span>
    <span><i className="flagged"/>Flagged</span></div>
  </aside>;
 }
