@@ -2246,3 +2246,12 @@ Applied:
 - This gives a usable fallback even if a browser hides or stacks the fixed floating launch button inside native fullscreen. Kept the bottom-left dock and P86 premium navigator, flagged questions and protected exam flows.
 - Strengthened regression source test `npm run test:p86:exam-tools` to require a wired in-flow header trigger on all four engines and the shared calculator event handler.
 - **Status**: committed to main; source wiring checked. Cloudflare worker deployment / browser-device fullscreen result **not yet verified** (no connected browser context, no Cloudflare deployment action). Must not claim a live fix until the deployed build and real fullscreen interaction are checked.
+
+
+## P89 — Cloudflare build blocker identified and fixed (2026-11-14)
+
+- Production screenshot showed Vite/esbuild transform failure in `src/production/LiveLearnerPortal.jsx:16:60`: `Expected '}' but found 're'`. Root cause was a single-quoted JavaScript message containing unescaped `We're` introduced by copy cleanup.
+- Changed this to a valid double-quoted user-facing message in the current `main` branch, without altering authentication, enrollment, session or routing logic.
+- Failed Cloudflare builds explain why the deployed Practice/Mock UI remained stale (old Supabase explanation, old number strip and no calculator toolbar). Do not assume latest GitHub code is live without a successful Workers build/deployment.
+- Verification gate: inspect newest Cloudflare production build for the fix commit or newer, verify it succeeds, then exercise Practice and Mock fullscreen Calculator, Flag and Navigator. Full Vite build was not available in this GitHub-only environment; do not claim one passed.
+- Release process rule: every copy/JSX edit must pass `npm run build` before relying on Cloudflare auto deploy; preserve functional exam controls and run focused P86 regression.
