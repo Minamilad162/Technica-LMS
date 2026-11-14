@@ -5,6 +5,7 @@ import {abandonSelectedMock,getSelectedMockReadiness,getSelectedMock,selectedMoc
 import {requestQuestionFullscreen,isFullscreenActive,fullscreenStartError,leaveQuestionFullscreen} from '../lib/questionFullscreen';
 import {useQuestionFullscreenGuard} from '../lib/useQuestionFullscreenGuard';
 import LiveProtectedContent from './LiveProtectedContent';
+import ScientificCalculator from '../components/ScientificCalculator.jsx';
 import './livePractice.css';
 import './liveMock.css';
 
@@ -311,6 +312,10 @@ export default function LiveSelectedMockExam({db,user,course,access}){
      </aside>
     </div>
    </LiveProtectedContent>}
+  {attempt?.state==='in_progress'&&<ScientificCalculator context="Mock Exam" portalTarget={ref.current}
+   currentQuestion={at+1} questionCount={attempt.questionCount}
+   canPrevious={at>0} onPrevious={()=>setAt(i=>Math.max(0,i-1))}
+   onNext={()=>setAt(i=>Math.min(attempt.questionCount-1,i+1))}/>}
   {error&&<p className="live-error" role="alert"><AlertTriangle size={16}/>{error}</p>}
  </section>;
 }
