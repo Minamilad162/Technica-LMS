@@ -189,3 +189,20 @@
  .live-practice button,.live-mock button{transition:none!important}
  .live-practice button:hover,.live-mock button:hover{transform:none!important}
 }
+
+/* P88: a persistent in-exam Calculator control is the accessible fallback for
+   browsers where the fixed floating dock is hidden by fullscreen layering. */
+.tc-exam-calc-trigger{
+ display:inline-flex;align-items:center;justify-content:center;gap:8px;
+ flex:0 0 auto;min-height:42px;padding:10px 14px;
+ border:1px solid #0b8e7c;border-radius:12px;
+ background:linear-gradient(120deg,#085f6a,#0d9786);
+ color:#fff;font-size:12px;font-weight:850;line-height:1.2;
+ cursor:pointer;box-shadow:0 5px 14px rgba(8,100,92,.19);
+}
+.tc-exam-calc-trigger:hover:not(:disabled){background:linear-gradient(120deg,#074b5a,#0c8577)}
+.tc-exam-calc-trigger:focus-visible{outline:3px solid #0ab99a;outline-offset:3px}
+@media(max-width:650px){
+ .tc-exam-calc-trigger{min-height:44px;padding:10px 13px}
+ .live-attempt-bar .tc-exam-calc-trigger{margin-left:auto}
+}
