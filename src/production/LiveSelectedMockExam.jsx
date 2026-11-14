@@ -312,7 +312,7 @@ export default function LiveSelectedMockExam({db,user,course,access}){
      </aside>
     </div>
    </LiveProtectedContent>}
-  {attempt?.state==='in_progress'&&<ScientificCalculator context="Mock Exam" portalTarget={ref.current}
+  {attempt?.state==='in_progress'&&<ScientificCalculator context="Mock Exam" inline
    currentQuestion={at+1} questionCount={attempt.questionCount}
    canPrevious={at>0} onPrevious={()=>setAt(i=>Math.max(0,i-1))}
    onNext={()=>setAt(i=>Math.min(attempt.questionCount-1,i+1))}/>}
