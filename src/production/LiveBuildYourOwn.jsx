@@ -3,6 +3,7 @@ import {Calculator,ArrowRight,Camera,Check,ChevronLeft,ChevronRight,Clock3,Eye,F
 import BuildYourOwnSettings from './BuildYourOwnSettings.jsx';
 import ScientificCalculator from '../components/ScientificCalculator.jsx';
 import ExamQuestionNavigator from './ExamQuestionNavigator.jsx';
+import {practiceQuestionOutcome} from './practiceQuestionReview.js';
 import {DEFAULT_BUILD_YOUR_OWN,prepareBuildYourOwn,remainingQuestionSeconds} from './buildYourOwnConfig.js';
 import {abandonSecurePractice,answerConfiguredPractice,finishSecurePractice,
  nextConfiguredPractice,practiceSessionKey,safeRemainingSeconds,startConfiguredPractice,startAllCoursesConfiguredPractice} from './practiceApi.js';
@@ -290,11 +291,8 @@ export default function LiveBuildYourOwn({db,user,course,domains=[],access}){
    </div>
    <ExamQuestionNavigator questions={attempt.questions} total={attempt.questionCount}
     currentIndex={displayPosition-1} isFlagged={q=>!!flaggedQuestions[q.id]}
-    getOutcome={q=>{
-     const review=finished?q:attempt.feedbackTiming==='each'?feedback[q.id]:null;
-     if(typeof review?.correctIndex!=='number'||q.selectedIndex===null||q.selectedIndex===undefined)return null;
-     return q.selectedIndex===review.correctIndex?'correct':'incorrect';
-    }}
+    getOutcome={q=>practiceQuestionOutcome({question:q,feedback:feedback[q.id],
+     feedbackTiming:attempt.feedbackTiming,finished})}
     canVisit={(q,i)=>finished||(i+1<=currentPosition&&typeof q.prompt==='string'&&q.prompt.length>0)}
     onJump={i=>finished?setReviewIndex(i):setInspectedPosition(i+1===currentPosition?null:i+1)}
     disabled={busy}/>
