@@ -98,7 +98,8 @@ assert(live.includes('startConfiguredPractice(db,'));
 assert(live.includes('answerConfiguredPractice(db,'));
 assert(live.includes('nextConfiguredPractice(db,'));
 assert(live.includes('finishSecurePractice(db,'));
-assert(live.includes("attempt.feedbackTiming==='each'"));
+assert(live.includes('setFeedback(old=>')&&live.includes('feedback[current?.id]'),
+ 'Per-question server feedback must remain usable without an explanatory note');
 assert(!live.includes('correct_index_snapshot'),'Answer keys must be delivered only by server payload/RPC');
 assert(!live.includes('../data/'),'No bundled/demo question bank');
 assert(sql.includes('BETWEEN 1 AND CASE WHEN mode=\'custom\' THEN 100 ELSE 50 END'));
