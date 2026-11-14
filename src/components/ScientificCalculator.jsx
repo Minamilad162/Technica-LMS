@@ -9,6 +9,8 @@ import{createMathDocument,serializeMathDocument}from'../lib/mathTemplateEditor';
 import{seededCalculatorRandom}from'../lib/calculatorRandom';
 import{finishCalculatorEntry}from'../lib/calculatorEntry';
 import CalculatorPhysicalKeypad from './CalculatorPhysicalKeypad';
+import '../scientificCalculator.css';
+import '../calculatorPhysical.css';
 
 // Original Technica keypad and calculation code; no third-party calculator emulator.
 const KEYS=[
@@ -48,7 +50,7 @@ function ExactOutput({exact}){
  if(exact.type==='radical')return <span className="tc-exact-radical">{exact.coefficient===1?'':exact.coefficient}<span>√{exact.radicand}</span></span>;
  return exact.value;
 }
-export default function ScientificCalculator({context='Quiz',onNext=null,onPrevious=null,canPrevious=false,currentQuestion=null,questionCount=null}){
+export default function ScientificCalculator({context='Quiz',onNext=null,onPrevious=null,canPrevious=false,currentQuestion=null,questionCount=null,portalTarget=null}){
  const[open,setOpen]=useState(false),[minimized,setMinimized]=useState(false);
  const[expression,setExpression]=useState(''),[result,setResult]=useState('0');
  const[answer,setAnswer]=useState(0),[memory,setMemory]=useState(0),[history,setHistory]=useState([]);
@@ -346,5 +348,5 @@ export default function ScientificCalculator({context='Quiz',onNext=null,onPrevi
      </div>}
    </div>}
   </section>}
- </>,document.body);
+ </>,portalTarget||document.body);
 }
