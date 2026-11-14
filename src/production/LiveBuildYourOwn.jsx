@@ -217,7 +217,7 @@ export default function LiveBuildYourOwn({db,user,course,domains=[],access}){
     <Camera size={15}/><span>Local camera preview · not recorded</span>
     <video ref={videoRef} autoPlay muted playsInline aria-label="Your optional camera preview"/>
    </div>}
-   <ScientificCalculator context="Build Your Own Practice" portalTarget={rootRef.current}
+   <ScientificCalculator context="Build Your Own Practice" inline
     currentQuestion={displayPosition} questionCount={attempt.questionCount}/>
    <div className="tc-exam-workbench"><div className="tc-exam-workbench-main">
    {current&&<LiveProtectedContent as="div" kind="exam-question"
