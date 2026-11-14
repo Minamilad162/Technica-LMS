@@ -174,7 +174,7 @@ export function AdminCoursesPanel({db}){
       tree.flatMap(d=>d.topics||[]).find(t=>t.id===f.parentId)?.lessons||[];
     await addAuthoringNode(db,editor,peers);
    }
-   setNotice('Course saved. Publish it when you're ready.');
+   setNotice("Course saved. Publish it when you are ready.");
    setEditing(null);setRevision(n=>n+1);
   }catch(x){setError(err(x));}finally{setBusy(false);}
  }
