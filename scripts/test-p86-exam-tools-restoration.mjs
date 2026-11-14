@@ -25,6 +25,14 @@ for(const marker of ['CalculatorPhysicalKeypad','MathTemplateEditor','evaluateSc
 assert.match(calc,/import '\.\.\/scientificCalculator\.css'/);
 assert.match(calc,/import '\.\.\/calculatorPhysical\.css'/);
 assert.match(calcCss,/:fullscreen \.tc-calc-launch/);
+assert.match(calc,/const calculatorSurface=<>/,'Calculator render tree must remain intact');
+assert.match(calc,/inline\?calculatorSurface:createPortal\(calculatorSurface,portalTarget\|\|document\.body\)/);
+assert.match(calcCss,/P87: float above the exam surface/,'Dedicated floating exam dock is required');
+assert.match(calcCss,/\.tc-calc-launch\{[\s\S]*?left:clamp\(12px,2vw,24px\)/);
+assert.match(calcCss,/z-index:2147483000/);
+assert.match(calc,/<option value="FLOAT">FLOAT<\/option>/,'FLOAT precision mode lost');
+assert.match(calc,/<option value=\{String\(i\)\} key=\{i\}>FIX \{i\}<\/option>/);
+
 assert.match(quiz,/ScientificCalculator/,'Earlier Lesson and Quiz calculator remains intact');
 
 // The main learner exam paths all render the same calculator inside native fullscreen.
