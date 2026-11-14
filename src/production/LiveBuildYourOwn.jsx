@@ -291,6 +291,7 @@ export default function LiveBuildYourOwn({db,user,course,domains=[],access}){
    </div>
    <ExamQuestionNavigator questions={attempt.questions} total={attempt.questionCount}
     currentIndex={displayPosition-1} isFlagged={q=>!!flaggedQuestions[q.id]}
+    showOutcomes={finished||attempt.feedbackTiming==='each'}
     getOutcome={q=>practiceQuestionOutcome({question:q,feedback:feedback[q.id],
      feedbackTiming:attempt.feedbackTiming,finished})}
     canVisit={(q,i)=>finished||(i+1<=currentPosition&&typeof q.prompt==='string'&&q.prompt.length>0)}
