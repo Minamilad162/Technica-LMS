@@ -177,7 +177,6 @@ assert.ok(!/\bdemoEnrolments\s*=/.test(centre),'No manufactured enrolments may a
 
 const internalNav=read('src/qualification/QualificationInternalNav.jsx');
 const internalNavCss=read('src/qualification/qualificationInternalNav.css');
-const sourcePreview=read('src/qualification/QualificationSourcePreview.jsx');
 const previewCss=read('src/qualification/qualificationSourcePreview.css');
 for(const name of ['Course','Evidence','Registration','Contact','Metrics','Overview','Study Library']){
  assert.ok(internalNav.includes("'"+name+"'"),'Shared Qualifications bar missing '+name);
