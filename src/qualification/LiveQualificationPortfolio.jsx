@@ -607,7 +607,7 @@ export default function LiveQualificationPortfolio({db}) {
       <p role="alert">{error}</p><Action secondary onClick={() => setRefreshKey(value => value + 1)}>Retry</Action>
     </Panel> : portfolio ? <OpenPortfolio key={portfolio.id} db={db} portfolio={portfolio} references={references} onRefresh={refresh}
       onBack={() => {setPortfolio(null); setRefreshKey(value => value + 1);}}/> : adminView
-      ? <QualificationCentreAdmin db={db} onBack={()=>{setAdminView(false);setRefreshKey(v=>v+1);}}/> : previewId
+      ? <QualificationCentreAdmin db={db} references={references} onBack={()=>{setAdminView(false);setRefreshKey(v=>v+1);}}/> : previewId
       ? <QualificationSourcePreview key={previewId} item={QUALIFICATIONS.find(item => item.id === previewId)}
           references={references} onBack={() => setPreviewId('')}/>
       : <ProgrammeListPremium rows={rows || []} references={references} activeRole={activeRole}
