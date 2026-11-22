@@ -206,3 +206,52 @@
 .qf-live .qc-approval-checklist input:disabled{opacity:.5;cursor:not-allowed}
 @media(max-width:620px){.qf-live .qc-source-rubric>summary{align-items:flex-start;flex-direction:column}
  .qf-live .qc-source-rubric-body{max-height:350px}}
+
+/* Admin-only source-backed Portfolio preview, matching Technica's premium design system */
+.qf-live .qc-top-actions{display:flex;align-items:center;gap:13px}
+.qf-live .qc-top-actions>.qc-outline{display:flex;align-items:center;gap:8px;font-size:12px;white-space:nowrap}
+.qf-live .qf-ref-preview-shell{display:grid;gap:14px;padding-bottom:20px}
+.qf-live .qf-ref-preview-banner{display:flex;justify-content:space-between;align-items:center;gap:12px;
+ padding:13px 16px;border:1px solid #b4d9c8;background:#ebf9f2;border-radius:13px;color:#205f4b}
+.qf-live .qf-ref-preview-banner>div{display:flex;gap:12px;align-items:center}
+.qf-live .qf-ref-preview-banner>div>div{display:grid;gap:3px}
+.qf-live .qf-ref-preview-banner strong{font-size:12px}
+.qf-live .qf-ref-preview-banner span{font-size:11px;line-height:1.55}
+.qf-live .qf-ref-preview-banner button{display:flex;align-items:center;gap:7px;font-weight:800;font-size:12px;
+ border:1px solid #a6cfbb;border-radius:9px;padding:9px 12px;color:#1a684d;background:#fff;cursor:pointer;white-space:nowrap}
+.qf-live .qf-ref-preview-hero{border-radius:20px;background:radial-gradient(ellipse at 90% -30%,#5598d35e,transparent 55%),
+ linear-gradient(110deg,#142c4a,#23518a);color:white;padding:25px 28px;display:flex;align-items:center;justify-content:space-between;gap:16px}
+.qf-live .qf-ref-preview-hero>div>span{font-size:10px;letter-spacing:.11em;font-weight:850;color:#d3e7ff}
+.qf-live .qf-ref-preview-hero h1{font-size:clamp(20px,2.5vw,32px);line-height:1.25;letter-spacing:-.03em;color:#fff;margin:8px 0}
+.qf-live .qf-ref-preview-hero p{font-size:12px;color:#e0edff;margin:0}
+.qf-live .qf-ref-preview-hero>svg{flex:0 0 auto;color:#b8d6f6}
+.qf-live .qf-ref-preview-tabs{display:flex;flex-wrap:nowrap;overflow-x:auto;gap:7px;padding:6px;background:#fff;
+ border:1px solid #dee9f5;border-radius:13px}
+.qf-live .qf-ref-preview-tabs button{display:inline-flex;align-items:center;gap:7px;padding:11px 15px;white-space:nowrap;
+ background:transparent;border:1px solid transparent;border-radius:10px;color:#56708e;font-weight:800;font-size:12px;cursor:pointer}
+.qf-live .qf-ref-preview-tabs button[aria-pressed=true]{background:#e8f2ff;border-color:#bcd6f2;color:#2a68a0}
+.qf-live .qf-ref-preview-course{display:grid;gap:15px}
+.qf-live .qf-ref-preview-columns{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.5fr);gap:15px}
+.qf-live .qf-ref-preview-outcome{display:flex;align-items:center;gap:11px;padding:13px;border:1px solid #e1eaf5;
+ border-radius:10px;background:#fafdff}
+.qf-live .qf-ref-preview-outcome>span{flex:1;min-width:0}
+.qf-live .qf-ref-preview-outcome strong{font-size:12px;line-height:1.55;color:#2c557d}
+.qf-live .qf-ref-preview-outcome small{display:block;margin-top:4px;color:#8699ae;font-size:11px}
+.qf-live .qf-ref-preview-outcome svg{flex-shrink:0;color:#9bb1c5}
+.qf-live .qf-ref-preview-source{display:inline-flex;align-items:center;gap:8px;justify-self:start;
+ font-size:12px;font-weight:750;color:#276ca4;text-decoration:underline}
+.qf-live .qf-ref-preview-empty{display:grid;justify-items:start;gap:10px}
+.qf-live .qf-ref-preview-empty>svg{color:#3c80b8}
+.qf-live .qf-ref-preview-empty>h3{font-size:20px;margin:0;color:#214f7b}
+.qf-live .qf-ref-preview-empty>p{max-width:700px;font-size:12px;line-height:1.8;color:#66819c;margin:0}
+.qf-live .qf-ref-preview-reg{width:100%;display:grid;gap:8px;margin-top:5px}
+.qf-live .qf-ref-preview-reg>div{display:flex;align-items:center;gap:10px;background:#f7faff;padding:13px;
+ border-radius:10px;border:1px solid #e2eaf4;font-size:12px;font-weight:760;color:#41678a}
+.qf-live .qf-ref-preview-reg svg:last-child{margin-left:auto}
+@media(max-width:850px){.qf-live .qf-ref-preview-columns{grid-template-columns:minmax(0,1fr)}
+ .qf-live .qc-top-actions{width:100%;justify-content:space-between}
+ .qf-live .qf-ref-preview-banner{align-items:start;flex-direction:column}}
+@media(max-width:580px){.qf-live .qf-ref-preview-hero{padding:20px}
+ .qf-live .qf-ref-preview-hero>svg{display:none}
+ .qf-live .qf-ref-preview-banner button{width:100%;justify-content:center}
+ .qf-live .qc-top-actions>.qc-outline{white-space:normal}}
