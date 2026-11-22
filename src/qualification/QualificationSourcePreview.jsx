@@ -64,7 +64,7 @@ export default function QualificationSourcePreview({item,references=[],onBack,em
   </header>}
   {!embedded&&<QualificationInternalNav active={section} onChange={setSection}
     ariaLabel="Qualification course, evidence, registration, contact, metrics and library"
-    readOnly={!source.publishedAt}/>}
+    readOnly={source.status!=='centre_published'}/>}
   <div className="qsrc-overview">
     <div><span className="qsrc-icon"><BookOpen size={19}/></span><strong>{source.units.length}</strong><small>Official Units</small></div>
     <div><span className="qsrc-icon"><LibraryBig size={19}/></span><strong>{fullCount||'—'}</strong><small>Imported Learning Outcomes</small></div>
