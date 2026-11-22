@@ -55,4 +55,31 @@ assert.match(workspace,/Read Material/);
 assert.match(css,/\.qfx-course-material-layout/);
 assert.match(css,/@media\(max-width:680px\)/);
 assert.ok(!/fetch\(|supabase|localStorage|sessionStorage/.test(panel),'Material UI must be source-only with no network/DB calls');
+
+const live=read('src/qualification/LiveQualificationPortfolio.jsx');
+const liveStudy=read('src/qualification/QualificationLearningResources.jsx');
+const liveStudyCss=read('src/qualification/qualificationLearningResources.css');
+for(const symbol of [
+ 'LiveUnitLearningHub','OutcomeLearningSupport','ProgrammeReferenceLibrary','ProgrammeMaterialSnapshot','EvidencePreparationTips'
+]) {
+ assert.match(live,new RegExp('<'+symbol+'\\b'),'Authenticated programme is missing '+symbol);
+ assert.match(liveStudy,new RegExp('function '+symbol+'\\b'),'Missing live material component '+symbol);
+}
+assert.match(live,/\['library','Study Library'\]/);
+assert.match(live,/onLibrary=\{cover \? \(\) => changeView\('library'\)/);
+assert.match(liveStudy,/getUnitSourceMaterial\(unit\.code\)/,'Live course must map only by immutable official unit code');
+assert.match(liveStudy,/getUnitSourceMaterial\(unit\?\.code\)/,'Outcome source mapping is missing');
+assert.match(liveStudy,/<UnitMaterialPanel key=\{unit\.code\} unitCode=\{unit\.code\}\/?>/);
+assert.match(liveStudy,/qualification\.units\.map/,'Reference syllabus must render every official unit');
+assert.match(liveStudy,/Centre-specific Unit/,'Custom test units require truthful fallback');
+assert.match(liveStudy,/No centre-published learning files/,'Do not invent private material files');
+assert.match(liveStudy,/Evidence Folder does not submit it for assessment/,'Evidence and competence claims must remain distinct');
+assert.match(panel,/Source assessment notes/,'Historical source assessment notes omitted');
+assert.match(liveStudyCss,/\.qlearn-library-layout/);
+assert.match(liveStudyCss,/\.qlearn-layout/);
+assert.match(liveStudyCss,/\.qlearn-overview-panel/);
+for(const rpc of ["commit('save_claim'","commit('review'","commit('finalize'"]){
+ assert.ok(live.includes(rpc), 'Existing real portfolio workflow was changed: '+rpc);
+}
+
 console.log('P34: 23 PDF-grounded Unit materials with per-Unit rendering, source provenance, learner right rail and Admin preview PASS');
