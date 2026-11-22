@@ -244,3 +244,17 @@
 @media(max-width:430px){.qf-live .qf-ref-evidence-toolbar{grid-template-columns:minmax(0,1fr)}
  .qf-live .qf-ref-evidence-toolbar>label:first-child{grid-column:auto}
  .qf-live .qf-ref-unit-toolbar>button{flex:1}}
+
+/* Privacy-scoped Contact Diary and historical review activity */
+.qf-live .qf-ref-contact{display:grid;gap:15px}
+.qf-live .qf-ref-contact .qf-card>p:first-of-type{font-size:12px;color:#677e96;line-height:1.7}
+.qf-live .qf-ref-contact-form{border:1px solid #e0e9f5;border-radius:12px;background:#f7fbff;padding:15px;margin:14px 0 18px}
+.qf-live .qf-ref-contact-form .qf-field{margin:0 0 12px}
+.qf-live .qf-ref-contact-form>button{margin-top:3px}
+.qf-live .qf-ref-contact-history{display:grid;gap:12px}
+.qf-live .qf-ref-contact-history article{border:1px solid #e2eaf4;background:#fcfdff;border-radius:13px;padding:15px 17px}
+.qf-live .qf-ref-contact-history article>div{display:flex;flex-wrap:wrap;align-items:baseline;gap:6px 12px}
+.qf-live .qf-ref-contact-history strong{font-size:12px;color:#265a87}
+.qf-live .qf-ref-contact-history span{font-size:11px;color:#5d7b98}
+.qf-live .qf-ref-contact-history time{margin-inline-start:auto;color:#8798aa;font-size:10px}
+.qf-live .qf-ref-contact-history p{font-size:13px;color:#294b6d;line-height:1.7;white-space:pre-wrap;margin:9px 0 0;overflow-wrap:anywhere}
