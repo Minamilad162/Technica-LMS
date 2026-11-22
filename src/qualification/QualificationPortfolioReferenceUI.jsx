@@ -1,6 +1,6 @@
-import React from 'react';
+import React,{useEffect,useState} from 'react';
 import {CalendarDays,CheckCircle2,ClipboardList,FileText,ShieldCheck,TrendingUp,Users} from 'lucide-react';
-import {claimState} from './qualificationPortfolioApi.js';
+import {claimState,portfolioRpc} from './qualificationPortfolioApi.js';
 
 const formatDate=value=>value?new Intl.DateTimeFormat(undefined,{dateStyle:'medium',timeZone:'UTC'}).format(new Date(value)):'Not set';
 const pct=(value,total)=>total>0?Math.round(value/total*100):0;
@@ -57,7 +57,40 @@ export function PortfolioStatusRibbon({portfolio,progress,onRegistration}){
 
 // Only values derivable from real portfolio records are displayed as metrics.
 // OJT/Off-job hours in the reference platform have no equivalent saved records yet.
-export function PortfolioMetrics({portfolio,progress,onOutcome}){
+export function PortfolioMetrics({db,portfolio,progress,onOutcome}){
+ const [training,setTraining]=useState(null);
+ const [error,setError]=useState('');
+ const [saving,setSaving]=useState(false);
+ const [refresh,setRefresh]=useState(0);
+ const [category,setCategory]=useState('on_job');
+ const [minutes,setMinutes]=useState('60');
+ const [date,setDate]=useState(()=>new Date(Date.now()-new Date().getTimezoneOffset()*60000).toISOString().slice(0,10));
+ const [description,setDescription]=useState('');
+ const canReport=portfolio.role==='learner'&&portfolio.canEdit;
+ useEffect(()=>{
+   let alive=true;
+   portfolioRpc(db,'training_list',{p_enrolment:portfolio.id})
+    .then(result=>{if(alive){setTraining(Array.isArray(result)?result:[]);setError('');}})
+    .catch(e=>{if(alive)setError(e?.message||'Unable to load training records.');});
+   return ()=>{alive=false;};
+ },[db,portfolio.id,refresh]);
+ const saveTraining=async e=>{
+   e.preventDefault();
+   if(saving||!canReport||!description.trim())return;
+   setSaving(true);setError('');
+   try{
+     await portfolioRpc(db,'training_add',{
+       p_enrolment:portfolio.id,p_date:date,p_category:category,
+       p_minutes:Number(minutes),p_description:description.trim()
+     });
+     setDescription('');setTraining(null);setRefresh(old=>old+1);
+   }catch(e){setError(e?.message||'Unable to record training activity.');}
+   finally{setSaving(false);}
+ };
+ const logged=Array.isArray(training)?training:[];
+ const totals={on_job:0,off_job:0};
+ for(const item of logged){if(Object.hasOwn(totals,item.category))totals[item.category]+=item.minutes;}
+ const hours=minutes=>(minutes/60).toLocaleString(undefined,{maximumFractionDigits:2})+' h';
  const outcomes=progress.outcomes;
  const submissions=outcomes.flatMap(o=>o.submissions||[]);
  const reviews=submissions.flatMap(s=>s.reviews||[]);
@@ -93,9 +126,36 @@ export function PortfolioMetrics({portfolio,progress,onOutcome}){
      })}</div>
    </section>
    <section className="qf-card qf-ref-hours">
-     <div className="qf-card-header"><h3>On-the-job / Off-the-job training</h3></div>
-     <p>Training-hour entries are not yet recorded by this assessment portfolio. No hours are inferred from uploads, logins or Outcome activity.</p>
-     <div><span>On-the-job training <strong>Not recorded</strong></span><span>Off-the-job training <strong>Not recorded</strong></span></div>
+     <div className="qf-card-header"><h3>On-the-job / Off-the-job training</h3><span>Learner-reported activity</span></div>
+     <p>Record professional training activity here. Entries are not automatically accepted as Assessment Evidence or verified study hours.</p>
+     {error&&<p className="qf-live-error" role="alert">{error} <button type="button" className="qf-live-link" onClick={()=>setRefresh(old=>old+1)}>Retry</button></p>}
+     <div className="qf-ref-hours-total">
+       <span>On-the-job training <strong>{logged.length?hours(totals.on_job):'Not recorded'}</strong></span>
+       <span>Off-the-job training <strong>{logged.length?hours(totals.off_job):'Not recorded'}</strong></span>
+     </div>
+     {canReport&&<form className="qf-ref-hours-form" onSubmit={saveTraining}>
+       <label className="qf-field">Date<input type="date" required min={portfolio.startsOn}
+         max={new Date(Date.now()-new Date().getTimezoneOffset()*60000).toISOString().slice(0,10)}
+         value={date} disabled={saving} onChange={e=>setDate(e.target.value)}/></label>
+       <label className="qf-field">Training type<select value={category} disabled={saving}
+         onChange={e=>setCategory(e.target.value)}><option value="on_job">On the job</option>
+         <option value="off_job">Off the job</option></select></label>
+       <label className="qf-field">Duration (minutes)<input type="number" required min={1} max={1440}
+         value={minutes} disabled={saving} onChange={e=>setMinutes(e.target.value)}/></label>
+       <label className="qf-field qf-ref-hours-description">Activity description<textarea required
+         rows={3} maxLength={1000} minLength={5} value={description} disabled={saving}
+         onChange={e=>setDescription(e.target.value)} placeholder="Describe the activity actually completed..."/></label>
+       <button type="submit" disabled={saving||description.trim().length<5} className="qf-button qf-primary">
+         {saving?'Saving activity...':'Record training activity'}</button>
+     </form>}
+     {training===null&&!error&&<p>Loading training activity...</p>}
+     {training?.length===0&&<p>No training activities have been recorded yet.</p>}
+     {!!training?.length&&<div className="qf-ref-hours-list" role="region" aria-label="Recorded training activity">
+       <table><thead><tr><th>Date</th><th>Type</th><th>Description</th><th>Duration</th></tr></thead>
+       <tbody>{training.map(item=><tr key={item.id}><td>{formatDate(item.date)}</td>
+        <td>{item.category==='on_job'?'On the job':'Off the job'}</td><td dir="auto">{item.description}</td>
+        <td>{hours(item.minutes)}</td></tr>)}</tbody></table>
+     </div>}
    </section>
  </div>;
 }
