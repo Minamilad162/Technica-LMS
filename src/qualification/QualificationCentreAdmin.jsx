@@ -30,6 +30,9 @@ export default function QualificationCentreAdmin({db,onBack}){
  [targetOn,setTargetOn]=useState('');
  const [fileTitle,setFileTitle]=useState(''),[fileKind,setFileKind]=useState(methods[0][0]),
  [file,setFile]=useState(null),[fileAttest,setFileAttest]=useState(false);
+ const [issuerName,setIssuerName]=useState(''),[issuerRef,setIssuerRef]=useState(''),
+ [issuerUrl,setIssuerUrl]=useState(''),[issuerAttest,setIssuerAttest]=useState(false),
+ [issuerStatus,setIssuerStatus]=useState(null);
  const [loading,setLoading]=useState(true),[saving,setSaving]=useState(false),
  [message,setMessage]=useState(''),[error,setError]=useState('');
  const version=versions.find(v=>v.id===versionId)||versions[0];
@@ -58,6 +61,14 @@ export default function QualificationCentreAdmin({db,onBack}){
  },[db]);
  useEffect(()=>{setInstructions(unit?.brief?.instructions||'');setAssessmentMethods(unit?.brief?.methods||'');},[unit?.id,unit?.brief?.approvedAt,unit?.brief?.instructions,unit?.brief?.methods]);
  useEffect(()=>{setApprovalRef('');setAttest(false);setDeclaration('');},[version?.id]);
+ useEffect(()=>{
+  if(!version?.id)return;
+  let alive=true;
+  portfolioRpc(db,'admin_certificate_status',{p_version:version.id})
+   .then(data=>{if(alive)setIssuerStatus(data||null);})
+   .catch(e=>{if(alive)setError(errText(e));});
+  return ()=>{alive=false;};
+ },[db,version?.id,version?.publishedAt]);
  const run=async(callback,success)=>{
   setSaving(true);setMessage('');setError('');
   try{await callback();await reload(version?.id,unit?.id);setMessage(success);}
@@ -78,6 +89,14 @@ export default function QualificationCentreAdmin({db,onBack}){
  const onPublish=()=>run(()=>portfolioRpc(db,'admin_publish',{
   p_version:version.id,p_approval_reference:approvalRef.trim(),p_declaration:declaration.trim(),p_attest:attest
  }),'Programme version published and locked. You can now assign distinct learner, assessor and verifier.');
+ const authorizeCertificate=()=>run(async()=>{
+    await portfolioRpc(db,'admin_certificate_authorize',{
+      p_version:version.id,p_issuer_name:issuerName.trim(),p_reference:issuerRef.trim(),
+      p_evidence_url:issuerUrl.trim(),p_attest:issuerAttest
+    });
+    const status=await portfolioRpc(db,'admin_certificate_status',{p_version:version.id});
+    setIssuerStatus(status||null);
+  },'Certificate issuer authorization recorded. The verifier may record an externally issued certificate after verified completion.');
  const onAssign=()=>run(()=>portfolioRpc(db,'admin_assign',{
   p_version:version.id,p_learner:learner,p_assessor:assessor,p_verifier:verifier,p_start:startOn,
   p_target:targetOn||null
@@ -210,6 +229,31 @@ export default function QualificationCentreAdmin({db,onBack}){
          <strong>{e.learner}</strong><small>Assessor: {e.assessor} · Verifier: {e.verifier}</small>
          <small>{e.completedAt?'Completed':'In progress'} · Started {e.startOn}</small>
       </div>):<p className="qc-secondary">No active learner enrolments on this edition.</p>}
+    </Card>
+    <Card title="Certificate issuer authorization" icon={FileCheck2}>
+      <p className="qc-secondary">Releasing a qualification does not authorise certificate issuance. The verifier can only record an actually issued certificate after the awarding body’s authority has been documented.</p>
+      {!release?<p className="qc-locked"><LockKeyhole size={16}/> Release the centre-approved programme first.</p>:
+       issuerStatus?<div className="qc-release-done"><CheckCircle2 size={19}/>
+        <span>Authorised by {issuerStatus.issuer} · {issuerStatus.reference}
+        <a href={issuerStatus.evidenceUrl} target="_blank" rel="noopener noreferrer"> View supporting record</a></span></div>:<>
+        <label className="qc-field">Issuing awarding body
+          <input value={issuerName} maxLength={140} disabled={saving}
+            onChange={e=>setIssuerName(e.target.value)} placeholder="Legal name of certificate issuer"/></label>
+        <label className="qc-field">Actual issuing-authority reference
+          <input value={issuerRef} maxLength={240} disabled={saving}
+            onChange={e=>setIssuerRef(e.target.value)} placeholder="Documented awarding-body authorisation"/></label>
+        <label className="qc-field">Evidence URL (HTTPS)
+          <input type="url" value={issuerUrl} disabled={saving} onChange={e=>setIssuerUrl(e.target.value)}
+            placeholder="https://…"/></label>
+        <label className="qc-confirm"><input type="checkbox" disabled={saving} checked={issuerAttest}
+          onChange={e=>setIssuerAttest(e.target.checked)}/>
+          <span>I confirm this issuer authority is real and documented, and that no certificate will be recorded without an externally issued certificate number.</span></label>
+        <button type="button" className="qc-primary"
+          disabled={saving||!issuerAttest||issuerName.trim().length<4||issuerRef.trim().length<12||!issuerUrl.startsWith('https://')}
+          onClick={()=>{if(window.confirm('Confirm actual awarding-body certificate issuer authorisation for this version?'))authorizeCertificate();}}>
+          <ShieldCheck size={16}/> Record issuer authorization
+        </button>
+       </>}
     </Card>
     <Card title="Release governance" icon={ShieldAlert}>
       <p className="qc-secondary">This edition is based on the supplied awarding-body specification. The centre must confirm it is the appropriate version for the learner, assessment requirements, and regulatory conditions.</p>
