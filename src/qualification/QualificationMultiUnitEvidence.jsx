@@ -53,7 +53,7 @@ export default function QualificationMultiUnitEvidence({portfolio,busy=false,onS
   if(ok!==false)setPending(false);
  };
  if(!portfolio.canEdit)return null;
- return <section className="qmu-card" aria-label="Map one evidence file across multiple qualification units">
+ return <section id="qualification-multi-unit-mapper" className="qmu-card" aria-label="Map one evidence file across multiple qualification units">
   <div className="qmu-head"><div className="qmu-logo"><Link2 size={23}/></div>
    <div><span className="qf-overline">EVIDENCE BANK · UNIT MAPPING</span>
     <h2>Link one evidence to multiple Units</h2>
