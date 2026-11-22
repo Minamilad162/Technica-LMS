@@ -503,12 +503,15 @@ function OpenPortfolio({db, portfolio, onRefresh, onBack}) {
         <Panel title="Assessment Criteria"><ol className="qf-live-criteria">
           {outcome.criteria.map(criterion => <li key={criterion.id}><strong>{criterion.code}</strong> {criterion.title}</li>)}
         </ol></Panel>
-        <Panel title="Resources and Actions">
-          {outcome.deadline && <p>Due {formatDate(outcome.deadline)}</p>}
-          {outcome.guidance && <p className="qf-live-copy" dir="auto">{outcome.guidance}</p>}
-          {outcome.resources.length ? <ul>{outcome.resources.map(resource => <li key={resource.id}>
-            <a href={resource.url} target="_blank" rel="noreferrer">{resource.title}</a>
-          </li>)}</ul> : <p>No resources published for this outcome.</p>}
+        <Panel title="Assessment readiness">
+          <div className="qlearn-readiness-list">
+            <div><span>Criteria to address</span><strong>{outcome.criteria.length}</strong></div>
+            <div><span>Current status</span><Status outcome={outcome}/></div>
+            {outcome.deadline && <div><span>Target date</span><strong>{formatDate(outcome.deadline)}</strong></div>}
+            <div><span>Submitted revisions</span><strong>{outcome.submissions.length}</strong></div>
+          </div>
+          {learner && <Action secondary disabled={busy} onClick={openEvidence}><FolderOpen size={16}/> Open Evidence Folder</Action>}
+          <p className="qlearn-readiness-note">An uploaded file is not an assessor submission. Link your evidence to the criteria in the Competence Claim below.</p>
         </Panel>
       </div>
       {learner ? <LearnerClaim key={outcome.id + ':' + claimVersion} portfolio={portfolio} outcome={outcome}
