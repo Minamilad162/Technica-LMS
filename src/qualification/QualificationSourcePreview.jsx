@@ -95,6 +95,20 @@ export default function QualificationSourcePreview({item,references=[],onBack,em
     <div className="qsrc-unit-content">
       <header className="qsrc-unit-heading"><span className="qf-overline">UNIT {String(unitIndex+1).padStart(2,'0')} · {unit.code}</span><h2>{unit.title}</h2>
         <div className="qsrc-unit-meta"><span>{unit.outcomes.length} Learning Outcomes</span><span>{unit.outcomes.reduce((n,o)=>n+o.criteria.length,0)} Assessment Criteria</span></div>
+        <div className="qsrc-unit-paging" aria-label="Navigate qualification units">
+          <button type="button" disabled={unitIndex===0} onClick={()=>setUnitIndex(Math.max(0,unitIndex-1))}>
+            <ArrowLeft size={16}/> Previous Unit</button>
+          <label>Jump to Unit
+            <select value={unitIndex} onChange={e=>setUnitIndex(Number(e.target.value))}>
+              {source.units.map((u,index)=><option key={u.code} value={index}>
+                {String(index+1).padStart(2,'0')} · {u.code}
+              </option>)}
+            </select>
+          </label>
+          <button type="button" disabled={unitIndex>=source.units.length-1}
+            onClick={()=>setUnitIndex(Math.min(source.units.length-1,unitIndex+1))}>
+            Next Unit <ArrowRight size={16}/></button>
+        </div>
       </header>
       {unit.aim && <section className="qsrc-unit-aim">
         <div className="qsrc-section-heading"><BookOpen size={19}/><h3>Unit aim</h3></div>
