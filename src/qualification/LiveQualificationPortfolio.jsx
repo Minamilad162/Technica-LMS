@@ -446,6 +446,14 @@ function OpenPortfolio({db, portfolio, references, onRefresh, onBack}) {
   const progress = programmeProgress(portfolio);
   const outcome = progress.outcomes.find(item => item.id === outcomeId);
   const learner = portfolio.role === 'learner';
+  // Reviewers only see evidence already included in submitted, authorised snapshots.
+  // The main evidence folder is intentionally learner-only in the backend RPC.
+  const visiblePortfolio = learner ? portfolio : {
+    ...portfolio,canEdit:false,
+    evidence:Array.from(new Map(portfolio.units.flatMap(unit=>unit.outcomes.flatMap(outcome=>
+      outcome.submissions.flatMap(submission=>Object.values(submission.snapshot?.evidence||{}))
+    )).map(item=>[item.id,item])).values()),
+  };
   const base = {p_enrolment: portfolio.id};
   const claimVersion = outcome?.claim?.version || 0;
   const mapping = drafts[outcomeId]?.version === claimVersion ? drafts[outcomeId].mapping : outcome?.claim?.mapping || {};
@@ -541,7 +549,7 @@ function OpenPortfolio({db, portfolio, references, onRefresh, onBack}) {
     {view === 'dashboard' && <PortfolioOverview portfolio={portfolio} progress={progress} onOutcome={openOutcome} onView={changeView} qualification={cover}/>}
     {view === 'programme' && <UnitProgramme db={db} portfolio={portfolio} unitIndex={unitIndex} setUnitIndex={setUnitIndex} onOutcome={openOutcome}
       onEvidence={learner ? () => changeView('evidence') : null} onLibrary={cover ? () => changeView('library') : null}/>}
-    {view === 'evidence' && <EvidenceFolder portfolio={portfolio} busy={busy} onSave={saveEvidence}
+    {view === 'evidence' && <EvidenceFolder portfolio={visiblePortfolio} busy={busy} onSave={saveEvidence}
       onDownload={onDownload} onShowcase={items => run(() => downloadEvidenceShowcase(db,items))} onBack={evidenceFromOutcome ? () => changeView('outcome') : null}/>}
     {view === 'registration' && <Registration portfolio={portfolio} progress={progress} busy={busy}
       onDeclare={() => commit('declare',{},'Declaration accepted.')}
