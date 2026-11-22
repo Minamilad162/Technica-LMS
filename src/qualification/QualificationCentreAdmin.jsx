@@ -3,6 +3,7 @@ import {ArrowLeft,BookCheck,BookOpen,CheckCircle2,ClipboardCheck,Download,FileCh
  FileText,FolderClosed,GraduationCap,Info,Layers3,LockKeyhole,RefreshCw,Search,ShieldAlert,ShieldCheck,UploadCloud,Users} from 'lucide-react';
 import {portfolioRpc} from './qualificationPortfolioApi.js';
 import {qualificationReadiness,needsAssessmentMethodReview,sourceRubricForUnit} from './qualificationReadiness.js';
+import QualificationCentreLearnerPreview from './QualificationCentreLearnerPreview.jsx';
 import './qualificationCentreAdmin.css';
 
 const methods=[['assignment_brief','Assignment Brief'],['reflective_account','Reflective Account'],
@@ -41,6 +42,7 @@ export default function QualificationCentreAdmin({db,onBack,references=[]}){
  const [issuerName,setIssuerName]=useState(''),[issuerRef,setIssuerRef]=useState(''),
  [issuerUrl,setIssuerUrl]=useState(''),[issuerAttest,setIssuerAttest]=useState(false),
  [issuerStatus,setIssuerStatus]=useState(null);
+ const [previewWorkspace,setPreviewWorkspace]=useState(false);
  const [loading,setLoading]=useState(true),[saving,setSaving]=useState(false),
  [message,setMessage]=useState(''),[error,setError]=useState('');
  const version=versions.find(v=>v.id===versionId)||versions[0];
@@ -159,11 +161,18 @@ export default function QualificationCentreAdmin({db,onBack,references=[]}){
   'Centre resource approved. Only appropriately enrolled users can open the file.');
  };
  if(loading)return <div className="qc-loading"><RefreshCw size={20}/> Loading the centre’s real qualification records…</div>;
+ if(previewWorkspace)return <QualificationCentreLearnerPreview version={version}
+   references={references} onBack={()=>setPreviewWorkspace(false)}/>;
  return <div className="qc-workspace">
   <div className="qc-top"><div><button className="qc-back" type="button" onClick={onBack}><ArrowLeft size={17}/> Back to Qualifications</button>
    <span className="qf-overline">CENTRE OPERATIONS · ADMIN ACCESS</span><h1>Qualification Management</h1>
    <p>Authorise source-backed programmes, approve Unit assessment briefs, attach private resources and enrol real learners.</p>
-  </div><div className="qc-top-icon"><ShieldCheck size={31}/></div></div>
+  </div><div className="qc-top-actions">
+    <button type="button" className="qc-outline" disabled={!version||saving} onClick={()=>setPreviewWorkspace(true)}>
+      <BookOpen size={16}/> Preview learner workspace
+    </button>
+    <div className="qc-top-icon"><ShieldCheck size={31}/></div>
+   </div></div>
   <Notice>Imported awarding-body specifications are real reference material, not evidence of centre approval.
     Only your centre administrator can release a version. Certificates stay disabled until there is an externally issued certificate reference and a separate authorised configuration.</Notice>
   {error&&<p role="alert" className="qc-error">{error}</p>}
