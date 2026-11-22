@@ -68,6 +68,7 @@ export default function QualificationCentreAdmin({db,onBack}){
  useEffect(()=>{
   if(!version?.id)return;
   let alive=true;
+  setIssuerStatus(null);
   portfolioRpc(db,'admin_certificate_status',{p_version:version.id})
    .then(data=>{if(alive)setIssuerStatus(data||null);})
    .catch(e=>{if(alive)setError(errText(e));});
@@ -258,7 +259,7 @@ export default function QualificationCentreAdmin({db,onBack}){
       <button type="button" className="qc-primary" disabled={saving||!staffUser||!staffAttest||staffReference.trim().length<12}
         onClick={authorizeStaff}><ShieldCheck size={16}/> Authorise reviewer</button>
       <div className="qc-staff-list"><strong>Authorised centre reviewers ({staff.length})</strong>
-        {staff.map(s=><div key={s.userId+':'+s.role}><span>{s.name||s.userId} · {s.role}</span>
+        {staff.map(s=><div key={s.userId+':'+s.role}><span>{s.name||people.find(p=>p.id===s.userId)?.email||s.userId} · {s.role}</span>
           <small>{s.reference}</small></div>)}
         {!staff.length&&<p className="qc-secondary">No competent assessors or verifiers have been authorised yet.</p>}
       </div>
