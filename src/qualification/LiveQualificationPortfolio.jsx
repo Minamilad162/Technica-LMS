@@ -607,7 +607,7 @@ function OpenPortfolio({db, portfolio, references, onRefresh, onBack}) {
       onDeclare={() => commit('declare',{},'Declaration accepted.')}
       onFinalize={reference => commit('finalize',{p_certificate_reference: reference},reference ? 'Certificate reference recorded.' : 'Qualification completed.')}/>}
     {view === 'contact' && <ContactDiary db={db} portfolio={portfolio} progress={progress} onOutcome={openOutcome}/>}
-    {view === 'metrics' && <PortfolioMetrics portfolio={portfolio} progress={progress} onOutcome={openOutcome}/>}
+    {view === 'metrics' && <PortfolioMetrics db={db} portfolio={portfolio} progress={progress} onOutcome={openOutcome}/>}
     {view === 'library' && cover && selectedReference &&
       <QualificationSourcePreview key={selectedReference.catalog_key} item={cover}
         references={[selectedReference]} onBack={() => changeView('programme')}/>}
