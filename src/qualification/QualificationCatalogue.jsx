@@ -14,11 +14,15 @@ export function qualificationFor(title = '') {
 
 const roleLabels = {learner: 'My Qualifications', assessor: 'Assessment queue', verifier: 'Verification queue'};
 
-export function ProgrammeListPremium({rows, activeRole, onRoleChange, onOpen, onPreview}) {
-  const roles = ['learner', ...['assessor', 'verifier'].filter(key => rows.some(row => row.role === key))];
+export function ProgrammeListPremium({rows, references = [], activeRole, onRoleChange, onOpen, onPreview}) {
+  const activeRows = rows.filter(row => !/test programme|sandbox|demo/i.test(row.title || ''));
+  const roles = ['learner', ...['assessor', 'verifier'].filter(key => activeRows.some(row => row.role === key))];
   const role = roles.includes(activeRole) ? activeRole : 'learner';
-  const assigned = rows.filter(row => row.role === role);
+  const assigned = activeRows.filter(row => row.role === role);
   const unmatched = assigned.filter(row => !qualificationFor(row.title));
+  const sourceFor = item => references.find(source => source.catalog_key === (
+    item.id === 'othm6' ? 'technica-source-othm6-2026' :
+    item.id === 'othm7' ? 'technica-source-othm7-2023' : 'technica-source-nvq6-2018'));
   return <>
     <header className="qf-live-lead">
       <div className="qf-live-lead-content">
@@ -33,7 +37,7 @@ export function ProgrammeListPremium({rows, activeRole, onRoleChange, onOpen, on
         const Icon = key === 'learner' ? GraduationCap : key === 'assessor' ? ClipboardCheck : ShieldCheck;
         return <button key={key} type="button" aria-pressed={role === key} onClick={() => onRoleChange(key)}>
           <Icon size={17}/>{roleLabels[key]}
-          {key !== 'learner' && <span className="qf-live-tab-count">{rows.filter(row => row.role === key).length}</span>}
+          {key !== 'learner' && <span className="qf-live-tab-count">{activeRows.filter(row => row.role === key).length}</span>}
         </button>;
       })}
     </nav>
@@ -45,6 +49,7 @@ export function ProgrammeListPremium({rows, activeRole, onRoleChange, onOpen, on
       <div className="qf-course-grid qf-live-catalogue">
         {QUALIFICATIONS.map(item => {
           const enrolments = assigned.filter(row => qualificationFor(row.title)?.id === item.id);
+          const spec = sourceFor(item);
           return <article className={'qf-course-card qf-course-theme-' + item.color} key={item.id}>
             <div className="qf-course-hero">
               <img src={item.heroImage} alt="" loading="lazy" decoding="async" aria-hidden="true"/>
@@ -54,14 +59,15 @@ export function ProgrammeListPremium({rows, activeRole, onRoleChange, onOpen, on
             </div>
             <div className="qf-course-body">
               <span className={'qf-live-card-label ' + (enrolments.length ? 'assigned' : '')}>
-                {enrolments.length ? <><CheckCircle2 size={15}/> Assigned to you</> : <><BookOpen size={15}/> Programme preview</>}
+                {enrolments.length ? <><CheckCircle2 size={15}/> Assigned to you</> : <><BookOpen size={15}/> Verified source syllabus</>}
               </span>
-              <h2>{item.name}</h2>
+              <h2>{spec?.title || item.name}</h2>
+              <p className="qsrc-card-edition">{spec ? spec.version + ' · ' + spec.reference_number : 'Source import unavailable'}</p>
               <div className="qf-course-foot">
-                <span className="qf-course-units"><Layers3 size={17}/> {item.units.length} Units</span>
+                <span className="qf-course-units"><Layers3 size={17}/> {spec?.units.length ?? item.units.length} Units</span>
                 <button type="button" onClick={() => enrolments.length === 1 ? onOpen(enrolments[0].id) : onPreview(item.id)}
                   aria-label={(enrolments.length === 1 ? 'Open ' : 'Preview ') + item.name}>
-                  {enrolments.length === 1 ? 'Open portfolio' : 'View syllabus'} <ArrowRight size={17}/>
+                  {enrolments.length === 1 ? 'Open portfolio' : 'Explore actual Units'} <ArrowRight size={17}/>
                 </button>
               </div>
               {enrolments.length > 1 && <div className="qf-live-multi-enrolments" aria-label="Assigned portfolios">
@@ -82,7 +88,7 @@ export function ProgrammeListPremium({rows, activeRole, onRoleChange, onOpen, on
         </div>
       </section>}
       <p className="qf-live-catalogue-note"><LockKeyhole size={16}/>
-        All three qualifications can be previewed. Submitting evidence or receiving assessor decisions requires an assigned portfolio.
+        The syllabuses are sourced from awarding-body documents and imported into the reference database. Evidence, assessment and certificates require a separately approved and enrolled programme.
       </p>
     </> : <>
       <div className="qf-live-section-heading">
