@@ -134,6 +134,9 @@ jobs:
       - name: P35 premium qualification card hero images and accessible typography
         run: npm run test:p35:cards
 
+      - name: Real qualification assessment readiness stays read-only until centre sign-off
+        run: npm run test:qualification:readiness
+
       - name: P34 Unit-specific PDF study material mapping and Learner/Admin layout contract
         run: npm run test:p34:materials
 
