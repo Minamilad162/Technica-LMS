@@ -77,6 +77,11 @@ assert.equal(sourceRubricForUnit([rubricExample],{catalogKey:'technica-source-ot
 assert.equal(sourceRubricForUnit([rubricExample],rubricVersion,{...rubricUnit,criteria:3}).complete,false,'Do not approve partial imported rubric');
 
 const read=p=>readFileSync(new URL('../'+p,import.meta.url),'utf8');
+const methodGuard=read('supabase/migrations/202611220008_qualification_methods_approval_guard.sql');
+assert.ok(methodGuard.includes('IF p_approve AND'), 'Approved methods require server-side review');
+assert.ok((methodGuard.match(/methods must be selected and justified by the centre assessor/g)||[]).length===2,
+ 'Both Unit approval and qualification publishing must reject the imported placeholder');
+assert.ok(methodGuard.includes('lms_qf_admin_access()'), 'Original centre-admin authorization must be preserved');
 const admin=read('src/qualification/QualificationCentreAdmin.jsx');
 const preview=read('src/qualification/QualificationSourcePreview.jsx');
 const live=read('src/qualification/LiveQualificationPortfolio.jsx');
