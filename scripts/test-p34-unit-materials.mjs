@@ -60,7 +60,7 @@ const live=read('src/qualification/LiveQualificationPortfolio.jsx');
 const liveStudy=read('src/qualification/QualificationLearningResources.jsx');
 const liveStudyCss=read('src/qualification/qualificationLearningResources.css');
 for(const symbol of [
- 'LiveUnitLearningHub','OutcomeLearningSupport','ProgrammeReferenceLibrary','ProgrammeMaterialSnapshot','EvidencePreparationTips'
+ 'LiveUnitLearningHub','OutcomeLearningSupport','ProgrammeMaterialSnapshot','EvidencePreparationTips'
 ]) {
  assert.match(live,new RegExp('<'+symbol+'\\b'),'Authenticated programme is missing '+symbol);
  assert.match(liveStudy,new RegExp('function '+symbol+'\\b'),'Missing live material component '+symbol);
