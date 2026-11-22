@@ -53,7 +53,7 @@ assert.match(catalogue,/QUALIFICATIONS\.map\(item =>/, 'All three pathways must 
 assert.match(catalogue,/assigned\.filter\(row => qualificationFor\(row\.title\)/, 'Enrolment matching must stay role-scoped');
 assert.match(catalogue,/onOpen\(enrolments\[0\]\.id\)/, 'Enrolled programmes must open live portfolios');
 assert.match(catalogue,/onPreview\(item\.id\)/, 'Other programmes must only open read-only syllabus');
-for(const title of ['OTHM','ProQual','Programme preview','Assigned to you']){
+for(const title of ['Programme preview','Assigned to you','Open portfolio','View syllabus']){
  assert.ok(catalogue.includes(title), 'Missing catalogue label: '+title);
 }
 for(const className of ['qf-live-lead','qf-live-feature','qf-live-kpi','qf-live-preview-notice']){
