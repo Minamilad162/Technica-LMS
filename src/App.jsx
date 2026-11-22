@@ -103,7 +103,7 @@ export default function App(){
  <Route path="/subscription-plans" element={<RoutePage><LiveLearnerPortal initialScreen="subscription"/></RoutePage>}/>
  <Route path="/checkout/:courseId" element={<Navigate to="/subscription-plans" replace/>}/>
  <Route path="/my-learning" element={<RoutePage>{legacyPreview?<LegacyPreviewWarning><LearningLibrary/></LegacyPreviewWarning>:<LiveLearnerPortal initialScreen="learning"/>}</RoutePage>}/>
- <Route path="/qualifications" element={<RoutePage><QualificationsWorkspace/></RoutePage>}/>
+ <Route path="/qualifications" element={<RoutePage>{legacyBrowserQa?<QualificationsWorkspace/>:<LiveLearnerPortal initialScreen="qualifications"/>}</RoutePage>}/>
  <Route path="/my-practice" element={<Navigate to="/assessments?tab=history" replace/>}/>
  <Route path="/my-profile" element={<RoutePage><LiveMyProfile/></RoutePage>}/>
  <Route path="/notifications" element={<RoutePage><NotificationsPage/></RoutePage>}/>

@@ -4,7 +4,7 @@
 >
 > Project: Technica Consult LMS
 > Version: 1.1.11 (Practice Center quick mode selection)
-> Last updated: 2026-11-05 (Africa/Cairo), P11 learner Progress & Analytics read-only source
+> Last updated: 2026-11-22 (Africa/Cairo), Qualifications e-portfolio implementation and staged reviewer workflow
 > Repository: https://github.com/Minamilad162/Technica-LMS
 > Target branch: main
 > Current inspected source baseline: v1.15.0, commit 8021f604c63c59b2100d944ead86fed149eb1ceb
@@ -17,7 +17,7 @@
 
 ## 0. Read this first: approved non-negotiables
 
-1. **Product areas:** Exam Preparation is the priority; Certificates is a future separate workflow using shared identities, payments and administration.
+1. **Product areas:** Exam Preparation and a separate Qualifications e-portfolio share LMS identities. External awarding-body certificate issue remains outside automatic LMS workflows. See P97 for the approved Qualifications scope and staging status.
 2. **Hierarchy is Course → Domain → Topic → Lesson.** This applies to learning navigation, question classification and performance analysis. Admin creates/edits these objects; no course-specific hardcoding.
 3. **Initial course:** ASP = **Associate Safety Professional**, the correct BCSP credential name. Preparation is independent, not an official BCSP exam or qualification and must not misrepresent affiliation/endorsement.
 4. **Site UI is English** with an extensible translation architecture for later Arabic.
@@ -503,7 +503,7 @@ Reserve relation to identity, entitlements and courses; later design admin-creat
 
 | Decision ID | Date | State | Decision / constraints |
 |---|---|---|---|
-| DEC-001 | 2026-10-28 | LOCKED | Two modules: Exam Preparation now; Certificates later |
+| DEC-001 | 2026-10-28 | PARTLY SUPERSEDED BY DEC-QF-001 | Two modules: Exam Preparation now; Certificates later. Awarding-body issuance remains a separate controlled activity. |
 | DEC-002 | 2026-10-28 | LOCKED | Course → Domain → Topic → Lesson |
 | DEC-003 | 2026-10-28 | LOCKED | English-first with future Arabic-ready architecture |
 | DEC-004 | 2026-10-28 | LOCKED | ASP first, preserve source questions and explanations |
@@ -535,6 +535,7 @@ Reserve relation to identity, entitlements and courses; later design admin-creat
 | DEC-030 | 2026-11-05 | P12.2 STAGING-ONLY SOURCE / GO-LIVE NO-GO | Build real signed-JWT Staging 19-scenario READ-ONLY API integration harness for Admin/Paid/Trial/Outsider+Anon, with explicit nonmatching Prod/Stage project refs, manual CLI acknowledgement and no Service Role/production fallback. Integrate a local-only sanitized JSON Staging Evidence panel into existing Admin Release Readiness. No API smoke or imported JSON may certify browser/mobile end-to-end coverage or change Production NO-GO. |
 | DEC-031 | 2026-11-05 | APPROVED P13 SOURCE / PRODUCTION NO WRITE | Centralize all Admin actions in one premium Admin Tools workspace with six sub-tabs, actual dynamic Supabase dashboards/charts, course hierarchy, human ASP review, P9B 200-item explicit Mock reservation, real learner plan/progress and system readiness. Apply to BOTH React Demo App and actual Vite SupabaseApp live entrypoint. Existing P1 entitlements have no financial ledger: show amount/currency/revenue as Not recorded, never invent paid sums. Real Admin JWT + RLS required; P13 read-only RPC migration is Stage-only source pending explicit owner approval. |
 | DEC-032 | 2026-11-06 | P14 SECURE LESSON PDF/VIDEO / STAGING NOT DEPLOYED | Fix Admin Tools Course→Domain→Topic→Lesson Text-only authoring: expose upload +PDF/+Video and optional Text, protect source media in private Supabase Storage with authenticated Admin-only signed upload and server-ACL-per-Lesson short-lived playback. Atomic service-only upload finalization, no raw path or keys in client bundles, dynamic user/time watermark, discourage browser print/copy/download controls. Browser OS screenshots/recording/network copy cannot be 100% blocked; Widevine/FairPlay DRM and server-rasterized PDF needed for stronger protection and require future integration. No existing Production DB writes without separate approval. |
+| DEC-QF-001 | 2026-11-22 | APPROVED LEARNER SCOPE / REVIEW POLICY STAGED | Qualifications uses Qualification → Unit → Learning Outcome → Assessment Criterion, shared evidence and explicit versioned claims. Reviewer roles and certificate operation require validation with the centre. |
 
 ## 16. Error, conflict & regression prevention register
 
@@ -573,6 +574,7 @@ Add new BUG rows immediately when an issue is discovered, include reproduction, 
 | BUG-024 | MEDIUM / AUDIT GAP | P9C SOURCE FIXED / LIVE NUMBERS PENDING | Previously the 1,625 historical Demo bank, private P6A review READY count and optional P9B 200 Mock flags could be misconstrued as verified production inventory or legal readiness. P9C adds SELECT-only real database aggregates, optional missing-P9B handling, separate P4 runtime vs governance-reviewed eligibility, 9×3 tier diagnostic, and CI zero-write fingerprints. Owner-run real Supabase counts and SME content verification remain explicitly pending. |
 
 | BUG-025 | MEDIUM / IMPORT SAFETY | PREVENTED IN P9D.1 SOURCE | Existing historical ASP importer hard-enforces 1,625/five groups and cannot safely ingest the newer 2,500/nine-sheet user-private source. New pinned offline-only parser and SELECT-only existing-bank hashed CSV snapshot differentiate duplicates/protected content conflicts without touching imported, reviewed, attempted or Mock-exclusive items. Real Supabase snapshot/export and qualified SME rights/answer checks remain pending. |
+| BUG-QF-001 | HIGH | FIXED IN STAGED SOURCE | The authenticated Qualifications link previously opened the browser-local demo. Both live entry points now use the portfolio API and the database persists drafts, claims, decisions and their revisions. The historic preview is restricted to developer QA. |
 
 ## 17. Test and release checklist
 
@@ -1773,7 +1775,7 @@ P39 CI `npm run test:p39:exam-practice` plus P10/P15/P34 legacy contracts, compl
 **QA:** `npm run test:p41:open-access`, P17/P18/P20 contracts adjusted to preserve source rules and core truth, `scripts/test-p41-postgres-smoke.sh` appended after P21/P34 in disposable CI, full Vite/build and desktop/mobile visual QA. Never claim operational production readiness or actual payment integration solely because commercial copy is polished.
 
 ### P41 customer-facing route refinement
-The old `HomePage` uses browser-local mock data and must NOT be customer-visible: production `/home` now mounts the authenticated Supabase My Learning dashboard. Historical Home remains accessible only with the explicit DEV-only local QA gate. Old demo results, admin reports and question-bank entry routes redirect to verified `/my-practice` and `/admin-tools` tabs rather than showing fabricated totals. The Qualifications prototype still has NO real submission backend; it is clearly a nonfunctional qualification preview and retains explicit unavailability of evidence uploads/assessor decisions rather than falsifying successful production records.
+The old `HomePage` uses browser-local mock data and must NOT be customer-visible: production `/home` now mounts the authenticated Supabase My Learning dashboard. Historical Home remains accessible only with the explicit DEV-only local QA gate. Old demo results, admin reports and question-bank entry routes redirect to verified `/my-practice` and `/admin-tools` tabs rather than showing fabricated totals. At P41, the Qualifications prototype had no real submission backend (superseded in staged source by P97); it is clearly a nonfunctional qualification preview and retains explicit unavailability of evidence uploads/assessor decisions rather than falsifying successful production records.
 
 ## 100. P42 — Saved Question Bank Mock selections to official learner Mock (2026-11-09)
 
@@ -2324,3 +2326,20 @@ Approved UI behavior restored across Quick 10, Timed Practice, Domain Practice, 
 - The header displays the verified active plan name and remaining days rounded up from its stored expiry. Open access without an active plan has an explicit label and no countdown bar. A failed subscription read remains distinguishable from an empty result.
 - Outside pointer presses dismiss the account menu. Escape dismisses it and returns focus to the trigger.
 - Verified locally with the P36 and P37 checks and Vite build. The reported account had no subscription row and open learning access was enabled. No database changes. Revert the source commit to roll back.
+
+
+## P97 — Qualifications e-portfolio and reviewer hand-off (2026-11-22)
+
+| Area | Source status |
+| --- | --- |
+| Learner | Authenticated Qualification → Unit → Outcome → Criterion. Programme status, deadlines, Gap Analysis, published outcome guidance, reusable written/file evidence, Showcase ZIP, declaration, saved cross-reference matrix, submission and revision history. |
+| Assessor | Assigned enrolments have a review queue. Each decision reads the submitted snapshot, with per-criterion decisions, mandatory feedback on return and human acceptance before verification. |
+| Verifier | Assigned enrolments have a separate queue. The verifier can accept an assessor-approved revision or send it back to that assessor. Verifier-only feedback is internal when returned. |
+| Completion | Assigned verifier confirms completion after every required outcome is verified and active reviews are resolved. A programme may explicitly allow recording an already issued certificate reference. External application and official issuance are pending centre validation. |
+| Release | Implementation and migration staged in source. No production schema, programme, enrolment or evidence has been changed. |
+
+The Learner and Admin entry points use the same assignment-scoped Supabase API. Platform Admin status alone grants no access to learner evidence. An opt-in local QA route retains the historical sample data. Published rubrics and submitted payloads are immutable to browser callers. Evidence files use private Storage with non-overwriting upload reservations. Visibility is limited to the learner and, after a qualifying submission or assessment, the assigned reviewer. Browser callers cannot write table rows directly, advance claims from stale versions, grade another enrolment or issue a platform certificate. Showcase uses lazily loaded `fflate` to generate an archive locally from the learner's selected evidence.
+
+Use the source migration and disposable lifecycle test described in DATABASE.md. Before release, provision centre-approved complete, versioned rubrics, resources and real reviewer assignments. Confirm live Supabase Storage, file safety and the assessor/verifier and awarding-body workflow with accounts authorized for those roles. Notifications, appointments, dedicated grading forms and certificate delivery are separate integrations. This milestone preserves the ASP content taxonomy and exam rules.
+
+Verification on 2026-11-22: both Vite builds passed, the lockfile dependency audit reported zero vulnerabilities, and P19/P26/P34/P35, P20, course hierarchy and P71 regression scripts passed. The disposable PostgreSQL lifecycle passed with emulated Supabase Storage. A local Chromium browser run covered mobile upload/Showcase, draft reload, revision history, both reviewer returns, completion and certificate-reference recording against the same disposable database. Connected Supabase Storage and Learning Assistant reviewer roles were not part of these tests.

@@ -11,3 +11,16 @@
 **Migration procedure:** numbered forward migrations, explicit RLS/grants, least privilege, backup, verify with disposable test data, recovery notes, review query plans and ensure no old progress/results loss. Admin UI-only roles are insufficient. Record actual SQL lineage and test results when integration begins.
 
 See Blueprint, docs/current/LOGIC_REGISTRY.md and docs/current/SECURITY_PLAN.md.
+
+
+## Qualifications portfolio
+
+Migration `supabase/migrations/202611220001_qualification_portfolio.sql` requires the existing LMS profiles and Supabase Storage schemas. It provisions an empty Qualifications schema and a private evidence bucket. The qualification data model is independent of course and subscription entitlements.
+
+In staging, the centre database operator creates a **draft** in `lms_qualification_versions` with a unique catalog key and version, the approval reference and the exact declaration. Then populate `lms_qualification_units`, `lms_qualification_outcomes`, `lms_qualification_criteria`, and approved HTTPS `lms_qualification_resources`. Set `published_at` only after the complete rubric is verified. The published parent and its children are sealed. Future rubric changes require a separate draft version with its own child rows. Historical catalogue and PDF fixtures are never seeded into the live schema.
+
+Provision `lms_qualification_enrolments` against the published version using three existing active, distinct LMS profile IDs. The learner, assessor and verifier roles are scoped to that enrolment. Learners and reviewers open **Qualifications** using their regular LMS account. Optional outcome-specific dates live in `lms_qualification_deadlines`. An assigned verifier can confirm completion only when all required outcomes are verified and no active review remains. Leave `allow_certificate_recording` at its default unless the centre has authorized the verifier to record an already issued certificate reference for that version. Official issuing and delivery remain with the awarding body.
+
+The migration has no automatic historical-data import and the ordinary browser has no publication or assignment administration rights. Verify accepted uploads in real Supabase Storage before release, including authenticated enrolment isolation and file type/size metadata for each allowed format. The bucket checks declared MIME and byte count. Content scanning and retention of unused uploads need a centre-approved operational workflow before production usage.
+
+The disposable test `scripts/test-qualification-portfolio-postgres.sql` exercises the roles and lifecycle. It uses synthetic data in a rolled-back transaction after applying the migration with the repository's P1 and Storage fixtures.

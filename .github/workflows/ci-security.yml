@@ -426,3 +426,10 @@ jobs:
 
       - name: Test scope disclosure
         run: echo "Ephemeral local PostgreSQL smoke only; live Supabase Auth, Storage, Data API and device tests still pending."
+
+      - name: Qualification portfolio lifecycle and role isolation
+        env:
+          PGPASSWORD: postgres
+        run: |
+          psql -h localhost -U postgres -v ON_ERROR_STOP=1 -f supabase/migrations/202611220001_qualification_portfolio.sql
+          psql -h localhost -U postgres -v ON_ERROR_STOP=1 -f scripts/test-qualification-portfolio-postgres.sql

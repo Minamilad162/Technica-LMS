@@ -103,7 +103,7 @@ export default function AdminToolsWorkspace({db,initialTab='overview',onExit,onT
   <section id={'at-panel-'+tab} role="tabpanel" aria-labelledby={'at-tab-'+tab} className="at-panel">
    {tab==='overview'&&<AdminDashboardPanel db={db} onNavigate={change}/>}
    {tab==='courses'&&<AdminCoursesPanel db={db}/>}
-   {tab==='qualifications'&&<React.Suspense fallback={<PremiumLoading variant="compact"/>}><QualificationsWorkspace admin/></React.Suspense>}
+   {tab==='qualifications'&&<React.Suspense fallback={<PremiumLoading variant="compact"/>}><QualificationsWorkspace admin db={db}/></React.Suspense>}
    {tab==='questions'&&<AdminCourseBank db={db} courses={courses} asp={asp} mode="bank"
      coursesLoading={coursesLoading} coursesError={coursesError} onDirtyChange={bankDirtyChanged}
      onRefreshCourses={()=>setCatalogRevision(v=>v+1)} onGoToCourses={()=>change('courses')}/>}

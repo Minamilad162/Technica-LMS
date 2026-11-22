@@ -166,9 +166,9 @@ export default function LiveLearnerWorkspace({db,user,onSignOut,embedded=false,
     <h1>{screenTitle}</h1></div>
    <button type="button" className="lj-quiet" disabled={loading} onClick={refresh}><RefreshCw size={16}/> Refresh</button>
   </div>}
-  {error&&<p className="lj-error" role="alert">{error}</p>}
+  {screen!=='qualifications'&&error&&<p className="lj-error" role="alert">{error}</p>}
   <React.Suspense fallback={<PremiumLoading variant="page"/>}>
-  {screen==="qualifications"?<QualificationsWorkspace/>:loading?<PremiumLoading variant="page"/>:
+  {screen==="qualifications"?<QualificationsWorkspace db={db}/>:loading?<PremiumLoading variant="page"/>:
    !catalog?<div className="lj-empty">Course catalog is unavailable. Check your LMS session.</div>:
    screen==='courses'?<section className="lj-grid" aria-label="Published courses">
     {catalog.courses.map(c=><LearnerCourseCard key={c.id} course={c} db={db}
