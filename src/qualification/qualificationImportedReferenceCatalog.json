@@ -10,7 +10,7 @@
       "title": "OTHM Level 6 Diploma in Occupational Health and Safety",
       "version": "November 2026",
       "source_pdf": "https://othm.org.uk/docs/qualifications/othm-level-6-diploma-in-occupational-health-and-safety7565/specification_files/othm_level_6_diploma_in_occupational_health_and_safety_specification_nov_2026_master_2026-11-04_08-59.pdf",
-      "import_status": "CURRENT_SPECIFICATION_LINK_VERIFIED_DETAILS_PENDING",
+      "import_status": "SOURCE_VERIFIED_NOT_CENTRE_APPROVED",
       "units": [
         {
           "code": "H/652/4328",
@@ -18,10 +18,132 @@
           "position": 1,
           "sourceUrl": "https://othm.org.uk/docs/qualifications/othm-level-6-diploma-in-occupational-health-and-safety7565/specification_files/othm_level_6_diploma_in_occupational_health_and_safety_specification_nov_2026_master_2026-11-04_08-59.pdf",
           "sourceVersion": "November 2026",
-          "aim": null,
-          "assessmentNote": null,
+          "aim": "The aim of this unit is to give learners an understanding of international frameworks for health and safety legislation and regulation along with organisational obligations and health and safety workplace requirements. The learner will explore the importance of performance objectives, communication systems and health and safety management systems. Learners will need to demonstrate understanding of moral, legal and financial justifications that underpin the importance of the company’s health and safety policy. Learners will also be able to articulate the importance of working with stakeholders and determine the benefits from an effective operational health and safety policy as part of a health and safety management system.",
+          "assessmentNote": "Standards specified by the official November 2026 awarding-body criteria. Centre-issued assignment brief and assessor approval are separate.",
           "indicativeTopics": [],
-          "outcomes": []
+          "outcomes": [
+            {
+              "code": "1",
+              "title": "Understand statutory and regulatory obligations for maintaining health and safety.",
+              "position": 1,
+              "required": true,
+              "guidance": "",
+              "criteria": [
+                {
+                  "code": "1.1",
+                  "title": "Evaluate statutory and regulatory obligations applicable to an organisation.",
+                  "position": 1
+                },
+                {
+                  "code": "1.2",
+                  "title": "Evaluate workplace health and safety requirements relating to inputs and outputs of products, services, contractors, visitors, employees, equipment, goods, materials and other activities of the organisation.",
+                  "position": 2
+                },
+                {
+                  "code": "1.3",
+                  "title": "Describe in detail the unique organisational challenges to maintain compliance with health and safety regulations.",
+                  "position": 3
+                },
+                {
+                  "code": "1.4",
+                  "title": "Identify new and improved opportunities that arise through evaluation of legal precedents and reports.",
+                  "position": 4
+                }
+              ]
+            },
+            {
+              "code": "2",
+              "title": "Understand the principles of health and safety management systems.",
+              "position": 2,
+              "required": true,
+              "guidance": "",
+              "criteria": [
+                {
+                  "code": "2.1",
+                  "title": "Explain the role of performance objectives and targets in effective health and safety management.",
+                  "position": 1
+                },
+                {
+                  "code": "2.2",
+                  "title": "Explain in detail the key aspects of effective health and safety.",
+                  "position": 2
+                },
+                {
+                  "code": "2.3",
+                  "title": "Evaluate the use of recording and communication systems to identify, manage, and distribute relevant health and safety information.",
+                  "position": 3
+                },
+                {
+                  "code": "2.4",
+                  "title": "Critically evaluate an organisation’s health and safety management system including its integration with other management systems (e.g. quality, human resources, etc.) and recommend future developments.",
+                  "position": 4
+                },
+                {
+                  "code": "2.5",
+                  "title": "Outline how prioritisation within a health and safety management system supports risk management decision making.",
+                  "position": 5
+                }
+              ]
+            },
+            {
+              "code": "3",
+              "title": "Understand the key organisational factors that support the development and implementation of an organisation’s health and safety policy.",
+              "position": 3,
+              "required": true,
+              "guidance": "",
+              "criteria": [
+                {
+                  "code": "3.1",
+                  "title": "Justify the moral, legal and financial need for health and safety policies in an organisation.",
+                  "position": 1
+                },
+                {
+                  "code": "3.2",
+                  "title": "Articulate the key impacts of an organisation’s health and safety policies on a range of stakeholders in the organisation.",
+                  "position": 2
+                },
+                {
+                  "code": "3.3",
+                  "title": "Explain the information and consultation required for the purpose of health and safety policy development at all organisational levels.",
+                  "position": 3
+                },
+                {
+                  "code": "3.4",
+                  "title": "Outline the objectives of a health and safety policy document.",
+                  "position": 4
+                },
+                {
+                  "code": "3.5",
+                  "title": "Explain how a health and safety policy document drives a health and safety management system in an organisation.",
+                  "position": 5
+                }
+              ]
+            },
+            {
+              "code": "4",
+              "title": "Be able to review the organisational advantages of a successful occupational health and safety policy.",
+              "position": 4,
+              "required": true,
+              "guidance": "",
+              "criteria": [
+                {
+                  "code": "4.1",
+                  "title": "Evaluate the importance of an operational health and safety policy in relation to an organisational health and safety culture.",
+                  "position": 1
+                },
+                {
+                  "code": "4.2",
+                  "title": "Explain how a health and safety policy should influence cooperation and coordination on health and safety matters across the organisation.",
+                  "position": 2
+                },
+                {
+                  "code": "4.3",
+                  "title": "Assess a range of measurable factors that would indicate improved implementation and benefit from an operational health and safety policy.",
+                  "position": 3
+                }
+              ]
+            }
+          ]
         },
         {
           "code": "J/652/4329",
@@ -29,10 +151,118 @@
           "position": 2,
           "sourceUrl": "https://othm.org.uk/docs/qualifications/othm-level-6-diploma-in-occupational-health-and-safety7565/specification_files/othm_level_6_diploma_in_occupational_health_and_safety_specification_nov_2026_master_2026-11-04_08-59.pdf",
           "sourceVersion": "November 2026",
-          "aim": null,
-          "assessmentNote": null,
+          "aim": "The aim of this unit is to provide learners with an understanding of the key principles that underpin the implementation of an operational health and safety strategy. Learners will be able to reflect on internal and external factors that influence health and safety practice. They will understand how stakeholders contribute to the effective implementation and communication of the health and safety policy, and how the policy is put into practice within an organisation’s health and safety systems. Learners will also develop the knowledge and skills to undertake a critical review of an organisation’s operational health and safety activities.",
+          "assessmentNote": "Standards specified by the official November 2026 awarding-body criteria. Centre-issued assignment brief and assessor approval are separate.",
           "indicativeTopics": [],
-          "outcomes": []
+          "outcomes": [
+            {
+              "code": "1",
+              "title": "Be able to build and influence relationships with stakeholders.",
+              "position": 1,
+              "required": true,
+              "guidance": "",
+              "criteria": [
+                {
+                  "code": "1.1",
+                  "title": "Outline actions that could be taken to address changes in the business context where relevant to the occupational safety and health function.",
+                  "position": 1
+                },
+                {
+                  "code": "1.2",
+                  "title": "Explain the importance of promoting to all stakeholders the importance of standards of behaviour including equality in the workplace.",
+                  "position": 2
+                },
+                {
+                  "code": "1.3",
+                  "title": "Explain how to build effective relationships with stakeholders.",
+                  "position": 3
+                },
+                {
+                  "code": "1.4",
+                  "title": "Outline the benefits from timely advice and guidance on occupational health and safety processes in establishing trust throughout the organisation.",
+                  "position": 4
+                },
+                {
+                  "code": "1.5",
+                  "title": "Outline a range of methods to ensure consistency in the communication of health and safety messages across stakeholders.",
+                  "position": 5
+                },
+                {
+                  "code": "1.6",
+                  "title": "Outline the importance of cooperation with legal advisors and third parties in the supply and exchange of information.",
+                  "position": 6
+                }
+              ]
+            },
+            {
+              "code": "2",
+              "title": "Understand how improved stakeholder relationships support and strengthen the organisation’s approach to its health and safety strategy.",
+              "position": 2,
+              "required": true,
+              "guidance": "",
+              "criteria": [
+                {
+                  "code": "2.1",
+                  "title": "Explain the role of the board and/or senior management in reviewing the performance of health and safety practices in the workplace.",
+                  "position": 1
+                },
+                {
+                  "code": "2.2",
+                  "title": "Explain how to identify that effective stakeholder relationships will support a health and safety strategy.",
+                  "position": 2
+                },
+                {
+                  "code": "2.3",
+                  "title": "Outline a range of reports and business focussed information to ensure that health and safety information underpins a functioning health and safety strategy.",
+                  "position": 3
+                },
+                {
+                  "code": "2.4",
+                  "title": "Evaluate how a corporate health and safety strategy should respond to the potential impact of advised environmental and regulatory changes.",
+                  "position": 4
+                },
+                {
+                  "code": "2.5",
+                  "title": "Outline the process for resolving conflict prior to taking action on health and safety initiatives.",
+                  "position": 5
+                }
+              ]
+            },
+            {
+              "code": "3",
+              "title": "Understand how a health and safety strategy supports processes that lead and control workplace health and safety practices.",
+              "position": 3,
+              "required": true,
+              "guidance": "",
+              "criteria": [
+                {
+                  "code": "3.1",
+                  "title": "Explain the role of the board and/or senior management in the leading and controlling of health and safety practices in the workplace.",
+                  "position": 1
+                },
+                {
+                  "code": "3.2",
+                  "title": "Evaluate the use of goals and targets in health and safety management practices in the workplace.",
+                  "position": 2
+                },
+                {
+                  "code": "3.3",
+                  "title": "Assess the resources and skills required to lead and control health and safety practices in the workplace.",
+                  "position": 3
+                },
+                {
+                  "code": "3.4",
+                  "title": "Explain the importance of the planning process to ensure changing policies, regulations and legal requirements are met.",
+                  "position": 4
+                },
+                {
+                  "code": "3.5",
+                  "title": "Explain and justify the use of results and outputs from a performance review.",
+                  "position": 5
+                }
+              ]
+            }
+          ]
         },
         {
           "code": "M/652/4330",
@@ -40,10 +270,147 @@
           "position": 3,
           "sourceUrl": "https://othm.org.uk/docs/qualifications/othm-level-6-diploma-in-occupational-health-and-safety7565/specification_files/othm_level_6_diploma_in_occupational_health_and_safety_specification_nov_2026_master_2026-11-04_08-59.pdf",
           "sourceVersion": "November 2026",
-          "aim": null,
-          "assessmentNote": null,
+          "aim": "The aim of this unit is to enable learners to identify, address and manage risks and incidents in their roles as health and safety practitioners. This includes understanding strategies for assessing and evaluating risk, strategies and techniques for controlling risk, the causes of loss events, the analysis of loss data and the management of incidents.",
+          "assessmentNote": "Standards specified by the official November 2026 awarding-body criteria. Centre-issued assignment brief and assessor approval are separate.",
           "indicativeTopics": [],
-          "outcomes": []
+          "outcomes": [
+            {
+              "code": "1",
+              "title": "Understand the process of managing the assessment and evaluation of risk within an organisation.",
+              "position": 1,
+              "required": true,
+              "guidance": "",
+              "criteria": [
+                {
+                  "code": "1.1",
+                  "title": "Outline sources of information to identify hazards and assess risks.",
+                  "position": 1
+                },
+                {
+                  "code": "1.2",
+                  "title": "Explain techniques to identify hazards.",
+                  "position": 2
+                },
+                {
+                  "code": "1.3",
+                  "title": "Explain how to implement a risk assessment system and to evaluate risk.",
+                  "position": 3
+                },
+                {
+                  "code": "1.4",
+                  "title": "Explain how to measure, monitor and report hazards.",
+                  "position": 4
+                },
+                {
+                  "code": "1.5",
+                  "title": "Explain how to maintain records of risk assessments to meet regulatory and statutory requirements.",
+                  "position": 5
+                },
+                {
+                  "code": "1.6",
+                  "title": "Explain how to use calculations in the analysis and improvement of systems reliability and failure tracing.",
+                  "position": 6
+                }
+              ]
+            },
+            {
+              "code": "2",
+              "title": "Understand strategies and techniques for controlling and reducing risk.",
+              "position": 2,
+              "required": true,
+              "guidance": "",
+              "criteria": [
+                {
+                  "code": "2.1",
+                  "title": "Evaluate the use of common risk management strategies.",
+                  "position": 1
+                },
+                {
+                  "code": "2.2",
+                  "title": "Justify when to use risk avoidance, risk reduction, risk transfer, risk analysis, risk evaluation and risk review strategies.",
+                  "position": 2
+                },
+                {
+                  "code": "2.3",
+                  "title": "Explain the development and characteristics of safe systems of work and safe operating procedures.",
+                  "position": 3
+                },
+                {
+                  "code": "2.4",
+                  "title": "Explain how to engage those affected in improving information related to risk profiling.",
+                  "position": 4
+                },
+                {
+                  "code": "2.5",
+                  "title": "Explain how risk prioritisation supports effective occupational safety and health risk management.",
+                  "position": 5
+                }
+              ]
+            },
+            {
+              "code": "3",
+              "title": "Understand loss causation and the principles underpinning incident investigation.",
+              "position": 3,
+              "required": true,
+              "guidance": "",
+              "criteria": [
+                {
+                  "code": "3.1",
+                  "title": "Outline a range of loss causation theories and techniques.",
+                  "position": 1
+                },
+                {
+                  "code": "3.2",
+                  "title": "Justify the use of quantitative methods in analysing loss data.",
+                  "position": 2
+                },
+                {
+                  "code": "3.3",
+                  "title": "Assess the needs and impacts of reporting of loss events.",
+                  "position": 3
+                },
+                {
+                  "code": "3.4",
+                  "title": "Explain the importance and impact of incident investigations.",
+                  "position": 4
+                },
+                {
+                  "code": "3.5",
+                  "title": "Outline the critical stages for managing incidents in the organisation.",
+                  "position": 5
+                }
+              ]
+            },
+            {
+              "code": "4",
+              "title": "Be able to manage operational policies and procedures relating to risk and incident management.",
+              "position": 4,
+              "required": true,
+              "guidance": "",
+              "criteria": [
+                {
+                  "code": "4.1",
+                  "title": "Outline organisational policies to identify, investigate, report and record incidents.",
+                  "position": 1
+                },
+                {
+                  "code": "4.2",
+                  "title": "Explain how to maintain records of incidents to meet regulatory and statutory requirements.",
+                  "position": 2
+                },
+                {
+                  "code": "4.3",
+                  "title": "Evaluate an organisational process for managing health and safety incidents.",
+                  "position": 3
+                },
+                {
+                  "code": "4.4",
+                  "title": "Outline the critical stages for managing incidents in the organisation.",
+                  "position": 4
+                }
+              ]
+            }
+          ]
         },
         {
           "code": "R/652/4331",
@@ -51,10 +418,113 @@
           "position": 4,
           "sourceUrl": "https://othm.org.uk/docs/qualifications/othm-level-6-diploma-in-occupational-health-and-safety7565/specification_files/othm_level_6_diploma_in_occupational_health_and_safety_specification_nov_2026_master_2026-11-04_08-59.pdf",
           "sourceVersion": "November 2026",
-          "aim": null,
-          "assessmentNote": null,
+          "aim": "The aim of this unit is to provide learners with an understanding of a range of factors that influence health and safety behaviours, performance and culture in the workplace, including the impact of human and organisational factors, leadership styles, organisational structure and consultation arrangements. Learners will develop the skills to evaluate the health and safety culture and performance within an organisation, and to develop a coherent strategy to improve these.",
+          "assessmentNote": "Standards specified by the official November 2026 awarding-body criteria. Centre-issued assignment brief and assessor approval are separate.",
           "indicativeTopics": [],
-          "outcomes": []
+          "outcomes": [
+            {
+              "code": "1",
+              "title": "Understand how organisational factors influence workplace health and safety culture.",
+              "position": 1,
+              "required": true,
+              "guidance": "",
+              "criteria": [
+                {
+                  "code": "1.1",
+                  "title": "Assess the importance of health and safety culture within an organisation.",
+                  "position": 1
+                },
+                {
+                  "code": "1.2",
+                  "title": "Evaluate the promoting factors and potential barriers to health and safety culture in an organisation.",
+                  "position": 2
+                },
+                {
+                  "code": "1.3",
+                  "title": "Explain how to communicate and engage with staff to promote positive health and safety awareness and behaviour.",
+                  "position": 3
+                },
+                {
+                  "code": "1.4",
+                  "title": "Produce a plan to promote a positive health and safety culture.",
+                  "position": 4
+                },
+                {
+                  "code": "1.5",
+                  "title": "Outline how to improve occupational safety and health culture and its contribution to the organisation’s overall safety culture.",
+                  "position": 5
+                }
+              ]
+            },
+            {
+              "code": "2",
+              "title": "Understand how human factors influence safety behaviours and performance.",
+              "position": 2,
+              "required": true,
+              "guidance": "",
+              "criteria": [
+                {
+                  "code": "2.1",
+                  "title": "Outline the human factors that contribute to individual behaviour.",
+                  "position": 1
+                },
+                {
+                  "code": "2.2",
+                  "title": "Explain human perception of risk and the classification of human failure.",
+                  "position": 2
+                },
+                {
+                  "code": "2.3",
+                  "title": "Assess the impact of job factors and organisational factors on human reliability.",
+                  "position": 3
+                },
+                {
+                  "code": "2.4",
+                  "title": "Outline methods of improving individual human reliability.",
+                  "position": 4
+                },
+                {
+                  "code": "2.5",
+                  "title": "Evaluate the optimum conditions of behavioural change and behaviour change courses and programmes.",
+                  "position": 5
+                }
+              ]
+            },
+            {
+              "code": "3",
+              "title": "Be able to demonstrate how an effective health and safety strategy improves organisational health and safety culture.",
+              "position": 3,
+              "required": true,
+              "guidance": "",
+              "criteria": [
+                {
+                  "code": "3.1",
+                  "title": "Outline techniques and assessment criteria used to assess the health and safety culture of an organisation.",
+                  "position": 1
+                },
+                {
+                  "code": "3.2",
+                  "title": "Critically evaluate the current health and safety culture of an organisation by analysing assessment data.",
+                  "position": 2
+                },
+                {
+                  "code": "3.3",
+                  "title": "Recommend measures to improve health and safety culture of an organisation.",
+                  "position": 3
+                },
+                {
+                  "code": "3.4",
+                  "title": "Develop a strategy to implement recommended measures for improving the health and safety culture of an organisation.",
+                  "position": 4
+                },
+                {
+                  "code": "3.5",
+                  "title": "Produce a business case to support the improvement strategy.",
+                  "position": 5
+                }
+              ]
+            }
+          ]
         },
         {
           "code": "T/652/4332",
@@ -62,10 +532,113 @@
           "position": 5,
           "sourceUrl": "https://othm.org.uk/docs/qualifications/othm-level-6-diploma-in-occupational-health-and-safety7565/specification_files/othm_level_6_diploma_in_occupational_health_and_safety_specification_nov_2026_master_2026-11-04_08-59.pdf",
           "sourceVersion": "November 2026",
-          "aim": null,
-          "assessmentNote": null,
+          "aim": "The aim of this unit is to provide learners with an understanding of the underpinning factors that relate to the principles of occupational health and well-being. Learners will evaluate the organisational factors that influence occupational health and well-being practice, including the critical arrangements that affect its management. Learners will evaluate key areas such as vocational rehabilitation, mental health and the role of agencies and third parties. They will develop a better understanding of the legal and regulatory frameworks that determine legal and moral obligations.",
+          "assessmentNote": "Standards specified by the official November 2026 awarding-body criteria. Centre-issued assignment brief and assessor approval are separate.",
           "indicativeTopics": [],
-          "outcomes": []
+          "outcomes": [
+            {
+              "code": "1",
+              "title": "Be able to identify a range of factors that influence occupational health and well-being.",
+              "position": 1,
+              "required": true,
+              "guidance": "",
+              "criteria": [
+                {
+                  "code": "1.1",
+                  "title": "Assess the internal and external factors, including change factors, that affect occupational health and safety policies and practice.",
+                  "position": 1
+                },
+                {
+                  "code": "1.2",
+                  "title": "Recommend actions for organisational practice that takes account of the internal and external influencing factors.",
+                  "position": 2
+                },
+                {
+                  "code": "1.3",
+                  "title": "Outline a range of methods and practices that support the identification of occupational health risks.",
+                  "position": 3
+                },
+                {
+                  "code": "1.4",
+                  "title": "Evaluate the importance of including the effects on vulnerable workers in policies, procedures and controls.",
+                  "position": 4
+                },
+                {
+                  "code": "1.5",
+                  "title": "Outline the importance of embedding information on well-being when developing competence and training for management.",
+                  "position": 5
+                }
+              ]
+            },
+            {
+              "code": "2",
+              "title": "Understand the critical factors involved in managing workplace occupational health and well- being.",
+              "position": 2,
+              "required": true,
+              "guidance": "",
+              "criteria": [
+                {
+                  "code": "2.1",
+                  "title": "Explain the key principles of occupational health that are essential to consistent messaging within occupational health and safety management systems.",
+                  "position": 1
+                },
+                {
+                  "code": "2.2",
+                  "title": "Outline the features of vocational rehabilitation including the role of outside support agencies.",
+                  "position": 2
+                },
+                {
+                  "code": "2.3",
+                  "title": "Articulate the key aspects of the management of occupational health including legal considerations.",
+                  "position": 3
+                },
+                {
+                  "code": "2.4",
+                  "title": "Explain the causes, effects, identification and control of common types of mental ill-health in the workplace.",
+                  "position": 4
+                },
+                {
+                  "code": "2.5",
+                  "title": "Explain the causes, effects, identification and control of work-related violence or aggression.",
+                  "position": 5
+                }
+              ]
+            },
+            {
+              "code": "3",
+              "title": "Be able to manage occupational health and well-being arrangements and procedures.",
+              "position": 3,
+              "required": true,
+              "guidance": "",
+              "criteria": [
+                {
+                  "code": "3.1",
+                  "title": "Outline the legal and regulatory requirements on a business to manage its approach to occupational health and well-being provision.",
+                  "position": 1
+                },
+                {
+                  "code": "3.2",
+                  "title": "Describe the range of moral obligations on a business that support the argument for improved and sustainable occupational health and well-being arrangements.",
+                  "position": 2
+                },
+                {
+                  "code": "3.3",
+                  "title": "Evaluate the potential contribution to improvements in a business from improving awareness and integration of better welfare provision in a business.",
+                  "position": 3
+                },
+                {
+                  "code": "3.4",
+                  "title": "Evaluate how a business can engage with a range of stakeholders to monitor and review performance relative to changes in occupational health provision.",
+                  "position": 4
+                },
+                {
+                  "code": "3.5",
+                  "title": "Evaluate the contribution to a successful health and safety management system of integrating arrangements and performance relative to occupational health and safety.",
+                  "position": 5
+                }
+              ]
+            }
+          ]
         },
         {
           "code": "Y/652/4333",
@@ -73,10 +646,132 @@
           "position": 6,
           "sourceUrl": "https://othm.org.uk/docs/qualifications/othm-level-6-diploma-in-occupational-health-and-safety7565/specification_files/othm_level_6_diploma_in_occupational_health_and_safety_specification_nov_2026_master_2026-11-04_08-59.pdf",
           "sourceVersion": "November 2026",
-          "aim": null,
-          "assessmentNote": null,
+          "aim": "The aim of this unit is to provide learners with an understanding of the underpinning factors that relate to establishing a framework for an improved approach to sustainability and ethical business practices. Learners will evaluate the organisational factors that influence CSR and ethical practices including codes of conduct, the general principles of sustainability and the importance of human capital. Learners will better understand the role of professional, trade and employer groups to support the development of improved practices and examine the importance of corporate governance and social responsibility.",
+          "assessmentNote": "Standards specified by the official November 2026 awarding-body criteria. Centre-issued assignment brief and assessor approval are separate.",
           "indicativeTopics": [],
-          "outcomes": []
+          "outcomes": [
+            {
+              "code": "1",
+              "title": "Understand how corporate social responsibility and ethical practices influence successful health and safety management behaviours.",
+              "position": 1,
+              "required": true,
+              "guidance": "",
+              "criteria": [
+                {
+                  "code": "1.1",
+                  "title": "Explain the importance of having a corporate social responsibility objective on health and safety management.",
+                  "position": 1
+                },
+                {
+                  "code": "1.2",
+                  "title": "Outline how ethical codes of conduct are applied to health and safety management.",
+                  "position": 2
+                },
+                {
+                  "code": "1.3",
+                  "title": "Assess the opportunities for improved practice within the organisation through the understanding of the general principles of sustainability (people, planet, and profit).",
+                  "position": 3
+                },
+                {
+                  "code": "1.4",
+                  "title": "Explain how an organisation should engage with initiatives on human capital.",
+                  "position": 4
+                }
+              ]
+            },
+            {
+              "code": "2",
+              "title": "Understand the roles of industry and the community in influencing and promoting ethical business practices.",
+              "position": 2,
+              "required": true,
+              "guidance": "",
+              "criteria": [
+                {
+                  "code": "2.1",
+                  "title": "Outline the function of professional and employer bodies, trade associations, media and community groups and organisational partnerships in supporting and promoting ethical business practices.",
+                  "position": 1
+                },
+                {
+                  "code": "2.2",
+                  "title": "Outline the ethical and social responsibilities of organisations to develop high standards in health and safety delivery.",
+                  "position": 2
+                },
+                {
+                  "code": "2.3",
+                  "title": "Assess the role of corporate governance and self-regulation in supporting continual improvement of organisational health and safety standards.",
+                  "position": 3
+                },
+                {
+                  "code": "2.4",
+                  "title": "Outline the role that professional bodies play in supporting organisations to develop and maintain an effective understanding of ethical business practices.",
+                  "position": 4
+                }
+              ]
+            },
+            {
+              "code": "3",
+              "title": "Be able to develop arrangements that improve compliance with sustainable practices.",
+              "position": 3,
+              "required": true,
+              "guidance": "",
+              "criteria": [
+                {
+                  "code": "3.1",
+                  "title": "Describe a range of benefits that can accrue within a business from integrating greater corporate social responsibility and environmental arrangements.",
+                  "position": 1
+                },
+                {
+                  "code": "3.2",
+                  "title": "Outline the key features of a policy that reflects the commitment from senior management to improved corporate social responsibility and environmental improvements.",
+                  "position": 2
+                },
+                {
+                  "code": "3.3",
+                  "title": "Describe a range of barriers to introducing new or improved arrangements relating to corporate social responsibility.",
+                  "position": 3
+                },
+                {
+                  "code": "3.4",
+                  "title": "Explain the key features of a plan to integrate improved arrangements for corporate social responsibility and environmental practices.",
+                  "position": 4
+                },
+                {
+                  "code": "3.5",
+                  "title": "Analyse the benefits that may accrue from improved environmental safety considerations across the business.",
+                  "position": 5
+                },
+                {
+                  "code": "3.6",
+                  "title": "Outline the ways in which a business can engage with stakeholders, internally and externally to achieve stated aims and objectives related to improving the approach to environmental and corporate social responsibility objectives.",
+                  "position": 6
+                }
+              ]
+            },
+            {
+              "code": "4",
+              "title": "Be able to develop practices that improve leadership and ownership of ethical and sustainable business practices.",
+              "position": 4,
+              "required": true,
+              "guidance": "",
+              "criteria": [
+                {
+                  "code": "4.1",
+                  "title": "Explain how to ensure that policy, financial sustainability, and budget requirements for occupational safety reflect ethical business practices.",
+                  "position": 1
+                },
+                {
+                  "code": "4.2",
+                  "title": "Assess how the organisation can gain commitment to ethical and sustainability practices within the occupational safety and health function.",
+                  "position": 2
+                },
+                {
+                  "code": "4.3",
+                  "title": "Evaluate the ways in which a business can and should measure the impact of changes and improvements to corporate social responsibility and welfare arrangements through employee performance across the business.",
+                  "position": 3
+                }
+              ]
+            }
+          ]
         },
         {
           "code": "A/652/4334",
@@ -84,10 +779,147 @@
           "position": 7,
           "sourceUrl": "https://othm.org.uk/docs/qualifications/othm-level-6-diploma-in-occupational-health-and-safety7565/specification_files/othm_level_6_diploma_in_occupational_health_and_safety_specification_nov_2026_master_2026-11-04_08-59.pdf",
           "sourceVersion": "November 2026",
-          "aim": null,
-          "assessmentNote": null,
+          "aim": "The aim of this unit is to provide learners with a clearer understanding of the roles and responsibilities of health and safety practitioners, the challenges and conflicts facing them, how they support safe working environments, and the skills required to meet these challenges. Learners will develop greater knowledge of the importance of individual and organisational competence. Learners will develop a better understanding and appreciation of continuing professional development (CPD) and its importance in enhancing personal and professional development. Learners will also gain a greater awareness of the importance of a range of skills beyond health and safety that help in developing the approach and capability of the safety practitioner.",
+          "assessmentNote": "Standards specified by the official November 2026 awarding-body criteria. Centre-issued assignment brief and assessor approval are separate.",
           "indicativeTopics": [],
-          "outcomes": []
+          "outcomes": [
+            {
+              "code": "1",
+              "title": "Understand the roles and responsibilities of health and safety practitioners.",
+              "position": 1,
+              "required": true,
+              "guidance": "",
+              "criteria": [
+                {
+                  "code": "1.1",
+                  "title": "Explain the role and purpose of health and safety practitioners.",
+                  "position": 1
+                },
+                {
+                  "code": "1.2",
+                  "title": "Evaluate the potential challenges and conflicts that face health and safety practitioners in the workplace.",
+                  "position": 2
+                },
+                {
+                  "code": "1.3",
+                  "title": "Describe responsibilities and obligations of health and safety practitioners in relation to promoting a safe working environment in an organisation.",
+                  "position": 3
+                },
+                {
+                  "code": "1.4",
+                  "title": "Assess how different leadership types can impact on health and safety performance.",
+                  "position": 4
+                },
+                {
+                  "code": "1.5",
+                  "title": "Explain the importance of formal and informal consultation as part of your roles and responsibilities.",
+                  "position": 5
+                },
+                {
+                  "code": "1.6",
+                  "title": "Assess the importance of operating within occupational health and safety governance arrangements.",
+                  "position": 6
+                }
+              ]
+            },
+            {
+              "code": "2",
+              "title": "Understand the importance of promoting inclusion and diversity in internal and external health and safety provision.",
+              "position": 2,
+              "required": true,
+              "guidance": "",
+              "criteria": [
+                {
+                  "code": "2.1",
+                  "title": "Explain the importance of applying professional ethics in relation to health and safety in an organisation.",
+                  "position": 1
+                },
+                {
+                  "code": "2.2",
+                  "title": "Evaluate the importance attached to your own performance when establishing values related to equality, diversity and inclusivity.",
+                  "position": 2
+                },
+                {
+                  "code": "2.3",
+                  "title": "Outline the importance of promoting high standards of ethical and moral conduct in health and safety practices.",
+                  "position": 3
+                }
+              ]
+            },
+            {
+              "code": "3",
+              "title": "Be able to explain the importance of continuing professional development (CPD) in the personal and professional development of health and safety practitioners.",
+              "position": 3,
+              "required": true,
+              "guidance": "",
+              "criteria": [
+                {
+                  "code": "3.1",
+                  "title": "Explain the importance of continuing professional development and shared personal reflection within your learning approach.",
+                  "position": 1
+                },
+                {
+                  "code": "3.2",
+                  "title": "Assess the value of group discussion to support professional development within an organisation.",
+                  "position": 2
+                },
+                {
+                  "code": "3.3",
+                  "title": "Outline the importance of evaluating your own strengths and weaknesses in relation to an operational health and safety role.",
+                  "position": 3
+                },
+                {
+                  "code": "3.4",
+                  "title": "Explain the importance of prioritising goals to improve own performance as a health and safety practitioner.",
+                  "position": 4
+                },
+                {
+                  "code": "3.5",
+                  "title": "Produce and maintain a personal and professional development plan.",
+                  "position": 5
+                }
+              ]
+            },
+            {
+              "code": "4",
+              "title": "Understand the importance of non-health and safety competencies and skills that support the development of health and safety practitioners.",
+              "position": 4,
+              "required": true,
+              "guidance": "",
+              "criteria": [
+                {
+                  "code": "4.1",
+                  "title": "Explain the importance of professional integrity in relation to offering occupational safety and health advice.",
+                  "position": 1
+                },
+                {
+                  "code": "4.2",
+                  "title": "Explain the importance of self-motivation and self-discipline to achieve the best possible outcomes in health and safety interactions.",
+                  "position": 2
+                },
+                {
+                  "code": "4.3",
+                  "title": "Evaluate the importance of communication skills in establishing occupational safety and health priorities and performance measures.",
+                  "position": 3
+                },
+                {
+                  "code": "4.4",
+                  "title": "Outline the importance of value-added outcomes through improved innovation and the application of new ideas and practices.",
+                  "position": 4
+                },
+                {
+                  "code": "4.5",
+                  "title": "Outline the importance of personal behavioural traits and how they impact on others.",
+                  "position": 5
+                },
+                {
+                  "code": "4.6",
+                  "title": "Evaluate the importance of supporting and encouraging others in their personal and professional development, offering positive advice and encouragement.",
+                  "position": 6
+                }
+              ]
+            }
+          ]
         }
       ]
     },
