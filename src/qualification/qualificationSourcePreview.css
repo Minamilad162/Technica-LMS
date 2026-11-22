@@ -109,3 +109,8 @@
  .qf-live .qsrc-unit-list>button,.qf-live .qsrc-outcome summary>svg{transition:none}
  .qf-live .qsrc-unit-list>button:hover{transform:none}
 }
+
+.qf-live .qsrc-card-edition{font-size:12px;line-height:1.55;color:#6d85a1;margin:-5px 0 16px}
+.qf-live .qsrc-unit-aim{padding:19px 21px;background:linear-gradient(135deg,#f8fbff,#fff);
+ border:1px solid #deebf8;border-radius:15px;box-shadow:0 5px 18px #1b4c790a}
+.qf-live .qsrc-unit-aim p{color:#516d89;font-size:13px;line-height:1.75;margin:0}
