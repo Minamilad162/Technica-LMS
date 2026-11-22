@@ -42,3 +42,19 @@ No frontend flag can bypass the real database checks; there is no automated appr
 - Verify student / Assessor / Verifier isolation and RLS before the first live assessment.
 
 **Not yet authorized:** No genuine centre publishing reference, Assessor / Verifier competence evidence, or real learner assignment was provided during this task. Therefore no production publication, professional authorization, enrollment, or certificate action was performed.
+
+## Activation phase 1 — implemented 22 November 2026
+
+**Live finding:** All 30 source-backed centre assessment briefs use the same generic `assessment_methods` text: `Methods must be selected and justified by the centre assessor...`. None of those Methods is an actual documented centre decision; the Methods therefore need human review for each Unit.
+
+**Changes committed:**
+- `Qualification Centre Admin` receives the exact source edition's Outcomes/Assessment Criteria, with a readable read-only panel and authoritative source-document link.
+- Each Unit has a 3-part sign-off checklist: source rubric reviewed, actual methods selected, and authorised Technica reviewer confirms their approval responsibility. Editing instructions/methods clears the relevant confirmations.
+- The approval button is disabled if rubric counts disagree, a generic methods placeholder is present, or a sign-off is not complete. Saving an unapproved draft remains available.
+- After approving, the workspace selects the next unapproved Unit.
+- The production Supabase migration `qualification_methods_approval_guard` was applied successfully on 2026-11-22. The two existing centre-admin RPCs now enforce method selection during approval **and** final release; anonymous execute permissions remain denied.
+- The update makes **no** changes to actual centre approvals, professional reviewer authorisations, enrolments or certificates.
+
+**Required action by Technica:** For OTHM Level 6 November 2026, open Unit `H/652/4328`, review all **4 LO and 17 AC**, replace the generic Assessment Methods with the actual centre-approved methods/acceptance conditions, confirm the 3 checklist items, and approve it *only if properly authorised*. The UI will advance through the remaining six Units. Do not copy a generic method for every Unit unless the centre explicitly determines and documents its appropriateness.
+
+**No assumed third-party authority:** The user has confirmed Technica's accreditation for the supplied editions. That does not substitute for individual internal reviewer identities, centre-selected methods, or external certificate issuer records.
