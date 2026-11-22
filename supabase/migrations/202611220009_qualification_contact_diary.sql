@@ -20,7 +20,7 @@ CREATE OR REPLACE FUNCTION public.lms_qf_contact_list(p_enrolment uuid)
 DECLARE actor uuid:=public.lms_qf_actor(); e public.lms_qualification_enrolments; data jsonb;
 BEGIN
  SELECT * INTO e FROM public.lms_qualification_enrolments WHERE id=p_enrolment;
- IF actor IS NULL OR NOT FOUND OR actor NOT IN (e.learner_id,e.assessor_id,e.verifier_id)
+ IF actor IS NULL OR NOT FOUND OR NOT (coalesce(actor=e.learner_id,false) OR coalesce(actor=e.assessor_id,false) OR coalesce(actor=e.verifier_id,false))
   OR NOT EXISTS (SELECT 1 FROM public.lms_qualification_versions v
     WHERE v.id=e.version_id AND v.published_at IS NOT NULL) THEN
   RAISE EXCEPTION 'Qualification Contact Diary access denied.' USING ERRCODE='42501';
@@ -44,7 +44,7 @@ CREATE OR REPLACE FUNCTION public.lms_qf_contact_add(p_enrolment uuid,p_kind tex
 DECLARE actor uuid:=public.lms_qf_actor(); e public.lms_qualification_enrolments; item uuid;
 BEGIN
  SELECT * INTO e FROM public.lms_qualification_enrolments WHERE id=p_enrolment;
- IF actor IS NULL OR NOT FOUND OR actor NOT IN (e.learner_id,e.assessor_id,e.verifier_id)
+ IF actor IS NULL OR NOT FOUND OR NOT (coalesce(actor=e.learner_id,false) OR coalesce(actor=e.assessor_id,false) OR coalesce(actor=e.verifier_id,false))
   OR NOT EXISTS (SELECT 1 FROM public.lms_qualification_versions v
     WHERE v.id=e.version_id AND v.published_at IS NOT NULL) THEN
   RAISE EXCEPTION 'Qualification Contact Diary access denied.' USING ERRCODE='42501';
