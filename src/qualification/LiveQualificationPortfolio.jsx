@@ -1,11 +1,12 @@
 import React, {useEffect, useRef, useState} from 'react';
-import {ArrowLeft, ArrowRight, BookOpen, CheckCircle2, ClipboardCheck, Download, FileText, FolderOpen, GraduationCap, Layers3, LibraryBig, MessageSquare, ShieldCheck} from 'lucide-react';
+import {ArrowLeft, ArrowRight, BookOpen, CheckCircle2, ClipboardCheck, Download, FileText, FolderOpen, GraduationCap, Layers3, LibraryBig, MessageSquare, ShieldCheck, BarChart3} from 'lucide-react';
 import PremiumLoading from '../components/PremiumLoading.jsx';
 import {QUALIFICATIONS} from './qualificationData.js';
 import {ProgrammeListPremium, qualificationFor} from './QualificationCatalogue.jsx';
 import QualificationSourcePreview from './QualificationSourcePreview.jsx';
 import QualificationCentreAdmin from './QualificationCentreAdmin.jsx';
 import QualificationCentreBrief from './QualificationCentreBrief.jsx';
+import {PortfolioStatusRibbon,PortfolioMetrics} from './QualificationPortfolioReferenceUI.jsx';
 import QualificationEvidenceTemplates from './QualificationEvidenceTemplates.jsx';
 import {LiveUnitLearningHub, OutcomeLearningSupport, ProgrammeMaterialSnapshot, EvidencePreparationTips} from './QualificationLearningResources.jsx';
 import {
@@ -390,7 +391,7 @@ function ContactDiary({progress, onOutcome}) {
 }
 
 function OpenPortfolio({db, portfolio, references, onRefresh, onBack}) {
-  const [view,setView] = useState('dashboard');
+  const [view,setView] = useState('programme');
   const [unitIndex,setUnitIndex] = useState(0);
   const [outcomeId,setOutcomeId] = useState('');
   const [evidenceFromOutcome,setEvidenceFromOutcome] = useState(false);
@@ -459,10 +460,11 @@ function OpenPortfolio({db, portfolio, references, onRefresh, onBack}) {
   };
   const onDownload = item => run(() => downloadPortfolioEvidence(db,item));
   const views = [
-    ['dashboard','Overview'],['programme',learner ? 'My Programme' : 'Units & Criteria'],...(learner ? [['evidence','Evidence']] : []),
-    ['registration','Registration'],['contact','Contact Diary'],...(qualificationFor(portfolio.title) ? [['library','Study Library']] : []),
+    ['programme','Course'],['evidence','Evidence'],['registration','Registration'],['contact','Contact'],
+    ['metrics','Metrics'],['dashboard','Overview'],
+    ...(qualificationFor(portfolio.title) ? [['library','Study Library']] : []),
   ];
-  const sectionIcons = {dashboard: Layers3, programme: BookOpen, evidence: FolderOpen, registration: GraduationCap, contact: MessageSquare, library: LibraryBig};
+  const sectionIcons = {dashboard: Layers3, programme: BookOpen, evidence: FolderOpen, registration: GraduationCap, contact: MessageSquare, metrics: BarChart3, library: LibraryBig};
   const cover = qualificationFor(portfolio.title);
   const selectedReference = references.find(ref => ref.catalog_key === portfolio.catalogKey ||
     (ref.title === portfolio.title && ref.version === portfolio.version));
@@ -482,6 +484,7 @@ function OpenPortfolio({db, portfolio, references, onRefresh, onBack}) {
       </div>
       <div className="qf-live-feature-action"><Action secondary disabled={busy} onClick={() => run(() => onRefresh())}>Refresh</Action></div>
     </header>
+    <PortfolioStatusRibbon portfolio={portfolio} progress={progress} onRegistration={()=>changeView('registration')}/>
     <nav className="qf-live-nav" aria-label="Programme sections">
       {views.map(([key,label]) => {
         const Icon = sectionIcons[key];
@@ -495,12 +498,13 @@ function OpenPortfolio({db, portfolio, references, onRefresh, onBack}) {
     {view === 'dashboard' && <PortfolioOverview portfolio={portfolio} progress={progress} onOutcome={openOutcome} onView={changeView} qualification={cover}/>}
     {view === 'programme' && <UnitProgramme db={db} portfolio={portfolio} unitIndex={unitIndex} setUnitIndex={setUnitIndex} onOutcome={openOutcome}
       onEvidence={learner ? () => changeView('evidence') : null} onLibrary={cover ? () => changeView('library') : null}/>}
-    {view === 'evidence' && learner && <EvidenceFolder portfolio={portfolio} busy={busy} onSave={saveEvidence}
+    {view === 'evidence' && <EvidenceFolder portfolio={portfolio} busy={busy} onSave={saveEvidence}
       onDownload={onDownload} onShowcase={items => run(() => downloadEvidenceShowcase(db,items))} onBack={evidenceFromOutcome ? () => changeView('outcome') : null}/>}
     {view === 'registration' && <Registration portfolio={portfolio} progress={progress} busy={busy}
       onDeclare={() => commit('declare',{},'Declaration accepted.')}
       onFinalize={reference => commit('finalize',{p_certificate_reference: reference},reference ? 'Certificate reference recorded.' : 'Qualification completed.')}/>}
     {view === 'contact' && <ContactDiary progress={progress} onOutcome={openOutcome}/>}
+    {view === 'metrics' && <PortfolioMetrics portfolio={portfolio} progress={progress} onOutcome={openOutcome}/>}
     {view === 'library' && cover && selectedReference &&
       <QualificationSourcePreview key={selectedReference.catalog_key} item={cover}
         references={[selectedReference]} onBack={() => changeView('programme')}/>}
