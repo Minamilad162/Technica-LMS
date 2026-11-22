@@ -1,3 +1,21 @@
+// The imported centre drafts contain a request to SELECT methods, not a decision.
+// A real centre assessor must replace this text before sign-off.
+export function needsAssessmentMethodReview(methods) {
+  const text=typeof methods==='string'?methods.trim():'';
+  return text.length<20 || /^methods must be selected and justified by the centre assessor\b/i.test(text);
+}
+
+// Match the server-supplied authoritative Unit, never a similarly named legacy edition.
+export function sourceRubricForUnit(references,version,unit) {
+  const source=Array.isArray(references)?references.find(r=>r.catalog_key===version?.catalogKey):null;
+  const actual=source?.units?.find(item=>item.code===unit?.code)??null;
+  const outcomes=Array.isArray(actual?.outcomes)?actual.outcomes:[];
+  const criteria=outcomes.reduce((sum,o)=>sum+(Array.isArray(o.criteria)?o.criteria.length:0),0);
+  return {source,unit:actual,outcomes,criteria,
+    complete:Boolean(actual&&outcomes.length>0&&outcomes.length===Number(unit?.outcomes)&&criteria>0&&criteria===Number(unit?.criteria)
+      &&outcomes.every(o=>Array.isArray(o.criteria)&&o.criteria.length>0))};
+}
+
 // Read-only readiness derived from the authenticated centre administrator RPC.
 // These checks NEVER grant assessment access, approve a Unit, or publish a programme.
 export function qualificationReadiness(version, staff = []) {
