@@ -43,4 +43,24 @@ assert.match(ui,/function UnitTabs/);
 assert.match(ui,/Map evidence to assessment criteria/);
 assert.match(ui,/Record preview decision/);
 assert.ok(!/\b(?:db|supabase|client)\.(?:from|rpc|insert|update|delete|storage)\s*[\.(]/.test(ui),'No Supabase mutations allowed in UI preview');
+
+const live=read('src/qualification/LiveQualificationPortfolio.jsx');
+const catalogue=read('src/qualification/QualificationCatalogue.jsx');
+const premium=read('src/qualification/qualificationPremium.css');
+assert.match(live,/ProgrammeListPremium/, 'The real DB-backed route must use the premium catalogue');
+assert.match(live,/<QualificationPreview/, 'Read-only qualification preview must be connected');
+assert.match(catalogue,/QUALIFICATIONS\.map\(item =>/, 'All three pathways must render, not only enrolled records');
+assert.match(catalogue,/assigned\.filter\(row => qualificationFor\(row\.title\)/, 'Enrolment matching must stay role-scoped');
+assert.match(catalogue,/onOpen\(enrolments\[0\]\.id\)/, 'Enrolled programmes must open live portfolios');
+assert.match(catalogue,/onPreview\(item\.id\)/, 'Other programmes must only open read-only syllabus');
+for(const title of ['OTHM','ProQual','Programme preview','Assigned to you']){
+ assert.ok(catalogue.includes(title), 'Missing catalogue label: '+title);
+}
+for(const className of ['qf-live-lead','qf-live-feature','qf-live-kpi','qf-live-preview-notice']){
+ assert.ok(premium.includes('.'+className), 'Premium live section missing: '+className);
+}
+for(const rpc of ["commit('save_claim'","commit('review'","commit('finalize'"]){
+ assert.ok(live.includes(rpc), 'Do not drop live backend workflow: '+rpc);
+}
+
 console.log('P35 premium Qualification heroes, 3 verified local images, clear responsive typography and workflow preservation PASS');
