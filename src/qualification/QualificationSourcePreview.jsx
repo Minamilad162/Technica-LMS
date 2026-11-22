@@ -75,7 +75,7 @@ export default function QualificationSourcePreview({item,references=[],onBack}) 
   <div className="qsrc-source-note"><Info size={18}/><div>
     <strong>{isReference ? 'Verified source reference — not a learner enrolment' : 'Centre-published syllabus'}</strong>
     <p>{source.version==='November 2026'
-      ? 'The November 2026 OTHM Level 6 specification has new Unit codes and qualification number. The official seven-unit structure is imported; detailed outcome and criterion text is not yet loaded, so do not use the previous 2023 criteria for this edition.'
+      ? 'The November 2026 OTHM Level 6 specification has a new qualification number and revised Units, Learning Outcomes and Assessment Criteria. All official content shown here is source-backed; the former 2023 standards do not apply to this edition. Centre approval is required before live assessment.'
       : 'This syllabus uses real Unit titles, Learning Outcomes and Assessment Criteria imported from the supplied awarding-body specification. It is not a demo. Centre approval is still required before using this version for live grading.'}</p>
   </div></div>
   <div className="qsrc-structure">
@@ -90,6 +90,10 @@ export default function QualificationSourcePreview({item,references=[],onBack}) 
       <header className="qsrc-unit-heading"><span className="qf-overline">UNIT {String(unitIndex+1).padStart(2,'0')} · {unit.code}</span><h2>{unit.title}</h2>
         <div className="qsrc-unit-meta"><span>{unit.outcomes.length} Learning Outcomes</span><span>{unit.outcomes.reduce((n,o)=>n+o.criteria.length,0)} Assessment Criteria</span></div>
       </header>
+      {unit.aim && <section className="qsrc-unit-aim">
+        <div className="qsrc-section-heading"><BookOpen size={19}/><h3>Unit aim</h3></div>
+        <p>{unit.aim}</p>
+      </section>}
       {unit.outcomes.length ? <section className="qsrc-outcomes">
         <div className="qsrc-section-heading"><ShieldCheck size={19}/><h3>Learning Outcomes &amp; Assessment Criteria</h3></div>
         {unit.outcomes.map((outcome,index)=><CriterionDetails key={outcome.code} outcome={outcome} index={index}/>)}
