@@ -225,3 +225,21 @@
 @media(max-width:650px){.qf-live .qsrc-unit-paging label{order:-1;width:100%;justify-content:space-between}
  .qf-live .qsrc-unit-paging label select{flex:1;max-width:230px}
  .qf-live .qsrc-unit-paging button{flex:1}}
+
+
+.qf-live .qsrc-evidence-bank-readonly{display:grid;gap:13px;padding:17px;margin:15px 0 20px;
+ border:1px solid #caddf0;border-radius:14px;background:linear-gradient(120deg,#f2f8ff,#fff)}
+.qf-live .qsrc-evidence-bank-header{display:flex;align-items:start;gap:10px;color:#317cb8}
+.qf-live .qsrc-evidence-bank-header>div{display:grid;gap:4px}
+.qf-live .qsrc-evidence-bank-header strong{color:#224d77;font-size:15px}
+.qf-live .qsrc-evidence-bank-header small{color:#7e96ac;font-size:11px;line-height:1.5}
+.qf-live .qsrc-evidence-bank-steps{display:flex;flex-wrap:wrap;gap:8px}
+.qf-live .qsrc-evidence-bank-steps span{display:inline-block;padding:8px 10px;
+ border-radius:9px;border:1px solid #dce8f6;background:#fff;color:#567b9f;
+ font-size:10.5px;font-weight:750;line-height:1.45}
+.qf-live .qsrc-evidence-bank-actions{display:flex;gap:9px;flex-wrap:wrap;align-items:center}
+.qf-live .qsrc-evidence-bank-actions button{display:inline-flex;gap:7px;align-items:center;
+ padding:10px 13px;min-height:42px;border-radius:10px;border:1px solid #c8dbea;
+ background:#edf3fa;color:#7791ad;font-size:12px;font-weight:800;cursor:not-allowed}
+.qf-live .qsrc-evidence-bank-actions p{width:100%;color:#718ba2;font-size:11px;
+ line-height:1.7;margin:4px 0 0}
