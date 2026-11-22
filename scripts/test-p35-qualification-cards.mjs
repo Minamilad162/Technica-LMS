@@ -162,5 +162,17 @@ assert.match(reviewerSql,/a\.role='verifier'/);
 assert.match(reviewerSql,/REVOKE ALL ON public\.lms_qf_staff_authorisations/);
 assert.match(reviewerSql,/ENABLE ROW LEVEL SECURITY/);
 
+
+const revocationSql=read('supabase/migrations/202611220007_qualification_reviewer_revocation_audit.sql');
+assert.match(centre,/admin_revoke_staff/,'Centre must revoke an assessor/verifier when necessary');
+assert.match(centre,/admin_reassign/,'Active portfolio must support auditable authorised replacement');
+assert.match(revocationSql,/CREATE TABLE public\.lms_qf_staff_events/,'Professional staff authorizations need immutable audit trail');
+assert.match(revocationSql,/CREATE TABLE public\.lms_qf_reassignment_events/,'Reviewer reassignments need immutable audit trail');
+assert.match(revocationSql,/Active centre professional authorization is required to review this portfolio/);
+assert.match(revocationSql,/a\.role='verifier' AND a\.revoked_at IS NULL/);
+assert.match(revocationSql,/p_assessor=p_verifier/);
+assert.match(revocationSql,/SET assessor_id=p_assessor,verifier_id=p_verifier/);
+assert.ok(!/\bdemoEnrolments\s*=/.test(centre),'No manufactured enrolments may appear in real centre administration');
+
 console.log('P35 premium Qualification heroes, 3 verified local images, clear responsive typography and workflow preservation PASS');
 
