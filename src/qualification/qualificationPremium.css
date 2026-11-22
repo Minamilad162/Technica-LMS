@@ -258,3 +258,33 @@
 .qf-live .qf-ref-contact-history span{font-size:11px;color:#5d7b98}
 .qf-live .qf-ref-contact-history time{margin-inline-start:auto;color:#8798aa;font-size:10px}
 .qf-live .qf-ref-contact-history p{font-size:13px;color:#294b6d;line-height:1.7;white-space:pre-wrap;margin:9px 0 0;overflow-wrap:anywhere}
+
+/* Candidate registration — structured original workflow, Technica visual system */
+.qf-live .qf-ref-registration{display:grid;gap:16px}
+.qf-live .qf-ref-candidate{display:grid;gap:14px}
+.qf-live .qf-ref-candidate>.qf-card-header{margin:0}
+.qf-live .qf-ref-candidate-heading{display:flex;align-items:center;justify-content:space-between;gap:15px;
+ border:1px solid #dfeafa;background:linear-gradient(105deg,#f2f8ff,#fff);border-radius:13px;padding:16px 18px}
+.qf-live .qf-ref-candidate-heading>div{display:grid;gap:5px}
+.qf-live .qf-ref-candidate-heading>div span{color:#6483a6;font-size:10px;font-weight:850;letter-spacing:.08em}
+.qf-live .qf-ref-candidate-heading>div strong{color:#1e4b79;font-size:17px}
+.qf-live .qf-ref-candidate-heading>div small{color:#8194a8;font-size:11px}
+.qf-live .qf-ref-candidate-heading>span{display:inline-flex;align-items:center;gap:6px;color:#32735e;
+ background:#eaf8f2;border:1px solid #c6ead9;border-radius:8px;font-size:11px;font-weight:750;padding:8px 11px;white-space:nowrap}
+.qf-live .qf-ref-candidate-intro{font-size:12px;line-height:1.7;color:#7489a0;margin:0}
+.qf-live .qf-ref-candidate-group{border:1px solid #e0eaf5;border-radius:12px;background:#fcfdff;overflow:hidden}
+.qf-live .qf-ref-candidate-group summary{display:flex;justify-content:space-between;align-items:center;gap:15px;
+ cursor:pointer;padding:16px 18px;background:linear-gradient(110deg,#f3f8ff,#fff)}
+.qf-live .qf-ref-candidate-group summary span{font-weight:850;color:#266095;font-size:13px}
+.qf-live .qf-ref-candidate-group summary small{font-size:11px;color:#8093a8;line-height:1.5;font-weight:450}
+.qf-live .qf-ref-candidate-group[open] summary{border-bottom:1px solid #e1e9f4}
+.qf-live .qf-ref-candidate-fields{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:2px 18px;padding:16px 18px}
+.qf-live .qf-ref-candidate-fields>.qf-field{margin:0 0 12px}
+.qf-live .qf-ref-candidate-fields>.qf-field:has(textarea){grid-column:1/-1}
+.qf-live .qf-ref-candidate-footer{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;
+ gap:12px;border-top:1px solid #e6edf6;padding-top:17px}
+.qf-live .qf-ref-candidate-footer span{color:#8497ac;font-size:11px}
+.qf-live .qf-ref-candidate-loading{display:flex;align-items:center;gap:9px;color:#6a89a8;font-size:12px}
+@media(max-width:650px){.qf-live .qf-ref-candidate-heading{align-items:start;flex-direction:column}
+ .qf-live .qf-ref-candidate-group summary{align-items:start;flex-direction:column;gap:5px}
+ .qf-live .qf-ref-candidate-fields{grid-template-columns:minmax(0,1fr)}}
