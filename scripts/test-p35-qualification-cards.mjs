@@ -105,5 +105,44 @@ assert.match(migration,/REVOKE ALL ON FUNCTION public\.lms_qf_reference_catalog\
 assert.match(migration,/GRANT EXECUTE ON FUNCTION public\.lms_qf_reference_catalog\(\) TO authenticated/);
 assert.ok(!/portfolioRpc\(db,'(?:save_claim|review|finalize)'/.test(sourcePreview),'Reference browser must never create real assessment data');
 
+
+const centre=read('src/qualification/QualificationCentreAdmin.jsx');
+const centreCss=read('src/qualification/qualificationCentreAdmin.css');
+const centreBrief=read('src/qualification/QualificationCentreBrief.jsx');
+const forms=read('src/qualification/QualificationEvidenceTemplates.jsx');
+const migrationCentre=read('supabase/migrations/202611220004_qualification_centre_governance.sql');
+assert.match(live,/<QualificationCentreAdmin/, 'Admin-only qualification centre workflow is missing');
+assert.match(live,/portfolioRpc\(db,'admin_access'\)/, 'Admin rights must be server-side scoped');
+assert.match(live,/portfolioRpc\(db,'programme_briefs'/, 'Live approved Unit briefing is missing');
+assert.match(live,/<QualificationCentreBrief/, 'Signed private resources not integrated');
+assert.match(live,/<QualificationEvidenceTemplates/, 'Unit-specific working forms missing');
+assert.match(live,/selectedReference/, 'Live Study Library must match the exact pinned qualification edition');
+assert.match(centre,/admin_save_brief/);
+assert.match(centre,/admin_publish/);
+assert.match(centre,/admin_assign/);
+assert.match(centre,/admin_reserve_document/);
+assert.match(centre,/admin_approve_document/);
+assert.match(centre,/storage.from\('technica-qualification-materials'\)/);
+assert.match(centreBrief,/createSignedUrl\(item.path,60\)/);
+assert.match(forms,/Witness Testimony/);
+assert.match(forms,/Reflective Account/);
+assert.match(forms,/CPD & Development Log/);
+assert.match(forms,/Evidence Mapping Matrix/);
+assert.match(forms,/Assessment Planning Sheet/);
+assert.match(forms,/unit\?\.outcomes/);
+assert.match(centreCss,/\.qc-columns/);
+assert.match(centreCss,/@media\(max-width:880px\)/);
+assert.match(migrationCentre,/lms_qf_admin_access/);
+assert.match(migrationCentre,/public\.lms_p1_actor_is_admin\(\)/);
+assert.match(migrationCentre,/published_at=now\(\),allow_certificate_recording=false/);
+assert.match(migrationCentre,/p_assessor=p_verifier/);
+assert.match(migrationCentre,/EXISTS \(SELECT 1 FROM public\.lms_qualification_claims/);
+assert.match(migrationCentre,/CREATE POLICY lms_qf_centre_files_read_guard/);
+assert.match(migrationCentre,/CREATE POLICY lms_qf_centre_files_anon_guard/);
+for(const table of ['lms_qf_centre_briefs','lms_qf_centre_documents','lms_qf_admin_activity']){
+ assert.ok(migrationCentre.includes('ALTER TABLE public.'+table+' ENABLE ROW LEVEL SECURITY'),
+   'Protected centre data without RLS: '+table);
+}
+
 console.log('P35 premium Qualification heroes, 3 verified local images, clear responsive typography and workflow preservation PASS');
 
