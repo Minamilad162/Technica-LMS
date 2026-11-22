@@ -89,6 +89,9 @@ function OutcomeLink({outcome, onOpen}) {
 function UnitProgramme({db,portfolio, unitIndex, setUnitIndex, onOutcome, onEvidence, onLibrary}) {
   const unit = portfolio.units[unitIndex];
   const learner = portfolio.role === 'learner';
+  const unitRequired = unit.outcomes.filter(outcome => outcome.required);
+  const unitStarted = unitRequired.filter(outcome => claimState(outcome) !== 'not_started').length;
+  const unitVerified = unitRequired.filter(outcome => claimState(outcome) === 'verified').length;
   return <>
     <div className="qf-live-section-heading"><div><span className="qf-overline">LEARNING OUTCOMES</span><h2>Programme units</h2></div><span>{portfolio.units.length} units</span></div>
     <nav className="qf-unit-strip" aria-label="Qualification units">
@@ -101,14 +104,29 @@ function UnitProgramme({db,portfolio, unitIndex, setUnitIndex, onOutcome, onEvid
       </div>
     </nav>
     <div className="qf-unit-heading"><div><span className="qf-overline" dir="ltr">{unit.code}</span><h2>{unit.title}</h2></div></div>
+    <div className="qf-ref-unit-toolbar">
+      <button type="button" disabled={unitIndex===0} onClick={()=>setUnitIndex(index=>Math.max(0,index-1))}><ArrowLeft size={15}/> Previous Unit</button>
+      <label>Jump to Unit
+        <select value={unitIndex} onChange={e=>setUnitIndex(Number(e.target.value))} aria-label="Jump to qualification Unit">
+          {portfolio.units.map((item,index)=><option key={item.id} value={index}>{String(index+1).padStart(2,'0')} · {item.title}</option>)}
+        </select>
+      </label>
+      <button type="button" disabled={unitIndex===portfolio.units.length-1}
+        onClick={()=>setUnitIndex(index=>Math.min(portfolio.units.length-1,index+1))}>Next Unit <ArrowRight size={15}/></button>
+    </div>
+    <div className="qf-ref-unit-progress">
+      <span><strong>{unitStarted}/{unitRequired.length}</strong> Outcomes started</span>
+      <span><strong>{unitVerified}/{unitRequired.length}</strong> Outcomes verified</span>
+      <progress max={unitRequired.length||1} value={unitVerified} aria-label={'Verified Outcomes in Unit '+unit.code}/>
+    </div>
     <QualificationCentreBrief unit={unit} db={db}/>
     <LiveUnitLearningHub key={unit.id} unit={unit} portfolio={portfolio} onEvidence={onEvidence} onLibrary={onLibrary}/>
     <QualificationEvidenceTemplates key={unit.id+':forms'} unit={unit}/>
     <div className="qf-live-grid">
-      <Panel title="Learning Outcomes"><div className="qf-live-list">
+      <Panel title="Activity · Learning Outcomes"><div className="qf-live-list">
         {unit.outcomes.map(outcome => <OutcomeLink key={outcome.id} outcome={outcome} onOpen={onOutcome}/>)}
       </div></Panel>
-      <Panel title="Criteria & Gap Analysis"><div className="qf-live-gaps">
+      <Panel title="Gap Analysis · Assessment Criteria"><div className="qf-live-gaps">
         {unit.outcomes.map(outcome => {
           const mapping = outcome.claim?.mapping;
           return <details key={outcome.id}>
@@ -139,6 +157,9 @@ function EvidenceItem({item, onDownload, uses = []}) {
 function EvidenceFolder({portfolio, onDownload, onShowcase, busy, onSave, onBack}) {
   const [mode, setMode] = useState('');
   const [showcase, setShowcase] = useState([]);
+  const [search, setSearch] = useState('');
+  const [type, setType] = useState('');
+  const [order, setOrder] = useState('newest');
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [kind, setKind] = useState(evidenceKinds[0]);
@@ -155,11 +176,33 @@ function EvidenceFolder({portfolio, onDownload, onShowcase, busy, onSave, onBack
     return mappings.some(mapping => mapping && Object.values(mapping).some(ids => ids.includes(id)));
   }).map(outcome => outcome.unitCode + ' / ' + outcome.code);
   const selection = portfolio.evidence.filter(item => showcase.includes(item.id));
+  const visibleEvidence = portfolio.evidence.filter(item=>{
+    const term=search.toLowerCase().trim();
+    return (!type||item.kind===type) && (!term||[item.title,item.filename,item.description,item.kind]
+      .some(value=>String(value||'').toLowerCase().includes(term)));
+  }).sort((a,b)=>order==='title'?a.title.localeCompare(b.title)
+    :order==='oldest'?Date.parse(a.created_at)-Date.parse(b.created_at)
+    :Date.parse(b.created_at)-Date.parse(a.created_at));
   return <div className="qlearn-evidence-stack"><EvidencePreparationTips/><div className="qf-live-grid">
     <Panel title="Evidence Folder" action={onBack && <Action secondary disabled={busy} onClick={onBack}>Back to outcome</Action>}>
+      <div className="qf-ref-evidence-toolbar">
+        <label>Search evidence<input value={search} onChange={e=>setSearch(e.target.value)}
+          type="search" placeholder="Title, filename or description"/></label>
+        <label>Type<select value={type} onChange={e=>setType(e.target.value)}>
+          <option value="">All types</option>
+          {evidenceKinds.map(kind=><option key={kind} value={kind}>{kind}</option>)}
+        </select></label>
+        <label>Sort<select value={order} onChange={e=>setOrder(e.target.value)}>
+          <option value="newest">Newest first</option><option value="oldest">Oldest first</option>
+          <option value="title">Title A–Z</option>
+        </select></label>
+      </div>
+      <p className="qf-ref-evidence-count">Displaying {visibleEvidence.length} of {portfolio.evidence.length} evidence records</p>
       {portfolio.evidence.length === 0 && <p>No evidence added yet.</p>}
+      {portfolio.evidence.length>0&&visibleEvidence.length===0&&<p>No evidence matches the filters.</p>}
       <div className="qf-live-evidence-list">
-        {portfolio.evidence.map(item => <div key={item.id}>
+        {visibleEvidence.map(item => <div key={item.id}>
+          <span className="qf-ref-evidence-id">Evidence ref · {item.id.slice(0,8).toUpperCase()}</span>
           <EvidenceItem item={item} onDownload={onDownload} uses={uses(item.id)}/>
           <label className="qf-live-showcase"><input type="checkbox" checked={showcase.includes(item.id)} disabled={busy}
             onChange={e => setShowcase(old => e.target.checked ? [...old,item.id] : old.filter(id => id !== item.id))}
