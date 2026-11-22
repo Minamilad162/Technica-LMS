@@ -137,6 +137,9 @@ jobs:
       - name: Real qualification assessment readiness stays read-only until centre sign-off
         run: npm run test:qualification:readiness
 
+      - name: Qualification portfolio reference workflow, role isolation and registration security
+        run: npm run test:qualification:reference
+
       - name: P34 Unit-specific PDF study material mapping and Learner/Admin layout contract
         run: npm run test:p34:materials
 
