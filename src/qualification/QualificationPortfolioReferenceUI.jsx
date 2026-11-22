@@ -62,7 +62,7 @@ export function PortfolioMetrics({portfolio,progress,onOutcome}){
  const submissions=outcomes.flatMap(o=>o.submissions||[]);
  const reviews=submissions.flatMap(s=>s.reviews||[]);
  const mappedCriteria=outcomes.reduce((sum,outcome)=>{
-   const mapping=outcome.claim?.mapping||{};
+   const mapping=outcome.claim?.mapping||outcome.submissions?.[0]?.snapshot?.mapping||{};
    return sum+outcome.criteria.filter(c=>Array.isArray(mapping[c.id])&&mapping[c.id].length>0).length;
  },0);
  const allCriteria=outcomes.reduce((sum,outcome)=>sum+outcome.criteria.length,0);
