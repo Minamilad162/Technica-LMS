@@ -2,7 +2,8 @@ import React, {useEffect, useRef, useState} from 'react';
 import {ArrowLeft, ArrowRight, BookOpen, CheckCircle2, ClipboardCheck, Download, FileText, FolderOpen, GraduationCap, Layers3, LibraryBig, MessageSquare, ShieldCheck} from 'lucide-react';
 import PremiumLoading from '../components/PremiumLoading.jsx';
 import {QUALIFICATIONS} from './qualificationData.js';
-import {ProgrammeListPremium, QualificationPreview, qualificationFor} from './QualificationCatalogue.jsx';
+import {ProgrammeListPremium, qualificationFor} from './QualificationCatalogue.jsx';
+import QualificationSourcePreview from './QualificationSourcePreview.jsx';
 import {LiveUnitLearningHub, OutcomeLearningSupport, ProgrammeReferenceLibrary, ProgrammeMaterialSnapshot, EvidencePreparationTips} from './QualificationLearningResources.jsx';
 import {
   canReview, claimLabels, claimState, downloadEvidenceShowcase, downloadPortfolioEvidence, evidenceExtensions,
@@ -529,6 +530,7 @@ function OpenPortfolio({db, portfolio, onRefresh, onBack}) {
 
 export default function LiveQualificationPortfolio({db}) {
   const [rows,setRows] = useState(null);
+  const [references,setReferences] = useState([]);
   const [activeRole,setActiveRole] = useState('');
   const [portfolio,setPortfolio] = useState(null);
   const [previewId,setPreviewId] = useState('');
@@ -539,7 +541,13 @@ export default function LiveQualificationPortfolio({db}) {
   useEffect(() => {
     const id = ++request.current;
     setBusy(true); setError('');
-    portfolioRpc(db,'list').then(data => {if (id === request.current) setRows(data);})
+    Promise.all([portfolioRpc(db,'list'),portfolioRpc(db,'reference_catalog')])
+      .then(([data,sourceData]) => {
+        if (id === request.current) {
+          setRows(data);
+          setReferences(Array.isArray(sourceData) ? sourceData : []);
+        }
+      })
       .catch(error => {if (id === request.current) setError(failureMessage(error));})
       .finally(() => {if (id === request.current) setBusy(false);});
     return () => {request.current++;};
@@ -566,7 +574,9 @@ export default function LiveQualificationPortfolio({db}) {
       <p role="alert">{error}</p><Action secondary onClick={() => setRefreshKey(value => value + 1)}>Retry</Action>
     </Panel> : portfolio ? <OpenPortfolio key={portfolio.id} db={db} portfolio={portfolio} onRefresh={refresh}
       onBack={() => {setPortfolio(null); setRefreshKey(value => value + 1);}}/> : previewId
-      ? <QualificationPreview key={previewId} item={QUALIFICATIONS.find(item => item.id === previewId)} onBack={() => setPreviewId('')}/>
-      : <ProgrammeListPremium rows={rows || []} activeRole={activeRole} onRoleChange={setActiveRole} onOpen={open} onPreview={setPreviewId}/>}
+      ? <QualificationSourcePreview key={previewId} item={QUALIFICATIONS.find(item => item.id === previewId)}
+          references={references} onBack={() => setPreviewId('')}/>
+      : <ProgrammeListPremium rows={rows || []} references={references} activeRole={activeRole}
+          onRoleChange={setActiveRole} onOpen={open} onPreview={setPreviewId}/>}
   </div>;
 }
