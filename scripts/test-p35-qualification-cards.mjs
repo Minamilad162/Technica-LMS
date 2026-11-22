@@ -91,6 +91,13 @@ for(const spec of imported.specifications){
 assert.match(live,/portfolioRpc\(db,'reference_catalog'\)/,'Live learner must read source content from actual Supabase');
 assert.match(catalogue,/references\.find\(source => source\.catalog_key/,'Source version selection missing');
 assert.match(sourcePreview,/source\.units\.map/,'Source Unit navigation missing');
+assert.match(sourcePreview,/unit\.indicativeTopics\?\.length/,'Study topics must come from source-backed API');
+assert.match(sourcePreview,/unit\.aim/,'Source Unit aim must be displayed');
+assert.match(read('supabase/migrations/202611220003_qualification_source_material_fields.sql'),/ADD COLUMN IF NOT EXISTS source_aim/);
+assert.match(read('supabase/migrations/202611220003_qualification_source_material_fields.sql'),/'indicativeTopics',u\.source_topics/);
+assert.ok(keyed.get('technica-source-othm6-2026').units.every(u=>u.aim?.length>100),
+ 'All 2026 official Unit aims must be imported from the November 2026 specification');
+
 assert.match(sourcePreview,/outcome\.criteria\.map/,'Real assessment criteria navigation missing');
 assert.match(sourcePreview,/source\.version==='November 2026'/,'Do not conflate 2023 and 2026 requirements');
 assert.match(migration,/auth\.uid\(\) IS NULL/);
