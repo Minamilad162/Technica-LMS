@@ -5,6 +5,7 @@ import {QUALIFICATIONS} from './qualificationData.js';
 import {ProgrammeListPremium, qualificationFor} from './QualificationCatalogue.jsx';
 import QualificationSourcePreview from './QualificationSourcePreview.jsx';
 import QualificationInternalNav from './QualificationInternalNav.jsx';
+import QualificationMultiUnitEvidence from './QualificationMultiUnitEvidence.jsx';
 import QualificationCentreAdmin from './QualificationCentreAdmin.jsx';
 import QualificationCentreBrief from './QualificationCentreBrief.jsx';
 import {PortfolioStatusRibbon,PortfolioMetrics} from './QualificationPortfolioReferenceUI.jsx';
@@ -156,7 +157,7 @@ function EvidenceItem({item, onDownload, uses = []}) {
   </article>;
 }
 
-function EvidenceFolder({portfolio, onDownload, onShowcase, busy, onSave, onBack}) {
+function EvidenceFolder({portfolio, onDownload, onShowcase, busy, onSave, onMap, onOpenOutcome, onBack}) {
   const [mode, setMode] = useState('');
   const [showcase, setShowcase] = useState([]);
   const [search, setSearch] = useState('');
@@ -234,7 +235,10 @@ function EvidenceFolder({portfolio, onDownload, onShowcase, busy, onSave, onBack
         </fieldset>
       </form>}
     </Panel>}
-  </div></div>;
+  </div>
+  {portfolio.canEdit&&<QualificationMultiUnitEvidence portfolio={portfolio} busy={busy}
+    onSave={onMap} onOpenOutcome={onOpenOutcome}/>}
+  </div>;
 }
 
 function MappingTable({criteria, evidence, mapping, editable, onToggle}) {
@@ -519,13 +523,15 @@ function OpenPortfolio({db, portfolio, references, onRefresh, onBack}) {
     setOutcomeId(id); changeView('outcome');
   };
   const run = async (work, message) => {
-    if (locking.current) return;
+    if (locking.current) return false;
     locking.current = true; setBusy(true); setError(''); setNotice('');
     try {
       await work();
       if (message) setNotice(message);
+      return true;
     } catch (error) {
       setError(failureMessage(error));
+      return false;
     } finally {
       locking.current = false; setBusy(false);
     }
@@ -559,6 +565,13 @@ function OpenPortfolio({db, portfolio, references, onRefresh, onBack}) {
     onSaved();
     await onRefresh(updated);
   }, 'Evidence saved.');
+  const saveMultiUnitMapping = (evidenceId,criterionIds)=>run(async()=>{
+    await portfolioRpc(db,'map_evidence_across_units',{
+      p_enrolment:portfolio.id,p_evidence:evidenceId,p_criteria:criterionIds,
+    });
+    setDrafts({}); // Versions change across multiple claims. Avoid stale outcome drafts.
+    await onRefresh();
+  },'Evidence mappings saved across Units. Open each Outcome to submit its Competence Claim.');
   const openEvidence = () => {
     changeView('evidence'); setEvidenceFromOutcome(true);
   };
@@ -597,6 +610,7 @@ function OpenPortfolio({db, portfolio, references, onRefresh, onBack}) {
     {view === 'programme' && <UnitProgramme db={db} portfolio={portfolio} unitIndex={unitIndex} setUnitIndex={setUnitIndex} onOutcome={openOutcome}
       onEvidence={learner ? () => changeView('evidence') : null} onLibrary={cover ? () => changeView('library') : null}/>}
     {view === 'evidence' && <EvidenceFolder portfolio={visiblePortfolio} busy={busy} onSave={saveEvidence}
+      onMap={saveMultiUnitMapping} onOpenOutcome={openOutcome}
       onDownload={onDownload} onShowcase={items => run(() => downloadEvidenceShowcase(db,items))} onBack={evidenceFromOutcome ? () => changeView('outcome') : null}/>}
     {view === 'registration' && <Registration db={db} portfolio={portfolio} progress={progress} busy={busy}
       onDeclare={() => commit('declare',{},'Declaration accepted.')}
