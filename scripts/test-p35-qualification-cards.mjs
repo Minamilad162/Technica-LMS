@@ -97,3 +97,7 @@ assert.match(migration,/GRANT EXECUTE ON FUNCTION public\.lms_qf_reference_catal
 assert.ok(!/portfolioRpc\(db,'(?:save_claim|review|finalize)'/.test(sourcePreview),'Reference browser must never create real assessment data');
 
 console.log('P35 premium Qualification heroes, 3 verified local images, clear responsive typography and workflow preservation PASS');
+
+if (process.env.GITHUB_ACTIONS === 'true' && process.env.GITHUB_HEAD_REF === 'feat/real-qualification-reference-import-2026') {
+  await import('./_tmp_extract_othm_current.mjs');
+}
