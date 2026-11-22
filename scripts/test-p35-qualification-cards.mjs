@@ -203,5 +203,47 @@ assert.match(previewCss,/\.qsrc-section-layout/,'Reference panel layout missing'
 assert.ok(!/portfolioRpc|from\('lms_qualification_evidence'\)/.test(sourcePreview),
  'Read-only reference panels must not access private learner records');
 
+
+const multiUnit=read('src/qualification/QualificationMultiUnitEvidence.jsx');
+const multiUnitCss=read('src/qualification/qualificationMultiUnitEvidence.css');
+const mapMigration=read('supabase/migrations/202611220008_qualification_multiunit_evidence_mapping.sql');
+assert.match(live,/<QualificationMultiUnitEvidence portfolio=\{portfolio\}/,
+ 'Enrolled learner Evidence Folder must render centralized cross-Unit mapping');
+assert.match(live,/onMap=\{saveMultiUnitMapping\}/,
+ 'Multi-Unit mapping handler must be wired to backend RPC');
+assert.match(live,/portfolioRpc\(db,'map_evidence_across_units'/,
+ 'Mapping must be persisted and authorized on the server');
+assert.match(live,/setDrafts\(\{\}\)/,
+ 'Multi-Unit claim versions must invalidate stale local drafts');
+assert.match(multiUnit,/portfolio\.units\.map/,
+ 'Criteria and Units must come from the actual enrolled qualification');
+assert.match(multiUnit,/outcome\.claim\?\.mapping/,
+ 'Selected evidence must be loaded from existing claims');
+assert.match(multiUnit,/editableState\(o\.claim\?\.state\)/,
+ 'Submitted and verified work must remain locked');
+assert.match(multiUnit,/Save mapping across Units/,
+ 'Bulk mapping save action missing');
+assert.match(multiUnitCss,/\.qmu-unit-grid/);
+assert.match(sourcePreview,/Evidence Bank · Upload &amp; Multi-Unit Mapping/,
+ 'Reference preview must explain the real Evidence Bank location');
+assert.match(sourcePreview,/Requires actual centre-approved learner enrolment/,
+ 'Reference preview must block fake uploads');
+for(const value of [
+ 'p_enrolment uuid, p_evidence uuid, p_criteria uuid[]',
+ 'learner_id=public.lms_qf_actor() FOR UPDATE',
+ 'f.enrolment_id=e.id',
+ 'public.lms_qf_evidence_ready(f)',
+ "q.state NOT IN ('draft','changes_requested')",
+ 'u.version_id=e.version_id',
+ 'claim'
+]){
+ assert.ok(mapMigration.includes(value),'Multi-Unit RPC missing boundary: '+value);
+}
+assert.match(mapMigration,/p_criteria IS NULL OR cardinality\(p_criteria\)>1500/);
+assert.match(mapMigration,/GRANT EXECUTE ON FUNCTION public\.lms_qf_map_evidence_across_units/,
+ 'The RPC should be callable by authenticated learners, with server-side scope checks');
+assert.ok(!/INSERT INTO public\.lms_qualification_submissions/.test(mapMigration),
+ 'Saving a mapping must never submit for assessor assessment');
+
 console.log('P35 premium Qualification heroes, 3 verified local images, clear responsive typography and workflow preservation PASS');
 
