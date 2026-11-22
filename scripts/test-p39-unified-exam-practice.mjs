@@ -60,7 +60,7 @@ assert(!legacyPortal.includes('mockMode'),'No third Selected Mock mode');
 check(legacyPortal,'<LiveMockExam','Existing deep link uses official P10 engine');
 for(const k of ['Quick 10','Timed Quiz','Build Your Own','Practice by Domain','Level Up',
  'setMinutes','setCount','startSecurePractice','startAdaptivePractice',
- 'requestQuestionFullscreen','useQuestionFullscreenGuard'])
+ 'startPracticePresentation','useQuestionFullscreenGuard'])
  check(practice,k,'Old customizable Practice preserved');
 for(const k of ['getMockReadiness(db,course.id)','startOfficialMock(db,course.id,requestId)',
  'saveOfficialMock(db,attempt.attemptId','submitOfficialMock(db,attempt.attemptId)',

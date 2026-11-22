@@ -1,0 +1,57 @@
+.qf-live { box-sizing:border-box; }
+.qf-live-stack, .qf-live-list, .qf-live-history, .qf-live-evidence-list { display:grid; gap:1rem; }
+.qf-live .qf-card { min-width:0; }
+.qf-live .qf-unit-heading { gap:1rem; }
+.qf-live .qf-card-header { gap:.75rem; flex-wrap:wrap; }
+.qf-live-nav, .qf-live-actions { display:flex; flex-wrap:wrap; align-items:center; gap:.65rem; }
+.qf-live-nav { margin-block:0 .8rem; }
+.qf-live-nav button { min-height:44px; padding:.55rem .9rem; border:1px solid #dce6ed; border-radius:.6rem; background:white; color:#173854; font:inherit; cursor:pointer; }
+.qf-live-nav button[aria-pressed=true] { background:#e8f3ff; border-color:#9abbae; font-weight:650; }
+.qf-live-grid, .qf-live-progress { display:grid; gap:1rem; grid-template-columns:minmax(0,3fr) minmax(0,2fr); }
+.qf-live-progress { grid-template-columns:repeat(3,minmax(0,1fr)); }
+.qf-live-progress progress { width:100%; accent-color:#176470; }
+.qf-live-list button { display:flex; align-items:center; gap:.75rem; width:100%; min-height:44px; text-align:start; color:#173854; padding:.75rem; border:1px solid #dce6ed; border-radius:.55rem; background:#fbfdff; cursor:pointer; font:inherit; }
+.qf-live-list button > span:first-of-type { flex:1; min-width:0; }
+.qf-live-list small, .qf-live-evidence-item small { display:block; color:#496071; margin-top:.25rem; }
+.qf-live-list svg, .qf-live-evidence-item svg { flex-shrink:0; }
+.qf-live-status { display:inline-block; border-radius:.45rem; padding:.25rem .55rem; background:#eef3f8; color:#274764; font-size:.82rem; }
+.qf-live-verified, .qf-live-notice { background:#e6f5ed; color:#16533b; }
+.qf-live-changes_requested, .qf-live-verification_returned, .qf-live-error { background:#fff0e7; color:#7c3421; }
+.qf-live-notice, .qf-live-error, .qf-live-confirm { border-radius:.55rem; padding:.75rem; margin:0; }
+.qf-live-confirm { background:#eff5fc; margin-block-start:.8rem; }
+.qf-live-stack > .qf-plain-back, .qf-live-stack > .qf-button { justify-self:start; }
+.qf-live-list p, .qf-live-progress p { margin-block:.4rem 0; }
+.qf-live-link { font:inherit; padding:0; color:#075b91; background:none; border:0; text-decoration:underline; cursor:pointer; text-align:start; }
+.qf-live-gaps details, .qf-live-history details, .qf-live-history article { padding:.65rem 0; border-bottom:1px solid #e5edf3; }
+.qf-live details summary { cursor:pointer; font-weight:600; padding-block:.2rem; }
+.qf-live-gaps li { margin-block:.4rem; }
+.qf-live-gaps li small { margin-inline-start:.65rem; font-weight:650; }
+.qf-live-evidence-item { display:grid; grid-template-columns:auto minmax(0,1fr); gap:.6rem; padding:.65rem 0; border-bottom:1px solid #e5edf3; }
+.qf-live-evidence-item .qf-button { margin-top:.45rem; max-width:100%; white-space:normal; overflow-wrap:anywhere; }
+.qf-live-copy { white-space:pre-wrap; overflow-wrap:anywhere; }
+.qf-live-form fieldset, .qf-live-choose { min-width:0; border:0; padding:0; margin:1rem 0; }
+.qf-live-choose legend { margin-bottom:.45rem; font-weight:650; }
+.qf-live-choose label { display:flex; align-items:center; min-height:36px; gap:.6rem; }
+.qf-live-matrix { margin-block:.65rem; min-width:max-content; }
+.qf-live-matrix th, .qf-live-matrix td { text-align:center; }
+.qf-live-matrix th:first-child { max-width:18rem; white-space:normal; overflow-wrap:anywhere; text-align:start; }
+.qf-live input[type=checkbox] { inline-size:20px; block-size:20px; accent-color:#126770; vertical-align:middle; }
+.qf-live-criteria { list-style:none; padding:0; }
+.qf-live-criteria li + li { margin-top:.6rem; }
+.qf-live-criteria strong { margin-inline-end:.4rem; }
+.qf-live-details { display:grid; grid-template-columns:auto 1fr; gap:.45rem .8rem; }
+.qf-live-details dd { margin:0; }
+.qf-live a { color:#075b91; }
+.qf-live :focus-visible { outline:2px solid #096991; outline-offset:3px; }
+.qf-live .qf-live-actions { margin-block:.6rem; }
+.qf-live-stack > h2 { margin:0; }
+.qf-live a, .qf-live strong { overflow-wrap:anywhere; }
+@media(max-width:700px) {
+  .qf-live-grid { grid-template-columns:minmax(0,1fr); }
+  .qf-live-progress { grid-template-columns:minmax(0,1fr); gap:.65rem; }
+  .qf-live-progress .qf-card { padding:.75rem; }
+  .qf-live .qf-unit-heading { flex-wrap:wrap; }
+  .qf-live .qf-field input, .qf-live .qf-field textarea, .qf-live .qf-field select { font-size:16px; }
+}
+
+.qf-live-showcase { display:flex; align-items:center; gap:.5rem; margin-block:.5rem .75rem; }

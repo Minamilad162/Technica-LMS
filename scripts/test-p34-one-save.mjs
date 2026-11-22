@@ -19,8 +19,8 @@ for(const key of ['lms_p34_save_question_bank','p_release_lesson_id',
  'selectedMockOnSave'])has(api,key,'P34 frontend');
 has(api,'return call(db,\'lms_p34_publish_lesson_quiz\'','P34 scoped publish');
 for(const key of ['releaseLessonId','Save All Changes','saveCourseBankBatch(db,courseId,payload,releaseLessonId',
- 'Publish saved Lesson questions on Save All Changes','Active, non-Mock questions publish immediately',
- 'No separate Review Draft step','inspectLessonQuizPublication(db,inspectLessonId)'])
+ 'Publish saved Lesson questions on Save All Changes','Save changes to update your Lesson Quiz and Mock Exam selections.',
+ 'no Review Draft step','inspectLessonQuizPublication(db,inspectLessonId)'])
  has(bank,key,'P34 Admin');
 assert(!bank.includes('>Review Draft questions</button>'),'No Review Draft step in Admin Save flow');
 assert(!bank.includes('Draft link(s) require question approval AND publishing'),'No extra Draft step on Save');

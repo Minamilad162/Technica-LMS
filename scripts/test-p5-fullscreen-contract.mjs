@@ -19,8 +19,8 @@ assert.deepEqual(await requestQuestionFullscreen({ownerDocument:{fullscreenEnabl
 const rejectedDoc={fullscreenEnabled:true,fullscreenElement:null};
 const rejected={ownerDocument:rejectedDoc,requestFullscreen:async()=>{throw Error('Denied')}};
 assert.deepEqual(await requestQuestionFullscreen(rejected),{ok:false,reason:'denied'});
-assert.match(fullscreenStartError({reason:'unsupported'}),/iPhone/);
-assert.match(fullscreenStartError({reason:'denied'}),/Fullscreen permission/);
+assert.match(fullscreenStartError({reason:'unsupported'}),/fullscreen is unavailable/i);
+assert.match(fullscreenStartError({reason:'denied'}),/browser permissions/);
 const code=path=>readFileSync(path,'utf8');
 const practice=code('src/pages/PracticePage.jsx');
 const assessment=code('src/pages/AssessmentOverview.jsx');

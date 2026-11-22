@@ -77,7 +77,7 @@ const cards=file('src/production/LearnerCourseCard.jsx');
 const css=file('src/production/adminDashboardCharts.css');
 const pc=file('src/production/adminCoursePreview.css');
 assert(panels.includes('<AdminAnalyticsCharts report={report} onNavigate={onNavigate}/>'));
-assert(panels.includes('Legacy Course grants')&&!panels.includes("['Active enrollments'"));
+assert(panels.includes("['Course-specific access',report.kpis.activeEnrollments")&&!panels.includes("['Active enrollments'"));
 assert(dashboard.includes('role="img"')&&dashboard.includes('strokeDasharray')&&dashboard.includes('No verified records yet.'));
 assert(dashboard.includes('onNavigate(data.target)'));
 assert(!dashboard.includes('Math.random'));

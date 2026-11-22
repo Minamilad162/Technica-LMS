@@ -3,6 +3,7 @@ import {ArrowLeft,ArrowRight,BookOpen,Check,CheckCircle2,ChevronRight,ClipboardC
 import {QUALIFICATIONS,FIRST_LO,SAMPLE_EVIDENCE} from './qualificationData.js';
 import {getUnitSourceMaterial} from './qualificationUnitMaterial.js';
 import './qualifications.css';
+import LiveQualificationPortfolio from './LiveQualificationPortfolio.jsx';
 import {PortfolioSnapshot,LearnerCourseSection,LearnerContactSection,LearnerRecordsSection,AdminResourcesSection,AdminPortfolioRecords} from './QualificationExtras.jsx';
 
 // P25: visual-only Qualifications workspace. No private files, credentials or assessment writes.
@@ -234,4 +235,7 @@ function AdminQualifications(){
   {notice&&<div className="qf-toast" role="status">{notice}<button type="button" aria-label="Dismiss message" onClick={()=>setNotice('')}><X size={16}/></button></div>}
  </div>;
 }
-export default function QualificationsWorkspace({admin=false}){return admin?<AdminQualifications/>:<LearnerQualifications/>;}
+export default function QualificationsWorkspace({admin=false, db}){
+ if(db) return <LiveQualificationPortfolio db={db}/>;
+ return admin?<AdminQualifications/>:<LearnerQualifications/>;
+}

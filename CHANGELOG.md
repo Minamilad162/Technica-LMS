@@ -1,3 +1,9 @@
+## 2026-11-22 — Qualifications e-portfolio
+
+- Added the authenticated learner programme, Outcome and criteria navigation, reusable written and uploaded evidence, draft mapping, claim submission, revision history, and Showcase ZIP.
+- Connected assigned assessor and verifier queues to the same submitted evidence snapshots. Added criterion decisions, feedback, resubmission, and verification returns.
+- Added controlled completion and optional recording of externally issued certificate references. The migration is staged in source and has no production enrolment fixtures.
+
 ## 2026-11-14 — P96 learner header
 - Clarify open access and active subscription countdowns.
 - Dismiss the account menu on outside taps and Escape.
