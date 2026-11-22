@@ -1,7 +1,7 @@
 import React,{useState} from 'react';
 import {ArrowLeft,BookOpen,CheckCircle2,ChevronDown,ExternalLink,FileText,GraduationCap,Info,Layers3,LibraryBig,LockKeyhole,ShieldCheck} from 'lucide-react';
-import UnitMaterialPanel from './UnitMaterialPanel.jsx';
-import {getUnitSourceMaterial} from './qualificationUnitMaterial.js';
+
+
 import './qualificationSourcePreview.css';
 
 const keys={othm6:['technica-source-othm6-2026','technica-source-othm6-2023'],
@@ -100,8 +100,15 @@ export default function QualificationSourcePreview({item,references=[],onBack}) 
       </section> : <div className="qsrc-awaiting"><Info size={22}/><div><h3>Current specification detail pending centre verification</h3>
         <p>The new 2026 Unit name and code are verified. Open the November 2026 source PDF for its complete current outcomes and criteria. Older standards are intentionally not shown as though they apply to this new Unit.</p>
         {source.source_url&&<a href={source.source_url} target="_blank" rel="noopener noreferrer">View official 2026 specification <ExternalLink size={15}/></a>}</div></div>}
-      {getUnitSourceMaterial(unit.code)&&<section className="qsrc-materials"><div className="qsrc-section-heading">
-        <BookOpen size={19}/><h3>Unit aim, study topics and source notes</h3></div><UnitMaterialPanel key={unit.code} unitCode={unit.code}/></section>}
+      {unit.indicativeTopics?.length>0 && <section className="qsrc-materials">
+        <div className="qsrc-section-heading"><BookOpen size={19}/><h3>Indicative study topics from source specification</h3></div>
+        <ul className="qsrc-study-topics">{unit.indicativeTopics.map((topic,index)=><li key={unit.code+':'+index}>{topic}</li>)}</ul>
+        <p className="qsrc-material-note">These topics are from the referenced awarding-body specification, not an uploaded centre-issued lesson pack.</p>
+      </section>}
+      {unit.assessmentNote && <section className="qsrc-source-assessment">
+        <div className="qsrc-section-heading"><ShieldCheck size={18}/><h3>Assessment information from source</h3></div>
+        <p>{unit.assessmentNote}</p>
+      </section>}
     </div>
     <aside className="qsrc-aside"><SourceDocument source={source}/>
       <section className="qsrc-source-card"><div className="qsrc-source-card-heading"><LockKeyhole size={19}/><h3>Assessment access</h3></div>
