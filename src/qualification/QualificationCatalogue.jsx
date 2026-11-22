@@ -6,9 +6,9 @@ import UnitMaterialPanel from './UnitMaterialPanel.jsx';
 // Reference catalogue entries are NOT enrolments. Real portfolio access only comes from lms_qf_list.
 export function qualificationFor(title = '') {
   const value = String(title).toLowerCase();
-  if (/(proqual|nvq)/.test(value) && /(level\\s*6|nvq)/.test(value)) return QUALIFICATIONS.find(q => q.id === 'nvq6');
-  if (/othm/.test(value) && /level\\s*7/.test(value)) return QUALIFICATIONS.find(q => q.id === 'othm7');
-  if (/othm/.test(value) && /level\\s*6/.test(value)) return QUALIFICATIONS.find(q => q.id === 'othm6');
+  if (/(proqual|nvq)/.test(value) && /(level\s*6|nvq)/.test(value)) return QUALIFICATIONS.find(q => q.id === 'nvq6');
+  if (/othm/.test(value) && /level\s*7/.test(value)) return QUALIFICATIONS.find(q => q.id === 'othm7');
+  if (/othm/.test(value) && /level\s*6/.test(value)) return QUALIFICATIONS.find(q => q.id === 'othm6');
   return null;
 }
 
