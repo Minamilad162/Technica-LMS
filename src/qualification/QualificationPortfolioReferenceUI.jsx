@@ -94,13 +94,15 @@ export function PortfolioMetrics({db,portfolio,progress,onOutcome}){
  const outcomes=progress.outcomes;
  const submissions=outcomes.flatMap(o=>o.submissions||[]);
  const reviews=submissions.flatMap(s=>s.reviews||[]);
+ const evidenceCount=portfolio.role==='learner'?portfolio.evidence.length:
+   new Set(submissions.flatMap(s=>Object.keys(s.snapshot?.evidence||{}))).size;
  const mappedCriteria=outcomes.reduce((sum,outcome)=>{
    const mapping=outcome.claim?.mapping||outcome.submissions?.[0]?.snapshot?.mapping||{};
    return sum+outcome.criteria.filter(c=>Array.isArray(mapping[c.id])&&mapping[c.id].length>0).length;
  },0);
  const allCriteria=outcomes.reduce((sum,outcome)=>sum+outcome.criteria.length,0);
  const counts=[
-   {label:'Evidence files & records',value:portfolio.evidence.length,icon:FileText},
+   {label:'Evidence files & records',value:evidenceCount,icon:FileText},
    {label:'Criteria with evidence linked',value:mappedCriteria+' / '+allCriteria,icon:ClipboardList},
    {label:'Submitted assessment revisions',value:submissions.length,icon:TrendingUp},
    {label:'Recorded assessor/verifier reviews',value:reviews.length,icon:ShieldCheck},
