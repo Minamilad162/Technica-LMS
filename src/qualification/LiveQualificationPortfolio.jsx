@@ -4,6 +4,7 @@ import PremiumLoading from '../components/PremiumLoading.jsx';
 import {QUALIFICATIONS} from './qualificationData.js';
 import {ProgrammeListPremium, qualificationFor} from './QualificationCatalogue.jsx';
 import QualificationSourcePreview from './QualificationSourcePreview.jsx';
+import QualificationInternalNav from './QualificationInternalNav.jsx';
 import QualificationCentreAdmin from './QualificationCentreAdmin.jsx';
 import QualificationCentreBrief from './QualificationCentreBrief.jsx';
 import {PortfolioStatusRibbon,PortfolioMetrics} from './QualificationPortfolioReferenceUI.jsx';
@@ -588,14 +589,8 @@ function OpenPortfolio({db, portfolio, references, onRefresh, onBack}) {
       <div className="qf-live-feature-action"><Action secondary disabled={busy} onClick={() => run(() => onRefresh())}>Refresh</Action></div>
     </header>
     <PortfolioStatusRibbon portfolio={portfolio} progress={progress} onRegistration={()=>changeView('registration')}/>
-    <nav className="qf-live-nav" aria-label="Programme sections">
-      {views.map(([key,label]) => {
-        const Icon = sectionIcons[key];
-        return <button key={key} type="button" disabled={busy}
-          aria-pressed={view === key || (view === 'outcome' && key === 'programme')}
-          onClick={() => changeView(key)}><Icon size={17}/>{label}</button>;
-      })}
-    </nav>
+    <QualificationInternalNav items={views} active={view === 'outcome' ? 'programme' : view}
+      onChange={changeView} disabled={busy} ariaLabel="Programme sections"/>
     {error && <p className="qf-live-error" role="alert">{error}</p>}
     {notice && <p className="qf-live-notice" role="status">{notice}</p>}
     {view === 'dashboard' && <PortfolioOverview portfolio={portfolio} progress={progress} onOutcome={openOutcome} onView={changeView} qualification={cover}/>}
@@ -610,7 +605,7 @@ function OpenPortfolio({db, portfolio, references, onRefresh, onBack}) {
     {view === 'metrics' && <PortfolioMetrics db={db} portfolio={portfolio} progress={progress} onOutcome={openOutcome}/>}
     {view === 'library' && cover && selectedReference &&
       <QualificationSourcePreview key={selectedReference.catalog_key} item={cover}
-        references={[selectedReference]} onBack={() => changeView('programme')}/>}
+        references={[selectedReference]} embedded onBack={() => changeView('programme')}/>}
     {view === 'outcome' && outcome && <>
       <div className="qf-live-actions"><Action secondary disabled={busy} onClick={() => changeView('programme')}><ArrowLeft size={16}/> Back to unit</Action><Status outcome={outcome}/></div>
       <h2>{outcome.code} · {outcome.title}</h2>

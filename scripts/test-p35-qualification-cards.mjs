@@ -174,5 +174,34 @@ assert.match(revocationSql,/p_assessor=p_verifier/);
 assert.match(revocationSql,/SET assessor_id=p_assessor,verifier_id=p_verifier/);
 assert.ok(!/\bdemoEnrolments\s*=/.test(centre),'No manufactured enrolments may appear in real centre administration');
 
+
+const internalNav=read('src/qualification/QualificationInternalNav.jsx');
+const internalNavCss=read('src/qualification/qualificationInternalNav.css');
+const previewCss=read('src/qualification/qualificationSourcePreview.css');
+for(const name of ['Course','Evidence','Registration','Contact','Metrics','Overview','Study Library']){
+ assert.ok(internalNav.includes("'"+name+"'"),'Shared Qualifications bar missing '+name);
+}
+assert.match(sourcePreview,/<QualificationInternalNav active=\{section\}/,
+ 'Reference previews must include internal Qualifications nav without a learner enrolment');
+assert.match(live,/<QualificationInternalNav items=\{views\}/,
+ 'Enrolled portfolios must use the same internal nav component');
+assert.match(live,/embedded onBack=\{\(\) => changeView\('programme'\)\}/,
+ 'Nested Study Library must not duplicate the real portfolio nav bar');
+assert.match(sourcePreview,/\(embedded\|\|section==='course'\)/,
+ 'Source course view must be available independently of enrolment');
+assert.match(sourcePreview,/section==='evidence'/,'Read-only evidence preparation tab missing');
+assert.match(sourcePreview,/section==='registration'/,'Read-only registration tab missing');
+assert.match(sourcePreview,/section==='contact'/,'Reference-safe Contact Diary tab missing');
+assert.match(sourcePreview,/section==='metrics'/,'Source-backed Metrics tab missing');
+assert.match(sourcePreview,/section==='overview'/,'Source-backed Overview tab missing');
+assert.match(sourcePreview,/section==='library'/,'Study Library tab missing');
+assert.match(sourcePreview,/source\.status!=='centre_published'/,
+ 'Reference-only status must be determined from the real database');
+assert.match(internalNavCss,/position:sticky/,'Internal nav should stay visible while scrolling');
+assert.match(internalNavCss,/overflow-x:auto/,'Internal nav must fit on mobile');
+assert.match(previewCss,/\.qsrc-section-layout/,'Reference panel layout missing');
+assert.ok(!/portfolioRpc|from\('lms_qualification_evidence'\)/.test(sourcePreview),
+ 'Read-only reference panels must not access private learner records');
+
 console.log('P35 premium Qualification heroes, 3 verified local images, clear responsive typography and workflow preservation PASS');
 
