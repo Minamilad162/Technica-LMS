@@ -1,11 +1,14 @@
 import React, {useEffect, useRef, useState} from 'react';
-import {ArrowLeft, ArrowRight, BookOpen, ClipboardCheck, Download, FileText, FolderOpen, ShieldCheck} from 'lucide-react';
+import {ArrowLeft, ArrowRight, BookOpen, CheckCircle2, ClipboardCheck, Download, FileText, FolderOpen, GraduationCap, Layers3, MessageSquare, ShieldCheck} from 'lucide-react';
 import PremiumLoading from '../components/PremiumLoading.jsx';
+import {QUALIFICATIONS} from './qualificationData.js';
+import {ProgrammeListPremium, QualificationPreview, qualificationFor} from './QualificationCatalogue.jsx';
 import {
   canReview, claimLabels, claimState, downloadEvidenceShowcase, downloadPortfolioEvidence, evidenceExtensions,
   evidenceKinds, evidencePayload, portfolioRpc, programmeProgress, uploadPortfolioEvidence,
 } from './qualificationPortfolioApi.js';
 import './qualificationPortfolio.css';
+import './qualificationPremium.css';
 
 const roleLabels = {learner: 'My Programme', assessor: 'Assessment queue', verifier: 'Verification queue'};
 const decisions = [['met','Met'], ['partial','Partially met'], ['not_met','Not met']];
@@ -32,32 +35,6 @@ function Status({outcome}) {
   return <span className={'qf-live-status qf-live-' + state}>{claimLabels[state]}</span>;
 }
 
-function ProgrammeList({rows, activeRole, onRoleChange, onOpen}) {
-  const visibleRoles = ['learner', ...['assessor','verifier'].filter(key => rows.some(item => item.role === key))];
-  const role = visibleRoles.includes(activeRole) ? activeRole : (visibleRoles[1] || 'learner');
-  const visible = rows.filter(item => item.role === role);
-  return <>
-    <div className="qf-intro"><h1>Qualifications</h1></div>
-    <nav className="qf-live-nav" aria-label="Qualification workspaces">
-      {visibleRoles.map(key => <button key={key} type="button" aria-pressed={role === key} onClick={() => onRoleChange(key)}>
-        {roleLabels[key]}
-      </button>)}
-    </nav>
-    <Panel title={role === 'learner' ? 'My Qualifications' : roleLabels[role]}>
-      {visible.length === 0 && <p className="qf-empty qf-empty-compact">No qualification enrolments assigned to your account.</p>}
-      <div className="qf-live-list">
-        {visible.map(row => <button type="button" key={row.id} onClick={() => onOpen(row.id)}>
-          {role === 'learner' ? <BookOpen size={20}/> : <ClipboardCheck size={20}/>}
-          <span><strong>{row.title}</strong>
-            <small>{role === 'learner' ? (row.completedAt ? 'Completed' : 'Open programme') :
-              (row.learner || 'Learner') + ' · ' + row.pending + ' awaiting review'}</small>
-          </span><ArrowRight size={18}/>
-        </button>)}
-      </div>
-    </Panel>
-  </>;
-}
-
 function PortfolioOverview({portfolio, progress, onOutcome, onView}) {
   const learner = portfolio.role === 'learner';
   const pending = progress.outcomes.filter(outcome => learner
@@ -72,9 +49,9 @@ function PortfolioOverview({portfolio, progress, onOutcome, onView}) {
   const percent = count => progress.total ? Math.round(count / progress.total * 100) : 0;
   return <>
     <div className="qf-live-progress">
-      <Panel title="Started"><progress max={100} value={percent(progress.started)}/><p>{percent(progress.started)}%</p></Panel>
-      <Panel title="Completed"><progress max={100} value={percent(progress.verified)}/><p>{progress.verified} of {progress.total} required outcomes verified</p></Panel>
-      <Panel title="Expected"><progress max={100} value={expected ?? 0}/><p>{expected === null ? 'No target date' : expected + '%'}</p></Panel>
+      <Panel title="Started"><div className="qf-live-kpi"><strong>{percent(progress.started)}%</strong><span>{progress.started} outcomes started</span></div><progress max={100} value={percent(progress.started)}/></Panel>
+      <Panel title="Completed"><div className="qf-live-kpi"><strong>{percent(progress.verified)}%</strong><span>{progress.verified} of {progress.total} required verified</span></div><progress max={100} value={percent(progress.verified)}/></Panel>
+      <Panel title="Expected"><div className="qf-live-kpi"><strong>{expected === null ? '—' : expected + '%'}</strong><span>{expected === null ? 'No target date' : 'Expected progress by today'}</span></div><progress max={100} value={expected ?? 0}/></Panel>
     </div>
     <Panel title={learner ? 'Awaiting Review' : roleLabels[portfolio.role]}>
       <div className="qf-live-list">
@@ -106,8 +83,9 @@ function UnitProgramme({portfolio, unitIndex, setUnitIndex, onOutcome}) {
   const unit = portfolio.units[unitIndex];
   const learner = portfolio.role === 'learner';
   return <>
+    <div className="qf-live-section-heading"><div><span className="qf-overline">LEARNING OUTCOMES</span><h2>Programme units</h2></div><span>{portfolio.units.length} units</span></div>
     <nav className="qf-unit-strip" aria-label="Qualification units">
-      <span className="qf-unit-strip-label">Units</span>
+      <span className="qf-unit-strip-label">UNITS</span>
       <div className="qf-number-tabs">
         {portfolio.units.map((item, index) => <button type="button" key={item.id}
           className={'qf-number-tab ' + (index === unitIndex ? 'active' : '')} aria-pressed={index === unitIndex}
@@ -120,7 +98,7 @@ function UnitProgramme({portfolio, unitIndex, setUnitIndex, onOutcome}) {
       <Panel title="Learning Outcomes"><div className="qf-live-list">
         {unit.outcomes.map(outcome => <OutcomeLink key={outcome.id} outcome={outcome} onOpen={onOutcome}/>)}
       </div></Panel>
-      <Panel title="Gap Analysis"><div className="qf-live-gaps">
+      <Panel title="Criteria & Gap Analysis"><div className="qf-live-gaps">
         {unit.outcomes.map(outcome => {
           const mapping = outcome.claim?.mapping;
           return <details key={outcome.id}>
@@ -472,20 +450,33 @@ function OpenPortfolio({db, portfolio, onRefresh, onBack}) {
   };
   const onDownload = item => run(() => downloadPortfolioEvidence(db,item));
   const views = [
-    ['dashboard','Overview'],['programme','My Programme'],...(learner ? [['evidence','Evidence']] : []),
+    ['dashboard','Overview'],['programme',learner ? 'My Programme' : 'Units & Criteria'],...(learner ? [['evidence','Evidence']] : []),
     ['registration','Registration'],['contact','Contact Diary'],
   ];
+  const sectionIcons = {dashboard: Layers3, programme: BookOpen, evidence: FolderOpen, registration: GraduationCap, contact: MessageSquare};
+  const cover = qualificationFor(portfolio.title);
   return <div className="qf-live-stack" aria-busy={busy}>
     <button type="button" className="qf-plain-back" disabled={busy} onClick={onBack}><ArrowLeft size={16}/> Qualifications</button>
-    <header className="qf-unit-heading">
-      <div><span className="qf-overline">{roleLabels[portfolio.role]}</span><h1 className="qf-programme-title">{portfolio.title}</h1>
-        {!learner && <p dir="auto">{portfolio.learner}</p>}
-      </div><Action secondary disabled={busy} onClick={() => run(() => onRefresh())}>Refresh</Action>
+    <header className={'qf-live-feature qf-live-feature-open ' + (cover ? 'qf-course-theme-' + cover.color : '')}>
+      {cover && <img src={cover.heroImage} alt="" aria-hidden="true"/>}
+      <div className="qf-live-feature-shade"/>
+      <div className="qf-live-feature-content">
+        <span className="qf-live-eyebrow">{roleLabels[portfolio.role]} · {cover?.body || 'TECHNICA'}</span>
+        <h1 className="qf-programme-title">{portfolio.title}</h1>
+        <div className="qf-live-feature-meta"><span><Layers3 size={16}/> {portfolio.units.length} Units</span>
+          <span><CheckCircle2 size={16}/> {progress.verified}/{progress.total} verified outcomes</span>
+          {portfolio.completedAt && <span><ShieldCheck size={16}/> Completed</span>}</div>
+        {!learner && <p className="qf-live-feature-learner" dir="auto">{portfolio.learner}</p>}
+      </div>
+      <div className="qf-live-feature-action"><Action secondary disabled={busy} onClick={() => run(() => onRefresh())}>Refresh</Action></div>
     </header>
     <nav className="qf-live-nav" aria-label="Programme sections">
-      {views.map(([key,label]) => <button key={key} type="button" disabled={busy}
-        aria-pressed={view === key || (view === 'outcome' && key === 'programme')}
-        onClick={() => changeView(key)}>{label}</button>)}
+      {views.map(([key,label]) => {
+        const Icon = sectionIcons[key];
+        return <button key={key} type="button" disabled={busy}
+          aria-pressed={view === key || (view === 'outcome' && key === 'programme')}
+          onClick={() => changeView(key)}><Icon size={17}/>{label}</button>;
+      })}
     </nav>
     {error && <p className="qf-live-error" role="alert">{error}</p>}
     {notice && <p className="qf-live-notice" role="status">{notice}</p>}
@@ -529,6 +520,7 @@ export default function LiveQualificationPortfolio({db}) {
   const [rows,setRows] = useState(null);
   const [activeRole,setActiveRole] = useState('');
   const [portfolio,setPortfolio] = useState(null);
+  const [previewId,setPreviewId] = useState('');
   const [error,setError] = useState('');
   const [busy,setBusy] = useState(true);
   const [refreshKey,setRefreshKey] = useState(0);
@@ -546,7 +538,7 @@ export default function LiveQualificationPortfolio({db}) {
     setBusy(true); setError('');
     try {
       const data = await portfolioRpc(db,'portfolio',{p_enrolment:id});
-      if (current === request.current) setPortfolio(data);
+      if (current === request.current) { setPortfolio(data); setPreviewId(''); }
     } catch (error) {
       if (current === request.current) setError(failureMessage(error));
     } finally {
@@ -562,6 +554,8 @@ export default function LiveQualificationPortfolio({db}) {
     {busy ? <PremiumLoading variant="compact"/> : error ? <Panel title="Qualifications">
       <p role="alert">{error}</p><Action secondary onClick={() => setRefreshKey(value => value + 1)}>Retry</Action>
     </Panel> : portfolio ? <OpenPortfolio key={portfolio.id} db={db} portfolio={portfolio} onRefresh={refresh}
-      onBack={() => {setPortfolio(null); setRefreshKey(value => value + 1);}}/> : <ProgrammeList rows={rows || []} activeRole={activeRole} onRoleChange={setActiveRole} onOpen={open}/>}
+      onBack={() => {setPortfolio(null); setRefreshKey(value => value + 1);}}/> : previewId
+      ? <QualificationPreview key={previewId} item={QUALIFICATIONS.find(item => item.id === previewId)} onBack={() => setPreviewId('')}/>
+      : <ProgrammeListPremium rows={rows || []} activeRole={activeRole} onRoleChange={setActiveRole} onOpen={open} onPreview={setPreviewId}/>}
   </div>;
 }
