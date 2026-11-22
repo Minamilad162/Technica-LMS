@@ -5,6 +5,15 @@ const ui=source('src/qualification/LiveQualificationPortfolio.jsx');
 const status=source('src/qualification/QualificationPortfolioReferenceUI.jsx');
 const registration=source('src/qualification/QualificationCandidateRegistration.jsx');
 const css=source('src/qualification/qualificationPremium.css');
+const preview=source('src/qualification/QualificationCentreLearnerPreview.jsx');
+const centre=source('src/qualification/QualificationCentreAdmin.jsx');
+assert.ok(centre.includes('Preview learner workspace')&&centre.includes('<QualificationCentreLearnerPreview version={version}'));
+assert.ok(preview.includes("source?.units||[]"),'Admin preview must be backed by real specification');
+assert.ok(preview.includes("No real learner, assessment decision, evidence record, or enrolment is created."));
+assert.ok(preview.includes('Gap Analysis · Assessment Criteria'));
+assert.ok(!/(?:portfolioRpc|db\.rpc|db\.from|db\.storage|supabase\.rpc)\(/.test(preview),
+ 'Source-only visual preview must have zero backend mutations');
+
 
 for(const route of ["['programme','Course']","['evidence','Evidence']","['registration','Registration']",
  "['contact','Contact']","['metrics','Metrics']"]){
