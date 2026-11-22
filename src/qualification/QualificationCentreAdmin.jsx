@@ -30,6 +30,10 @@ export default function QualificationCentreAdmin({db,onBack}){
  [targetOn,setTargetOn]=useState('');
  const [fileTitle,setFileTitle]=useState(''),[fileKind,setFileKind]=useState(methods[0][0]),
  [file,setFile]=useState(null),[fileAttest,setFileAttest]=useState(false);
+ const [revokeUser,setRevokeUser]=useState(''),[revokeRole,setRevokeRole]=useState(''),
+ [revokeReason,setRevokeReason]=useState(''),[reassignId,setReassignId]=useState(''),
+ [reassignAssessor,setReassignAssessor]=useState(''),[reassignVerifier,setReassignVerifier]=useState(''),
+ [reassignReason,setReassignReason]=useState('');
  const [staffUser,setStaffUser]=useState(''),[staffRole,setStaffRole]=useState('assessor'),
  [staffReference,setStaffReference]=useState(''),[staffAttest,setStaffAttest]=useState(false);
  const [issuerName,setIssuerName]=useState(''),[issuerRef,setIssuerRef]=useState(''),
@@ -107,6 +111,18 @@ export default function QualificationCentreAdmin({db,onBack}){
   run(()=>portfolioRpc(db,'admin_authorize_staff',{
     p_user:staffUser,p_role:staffRole,p_reference:staffReference.trim(),p_attest:staffAttest
   }),'Professional reviewer authorization recorded. This staff member may now be selected for the approved role.');
+ };
+ const revokeStaff=()=>{
+  if(!window.confirm('Revoke this professional reviewer authorization? Future decisions will be blocked; reassign any unfinished portfolios affected.'))return;
+  run(()=>portfolioRpc(db,'admin_revoke_staff',{
+   p_user:revokeUser,p_role:revokeRole,p_reason:revokeReason.trim()
+  }),'Reviewer authorization revoked. Reassign any unfinished portfolios using this reviewer.');
+ };
+ const reassignStaff=()=>{
+  if(!window.confirm('Reassign these reviewers on an active qualification? Existing assessment decisions are preserved in the audit trail.'))return;
+  run(()=>portfolioRpc(db,'admin_reassign',{
+    p_enrolment:reassignId,p_assessor:reassignAssessor,p_verifier:reassignVerifier,p_reason:reassignReason.trim()
+  }),'Active portfolio reviewers reassigned with auditable reason. Previous assessment decisions remain intact.');
  };
  const onAssign=()=>run(()=>portfolioRpc(db,'admin_assign',{
   p_version:version.id,p_learner:learner,p_assessor:assessor,p_verifier:verifier,p_start:startOn,
@@ -241,7 +257,22 @@ export default function QualificationCentreAdmin({db,onBack}){
       {version.enrolments.length?version.enrolments.map(e=><div className="qc-enrolled" key={e.id}>
          <strong>{e.learner}</strong><small>Assessor: {e.assessor} · Verifier: {e.verifier}</small>
          <small>{e.completedAt?'Completed':'In progress'} · Started {e.startOn}</small>
+         {!e.completedAt&&<button className="qc-inline-action" type="button" onClick={()=>{setReassignId(e.id);
+          setReassignAssessor('');setReassignVerifier('');setReassignReason('');}}>
+          Change reviewers</button>}
       </div>):<p className="qc-secondary">No active learner enrolments on this edition.</p>}
+      {reassignId&&<div className="qc-reassign">
+        <h4>Documented reassignment</h4>
+        <PeopleSelect label="Replacement Assessor" value={reassignAssessor} onChange={setReassignAssessor}
+          people={people.filter(p=>staff.some(s=>s.role==='assessor'&&s.userId===p.id))} disabled={saving}/>
+        <PeopleSelect label="Replacement Verifier" value={reassignVerifier} onChange={setReassignVerifier}
+          people={people.filter(p=>staff.some(s=>s.role==='verifier'&&s.userId===p.id))} disabled={saving}/>
+        <label className="qc-field">Reason for changing reviewers<textarea rows={2} maxLength={1500}
+          value={reassignReason} disabled={saving} onChange={e=>setReassignReason(e.target.value)}/></label>
+        <button className="qc-outline" type="button" onClick={reassignStaff}
+          disabled={saving||reassignReason.trim().length<15||!reassignAssessor||!reassignVerifier||
+            reassignAssessor===reassignVerifier}>Save audited reassignment</button>
+      </div>}
     </Card>
     <Card title="Qualified assessment staff" icon={ShieldCheck}>
       <p className="qc-secondary">A person may only serve as Assessor or Internal Verifier after the centre confirms their actual professional competence. These roles are distinct from a normal LMS login.</p>
@@ -263,6 +294,19 @@ export default function QualificationCentreAdmin({db,onBack}){
           <small>{s.reference}</small></div>)}
         {!staff.length&&<p className="qc-secondary">No competent assessors or verifiers have been authorised yet.</p>}
       </div>
+      {!!staff.length&&<details className="qc-revoke"><summary>Revoke a professional reviewer authorization</summary>
+        <label className="qc-field">Authorised reviewer<select value={revokeUser+':'+revokeRole}
+          onChange={e=>{const item=staff.find(s=>s.userId+':'+s.role===e.target.value);
+            setRevokeUser(item?.userId||'');setRevokeRole(item?.role||'');}}>
+          <option value=":">Choose reviewer and role</option>
+          {staff.map(s=><option key={s.userId+':'+s.role} value={s.userId+':'+s.role}>
+            {s.name||people.find(p=>p.id===s.userId)?.email||s.userId} · {s.role}</option>)}
+        </select></label>
+        <label className="qc-field">Documented reason<textarea rows={2} value={revokeReason}
+          onChange={e=>setRevokeReason(e.target.value)} maxLength={1000} disabled={saving}/></label>
+        <button type="button" className="qc-outline" disabled={saving||!revokeUser||revokeReason.trim().length<15}
+          onClick={revokeStaff}>Revoke authorization</button>
+      </details>}
     </Card>
     <Card title="Certificate issuer authorization" icon={FileCheck2}>
       <p className="qc-secondary">Releasing a qualification does not authorise certificate issuance. The verifier can only record an actually issued certificate after the awarding body’s authority has been documented.</p>
