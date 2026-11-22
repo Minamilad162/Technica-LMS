@@ -2,6 +2,7 @@ import React,{useEffect,useMemo,useState} from 'react';
 import {ArrowLeft,BookCheck,BookOpen,CheckCircle2,ClipboardCheck,Download,FileCheck2,FilePlus2,
  FileText,FolderClosed,GraduationCap,Info,Layers3,LockKeyhole,RefreshCw,Search,ShieldAlert,ShieldCheck,UploadCloud,Users} from 'lucide-react';
 import {portfolioRpc} from './qualificationPortfolioApi.js';
+import {qualificationReadiness} from './qualificationReadiness.js';
 import './qualificationCentreAdmin.css';
 
 const methods=[['assignment_brief','Assignment Brief'],['reflective_account','Reflective Account'],
@@ -47,6 +48,7 @@ export default function QualificationCentreAdmin({db,onBack}){
  const approved=version?.units.filter(u=>u.brief?.status==='approved').length||0;
  const total=version?.units.length||0;
  const documents=unit?.documents||[];
+ const readiness=qualificationReadiness(version,staff);
 
  const reload=async(preferredVersion,preferredUnit)=>{
   const [v,p,s]=await Promise.all([portfolioRpc(db,'admin_workspace'),
@@ -169,9 +171,35 @@ export default function QualificationCentreAdmin({db,onBack}){
     </button>;
    })}
   </div>
+  {version&&<section className="qc-assessment-readiness" aria-label="Assessment access readiness">
+    <div className="qc-assessment-readiness-heading">
+      <div><span className="qf-overline">LIVE CENTRE RECORDS</span><h2>Assessment access readiness</h2>
+        <p>Technical access opens only after centre publication and genuine learner enrolment.</p></div>
+      <span className={'qc-assessment-readiness-status '+(readiness.live?'is-ready':'is-locked')}>
+        {readiness.live?<CheckCircle2 size={16}/>:<LockKeyhole size={16}/>}
+        {readiness.live?'Enrolments active':'Not yet available'}
+      </span>
+    </div>
+    <div className="qc-assessment-readiness-grid">
+      <div><strong>{readiness.approvedBriefs} / {readiness.units}</strong><span>Unit briefs approved</span></div>
+      <div><strong>{readiness.incompleteRubric.length===0?'Complete':readiness.incompleteRubric.length+' missing'}</strong><span>Source assessment rubric</span></div>
+      <div><strong>{readiness.published?'Published':'Pending'}</strong><span>Centre release</span></div>
+      <div><strong>{readiness.assessors} / {readiness.verifiers}</strong><span>Authorised Assessors / Verifiers</span></div>
+      <div><strong>{readiness.enrolments}</strong><span>Real learner enrolments</span></div>
+    </div>
+    <div className="qc-assessment-next">
+      <div><strong>Next required action</strong><p>{readiness.next}</p></div>
+      {!readiness.published&&readiness.pendingUnits.length>0&&<button className="qc-outline" type="button"
+        onClick={()=>{setUnitId(readiness.pendingUnits[0].id);
+          document.getElementById('qc-centre-unit-review')?.scrollIntoView({behavior:'smooth',block:'start'});}}>
+        Review next Unit · {readiness.pendingUnits[0].code}
+      </button>}
+    </div>
+    <small className="qc-assessment-caveat">Database readiness is not proof of awarding-body approval or permission to issue certificates. Never publish using test references.</small>
+  </section>}
   {version&&<div className="qc-columns">
    <div className="qc-main">
-    <Card title="Unit assessment plans" icon={Layers3}>
+    <div id="qc-centre-unit-review"><Card title="Unit assessment plans" icon={Layers3}>
       <p className="qc-secondary">The real Learning Outcomes and Assessment Criteria are already imported.
         These centre-authored brief drafts must be checked against the current programme before approval.</p>
       <div className="qc-unit-pills">{version.units.map(u=><button key={u.id} type="button"
@@ -195,7 +223,7 @@ export default function QualificationCentreAdmin({db,onBack}){
           onClick={()=>onBrief(true)}><BookCheck size={16}/> Approve Unit brief</button>
        </div>
       </div>}
-    </Card>
+    </Card></div>
     <Card title="Centre resources · protected uploads" icon={FolderClosed}>
       <p className="qc-secondary">Upload genuine centre-authorised Assignment Briefs, Reflective Account forms, Witness Testimony forms, CPD records or evidence matrices. Drafts cannot be viewed by learners until approved.</p>
       <div className="qc-document-list">{documents.map(d=><div key={d.id}>
