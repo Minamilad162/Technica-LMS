@@ -7,6 +7,7 @@ import QualificationSourcePreview from './QualificationSourcePreview.jsx';
 import QualificationCentreAdmin from './QualificationCentreAdmin.jsx';
 import QualificationCentreBrief from './QualificationCentreBrief.jsx';
 import {PortfolioStatusRibbon,PortfolioMetrics} from './QualificationPortfolioReferenceUI.jsx';
+import QualificationCandidateRegistration from './QualificationCandidateRegistration.jsx';
 import QualificationEvidenceTemplates from './QualificationEvidenceTemplates.jsx';
 import {LiveUnitLearningHub, OutcomeLearningSupport, ProgrammeMaterialSnapshot, EvidencePreparationTips} from './QualificationLearningResources.jsx';
 import {
@@ -385,12 +386,14 @@ function ReviewerClaim({portfolio, outcome, busy, onDownload, onReview}) {
   </>;
 }
 
-function Registration({portfolio, progress, busy, onDeclare, onFinalize}) {
+function Registration({db, portfolio, progress, busy, onDeclare, onFinalize}) {
   const [reference, setReference] = useState('');
   const learner = portfolio.role === 'learner';
   const verifier = portfolio.role === 'verifier';
-  return <div className="qf-live-grid">
-    <Panel title="Registration">
+  return <div className="qf-ref-registration">
+    <QualificationCandidateRegistration db={db} portfolio={portfolio}/>
+    <div className="qf-live-grid">
+    <Panel title="Programme registration & Declaration">
       <dl className="qf-live-details">
         <dt>Learner</dt><dd>{portfolio.learner || 'Registered learner'}</dd>
         <dt>Specification version</dt><dd>{portfolio.version}</dd>
@@ -416,6 +419,7 @@ function Registration({portfolio, progress, busy, onDeclare, onFinalize}) {
         <button type="submit" className="qf-button qf-primary" disabled={busy || !reference.trim()}>Record issued certificate</button>
       </form>}
     </Panel>
+    </div>
   </div>;
 }
 
@@ -599,7 +603,7 @@ function OpenPortfolio({db, portfolio, references, onRefresh, onBack}) {
       onEvidence={learner ? () => changeView('evidence') : null} onLibrary={cover ? () => changeView('library') : null}/>}
     {view === 'evidence' && <EvidenceFolder portfolio={visiblePortfolio} busy={busy} onSave={saveEvidence}
       onDownload={onDownload} onShowcase={items => run(() => downloadEvidenceShowcase(db,items))} onBack={evidenceFromOutcome ? () => changeView('outcome') : null}/>}
-    {view === 'registration' && <Registration portfolio={portfolio} progress={progress} busy={busy}
+    {view === 'registration' && <Registration db={db} portfolio={portfolio} progress={progress} busy={busy}
       onDeclare={() => commit('declare',{},'Declaration accepted.')}
       onFinalize={reference => commit('finalize',{p_certificate_reference: reference},reference ? 'Certificate reference recorded.' : 'Qualification completed.')}/>}
     {view === 'contact' && <ContactDiary db={db} portfolio={portfolio} progress={progress} onOutcome={openOutcome}/>}
