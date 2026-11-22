@@ -19,6 +19,8 @@ export default function UnitMaterialPanel({unitCode,compact=false}){
    <span className="qmat-edition">{material.sourceVersion}</span>
   </div>
   {material.aim&&<div className="qmat-aim"><span className="qmat-label">Unit aim</span><p>{material.aim}</p></div>}
+  {material.assessmentNote&&<div className="qmat-aim qmat-assessment-note"><span className="qmat-label">Source assessment notes</span>
+    <p>{material.assessmentNote}</p><small>From the referenced historical specification. Your published centre assessment instructions take precedence.</small></div>}
   <section className="qmat-block"><div className="qmat-subheading"><Layers3 size={16}/><h4>{isNvq?'Competence outcomes':'Learning outcomes'}</h4><span>{outcomes.length}</span></div>
    <ol className="qmat-outcomes">{outcomes.map(lo=><li key={lo.number}><b>{lo.number.toString().padStart(2,'0')}</b><span>{lo.title}</span></li>)}</ol>
   </section>
