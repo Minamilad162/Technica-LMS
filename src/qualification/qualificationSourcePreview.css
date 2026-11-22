@@ -1,0 +1,111 @@
+/* Source-backed qualification syllabus — production reference view. */
+.qf-live .qsrc-page{display:grid;gap:16px;min-width:0}
+.qf-live .qsrc-page>.qf-plain-back{justify-self:start;font-size:13px;font-weight:800;color:#436b94}
+.qf-live .qsrc-hero{min-height:220px;margin:0}
+.qf-live .qsrc-overview{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:13px}
+.qf-live .qsrc-overview>div{display:flex;align-items:center;gap:11px;padding:15px 17px;background:#fff;
+ border:1px solid #e2ebf5;border-radius:15px;box-shadow:0 6px 20px #153d690b}
+.qf-live .qsrc-overview .qsrc-icon{width:37px;height:37px;border-radius:11px;background:#eaf3ff;
+ color:#397fc0;display:grid;place-items:center;flex-shrink:0}
+.qf-live .qsrc-overview strong{font-size:24px;letter-spacing:-.045em;color:#1f3d60}
+.qf-live .qsrc-overview small{color:#7b8aa0;font-size:11px;line-height:1.4}
+.qf-live .qsrc-edition-row{display:flex;gap:16px;align-items:end;justify-content:space-between}
+.qf-live .qsrc-edition-row h2{font-size:23px;letter-spacing:-.025em;margin:4px 0 0}
+.qf-live .qsrc-edition-picker{font-size:11px;font-weight:780;color:#597290;display:grid;gap:7px}
+.qf-live .qsrc-edition-picker select{min-height:45px;border:1px solid #cbdbee;border-radius:11px;background:#fff;
+ padding:9px 12px;font-weight:760;color:#295684;min-width:260px;max-width:100%}
+.qf-live .qsrc-edition-single{padding:9px 13px;border-radius:10px;background:#eaf2fc;color:#2a5d94;
+ font-size:12px;font-weight:820}
+.qf-live .qsrc-source-note{display:flex;align-items:start;gap:12px;border:1px solid #d8e7f7;
+ background:#f1f7ff;border-radius:14px;padding:14px 18px;color:#4c6784}
+.qf-live .qsrc-source-note>svg{margin-top:2px;flex-shrink:0;color:#2d7bbf}
+.qf-live .qsrc-source-note strong{display:block;font-size:13px;color:#244f80;margin-bottom:4px}
+.qf-live .qsrc-source-note p{font-size:12px;line-height:1.65;margin:0}
+.qf-live .qsrc-structure{display:grid;grid-template-columns:minmax(205px,.6fr) minmax(0,1.65fr) minmax(250px,.72fr);
+ gap:15px;align-items:start}
+.qf-live .qsrc-unit-list{display:grid;gap:8px;min-width:0}
+.qf-live .qsrc-unit-list>button{display:flex;align-items:center;gap:11px;min-width:0;min-height:70px;
+ text-align:left;cursor:pointer;border:1px solid #e2eaf6;background:#fff;padding:13px 12px;border-radius:13px;
+ color:#2a4767;box-shadow:0 4px 14px #17395b08;transition:border-color .18s,background .18s,transform .18s}
+.qf-live .qsrc-unit-list>button:hover{border-color:#b4cfeb;background:#f9fcff;transform:translateX(2px)}
+.qf-live .qsrc-unit-list>button.active{border-color:#80acd9;background:#edf5ff;box-shadow:inset 3px 0 #3684c7}
+.qf-live .qsrc-unit-index{display:grid;place-items:center;min-width:35px;height:35px;border-radius:10px;
+ color:#3978ba;background:#eaf3ff;font-weight:850;font-size:12px}
+.qf-live .qsrc-unit-list>button>span:nth-child(2){display:grid;gap:5px;min-width:0}
+.qf-live .qsrc-unit-list strong{font-size:12px;font-weight:800;line-height:1.35;overflow-wrap:anywhere}
+.qf-live .qsrc-unit-list small{font-size:11px;color:#8295ac}
+.qf-live .qsrc-unit-content{display:grid;gap:14px;min-width:0}
+.qf-live .qsrc-unit-heading{padding:19px 20px;background:#fff;border:1px solid #e1eaf6;
+ border-radius:15px;box-shadow:0 6px 17px #1c40660a}
+.qf-live .qsrc-unit-heading h2{font-size:clamp(18px,2vw,23px);line-height:1.3;margin:6px 0 13px}
+.qf-live .qsrc-unit-meta{display:flex;align-items:center;gap:9px;flex-wrap:wrap}
+.qf-live .qsrc-unit-meta span{background:#f0f6fe;color:#46729f;padding:6px 10px;border-radius:8px;
+ font-size:11px;font-weight:750}
+.qf-live .qsrc-outcomes,.qf-live .qsrc-materials{padding:18px;background:#fff;border:1px solid #e0e9f6;
+ border-radius:15px;box-shadow:0 5px 19px #163a630a}
+.qf-live .qsrc-section-heading{display:flex;align-items:center;gap:10px;margin-bottom:14px;color:#3579b4}
+.qf-live .qsrc-section-heading h3{font-size:16px;font-weight:850;color:#1f3c5d;margin:0}
+.qf-live .qsrc-outcome{border:1px solid #e1e9f5;background:#fcfdff;border-radius:12px;margin-bottom:9px;overflow:hidden}
+.qf-live .qsrc-outcome[open]{background:#fff;border-color:#bad5f0}
+.qf-live .qsrc-outcome summary{display:flex;align-items:center;gap:12px;list-style:none;cursor:pointer;
+ padding:13px 15px}
+.qf-live .qsrc-outcome summary::-webkit-details-marker{display:none}
+.qf-live .qsrc-outcome summary>svg{flex-shrink:0;color:#7f9bb7;transition:transform .16s}
+.qf-live .qsrc-outcome[open] summary>svg{transform:rotate(180deg)}
+.qf-live .qsrc-outcome-number{display:grid;place-items:center;min-width:33px;height:33px;
+ border-radius:10px;background:#e9f2fd;color:#3176b6;font-size:11px;font-weight:850}
+.qf-live .qsrc-outcome-head{flex:1;min-width:0;display:grid;gap:4px}
+.qf-live .qsrc-outcome-head strong{font-size:12.5px;color:#264b73;line-height:1.5}
+.qf-live .qsrc-outcome-head small{font-size:11px;color:#879bb0}
+.qf-live .qsrc-outcome-body{padding:0 14px 15px;border-top:1px solid #edf2f8}
+.qf-live .qsrc-outcome-guidance{font-size:11px;color:#7189a1;line-height:1.65;margin:12px 0}
+.qf-live .qsrc-criteria-list{list-style:none;margin:12px 0 0;padding:0;display:grid;gap:8px}
+.qf-live .qsrc-criteria-list li{display:flex;align-items:flex-start;gap:11px;padding:11px 12px;
+ border:1px solid #e4ebf6;background:#fafcff;border-radius:10px}
+.qf-live .qsrc-criteria-list li>span{flex-shrink:0;min-width:37px;color:#2f7aba;font-size:12px;font-weight:850}
+.qf-live .qsrc-criteria-list p{font-size:12px;color:#425d7c;line-height:1.65;margin:0;overflow-wrap:anywhere}
+.qf-live .qsrc-aside{display:grid;gap:14px;min-width:0}
+.qf-live .qsrc-source-card{display:grid;gap:13px;background:#fff;border:1px solid #e1eaf6;
+ padding:18px;border-radius:15px;box-shadow:0 7px 20px #173b690b}
+.qf-live .qsrc-source-card-heading{display:flex;gap:9px;align-items:center;color:#3279ba}
+.qf-live .qsrc-source-card-heading>div{min-width:0}
+.qf-live .qsrc-source-card-heading h3{font-size:15px;color:#244464;margin:0}
+.qf-live .qsrc-source-card-heading small{display:block;margin-top:4px;color:#7891aa;line-height:1.4;font-size:10.5px}
+.qf-live .qsrc-source-card>p{font-size:12px;line-height:1.65;color:#70869d;margin:0}
+.qf-live .qsrc-source-link{display:flex;align-items:center;justify-content:center;gap:9px;min-height:43px;
+ border:1px solid #bcd7f3;background:#f0f7ff;padding:9px;border-radius:10px;
+ text-decoration:none;color:#2d6ea8;font-weight:800;font-size:12px}
+.qf-live .qsrc-source-link:hover{background:#e3f0ff}
+.qf-live .qsrc-awaiting,.qf-live .qsrc-empty{display:flex;gap:13px;align-items:start;padding:20px;
+ background:#f8fbff;border:1px dashed #c8d9e9;border-radius:15px;color:#64809b}
+.qf-live .qsrc-awaiting>svg,.qf-live .qsrc-empty>svg{flex-shrink:0;color:#3e84c1}
+.qf-live .qsrc-awaiting h3,.qf-live .qsrc-empty h2{color:#244768;font-size:16px;margin:0 0 8px}
+.qf-live .qsrc-awaiting p,.qf-live .qsrc-empty p{font-size:12px;line-height:1.65;margin:0 0 10px}
+.qf-live .qsrc-awaiting a{display:inline-flex;align-items:center;gap:8px;color:#2c75b4;font-size:12px;font-weight:800}
+.qf-live .qsrc-materials .qmat-panel{box-shadow:none;border-radius:12px}
+@media(max-width:1300px){
+ .qf-live .qsrc-structure{grid-template-columns:minmax(205px,.53fr) minmax(0,1.47fr)}
+ .qf-live .qsrc-aside{grid-column:2;grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media(max-width:760px){
+ .qf-live .qsrc-overview{grid-template-columns:repeat(3,minmax(0,1fr));gap:7px}
+ .qf-live .qsrc-overview>div{gap:4px;flex-wrap:wrap;padding:12px}
+ .qf-live .qsrc-overview small{width:100%;font-size:10px}
+ .qf-live .qsrc-overview strong{font-size:20px}
+ .qf-live .qsrc-structure{grid-template-columns:minmax(0,1fr)}
+ .qf-live .qsrc-unit-list{display:flex;overflow-x:auto;scrollbar-width:thin;padding-bottom:8px}
+ .qf-live .qsrc-unit-list>button{flex:0 0 min(225px,68vw);min-height:88px}
+ .qf-live .qsrc-aside{grid-column:auto;grid-template-columns:minmax(0,1fr)}
+ .qf-live .qsrc-edition-row{align-items:start;flex-direction:column}
+ .qf-live .qsrc-edition-picker{width:100%}
+ .qf-live .qsrc-edition-picker select{width:100%}
+}
+@media(max-width:400px){.qf-live .qsrc-outcomes,.qf-live .qsrc-materials{padding:12px}
+ .qf-live .qsrc-unit-heading{padding:16px}
+ .qf-live .qsrc-outcome summary{padding:11px}
+ .qf-live .qsrc-outcome-body{padding:0 10px 12px}
+}
+@media(prefers-reduced-motion:reduce){
+ .qf-live .qsrc-unit-list>button,.qf-live .qsrc-outcome summary>svg{transition:none}
+ .qf-live .qsrc-unit-list>button:hover{transform:none}
+}
