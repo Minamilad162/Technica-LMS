@@ -8,6 +8,7 @@ import {
   evidenceKinds, evidencePayload, portfolioRpc, programmeProgress, uploadPortfolioEvidence,
 } from './qualificationPortfolioApi.js';
 import './qualificationPortfolio.css';
+import './qualificationPremium.css';
 
 const roleLabels = {learner: 'My Programme', assessor: 'Assessment queue', verifier: 'Verification queue'};
 const decisions = [['met','Met'], ['partial','Partially met'], ['not_met','Not met']];
