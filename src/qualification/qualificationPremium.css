@@ -64,9 +64,9 @@
   border:1px solid #d9e6f7;border-radius:14px;background:#f3f8ff;color:#48617d;font-size:13px;line-height:1.6}
 .qf-live .qf-live-preview-notice svg{color:#3a78bc;flex:0 0 auto;margin-top:2px}
 .qf-live .qf-live-preview-notice strong{color:#1e4575}
-.qf-live .qf-live-feature-open+.qf-live-nav{margin:0 0 18px;overflow-x:auto;flex-wrap:nowrap;scrollbar-width:thin;
+.qf-live .qf-ref-ribbon+.qf-live-nav{margin:0 0 18px;overflow-x:auto;flex-wrap:nowrap;scrollbar-width:thin;
   padding:6px;border:1px solid #e1e9f5;border-radius:15px;background:#fff;box-shadow:0 6px 15px #1736580c}
-.qf-live .qf-live-feature-open+.qf-live-nav button{flex:0 0 auto;white-space:nowrap}
+.qf-live .qf-ref-ribbon+.qf-live-nav button{flex:0 0 auto;white-space:nowrap}
 .qf-live .qf-card{border:1px solid #e1e9f4;border-radius:17px;padding:clamp(17px,2vw,23px);
   box-shadow:0 9px 26px #1f47730a}
 .qf-live .qf-card-header h3{font-weight:850;font-size:17px}
@@ -158,3 +158,60 @@
   .qf-live .qf-live-nav button,.qf-live .qf-live-list button{transition:none}
   .qf-live .qf-live-list button:hover{transform:none}
 }
+
+/* Premium qualification portfolio: source structure retained without copying reference styling. */
+.qf-live .qf-ref-ribbon{display:grid;gap:19px;margin:-1px 0 16px;border:1px solid #dce7f5;border-radius:17px;
+ padding:20px 22px;background:linear-gradient(110deg,#fff,#f7fbff);box-shadow:0 8px 23px #1a49740d}
+.qf-live .qf-ref-ribbon-top{display:flex;align-items:center;justify-content:space-between;gap:16px}
+.qf-live .qf-ref-ribbon-top>div{display:grid;gap:5px;min-width:0}
+.qf-live .qf-ref-eyebrow{font-weight:850;font-size:10px;color:#3e73ab;letter-spacing:.11em}
+.qf-live .qf-ref-ribbon-top strong{font-size:14px;font-weight:850;color:#193b61;line-height:1.4}
+.qf-live .qf-ref-ribbon-top small{font-size:11px;color:#8093a9}
+.qf-live .qf-ref-declaration{display:flex;align-items:center;gap:7px;border:1px solid #bdd5ed;background:#ebf5ff;
+ color:#1c609a;font-size:12px;font-weight:800;padding:10px 13px;border-radius:10px;cursor:pointer;white-space:nowrap}
+.qf-live .qf-ref-declaration:hover{background:#dcefff}
+.qf-live .qf-ref-ribbon-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1.05fr)) repeat(2,minmax(0,1fr));gap:9px}
+.qf-live .qf-ref-progress-block,.qf-live .qf-ref-reviewer{min-width:0;display:grid;align-content:start;
+ gap:9px;padding:13px 14px;border-radius:13px;border:1px solid #e2eaf5;background:white}
+.qf-live .qf-ref-progress-heading{display:flex;justify-content:space-between;align-items:center;gap:7px}
+.qf-live .qf-ref-progress-heading span,.qf-live .qf-ref-reviewer>div span{font-size:11px;font-weight:760;color:#70839b}
+.qf-live .qf-ref-progress-heading strong{font-size:19px;color:#1e436b;letter-spacing:-.04em}
+.qf-live .qf-ref-progress-block small,.qf-live .qf-ref-reviewer>small{font-size:10px;color:#8195ab;line-height:1.5}
+.qf-live .qf-ref-progress-block progress,.qf-live .qf-ref-unit-metric progress{display:block;width:100%;height:7px;accent-color:#387abb}
+.qf-live .qf-ref-completed progress{accent-color:#15997b}
+.qf-live .qf-ref-expected progress{accent-color:#ea8638}
+.qf-live .qf-ref-reviewer>div{display:flex;align-items:center;gap:7px;color:#3a79b5}
+.qf-live .qf-ref-reviewer>strong{font-size:12px;color:#173d64;line-height:1.5;overflow-wrap:anywhere}
+.qf-live .qf-ref-ribbon-footer{display:flex;flex-wrap:wrap;gap:10px 24px;padding-top:13px;border-top:1px solid #e4edf6}
+.qf-live .qf-ref-ribbon-footer span{display:inline-flex;align-items:center;gap:6px;font-size:11px;color:#6b809a}
+.qf-live .qf-ref-ribbon-footer strong{color:#284968}
+.qf-live .qf-ref-metrics{display:grid;gap:16px}
+.qf-live .qf-ref-metrics-stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+.qf-live .qf-ref-metrics-stats>div{min-width:0;padding:19px 17px;display:grid;gap:9px;
+ background:#fff;border:1px solid #e0eaf6;border-radius:16px;box-shadow:0 6px 19px #183c6509}
+.qf-live .qf-ref-metrics-stats svg{color:#3d80bd}
+.qf-live .qf-ref-metrics-stats strong{font-size:28px;font-weight:850;line-height:1;color:#183d65;letter-spacing:-.04em}
+.qf-live .qf-ref-metrics-stats span{font-size:11px;font-weight:700;color:#758aa1;line-height:1.5}
+.qf-live .qf-ref-metrics-unit .qf-card-header{align-items:baseline}
+.qf-live .qf-ref-metrics-unit .qf-card-header>span{font-size:11px;color:#798da3}
+.qf-live .qf-ref-unit-metrics{display:grid;gap:14px}
+.qf-live .qf-ref-unit-metric{padding:14px;border:1px solid #e4ecf6;background:#fbfdff;border-radius:11px;display:grid;gap:8px}
+.qf-live .qf-ref-unit-metric>div{display:flex;justify-content:space-between;align-items:start;gap:10px}
+.qf-live .qf-ref-unit-metric>div span{font-size:12px;font-weight:740;color:#2d557a}
+.qf-live .qf-ref-unit-metric>div strong{font-size:12px;flex-shrink:0;color:#2e77ac}
+.qf-live .qf-ref-unit-metric>small{color:#ac6320;font-size:11px}
+.qf-live .qf-ref-unit-metric>button{background:none;border:0;padding:2px 0;text-align:left;color:#2b6ea4;font-size:11px;text-decoration:underline;cursor:pointer}
+.qf-live .qf-ref-hours>p{font-size:12px;line-height:1.7;color:#71869f}
+.qf-live .qf-ref-hours>div:last-child{display:flex;gap:11px;flex-wrap:wrap}
+.qf-live .qf-ref-hours>div:last-child span{display:flex;justify-content:space-between;gap:10px;background:#f4f8fe;padding:12px 14px;border-radius:10px;font-size:12px;color:#52718d}
+.qf-live .qf-ref-hours>div:last-child strong{color:#244f76}
+@media(max-width:1150px){.qf-live .qf-ref-ribbon-grid{grid-template-columns:repeat(3,minmax(0,1fr))}
+ .qf-live .qf-ref-metrics-stats{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:720px){.qf-live .qf-ref-ribbon{padding:15px}
+ .qf-live .qf-ref-ribbon-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .qf-live .qf-ref-ribbon-top{align-items:start}
+ .qf-live .qf-ref-ribbon-top strong{font-size:12px}}
+@media(max-width:430px){.qf-live .qf-ref-ribbon-top{flex-direction:column;align-items:stretch}
+ .qf-live .qf-ref-ribbon-grid{grid-template-columns:minmax(0,1fr)}
+ .qf-live .qf-ref-declaration{justify-content:center}
+ .qf-live .qf-ref-metrics-stats{grid-template-columns:minmax(0,1fr)}}
