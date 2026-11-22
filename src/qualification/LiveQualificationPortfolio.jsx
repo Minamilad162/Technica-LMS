@@ -186,7 +186,20 @@ function EvidenceFolder({portfolio, onDownload, onShowcase, busy, onSave, onMap,
   }).sort((a,b)=>order==='title'?a.title.localeCompare(b.title)
     :order==='oldest'?Date.parse(a.created_at)-Date.parse(b.created_at)
     :Date.parse(b.created_at)-Date.parse(a.created_at));
-  return <div className="qlearn-evidence-stack"><EvidencePreparationTips/><div className="qf-live-grid">
+  return <div className="qlearn-evidence-stack"><EvidencePreparationTips/>
+    {portfolio.canEdit&&<div className="qmu-entry">
+      <div><span className="qf-overline">YOUR QUALIFICATION · EVIDENCE BANK</span>
+        <strong>Upload once. Map to several Units.</strong>
+        <p>Keep each genuine evidence file in one secure folder, then connect it to as many relevant Criteria as needed.</p></div>
+      <div className="qmu-entry-actions">
+        <button type="button" disabled={busy} onClick={()=>{start('upload');
+          requestAnimationFrame(()=>document.getElementById('qualification-evidence-upload')?.scrollIntoView({behavior:'smooth',block:'center'}));}}>
+          <FolderOpen size={16}/> Upload evidence</button>
+        <button type="button" disabled={busy} onClick={()=>document.getElementById('qualification-multi-unit-mapper')?.scrollIntoView({behavior:'smooth',block:'start'})}>
+          <Layers3 size={16}/> Map across Units</button>
+      </div>
+    </div>}
+    <div className="qf-live-grid">
     <Panel title="Evidence Folder" action={onBack && <Action secondary disabled={busy} onClick={onBack}>Back to outcome</Action>}>
       <div className="qf-ref-evidence-toolbar">
         <label>Search evidence<input value={search} onChange={e=>setSearch(e.target.value)}
@@ -221,7 +234,7 @@ function EvidenceFolder({portfolio, onDownload, onShowcase, busy, onSave, onMap,
         <Action secondary disabled={busy || mode === 'upload'} onClick={() => start('upload')}>Upload a file</Action>
         <Action secondary disabled={busy || mode === 'write'} onClick={() => start('write')}>Write evidence</Action>
       </div>
-      {mode && <form className="qf-live-form" onSubmit={event => {event.preventDefault(); save();}}>
+      {mode && <form id="qualification-evidence-upload" className="qf-live-form" onSubmit={event => {event.preventDefault(); save();}}>
         <fieldset disabled={busy}>
           <label className="qf-field">Title<input dir="auto" required maxLength={160} value={title} onChange={e => {setTitle(e.target.value); reservation.current = null;}}/></label>
           <label className="qf-field">Description<textarea dir="auto" maxLength={2000} rows={2} value={description} onChange={e => {setDescription(e.target.value); reservation.current = null;}}/></label>
