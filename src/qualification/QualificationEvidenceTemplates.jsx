@@ -93,7 +93,7 @@ export default function QualificationEvidenceTemplates({unit,compact=false}){
   const blob=new Blob([text],{type:'text/plain;charset=utf-8'});
   const url=URL.createObjectURL(blob);
   const a=document.createElement('a');a.href=url;a.download=`Technica_${selected}_${(unit?.code||'Unit').replaceAll('/','-')}.txt`;
-  a.click();URL.revokeObjectURL(url);setMessage('Blank working template downloaded. Complete it with authentic evidence.');
+  a.click();setTimeout(()=>URL.revokeObjectURL(url),3000);setMessage('Blank working template downloaded. Complete it with authentic evidence.');
  };
  const copy=async()=>{
   try{await navigator.clipboard.writeText(text);setMessage('Blank template copied for your records.');}
