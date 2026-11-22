@@ -2,7 +2,7 @@ import React,{useEffect,useMemo,useState} from 'react';
 import {ArrowLeft,BookCheck,BookOpen,CheckCircle2,ClipboardCheck,Download,FileCheck2,FilePlus2,
  FileText,FolderClosed,GraduationCap,Info,Layers3,LockKeyhole,RefreshCw,Search,ShieldAlert,ShieldCheck,UploadCloud,Users} from 'lucide-react';
 import {portfolioRpc} from './qualificationPortfolioApi.js';
-import {qualificationReadiness} from './qualificationReadiness.js';
+import {qualificationReadiness,needsAssessmentMethodReview,sourceRubricForUnit} from './qualificationReadiness.js';
 import './qualificationCentreAdmin.css';
 
 const methods=[['assignment_brief','Assignment Brief'],['reflective_account','Reflective Account'],
@@ -21,10 +21,11 @@ function PeopleSelect({label,value,onChange,people,disabled}){return <label clas
   {people.map(p=><option value={p.id} key={p.id}>{p.name||p.email} · {p.email}</option>)}
  </select></label>;}
 
-export default function QualificationCentreAdmin({db,onBack}){
+export default function QualificationCentreAdmin({db,onBack,references=[]}){
  const [versions,setVersions]=useState([]),[people,setPeople]=useState([]),[staff,setStaff]=useState([]);
  const [search,setSearch]=useState(''),[versionId,setVersionId]=useState(''),[unitId,setUnitId]=useState('');
  const [instructions,setInstructions]=useState(''),[assessmentMethods,setAssessmentMethods]=useState('');
+ const [reviewChecks,setReviewChecks]=useState({rubric:false,methods:false,authority:false});
  const [approvalRef,setApprovalRef]=useState(''),[declaration,setDeclaration]=useState('');
  const [attest,setAttest]=useState(false),[learner,setLearner]=useState(''),[assessor,setAssessor]=useState(''),
  [verifier,setVerifier]=useState(''),[startOn,setStartOn]=useState(()=>new Date().toISOString().slice(0,10)),
@@ -49,6 +50,12 @@ export default function QualificationCentreAdmin({db,onBack}){
  const total=version?.units.length||0;
  const documents=unit?.documents||[];
  const readiness=qualificationReadiness(version,staff);
+ const sourceRubric=sourceRubricForUnit(references,version,unit);
+ const methodsNeedReview=needsAssessmentMethodReview(assessmentMethods);
+ const canApproveBrief=Boolean(!saving&&!release&&unit&&sourceRubric.complete&&
+   instructions.trim().length>=80&&!methodsNeedReview&&
+   reviewChecks.rubric&&reviewChecks.methods&&reviewChecks.authority);
+ const nextUnapproved=version?.units?.find(item=>item.id!==unit?.id&&item.brief?.status!=='approved');
 
  const reload=async(preferredVersion,preferredUnit)=>{
   const [v,p,s]=await Promise.all([portfolioRpc(db,'admin_workspace'),
@@ -69,7 +76,7 @@ export default function QualificationCentreAdmin({db,onBack}){
     .finally(()=>{if(alive)setLoading(false);});
   return ()=>{alive=false;};
  },[db]);
- useEffect(()=>{setInstructions(unit?.brief?.instructions||'');setAssessmentMethods(unit?.brief?.methods||'');},[unit?.id,unit?.brief?.approvedAt,unit?.brief?.instructions,unit?.brief?.methods]);
+ useEffect(()=>{setInstructions(unit?.brief?.instructions||'');setAssessmentMethods(unit?.brief?.methods||'');setReviewChecks({rubric:false,methods:false,authority:false});},[unit?.id,unit?.brief?.approvedAt,unit?.brief?.instructions,unit?.brief?.methods]);
  useEffect(()=>{setApprovalRef('');setAttest(false);setDeclaration('');},[version?.id]);
  useEffect(()=>{
   if(!version?.id)return;
@@ -80,9 +87,9 @@ export default function QualificationCentreAdmin({db,onBack}){
    .catch(e=>{if(alive)setError(errText(e));});
   return ()=>{alive=false;};
  },[db,version?.id,version?.publishedAt]);
- const run=async(callback,success)=>{
+ const run=async(callback,success,preferredUnit)=>{
   setSaving(true);setMessage('');setError('');
-  try{await callback();await reload(version?.id,unit?.id);setMessage(success);}
+  try{await callback();await reload(version?.id,preferredUnit||unit?.id);setMessage(success);}
   catch(e){setError(errText(e));}
   finally{setSaving(false);}
  };
@@ -92,10 +99,12 @@ export default function QualificationCentreAdmin({db,onBack}){
   catch(e){setError(errText(e));}finally{setSaving(false);}
  };
  const onBrief=approve=>{
-  if(approve&&!window.confirm('Confirm you reviewed this Unit assessment plan and approve it as a Technica centre-authored brief, not an awarding-body document?'))return;
-  run(()=>portfolioRpc(db,'admin_save_brief',{
+  if(approve&&!canApproveBrief){setError('Review the official criteria, replace the generic methods and complete the centre sign-off checklist.');return;}
+  if(approve&&!window.confirm('Confirm you are authorised by Technica Consult, reviewed this Unit against its official criteria, and selected its assessment methods? Your approval is recorded.'))return;
+  void run(()=>portfolioRpc(db,'admin_save_brief',{
    p_unit:unit.id,p_instructions:instructions,p_methods:assessmentMethods,p_approve:approve}),
-   approve?'Unit brief approved by centre administrator.':'Draft saved for centre review.');
+   approve?'Unit brief approved by centre administrator.':'Draft saved for centre review.',
+   approve?nextUnapproved?.id:undefined);
  };
  const onPublish=()=>run(()=>portfolioRpc(db,'admin_publish',{
   p_version:version.id,p_approval_reference:approvalRef.trim(),p_declaration:declaration.trim(),p_attest:attest
@@ -209,17 +218,43 @@ export default function QualificationCentreAdmin({db,onBack}){
        <div className="qc-unit-head"><div><span className="qf-overline">{unit.code}</span><h3>{unit.title}</h3>
         <small>{unit.outcomes} Outcomes · {unit.criteria} Criteria</small></div>
         <Pill ready={unit.brief?.status==='approved'}>{unit.brief?.status==='approved'?'Centre approved':'Working draft'}</Pill></div>
+       <details className="qc-source-rubric">
+        <summary><span>Official source criteria · {sourceRubric.outcomes.length} Outcomes / {sourceRubric.criteria} Criteria</span>
+          <Pill ready={sourceRubric.complete}>{sourceRubric.complete?'Matched':'Verification required'}</Pill></summary>
+        {sourceRubric.complete?<div className="qc-source-rubric-body">
+         <p>Compare this Unit's centre brief and methods against all official Learning Outcomes and Assessment Criteria. Source content is read-only.</p>
+         {sourceRubric.outcomes.map(outcome=><div key={outcome.code} className="qc-source-outcome">
+          <strong>LO {outcome.code} — {outcome.title}</strong>
+          <ol>{outcome.criteria.map(criterion=><li key={criterion.code}><b>AC {criterion.code}</b> — {criterion.title}</li>)}</ol>
+         </div>)}
+         {sourceRubric.source?.source_url?.startsWith('https://')&&
+          <a href={sourceRubric.source.source_url} target="_blank" rel="noopener noreferrer">Open awarding-body specification</a>}
+        </div>:<p className="qc-source-rubric-missing">Official criteria are missing or inconsistent with the Unit record; approval is blocked until reviewed.</p>}
+       </details>
        <label className="qc-field">Unit Assessment Brief — centre-authored editable text
         <textarea value={instructions} disabled={saving||release} rows={13}
-          onChange={e=>setInstructions(e.target.value)} maxLength={30000}/></label>
+          onChange={e=>{setInstructions(e.target.value);setReviewChecks(old=>({...old,rubric:false,authority:false}));}} maxLength={30000}/></label>
        <label className="qc-field">Assessment methods &amp; acceptance conditions
         <textarea value={assessmentMethods} disabled={saving||release} rows={3}
-          onChange={e=>setAssessmentMethods(e.target.value)} maxLength={3000}
+          onChange={e=>{setAssessmentMethods(e.target.value);setReviewChecks(old=>({...old,methods:false,authority:false}));}} maxLength={3000}
           placeholder="List approved evidence methods, required checks and any practical activities."/></label>
+       {methodsNeedReview&&<p className="qc-method-warning" role="status"><ShieldAlert size={16}/>
+        These are placeholder methods. Select real assessment methods and acceptance conditions for this Unit before centre approval.</p>}
+       {!release&&<fieldset className="qc-approval-checklist"><legend>Unit approval checklist · centre sign-off</legend>
+        <label><input type="checkbox" checked={reviewChecks.rubric} disabled={saving||!sourceRubric.complete}
+          onChange={e=>setReviewChecks(old=>({...old,rubric:e.target.checked}))}/>
+          I checked this Unit against every official Learning Outcome and Assessment Criterion.</label>
+        <label><input type="checkbox" checked={reviewChecks.methods} disabled={saving||methodsNeedReview}
+          onChange={e=>setReviewChecks(old=>({...old,methods:e.target.checked}))}/>
+          The actual methods and acceptance conditions are centre-selected and appropriate for this Unit.</label>
+        <label><input type="checkbox" checked={reviewChecks.authority} disabled={saving}
+          onChange={e=>setReviewChecks(old=>({...old,authority:e.target.checked}))}/>
+          I am authorised by Technica Consult to approve this centre-authored Unit brief.</label>
+       </fieldset>}
        <div className="qc-actions">
         <button type="button" className="qc-outline" disabled={saving||release||!instructions.trim()}
           onClick={()=>onBrief(false)}><FileText size={16}/> Save draft</button>
-        <button type="button" className="qc-primary" disabled={saving||release||instructions.trim().length<80||assessmentMethods.trim().length<20}
+        <button type="button" className="qc-primary" disabled={!canApproveBrief}
           onClick={()=>onBrief(true)}><BookCheck size={16}/> Approve Unit brief</button>
        </div>
       </div>}
