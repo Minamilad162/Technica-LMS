@@ -105,5 +105,74 @@ assert.match(migration,/REVOKE ALL ON FUNCTION public\.lms_qf_reference_catalog\
 assert.match(migration,/GRANT EXECUTE ON FUNCTION public\.lms_qf_reference_catalog\(\) TO authenticated/);
 assert.ok(!/portfolioRpc\(db,'(?:save_claim|review|finalize)'/.test(sourcePreview),'Reference browser must never create real assessment data');
 
+
+const centre=read('src/qualification/QualificationCentreAdmin.jsx');
+const centreCss=read('src/qualification/qualificationCentreAdmin.css');
+const centreBrief=read('src/qualification/QualificationCentreBrief.jsx');
+const forms=read('src/qualification/QualificationEvidenceTemplates.jsx');
+const migrationCentre=read('supabase/migrations/202611220004_qualification_centre_governance.sql');
+assert.match(live,/<QualificationCentreAdmin/, 'Admin-only qualification centre workflow is missing');
+assert.match(live,/portfolioRpc\(db,'admin_access'\)/, 'Admin rights must be server-side scoped');
+assert.match(live,/portfolioRpc\(db,'programme_briefs'/, 'Live approved Unit briefing is missing');
+assert.match(live,/<QualificationCentreBrief/, 'Signed private resources not integrated');
+assert.match(live,/<QualificationEvidenceTemplates/, 'Unit-specific working forms missing');
+assert.match(live,/selectedReference/, 'Live Study Library must match the exact pinned qualification edition');
+assert.match(centre,/admin_save_brief/);
+assert.match(centre,/admin_publish/);
+assert.match(centre,/admin_assign/);
+assert.match(centre,/admin_reserve_document/);
+assert.match(centre,/admin_approve_document/);
+assert.match(centre,/storage.from\('technica-qualification-materials'\)/);
+assert.match(centreBrief,/createSignedUrl\(item.path,60\)/);
+assert.match(forms,/Witness Testimony/);
+assert.match(forms,/Reflective Account/);
+assert.match(forms,/CPD & Development Log/);
+assert.match(forms,/Evidence Mapping Matrix/);
+assert.match(forms,/Assessment Planning Sheet/);
+assert.match(forms,/unit\?\.outcomes/);
+assert.match(centreCss,/\.qc-columns/);
+assert.match(centreCss,/@media\(max-width:880px\)/);
+assert.match(migrationCentre,/lms_qf_admin_access/);
+assert.match(migrationCentre,/public\.lms_p1_actor_is_admin\(\)/);
+assert.match(migrationCentre,/published_at=now\(\),allow_certificate_recording=false/);
+assert.match(migrationCentre,/p_assessor=p_verifier/);
+assert.match(migrationCentre,/EXISTS \(SELECT 1 FROM public\.lms_qualification_claims/);
+assert.match(migrationCentre,/CREATE POLICY lms_qf_centre_files_read_guard/);
+assert.match(migrationCentre,/CREATE POLICY lms_qf_centre_files_anon_guard/);
+for(const table of ['lms_qf_centre_briefs','lms_qf_centre_documents','lms_qf_admin_activity']){
+ assert.ok(migrationCentre.includes('ALTER TABLE public.'+table+' ENABLE ROW LEVEL SECURITY'),
+   'Protected centre data without RLS: '+table);
+}
+
+
+const issuerSql=read('supabase/migrations/202611220005_qualification_issuer_authorisation.sql');
+const reviewerSql=read('supabase/migrations/202611220006_qualification_reviewer_competence.sql');
+assert.match(centre,/admin_certificate_authorize/,'Must require real external issuer authorization');
+assert.match(centre,/admin_authorize_staff/,'Staff competence admin action missing');
+assert.match(centre,/admin_staff/,'Reviewers must be filtered to centre-authorized staff');
+assert.match(centre,/s\.role==='assessor'/,'Assessor dropdown incorrectly shows unqualified users');
+assert.match(centre,/s\.role==='verifier'/,'Verifier dropdown incorrectly shows unqualified users');
+assert.match(live,/portfolioRpc\(db,'certificate_access'/,'Certificate eligibility not linked to actual issuer authority');
+assert.match(issuerSql,/lms_qf_certificate_issuer_authorisations/,'Issuer authorization must be persisted');
+assert.match(issuerSql,/e\.completed_at IS NULL/,'Unfinished outcomes may not create certificates');
+assert.match(issuerSql,/c\.state IS DISTINCT FROM 'verified'/,'Verification completion criteria missing');
+assert.match(reviewerSql,/lms_qf_staff_authorisations/,'Independent assessor/verifier competence authorizations required');
+assert.match(reviewerSql,/a\.role='assessor'/);
+assert.match(reviewerSql,/a\.role='verifier'/);
+assert.match(reviewerSql,/REVOKE ALL ON public\.lms_qf_staff_authorisations/);
+assert.match(reviewerSql,/ENABLE ROW LEVEL SECURITY/);
+
+
+const revocationSql=read('supabase/migrations/202611220007_qualification_reviewer_revocation_audit.sql');
+assert.match(centre,/admin_revoke_staff/,'Centre must revoke an assessor/verifier when necessary');
+assert.match(centre,/admin_reassign/,'Active portfolio must support auditable authorised replacement');
+assert.match(revocationSql,/CREATE TABLE public\.lms_qf_staff_events/,'Professional staff authorizations need immutable audit trail');
+assert.match(revocationSql,/CREATE TABLE public\.lms_qf_reassignment_events/,'Reviewer reassignments need immutable audit trail');
+assert.match(revocationSql,/Active centre professional authorization is required to review this portfolio/);
+assert.match(revocationSql,/a\.role='verifier' AND a\.revoked_at IS NULL/);
+assert.match(revocationSql,/p_assessor=p_verifier/);
+assert.match(revocationSql,/SET assessor_id=p_assessor,verifier_id=p_verifier/);
+assert.ok(!/\bdemoEnrolments\s*=/.test(centre),'No manufactured enrolments may appear in real centre administration');
+
 console.log('P35 premium Qualification heroes, 3 verified local images, clear responsive typography and workflow preservation PASS');
 

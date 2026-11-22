@@ -1,0 +1,43 @@
+/* Actual qualification criteria → unit-specific blank learner working documents. */
+.qf-live .qt-templates{border:1px solid #dce8f5;background:#fff;border-radius:17px;
+ box-shadow:0 8px 26px #214f7b0c;padding:clamp(16px,2vw,22px);margin:16px 0}
+.qf-live .qt-intro{display:flex;align-items:start;gap:12px;margin-bottom:17px}
+.qf-live .qt-intro-icon{flex-shrink:0;width:45px;height:45px;display:grid;place-items:center;
+ border-radius:13px;color:#3174b3;background:linear-gradient(145deg,#dceefa,#f0f7ff)}
+.qf-live .qt-intro h3{color:#1e4265;font-size:17px;margin:4px 0 6px}
+.qf-live .qt-intro p{color:#72869c;font-size:11.5px;line-height:1.65;margin:0}
+.qf-live .qt-layout{display:grid;grid-template-columns:minmax(175px,.68fr) minmax(0,1.35fr);gap:14px;align-items:start}
+.qf-live .qt-form-nav{display:grid;gap:7px;min-width:0}
+.qf-live .qt-form-nav button{display:flex;align-items:start;gap:10px;padding:13px 12px;text-align:left;
+ border-radius:11px;border:1px solid #e2eaf5;background:#fbfdff;cursor:pointer;color:#427cae}
+.qf-live .qt-form-nav button:hover{background:#f1f7ff}
+.qf-live .qt-form-nav button.selected{border-color:#9dc3e5;background:#eaf4ff;box-shadow:inset 3px 0 #347dbd}
+.qf-live .qt-form-nav button svg{flex-shrink:0;margin-top:2px}
+.qf-live .qt-form-nav button span{display:grid;gap:4px}
+.qf-live .qt-form-nav button strong{font-size:12px;color:#254f77;line-height:1.4}
+.qf-live .qt-form-nav button small{font-size:10.5px;color:#8094a8;line-height:1.5}
+.qf-live .qt-preview{min-width:0;border:1px solid #e3eaf4;border-radius:13px;background:#f9fcff;overflow:hidden}
+.qf-live .qt-preview-head{display:flex;align-items:center;justify-content:space-between;gap:8px;
+ background:#eef5fc;border-bottom:1px solid #e1e9f5;padding:12px 15px}
+.qf-live .qt-preview-head strong{font-size:13px;color:#274c70}
+.qf-live .qt-preview-head span{font-size:10px;color:#6486a7}
+.qf-live .qt-preview pre{white-space:pre-wrap;overflow-wrap:anywhere;font-family:inherit;
+ font-size:11px;line-height:1.65;color:#55718e;padding:14px;margin:0;max-height:290px;
+ overflow-y:auto;scrollbar-width:thin}
+.qf-live .qt-action-bar{display:flex;gap:9px;flex-wrap:wrap;padding:12px 14px;border-top:1px solid #e2eaf4}
+.qf-live .qt-primary,.qf-live .qt-secondary{display:inline-flex;align-items:center;justify-content:center;
+ gap:7px;min-height:40px;padding:9px 12px;border-radius:10px;font-weight:790;font-size:11.5px;cursor:pointer}
+.qf-live .qt-primary{background:#337fba;border:1px solid #337fba;color:white}
+.qf-live .qt-secondary{background:white;border:1px solid #c2d6eb;color:#3979ad}
+.qf-live .qt-status{display:flex;gap:6px;align-items:start;color:#238366;font-size:11px;
+ line-height:1.5;margin:0 14px 12px}
+.qf-live .qt-disclaimer{display:flex;align-items:start;gap:9px;color:#748aa1;
+ border-top:1px solid #edf2f7;padding-top:13px;font-size:11px;line-height:1.65;margin:15px 0 0}
+.qf-live .qt-disclaimer svg{flex-shrink:0;color:#4d91bd;margin-top:1px}
+@media(max-width:800px){.qf-live .qt-layout{grid-template-columns:minmax(0,1fr)}
+ .qf-live .qt-form-nav{display:flex;overflow-x:auto;scrollbar-width:thin;padding-bottom:8px}
+ .qf-live .qt-form-nav button{flex:0 0 min(205px,65vw)}
+ .qf-live .qt-preview pre{max-height:230px}}
+@media(max-width:450px){.qf-live .qt-action-bar button{flex:1}
+ .qf-live .qt-intro-icon{width:37px;height:37px}
+ .qf-live .qt-intro h3{font-size:15px}}

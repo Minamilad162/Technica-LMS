@@ -1,0 +1,30 @@
+.qf-live .qb-brief{border-radius:16px;background:#fff;border:1px solid #cfe2ef;
+ box-shadow:0 8px 25px #1a56860d;padding:19px;margin:14px 0}
+.qf-live .qb-brief>header{display:flex;align-items:center;gap:11px;margin-bottom:14px}
+.qf-live .qb-brief>header>div:nth-child(2){flex:1;min-width:0}
+.qf-live .qb-brief>header>svg:last-child{color:#259a72;flex-shrink:0}
+.qf-live .qb-icon{width:43px;height:43px;display:grid;place-items:center;color:#21866e;
+ background:#e6f8ee;border-radius:12px}
+.qf-live .qb-brief h3{font-size:16px;color:#19425f;margin:4px 0}
+.qf-live .qb-brief header p{margin:0;color:#748da0;font-size:11px}
+.qf-live .qb-brief details{border:1px solid #e3ecf5;border-radius:10px;overflow:hidden}
+.qf-live .qb-brief summary{cursor:pointer;background:#f6faff;padding:12px 14px;
+ font-size:12px;color:#3673a5;font-weight:800}
+.qf-live .qb-body{white-space:pre-wrap;line-height:1.8;color:#415e7c;font-size:12px;
+ padding:15px 14px;max-height:370px;overflow-y:auto;overflow-wrap:anywhere}
+.qf-live .qb-methods{margin:13px 0 0;padding:13px;background:#f4f9ff;border:1px solid #deebf7;
+ border-radius:10px;color:#536c85}
+.qf-live .qb-methods strong{color:#295478;font-size:12px}
+.qf-live .qb-methods p{font-size:12px;line-height:1.7;margin:5px 0 0;white-space:pre-wrap}
+.qf-live .qb-files{display:grid;gap:8px;margin-top:15px}
+.qf-live .qb-files>strong{font-size:12px;color:#31597a}
+.qf-live .qb-files button{display:flex;gap:10px;align-items:center;text-align:left;
+ border:1px solid #d9e8f6;border-radius:10px;padding:12px;background:#f8fcff;
+ color:#3477b4;cursor:pointer}
+.qf-live .qb-files button>span{flex:1;display:grid;gap:3px;font-size:12px;font-weight:780;color:#274d70}
+.qf-live .qb-files button small{font-size:10px;color:#8499ae;font-weight:500}
+.qf-live .qb-files p{display:flex;align-items:center;gap:7px;font-size:10.5px;color:#7892a9;margin:0}
+.qf-live .qb-empty{display:flex;gap:10px;padding:14px;background:#fff9f3;border:1px dashed #eddbc6;
+ border-radius:12px;color:#8f6c46;font-size:11.5px;line-height:1.65;margin:10px 0}
+.qf-live .qb-empty svg{flex-shrink:0;margin-top:2px}
+.qf-live .qb-error{padding:9px;color:#a54e39;background:#fff5f1;border-radius:8px;font-size:11px}
