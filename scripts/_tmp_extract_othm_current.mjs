@@ -10,7 +10,16 @@ try {
  const dir=mkdtempSync(join(tmpdir(),'othm-2026-'));
  const pdf=join(dir,'spec.pdf');
  execFileSync('curl',['-fsSL','--max-time','35','--retry','2','-A','Mozilla/5.0','-o',pdf,url],{timeout:60000});
- const extracted=execFileSync('pdftotext',['-raw','-nopgbrk','-enc','UTF-8',pdf,'-'],{encoding:'utf8',maxBuffer:5*1024*1024});
+ let extracted;
+ try {
+   extracted=execFileSync('pdftotext',['-raw','-nopgbrk','-enc','UTF-8',pdf,'-'],{encoding:'utf8',maxBuffer:5*1024*1024});
+ } catch {
+   const venv=join(dir,'venv');
+   execFileSync('python3',['-m','venv',venv],{timeout:60000});
+   execFileSync(join(venv,'bin','pip'),['install','-q','pypdf'],{timeout:90000,stdio:'pipe'});
+   const py="from pypdf import PdfReader; import sys; r=PdfReader(sys.argv[1]); print('\\n'.join((p.extract_text() or '') for p in r.pages))";
+   extracted=execFileSync(join(venv,'bin','python'),['-c',py,pdf],{encoding:'utf8',maxBuffer:5*1024*1024,timeout:90000});
+ }
  console.log('OTHM_2026_EXTRACT_BEGIN');
  console.log(Buffer.from(extracted,'utf8').toString('base64').match(/.{1,350}/g).join('\n'));
  console.log('OTHM_2026_EXTRACT_END');
