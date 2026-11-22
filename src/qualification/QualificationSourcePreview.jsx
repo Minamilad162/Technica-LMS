@@ -3,6 +3,7 @@ import {ArrowLeft,BookOpen,CheckCircle2,ChevronDown,ExternalLink,FileText,Gradua
 
 
 import './qualificationSourcePreview.css';
+import QualificationEvidenceTemplates from './QualificationEvidenceTemplates.jsx';
 
 const keys={othm6:['technica-source-othm6-2026','technica-source-othm6-2023'],
   othm7:['technica-source-othm7-2023'],nvq6:['technica-source-nvq6-2018']};
@@ -100,6 +101,7 @@ export default function QualificationSourcePreview({item,references=[],onBack}) 
       </section> : <div className="qsrc-awaiting"><Info size={22}/><div><h3>Current specification detail pending centre verification</h3>
         <p>The new 2026 Unit name and code are verified. Open the November 2026 source PDF for its complete current outcomes and criteria. Older standards are intentionally not shown as though they apply to this new Unit.</p>
         {source.source_url&&<a href={source.source_url} target="_blank" rel="noopener noreferrer">View official 2026 specification <ExternalLink size={15}/></a>}</div></div>}
+      {unit.outcomes.length>0 && <QualificationEvidenceTemplates key={unit.code} unit={unit} compact/>}
       {unit.indicativeTopics?.length>0 && <section className="qsrc-materials">
         <div className="qsrc-section-heading"><BookOpen size={19}/><h3>Indicative study topics from source specification</h3></div>
         <ul className="qsrc-study-topics">{unit.indicativeTopics.map((topic,index)=><li key={unit.code+':'+index}>{topic}</li>)}</ul>
