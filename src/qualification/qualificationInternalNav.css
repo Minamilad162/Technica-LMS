@@ -1,0 +1,37 @@
+/* One premium navigation system for live portfolios and source previews. */
+.qf-live .qf-internal-nav{
+ position:sticky;top:10px;z-index:15;display:flex;align-items:center;gap:5px;
+ min-width:0;width:100%;max-width:100%;box-sizing:border-box;
+ padding:7px;margin:1px 0 20px;border:1px solid #dce8f5;border-radius:16px;
+ background:rgba(255,255,255,.97);box-shadow:0 12px 29px #14386314;
+ overflow-x:auto;overscroll-behavior-inline:contain;scrollbar-width:thin;
+ -webkit-overflow-scrolling:touch;backdrop-filter:blur(14px);
+}
+.qf-live .qf-internal-nav button{
+ display:inline-flex;align-items:center;justify-content:center;gap:8px;
+ border:1px solid transparent;border-radius:11px;background:transparent;
+ padding:11px 15px;min-height:45px;min-width:max-content;
+ color:#5c7492;font-size:12px;font-weight:780;cursor:pointer;
+ flex:0 0 auto;white-space:nowrap;transition:background .16s ease,color .16s ease,box-shadow .16s ease;
+}
+.qf-live .qf-internal-nav button:hover:not(:disabled){background:#f2f7fd;color:#2b608f}
+.qf-live .qf-internal-nav button[aria-pressed="true"]{
+ color:#245c9d;background:#eaf3ff;border-color:#c6dafa;
+ box-shadow:0 3px 11px #1d5c9e16;font-weight:870;
+}
+.qf-live .qf-internal-nav button:focus-visible{
+ outline:3px solid #7cb2e8;outline-offset:1px;
+}
+.qf-live .qf-internal-nav button:disabled{opacity:.55;cursor:not-allowed}
+.qf-live .qf-internal-preview-label{display:inline-flex;align-items:center;justify-content:center;
+ margin-left:auto;min-width:max-content;padding:7px 11px;background:#f4f7fb;
+ border:1px solid #e2e9f3;border-radius:9px;color:#7d91a6;
+ font-weight:750;font-size:10px;letter-spacing:.02em;white-space:nowrap}
+@media(max-width:850px){
+ .qf-live .qf-internal-nav{top:0;border-radius:13px;padding:6px;margin-bottom:16px;gap:3px}
+ .qf-live .qf-internal-nav button{padding:10px 11px;min-height:43px;font-size:11px}
+ .qf-live .qf-internal-preview-label{padding:6px 9px}
+}
+@media(prefers-reduced-motion:reduce){
+ .qf-live .qf-internal-nav button{transition:none}
+}
