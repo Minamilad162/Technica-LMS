@@ -1,9 +1,10 @@
 import React,{useState} from 'react';
-import {ArrowLeft,BookOpen,CheckCircle2,ChevronDown,ExternalLink,FileText,GraduationCap,Info,Layers3,LibraryBig,LockKeyhole,ShieldCheck} from 'lucide-react';
+import {ArrowLeft,ArrowRight,BarChart3,BookOpen,CheckCircle2,ChevronDown,ExternalLink,FileText,FolderOpen,GraduationCap,Info,Layers3,LibraryBig,LockKeyhole,MessageSquare,ShieldCheck} from 'lucide-react';
 
 
 import './qualificationSourcePreview.css';
 import QualificationEvidenceTemplates from './QualificationEvidenceTemplates.jsx';
+import QualificationInternalNav from './QualificationInternalNav.jsx';
 
 const keys={othm6:['technica-source-othm6-2026','technica-source-othm6-2023'],
   othm7:['technica-source-othm7-2023'],nvq6:['technica-source-nvq6-2018']};
@@ -38,10 +39,11 @@ function CriterionDetails({outcome,index}){
  </details>;
 }
 
-export default function QualificationSourcePreview({item,references=[],onBack}) {
+export default function QualificationSourcePreview({item,references=[],onBack,embedded=false}) {
  const sources=getQualificationSources(item,references);
  const [sourceKey,setSourceKey]=useState(sources[0]?.catalog_key||'');
  const [unitIndex,setUnitIndex]=useState(0);
+ const [section,setSection]=useState('course');
  const source=sources.find(s=>s.catalog_key===sourceKey)||sources[0];
  const unit=source?.units?.[Math.min(unitIndex,Math.max(0,(source?.units?.length||1)-1))];
  if(!source)return <div className="qsrc-page"><button type="button" className="qf-plain-back" onClick={onBack}><ArrowLeft size={16}/> Qualifications</button>
@@ -50,16 +52,19 @@ export default function QualificationSourcePreview({item,references=[],onBack}) 
  const fullCount=source.units.reduce((n,u)=>n+u.outcomes.length,0);
  const acCount=source.units.reduce((n,u)=>n+u.outcomes.reduce((a,o)=>a+o.criteria.length,0),0);
  const isReference=source.status!=='centre_published';
- return <div className="qsrc-page">
-  <button type="button" className="qf-plain-back" onClick={onBack}><ArrowLeft size={17}/> All qualifications</button>
-  <header className={'qf-live-feature qsrc-hero qf-course-theme-'+item.color}>
+ return <div className={'qsrc-page'+(embedded?' qsrc-embedded':'')}>
+  {!embedded&&<button type="button" className="qf-plain-back" onClick={onBack}><ArrowLeft size={17}/> All qualifications</button>}
+  {!embedded&&<header className={'qf-live-feature qsrc-hero qf-course-theme-'+item.color}>
     <img src={item.heroImage} alt="" aria-hidden="true"/><div className="qf-live-feature-shade"/>
     <div className="qf-live-feature-content"><span className="qf-live-eyebrow">{item.body} · AWARDING-BODY SYLLABUS</span>
       <h1>{source.title}</h1><div className="qf-live-feature-meta">
         <span><GraduationCap size={16}/> Level {item.level}</span>
         <span><Layers3 size={16}/> {source.units.length} mandatory Units</span>
         <span>{source.reference_number}</span></div></div>
-  </header>
+  </header>}
+  {!embedded&&<QualificationInternalNav active={section} onChange={setSection}
+    ariaLabel="Qualification course, evidence, registration, contact, metrics and library"
+    readOnly={!source.publishedAt}/>}
   <div className="qsrc-overview">
     <div><span className="qsrc-icon"><BookOpen size={19}/></span><strong>{source.units.length}</strong><small>Official Units</small></div>
     <div><span className="qsrc-icon"><LibraryBig size={19}/></span><strong>{fullCount||'—'}</strong><small>Imported Learning Outcomes</small></div>
@@ -79,7 +84,7 @@ export default function QualificationSourcePreview({item,references=[],onBack}) 
       ? 'The November 2026 OTHM Level 6 specification has a new qualification number and revised Units, Learning Outcomes and Assessment Criteria. All official content shown here is source-backed; the former 2023 standards do not apply to this edition. Centre approval is required before live assessment.'
       : 'This syllabus uses real Unit titles, Learning Outcomes and Assessment Criteria imported from the supplied awarding-body specification. It is not a demo. Centre approval is still required before using this version for live grading.'}</p>
   </div></div>
-  <div className="qsrc-structure">
+  {(embedded||section==='course')&&<div className="qsrc-structure">
     <nav aria-label="Official qualification units" className="qsrc-unit-list">
       {source.units.map((u,index)=><button key={u.code} type="button" className={unitIndex===index?'active':''}
         aria-current={unitIndex===index?'true':undefined} onClick={()=>setUnitIndex(index)}>
@@ -101,7 +106,6 @@ export default function QualificationSourcePreview({item,references=[],onBack}) 
       </section> : <div className="qsrc-awaiting"><Info size={22}/><div><h3>Current specification detail pending centre verification</h3>
         <p>The new 2026 Unit name and code are verified. Open the November 2026 source PDF for its complete current outcomes and criteria. Older standards are intentionally not shown as though they apply to this new Unit.</p>
         {source.source_url&&<a href={source.source_url} target="_blank" rel="noopener noreferrer">View official 2026 specification <ExternalLink size={15}/></a>}</div></div>}
-      {unit.outcomes.length>0 && <QualificationEvidenceTemplates key={unit.code} unit={unit} compact/>}
       {unit.indicativeTopics?.length>0 && <section className="qsrc-materials">
         <div className="qsrc-section-heading"><BookOpen size={19}/><h3>Indicative study topics from source specification</h3></div>
         <ul className="qsrc-study-topics">{unit.indicativeTopics.map((topic,index)=><li key={unit.code+':'+index}>{topic}</li>)}</ul>
@@ -116,6 +120,106 @@ export default function QualificationSourcePreview({item,references=[],onBack}) 
       <section className="qsrc-source-card"><div className="qsrc-source-card-heading"><LockKeyhole size={19}/><h3>Assessment access</h3></div>
         <p>This is a reference syllabus. Evidence submissions, assessor decisions and certificate recording require a centre-published version and a genuine learner enrolment.</p>
       </section></aside>
-  </div>
+  </div>}
+  {!embedded&&section==='overview'&&<div className="qsrc-section-layout">
+    <section className="qsrc-information-card">
+      <span className="qf-overline">QUALIFICATION OVERVIEW</span>
+      <h2>Professional qualification structure</h2>
+      <p>This is the awarding-body syllabus selected above. The actual Unit names, Learning Outcomes,
+        Assessment Criteria and original specification are available for inspection. This is a
+        reference view, not a record of learner registration or assessment.</p>
+      <div className="qsrc-overview-unit-list">
+        {source.units.map((u,index)=><button type="button" key={u.code} onClick={()=>{setUnitIndex(index);setSection('course');}}>
+          <span>{String(index+1).padStart(2,'0')}</span><strong>{u.title}</strong><ArrowRight size={17}/>
+        </button>)}
+      </div>
+    </section>
+    <aside className="qsrc-aside"><SourceDocument source={source}/></aside>
+  </div>}
+  {!embedded&&section==='evidence'&&<div className="qsrc-section-layout">
+    <section className="qsrc-information-card">
+      <span className="qf-overline">EVIDENCE PREPARATION</span>
+      <h2>Unit evidence and working forms</h2>
+      <p>Explore blank Technica working forms generated from the actual criteria of a chosen Unit.
+        They do not represent submitted evidence, a learner portfolio, or an approved awarding-body assignment.</p>
+      <label className="qsrc-unit-select">Choose the Unit
+        <select value={unitIndex} onChange={e=>setUnitIndex(Number(e.target.value))}>
+          {source.units.map((u,index)=><option key={u.code} value={index}>{String(index+1).padStart(2,'0')} · {u.title}</option>)}
+        </select>
+      </label>
+      <div className="qsrc-evidence-heading"><FileText size={17}/>
+        <span>{unit.code} · {unit.outcomes.reduce((n,o)=>n+o.criteria.length,0)} source criteria</span></div>
+      {unit.outcomes.length>0?<QualificationEvidenceTemplates key={unit.code} unit={unit} compact/>:
+        <div className="qsrc-empty"><Info size={19}/><p>Assessment criteria for this edition have not been imported. No forms can be generated.</p></div>}
+    </section>
+    <aside className="qsrc-aside"><div className="qsrc-source-card">
+      <div className="qsrc-source-card-heading"><LockKeyhole size={19}/><h3>Not a learner evidence folder</h3></div>
+      <p>Actual evidence uploads, cross-references, submissions, revisions and Assessor decisions appear
+        here only after centre publication and enrolment. Nothing is created in this preview.</p>
+    </div></aside>
+  </div>}
+  {!embedded&&section==='registration'&&<div className="qsrc-section-layout">
+    <section className="qsrc-information-card">
+      <span className="qf-overline">REGISTRATION</span><h2>Qualification registration</h2>
+      <div className="qsrc-fact-rows">
+        <div><span>Programme</span><strong>{source.title}</strong></div>
+        <div><span>Qualification number</span><strong>{source.reference_number}</strong></div>
+        <div><span>Specification</span><strong>{source.version}</strong></div>
+        <div><span>Reference status</span><strong>{isReference?'Not yet published by centre':'Centre-published'}</strong></div>
+        <div><span>Learner registration</span><strong>Not enrolled in this preview</strong></div>
+        <div><span>Certificate</span><strong>No certificate associated with this preview</strong></div>
+      </div>
+      <p>Real registration, learner declarations, assigned Assessor and Verifier, target dates,
+        and certificate references remain available only in a genuine enrolled portfolio.</p>
+    </section><aside className="qsrc-aside"><SourceDocument source={source}/></aside>
+  </div>}
+  {!embedded&&section==='contact'&&<div className="qsrc-section-layout">
+    <section className="qsrc-information-card">
+      <span className="qf-overline">COMMUNICATIONS</span><h2>Contact Diary</h2>
+      <div className="qsrc-empty"><MessageSquare size={21}/><div><h3>No learner correspondence in a syllabus preview</h3>
+        <p>Contact Diary records, Assessor feedback, requests for amendments, Verifier decisions and
+        resubmission history are private to a genuine learner enrolment. This reference view does not
+        invent messages or display another learner’s records.</p></div></div>
+    </section><aside className="qsrc-aside"><div className="qsrc-source-card">
+      <div className="qsrc-source-card-heading"><MessageSquare size={19}/><h3>Contact the centre</h3></div>
+      <p>For enrollment and assessment arrangements, use the centre’s normal support channels.</p>
+    </div></aside>
+  </div>}
+  {!embedded&&section==='metrics'&&<div className="qsrc-section-layout">
+    <section className="qsrc-information-card">
+      <span className="qf-overline">SOURCE COVERAGE</span><h2>Qualification metrics</h2>
+      <p>These figures count published-source curriculum items, not learner progress or assessor results.</p>
+      <div className="qsrc-metric-list">{source.units.map((u,index)=>{
+        const count=u.outcomes.reduce((n,o)=>n+o.criteria.length,0);
+        const max=Math.max(1,...source.units.map(x=>x.outcomes.reduce((n,o)=>n+o.criteria.length,0)));
+        return <button key={u.code} type="button" className="qsrc-metric-unit" onClick={()=>{setUnitIndex(index);setSection('course');}}>
+          <span><strong>{String(index+1).padStart(2,'0')} · {u.title}</strong><small>{u.outcomes.length} outcomes · {count} criteria</small></span>
+          <span className="qsrc-metric-track"><span style={{width:(100*count/max)+'%'}}/></span>
+        </button>;
+      })}</div>
+    </section><aside className="qsrc-aside"><SourceDocument source={source}/></aside>
+  </div>}
+  {!embedded&&section==='library'&&<div className="qsrc-section-layout">
+    <section className="qsrc-information-card">
+      <span className="qf-overline">STUDY LIBRARY</span><h2>Original source material</h2>
+      <p>Read the imported Unit aims and indicative topics alongside the original awarding-body
+        specification. Centre-authored Assignment Briefs and private uploaded files are
+        separate from this reference library.</p>
+      <label className="qsrc-unit-select">Unit
+        <select value={unitIndex} onChange={e=>setUnitIndex(Number(e.target.value))}>
+          {source.units.map((u,index)=><option key={u.code} value={index}>{String(index+1).padStart(2,'0')} · {u.title}</option>)}
+        </select>
+      </label>
+      <div className="qsrc-source-unit-brief">
+        <span className="qf-overline">{unit.code}</span><h3>{unit.title}</h3>
+        {unit.aim?<p>{unit.aim}</p>:<p>The source did not provide an imported Unit aim for this edition.</p>}
+        {unit.indicativeTopics?.length>0&&<>
+          <h4>Indicative study topics</h4>
+          <ul>{unit.indicativeTopics.map((topic,index)=><li key={index}>{topic}</li>)}</ul>
+        </>}
+        {unit.assessmentNote&&<p className="qsrc-material-note">{unit.assessmentNote}</p>}
+      </div>
+    </section><aside className="qsrc-aside"><SourceDocument source={source}/></aside>
+  </div>}
  </div>;
 }
