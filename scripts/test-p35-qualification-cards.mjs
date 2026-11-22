@@ -231,7 +231,7 @@ assert.match(sourcePreview,/Requires actual centre-approved learner enrolment/,
 for(const value of [
  'p_enrolment uuid, p_evidence uuid, p_criteria uuid[]',
  'learner_id=public.lms_qf_actor() FOR UPDATE',
- 'f.enrolment_id=e.id',
+ 'enrolment_id=e.id',
  'public.lms_qf_evidence_ready(f)',
  "q.state NOT IN ('draft','changes_requested')",
  'u.version_id=e.version_id',
