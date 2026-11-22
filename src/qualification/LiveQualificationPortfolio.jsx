@@ -1,8 +1,9 @@
 import React, {useEffect, useRef, useState} from 'react';
-import {ArrowLeft, ArrowRight, BookOpen, CheckCircle2, ClipboardCheck, Download, FileText, FolderOpen, GraduationCap, Layers3, MessageSquare, ShieldCheck} from 'lucide-react';
+import {ArrowLeft, ArrowRight, BookOpen, CheckCircle2, ClipboardCheck, Download, FileText, FolderOpen, GraduationCap, Layers3, LibraryBig, MessageSquare, ShieldCheck} from 'lucide-react';
 import PremiumLoading from '../components/PremiumLoading.jsx';
 import {QUALIFICATIONS} from './qualificationData.js';
 import {ProgrammeListPremium, QualificationPreview, qualificationFor} from './QualificationCatalogue.jsx';
+import {LiveUnitLearningHub, OutcomeLearningSupport, ProgrammeReferenceLibrary, ProgrammeMaterialSnapshot, EvidencePreparationTips} from './QualificationLearningResources.jsx';
 import {
   canReview, claimLabels, claimState, downloadEvidenceShowcase, downloadPortfolioEvidence, evidenceExtensions,
   evidenceKinds, evidencePayload, portfolioRpc, programmeProgress, uploadPortfolioEvidence,
@@ -35,7 +36,7 @@ function Status({outcome}) {
   return <span className={'qf-live-status qf-live-' + state}>{claimLabels[state]}</span>;
 }
 
-function PortfolioOverview({portfolio, progress, onOutcome, onView}) {
+function PortfolioOverview({portfolio, progress, onOutcome, onView, qualification}) {
   const learner = portfolio.role === 'learner';
   const pending = progress.outcomes.filter(outcome => learner
     ? ['submitted','awaiting_verification','verification_returned'].includes(claimState(outcome))
@@ -66,8 +67,9 @@ function PortfolioOverview({portfolio, progress, onOutcome, onView}) {
       <Panel title="Overdue"><div className="qf-live-list">
         {overdue.length ? overdue.map(outcome => <OutcomeLink key={outcome.id} outcome={outcome} onOpen={onOutcome}/>) : <p>No overdue outcomes.</p>}
       </div></Panel>
-      <Action secondary onClick={() => onView('programme')}>Open My Programme <ArrowRight size={16}/></Action>
     </>}
+    <ProgrammeMaterialSnapshot portfolio={portfolio} qualification={qualification}
+      onProgramme={() => onView('programme')} onLibrary={() => onView('library')}/>
   </>;
 }
 
@@ -79,7 +81,7 @@ function OutcomeLink({outcome, onOpen}) {
   </button>;
 }
 
-function UnitProgramme({portfolio, unitIndex, setUnitIndex, onOutcome}) {
+function UnitProgramme({portfolio, unitIndex, setUnitIndex, onOutcome, onEvidence, onLibrary}) {
   const unit = portfolio.units[unitIndex];
   const learner = portfolio.role === 'learner';
   return <>
@@ -94,6 +96,7 @@ function UnitProgramme({portfolio, unitIndex, setUnitIndex, onOutcome}) {
       </div>
     </nav>
     <div className="qf-unit-heading"><div><span className="qf-overline" dir="ltr">{unit.code}</span><h2>{unit.title}</h2></div></div>
+    <LiveUnitLearningHub key={unit.id} unit={unit} portfolio={portfolio} onEvidence={onEvidence} onLibrary={onLibrary}/>
     <div className="qf-live-grid">
       <Panel title="Learning Outcomes"><div className="qf-live-list">
         {unit.outcomes.map(outcome => <OutcomeLink key={outcome.id} outcome={outcome} onOpen={onOutcome}/>)}
@@ -145,7 +148,7 @@ function EvidenceFolder({portfolio, onDownload, onShowcase, busy, onSave, onBack
     return mappings.some(mapping => mapping && Object.values(mapping).some(ids => ids.includes(id)));
   }).map(outcome => outcome.unitCode + ' / ' + outcome.code);
   const selection = portfolio.evidence.filter(item => showcase.includes(item.id));
-  return <div className="qf-live-grid">
+  return <div className="qlearn-evidence-stack"><EvidencePreparationTips/><div className="qf-live-grid">
     <Panel title="Evidence Folder" action={onBack && <Action secondary disabled={busy} onClick={onBack}>Back to outcome</Action>}>
       {portfolio.evidence.length === 0 && <p>No evidence added yet.</p>}
       <div className="qf-live-evidence-list">
@@ -179,7 +182,7 @@ function EvidenceFolder({portfolio, onDownload, onShowcase, busy, onSave, onBack
         </fieldset>
       </form>}
     </Panel>}
-  </div>;
+  </div></div>;
 }
 
 function MappingTable({criteria, evidence, mapping, editable, onToggle}) {
@@ -451,10 +454,11 @@ function OpenPortfolio({db, portfolio, onRefresh, onBack}) {
   const onDownload = item => run(() => downloadPortfolioEvidence(db,item));
   const views = [
     ['dashboard','Overview'],['programme',learner ? 'My Programme' : 'Units & Criteria'],...(learner ? [['evidence','Evidence']] : []),
-    ['registration','Registration'],['contact','Contact Diary'],
+    ['registration','Registration'],['contact','Contact Diary'],...(qualificationFor(portfolio.title) ? [['library','Study Library']] : []),
   ];
-  const sectionIcons = {dashboard: Layers3, programme: BookOpen, evidence: FolderOpen, registration: GraduationCap, contact: MessageSquare};
+  const sectionIcons = {dashboard: Layers3, programme: BookOpen, evidence: FolderOpen, registration: GraduationCap, contact: MessageSquare, library: LibraryBig};
   const cover = qualificationFor(portfolio.title);
+  const outcomeUnit = portfolio.units.find(unit => unit.outcomes.some(item => item.id === outcomeId));
   return <div className="qf-live-stack" aria-busy={busy}>
     <button type="button" className="qf-plain-back" disabled={busy} onClick={onBack}><ArrowLeft size={16}/> Qualifications</button>
     <header className={'qf-live-feature qf-live-feature-open ' + (cover ? 'qf-course-theme-' + cover.color : '')}>
@@ -480,17 +484,21 @@ function OpenPortfolio({db, portfolio, onRefresh, onBack}) {
     </nav>
     {error && <p className="qf-live-error" role="alert">{error}</p>}
     {notice && <p className="qf-live-notice" role="status">{notice}</p>}
-    {view === 'dashboard' && <PortfolioOverview portfolio={portfolio} progress={progress} onOutcome={openOutcome} onView={changeView}/>}
-    {view === 'programme' && <UnitProgramme portfolio={portfolio} unitIndex={unitIndex} setUnitIndex={setUnitIndex} onOutcome={openOutcome}/>}
+    {view === 'dashboard' && <PortfolioOverview portfolio={portfolio} progress={progress} onOutcome={openOutcome} onView={changeView} qualification={cover}/>}
+    {view === 'programme' && <UnitProgramme portfolio={portfolio} unitIndex={unitIndex} setUnitIndex={setUnitIndex} onOutcome={openOutcome}
+      onEvidence={learner ? () => changeView('evidence') : null} onLibrary={cover ? () => changeView('library') : null}/>}
     {view === 'evidence' && learner && <EvidenceFolder portfolio={portfolio} busy={busy} onSave={saveEvidence}
       onDownload={onDownload} onShowcase={items => run(() => downloadEvidenceShowcase(db,items))} onBack={evidenceFromOutcome ? () => changeView('outcome') : null}/>}
     {view === 'registration' && <Registration portfolio={portfolio} progress={progress} busy={busy}
       onDeclare={() => commit('declare',{},'Declaration accepted.')}
       onFinalize={reference => commit('finalize',{p_certificate_reference: reference},reference ? 'Certificate reference recorded.' : 'Qualification completed.')}/>}
     {view === 'contact' && <ContactDiary progress={progress} onOutcome={openOutcome}/>}
+    {view === 'library' && cover && <ProgrammeReferenceLibrary key={cover.id} qualification={cover}/>}
     {view === 'outcome' && outcome && <>
       <div className="qf-live-actions"><Action secondary disabled={busy} onClick={() => changeView('programme')}><ArrowLeft size={16}/> Back to unit</Action><Status outcome={outcome}/></div>
       <h2>{outcome.code} · {outcome.title}</h2>
+      <OutcomeLearningSupport unit={outcomeUnit} outcome={outcome} learner={learner}
+        onEvidence={openEvidence} onLibrary={cover ? () => changeView('library') : null}/>
       <div className="qf-live-grid">
         <Panel title="Assessment Criteria"><ol className="qf-live-criteria">
           {outcome.criteria.map(criterion => <li key={criterion.id}><strong>{criterion.code}</strong> {criterion.title}</li>)}
