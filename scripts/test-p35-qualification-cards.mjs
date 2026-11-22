@@ -144,5 +144,23 @@ for(const table of ['lms_qf_centre_briefs','lms_qf_centre_documents','lms_qf_adm
    'Protected centre data without RLS: '+table);
 }
 
+
+const issuerSql=read('supabase/migrations/202611220005_qualification_issuer_authorisation.sql');
+const reviewerSql=read('supabase/migrations/202611220006_qualification_reviewer_competence.sql');
+assert.match(centre,/admin_certificate_authorize/,'Must require real external issuer authorization');
+assert.match(centre,/admin_authorize_staff/,'Staff competence admin action missing');
+assert.match(centre,/admin_staff/,'Reviewers must be filtered to centre-authorized staff');
+assert.match(centre,/s\.role==='assessor'/,'Assessor dropdown incorrectly shows unqualified users');
+assert.match(centre,/s\.role==='verifier'/,'Verifier dropdown incorrectly shows unqualified users');
+assert.match(live,/portfolioRpc\(db,'certificate_access'/,'Certificate eligibility not linked to actual issuer authority');
+assert.match(issuerSql,/lms_qf_certificate_issuer_authorisations/,'Issuer authorization must be persisted');
+assert.match(issuerSql,/e\.completed_at IS NULL/,'Unfinished outcomes may not create certificates');
+assert.match(issuerSql,/c\.state IS DISTINCT FROM 'verified'/,'Verification completion criteria missing');
+assert.match(reviewerSql,/lms_qf_staff_authorisations/,'Independent assessor/verifier competence authorizations required');
+assert.match(reviewerSql,/a\.role='assessor'/);
+assert.match(reviewerSql,/a\.role='verifier'/);
+assert.match(reviewerSql,/REVOKE ALL ON public\.lms_qf_staff_authorisations/);
+assert.match(reviewerSql,/ENABLE ROW LEVEL SECURITY/);
+
 console.log('P35 premium Qualification heroes, 3 verified local images, clear responsive typography and workflow preservation PASS');
 
