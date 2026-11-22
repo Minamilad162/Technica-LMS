@@ -1,8 +1,12 @@
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
-import {completeSimulatedCheckout,hasSimulatedEnrollment,simulationEnabled}
- from '../src/production/checkoutSimulationApi.js';
+import {simulationEnabled as productionSimulationEnabled} from '../src/production/checkoutSimulationApi.js';
 const read=p=>readFileSync(new URL('../'+p,import.meta.url),'utf8');
+const source=read('src/production/checkoutSimulationApi.js');
+const devSource=source.replaceAll('import.meta.env', '({DEV:true,VITE_LOCAL_QA_DEMO:"1"})');
+const {completeSimulatedCheckout,hasSimulatedEnrollment,simulationEnabled}=
+ await import('data:text/javascript;base64,'+Buffer.from(devSource).toString('base64'));
+assert.equal(productionSimulationEnabled(),false,'Production cannot enable the legacy checkout simulation.');
 const user='11111111-1111-1111-1111-111111111111';
 const course='22222222-2222-2222-2222-222222222222';
 const otherCourse='33333333-3333-3333-3333-333333333333';
@@ -12,7 +16,7 @@ globalThis.sessionStorage={
  getItem:key=>data.get(key)||null,
  setItem:(key,value)=>data.set(key,value)
 };
-assert.equal(simulationEnabled(),true,'Demo-only mode is available until explicitly disabled.');
+assert.equal(simulationEnabled(),true,'Checkout simulation is available in opt-in developer QA.');
 assert.equal(hasSimulatedEnrollment(user,course),false);
 assert.throws(()=>completeSimulatedCheckout(user,course,{testReference:'12345678',confirmedDemo:false}),/confirm/);
 assert.throws(()=>completeSimulatedCheckout(user,course,{testReference:'',confirmedDemo:true}),/fictional/);

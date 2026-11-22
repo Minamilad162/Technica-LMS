@@ -19,10 +19,9 @@ assert(positions.every(p=>p>=0),'Every approved screenshot heading must be rende
 assert(positions.every((p,i)=>i===0||p>positions[i-1]),'Preserve reference card reading order');
 
 for(const label of [
- 'Customize your practice session exactly the way you want.',
  'Max 100','After each question','At the end (summary)',
  'No timer','Total time','Per question','Both','Total Exam Time',
- 'Time Per Question','All course domains','Live camera preview during the practice',
+ 'Time Per Question','All course domains','Local preview only',
  'Mixed','Easy','Medium','Hard','Adaptive','not recorded',
  'Start Practice','Camera: ','Questions'
 ])assert(ui.includes(label),'Missing approved screenshot copy: '+label);

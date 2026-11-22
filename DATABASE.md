@@ -15,7 +15,7 @@ See Blueprint, docs/current/LOGIC_REGISTRY.md and docs/current/SECURITY_PLAN.md.
 
 ## Qualifications portfolio
 
-Migration `supabase/migrations/202611220001_qualification_portfolio.sql` requires the existing LMS profiles and Supabase Storage schemas. It provisions an empty Qualifications schema and a private evidence bucket. The qualification data model is independent of course and subscription entitlements.
+Migration `supabase/migrations/202611220001_qualification_portfolio.sql` requires the existing LMS profiles and Supabase Storage schemas. It provisions an empty Qualifications schema and a private evidence bucket. Installed on the Technica Account production project on 2026-11-22 as ledger version `20261122073054`; existing LMS records were untouched. The qualification data model is independent of course and subscription entitlements.
 
 In staging, the centre database operator creates a **draft** in `lms_qualification_versions` with a unique catalog key and version, the approval reference and the exact declaration. Then populate `lms_qualification_units`, `lms_qualification_outcomes`, `lms_qualification_criteria`, and approved HTTPS `lms_qualification_resources`. Set `published_at` only after the complete rubric is verified. The published parent and its children are sealed. Future rubric changes require a separate draft version with its own child rows. Historical catalogue and PDF fixtures are never seeded into the live schema.
 

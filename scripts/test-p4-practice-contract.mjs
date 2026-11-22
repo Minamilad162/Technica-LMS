@@ -4,6 +4,7 @@ import {safeRemainingSeconds,practiceSessionKey} from '../src/production/practic
 const sql=readFileSync('supabase/migrations/202610310003_p4_secure_practice.sql','utf8');
 const app=readFileSync('src/production/SupabaseApp.jsx','utf8');
 const practice=readFileSync('src/production/LivePractice.jsx','utf8');
+const examHub=readFileSync('src/production/LiveExamPracticeHub.jsx','utf8');
 const importer=readFileSync('scripts/import-asp-p4.mjs','utf8');
 assert.match(sql,/CREATE TABLE public.lms_questions/);
 assert.match(sql,/CREATE TABLE public.lms_practice_attempts/);
@@ -30,7 +31,8 @@ assert(!importer.includes('VITE_SUPABASE_SERVICE_ROLE_KEY'));
 assert(app.includes("import LivePractice from './LivePractice'"));
 assert(practice.includes('startSecurePractice(')&&practice.includes('finishSecurePractice('));
 assert(practice.includes("crypto.randomUUID()"));
-assert(practice.includes('mock')||practice.includes('Mock Exam'));
+assert.match(examHub,/id="lep-tab-mock"/);
+assert.match(examHub,/activate\('mock'\)/);
 assert.equal(safeRemainingSeconds({},Date.now()),null);
 assert.equal(safeRemainingSeconds({deadlineAt:'2026-01-01T00:01:00Z',serverNow:'2026-01-01T00:00:00Z',observedAtEpoch:100000},100000),60);
 assert.equal(safeRemainingSeconds({deadlineAt:'2026-01-01T00:00:10Z',serverNow:'2026-01-01T00:00:00Z',observedAtEpoch:100000},115000),0);
