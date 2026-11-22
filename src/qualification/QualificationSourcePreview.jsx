@@ -156,6 +156,19 @@ export default function QualificationSourcePreview({item,references=[],onBack,em
       <h2>Unit evidence and working forms</h2>
       <p>Explore blank Technica working forms generated from the actual criteria of a chosen Unit.
         They do not represent submitted evidence, a learner portfolio, or an approved awarding-body assignment.</p>
+      <div className="qsrc-evidence-bank-readonly">
+        <div className="qsrc-evidence-bank-header"><FolderOpen size={22}/>
+          <div><strong>Evidence Bank · Upload &amp; Multi-Unit Mapping</strong>
+            <small>Available with an assigned, active qualification portfolio</small></div></div>
+        <div className="qsrc-evidence-bank-steps">
+          <span>01 · Upload a document once</span><span>02 · Link it to multiple Units / LOs / ACs</span>
+          <span>03 · Save mapping, then submit each Competence Claim</span></div>
+        <div className="qsrc-evidence-bank-actions">
+          <button type="button" disabled title="Requires actual centre-approved learner enrolment"><LockKeyhole size={15}/> Upload evidence</button>
+          <button type="button" disabled title="Requires actual centre-approved learner enrolment"><LockKeyhole size={15}/> Map across Units</button>
+          <p>This is an awarding-body syllabus preview, not your enrolled portfolio. The upload tools activate inside the Evidence tab once the centre enrols you in a published qualification.</p>
+        </div>
+      </div>
       <label className="qsrc-unit-select">Choose the Unit
         <select value={unitIndex} onChange={e=>setUnitIndex(Number(e.target.value))}>
           {source.units.map((u,index)=><option key={u.code} value={index}>{String(index+1).padStart(2,'0')} · {u.title}</option>)}
