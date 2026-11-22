@@ -419,18 +419,66 @@ function Registration({portfolio, progress, busy, onDeclare, onFinalize}) {
   </div>;
 }
 
-function ContactDiary({progress, onOutcome}) {
+function ContactDiary({db,portfolio,progress,onOutcome}) {
+  const [entries,setEntries]=useState(null);
+  const [error,setError]=useState('');
+  const [body,setBody]=useState('');
+  const [kind,setKind]=useState('message');
+  const [sending,setSending]=useState(false);
+  const [refresh,setRefresh]=useState(0);
+  useEffect(()=>{
+    let active=true;
+    setError('');
+    portfolioRpc(db,'contact_list',{p_enrolment:portfolio.id})
+      .then(result=>{if(active)setEntries(Array.isArray(result)?result:[]);})
+      .catch(err=>{if(active)setError(failureMessage(err));});
+    return ()=>{active=false;};
+  },[db,portfolio.id,refresh]);
+  const save=async event=>{
+    event.preventDefault();
+    if(!body.trim()||sending)return;
+    setSending(true);setError('');
+    try{
+      await portfolioRpc(db,'contact_add',{p_enrolment:portfolio.id,p_kind:kind,p_body:body.trim()});
+      setBody('');setEntries(null);setRefresh(old=>old+1);
+    }catch(err){setError(failureMessage(err));}
+    finally{setSending(false);}
+  };
   const activity = progress.outcomes.flatMap(outcome => outcome.submissions.flatMap(submission =>
     submission.reviews.map((review,index) => ({...review,outcome,revision:submission.revision,index}))))
     .sort((a,b) => Date.parse(b.createdAt) - Date.parse(a.createdAt));
-  return <Panel title="Contact Diary">
-    {activity.length === 0 && <p>No assessment feedback yet.</p>}
-    <div className="qf-live-history">{activity.map(entry => <article key={entry.outcome.id + ':' + entry.revision + ':' + entry.index}>
-      <button type="button" className="qf-live-link" onClick={() => onOutcome(entry.outcome.id)}>{entry.outcome.code} · {entry.outcome.title}</button>
-      <p><strong>{entry.stage === 'assessor' ? 'Assessor' : 'Verifier'} · {entry.decision === 'accept' ? 'Accepted' : 'Returned'}</strong> · {formatDate(entry.createdAt)}</p>
-      {entry.feedback && <p className="qf-live-copy" dir="auto">{entry.feedback}</p>}
-    </article>)}</div>
-  </Panel>;
+  return <div className="qf-ref-contact">
+    <Panel title="Contact Diary · Learner / Assessor / Verifier">
+      <p className="qf-live-copy">Messages and meeting notes are stored privately against this programme.
+        Only the enrolled learner and currently assigned reviewers can access this diary. This does not send an email.</p>
+      {error&&<p className="qf-live-error" role="alert">{error} <button className="qf-live-link" type="button" onClick={()=>setRefresh(old=>old+1)}>Retry</button></p>}
+      <form className="qf-ref-contact-form" onSubmit={save}>
+        <label className="qf-field">Entry type<select value={kind} disabled={sending} onChange={e=>setKind(e.target.value)}>
+          <option value="message">Message</option><option value="meeting_note">Meeting / discussion note</option>
+        </select></label>
+        <label className="qf-field">Contact entry<textarea required rows={3} maxLength={4000} value={body} disabled={sending}
+          onChange={e=>setBody(e.target.value)} placeholder="Record a message or assessment discussion..."/></label>
+        <button className="qf-button qf-primary" type="submit" disabled={sending||!body.trim()}>
+          {sending?'Saving...':'Save Contact Diary entry'}</button>
+      </form>
+      {entries===null&&!error&&<p>Loading contact records...</p>}
+      {entries?.length===0&&<p>No Contact Diary entries yet.</p>}
+      {!!entries?.length&&<div className="qf-ref-contact-history">{entries.map(item=><article key={item.id}>
+        <div><strong>{item.author}</strong><span>{item.authorRole} · {item.kind==='meeting_note'?'Meeting note':'Message'}</span>
+          <time dateTime={item.createdAt}>{formatDate(item.createdAt)}</time></div>
+        <p dir="auto">{item.body}</p>
+      </article>)}</div>}
+    </Panel>
+    <Panel title="Assessment feedback and decisions">
+      {activity.length===0&&<p>No assessment feedback yet.</p>}
+      <div className="qf-live-history">{activity.map(entry=><article key={entry.outcome.id+':'+entry.revision+':'+entry.index}>
+        <button type="button" className="qf-live-link" onClick={()=>onOutcome(entry.outcome.id)}>
+          {entry.outcome.code} · {entry.outcome.title}</button>
+        <p><strong>{entry.stage==='assessor'?'Assessor':'Verifier'} · {entry.decision==='accept'?'Accepted':'Returned'}</strong> · {formatDate(entry.createdAt)}</p>
+        {entry.feedback&&<p className="qf-live-copy" dir="auto">{entry.feedback}</p>}
+      </article>)}</div>
+    </Panel>
+  </div>;
 }
 
 function OpenPortfolio({db, portfolio, references, onRefresh, onBack}) {
@@ -554,7 +602,7 @@ function OpenPortfolio({db, portfolio, references, onRefresh, onBack}) {
     {view === 'registration' && <Registration portfolio={portfolio} progress={progress} busy={busy}
       onDeclare={() => commit('declare',{},'Declaration accepted.')}
       onFinalize={reference => commit('finalize',{p_certificate_reference: reference},reference ? 'Certificate reference recorded.' : 'Qualification completed.')}/>}
-    {view === 'contact' && <ContactDiary progress={progress} onOutcome={openOutcome}/>}
+    {view === 'contact' && <ContactDiary db={db} portfolio={portfolio} progress={progress} onOutcome={openOutcome}/>}
     {view === 'metrics' && <PortfolioMetrics portfolio={portfolio} progress={progress} onOutcome={openOutcome}/>}
     {view === 'library' && cover && selectedReference &&
       <QualificationSourcePreview key={selectedReference.catalog_key} item={cover}
