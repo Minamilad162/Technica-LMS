@@ -29,6 +29,7 @@ assert.equal(state.live,false);
 
 state=qualificationReadiness(version([unit('a',true)],true));
 assert.equal(state.published,true);
+assert.equal(state.canRelease,false);
 assert.equal(state.canEnrol,false);
 assert.match(state.next,/Assessor and an Internal Verifier/);
 assert.equal(state.live,false);
@@ -50,6 +51,13 @@ incomplete.criteria=0;
 state=qualificationReadiness(version([incomplete]));
 assert.equal(state.canRelease,false);
 assert.equal(state.incompleteRubric.length,1);
+
+state=qualificationReadiness(version([{id:'unknown',brief:{status:'approved',approvedAt}}]));
+assert.equal(state.incompleteRubric.length,1);
+assert.equal(state.canRelease,false);
+
+state=qualificationReadiness(version([unit('a',true)],true,[{id:'enrol1'}]));
+assert.equal(state.live,false,'Missing authorised reviewers must not be treated as live');
 
 const unsigned=unit('unsigned');
 unsigned.brief={status:'approved',approvedAt:null};
