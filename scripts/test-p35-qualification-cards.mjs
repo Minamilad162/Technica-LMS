@@ -48,12 +48,12 @@ const live=read('src/qualification/LiveQualificationPortfolio.jsx');
 const catalogue=read('src/qualification/QualificationCatalogue.jsx');
 const premium=read('src/qualification/qualificationPremium.css');
 assert.match(live,/ProgrammeListPremium/, 'The real DB-backed route must use the premium catalogue');
-assert.match(live,/<QualificationPreview/, 'Read-only qualification preview must be connected');
+assert.match(live,/<QualificationSourcePreview/, 'Source-backed qualification syllabus must be connected');
 assert.match(catalogue,/QUALIFICATIONS\.map\(item =>/, 'All three pathways must render, not only enrolled records');
 assert.match(catalogue,/assigned\.filter\(row => qualificationFor\(row\.title\)/, 'Enrolment matching must stay role-scoped');
 assert.match(catalogue,/onOpen\(enrolments\[0\]\.id\)/, 'Enrolled programmes must open live portfolios');
 assert.match(catalogue,/onPreview\(item\.id\)/, 'Other programmes must only open read-only syllabus');
-for(const title of ['Programme preview','Assigned to you','Open portfolio','View syllabus']){
+for(const title of ['Verified source syllabus','Assigned to you','Open portfolio','Explore actual Units']){
  assert.ok(catalogue.includes(title), 'Missing catalogue label: '+title);
 }
 for(const className of ['qf-live-lead','qf-live-feature','qf-live-kpi','qf-live-preview-notice']){
@@ -62,5 +62,38 @@ for(const className of ['qf-live-lead','qf-live-feature','qf-live-kpi','qf-live-
 for(const rpc of ["commit('save_claim'","commit('review'","commit('finalize'"]){
  assert.ok(live.includes(rpc), 'Do not drop live backend workflow: '+rpc);
 }
+
+
+const imported=JSON.parse(read('src/qualification/qualificationImportedReferenceCatalog.json'));
+const sourcePreview=read('src/qualification/QualificationSourcePreview.jsx');
+const migration=read('supabase/migrations/202611220002_qualification_reference_catalog.sql');
+assert.equal(imported.specifications.length,4,'New + historical source editions must be available');
+const keyed=new Map(imported.specifications.map(v=>[v.catalog_key,v]));
+assert.equal(keyed.get('technica-source-othm6-2026').reference_number,'610/8264/8');
+assert.equal(keyed.get('technica-source-othm6-2026').units.length,7);
+assert.equal(keyed.get('technica-source-othm6-2026').units.reduce((n,u)=>n+u.outcomes.length,0),0,'Do not invent current 2026 criteria');
+const legacy=imported.specifications.filter(v=>v.catalog_key!=='technica-source-othm6-2026');
+assert.equal(legacy.reduce((n,s)=>n+s.units.length,0),23);
+assert.equal(legacy.reduce((n,s)=>n+s.units.reduce((m,u)=>m+u.outcomes.length,0),0),93);
+assert.equal(legacy.reduce((n,s)=>n+s.units.reduce((m,u)=>m+u.outcomes.reduce((a,o)=>a+o.criteria.length,0),0),0),390);
+for(const spec of imported.specifications){
+ assert.match(spec.source_pdf,/^https:\/\//);
+ for(const unit of spec.units){
+  assert.ok(unit.code&&unit.title&&unit.position>0);
+  for(const o of unit.outcomes){
+   assert.ok(o.title&&o.criteria.length>0);
+   for(const c of o.criteria)assert.ok(c.code&&c.title.length>10&&!/Learning Outcome\s*-\s*The learner/.test(c.title));
+  }
+ }
+}
+assert.match(live,/portfolioRpc\(db,'reference_catalog'\)/,'Live learner must read source content from actual Supabase');
+assert.match(catalogue,/references\.find\(source => source\.catalog_key/,'Source version selection missing');
+assert.match(sourcePreview,/source\.units\.map/,'Source Unit navigation missing');
+assert.match(sourcePreview,/outcome\.criteria\.map/,'Real assessment criteria navigation missing');
+assert.match(sourcePreview,/source\.version==='November 2026'/,'Do not conflate 2023 and 2026 requirements');
+assert.match(migration,/auth\.uid\(\) IS NULL/);
+assert.match(migration,/REVOKE ALL ON FUNCTION public\.lms_qf_reference_catalog\(\) FROM PUBLIC, anon/);
+assert.match(migration,/GRANT EXECUTE ON FUNCTION public\.lms_qf_reference_catalog\(\) TO authenticated/);
+assert.ok(!/portfolioRpc\(db,'(?:save_claim|review|finalize)'/.test(sourcePreview),'Reference browser must never create real assessment data');
 
 console.log('P35 premium Qualification heroes, 3 verified local images, clear responsive typography and workflow preservation PASS');
