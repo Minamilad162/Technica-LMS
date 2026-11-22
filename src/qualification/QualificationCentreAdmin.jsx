@@ -14,7 +14,7 @@ const errText=e=>e?.message||'This action could not be completed.';
 const stamp=date=>date?new Date(date).toLocaleDateString(undefined,{dateStyle:'medium'}):'Not yet';
 function Pill({ready,children}){return <span className={'qc-pill '+(ready?'qc-success':'qc-pending')}>{ready?<CheckCircle2 size={13}/>:<Info size={13}/>} {children}</span>;}
 function Notice({children}){return <div className="qc-notice"><Info size={18}/><span>{children}</span></div>;}
-function Card({title,icon:Icon,children}){return <section className="qc-card"><header><Icon size={19}/><h3>{title}</h3></header>{children}</section>;}
+function Card({title,icon:Icon,children,id}){return <section id={id} className="qc-card"><header><Icon size={19}/><h3>{title}</h3></header>{children}</section>;}
 function PeopleSelect({label,value,onChange,people,disabled}){return <label className="qc-field">{label}
  <select value={value} onChange={e=>onChange(e.target.value)} disabled={disabled} required>
   <option value="">Select active account</option>
@@ -199,7 +199,7 @@ export default function QualificationCentreAdmin({db,onBack}){
   </section>}
   {version&&<div className="qc-columns">
    <div className="qc-main">
-    <div id="qc-centre-unit-review"><Card title="Unit assessment plans" icon={Layers3}>
+    <Card id="qc-centre-unit-review" title="Unit assessment plans" icon={Layers3}>
       <p className="qc-secondary">The real Learning Outcomes and Assessment Criteria are already imported.
         These centre-authored brief drafts must be checked against the current programme before approval.</p>
       <div className="qc-unit-pills">{version.units.map(u=><button key={u.id} type="button"
@@ -223,7 +223,7 @@ export default function QualificationCentreAdmin({db,onBack}){
           onClick={()=>onBrief(true)}><BookCheck size={16}/> Approve Unit brief</button>
        </div>
       </div>}
-    </Card></div>
+    </Card>
     <Card title="Centre resources · protected uploads" icon={FolderClosed}>
       <p className="qc-secondary">Upload genuine centre-authorised Assignment Briefs, Reflective Account forms, Witness Testimony forms, CPD records or evidence matrices. Drafts cannot be viewed by learners until approved.</p>
       <div className="qc-document-list">{documents.map(d=><div key={d.id}>
