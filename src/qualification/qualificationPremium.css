@@ -202,9 +202,9 @@
 .qf-live .qf-ref-unit-metric>small{color:#ac6320;font-size:11px}
 .qf-live .qf-ref-unit-metric>button{background:none;border:0;padding:2px 0;text-align:left;color:#2b6ea4;font-size:11px;text-decoration:underline;cursor:pointer}
 .qf-live .qf-ref-hours>p{font-size:12px;line-height:1.7;color:#71869f}
-.qf-live .qf-ref-hours>div:last-child{display:flex;gap:11px;flex-wrap:wrap}
-.qf-live .qf-ref-hours>div:last-child span{display:flex;justify-content:space-between;gap:10px;background:#f4f8fe;padding:12px 14px;border-radius:10px;font-size:12px;color:#52718d}
-.qf-live .qf-ref-hours>div:last-child strong{color:#244f76}
+.qf-live .qf-ref-hours-total{display:flex;gap:11px;flex-wrap:wrap}
+.qf-live .qf-ref-hours-total span{display:flex;justify-content:space-between;gap:10px;background:#f4f8fe;padding:12px 14px;border-radius:10px;font-size:12px;color:#52718d}
+.qf-live .qf-ref-hours-total strong{color:#244f76}
 @media(max-width:1150px){.qf-live .qf-ref-ribbon-grid{grid-template-columns:repeat(3,minmax(0,1fr))}
  .qf-live .qf-ref-metrics-stats{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:720px){.qf-live .qf-ref-ribbon{padding:15px}
@@ -288,3 +288,18 @@
 @media(max-width:650px){.qf-live .qf-ref-candidate-heading{align-items:start;flex-direction:column}
  .qf-live .qf-ref-candidate-group summary{align-items:start;flex-direction:column;gap:5px}
  .qf-live .qf-ref-candidate-fields{grid-template-columns:minmax(0,1fr)}}
+
+/* Logged training hours remain distinct from assessor-verified outcomes. */
+.qf-live .qf-ref-hours .qf-card-header>span{font-size:11px;color:#7491ab}
+.qf-live .qf-ref-hours-form{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:11px 13px;
+ padding:17px;background:#f6faff;border:1px solid #dce8f5;border-radius:13px;margin:17px 0}
+.qf-live .qf-ref-hours-form .qf-field{margin:0}
+.qf-live .qf-ref-hours-form .qf-ref-hours-description{grid-column:1/-1}
+.qf-live .qf-ref-hours-form>button{justify-self:start;grid-column:1/-1}
+.qf-live .qf-ref-hours-list{max-width:100%;overflow-x:auto;border:1px solid #e0eaf4;border-radius:12px}
+.qf-live .qf-ref-hours-list table{border-collapse:collapse;width:100%;min-width:460px}
+.qf-live .qf-ref-hours-list th,.qf-live .qf-ref-hours-list td{padding:13px 11px;border-bottom:1px solid #e8edf5;text-align:left;
+ font-size:11px;color:#365877}
+.qf-live .qf-ref-hours-list th{background:#f4f8fe;color:#667d9a;font-weight:850}
+.qf-live .qf-ref-hours-list tr:last-child td{border-bottom:0}
+@media(max-width:660px){.qf-live .qf-ref-hours-form{grid-template-columns:minmax(0,1fr)}}
