@@ -4,7 +4,10 @@ import PremiumLoading from '../components/PremiumLoading.jsx';
 import {QUALIFICATIONS} from './qualificationData.js';
 import {ProgrammeListPremium, qualificationFor} from './QualificationCatalogue.jsx';
 import QualificationSourcePreview from './QualificationSourcePreview.jsx';
-import {LiveUnitLearningHub, OutcomeLearningSupport, ProgrammeReferenceLibrary, ProgrammeMaterialSnapshot, EvidencePreparationTips} from './QualificationLearningResources.jsx';
+import QualificationCentreAdmin from './QualificationCentreAdmin.jsx';
+import QualificationCentreBrief from './QualificationCentreBrief.jsx';
+import QualificationEvidenceTemplates from './QualificationEvidenceTemplates.jsx';
+import {LiveUnitLearningHub, OutcomeLearningSupport, ProgrammeMaterialSnapshot, EvidencePreparationTips} from './QualificationLearningResources.jsx';
 import {
   canReview, claimLabels, claimState, downloadEvidenceShowcase, downloadPortfolioEvidence, evidenceExtensions,
   evidenceKinds, evidencePayload, portfolioRpc, programmeProgress, uploadPortfolioEvidence,
@@ -82,7 +85,7 @@ function OutcomeLink({outcome, onOpen}) {
   </button>;
 }
 
-function UnitProgramme({portfolio, unitIndex, setUnitIndex, onOutcome, onEvidence, onLibrary}) {
+function UnitProgramme({db,portfolio, unitIndex, setUnitIndex, onOutcome, onEvidence, onLibrary}) {
   const unit = portfolio.units[unitIndex];
   const learner = portfolio.role === 'learner';
   return <>
@@ -97,7 +100,9 @@ function UnitProgramme({portfolio, unitIndex, setUnitIndex, onOutcome, onEvidenc
       </div>
     </nav>
     <div className="qf-unit-heading"><div><span className="qf-overline" dir="ltr">{unit.code}</span><h2>{unit.title}</h2></div></div>
+    <QualificationCentreBrief unit={unit} db={db}/>
     <LiveUnitLearningHub key={unit.id} unit={unit} portfolio={portfolio} onEvidence={onEvidence} onLibrary={onLibrary}/>
+    <QualificationEvidenceTemplates key={unit.id+':forms'} unit={unit}/>
     <div className="qf-live-grid">
       <Panel title="Learning Outcomes"><div className="qf-live-list">
         {unit.outcomes.map(outcome => <OutcomeLink key={outcome.id} outcome={outcome} onOpen={onOutcome}/>)}
@@ -384,7 +389,7 @@ function ContactDiary({progress, onOutcome}) {
   </Panel>;
 }
 
-function OpenPortfolio({db, portfolio, onRefresh, onBack}) {
+function OpenPortfolio({db, portfolio, references, onRefresh, onBack}) {
   const [view,setView] = useState('dashboard');
   const [unitIndex,setUnitIndex] = useState(0);
   const [outcomeId,setOutcomeId] = useState('');
@@ -459,6 +464,8 @@ function OpenPortfolio({db, portfolio, onRefresh, onBack}) {
   ];
   const sectionIcons = {dashboard: Layers3, programme: BookOpen, evidence: FolderOpen, registration: GraduationCap, contact: MessageSquare, library: LibraryBig};
   const cover = qualificationFor(portfolio.title);
+  const selectedReference = references.find(ref => ref.catalog_key === portfolio.catalogKey ||
+    (ref.title === portfolio.title && ref.version === portfolio.version));
   const outcomeUnit = portfolio.units.find(unit => unit.outcomes.some(item => item.id === outcomeId));
   return <div className="qf-live-stack" aria-busy={busy}>
     <button type="button" className="qf-plain-back" disabled={busy} onClick={onBack}><ArrowLeft size={16}/> Qualifications</button>
@@ -486,7 +493,7 @@ function OpenPortfolio({db, portfolio, onRefresh, onBack}) {
     {error && <p className="qf-live-error" role="alert">{error}</p>}
     {notice && <p className="qf-live-notice" role="status">{notice}</p>}
     {view === 'dashboard' && <PortfolioOverview portfolio={portfolio} progress={progress} onOutcome={openOutcome} onView={changeView} qualification={cover}/>}
-    {view === 'programme' && <UnitProgramme portfolio={portfolio} unitIndex={unitIndex} setUnitIndex={setUnitIndex} onOutcome={openOutcome}
+    {view === 'programme' && <UnitProgramme db={db} portfolio={portfolio} unitIndex={unitIndex} setUnitIndex={setUnitIndex} onOutcome={openOutcome}
       onEvidence={learner ? () => changeView('evidence') : null} onLibrary={cover ? () => changeView('library') : null}/>}
     {view === 'evidence' && learner && <EvidenceFolder portfolio={portfolio} busy={busy} onSave={saveEvidence}
       onDownload={onDownload} onShowcase={items => run(() => downloadEvidenceShowcase(db,items))} onBack={evidenceFromOutcome ? () => changeView('outcome') : null}/>}
@@ -494,7 +501,9 @@ function OpenPortfolio({db, portfolio, onRefresh, onBack}) {
       onDeclare={() => commit('declare',{},'Declaration accepted.')}
       onFinalize={reference => commit('finalize',{p_certificate_reference: reference},reference ? 'Certificate reference recorded.' : 'Qualification completed.')}/>}
     {view === 'contact' && <ContactDiary progress={progress} onOutcome={openOutcome}/>}
-    {view === 'library' && cover && <ProgrammeReferenceLibrary key={cover.id} qualification={cover}/>}
+    {view === 'library' && cover && selectedReference &&
+      <QualificationSourcePreview key={selectedReference.catalog_key} item={cover}
+        references={[selectedReference]} onBack={() => changeView('programme')}/>}
     {view === 'outcome' && outcome && <>
       <div className="qf-live-actions"><Action secondary disabled={busy} onClick={() => changeView('programme')}><ArrowLeft size={16}/> Back to unit</Action><Status outcome={outcome}/></div>
       <h2>{outcome.code} · {outcome.title}</h2>
@@ -531,6 +540,8 @@ function OpenPortfolio({db, portfolio, onRefresh, onBack}) {
 export default function LiveQualificationPortfolio({db}) {
   const [rows,setRows] = useState(null);
   const [references,setReferences] = useState([]);
+  const [adminEnabled,setAdminEnabled] = useState(false);
+  const [adminView,setAdminView] = useState(false);
   const [activeRole,setActiveRole] = useState('');
   const [portfolio,setPortfolio] = useState(null);
   const [previewId,setPreviewId] = useState('');
@@ -541,11 +552,12 @@ export default function LiveQualificationPortfolio({db}) {
   useEffect(() => {
     const id = ++request.current;
     setBusy(true); setError('');
-    Promise.all([portfolioRpc(db,'list'),portfolioRpc(db,'reference_catalog')])
-      .then(([data,sourceData]) => {
+    Promise.all([portfolioRpc(db,'list'),portfolioRpc(db,'reference_catalog'),portfolioRpc(db,'admin_access')])
+      .then(([data,sourceData,canManage]) => {
         if (id === request.current) {
           setRows(data);
           setReferences(Array.isArray(sourceData) ? sourceData : []);
+          setAdminEnabled(canManage === true);
         }
       })
       .catch(error => {if (id === request.current) setError(failureMessage(error));})
@@ -556,8 +568,15 @@ export default function LiveQualificationPortfolio({db}) {
     const current = ++request.current;
     setBusy(true); setError('');
     try {
-      const data = await portfolioRpc(db,'portfolio',{p_enrolment:id});
-      if (current === request.current) { setPortfolio(data); setPreviewId(''); }
+      const [data,briefs] = await Promise.all([
+        portfolioRpc(db,'portfolio',{p_enrolment:id}),
+        portfolioRpc(db,'programme_briefs',{p_enrolment:id}),
+      ]);
+      if (current === request.current) {
+        const byUnit=new Map((briefs||[]).map(item=>[item.unitId,item]));
+        setPortfolio({...data,units:data.units.map(unit=>({...unit,centreBrief:byUnit.get(unit.id)||null}))});
+        setPreviewId('');setAdminView(false);
+      }
     } catch (error) {
       if (current === request.current) setError(failureMessage(error));
     } finally {
@@ -567,13 +586,22 @@ export default function LiveQualificationPortfolio({db}) {
   const refresh = async updated => {
     const current = request.current;
     const data = updated || await portfolioRpc(db,'portfolio',{p_enrolment:portfolio.id});
-    if (current === request.current) setPortfolio(data);
+    if (current === request.current) {
+      const byUnit=new Map((portfolio?.units||[]).map(unit=>[unit.id,unit.centreBrief]));
+      setPortfolio({...data,units:data.units.map(unit=>({...unit,centreBrief:byUnit.get(unit.id)||null}))});
+    }
   };
   return <div className="qf-workspace qf-learner qf-live">
+    {!busy&&!error&&!portfolio&&!previewId&&adminEnabled&&<div className="qc-admin-toolbar">
+      <button type="button" onClick={()=>setAdminView(!adminView)}>
+        <ShieldCheck size={17}/>{adminView?'Qualification catalogue':'Qualification Centre Admin'}
+      </button>
+    </div>}
     {busy ? <PremiumLoading variant="compact"/> : error ? <Panel title="Qualifications">
       <p role="alert">{error}</p><Action secondary onClick={() => setRefreshKey(value => value + 1)}>Retry</Action>
-    </Panel> : portfolio ? <OpenPortfolio key={portfolio.id} db={db} portfolio={portfolio} onRefresh={refresh}
-      onBack={() => {setPortfolio(null); setRefreshKey(value => value + 1);}}/> : previewId
+    </Panel> : portfolio ? <OpenPortfolio key={portfolio.id} db={db} portfolio={portfolio} references={references} onRefresh={refresh}
+      onBack={() => {setPortfolio(null); setRefreshKey(value => value + 1);}}/> : adminView
+      ? <QualificationCentreAdmin db={db} onBack={()=>{setAdminView(false);setRefreshKey(v=>v+1);}}/> : previewId
       ? <QualificationSourcePreview key={previewId} item={QUALIFICATIONS.find(item => item.id === previewId)}
           references={references} onBack={() => setPreviewId('')}/>
       : <ProgrammeListPremium rows={rows || []} references={references} activeRole={activeRole}
