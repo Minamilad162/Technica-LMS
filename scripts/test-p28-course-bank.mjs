@@ -70,8 +70,8 @@ for(const fragment of ['verifiedLiveAdmin(db)','p_course_id:courseId','p_items:r
 assert(!sql.includes("to_regclass('public.lms_p9b_mock_items')"),'P9B must not block non-ASP Course Bank migration');
 assert(sql.includes('P28 missing prerequisites:'),'Admin requires exact missing P1/P4/P22 diagnostics');
 assert(bank.includes('importQuestionFile(file,courseId,domainId)')&&bank.includes('Upload Excel / CSV')&&bank.includes('to Practice'));
-assert(bank.includes("selected.slug!=='asp'")&&bank.includes("selected.slug==='asp'"));
-assert(bank.includes('reserveNonAspMockQuestion')&&bank.includes('approveNonAspBankQuestion'));
+assert(bank.includes("selected?.slug!=='asp'")&&bank.includes("selected.slug==='asp'"));
+assert(bank.includes("stage(q,'mockCandidate',e.target.checked)")&&bank.includes('saveCourseBankBatch(db,courseId,payload'));
 assert(quiz.includes('Choose from Course Bank')&&quiz.includes('attachBankToLesson(db,lessonId,q.id'));
 assert(quiz.includes('q.mockExclusive')&&quiz.includes('item.bank_question_id'));
 assert(builder.includes('courseId={courseId}')&&builder.includes('AdminLessonQuizEditor'));
