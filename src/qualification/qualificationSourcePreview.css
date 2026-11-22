@@ -209,3 +209,19 @@
 @media(prefers-reduced-motion:reduce){
  .qf-live .qsrc-overview-unit-list button{transition:none}
 }
+
+.qf-live .qsrc-unit-paging{display:flex;align-items:center;gap:9px;
+ flex-wrap:wrap;margin-top:18px;padding-top:14px;border-top:1px solid #e6edf6}
+.qf-live .qsrc-unit-paging button{display:inline-flex;align-items:center;justify-content:center;gap:7px;
+ padding:9px 12px;min-height:41px;border:1px solid #bcd5ec;border-radius:10px;
+ background:#f3f9ff;color:#2e6d9f;font-size:11px;font-weight:800;cursor:pointer}
+.qf-live .qsrc-unit-paging button:hover:not(:disabled){background:#e6f2fe}
+.qf-live .qsrc-unit-paging button:disabled{opacity:.45;cursor:not-allowed}
+.qf-live .qsrc-unit-paging label{display:flex;align-items:center;gap:9px;
+ margin:0 auto;color:#7089a1;font-size:11px;font-weight:760}
+.qf-live .qsrc-unit-paging select{min-height:41px;border-radius:10px;
+ padding:9px 11px;border:1px solid #c6d9ed;background:#fff;color:#315c84;
+ font-size:11px;font-weight:780}
+@media(max-width:650px){.qf-live .qsrc-unit-paging label{order:-1;width:100%;justify-content:space-between}
+ .qf-live .qsrc-unit-paging label select{flex:1;max-width:230px}
+ .qf-live .qsrc-unit-paging button{flex:1}}
