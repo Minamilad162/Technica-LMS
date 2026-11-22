@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
-import {qualificationReadiness} from '../src/qualification/qualificationReadiness.js';
+import {qualificationReadiness,needsAssessmentMethodReview,sourceRubricForUnit} from '../src/qualification/qualificationReadiness.js';
 
 const approvedAt='2026-11-22T09:00:00Z';
 const unit=(id,approved=false)=>({
@@ -65,6 +65,17 @@ state=qualificationReadiness(version([unsigned]));
 assert.equal(state.approvedBriefs,0);
 assert.equal(state.canRelease,false);
 
+assert.equal(needsAssessmentMethodReview('Methods must be selected and justified by the centre assessor (e.g., work product review).'),true);
+assert.equal(needsAssessmentMethodReview(' '),true);
+assert.equal(needsAssessmentMethodReview('Professional discussion and a written assignment will be assessed against all AC; the assessor will validate documentary evidence.'),false);
+const rubricExample={catalog_key:'technica-source-othm6-2026',units:[{code:'H/652/4328',
+ outcomes:[{code:'1',title:'Safety management',criteria:[{code:'1.1',title:'Evaluate requirements'},{code:'1.2',title:'Assess legal duties'}]}]}]};
+const rubricVersion={catalogKey:'technica-source-othm6-2026'};
+const rubricUnit={code:'H/652/4328',outcomes:1,criteria:2};
+assert.equal(sourceRubricForUnit([rubricExample],rubricVersion,rubricUnit).complete,true);
+assert.equal(sourceRubricForUnit([rubricExample],{catalogKey:'technica-source-othm6-2023'},rubricUnit).complete,false,'Never use a legacy edition rubric');
+assert.equal(sourceRubricForUnit([rubricExample],rubricVersion,{...rubricUnit,criteria:3}).complete,false,'Do not approve partial imported rubric');
+
 const read=p=>readFileSync(new URL('../'+p,import.meta.url),'utf8');
 const admin=read('src/qualification/QualificationCentreAdmin.jsx');
 const preview=read('src/qualification/QualificationSourcePreview.jsx');
@@ -72,6 +83,12 @@ const live=read('src/qualification/LiveQualificationPortfolio.jsx');
 assert.ok(admin.includes('qualificationReadiness(version,staff)'),'Readiness must come from the live admin workspace and reviewer roster');
 assert.ok(admin.includes('Assessment access readiness'));
 assert.ok(admin.includes('Review next Unit'));
+assert.ok(admin.includes('sourceRubricForUnit(references,version,unit)'));
+assert.ok(admin.includes('reviewChecks.rubric&&reviewChecks.methods&&reviewChecks.authority'));
+assert.ok(admin.includes('methodsNeedReview'));
+assert.ok(admin.includes("I am authorised by Technica Consult"));
+assert.ok(live.includes('<QualificationCentreAdmin db={db} references={references}'));
+
 assert.ok(admin.includes('qc-centre-unit-review'));
 assert.ok(preview.includes('Evidence submissions, assessor decisions and certificate recording require a centre-published version'));
 assert.ok(live.includes("portfolioRpc(db,'admin_workspace')")===false,'Learner route must not query the privileged admin workspace');
