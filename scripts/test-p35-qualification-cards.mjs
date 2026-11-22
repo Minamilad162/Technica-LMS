@@ -71,7 +71,9 @@ assert.equal(imported.specifications.length,4,'New + historical source editions 
 const keyed=new Map(imported.specifications.map(v=>[v.catalog_key,v]));
 assert.equal(keyed.get('technica-source-othm6-2026').reference_number,'610/8264/8');
 assert.equal(keyed.get('technica-source-othm6-2026').units.length,7);
-assert.equal(keyed.get('technica-source-othm6-2026').units.reduce((n,u)=>n+u.outcomes.length,0),0,'Do not invent current 2026 criteria');
+assert.equal(keyed.get('technica-source-othm6-2026').units.reduce((n,u)=>n+u.outcomes.length,0),25,'Every new 2026 outcome must be source-backed');
+assert.equal(keyed.get('technica-source-othm6-2026').units.reduce((n,u)=>n+u.outcomes.reduce((a,o)=>a+o.criteria.length,0),0),120,'2026 criteria must match new official specification');
+assert.equal(imported.specifications.reduce((n,s)=>n+s.units.reduce((m,u)=>m+u.outcomes.reduce((a,o)=>a+o.criteria.length,0),0),0),510,'Historical and current criteria are version-isolated');
 const legacy=imported.specifications.filter(v=>v.catalog_key!=='technica-source-othm6-2026');
 assert.equal(legacy.reduce((n,s)=>n+s.units.length,0),23);
 assert.equal(legacy.reduce((n,s)=>n+s.units.reduce((m,u)=>m+u.outcomes.length,0),0),93);
@@ -98,6 +100,3 @@ assert.ok(!/portfolioRpc\(db,'(?:save_claim|review|finalize)'/.test(sourcePrevie
 
 console.log('P35 premium Qualification heroes, 3 verified local images, clear responsive typography and workflow preservation PASS');
 
-if (process.env.GITHUB_ACTIONS === 'true' && process.env.GITHUB_HEAD_REF === 'feat/real-qualification-reference-import-2026') {
-  await import('./_tmp_extract_othm_current.mjs');
-}
