@@ -1,0 +1,92 @@
+/* Central multi-Unit evidence mapping • premium Technica design */
+.qf-live .qmu-card{display:grid;gap:17px;margin:18px 0 8px;padding:clamp(18px,2.6vw,26px);
+ border:1px solid #d4e5f4;border-radius:20px;background:#fff;box-shadow:0 13px 32px #17416b12;min-width:0}
+.qf-live .qmu-head{display:flex;align-items:start;gap:14px}
+.qf-live .qmu-logo{flex:0 0 48px;height:48px;display:grid;place-items:center;border-radius:14px;
+ background:linear-gradient(145deg,#dceefa,#edf6ff);color:#3479b8}
+.qf-live .qmu-head h2{margin:5px 0 7px;font-size:clamp(18px,2vw,22px);
+ letter-spacing:-.025em;color:#1f4369}
+.qf-live .qmu-head p{max-width:760px;color:#6c86a0;font-size:12px;line-height:1.75;margin:0}
+.qf-live .qmu-steps{display:flex;gap:9px;flex-wrap:wrap}
+.qf-live .qmu-steps>span{display:inline-flex;align-items:center;gap:7px;padding:9px 11px;
+ border:1px solid #dceaf8;border-radius:10px;background:#f4faff;color:#4d789d;
+ font-size:11px;font-weight:800}
+.qf-live .qmu-toolbar{display:grid;grid-template-columns:minmax(0,1fr) minmax(200px,.5fr);gap:12px;
+ padding:16px;border:1px solid #e2ecf6;border-radius:12px;background:#f9fcff}
+.qf-live .qmu-toolbar label{display:grid;gap:7px;font-size:12px;color:#486d8b;font-weight:790}
+.qf-live .qmu-toolbar select,.qf-live .qmu-toolbar input{box-sizing:border-box;min-width:0;width:100%;
+ min-height:44px;padding:10px 12px;border:1px solid #cbddeb;border-radius:9px;color:#2b547c;
+ font-size:12px;background:#fff}
+.qf-live .qmu-toolbar :is(input,select):focus-visible{outline:3px solid #a6cbee}
+.qf-live .qmu-selected-document{display:flex;align-items:center;gap:10px;padding:13px 15px;
+ border-radius:12px;border:1px solid #cbe3d9;background:#f4fbf8;color:#2e8d6a}
+.qf-live .qmu-selected-document>div{flex:1;min-width:0;display:grid;gap:4px}
+.qf-live .qmu-selected-document strong{color:#2a6558;font-size:12.5px;overflow-wrap:anywhere}
+.qf-live .qmu-selected-document small{color:#7b9d8e;font-size:10.5px}
+.qf-live .qmu-selected-document>span{font-size:11px;font-weight:800;white-space:nowrap}
+.qf-live .qmu-unit-grid{display:grid;gap:9px;max-height:740px;overflow-y:auto;scrollbar-width:thin}
+.qf-live .qmu-unit{border:1px solid #dfe9f5;border-radius:13px;background:#fff;overflow:hidden}
+.qf-live .qmu-unit[open]{border-color:#a9cae7;box-shadow:0 5px 15px #23578c0b}
+.qf-live .qmu-unit>summary{display:flex;align-items:center;gap:11px;min-height:64px;
+ background:#fafcff;padding:12px 15px;cursor:pointer;list-style:none}
+.qf-live .qmu-unit>summary::-webkit-details-marker{display:none}
+.qf-live .qmu-unit[open]>summary{background:linear-gradient(90deg,#eef6ff,#fff);
+ border-bottom:1px solid #e2eefa}
+.qf-live .qmu-unit-num{flex:0 0 36px;height:36px;border-radius:10px;display:grid;
+ place-items:center;font-size:11px;font-weight:870;background:#e8f2fe;color:#397ab6}
+.qf-live .qmu-unit-title{display:grid;gap:5px;min-width:0;flex:1}
+.qf-live .qmu-unit-title strong{font-size:12px;color:#244c70;line-height:1.55}
+.qf-live .qmu-unit-title small{font-size:10.5px;color:#8098b0}
+.qf-live .qmu-linked{display:flex;align-items:center;gap:5px;color:#248b68;
+ background:#e4f6ec;padding:5px 8px;border-radius:8px;font-size:11px;font-weight:820}
+.qf-live .qmu-chevron{color:#6d89a8;font-size:22px;transition:transform .15s}
+.qf-live .qmu-unit[open] .qmu-chevron{transform:rotate(180deg)}
+.qf-live .qmu-unit-body{display:grid;gap:13px;padding:16px}
+.qf-live .qmu-select-all{display:flex;align-items:center;gap:9px;color:#2e709f;
+ font-size:12px;font-weight:800;padding:9px 12px;background:#eff7ff;
+ border-radius:9px;cursor:pointer}
+.qf-live .qmu-unit input[type=checkbox]{width:16px;height:16px;flex-shrink:0;
+ accent-color:#347fc2}
+.qf-live .qmu-outcome{display:grid;gap:9px;padding:13px;background:#fcfdff;
+ border:1px solid #e5ecf6;border-radius:10px}
+.qf-live .qmu-outcome-head{display:flex;gap:12px;justify-content:space-between;align-items:start}
+.qf-live .qmu-outcome-head strong{font-size:12px;font-weight:830;color:#325a7f;line-height:1.55}
+.qf-live .qmu-outcome-head>span{display:inline-flex;align-items:center;gap:5px;
+ color:#8d9db0;font-size:10px;white-space:nowrap}
+.qf-live .qmu-criteria{display:grid;gap:7px}
+.qf-live .qmu-criterion{display:flex;gap:10px;align-items:start;padding:10px 12px;
+ border:1px solid #e6eef8;border-radius:9px;color:#59728c;background:#fff;
+ cursor:pointer;font-size:11px;line-height:1.6}
+.qf-live .qmu-criterion:hover{border-color:#a7c8e6}
+.qf-live .qmu-criterion.selected{background:#eff8ff;border-color:#bfd9f1;color:#244f7a}
+.qf-live .qmu-criterion.locked{cursor:default;color:#8190a2;background:#f7f9fc}
+.qf-live .qmu-criterion-code{font-weight:880;color:#397cb3;min-width:33px}
+.qf-live .qmu-open-outcome{justify-self:start;display:inline-flex;gap:7px;align-items:center;
+ border:0;background:transparent;color:#417db2;font-size:11px;font-weight:770;cursor:pointer}
+.qf-live .qmu-save{display:flex;justify-content:space-between;align-items:center;gap:18px;flex-wrap:wrap;
+ padding-top:14px;border-top:1px solid #e3edf5}
+.qf-live .qmu-save p{display:flex;align-items:start;gap:7px;color:#7e92a7;
+ font-size:11px;line-height:1.6;max-width:580px;margin:0}
+.qf-live .qmu-save p svg{flex-shrink:0;margin-top:1px}
+.qf-live .qmu-save button{display:inline-flex;align-items:center;gap:8px;justify-content:center;
+ border:1px solid #2b7fbe;border-radius:11px;min-height:46px;padding:11px 17px;
+ color:#fff;background:linear-gradient(110deg,#2374b4,#4098cf);
+ font-size:12px;font-weight:850;cursor:pointer;box-shadow:0 5px 17px #1965991e}
+.qf-live .qmu-save button:disabled{opacity:.46;cursor:not-allowed;box-shadow:none}
+.qf-live .qmu-empty{display:flex;gap:13px;align-items:start;padding:18px;
+ border:1px dashed #aacbe5;border-radius:12px;background:#f7fbff;color:#397cb3}
+.qf-live .qmu-empty strong{font-size:13px;color:#315b7e}
+.qf-live .qmu-empty p{font-size:11.5px;line-height:1.7;color:#6c86a0;margin:6px 0 0}
+@media(max-width:770px){
+ .qf-live .qmu-toolbar{grid-template-columns:minmax(0,1fr)}
+ .qf-live .qmu-save button{width:100%}
+ .qf-live .qmu-unit-grid{max-height:610px}
+}
+@media(max-width:480px){
+ .qf-live .qmu-card{padding:14px}
+ .qf-live .qmu-logo{flex-basis:38px;height:38px}
+ .qf-live .qmu-outcome-head{flex-direction:column;gap:4px}
+ .qf-live .qmu-selected-document{flex-wrap:wrap}
+ .qf-live .qmu-selected-document>span{width:100%}
+}
+@media(prefers-reduced-motion:reduce){.qf-live .qmu-chevron{transition:none}}
