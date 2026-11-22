@@ -568,13 +568,15 @@ export default function LiveQualificationPortfolio({db}) {
     const current = ++request.current;
     setBusy(true); setError('');
     try {
-      const [data,briefs] = await Promise.all([
+      const [data,briefs,certAuthorized] = await Promise.all([
         portfolioRpc(db,'portfolio',{p_enrolment:id}),
         portfolioRpc(db,'programme_briefs',{p_enrolment:id}),
+        portfolioRpc(db,'certificate_access',{p_enrolment:id}),
       ]);
       if (current === request.current) {
         const byUnit=new Map((briefs||[]).map(item=>[item.unitId,item]));
-        setPortfolio({...data,units:data.units.map(unit=>({...unit,centreBrief:byUnit.get(unit.id)||null}))});
+        setPortfolio({...data,canRecordCertificate:data.canRecordCertificate||certAuthorized===true,
+          units:data.units.map(unit=>({...unit,centreBrief:byUnit.get(unit.id)||null}))});
         setPreviewId('');setAdminView(false);
       }
     } catch (error) {
@@ -585,10 +587,14 @@ export default function LiveQualificationPortfolio({db}) {
   };
   const refresh = async updated => {
     const current = request.current;
-    const data = updated || await portfolioRpc(db,'portfolio',{p_enrolment:portfolio.id});
+    const [data,certAuthorized] = await Promise.all([
+      updated || portfolioRpc(db,'portfolio',{p_enrolment:portfolio.id}),
+      portfolioRpc(db,'certificate_access',{p_enrolment:portfolio.id}),
+    ]);
     if (current === request.current) {
       const byUnit=new Map((portfolio?.units||[]).map(unit=>[unit.id,unit.centreBrief]));
-      setPortfolio({...data,units:data.units.map(unit=>({...unit,centreBrief:byUnit.get(unit.id)||null}))});
+      setPortfolio({...data,canRecordCertificate:data.canRecordCertificate||certAuthorized===true,
+        units:data.units.map(unit=>({...unit,centreBrief:byUnit.get(unit.id)||null}))});
     }
   };
   return <div className="qf-workspace qf-learner qf-live">
