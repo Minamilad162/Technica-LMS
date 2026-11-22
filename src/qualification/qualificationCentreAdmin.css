@@ -121,3 +121,10 @@
 }
 @media(prefers-reduced-motion:reduce){.qf-live .qc-versions>button,
  .qf-live .qc-primary,.qf-live .qc-outline{transition:none}}
+
+.qf-live .qc-admin-toolbar{display:flex;justify-content:flex-end;margin:0 0 14px}
+.qf-live .qc-admin-toolbar>button{display:inline-flex;align-items:center;gap:9px;cursor:pointer;
+ font-size:12px;font-weight:810;min-height:43px;border-radius:11px;padding:10px 16px;
+ background:#eef6ff;color:#276b9e;border:1px solid #b8d4ec;
+ box-shadow:0 4px 13px #29699a0b}
+.qf-live .qc-admin-toolbar>button:hover{background:#e0efff}
