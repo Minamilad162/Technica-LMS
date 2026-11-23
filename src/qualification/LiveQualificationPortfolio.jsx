@@ -14,7 +14,7 @@ import QualificationCentreBrief from './QualificationCentreBrief.jsx';
 import {PortfolioStatusRibbon,PortfolioMetrics} from './QualificationPortfolioReferenceUI.jsx';
 import QualificationCandidateRegistration from './QualificationCandidateRegistration.jsx';
 import QualificationEvidenceTemplates from './QualificationEvidenceTemplates.jsx';
-import {CentreResourceLinks, LiveUnitLearningHub, OutcomeLearningSupport, ProgrammeMaterialSnapshot} from './QualificationLearningResources.jsx';
+import {CentreResourceLinks, LiveUnitLearningHub, OutcomeLearningSupport, ProgrammeMaterialSnapshot, EvidencePreparationTips} from './QualificationLearningResources.jsx';
 import {
   canReview, claimLabels, claimState, downloadEvidenceShowcase, downloadPortfolioEvidence, evidenceExtensions,
   evidenceKinds, evidencePayload, fetchEvidenceFile, portfolioRpc, programmeProgress, uploadPortfolioEvidence,
@@ -436,6 +436,7 @@ function EvidenceFolder({portfolio, initialUnitId, onDownload, onShowcase, busy,
     </section>}
   {portfolio.canEdit&&<QualificationMultiUnitEvidence portfolio={portfolio} busy={busy} targetEvidence={mappingTarget}
     onSave={onMap} onOpenOutcome={onOpenOutcome}/>}
+  {portfolio.canEdit && <EvidencePreparationTips/>}
   </div>;
 }
 
