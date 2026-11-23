@@ -26,15 +26,6 @@ export default function QualificationSourceDashboard({source, onUnit, onEvidence
  return <div className="qsrd-workspace">
   <div className="qsrd-grid">
    <div className="qsrd-main">
-    <section className="qsrd-programme" aria-label="Official qualification details">
-     <div className="qsrd-programme-title"><span className="qsrd-programme-logo"><GraduationCap size={25}/></span>
-      <div><span className="qf-overline">OFFICIAL QUALIFICATION · {source.version}</span>
-       <h2>{source.title}</h2><small>Qualification ref: {source.reference_number||'Not provided'}</small>
-      </div>
-      <span className={'qsrd-chip '+(published?'qsrd-published':'qsrd-reference')}>{published?'Centre-published':'Reference syllabus'}</span>
-     </div>
-     <p className="qsrd-programme-intro">This view contains the imported awarding-body syllabus. Learner progress, Evidence decisions and certificates appear only inside an enrolled portfolio.</p>
-    </section>
     <section className="qsrd-table-card">
      <div className="qsrd-section-heading"><div><h2>Units</h2><small>Select a Unit to see its Learning Outcomes and Assessment Criteria.</small></div><span>{units.length} Units</span></div>
      <div className="qsrd-table-scroll" role="region" tabIndex={0} aria-label="Official qualification Units">
