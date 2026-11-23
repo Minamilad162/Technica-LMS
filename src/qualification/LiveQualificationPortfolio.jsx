@@ -14,7 +14,7 @@ import QualificationCentreBrief from './QualificationCentreBrief.jsx';
 import {PortfolioStatusRibbon,PortfolioMetrics} from './QualificationPortfolioReferenceUI.jsx';
 import QualificationCandidateRegistration from './QualificationCandidateRegistration.jsx';
 import QualificationEvidenceTemplates from './QualificationEvidenceTemplates.jsx';
-import {CentreResourceLinks, LiveUnitLearningHub, OutcomeLearningSupport, ProgrammeMaterialSnapshot, EvidencePreparationTips} from './QualificationLearningResources.jsx';
+import {CentreResourceLinks, EvidenceUnitMaterials, LiveUnitLearningHub, OutcomeLearningSupport, ProgrammeMaterialSnapshot, EvidencePreparationTips} from './QualificationLearningResources.jsx';
 import {
   canReview, claimLabels, claimState, downloadEvidenceShowcase, downloadPortfolioEvidence, evidenceExtensions,
   evidenceKinds, evidencePayload, fetchEvidenceFile, portfolioRpc, programmeProgress, uploadPortfolioEvidence,
@@ -219,7 +219,7 @@ function EvidenceItem({item, onDownload, uses = []}) {
   </article>;
 }
 
-function EvidenceFolder({portfolio, initialUnitId, initialWizard, onDownload, onShowcase, busy, onSave, onDuplicate, onMap, onOpenOutcome, onBack, backLabel}) {
+function EvidenceFolder({db, portfolio, source, initialUnitId, initialWizard, onDownload, onShowcase, busy, onSave, onDuplicate, onMap, onOpenOutcome, onBack, backLabel}) {
   const [mode, setMode] = useState(initialWizard ? 'choose' : '');
   const [showcase, setShowcase] = useState([]);
   const [detailId, setDetailId] = useState('');
@@ -273,6 +273,7 @@ function EvidenceFolder({portfolio, initialUnitId, initialWizard, onDownload, on
       }
     }
   }
+  const selectedUnit = portfolio.units.find(unit => unit.id === unitFilter);
   const selection = portfolio.evidence.filter(item => showcase.includes(item.id));
   const term = search.toLowerCase().trim();
   const visibleEvidence = portfolio.evidence.filter(item =>
@@ -441,6 +442,10 @@ function EvidenceFolder({portfolio, initialUnitId, initialWizard, onDownload, on
     </section>}
   {portfolio.canEdit&&<QualificationMultiUnitEvidence portfolio={portfolio} busy={busy} targetEvidence={mappingTarget}
     onSave={onMap} onOpenOutcome={onOpenOutcome}/>}
+  {selectedUnit && <EvidenceUnitMaterials key={selectedUnit.id} unit={selectedUnit} source={source}
+    onOutcome={outcome => onOpenOutcome(outcome.id)}>
+    {selectedUnit.centreBrief && <QualificationCentreBrief unit={selectedUnit} db={db}/>}
+  </EvidenceUnitMaterials>}
   {portfolio.canEdit && <EvidencePreparationTips/>}
   </div>;
 }
@@ -901,7 +906,7 @@ function OpenPortfolio({db, portfolio, references, onRefresh, onBack}) {
     {view === 'programme' && <UnitProgramme db={db} portfolio={portfolio} unitIndex={unitIndex} setUnitIndex={setUnitIndex} onOutcome={openOutcome}
       onEvidence={id => { changeView('evidence'); setEvidenceUnit(id); }} onContact={() => changeView('contact')}
       onLibrary={libraryAvailable ? () => changeView('library') : null}/>}
-    {view === 'evidence' && <EvidenceFolder key={evidenceUnit} portfolio={visiblePortfolio} initialUnitId={evidenceUnit} initialWizard={evidenceFromOutcome} busy={busy} onSave={saveEvidence} onDuplicate={duplicateEvidence}
+    {view === 'evidence' && <EvidenceFolder key={evidenceUnit} db={db} portfolio={visiblePortfolio} source={selectedReference} initialUnitId={evidenceUnit} initialWizard={evidenceFromOutcome} busy={busy} onSave={saveEvidence} onDuplicate={duplicateEvidence}
       onMap={saveMultiUnitMapping} onOpenOutcome={openOutcome}
       onDownload={onDownload} onShowcase={items => run(() => downloadEvidenceShowcase(db,items))}
       onBack={evidenceFromOutcome || evidenceUnit ? () => changeView(evidenceFromOutcome ? 'outcome' : 'programme') : null}

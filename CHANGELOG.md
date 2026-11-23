@@ -1,3 +1,8 @@
+## 2026-11-23 — Evidence Unit materials
+
+- Exposed the selected Unit’s available material, links and criteria from syllabus Evidence and the enrolled Evidence Folder.
+- Reused approved Unit briefs and protected resources in enrolled Evidence where available.
+
 ## 2026-11-23 — Qualification Outcome detail pages
 
 - Open a dedicated Outcome view from the Course in enrolled portfolios, syllabus and centre preview, with previous/next and Unit/Outcome jump controls.
