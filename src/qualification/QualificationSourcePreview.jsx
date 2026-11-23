@@ -6,6 +6,7 @@ import './qualificationSourcePreview.css';
 import QualificationEvidenceTemplates from './QualificationEvidenceTemplates.jsx';
 import QualificationInternalNav from './QualificationInternalNav.jsx';
 import QualificationUnitNavigation from './QualificationUnitNavigation.jsx';
+import QualificationSourceDashboard from './QualificationSourceDashboard.jsx';
 import QualificationOutcome, {ReadOnlyOutcomeDetails} from './QualificationOutcome.jsx';
 import {EvidenceUnitMaterials} from './QualificationLearningResources.jsx';
 
@@ -42,7 +43,7 @@ export default function QualificationSourcePreview({item,references=[],onBack,em
    setSection(nextSection);
    setOutcomeIndex(null);
  };
- const [section,setSection]=useState('course');
+ const [section,setSection]=useState(embedded?'course':'overview');
  const source=sources.find(s=>s.catalog_key===sourceKey)||sources[0];
  const unit=source?.units?.[unitIndex];
  const outcome=unit?.outcomes[outcomeIndex];
@@ -56,13 +57,15 @@ export default function QualificationSourcePreview({item,references=[],onBack,em
  const needsUploadRoute = !embedded && section === 'evidence';
  return <div className={'qsrc-page'+(embedded?' qsrc-embedded':'')}>
   {!embedded&&<button type="button" className="qf-plain-back" onClick={onBack}><ArrowLeft size={17}/> All qualifications</button>}
-  {!embedded&&<header className={'qf-live-feature qsrc-hero qf-course-theme-'+item.color}>
-    <img src={item.heroImage} alt="" aria-hidden="true"/><div className="qf-live-feature-shade"/>
-    <div className="qf-live-feature-content"><span className="qf-live-eyebrow">{item.body} · AWARDING-BODY SYLLABUS</span>
-      <h1>{source.title}</h1><div className="qf-live-feature-meta">
-        <span><GraduationCap size={16}/> Level {item.level}</span>
-        <span><Layers3 size={16}/> {source.units.length} mandatory Units</span>
-        <span>{source.reference_number}</span></div></div>
+  {!embedded&&<header className="qsrc-compact-header">
+    <div className="qsrc-compact-emblem"><img src={item.heroImage} alt="" aria-hidden="true"/></div>
+    <div className="qsrc-compact-header-copy">
+      <span className="qf-overline">{item.body} · OFFICIAL QUALIFICATION</span>
+      <h1>{source.title}</h1>
+      <div className="qsrc-compact-meta"><span><GraduationCap size={14}/> Level {item.level}</span>
+        <span><Layers3 size={14}/> {source.units.length} Units</span>
+        <span>{source.reference_number}</span></div>
+    </div>
   </header>}
   <div className="qsrc-edition-row">
     <div><span className="qf-overline">QUALIFICATION VERSION</span><h2>Official syllabus</h2></div>
@@ -75,14 +78,7 @@ export default function QualificationSourcePreview({item,references=[],onBack,em
   {unit && <QualificationUnitNavigation units={source.units} selectedIndex={unitIndex} onSelect={index => jumpTo(index)}/>}
   {!embedded&&<QualificationInternalNav active={section} onChange={changeSection}
     ariaLabel="Unit sections" unitContext readOnly={isReference}/>}
-  {unit && !outcome && <header className="qf-unit-heading">
-    <div><span className="qf-overline">Unit {String(unitIndex + 1).padStart(2,'0')} · {unit.code}</span>
-      <h2>{unit.title}</h2></div>
-  </header>}
-  {!needsUploadRoute && !embedded && <div className="qsrc-source-note">
-    <Info size={16} aria-hidden="true"/>
-    <p>{isReference ? 'Syllabus preview. This edition is pending centre approval.' : 'Syllabus preview.'}</p>
-  </div>}
+  {section==='course' && !embedded && isReference && <p className="qsrc-compact-reference-note"><Info size={14}/> Source reference · Enrolment and assessment remain separate.</p>}
   {(embedded||section==='course')&&!unit&&<div className="qsrc-empty"><Info size={19}/><p>No units are available for this edition.</p></div>}
   {(embedded||section==='course')&&outcome&&<QualificationOutcome units={source.units}
     unitIndex={unitIndex} outcomeIndex={outcomeIndex} onJump={jumpTo} onBack={()=>setOutcomeIndex(null)}
@@ -93,7 +89,10 @@ export default function QualificationSourcePreview({item,references=[],onBack,em
     <div className="qsrc-structure">
     <div className="qsrc-unit-content" key={unit.code}>
       <header className="qsrc-unit-heading">
-        <div className="qsrc-unit-meta"><span>{unit.outcomes.length} Learning Outcomes</span><span>{unit.outcomes.reduce((n,o)=>n+o.criteria.length,0)} Assessment Criteria</span></div>
+        <div className="qsrc-compact-unit-title"><div><span className="qf-overline">Unit {String(unitIndex+1).padStart(2,'0')} · {unit.code}</span>
+          <h2>{unit.title}</h2></div>
+          <div className="qsrc-unit-meta"><span>{unit.outcomes.length} Learning Outcomes</span><span>{unit.outcomes.reduce((n,o)=>n+o.criteria.length,0)} Assessment Criteria</span></div>
+        </div>
         <div className="qsrc-unit-paging" aria-label="Navigate qualification units">
           <button type="button" disabled={unitIndex===0} onClick={()=>setUnitIndex(Math.max(0,unitIndex-1))}>
             <ArrowLeft size={16}/> Previous Unit</button>
@@ -130,10 +129,10 @@ export default function QualificationSourcePreview({item,references=[],onBack,em
       </section> : <div className="qsrc-awaiting"><Info size={22}/><div><h3>Current specification detail pending centre verification</h3>
         <p>The new 2026 Unit name and code are verified. Open the November 2026 source PDF for its complete current outcomes and criteria. Older standards are intentionally not shown as though they apply to this new Unit.</p>
         {source.source_url&&<a href={source.source_url} target="_blank" rel="noopener noreferrer">View official 2026 specification <ExternalLink size={15}/></a>}</div></div>}
-      {!embedded && <section className="qsrc-information-card">
-        <h3>Evidence Folder</h3>
-        <button type="button" className="qsrc-source-link" onClick={() => changeSection('evidence')}>View Unit evidence materials <ArrowRight size={16}/></button>
-      </section>}
+      {!embedded && <div className="qsrc-quick-actions">
+        <button type="button" onClick={() => changeSection('evidence')}><FolderOpen size={16}/> Evidence materials <ArrowRight size={15}/></button>
+        <button type="button" onClick={() => changeSection('contact')}><MessageSquare size={16}/> Contact Diary <ArrowRight size={15}/></button>
+      </div>}
       {!!unit.outcomes.length && <section className="qsrc-outcomes">
         <div className="qsrc-section-heading"><ShieldCheck size={19}/><h3>Gap Analysis · Assessment Criteria</h3></div>
         <div className="qf-live-gaps">{unit.outcomes.map(entry => <details key={entry.code}>
@@ -141,10 +140,7 @@ export default function QualificationSourcePreview({item,references=[],onBack,em
           <ul>{entry.criteria.map(criterion => <li key={criterion.code}>{criterion.code} · {criterion.title}</li>)}</ul>
         </details>)}</div>
       </section>}
-      {!embedded && <section className="qsrc-information-card">
-        <h3>Contact</h3>
-        <button type="button" className="qsrc-source-link" onClick={() => changeSection('contact')}>View the Contact Diary <ArrowRight size={16}/></button>
-      </section>}
+      
       {unit.indicativeTopics?.length>0 && <section className="qsrc-materials">
         <div className="qsrc-section-heading"><BookOpen size={19}/><h3>Indicative study topics from source specification</h3></div>
         <ul className="qsrc-study-topics">{unit.indicativeTopics.map((topic,index)=><li key={unit.code+':'+index}>{topic}</li>)}</ul>
@@ -161,27 +157,11 @@ export default function QualificationSourcePreview({item,references=[],onBack,em
       </section></aside>
     </div>
   </section>}
-  {!embedded&&section==='overview'&&<>
-  <div className="qsrc-overview">
-    <div><span className="qsrc-icon"><BookOpen size={19}/></span><strong>{source.units.length}</strong><small>Official Units</small></div>
-    <div><span className="qsrc-icon"><LibraryBig size={19}/></span><strong>{fullCount||'—'}</strong><small>Imported Learning Outcomes</small></div>
-    <div><span className="qsrc-icon"><CheckCircle2 size={19}/></span><strong>{acCount||'—'}</strong><small>Imported Assessment Criteria</small></div>
-  </div>
-  <div className="qsrc-section-layout">
-    <section className="qsrc-information-card">
-      <span className="qf-overline">QUALIFICATION OVERVIEW</span>
-      <h2>Professional qualification structure</h2>
-      <p>This is the awarding-body syllabus selected above. The actual Unit names, Learning Outcomes,
-        Assessment Criteria and original specification are available for inspection. This is a
-        reference view, not a record of learner registration or assessment.</p>
-      <div className="qsrc-overview-unit-list">
-        {source.units.map((u,index)=><button type="button" key={u.code} onClick={()=>{setUnitIndex(index);setSection('course');}}>
-          <span>{String(index+1).padStart(2,'0')}</span><strong>{u.title}</strong><ArrowRight size={17}/>
-        </button>)}
-      </div>
-    </section>
-    <aside className="qsrc-aside"><SourceDocument source={source}/></aside>
-  </div></>}
+  {!embedded&&section==='overview'&&<QualificationSourceDashboard source={source}
+    onUnit={index=>{jumpTo(index);setSection('course');}}
+    onEvidence={()=>changeSection('evidence')}
+    onLibrary={()=>changeSection('library')}
+    onRegistration={()=>changeSection('registration')}/>}
   {needsUploadRoute && unit && <div className="qsrc-evidence-page qf-evidence-experience">
     <section className="qsrc-evidence-access" aria-label="Evidence upload access">
       <span className="qsrc-evidence-access-icon"><Upload size={21} aria-hidden="true"/></span>
@@ -190,18 +170,15 @@ export default function QualificationSourcePreview({item,references=[],onBack,em
         {enrolled.length > 0 ? <p>Open your enrolled portfolio for this edition.</p> :
           <p>{isReference ? 'This edition is pending centre approval. Uploads for this qualification require an enrolment after publication.' :
             'Your account has no learner enrolment for this edition.'}</p>}
-        {!enrolled.length && practicePortfolio && <p>Use your private test portfolio to practise uploading a file.</p>}
+
       </div>
       <div className="qsrc-evidence-access-actions">
         {enrolled.map(portfolio => <button key={portfolio.id} type="button" className="qf-button qf-primary"
           onClick={() => onOpenEvidence(portfolio.id, unit.code)}>
           <Upload size={16}/> {enrolled.length === 1 ? 'Upload evidence' : portfolio.title}
         </button>)}
-        {!enrolled.length && practicePortfolio && <button type="button" className="qf-button qf-primary"
-          onClick={() => onOpenEvidence(practicePortfolio.id)}>
-          <Upload size={16}/> Open test upload
-        </button>}
-        {!enrolled.length && !practicePortfolio && <button type="button" className="qf-button qf-outline" onClick={onBack}>
+
+        {!enrolled.length && <button type="button" className="qf-button qf-outline" onClick={onBack}>
           My qualifications <ArrowRight size={16}/>
         </button>}
       </div>
