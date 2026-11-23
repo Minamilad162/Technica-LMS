@@ -66,3 +66,18 @@ The walkthrough inspected visible navigation, filters and wizard entry pages. No
 ### Follow-up implementation (23 November 2026)
 
 Centre Admin can now publish News and Events and schedule private Appointments or Reviews. Learner Home consumes these records. The Unit view opens a pre-filtered Evidence Folder with reference search, type and Unit filters, pagination, and a Duplication Wizard for learner-owned written evidence or files. Copies receive fresh identifiers and keep criteria mappings separate. The Contact Diary can be filtered and printed, and Metrics can print the training log. These changes preserve the existing assessment, registration and certificate rules. The new feed needs its forward migration, centre-created data and live rollout verification.
+
+### Second walkthrough and Evidence changes
+
+| Reference area | Inspected | Remaining difference or live verification limit |
+| --- | --- | --- |
+| Homepage | Tasks, Messages, Appointments, Resources, LA App, News, Events. Tasks exposes review, contact and overdue tables. Resources on the inspected account contained 133 links. | Technica uses its scoped Contact Diary and centre resources, and provides mobile browser access. Destination-by-destination validation of the 133 third-party resource links was outside this walkthrough. |
+| My Programme | Course tile, Induction/CPD and numbered Unit links, Unit activity, Outcome jump, Gap Analysis, Evidence and Contact, plus the Course/Registration/Contact/Metrics tabs. | Technica has a source preview and a separate enrolled path. Production returned one published version and zero enrolments, so no learner transactions were made there. |
+| Evidence | Register columns, record details, page controls, filter panel, Showcase and wizard entry points. The reference filter includes Evidence Type, Uploaded By, Order By and Tagged As. Reference records show review, lock and revision actions. | Technica now has the register, supported filters including Showcase and Unit, and separate wizard entry points. Uploaded By, dedicated evidence review/lock tags and per-file revision controls need separate business rules. Technica retains Outcome-level assessment revisions. |
+| Registration, Contact and Metrics | Reference form entry, programme diary filter/print, training metrics table/print. | Private registration, contact and training on the Technica enrolled path need a named test enrolment for browser verification. |
+
+Names, reference evidence, support destinations and provider resources remain on the reference platform. Changes in this release use existing Technica data and permissions.
+
+### Reference resource inventory and sandbox activation
+
+All seven reference resource groups were opened. They listed 20, 20, 14, 14, 16, 25 and 17 resource destinations respectively, for 126 resources plus seven folder controls. Resource actions are application links. Opening the first handbook document led to an Edge client block on the asset viewer. The resource inventory does not certify the destination contents. Technica's published private sandbox has zero attached programme resource rows, so the reference materials have no enrolled Technica counterparts to open there.

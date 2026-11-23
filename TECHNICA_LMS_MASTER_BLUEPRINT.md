@@ -2375,3 +2375,20 @@ Verification: Vite build and isolated Supabase bundle build passed. Qualificatio
 Publication uses the current LMS admin role. Reads are limited to active participants of a published enrolment, with edition-scoped announcements and enrolment-scoped appointments. No production records were seeded. Install the forward migration before enabling the feed on a deployment. Reverting the frontend leaves records intact. The role-scoped functions and table can remain in place after a frontend rollback.
 
 Verification: disposable PostgreSQL with the actual P1 and Qualification migrations verified permissions, private meeting isolation, idempotent publication, resolved items and the existing assessment lifecycle. React DOM interaction tests with mocked RPC and Storage exercised Home data, Unit filtering and pagination, written and file duplication, and scoped print selection. Real browser print preview, real Supabase Storage and production deployment require verification.
+
+## P100 — Evidence Folder and reference walkthrough (2026-11-23)
+
+| Surface | Verified state |
+| --- | --- |
+| Learner and reviewer Evidence | Reference, title, type and uploaded date display in a sortable register, with authorised Outcome links, Showcase selection and record actions. Filters cover reference/text, type, format, Unit and the current Showcase selection. Previous/Next and a page selector navigate filtered results. |
+| Evidence actions | Evidence Wizard opens Upload or Write. Duplication can start from the toolbar or a record. The row mapping action opens the correct record in the existing cross-Unit mapper, including repeated selection. Existing enrolment permissions, evidence RPCs, private Storage and immutable submitted snapshots remain in force. |
+| Syllabus preview | The Evidence tab uses the same numbered Unit selector as Course. It displays working forms and a direct path to selected Unit criteria. Evidence upload and mapping require an enrolment. |
+| Production | P99 migration `qualification_programme_updates` was applied under `20261123095056`. The subsequent read-only production check found one published version and zero enrolments. The live browser consequently verified the syllabus preview only. |
+
+The second reference walkthrough inventoried the seven Home tabs, Course tree and Unit actions, and the Programme Evidence, Registration, Contact and Metrics tabs. The reference has separate direct messages, provider resource links and its own mobile app. Evidence also has uploader and review-tag filters, an individual evidence review request, lock and revision-history controls. Technica currently uses its assignment-scoped Contact Diary, centre-published resources, web access and Outcome-level review/revisions. The walkthrough did not validate all resource destinations or submit external forms. Keep these workflow differences visible until Centre Admin and learner test assignments exist.
+
+Bug fixed: the enrolled Evidence tab buried primary actions beside cards and did not open the mapping workflow with the chosen row. Existing qualification regressions and production build passed. Mocked React DOM interactions covered record detail, format filtering, repeated selection of the target mapper, duplication defaults, upload/write mode selection and linked Outcome navigation. Production learner upload and authenticated role end-to-end verification remain pending. This change is frontend-only and reversible by reverting the commit.
+
+### P100 private sandbox verification access
+
+The authenticated catalogue displays the exact private sandbox catalogue key only when the server returns an assigned learner portfolio. The sandbox appears under a separate Private test portfolio card, outside the official offering. The same scoped APIs govern reads and uploads. Connect Study Library links only when a matching source edition exists. The existing production QA fixture was assigned to the requested tester as learner only, with no assessor, verifier or certificate entitlement. No source qualification was published.

@@ -66,7 +66,7 @@ for(const symbol of [
  assert.match(liveStudy,new RegExp('function '+symbol+'\\b'),'Missing live material component '+symbol);
 }
 assert.match(live,/\['library','Study Library'\]/);
-assert.match(live,/onLibrary=\{cover \? \(\) => changeView\('library'\)/);
+assert.match(live,/onLibrary=\{libraryAvailable \? \(\) => changeView\('library'\)/);
 assert.match(liveStudy,/getUnitSourceMaterial\(unit\.code\)/,'Live course must map only by immutable official unit code');
 assert.match(liveStudy,/getUnitSourceMaterial\(unit\?\.code\)/,'Outcome source mapping is missing');
 assert.match(liveStudy,/<UnitMaterialPanel key=\{unit\.code\} unitCode=\{unit\.code\}\/?>/);

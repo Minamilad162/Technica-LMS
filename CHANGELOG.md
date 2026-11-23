@@ -1,3 +1,13 @@
+## 2026-11-23 — Private qualification test access
+
+- Show the assigned private test portfolio in its own catalogue section. Offer Study Library only when a matching source edition is available.
+
+## 2026-11-23 — Evidence Folder reference audit
+
+- Added a sortable evidence register with row details, linked Outcomes, Showcase, pagination and direct upload, duplication and mapping entry points.
+- Used the numbered Unit strip in Evidence syllabus preview and linked to each Unit's criteria.
+- Documented reference differences and the production enrolment gap. No database migration for this change.
+
 ## 2026-11-23 — Qualification appointments and portfolio tools
 
 - Added centre-managed News, Events, Appointments and Reviews for published Qualifications.

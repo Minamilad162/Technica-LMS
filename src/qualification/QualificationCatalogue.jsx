@@ -12,10 +12,13 @@ export function qualificationFor(title = '') {
   return null;
 }
 
+export const privateSandboxKey = 'technica-qf-private-sandbox';
+
 const roleLabels = {learner: 'My Qualifications', assessor: 'Assessment queue', verifier: 'Verification queue'};
 
 export function ProgrammeListPremium({rows, references = [], activeRole, onRoleChange, onOpen, onPreview}) {
-  const activeRows = rows.filter(row => !/test programme|sandbox|demo/i.test(row.title || ''));
+  const testPortfolios = rows.filter(row => row.catalogKey === privateSandboxKey && row.role === 'learner');
+  const activeRows = rows.filter(row => row.catalogKey !== privateSandboxKey && !/test programme|sandbox|demo/i.test(row.title || ''));
   const roles = ['learner', ...['assessor', 'verifier'].filter(key => activeRows.some(row => row.role === key))];
   const role = roles.includes(activeRole) ? activeRole : 'learner';
   const assigned = activeRows.filter(row => row.role === role);
@@ -79,6 +82,15 @@ export function ProgrammeListPremium({rows, references = [], activeRole, onRoleC
           </article>;
         })}
       </div>
+      {testPortfolios.length > 0 && <section className="qf-card">
+        <div className="qf-card-header"><h3>Private test portfolio</h3></div>
+        <p>For testing learner workflows with sample evidence.</p>
+        <div className="qf-live-list">
+          {testPortfolios.map(row => <button type="button" key={row.id} onClick={() => onOpen(row.id)}>
+            <BookOpen size={19}/><span><strong>{row.title}</strong><small>Open test portfolio</small></span><ArrowRight size={18}/>
+          </button>)}
+        </div>
+      </section>}
       {unmatched.length > 0 && <section className="qf-card">
         <div className="qf-card-header"><h3>Other assigned programmes</h3></div>
         <div className="qf-live-list">

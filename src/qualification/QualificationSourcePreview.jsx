@@ -150,37 +150,18 @@ export default function QualificationSourcePreview({item,references=[],onBack,em
   </div>}
   {!embedded&&section==='evidence'&&unit&&<div className="qsrc-section-layout">
     <section className="qsrc-information-card">
-      <span className="qf-overline">EVIDENCE PREPARATION</span>
-      <h2>Unit evidence and working forms</h2>
-      <p>Explore blank Technica working forms generated from the actual criteria of a chosen Unit.
-        They do not represent submitted evidence, a learner portfolio, or an approved awarding-body assignment.</p>
-      <div className="qsrc-evidence-bank-readonly">
-        <div className="qsrc-evidence-bank-header"><FolderOpen size={22}/>
-          <div><strong>Evidence Bank · Upload &amp; Multi-Unit Mapping</strong>
-            <small>Available with an assigned, active qualification portfolio</small></div></div>
-        <div className="qsrc-evidence-bank-steps">
-          <span>01 · Upload a document once</span><span>02 · Link it to multiple Units / LOs / ACs</span>
-          <span>03 · Save mapping, then submit each Competence Claim</span></div>
-        <div className="qsrc-evidence-bank-actions">
-          <button type="button" disabled title="Requires actual centre-approved learner enrolment"><LockKeyhole size={15}/> Upload evidence</button>
-          <button type="button" disabled title="Requires actual centre-approved learner enrolment"><LockKeyhole size={15}/> Map across Units</button>
-          <p>This is an awarding-body syllabus preview, not your enrolled portfolio. The upload tools activate inside the Evidence tab once the centre enrols you in a published qualification.</p>
-        </div>
-      </div>
-      <label className="qsrc-unit-select">Choose the Unit
-        <select value={unitIndex} onChange={e=>setUnitIndex(Number(e.target.value))}>
-          {source.units.map((u,index)=><option key={u.code} value={index}>{String(index+1).padStart(2,'0')} · {u.title}</option>)}
-        </select>
-      </label>
+      <h2>Evidence working forms</h2>
+      <QualificationUnitNavigation units={source.units} selectedIndex={unitIndex} onSelect={setUnitIndex}/>
       <div className="qsrc-evidence-heading"><FileText size={17}/>
-        <span>{unit.code} · {unit.outcomes.reduce((n,o)=>n+o.criteria.length,0)} source criteria</span></div>
+        <span>{unit.code} · {unit.title} · {unit.outcomes.reduce((n,o)=>n+o.criteria.length,0)} source criteria</span></div>
       {unit.outcomes.length>0?<QualificationEvidenceTemplates key={unit.code} unit={unit} compact/>:
         <div className="qsrc-empty"><Info size={19}/><p>Assessment criteria for this edition have not been imported. No forms can be generated.</p></div>}
     </section>
     <aside className="qsrc-aside"><div className="qsrc-source-card">
-      <div className="qsrc-source-card-heading"><LockKeyhole size={19}/><h3>Not a learner evidence folder</h3></div>
-      <p>Actual evidence uploads, cross-references, submissions, revisions and Assessor decisions appear
-        here only after centre publication and enrolment. Nothing is created in this preview.</p>
+      <div className="qsrc-source-card-heading"><FolderOpen size={19}/><h3>Evidence Bank · Upload &amp; Multi-Unit Mapping</h3></div>
+      <p>Requires actual centre-approved learner enrolment. From your enrolled portfolio, open Evidence
+        to upload a file, write evidence, or link a record across Units.</p>
+      <button type="button" className="qsrc-source-link" onClick={()=>setSection('course')}>View Unit criteria <ArrowRight size={16}/></button>
     </div></aside>
   </div>}
   {!embedded&&section==='registration'&&<div className="qsrc-section-layout">

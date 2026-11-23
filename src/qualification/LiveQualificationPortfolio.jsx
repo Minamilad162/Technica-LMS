@@ -1,8 +1,8 @@
 import React, {useEffect, useRef, useState} from 'react';
-import {ArrowLeft, ArrowRight, BookOpen, CheckCircle2, ClipboardCheck, Download, FileText, FolderOpen, GraduationCap, Layers3, LibraryBig, MessageSquare, Printer, ShieldCheck, BarChart3} from 'lucide-react';
+import {ArrowLeft, ArrowRight, BookOpen, CheckCircle2, ClipboardCheck, Download, FileText, FolderOpen, GraduationCap, Layers3, LibraryBig, Link2, MessageSquare, Printer, ShieldCheck, BarChart3} from 'lucide-react';
 import PremiumLoading from '../components/PremiumLoading.jsx';
 import {QUALIFICATIONS} from './qualificationData.js';
-import {ProgrammeListPremium, qualificationFor} from './QualificationCatalogue.jsx';
+import {ProgrammeListPremium, privateSandboxKey, qualificationFor} from './QualificationCatalogue.jsx';
 import QualificationSourcePreview from './QualificationSourcePreview.jsx';
 import QualificationInternalNav from './QualificationInternalNav.jsx';
 import QualificationUnitNavigation from './QualificationUnitNavigation.jsx';
@@ -220,9 +220,13 @@ function EvidenceItem({item, onDownload, uses = []}) {
 function EvidenceFolder({portfolio, initialUnitId, onDownload, onShowcase, busy, onSave, onDuplicate, onMap, onOpenOutcome, onBack, backLabel}) {
   const [mode, setMode] = useState('');
   const [showcase, setShowcase] = useState([]);
+  const [detailId, setDetailId] = useState('');
+  const [mappingTarget, setMappingTarget] = useState(null);
   const [search, setSearch] = useState('');
   const [type, setType] = useState('');
   const [order, setOrder] = useState('newest');
+  const [medium, setMedium] = useState('');
+  const [showcaseOnly, setShowcaseOnly] = useState(false);
   const [unitFilter, setUnitFilter] = useState(initialUnitId);
   const [page, setPage] = useState(0);
   const [pageSize, setPageSize] = useState(25);
@@ -236,6 +240,18 @@ function EvidenceFolder({portfolio, initialUnitId, onDownload, onShowcase, busy,
   const start = value => {
     setMode(value); setBody(''); setTitle(''); setDescription(''); setFile(null); setDuplicateId(''); reservation.current = null;
   };
+  const openWizard = (nextMode, source) => {
+    start(nextMode);
+    if (source) {
+      setDuplicateId(source.id);
+      setTitle(('Copy of ' + source.title).slice(0, 160));
+    }
+    requestAnimationFrame(() => document.getElementById('qualification-evidence-wizard-heading')?.focus());
+  };
+  const openMapper = item => {
+    if (item) setMappingTarget({id:item.id});
+    document.getElementById('qualification-multi-unit-mapper')?.scrollIntoView({block:'start'});
+  };
   const duplicate = portfolio.evidence.find(item => item.id === duplicateId);
   const save = () => mode === 'duplicate'
     ? onDuplicate(duplicate, title, reservation, () => start(''))
@@ -246,40 +262,52 @@ function EvidenceFolder({portfolio, initialUnitId, onDownload, onShowcase, busy,
       const ids = new Set([outcome.claim?.mapping, ...outcome.submissions.map(submission => submission.snapshot?.mapping)]
         .flatMap(mapping => Object.values(mapping || {}).flat()));
       for (const id of ids) {
-        if (!links.has(id)) links.set(id, {unitIds: new Set(), labels: []});
+        if (!links.has(id)) links.set(id, {unitIds: new Set(), outcomes: []});
         links.get(id).unitIds.add(unit.id);
-        links.get(id).labels.push(unit.code + ' / ' + outcome.code);
+        links.get(id).outcomes.push({id:outcome.id, label:unit.code + ' / ' + outcome.code});
       }
     }
   }
   const selection = portfolio.evidence.filter(item => showcase.includes(item.id));
   const term = search.toLowerCase().trim();
   const visibleEvidence = portfolio.evidence.filter(item =>
+    (!showcaseOnly || showcase.includes(item.id)) &&
     (!unitFilter || (unitFilter === 'unmapped' ? !links.has(item.id) : links.get(item.id)?.unitIds.has(unitFilter))) &&
-    (!type || item.kind === type) && (!term || [item.id, item.title, item.filename, item.description, item.kind]
+    (!type || item.kind === type) && (!medium || (item.filename ? 'file' : 'written') === medium) && (!term || [item.id, item.title, item.filename, item.description, item.kind]
       .some(value => String(value || '').toLowerCase().includes(term)))
   ).sort((a,b) => order === 'title' ? a.title.localeCompare(b.title)
+    : order === 'title-desc' ? b.title.localeCompare(a.title)
+    : order === 'reference' ? a.id.localeCompare(b.id)
+    : order === 'reference-desc' ? b.id.localeCompare(a.id)
     : order === 'oldest' ? Date.parse(a.created_at) - Date.parse(b.created_at)
     : Date.parse(b.created_at) - Date.parse(a.created_at));
   const lastPage = Math.max(0, Math.ceil(visibleEvidence.length / pageSize) - 1);
   const evidencePage = Math.min(page, lastPage);
   const pageStart = evidencePage * pageSize;
   const applyFilter = setter => event => { setter(event.target.value); setPage(0); };
-  return <div className="qlearn-evidence-stack"><EvidencePreparationTips/>
-    {portfolio.canEdit&&<div className="qmu-entry">
-      <div><span className="qf-overline">YOUR QUALIFICATION · EVIDENCE BANK</span>
-        <strong>Upload once. Map to several Units.</strong>
-        <p>Keep each genuine evidence file in one secure folder, then connect it to as many relevant Criteria as needed.</p></div>
-      <div className="qmu-entry-actions">
-        <button type="button" disabled={busy} onClick={()=>{start('upload');
-          requestAnimationFrame(()=>document.getElementById('qualification-evidence-upload')?.scrollIntoView({behavior:'smooth',block:'center'}));}}>
-          <FolderOpen size={16}/> Upload evidence</button>
-        <button type="button" disabled={busy} onClick={()=>document.getElementById('qualification-multi-unit-mapper')?.scrollIntoView({behavior:'smooth',block:'start'})}>
-          <Layers3 size={16}/> Map across Units</button>
-      </div>
-    </div>}
-    <div className="qf-live-grid">
+  const sortColumn = (label, ascending, descending) => {
+    const direction = order === ascending ? 'ascending' : order === descending ? 'descending' : undefined;
+    return <th scope="col" aria-sort={direction}>
+      <button type="button" className="qf-live-link" onClick={() => {
+        setOrder(direction === 'ascending' ? descending : ascending); setPage(0);
+      }}>{label}{direction && <span aria-hidden="true">{direction === 'ascending' ? ' ↑' : ' ↓'}</span>}</button>
+    </th>;
+  };
+  const toggleShowcase = (id, checked) => setShowcase(old => checked ? [...new Set([...old, id])] : old.filter(value => value !== id));
+  return <div className="qlearn-evidence-stack">
     <Panel title="Evidence Folder" action={onBack && <Action secondary disabled={busy} onClick={onBack}>{backLabel}</Action>}>
+      <div className="qf-live-actions">
+        {portfolio.canEdit && <>
+          <Action disabled={busy} onClick={() => openWizard('choose')}><FolderOpen size={16}/> Evidence Wizard</Action>
+          <Action secondary disabled={busy || !portfolio.evidence.length} onClick={() => openWizard('duplicate')}>Duplication Wizard</Action>
+          <Action secondary disabled={busy || !portfolio.evidence.length} onClick={() => openMapper()}><Layers3 size={16}/> Map across Units</Action>
+        </>}
+        <Action secondary disabled={busy || !selection.length} onClick={() => onShowcase(selection)}>
+          <Download size={15}/> Download Showcase ({selection.length})
+        </Action>
+      </div>
+      <details className="qf-evidence-filters" open={!!initialUnitId}>
+        <summary>Filter evidence</summary>
       <div className="qf-ref-evidence-toolbar qf-ref-evidence-filters">
         <label>Search evidence<input value={search} onChange={applyFilter(setSearch)}
           type="search" placeholder="Reference, title, filename or description"/></label>
@@ -287,26 +315,69 @@ function EvidenceFolder({portfolio, initialUnitId, onDownload, onShowcase, busy,
           <option value="">All types</option>
           {evidenceKinds.map(kind=><option key={kind} value={kind}>{kind}</option>)}
         </select></label>
+        <label>Format<select value={medium} onChange={applyFilter(setMedium)}>
+          <option value="">All formats</option><option value="file">File upload</option><option value="written">Written evidence</option>
+        </select></label>
         <label>Unit<select value={unitFilter} onChange={applyFilter(setUnitFilter)}>
           <option value="">All Units</option><option value="unmapped">Unmapped</option>
           {portfolio.units.map(unit => <option key={unit.id} value={unit.id}>{unit.code} · {unit.title}</option>)}
         </select></label>
         <label>Sort<select value={order} onChange={applyFilter(setOrder)}>
           <option value="newest">Newest first</option><option value="oldest">Oldest first</option>
-          <option value="title">Title A–Z</option>
+          <option value="title">Title A–Z</option><option value="title-desc">Title Z–A</option>
+          <option value="reference">Reference A–Z</option><option value="reference-desc">Reference Z–A</option>
         </select></label>
       </div>
-      <p className="qf-ref-evidence-count">Displaying {visibleEvidence.length} of {portfolio.evidence.length} evidence records</p>
-      {portfolio.evidence.length === 0 && <p>No evidence added yet.</p>}
-      {portfolio.evidence.length>0&&visibleEvidence.length===0&&<p>No evidence matches the filters.</p>}
-      <div className="qf-live-evidence-list">
-        {visibleEvidence.slice(pageStart, pageStart + pageSize).map(item => <div key={item.id}>
-          <span className="qf-ref-evidence-id">Evidence ref · {item.id.slice(0,8).toUpperCase()}</span>
-          <EvidenceItem item={item} onDownload={onDownload} uses={links.get(item.id)?.labels}/>
-          <label className="qf-live-showcase"><input type="checkbox" checked={showcase.includes(item.id)} disabled={busy}
-            onChange={e => setShowcase(old => e.target.checked ? [...old,item.id] : old.filter(id => id !== item.id))}
-            aria-label={'Include ' + item.title + ' in showcase'}/> Include in Showcase</label>
-        </div>)}
+      <label className="qf-live-showcase"><input type="checkbox" checked={showcaseOnly}
+        onChange={event => { setShowcaseOnly(event.target.checked); setPage(0); }}/> Showcase selection only</label>
+      </details>
+      <p className="qf-ref-evidence-count" role="status">Displaying {visibleEvidence.length} of {portfolio.evidence.length} evidence records</p>
+      <div className="qf-evidence-table" role="region" aria-label="Evidence records" tabIndex={0}>
+        <table>
+          <thead><tr>
+            {sortColumn('Ref','reference','reference-desc')}
+            {sortColumn('Title','title','title-desc')}
+            <th scope="col">Type</th>
+            {sortColumn('Uploaded','oldest','newest')}
+            <th scope="col">Used in</th><th scope="col">Showcase</th><th scope="col">Actions</th>
+          </tr></thead>
+          <tbody>
+            {!visibleEvidence.length && <tr><td colSpan={7}>{portfolio.evidence.length ? 'No evidence matches the filters.' : 'No evidence has been added yet.'}</td></tr>}
+            {visibleEvidence.slice(pageStart, pageStart + pageSize).map(item => {
+              const expanded = detailId === item.id;
+              return <React.Fragment key={item.id}>
+                <tr>
+                  <td><span className="qf-ref-evidence-id">{item.id.slice(0,8).toUpperCase()}</span></td>
+                  <th scope="row"><button type="button" className="qf-live-link" dir="auto" aria-expanded={expanded}
+                    aria-controls={'evidence-details-' + item.id}
+                    onClick={() => setDetailId(expanded ? '' : item.id)}>{item.title}</button></th>
+                  <td>{item.kind}<small>{item.filename ? 'File upload' : 'Written evidence'}</small></td>
+                  <td>{formatDate(item.created_at)}</td>
+                  <td>{links.has(item.id) ? <ul className="qf-evidence-outcomes">{links.get(item.id).outcomes.map(outcome =>
+                    <li key={outcome.id}><button type="button" className="qf-live-link" disabled={busy}
+                      onClick={() => onOpenOutcome(outcome.id)}>{outcome.label}</button></li>)}</ul> : 'Unmapped'}</td>
+                  <td><input type="checkbox" checked={showcase.includes(item.id)} disabled={busy}
+                    aria-label={'Include ' + item.title + ' in Showcase'}
+                    onChange={event => toggleShowcase(item.id, event.target.checked)}/></td>
+                  <td><div className="qf-evidence-row-actions">
+                    {item.filename && <Action secondary disabled={busy} aria-label={'Download ' + item.title} onClick={() => onDownload(item)}><Download size={15}/></Action>}
+                    {portfolio.canEdit && <>
+                      <Action secondary disabled={busy} aria-label={'Map ' + item.title} onClick={() => openMapper(item)}><Link2 size={15}/></Action>
+                      <Action secondary disabled={busy} aria-label={'Duplicate ' + item.title} onClick={() => openWizard('duplicate', item)}>Duplicate</Action>
+                    </>}
+                  </div></td>
+                </tr>
+                <tr id={'evidence-details-' + item.id} hidden={!expanded}>
+                  <td colSpan={7}>{expanded && <div className="qf-evidence-details">
+                    {item.description && <p dir="auto">{item.description}</p>}
+                    {item.body && <p className="qf-live-copy" dir="auto">{item.body}</p>}
+                    {item.filename && <span dir="auto">{item.filename}</span>}
+                  </div>}</td>
+                </tr>
+              </React.Fragment>;
+            })}
+          </tbody>
+        </table>
       </div>
       {visibleEvidence.length > 0 && <div className="qf-live-actions">
         <label className="qf-field">Records per page<select value={pageSize}
@@ -314,20 +385,21 @@ function EvidenceFolder({portfolio, initialUnitId, onDownload, onShowcase, busy,
           {[10, 25, 50].map(size => <option key={size}>{size}</option>)}
         </select></label>
         <Action secondary disabled={evidencePage === 0} onClick={() => setPage(evidencePage - 1)}>Previous</Action>
-        <span role="status">Page {evidencePage + 1} of {lastPage + 1}</span>
+        <label className="qf-field">Page<select value={evidencePage} onChange={event => setPage(Number(event.target.value))}>
+          {Array.from({length:lastPage+1},(_,index) => <option key={index} value={index}>{index+1} of {lastPage+1}</option>)}
+        </select></label>
         <Action secondary disabled={evidencePage === lastPage} onClick={() => setPage(evidencePage + 1)}>Next</Action>
       </div>}
-      {portfolio.evidence.length > 0 && <Action secondary disabled={busy || !selection.length} onClick={() => onShowcase(selection)}>
-        <Download size={15}/> Download Showcase ({selection.length})
-      </Action>}
     </Panel>
-    {portfolio.canEdit && <Panel title="Evidence Wizard">
-      <div className="qf-live-actions">
+    {portfolio.canEdit && mode && <section className="qf-card">
+      <div className="qf-card-header">
+        <h3 id="qualification-evidence-wizard-heading" tabIndex={-1}>{mode === 'duplicate' ? 'Duplication Wizard' : 'Evidence Wizard'}</h3>
+        <Action secondary disabled={busy} onClick={() => start('')}>Close</Action>
+      </div>
+      {mode !== 'duplicate' && <div className="qf-live-actions">
         <Action secondary disabled={busy || mode === 'upload'} onClick={() => start('upload')}>Upload a file</Action>
         <Action secondary disabled={busy || mode === 'write'} onClick={() => start('write')}>Write evidence</Action>
-        <Action secondary disabled={busy || mode === 'duplicate' || !portfolio.evidence.length}
-          onClick={() => start('duplicate')}>Duplication Wizard</Action>
-      </div>
+      </div>}
       {mode === 'duplicate' && <form className="qf-live-form" onSubmit={event => {event.preventDefault(); save();}}>
         <fieldset disabled={busy}>
           <label className="qf-field">Evidence to duplicate<select required value={duplicateId}
@@ -361,10 +433,10 @@ function EvidenceFolder({portfolio, initialUnitId, onDownload, onShowcase, busy,
           <button className="qf-button qf-primary" type="submit" disabled={!title.trim() || (mode === 'write' ? !body.trim() : !file)}>Save evidence</button>
         </fieldset>
       </form>}
-    </Panel>}
-  </div>
-  {portfolio.canEdit&&<QualificationMultiUnitEvidence portfolio={portfolio} busy={busy}
+    </section>}
+  {portfolio.canEdit&&<QualificationMultiUnitEvidence portfolio={portfolio} busy={busy} targetEvidence={mappingTarget}
     onSave={onMap} onOpenOutcome={onOpenOutcome}/>}
+  {portfolio.canEdit && <EvidencePreparationTips/>}
   </div>;
 }
 
@@ -742,17 +814,18 @@ function OpenPortfolio({db, portfolio, references, onRefresh, onBack}) {
     changeView('evidence'); setEvidenceFromOutcome(true);
   };
   const onDownload = item => run(() => downloadPortfolioEvidence(db,item));
+  const isSandbox = portfolio.catalogKey === privateSandboxKey;
+  const cover = isSandbox ? null : qualificationFor(portfolio.title);
+  const selectedReference = references.find(ref => ref.catalog_key === portfolio.catalogKey ||
+    (ref.title === portfolio.title && ref.version === portfolio.version));
+  const libraryAvailable = cover && selectedReference;
   const views = [
     ...(learner ? [['dashboard','Home']] : []),
     ['programme','Course'],['evidence','Evidence'],['registration','Registration'],['contact','Contact'],
     ['metrics','Metrics'],
     ...(!learner ? [['dashboard','Overview']] : []),
-    ...(qualificationFor(portfolio.title) ? [['library','Study Library']] : []),
+    ...(libraryAvailable ? [['library','Study Library']] : []),
   ];
-  const sectionIcons = {dashboard: Layers3, programme: BookOpen, evidence: FolderOpen, registration: GraduationCap, contact: MessageSquare, metrics: BarChart3, library: LibraryBig};
-  const cover = qualificationFor(portfolio.title);
-  const selectedReference = references.find(ref => ref.catalog_key === portfolio.catalogKey ||
-    (ref.title === portfolio.title && ref.version === portfolio.version));
   const outcomeUnit = portfolio.units.find(unit => unit.outcomes.some(item => item.id === outcomeId));
   return <div className="qf-live-stack" aria-busy={busy}>
     <button type="button" className="qf-plain-back" disabled={busy} onClick={onBack}><ArrowLeft size={16}/> Qualifications</button>
@@ -774,10 +847,10 @@ function OpenPortfolio({db, portfolio, references, onRefresh, onBack}) {
       onChange={changeView} disabled={busy} ariaLabel="Programme sections"/>
     {error && <p className="qf-live-error" role="alert">{error}</p>}
     {notice && <p className="qf-live-notice" role="status">{notice}</p>}
-    {view === 'dashboard' && <PortfolioOverview db={db} portfolio={portfolio} progress={progress} onOutcome={openOutcome} onView={changeView} qualification={cover}/>}
+    {view === 'dashboard' && <PortfolioOverview db={db} portfolio={portfolio} progress={progress} onOutcome={openOutcome} onView={changeView} qualification={libraryAvailable ? cover : null}/>}
     {view === 'programme' && <UnitProgramme db={db} portfolio={portfolio} unitIndex={unitIndex} setUnitIndex={setUnitIndex} onOutcome={openOutcome}
       onEvidence={id => { changeView('evidence'); setEvidenceUnit(id); }} onContact={() => changeView('contact')}
-      onLibrary={cover ? () => changeView('library') : null}/>}
+      onLibrary={libraryAvailable ? () => changeView('library') : null}/>}
     {view === 'evidence' && <EvidenceFolder key={evidenceUnit} portfolio={visiblePortfolio} initialUnitId={evidenceUnit} busy={busy} onSave={saveEvidence} onDuplicate={duplicateEvidence}
       onMap={saveMultiUnitMapping} onOpenOutcome={openOutcome}
       onDownload={onDownload} onShowcase={items => run(() => downloadEvidenceShowcase(db,items))}
@@ -795,7 +868,7 @@ function OpenPortfolio({db, portfolio, references, onRefresh, onBack}) {
       <div className="qf-live-actions"><Action secondary disabled={busy} onClick={() => changeView('programme')}><ArrowLeft size={16}/> Back to unit</Action><Status outcome={outcome}/></div>
       <h2>{outcome.code} · {outcome.title}</h2>
       <OutcomeLearningSupport unit={outcomeUnit} outcome={outcome} learner={learner}
-        onEvidence={openEvidence} onLibrary={cover ? () => changeView('library') : null}/>
+        onEvidence={openEvidence} onLibrary={libraryAvailable ? () => changeView('library') : null}/>
       <div className="qf-live-grid">
         <Panel title="Assessment Criteria"><ol className="qf-live-criteria">
           {outcome.criteria.map(criterion => <li key={criterion.id}><strong>{criterion.code}</strong> {criterion.title}</li>)}
@@ -862,7 +935,7 @@ export default function LiveQualificationPortfolio({db}) {
       ]);
       if (current === request.current) {
         const byUnit=new Map((briefs||[]).map(item=>[item.unitId,item]));
-        setPortfolio({...data,canRecordCertificate:data.canRecordCertificate||certAuthorized===true,
+        setPortfolio({...data,catalogKey:data.catalogKey||rows?.find(row=>row.id===id)?.catalogKey,canRecordCertificate:data.canRecordCertificate||certAuthorized===true,
           units:data.units.map(unit=>({...unit,centreBrief:byUnit.get(unit.id)||null}))});
         setPreviewId('');setAdminView(false);
       }
@@ -880,7 +953,7 @@ export default function LiveQualificationPortfolio({db}) {
     ]);
     if (current === request.current) {
       const byUnit=new Map((portfolio?.units||[]).map(unit=>[unit.id,unit.centreBrief]));
-      setPortfolio({...data,canRecordCertificate:data.canRecordCertificate||certAuthorized===true,
+      setPortfolio({...data,catalogKey:data.catalogKey||portfolio.catalogKey,canRecordCertificate:data.canRecordCertificate||certAuthorized===true,
         units:data.units.map(unit=>({...unit,centreBrief:byUnit.get(unit.id)||null}))});
     }
   };
