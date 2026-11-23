@@ -254,3 +254,9 @@
  .qf-workspace .qf-card{padding:clamp(13px,3.5vw,18px)}
  .qf-workspace :is(input,select,textarea){max-width:100%;font-size:16px}
 }
+
+.qf-programme-unit-strip{margin-bottom:12px}
+.qf-programme-unit-strip .qf-number-tab{
+ width:auto;flex:0 0 auto;min-width:44px;min-height:44px;padding-inline:11px;cursor:pointer
+}
+.qf-programme-unit-strip .qf-number-tab:focus-visible{outline:2px solid #215993;outline-offset:2px}

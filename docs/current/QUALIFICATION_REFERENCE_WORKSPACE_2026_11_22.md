@@ -49,3 +49,16 @@ These were applied to the Technica production Supabase project `klmwiivitgbyjbyn
 
 ## Source integrity
 Never copy names, contact details, photos, dates or actual evidence from the reference screenshots into the production LMS. The ProQual qualification content already in Technica comes from its separately imported source specifications.
+
+
+## Browser walkthrough — 23 November 2026
+
+| Reference surface | Observed structure | Technica implementation |
+|---|---|---|
+| Homepage | Welcome followed by Tasks, Messages, Appointments, Resources and LA App. News and Events switch separately. Tasks lists awaiting review, recent diary records and overdue Outcomes. Messages shows sender, subject and received date. Appointments separates upcoming appointments, upcoming reviews and overdue reviews. Resources is a directory of folders and files. | Home inside the enrolled portfolio. Tasks reads current claim states and the contact diary. Messages uses the scoped programme diary. Resources groups approved files and links by Unit. Mobile access links to the browser evidence workflow. Scheduling and announcements need their own feeds. |
+| My Programme | Course cards include the compact Unit links Induction, CPD and 01–10 for the inspected programme. Unit pages show title and aim, previous/next and a Unit/Outcome jump, Activity, Evidence Folder, Gap Analysis, and Contact. | The horizontal selector follows the units and order of the actual Technica edition. Live Outcomes open through the existing claim route. Source and Admin previews remain read-only. Technica evidence and contact remain available from their programme tabs. |
+| Evidence | Reference, title, type and upload columns; filter and pagination. Evidence Wizard offers Upload or Create. The Duplication Wizard opens separately and requires a selection. | Existing file or written evidence, search/type/order, multi-Unit criteria mapping and Showcase. Duplicating an evidence record remains a separate workflow. |
+| Registration | Candidate profile and separate declaration. The reference includes sensitive identity fields. | Existing private learner form and declaration. Identity-document and sensitive-field collection are outside the current data model. |
+| Contact and Metrics | Contact diary with filter and print. Metrics records date, description, author, On the Job and Off the Job minutes. | Existing enrolment-scoped Contact and Metrics. Reference print and filter parity was not part of this implementation. |
+
+The walkthrough inspected visible navigation, filters and wizard entry pages. No evidence, registration, declaration or assessment was submitted or changed on the reference.

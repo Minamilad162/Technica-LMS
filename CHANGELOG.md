@@ -1,3 +1,9 @@
+## 2026-11-23 — Qualification Home and Programme navigation
+
+- Moved the official syllabus Unit picker to a horizontal, numbered strip shared with enrolled portfolios and the Centre Admin learner preview.
+- Added a learner Home with review tasks, Contact Diary activity, programme messages, and published resources by Unit. The learner Course can jump directly to an Outcome.
+- Recorded the learner reference walkthrough and the outstanding backend integrations. No database migration.
+
 ## 2026-11-22 — Qualifications e-portfolio
 
 - Added the authenticated learner programme, Outcome and criteria navigation, reusable written and uploaded evidence, draft mapping, claim submission, revision history, and Showcase ZIP.

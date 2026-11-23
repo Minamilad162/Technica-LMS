@@ -5,6 +5,7 @@ import {ArrowLeft,ArrowRight,BarChart3,BookOpen,CheckCircle2,ChevronDown,Externa
 import './qualificationSourcePreview.css';
 import QualificationEvidenceTemplates from './QualificationEvidenceTemplates.jsx';
 import QualificationInternalNav from './QualificationInternalNav.jsx';
+import QualificationUnitNavigation from './QualificationUnitNavigation.jsx';
 
 const keys={othm6:['technica-source-othm6-2026','technica-source-othm6-2023'],
   othm7:['technica-source-othm7-2023'],nvq6:['technica-source-nvq6-2018']};
@@ -45,7 +46,7 @@ export default function QualificationSourcePreview({item,references=[],onBack,em
  const [unitIndex,setUnitIndex]=useState(0);
  const [section,setSection]=useState('course');
  const source=sources.find(s=>s.catalog_key===sourceKey)||sources[0];
- const unit=source?.units?.[Math.min(unitIndex,Math.max(0,(source?.units?.length||1)-1))];
+ const unit=source?.units?.[unitIndex];
  if(!source)return <div className="qsrc-page"><button type="button" className="qf-plain-back" onClick={onBack}><ArrowLeft size={16}/> Qualifications</button>
    <div className="qsrc-empty"><Info size={22}/><div><h2>Qualification source not available</h2>
      <p>The centre has not imported this awarding-body version into the reference database. No demo content will be substituted.</p></div></div></div>;
@@ -84,15 +85,11 @@ export default function QualificationSourcePreview({item,references=[],onBack,em
       ? 'The November 2026 OTHM Level 6 specification has a new qualification number and revised Units, Learning Outcomes and Assessment Criteria. All official content shown here is source-backed; the former 2023 standards do not apply to this edition. Centre approval is required before live assessment.'
       : 'This syllabus uses real Unit titles, Learning Outcomes and Assessment Criteria imported from the supplied awarding-body specification. It is not a demo. Centre approval is still required before using this version for live grading.'}</p>
   </div></div>
-  {(embedded||section==='course')&&<div className="qsrc-structure">
-    <nav aria-label="Official qualification units" className="qsrc-unit-list">
-      {source.units.map((u,index)=><button key={u.code} type="button" className={unitIndex===index?'active':''}
-        aria-current={unitIndex===index?'true':undefined} onClick={()=>setUnitIndex(index)}>
-        <span className="qsrc-unit-index">{String(index+1).padStart(2,'0')}</span>
-        <span><strong>{u.title}</strong><small>{u.code}</small></span>
-      </button>)}
-    </nav>
-    <div className="qsrc-unit-content">
+  {(embedded||section==='course')&&!unit&&<div className="qsrc-empty"><Info size={19}/><p>No units are available for this edition.</p></div>}
+  {(embedded||section==='course')&&unit&&<section className="qsrc-course">
+    <QualificationUnitNavigation units={source.units} selectedIndex={unitIndex} onSelect={setUnitIndex}/>
+    <div className="qsrc-structure">
+    <div className="qsrc-unit-content" key={unit.code}>
       <header className="qsrc-unit-heading"><span className="qf-overline">UNIT {String(unitIndex+1).padStart(2,'0')} · {unit.code}</span><h2>{unit.title}</h2>
         <div className="qsrc-unit-meta"><span>{unit.outcomes.length} Learning Outcomes</span><span>{unit.outcomes.reduce((n,o)=>n+o.criteria.length,0)} Assessment Criteria</span></div>
         <div className="qsrc-unit-paging" aria-label="Navigate qualification units">
@@ -101,7 +98,7 @@ export default function QualificationSourcePreview({item,references=[],onBack,em
           <label>Jump to Unit
             <select value={unitIndex} onChange={e=>setUnitIndex(Number(e.target.value))}>
               {source.units.map((u,index)=><option key={u.code} value={index}>
-                {String(index+1).padStart(2,'0')} · {u.code}
+                {String(index+1).padStart(2,'0')} · {u.title}
               </option>)}
             </select>
           </label>
@@ -134,7 +131,8 @@ export default function QualificationSourcePreview({item,references=[],onBack,em
       <section className="qsrc-source-card"><div className="qsrc-source-card-heading"><LockKeyhole size={19}/><h3>Assessment access</h3></div>
         <p>This is a reference syllabus. Evidence submissions, assessor decisions and certificate recording require a centre-published version and a genuine learner enrolment.</p>
       </section></aside>
-  </div>}
+    </div>
+  </section>}
   {!embedded&&section==='overview'&&<div className="qsrc-section-layout">
     <section className="qsrc-information-card">
       <span className="qf-overline">QUALIFICATION OVERVIEW</span>
@@ -150,7 +148,7 @@ export default function QualificationSourcePreview({item,references=[],onBack,em
     </section>
     <aside className="qsrc-aside"><SourceDocument source={source}/></aside>
   </div>}
-  {!embedded&&section==='evidence'&&<div className="qsrc-section-layout">
+  {!embedded&&section==='evidence'&&unit&&<div className="qsrc-section-layout">
     <section className="qsrc-information-card">
       <span className="qf-overline">EVIDENCE PREPARATION</span>
       <h2>Unit evidence and working forms</h2>
@@ -226,7 +224,7 @@ export default function QualificationSourcePreview({item,references=[],onBack,em
       })}</div>
     </section><aside className="qsrc-aside"><SourceDocument source={source}/></aside>
   </div>}
-  {!embedded&&section==='library'&&<div className="qsrc-section-layout">
+  {!embedded&&section==='library'&&unit&&<div className="qsrc-section-layout">
     <section className="qsrc-information-card">
       <span className="qf-overline">STUDY LIBRARY</span><h2>Original source material</h2>
       <p>Read the imported Unit aims and indicative topics alongside the original awarding-body

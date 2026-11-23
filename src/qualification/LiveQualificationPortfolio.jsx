@@ -5,13 +5,14 @@ import {QUALIFICATIONS} from './qualificationData.js';
 import {ProgrammeListPremium, qualificationFor} from './QualificationCatalogue.jsx';
 import QualificationSourcePreview from './QualificationSourcePreview.jsx';
 import QualificationInternalNav from './QualificationInternalNav.jsx';
+import QualificationUnitNavigation from './QualificationUnitNavigation.jsx';
 import QualificationMultiUnitEvidence from './QualificationMultiUnitEvidence.jsx';
 import QualificationCentreAdmin from './QualificationCentreAdmin.jsx';
 import QualificationCentreBrief from './QualificationCentreBrief.jsx';
 import {PortfolioStatusRibbon,PortfolioMetrics} from './QualificationPortfolioReferenceUI.jsx';
 import QualificationCandidateRegistration from './QualificationCandidateRegistration.jsx';
 import QualificationEvidenceTemplates from './QualificationEvidenceTemplates.jsx';
-import {LiveUnitLearningHub, OutcomeLearningSupport, ProgrammeMaterialSnapshot, EvidencePreparationTips} from './QualificationLearningResources.jsx';
+import {CentreResourceLinks, LiveUnitLearningHub, OutcomeLearningSupport, ProgrammeMaterialSnapshot, EvidencePreparationTips} from './QualificationLearningResources.jsx';
 import {
   canReview, claimLabels, claimState, downloadEvidenceShowcase, downloadPortfolioEvidence, evidenceExtensions,
   evidenceKinds, evidencePayload, portfolioRpc, programmeProgress, uploadPortfolioEvidence,
@@ -44,40 +45,82 @@ function Status({outcome}) {
   return <span className={'qf-live-status qf-live-' + state}>{claimLabels[state]}</span>;
 }
 
-function PortfolioOverview({portfolio, progress, onOutcome, onView, qualification}) {
+function PortfolioOverview({db, portfolio, progress, onOutcome, onView, qualification}) {
   const learner = portfolio.role === 'learner';
   const pending = progress.outcomes.filter(outcome => learner
     ? ['submitted','awaiting_verification','verification_returned'].includes(claimState(outcome))
     : canReview(portfolio.role, claimState(outcome)));
   const changes = learner ? progress.outcomes.filter(outcome => claimState(outcome) === 'changes_requested') : [];
   const overdue = learner ? progress.outcomes.filter(o => o.overdue) : [];
-  const start = new Date(portfolio.startsOn).getTime();
-  const end = new Date(portfolio.targetOn).getTime();
-  const expected = portfolio.targetOn && end > start
-    ? Math.round(Math.min(1, Math.max(0, (Date.now() - start) / (end - start))) * 100) : null;
-  const percent = count => progress.total ? Math.round(count / progress.total * 100) : 0;
+  const [tab, setTab] = useState('tasks');
+  const [updates, setUpdates] = useState('news');
+  const {entries, error} = usePortfolioContactEntries(db, portfolio.id, 0, learner);
+  const homeTabs = [
+    ['tasks', 'Tasks'], ['messages', 'Messages'], ['appointments', 'Appointments'],
+    ['resources', 'Resources'], ['app', 'Mobile access'],
+  ];
+  const messages = entries?.filter(entry => entry.kind === 'message');
+  const openContact = () => onView('contact');
+  const recentContact = (items, empty) => <>
+    {error && <p className="qf-live-error" role="alert">{error}</p>}
+    {!error && !items && <p>Loading Contact Diary…</p>}
+    {items?.length === 0 && <p>{empty}</p>}
+    {!!items?.length && <div className="qf-ref-contact-history">
+      {items.slice(0, 5).map(entry => <article key={entry.id}>
+        <div><strong dir="auto">{entry.author}</strong><time dateTime={entry.createdAt}>{formatDate(entry.createdAt)}</time></div>
+        <p dir="auto">{entry.body}</p>
+      </article>)}
+    </div>}
+  </>;
   return <>
-    <div className="qf-live-progress">
-      <Panel title="Started"><div className="qf-live-kpi"><strong>{percent(progress.started)}%</strong><span>{progress.started} outcomes started</span></div><progress max={100} value={percent(progress.started)}/></Panel>
-      <Panel title="Completed"><div className="qf-live-kpi"><strong>{percent(progress.verified)}%</strong><span>{progress.verified} of {progress.total} required verified</span></div><progress max={100} value={percent(progress.verified)}/></Panel>
-      <Panel title="Expected"><div className="qf-live-kpi"><strong>{expected === null ? '—' : expected + '%'}</strong><span>{expected === null ? 'No target date' : 'Expected progress by today'}</span></div><progress max={100} value={expected ?? 0}/></Panel>
-    </div>
-    <Panel title={learner ? 'Awaiting Review' : roleLabels[portfolio.role]}>
-      <div className="qf-live-list">
-        {pending.length === 0 && <p>No outcomes awaiting action.</p>}
-        {pending.map(outcome => <OutcomeLink key={outcome.id} outcome={outcome} onOpen={onOutcome}/>)}
-      </div>
-    </Panel>
-    {learner && <>
-      {changes.length > 0 && <Panel title="Changes Requested"><div className="qf-live-list">
-        {changes.map(outcome => <OutcomeLink key={outcome.id} outcome={outcome} onOpen={onOutcome}/>)}
-      </div></Panel>}
-      <Panel title="Overdue"><div className="qf-live-list">
-        {overdue.length ? overdue.map(outcome => <OutcomeLink key={outcome.id} outcome={outcome} onOpen={onOutcome}/>) : <p>No overdue outcomes.</p>}
-      </div></Panel>
+    {learner && <QualificationInternalNav items={homeTabs} active={tab} onChange={setTab}
+      ariaLabel="Qualification home sections" nested/>}
+    {tab === 'tasks' && <>
+      <Panel title={learner ? 'Awaiting Review' : roleLabels[portfolio.role]}>
+        <div className="qf-live-list">
+          {pending.length === 0 && <p>No outcomes awaiting action.</p>}
+          {pending.map(outcome => <OutcomeLink key={outcome.id} outcome={outcome} onOpen={onOutcome}/>)}
+        </div>
+      </Panel>
+      {learner && <>
+        <Panel title="Latest Contact Diary entries" action={<Action secondary onClick={openContact}>Open Contact Diary</Action>}>
+          {recentContact(entries, 'No Contact Diary entries yet.')}
+        </Panel>
+        {changes.length > 0 && <Panel title="Changes Requested"><div className="qf-live-list">
+          {changes.map(outcome => <OutcomeLink key={outcome.id} outcome={outcome} onOpen={onOutcome}/>)}
+        </div></Panel>}
+        <Panel title="Overdue"><div className="qf-live-list">
+          {overdue.length ? overdue.map(outcome => <OutcomeLink key={outcome.id} outcome={outcome} onOpen={onOutcome}/>) : <p>No overdue outcomes.</p>}
+        </div></Panel>
+      </>}
     </>}
-    <ProgrammeMaterialSnapshot portfolio={portfolio} qualification={qualification}
-      onProgramme={() => onView('programme')} onLibrary={() => onView('library')}/>
+    {tab === 'messages' && <Panel title="Latest Messages" action={<Action secondary onClick={openContact}>Open Contact Diary</Action>}>
+      {recentContact(messages, 'No programme messages yet.')}
+    </Panel>}
+    {tab === 'appointments' && <div className="qf-live-grid">
+      <Panel title="Upcoming Appointments"><p>Appointment scheduling is unavailable.</p></Panel>
+      <Panel title="Upcoming Reviews"><p>Review scheduling is unavailable.</p></Panel>
+      <Panel title="Overdue Reviews"><p>Review appointments are unavailable.</p></Panel>
+    </div>}
+    {(tab === 'resources' || !learner) && <ProgrammeMaterialSnapshot portfolio={portfolio} qualification={qualification}
+      onProgramme={() => onView('programme')} onLibrary={() => onView('library')}/>}
+    {tab === 'resources' && <Panel title="Resources by Unit">
+      <div className="qf-live-gaps">{portfolio.units.map(unit => <details key={unit.id}>
+        <summary>{unit.code} · {unit.title}</summary>
+        <CentreResourceLinks unit={unit}/>
+      </details>)}</div>
+    </Panel>}
+    {tab === 'app' && <Panel title="Technica LMS on mobile">
+      <p>Open Technica LMS in your mobile browser to access your programme and upload evidence.</p>
+      <Action secondary onClick={() => onView('evidence')}>Open Evidence Folder</Action>
+    </Panel>}
+    {learner && <Panel title="Programme updates">
+      <div className="qf-live-actions" role="group" aria-label="Programme updates">
+        {['news', 'events'].map(key => <Action key={key} secondary={updates !== key}
+          aria-pressed={updates === key} onClick={() => setUpdates(key)}>{key === 'news' ? 'News' : 'Events'}</Action>)}
+      </div>
+      <p>{updates === 'news' ? 'Programme news is unavailable in this workspace.' : 'Programme events are unavailable in this workspace.'}</p>
+    </Panel>}
   </>;
 }
 
@@ -90,28 +133,29 @@ function OutcomeLink({outcome, onOpen}) {
 }
 
 function UnitProgramme({db,portfolio, unitIndex, setUnitIndex, onOutcome, onEvidence, onLibrary}) {
-  const unit = portfolio.units[unitIndex];
+  const unit = portfolio.units[unitIndex] || portfolio.units[0];
   const learner = portfolio.role === 'learner';
+  if (!unit) return <Panel title="Programme units"><p>No units are available.</p></Panel>;
   const unitRequired = unit.outcomes.filter(outcome => outcome.required);
   const unitStarted = unitRequired.filter(outcome => claimState(outcome) !== 'not_started').length;
   const unitVerified = unitRequired.filter(outcome => claimState(outcome) === 'verified').length;
   return <>
-    <div className="qf-live-section-heading"><div><span className="qf-overline">LEARNING OUTCOMES</span><h2>Programme units</h2></div><span>{portfolio.units.length} units</span></div>
-    <nav className="qf-unit-strip" aria-label="Qualification units">
-      <span className="qf-unit-strip-label">UNITS</span>
-      <div className="qf-number-tabs">
-        {portfolio.units.map((item, index) => <button type="button" key={item.id}
-          className={'qf-number-tab ' + (index === unitIndex ? 'active' : '')} aria-pressed={index === unitIndex}
-          title={item.title} aria-label={item.code + ' · ' + item.title}
-          onClick={() => setUnitIndex(index)}>{String(index + 1).padStart(2, '0')}</button>)}
-      </div>
-    </nav>
+    <QualificationUnitNavigation units={portfolio.units} selectedIndex={unitIndex} onSelect={setUnitIndex}/>
     <div className="qf-unit-heading"><div><span className="qf-overline" dir="ltr">{unit.code}</span><h2>{unit.title}</h2></div></div>
     <div className="qf-ref-unit-toolbar">
       <button type="button" disabled={unitIndex===0} onClick={()=>setUnitIndex(index=>Math.max(0,index-1))}><ArrowLeft size={15}/> Previous Unit</button>
-      <label>Jump to Unit
-        <select value={unitIndex} onChange={e=>setUnitIndex(Number(e.target.value))} aria-label="Jump to qualification Unit">
-          {portfolio.units.map((item,index)=><option key={item.id} value={index}>{String(index+1).padStart(2,'0')} · {item.title}</option>)}
+      <label>Jump to Unit or Outcome
+        <select value={'unit:' + unitIndex} onChange={event => {
+          const [kind, value] = event.target.value.split(':');
+          if (kind === 'unit') setUnitIndex(Number(value));
+          else onOutcome(value);
+        }}>
+          {portfolio.units.map((item, index) => <optgroup key={item.id} label={item.code + ' · ' + item.title}>
+            <option value={'unit:' + index}>{item.code} · Unit overview</option>
+            {item.outcomes.map(outcome => <option key={outcome.id} value={'outcome:' + outcome.id}>
+              {outcome.code} · {outcome.title}
+            </option>)}
+          </optgroup>)}
         </select>
       </label>
       <button type="button" disabled={unitIndex===portfolio.units.length-1}
@@ -441,28 +485,36 @@ function Registration({db, portfolio, progress, busy, onDeclare, onFinalize}) {
   </div>;
 }
 
+function usePortfolioContactEntries(db, portfolioId, refresh, enabled = true) {
+  const [entries, setEntries] = useState(null);
+  const [error, setError] = useState('');
+  useEffect(() => {
+    if (!enabled) return;
+    let active = true;
+    setEntries(null);
+    setError('');
+    portfolioRpc(db,'contact_list',{p_enrolment:portfolioId})
+      .then(result => { if (active) setEntries(Array.isArray(result) ? result : []); })
+      .catch(err => { if (active) setError(failureMessage(err)); });
+    return () => { active = false; };
+  }, [db, portfolioId, refresh, enabled]);
+  return {entries, error};
+}
+
 function ContactDiary({db,portfolio,progress,onOutcome}) {
-  const [entries,setEntries]=useState(null);
   const [error,setError]=useState('');
   const [body,setBody]=useState('');
   const [kind,setKind]=useState('message');
   const [sending,setSending]=useState(false);
   const [refresh,setRefresh]=useState(0);
-  useEffect(()=>{
-    let active=true;
-    setError('');
-    portfolioRpc(db,'contact_list',{p_enrolment:portfolio.id})
-      .then(result=>{if(active)setEntries(Array.isArray(result)?result:[]);})
-      .catch(err=>{if(active)setError(failureMessage(err));});
-    return ()=>{active=false;};
-  },[db,portfolio.id,refresh]);
+  const {entries, error:readError} = usePortfolioContactEntries(db, portfolio.id, refresh);
   const save=async event=>{
     event.preventDefault();
     if(!body.trim()||sending)return;
     setSending(true);setError('');
     try{
       await portfolioRpc(db,'contact_add',{p_enrolment:portfolio.id,p_kind:kind,p_body:body.trim()});
-      setBody('');setEntries(null);setRefresh(old=>old+1);
+      setBody('');setRefresh(old=>old+1);
     }catch(err){setError(failureMessage(err));}
     finally{setSending(false);}
   };
@@ -483,7 +535,8 @@ function ContactDiary({db,portfolio,progress,onOutcome}) {
         <button className="qf-button qf-primary" type="submit" disabled={sending||!body.trim()}>
           {sending?'Saving...':'Save Contact Diary entry'}</button>
       </form>
-      {entries===null&&!error&&<p>Loading contact records...</p>}
+      {readError&&<p className="qf-live-error" role="alert">{readError} <button className="qf-live-link" type="button" onClick={()=>setRefresh(old=>old+1)}>Retry</button></p>}
+      {entries===null&&!readError&&<p>Loading contact records...</p>}
       {entries?.length===0&&<p>No Contact Diary entries yet.</p>}
       {!!entries?.length&&<div className="qf-ref-contact-history">{entries.map(item=><article key={item.id}>
         <div><strong>{item.author}</strong><span>{item.authorRole} · {item.kind==='meeting_note'?'Meeting note':'Message'}</span>
@@ -590,8 +643,10 @@ function OpenPortfolio({db, portfolio, references, onRefresh, onBack}) {
   };
   const onDownload = item => run(() => downloadPortfolioEvidence(db,item));
   const views = [
+    ...(learner ? [['dashboard','Home']] : []),
     ['programme','Course'],['evidence','Evidence'],['registration','Registration'],['contact','Contact'],
-    ['metrics','Metrics'],['dashboard','Overview'],
+    ['metrics','Metrics'],
+    ...(!learner ? [['dashboard','Overview']] : []),
     ...(qualificationFor(portfolio.title) ? [['library','Study Library']] : []),
   ];
   const sectionIcons = {dashboard: Layers3, programme: BookOpen, evidence: FolderOpen, registration: GraduationCap, contact: MessageSquare, metrics: BarChart3, library: LibraryBig};
@@ -619,7 +674,7 @@ function OpenPortfolio({db, portfolio, references, onRefresh, onBack}) {
       onChange={changeView} disabled={busy} ariaLabel="Programme sections"/>
     {error && <p className="qf-live-error" role="alert">{error}</p>}
     {notice && <p className="qf-live-notice" role="status">{notice}</p>}
-    {view === 'dashboard' && <PortfolioOverview portfolio={portfolio} progress={progress} onOutcome={openOutcome} onView={changeView} qualification={cover}/>}
+    {view === 'dashboard' && <PortfolioOverview db={db} portfolio={portfolio} progress={progress} onOutcome={openOutcome} onView={changeView} qualification={cover}/>}
     {view === 'programme' && <UnitProgramme db={db} portfolio={portfolio} unitIndex={unitIndex} setUnitIndex={setUnitIndex} onOutcome={openOutcome}
       onEvidence={learner ? () => changeView('evidence') : null} onLibrary={cover ? () => changeView('library') : null}/>}
     {view === 'evidence' && <EvidenceFolder portfolio={visiblePortfolio} busy={busy} onSave={saveEvidence}
