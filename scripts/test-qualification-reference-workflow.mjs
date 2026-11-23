@@ -71,4 +71,11 @@ for(const control of ['Jump to Unit/Outcome','No previous outcomes','No next out
 }
 assert.ok(ui.includes('initialWizard={evidenceFromOutcome}')&&ui.includes('Back to outcome'));
 assert.ok(ui.includes('Completed (Assessor Only)')&&ui.includes("commit('save_claim'"));
+const unitMaterials=source('src/qualification/QualificationLearningResources.jsx');
+assert.match(sourcePreview,/<EvidenceUnitMaterials[\s\S]*?unit=\{unit\} source=\{source\}/,
+ 'Reference Evidence should expose materials for the selected Unit and edition');
+assert.match(ui,/<EvidenceUnitMaterials[\s\S]*?unit=\{selectedUnit\} source=\{source\}/,
+ 'Enrolled Evidence should scope materials to its Unit filter');
+assert.match(unitMaterials,/source\?\.units\?\.find\(entry => entry.code === unit.code\)/,
+ 'Select source materials by official Unit code in the pinned edition');
 console.log('Qualification reference workflow: programme, evidence, enrolment, contact, metrics and privacy constraints PASS');

@@ -7,6 +7,7 @@ import QualificationEvidenceTemplates from './QualificationEvidenceTemplates.jsx
 import QualificationInternalNav from './QualificationInternalNav.jsx';
 import QualificationUnitNavigation from './QualificationUnitNavigation.jsx';
 import QualificationOutcome, {ReadOnlyOutcomeDetails} from './QualificationOutcome.jsx';
+import {EvidenceUnitMaterials} from './QualificationLearningResources.jsx';
 
 const keys={othm6:['technica-source-othm6-2026','technica-source-othm6-2023'],
   othm7:['technica-source-othm7-2023'],nvq6:['technica-source-nvq6-2018']};
@@ -161,6 +162,8 @@ export default function QualificationSourcePreview({item,references=[],onBack,em
       <QualificationUnitNavigation units={source.units} selectedIndex={unitIndex} onSelect={setUnitIndex}/>
       <div className="qsrc-evidence-heading"><FileText size={17}/>
         <span>{unit.code} · {unit.title} · {unit.outcomes.reduce((n,o)=>n+o.criteria.length,0)} source criteria</span></div>
+      <EvidenceUnitMaterials key={unit.code + ':materials'} unit={unit} source={source}
+        onOutcome={(_, index) => {setSection('course');jumpTo(unitIndex,index);}}/>
       {unit.outcomes.length>0?<QualificationEvidenceTemplates key={unit.code} unit={unit} compact/>:
         <div className="qsrc-empty"><Info size={19}/><p>Assessment criteria for this edition have not been imported. No forms can be generated.</p></div>}
     </section>

@@ -20,6 +20,51 @@ export function CentreResourceLinks({unit, onOutcome}) {
   </section>;
 }
 
+export function EvidenceUnitMaterials({unit, source, onOutcome, children}) {
+  const sourceUnit = source?.units?.find(entry => entry.code === unit.code);
+  const files = new Map();
+  for (const outcome of unit.outcomes) {
+    for (const resource of outcome.resources || []) {
+      if (!files.has(resource.url)) {
+        files.set(resource.url, {resource, outcomes: []});
+      }
+      files.get(resource.url).outcomes.push(outcome);
+    }
+  }
+  return <section className="qlearn-rail-card" aria-label="Unit evidence materials">
+    <div className="qlearn-rail-heading"><FolderOpen size={18}/><h3>Unit materials</h3></div>
+    {sourceUnit?.aim && <p>{sourceUnit.aim}</p>}
+    {!!sourceUnit?.indicativeTopics?.length && <details className="qf-outcome-filters">
+      <summary>Indicative study topics</summary>
+      <ul>{sourceUnit.indicativeTopics.map((topic, index) => <li key={index}>{topic}</li>)}</ul>
+    </details>}
+    {!!files.size && <div className="qlearn-resource-links">
+      {[...files.values()].map(({resource, outcomes}) => <a key={resource.url} href={resource.url}
+        target="_blank" rel="noopener noreferrer">
+        <FileText size={17}/><span><strong>{resource.title}</strong>
+          <small>{resource.url === source?.source_url ? 'Awarding-body specification' : 'Unit resource'}
+            {' · Outcomes ' + outcomes.map(outcome => outcome.code).join(', ')}</small>
+        </span><ExternalLink size={15}/>
+      </a>)}
+    </div>}
+    {sourceUnit && source.source_url && !files.has(source.source_url) && <div className="qlearn-resource-links">
+      <a href={source.source_url} target="_blank" rel="noopener noreferrer"><FileText size={17}/>
+        <span><strong>Open the original specification</strong><small>{source.version}</small></span><ExternalLink size={15}/>
+      </a>
+    </div>}
+    {!files.size && !(sourceUnit && source.source_url) && !children && <p>No learning files are attached to this Unit.</p>}
+    {children}
+    {unit.outcomes.length > 0 && <details className="qf-outcome-filters">
+      <summary>Learning Outcomes &amp; Assessment Criteria</summary>
+      <ul>{unit.outcomes.map((outcome, index) => <li key={outcome.id || outcome.code}>
+        <button type="button" className="qf-live-link" onClick={() => onOutcome(outcome, index)}>
+          {outcome.code} · {outcome.title}
+        </button>
+      </li>)}</ul>
+    </details>}
+  </section>;
+}
+
 function AssessmentGuide({learner = true, onEvidence, onLibrary}) {
   const steps = [
     {icon:BookOpen,title:'Read the Unit',body:'Review the learning outcomes, official criteria and available source information.'},

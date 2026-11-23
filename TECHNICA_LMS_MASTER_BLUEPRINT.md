@@ -4,7 +4,7 @@
 >
 > Project: Technica Consult LMS
 > Version: 1.1.11 (Practice Center quick mode selection)
-> Last updated: 2026-11-23 (Africa/Cairo), Qualification Outcome pages
+> Last updated: 2026-11-23 (Africa/Cairo), Evidence Unit materials
 > Repository: https://github.com/Minamilad162/Technica-LMS
 > Target branch: main
 > Current inspected source baseline: v1.15.0, commit 8021f604c63c59b2100d944ead86fed149eb1ceb
@@ -577,6 +577,7 @@ Add new BUG rows immediately when an issue is discovered, include reproduction, 
 | BUG-025 | MEDIUM / IMPORT SAFETY | PREVENTED IN P9D.1 SOURCE | Existing historical ASP importer hard-enforces 1,625/five groups and cannot safely ingest the newer 2,500/nine-sheet user-private source. New pinned offline-only parser and SELECT-only existing-bank hashed CSV snapshot differentiate duplicates/protected content conflicts without touching imported, reviewed, attempted or Mock-exclusive items. Real Supabase snapshot/export and qualified SME rights/answer checks remain pending. |
 | BUG-QF-001 | HIGH | FIXED IN STAGED SOURCE | The authenticated Qualifications link previously opened the browser-local demo. Both live entry points now use the portfolio API and the database persists drafts, claims, decisions and their revisions. The historic preview is restricted to developer QA. |
 | BUG-QF-002 | MEDIUM | FIXED IN SOURCE | The syllabus Course only expanded Outcomes inline. Open each Outcome in the shared view and retain the selected Unit on return. |
+| BUG-QF-003 | MEDIUM | FIXED IN SOURCE | Evidence exposed worksheets and records without the selected Unit's available source material. Reuse version-matched content and existing protected file access. |
 
 ## 17. Test and release checklist
 
@@ -2413,3 +2414,12 @@ In enrolled portfolios, the Evidence picker selects ready evidence into the crit
 The inspected ProQual reference Outcome pages also list private provider resources, individual recording form/checklist instances and scoped diary records. Documents that could not be opened or are not in the Technica edition's material set remain unverified. This change has no database migration or enrolment change. Rollback is a frontend revert.
 
 Verification: Vite production build, project integrity, qualification reference, material, catalogue and readiness tests passed. A React DOM run with mocked RPC data exercised the three entry points, language-independent criterion IDs, adjacency, jump, evidence selection, saved draft mapping and wizard return. Desktop and mobile browser layout and production publication are tracked separately.
+
+
+## P102 — Evidence Unit materials (2026-11-23)
+
+The syllabus Evidence tab lists the selected Unit’s materials alongside the existing working forms and opens the exact Outcome from the criteria list. In an enrolled Evidence Folder, selecting a Unit filter exposes that Unit’s resources below the register, including its approved centre assessment brief and protected files when present. Matching the pinned edition and Unit code prevents a syllabus attachment from appearing in an unrelated sandbox. Shared resource URLs are listed once per Unit with their linked Outcome codes.
+
+Learning Assistant’s 12 reference Units (Induction, CPD and 01–10) expose Activity, Evidence Folder, Gap Analysis and Contact. Technica’s four qualification syllabuses contain 30 Units with 118 Outcomes and one specification file destination per edition. The production check found no approved Unit files for these syllabuses and no resource links or approved Unit files in the two-Unit private test portfolio. Working forms remain Technica-authored templates. Individual uploaded-by, review-tag, lock and per-evidence revision operations from the reference remain open gaps; existing assessment decisions and submission revisions are stored per Outcome.
+
+Local verification: qualification reference, readiness, materials and catalogue checks, a Vite build, and a rendered component check for pinned provenance, deduplication, Outcome links and the no-material state. No migration or production evidence edit is required. Rollback is a frontend revert.
