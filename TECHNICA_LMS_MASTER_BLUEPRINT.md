@@ -4,7 +4,7 @@
 >
 > Project: Technica Consult LMS
 > Version: 1.1.11 (Practice Center quick mode selection)
-> Last updated: 2026-11-23 (Africa/Cairo), Qualification appointments and portfolio tools
+> Last updated: 2026-11-23 (Africa/Cairo), Qualification Outcome pages
 > Repository: https://github.com/Minamilad162/Technica-LMS
 > Target branch: main
 > Current inspected source baseline: v1.15.0, commit 8021f604c63c59b2100d944ead86fed149eb1ceb
@@ -536,6 +536,7 @@ Reserve relation to identity, entitlements and courses; later design admin-creat
 | DEC-031 | 2026-11-05 | APPROVED P13 SOURCE / PRODUCTION NO WRITE | Centralize all Admin actions in one premium Admin Tools workspace with six sub-tabs, actual dynamic Supabase dashboards/charts, course hierarchy, human ASP review, P9B 200-item explicit Mock reservation, real learner plan/progress and system readiness. Apply to BOTH React Demo App and actual Vite SupabaseApp live entrypoint. Existing P1 entitlements have no financial ledger: show amount/currency/revenue as Not recorded, never invent paid sums. Real Admin JWT + RLS required; P13 read-only RPC migration is Stage-only source pending explicit owner approval. |
 | DEC-032 | 2026-11-06 | P14 SECURE LESSON PDF/VIDEO / STAGING NOT DEPLOYED | Fix Admin Tools Course→Domain→Topic→Lesson Text-only authoring: expose upload +PDF/+Video and optional Text, protect source media in private Supabase Storage with authenticated Admin-only signed upload and server-ACL-per-Lesson short-lived playback. Atomic service-only upload finalization, no raw path or keys in client bundles, dynamic user/time watermark, discourage browser print/copy/download controls. Browser OS screenshots/recording/network copy cannot be 100% blocked; Widevine/FairPlay DRM and server-rasterized PDF needed for stronger protection and require future integration. No existing Production DB writes without separate approval. |
 | DEC-QF-001 | 2026-11-22 | APPROVED LEARNER SCOPE / REVIEW POLICY STAGED | Qualifications uses Qualification → Unit → Learning Outcome → Assessment Criterion, shared evidence and explicit versioned claims. Reviewer roles and certificate operation require validation with the centre. |
+| DEC-QF-002 | 2026-11-23 | APPROVED | Selecting a Course Outcome opens its own detail view across enrolment, syllabus and centre preview, with shared navigation and role-appropriate actions. |
 
 ## 16. Error, conflict & regression prevention register
 
@@ -575,6 +576,7 @@ Add new BUG rows immediately when an issue is discovered, include reproduction, 
 
 | BUG-025 | MEDIUM / IMPORT SAFETY | PREVENTED IN P9D.1 SOURCE | Existing historical ASP importer hard-enforces 1,625/five groups and cannot safely ingest the newer 2,500/nine-sheet user-private source. New pinned offline-only parser and SELECT-only existing-bank hashed CSV snapshot differentiate duplicates/protected content conflicts without touching imported, reviewed, attempted or Mock-exclusive items. Real Supabase snapshot/export and qualified SME rights/answer checks remain pending. |
 | BUG-QF-001 | HIGH | FIXED IN STAGED SOURCE | The authenticated Qualifications link previously opened the browser-local demo. Both live entry points now use the portfolio API and the database persists drafts, claims, decisions and their revisions. The historic preview is restricted to developer QA. |
+| BUG-QF-002 | MEDIUM | FIXED IN SOURCE | The syllabus Course only expanded Outcomes inline. Open each Outcome in the shared view and retain the selected Unit on return. |
 
 ## 17. Test and release checklist
 
@@ -2400,3 +2402,14 @@ On the live private learner portfolio, written evidence saved successfully. Expa
 ### P100 draft mapping production database repair
 
 Live learner QA surfaced a second mapper failure in PostgreSQL. Loop record variables collided with query aliases and could raise “record is not assigned yet” before saving a draft. A forward migration disambiguates those variables while retaining enrolment, storage, criteria and locked-claim checks. Local PostgreSQL lifecycle tests cover mapping one item to two outcomes, repeating the request and unlinking one criterion without affecting the original lifecycle. Production ledger recorded the function replacement as `20261123111134`.
+
+
+## P101 — Qualification Course Outcome pages (2026-11-23)
+
+Selecting an Outcome in the Course opens a dedicated view in the enrolled portfolio, the syllabus and the centre preview. It uses the selected edition's Outcome and criteria, a previous/next sequence across Units, a grouped Unit/Outcome jump and a return to the selected Unit. Live status and deadlines come from enrolment data. Resources use the selected Outcome's attached links and the matching source specification when available.
+
+In enrolled portfolios, the Evidence picker selects ready evidence into the criterion matrix, with an explicit draft save and a separate competence claim submission. The Evidence Wizard opens upload and written evidence from the current Outcome with a return path. The matrix shows evidence references, types, claim-level verification and recorded assessor criterion decisions. The grading checklist summarises recorded assessor criteria and the recording forms are blank Technica worksheets scoped to the Outcome. Outcome Contact filters and prints available review feedback. General programme messages remain in Contact Diary. Both previews are read-only for claims and decisions.
+
+The inspected ProQual reference Outcome pages also list private provider resources, individual recording form/checklist instances and scoped diary records. Documents that could not be opened or are not in the Technica edition's material set remain unverified. This change has no database migration or enrolment change. Rollback is a frontend revert.
+
+Verification: Vite production build, project integrity, qualification reference, material, catalogue and readiness tests passed. A React DOM run with mocked RPC data exercised the three entry points, language-independent criterion IDs, adjacency, jump, evidence selection, saved draft mapping and wizard return. Desktop and mobile browser layout and production publication are tracked separately.

@@ -1,11 +1,12 @@
 import React,{useState} from 'react';
-import {ArrowLeft,ArrowRight,BarChart3,BookOpen,CheckCircle2,ChevronDown,ExternalLink,FileText,FolderOpen,GraduationCap,Info,Layers3,LibraryBig,LockKeyhole,MessageSquare,ShieldCheck} from 'lucide-react';
+import {ArrowLeft,ArrowRight,BarChart3,BookOpen,CheckCircle2,ExternalLink,FileText,FolderOpen,GraduationCap,Info,Layers3,LibraryBig,LockKeyhole,MessageSquare,ShieldCheck} from 'lucide-react';
 
 
 import './qualificationSourcePreview.css';
 import QualificationEvidenceTemplates from './QualificationEvidenceTemplates.jsx';
 import QualificationInternalNav from './QualificationInternalNav.jsx';
 import QualificationUnitNavigation from './QualificationUnitNavigation.jsx';
+import QualificationOutcome, {ReadOnlyOutcomeDetails} from './QualificationOutcome.jsx';
 
 const keys={othm6:['technica-source-othm6-2026','technica-source-othm6-2023'],
   othm7:['technica-source-othm7-2023'],nvq6:['technica-source-nvq6-2018']};
@@ -27,26 +28,23 @@ function SourceDocument({source}){
  </section>;
 }
 
-function CriterionDetails({outcome,index}){
- return <details className="qsrc-outcome" open={index===0}>
-  <summary><span className="qsrc-outcome-number">{String(index+1).padStart(2,'0')}</span>
-    <span className="qsrc-outcome-head"><strong>{outcome.code} · {outcome.title}</strong>
-      <small>{outcome.criteria.length} Assessment Criteria</small></span><ChevronDown size={18}/></summary>
-  <div className="qsrc-outcome-body">
-    {outcome.guidance&&<p className="qsrc-outcome-guidance">{outcome.guidance}</p>}
-    <ol className="qsrc-criteria-list">{outcome.criteria.map(criterion=><li key={criterion.code}>
-      <span>{criterion.code}</span><p>{criterion.title}</p></li>)}</ol>
-  </div>
- </details>;
-}
-
 export default function QualificationSourcePreview({item,references=[],onBack,embedded=false}) {
  const sources=getQualificationSources(item,references);
  const [sourceKey,setSourceKey]=useState(sources[0]?.catalog_key||'');
  const [unitIndex,setUnitIndex]=useState(0);
+ const [outcomeIndex,setOutcomeIndex]=useState(null);
+ const jumpTo=(nextUnit,nextOutcome=null)=>{
+   setUnitIndex(nextUnit);
+   setOutcomeIndex(nextOutcome);
+ };
+ const changeSection=nextSection=>{
+   setSection(nextSection);
+   setOutcomeIndex(null);
+ };
  const [section,setSection]=useState('course');
  const source=sources.find(s=>s.catalog_key===sourceKey)||sources[0];
  const unit=source?.units?.[unitIndex];
+ const outcome=unit?.outcomes[outcomeIndex];
  if(!source)return <div className="qsrc-page"><button type="button" className="qf-plain-back" onClick={onBack}><ArrowLeft size={16}/> Qualifications</button>
    <div className="qsrc-empty"><Info size={22}/><div><h2>Qualification source not available</h2>
      <p>The centre has not imported this awarding-body version into the reference database. No demo content will be substituted.</p></div></div></div>;
@@ -63,7 +61,7 @@ export default function QualificationSourcePreview({item,references=[],onBack,em
         <span><Layers3 size={16}/> {source.units.length} mandatory Units</span>
         <span>{source.reference_number}</span></div></div>
   </header>}
-  {!embedded&&<QualificationInternalNav active={section} onChange={setSection}
+  {!embedded&&<QualificationInternalNav active={section} onChange={changeSection}
     ariaLabel="Qualification course, evidence, registration, contact, metrics and library"
     readOnly={source.status!=='centre_published'}/>}
   <div className="qsrc-overview">
@@ -74,7 +72,7 @@ export default function QualificationSourcePreview({item,references=[],onBack,em
   <div className="qsrc-edition-row">
     <div><span className="qf-overline">QUALIFICATION VERSION</span><h2>Official syllabus</h2></div>
     {sources.length>1&&<label className="qsrc-edition-picker">Specification edition
-      <select value={source.catalog_key} onChange={e=>{setSourceKey(e.target.value);setUnitIndex(0);}}>
+      <select value={source.catalog_key} onChange={e=>{setSourceKey(e.target.value);jumpTo(0);}}>
         {sources.map(s=><option value={s.catalog_key} key={s.catalog_key}>{s.version} · {s.reference_number}</option>)}
       </select></label>}
     {sources.length===1&&<span className="qsrc-edition-single">{source.version}</span>}
@@ -86,7 +84,12 @@ export default function QualificationSourcePreview({item,references=[],onBack,em
       : 'This syllabus uses real Unit titles, Learning Outcomes and Assessment Criteria imported from the supplied awarding-body specification. It is not a demo. Centre approval is still required before using this version for live grading.'}</p>
   </div></div>
   {(embedded||section==='course')&&!unit&&<div className="qsrc-empty"><Info size={19}/><p>No units are available for this edition.</p></div>}
-  {(embedded||section==='course')&&unit&&<section className="qsrc-course">
+  {(embedded||section==='course')&&outcome&&<QualificationOutcome units={source.units}
+    unitIndex={unitIndex} outcomeIndex={outcomeIndex} onJump={jumpTo} onBack={()=>setOutcomeIndex(null)}
+    aim={unit.aim} sourceUrl={source.source_url} status="Reference view">
+    <ReadOnlyOutcomeDetails unit={unit} outcome={outcome}/>
+  </QualificationOutcome>}
+  {(embedded||section==='course')&&unit&&!outcome&&<section className="qsrc-course">
     <QualificationUnitNavigation units={source.units} selectedIndex={unitIndex} onSelect={setUnitIndex}/>
     <div className="qsrc-structure">
     <div className="qsrc-unit-content" key={unit.code}>
@@ -113,7 +116,11 @@ export default function QualificationSourcePreview({item,references=[],onBack,em
       </section>}
       {unit.outcomes.length ? <section className="qsrc-outcomes">
         <div className="qsrc-section-heading"><ShieldCheck size={19}/><h3>Learning Outcomes &amp; Assessment Criteria</h3></div>
-        {unit.outcomes.map((outcome,index)=><CriterionDetails key={outcome.code} outcome={outcome} index={index}/>)}
+        <div className="qf-live-list">{unit.outcomes.map((entry,index)=><button className="qsrc-outcome" type="button"
+          key={entry.code} onClick={()=>jumpTo(unitIndex,index)}>
+          <span><strong>{entry.code} · {entry.title}</strong><small>{entry.criteria.length} Assessment Criteria</small></span>
+          <ArrowRight size={17}/>
+        </button>)}</div>
       </section> : <div className="qsrc-awaiting"><Info size={22}/><div><h3>Current specification detail pending centre verification</h3>
         <p>The new 2026 Unit name and code are verified. Open the November 2026 source PDF for its complete current outcomes and criteria. Older standards are intentionally not shown as though they apply to this new Unit.</p>
         {source.source_url&&<a href={source.source_url} target="_blank" rel="noopener noreferrer">View official 2026 specification <ExternalLink size={15}/></a>}</div></div>}

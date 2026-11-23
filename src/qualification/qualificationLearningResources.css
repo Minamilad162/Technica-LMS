@@ -1,6 +1,6 @@
 /* Live Course Folder and material details. Separate from the source-only legacy preview. */
-.qf-live .qlearn-layout,.qf-live .qlearn-outcome-support{display:grid;grid-template-columns:minmax(0,1.65fr) minmax(270px,.83fr);gap:17px;align-items:start;margin:6px 0 19px}
-.qf-live .qlearn-primary,.qf-live .qlearn-outcome-main,.qf-live .qlearn-rail{display:grid;gap:15px;min-width:0}
+.qf-live .qlearn-layout{display:grid;grid-template-columns:minmax(0,1.65fr) minmax(270px,.83fr);gap:17px;align-items:start;margin:6px 0 19px}
+.qf-live .qlearn-primary,.qf-live .qlearn-rail{display:grid;gap:15px;min-width:0}
 .qf-live .qlearn-rail-card{border:1px solid #e1e9f5;border-radius:17px;background:#fff;
   box-shadow:0 8px 25px #173e6b0a;padding:19px;min-width:0}
 .qf-live .qlearn-rail-heading{display:flex;align-items:center;gap:10px;margin-bottom:16px;color:#3478b8}
@@ -35,7 +35,7 @@
 .qf-live .qlearn-source-disclaimer{display:flex;align-items:flex-start;gap:9px;border:1px solid #dce6f1;border-radius:12px;
   padding:11px 14px;color:#75849a;font-size:11px;line-height:1.65;background:#fbfdff}
 .qf-live .qlearn-source-disclaimer svg{color:#7299bf;margin-top:1px;flex-shrink:0}
-.qf-live .qlearn-custom-unit,.qf-live .qlearn-outcome-intro{background:#fff;border:1px solid #e0e9f5;border-radius:17px;
+.qf-live .qlearn-custom-unit{background:#fff;border:1px solid #e0e9f5;border-radius:17px;
   box-shadow:0 8px 24px #173e6b0b;padding:clamp(17px,2vw,23px)}
 .qf-live .qlearn-section-intro{display:flex;align-items:center;gap:13px;margin:0 0 17px}
 .qf-live .qlearn-section-icon{flex:0 0 auto;display:grid;place-items:center;width:43px;height:43px;
@@ -51,16 +51,6 @@
 .qf-live .qlearn-custom-outcomes>div>div{display:grid;gap:5px;min-width:0}
 .qf-live .qlearn-custom-outcomes strong{font-size:12px;color:#214268;line-height:1.5}
 .qf-live .qlearn-custom-outcomes small{font-size:11px;color:#8294aa}
-.qf-live .qlearn-outcome-intro h3{font-size:21px;letter-spacing:-.025em;margin:6px 0 8px}
-.qf-live .qlearn-outcome-intro>p{font-size:13px;line-height:1.65;color:#59718c;margin:0 0 17px}
-.qf-live .qlearn-guidance{display:flex;gap:12px;align-items:flex-start;padding:15px;
-  background:#f4f8fe;border:1px solid #e0e9f6;border-radius:12px}
-.qf-live .qlearn-guidance svg{flex-shrink:0;color:#3d82c0;margin-top:2px}
-.qf-live .qlearn-guidance strong{font-size:12px;color:#214d78;font-weight:850}
-.qf-live .qlearn-guidance p{font-size:12px;line-height:1.75;color:#506d89;margin:6px 0 0}
-.qf-live .qlearn-outcome-reference{display:flex;align-items:center;gap:10px;padding:14px;border:1px solid #e1e9f4;
-  border-radius:12px;background:#fafcff;color:#667f99;font-size:12px;line-height:1.6}
-.qf-live .qlearn-outcome-reference svg{flex:0 0 auto}
 .qf-live .qlearn-library-banner{display:flex;align-items:center;justify-content:space-between;gap:15px;
   padding:25px 27px;border-radius:18px;background:linear-gradient(110deg,#172f4f,#285d91);color:#fff;margin-bottom:12px}
 .qf-live .qlearn-library-banner h2{font-size:clamp(19px,2.3vw,26px);color:#fff;margin:7px 0}
@@ -109,10 +99,10 @@
 .qf-live .qlearn-evidence-help li svg{flex-shrink:0;color:#2e927a;margin-top:2px}
 .qf-live .qmat-panel{box-shadow:0 8px 26px #183d6b0e;border-color:#e1e9f4;border-radius:17px}
 .qf-live .qmat-panel .qmat-head{flex-wrap:wrap}
-@media(max-width:1070px){.qf-live .qlearn-layout,.qf-live .qlearn-outcome-support{grid-template-columns:minmax(0,1.25fr) minmax(245px,.75fr)}
+@media(max-width:1070px){.qf-live .qlearn-layout{grid-template-columns:minmax(0,1.25fr) minmax(245px,.75fr)}
  .qf-live .qlearn-overview-counters{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:780px){
- .qf-live .qlearn-layout,.qf-live .qlearn-outcome-support,.qf-live .qlearn-library-layout{grid-template-columns:minmax(0,1fr)}
+ .qf-live .qlearn-layout,.qf-live .qlearn-library-layout{grid-template-columns:minmax(0,1fr)}
  .qf-live .qlearn-rail{grid-template-columns:minmax(0,1fr)}
  .qf-live .qlearn-library-units{display:flex;overflow-x:auto;padding-bottom:7px;scrollbar-width:thin}
  .qf-live .qlearn-library-units button{flex:0 0 min(225px,70vw)}
@@ -129,13 +119,6 @@
 @media(prefers-reduced-motion:reduce){.qf-live .qlearn-resource-links a,.qf-live .qlearn-library-units button{transition:none}}
 
 
-.qf-live .qlearn-readiness-list{display:grid;gap:0;border:1px solid #e1eaf5;border-radius:12px;overflow:hidden;margin-bottom:14px}
-.qf-live .qlearn-readiness-list>div{display:flex;align-items:center;justify-content:space-between;gap:14px;
-  padding:12px 13px;border-bottom:1px solid #e9eff7;font-size:12px;color:#72859c;background:#fff}
-.qf-live .qlearn-readiness-list>div:nth-child(odd){background:#f8fbff}
-.qf-live .qlearn-readiness-list>div:last-child{border-bottom:0}
-.qf-live .qlearn-readiness-list strong{color:#254a72;font-size:13px;text-align:right}
-.qf-live .qlearn-readiness-note{font-size:11px;line-height:1.6;color:#72859b;margin:11px 0 0}
 .qf-live .qmat-assessment-note{margin:12px 0;padding:13px 15px;border:1px solid #dce8f6;
   border-left:3px solid #e98141;background:#fffaf6;border-radius:10px}
 .qf-live .qmat-assessment-note small{display:block;color:#a16e43;font-size:10px;line-height:1.6;margin-top:8px}

@@ -81,3 +81,13 @@ Names, reference evidence, support destinations and provider resources remain on
 ### Reference resource inventory and sandbox activation
 
 All seven reference resource groups were opened. They listed 20, 20, 14, 14, 16, 25 and 17 resource destinations respectively, for 126 resources plus seven folder controls. Resource actions are application links. Opening the first handbook document led to an Edge client block on the asset viewer. The resource inventory does not certify the destination contents. Technica's published private sandbox has zero attached programme resource rows, so the reference materials have no enrolled Technica counterparts to open there.
+
+
+## Outcome walkthrough — 2026-11-23
+
+| Inspected in Learning Assistant | Technica implementation |
+| --- | --- |
+| Unit 01 Activity and Gap Analysis lead to individual Outcomes. Outcomes 01.1 and 01.2 have descriptions, adjacent navigation and a Unit/Outcome jump. | Shared detail view from the enrolled Course, reference syllabus and centre preview. Unit and Outcome order comes from the selected edition. |
+| Resource and type table, current status and deadline. Seven resource rows appeared on both inspected Outcomes. Opening Unit 1 Learner Guidance Notes hit the browser's client block. | Attached Outcome links and matching source specification appear in the resources table. Status and deadlines come from the enrolment. Private source files were not imported. |
+| Choose Evidence opens a tick-box register with reference and document name. Evidence Wizard offers upload or written evidence. The competence matrix shows criteria columns and an assessor-only completion row. | Existing Evidence Folder and versioned claim RPCs power the picker, wizard, criterion mapping, save and submit. Verification is shown at claim level. |
+| Grading Checklists, Recording Forms, Outcome Contact with Category, Posted By, text search, Order By and Print. The inspected Outcomes had empty lists. | Recorded assessor criteria, Outcome-scoped blank Technica recording forms and filterable, printable Outcome review feedback. General private messages and meeting notes stay in the programme diary. |

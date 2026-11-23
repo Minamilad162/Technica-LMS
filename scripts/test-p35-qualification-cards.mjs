@@ -98,7 +98,9 @@ assert.match(read('supabase/migrations/202611220003_qualification_source_materia
 assert.ok(keyed.get('technica-source-othm6-2026').units.every(u=>u.aim?.length>100),
  'All 2026 official Unit aims must be imported from the November 2026 specification');
 
-assert.match(sourcePreview,/outcome\.criteria\.map/,'Real assessment criteria navigation missing');
+assert.match(sourcePreview,/<ReadOnlyOutcomeDetails unit=\{unit\} outcome=\{outcome\}/,'Source preview must open the selected Outcome criteria');
+assert.match(read('src/qualification/QualificationOutcome.jsx'),/<OutcomeCriteria criteria=\{outcome\.criteria\}/,
+ 'Read-only Outcome must render the imported assessment criteria');
 assert.match(sourcePreview,/source\.version==='November 2026'/,'Do not conflate 2023 and 2026 requirements');
 assert.match(migration,/auth\.uid\(\) IS NULL/);
 assert.match(migration,/REVOKE ALL ON FUNCTION public\.lms_qf_reference_catalog\(\) FROM PUBLIC, anon/);

@@ -1,17 +1,24 @@
 import React,{useEffect,useState} from 'react';
-import {ArrowLeft,BookOpen,CalendarDays,ClipboardList,FileText,FolderOpen,GraduationCap,
+import {ArrowLeft,ArrowRight,BookOpen,CalendarDays,ClipboardList,FileText,FolderOpen,GraduationCap,
  LockKeyhole,MessageSquare,BarChart3,ShieldCheck} from 'lucide-react';
 import QualificationUnitNavigation from './QualificationUnitNavigation.jsx';
+import QualificationOutcome, {ReadOnlyOutcomeDetails} from './QualificationOutcome.jsx';
 
 // Design-only preview. It does not create enrolments, issue evidence, or call the backend.
 // All Unit, Outcome and Criterion text comes from the authenticated source catalogue.
 export default function QualificationCentreLearnerPreview({version,references,onBack}){
  const [tab,setTab]=useState('course');
  const [unitIndex,setUnitIndex]=useState(0);
- useEffect(()=>{setTab('course');setUnitIndex(0);},[version?.id]);
+ const [outcomeIndex,setOutcomeIndex]=useState(null);
+ useEffect(()=>{setTab('course');setUnitIndex(0);setOutcomeIndex(null);},[version?.id]);
+ const jumpTo=(nextUnit,nextOutcome=null)=>{
+   setUnitIndex(nextUnit);
+   setOutcomeIndex(nextOutcome);
+ };
  const source=references.find(item=>item.catalog_key===version?.catalogKey);
  const units=source?.units||[];
  const unit=units[unitIndex] || units[0];
+ const outcome=unit?.outcomes[outcomeIndex];
  const tabs=[['course','Course',BookOpen],['evidence','Evidence',FolderOpen],
   ['registration','Registration',GraduationCap],['contact','Contact',MessageSquare],
   ['metrics','Metrics',BarChart3]];
@@ -44,10 +51,14 @@ export default function QualificationCentreLearnerPreview({version,references,on
    </div>
    <nav className="qf-ref-preview-tabs" aria-label="Preview programme sections">
      {tabs.map(([key,label,Icon])=><button type="button" key={key} aria-pressed={tab===key}
-       onClick={()=>setTab(key)}><Icon size={16}/>{label}</button>)}
+       onClick={()=>{setTab(key);setOutcomeIndex(null);}}><Icon size={16}/>{label}</button>)}
    </nav>
    {tab==='course'&&<section className="qf-ref-preview-course">
-     {units.length===0?<div className="qf-card"><p>The official source Units are not yet available for preview.</p></div>:<>
+     {outcome ? <QualificationOutcome units={units} unitIndex={unitIndex} outcomeIndex={outcomeIndex}
+       onJump={jumpTo} onBack={()=>setOutcomeIndex(null)} aim={unit.aim}
+       sourceUrl={source?.source_url} status="Preview · No learner enrolment">
+       <ReadOnlyOutcomeDetails unit={unit} outcome={outcome}/>
+     </QualificationOutcome> : units.length===0?<div className="qf-card"><p>The official source Units are not yet available for preview.</p></div>:<>
        <QualificationUnitNavigation units={units} selectedIndex={unitIndex} onSelect={setUnitIndex}/>
        <div className="qf-unit-heading"><div><span className="qf-overline">{unit.code}</span>
          <h2>{unit.title}</h2></div></div>
@@ -55,9 +66,9 @@ export default function QualificationCentreLearnerPreview({version,references,on
          <p>{unit.aim}</p></section>}
        <div className="qf-ref-preview-columns">
          <section className="qf-card"><div className="qf-card-header"><h3>Activity · Learning Outcomes</h3></div>
-           <div className="qf-live-list">{(unit.outcomes||[]).map(o=><div className="qf-ref-preview-outcome" key={o.code}>
-             <span><strong>{o.code} · {o.title}</strong><small>Not started · No learner enrolment</small></span>
-             <LockKeyhole size={15}/></div>)}</div></section>
+           <div className="qf-live-list">{(unit.outcomes||[]).map((o,index)=><button type="button" key={o.code} onClick={()=>jumpTo(unitIndex,index)}>
+             <span><strong>{o.code} · {o.title}</strong></span>
+             <ArrowRight size={15}/></button>)}</div></section>
          <section className="qf-card"><div className="qf-card-header"><h3>Gap Analysis · Assessment Criteria</h3></div>
            <div className="qf-live-gaps">{(unit.outcomes||[]).map(o=><details key={o.code}>
              <summary>{o.code} · {o.title}</summary>

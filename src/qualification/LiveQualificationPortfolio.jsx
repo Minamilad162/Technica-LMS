@@ -19,6 +19,8 @@ import {
   canReview, claimLabels, claimState, downloadEvidenceShowcase, downloadPortfolioEvidence, evidenceExtensions,
   evidenceKinds, evidencePayload, fetchEvidenceFile, portfolioRpc, programmeProgress, uploadPortfolioEvidence,
 } from './qualificationPortfolioApi.js';
+import QualificationOutcome, {OutcomeContact, OutcomeCriteria, OutcomeRecords} from './QualificationOutcome.jsx';
+import {getUnitSourceMaterial} from './qualificationUnitMaterial.js';
 import './qualificationPortfolio.css';
 import './qualificationPremium.css';
 
@@ -217,8 +219,8 @@ function EvidenceItem({item, onDownload, uses = []}) {
   </article>;
 }
 
-function EvidenceFolder({portfolio, initialUnitId, onDownload, onShowcase, busy, onSave, onDuplicate, onMap, onOpenOutcome, onBack, backLabel}) {
-  const [mode, setMode] = useState('');
+function EvidenceFolder({portfolio, initialUnitId, initialWizard, onDownload, onShowcase, busy, onSave, onDuplicate, onMap, onOpenOutcome, onBack, backLabel}) {
+  const [mode, setMode] = useState(initialWizard ? 'choose' : '');
   const [showcase, setShowcase] = useState([]);
   const [detailId, setDetailId] = useState('');
   const [mappingTarget, setMappingTarget] = useState(null);
@@ -237,6 +239,9 @@ function EvidenceFolder({portfolio, initialUnitId, onDownload, onShowcase, busy,
   const [body, setBody] = useState('');
   const [file, setFile] = useState(null);
   const reservation = useRef(null);
+  useEffect(() => {
+    if (initialWizard) document.getElementById('qualification-evidence-wizard-heading')?.focus();
+  }, [initialWizard]);
   const start = value => {
     setMode(value); setBody(''); setTitle(''); setDescription(''); setFile(null); setDuplicateId(''); reservation.current = null;
   };
@@ -440,12 +445,21 @@ function EvidenceFolder({portfolio, initialUnitId, onDownload, onShowcase, busy,
   </div>;
 }
 
-function MappingTable({criteria, evidence, mapping, editable, onToggle}) {
+function MappingTable({criteria, evidence, mapping, editable, onToggle, assessment}) {
+  const isClaim = assessment !== undefined;
   return <div className="qf-matrix-scroll" role="region" tabIndex={0} aria-label="Evidence to criteria mapping">
-    <table className="qf-matrix qf-live-matrix"><thead><tr><th scope="col">Evidence</th>
-      {criteria.map(criterion => <th key={criterion.id} scope="col" title={criterion.title}>{criterion.code}</th>)}
-    </tr></thead><tbody>
-      {evidence.map(item => <tr key={item.id}><th scope="row" dir="auto">{item.title}</th>
+    <table className="qf-matrix qf-live-matrix"><thead>
+      {isClaim && criteria.length > 0 && <tr><td colSpan={4}/><th scope="colgroup" colSpan={criteria.length}>Assessment Criteria</th></tr>}
+      <tr>{isClaim && <th scope="col">Ref</th>}<th scope="col">Evidence</th>
+        {isClaim && <><th scope="col">Type(s)</th><th scope="col">IV (claim)</th></>}
+        {criteria.map(criterion => <th key={criterion.id} scope="col" title={criterion.title}>{criterion.code}</th>)}
+      </tr>
+    </thead><tbody>
+      {isClaim && !evidence.length && <tr><td colSpan={criteria.length + 4}>No evidence selected for this outcome.</td></tr>}
+      {evidence.map(item => <tr key={item.id}>
+        {isClaim && <td>{item.id.slice(0,8).toUpperCase()}</td>}
+        <th scope="row" dir="auto">{item.title}</th>
+        {isClaim && <><td>{item.kind}</td><td>{assessment.verified ? 'Verified' : '—'}</td></>}
         {criteria.map(criterion => {
           const linked = mapping[criterion.id]?.includes(item.id);
           return <td key={criterion.id}>{editable
@@ -454,7 +468,12 @@ function MappingTable({criteria, evidence, mapping, editable, onToggle}) {
             : (linked ? 'Linked' : '—')}</td>;
         })}
       </tr>)}
-    </tbody></table>
+    </tbody>
+    {isClaim && <tfoot><tr><th scope="row" colSpan={4}>Completed (Assessor Only)</th>
+      {criteria.map(criterion => <td key={criterion.id} title={criterion.title}>
+        {assessment.criteria?.[criterion.id] === 'met' ? 'Met' : '—'}
+      </td>)}
+    </tr></tfoot>}</table>
   </div>;
 }
 
@@ -486,7 +505,7 @@ function SubmissionHistory({outcome, onDownload}) {
 
 function LearnerClaim({portfolio, outcome, mapping, updateMapping, busy, onSave, onEvidence, onRegistration, onDownload}) {
   const [confirming, setConfirming] = useState(false);
-  const [choosing, setChoosing] = useState(false);
+  const [picks, setPicks] = useState(null);
   const [selected, setSelected] = useState(() => {
     const linked = new Set(Object.values(mapping).flat());
     return Array.from(linked);
@@ -506,21 +525,39 @@ function LearnerClaim({portfolio, outcome, mapping, updateMapping, busy, onSave,
     setConfirming(false);
   };
   return <>
-    <Panel title="Competence Claim" action={<span>{covered} / {outcome.criteria.length} linked</span>}>
-      {editable && <div className="qf-live-actions">
-        <Action secondary disabled={busy} aria-expanded={choosing} onClick={() => setChoosing(value => !value)}>Choose evidence</Action>
-        <Action secondary disabled={busy} onClick={onEvidence}>Evidence Wizard <FolderOpen size={16}/></Action>
-      </div>}
-      {editable && choosing && <fieldset className="qf-live-choose" disabled={busy}>
-        <legend>Show evidence in the mapping table</legend>
-        {portfolio.evidence.length === 0 && <p>Add evidence to your folder first.</p>}
-        {portfolio.evidence.map(item => <label key={item.id}><input type="checkbox" checked={linked.has(item.id) || selected.includes(item.id)}
-          disabled={linked.has(item.id)} onChange={e => setSelected(old => e.target.checked ? [...old,item.id] : old.filter(id => id !== item.id))}/>
-          <span dir="auto">{item.title}</span>
-        </label>)}
+    <Panel title="Competence Claim" action={<div className="qf-live-actions">
+      <span>{covered} / {outcome.criteria.length} linked</span>
+      {editable && <>
+        <Action secondary disabled={busy} aria-expanded={picks !== null} onClick={() => setPicks(picks ? null : [...selected])}>Choose Evidence</Action>
+        <Action secondary disabled={busy} onClick={onEvidence}><FolderOpen size={16}/> Evidence Wizard</Action>
+      </>}
+    </div>}>
+      {editable && picks !== null && <fieldset className="qf-live-choose qf-outcome-picker" disabled={busy}>
+        <legend>Choose evidence for this outcome</legend>
+        {!portfolio.evidence.length ? <p>Add evidence to your folder first.</p> : <div className="qf-outcome-table">
+          <table><thead><tr><th scope="col">Ref</th><th scope="col">Document</th><th scope="col">
+            <label><input type="checkbox" aria-label="Select all evidence"
+              checked={portfolio.evidence.every(item => linked.has(item.id) || picks.includes(item.id))}
+              onChange={event => setPicks(event.target.checked ? portfolio.evidence.map(item => item.id) : [])}/> Select all</label>
+          </th></tr></thead><tbody>
+            {portfolio.evidence.map(item => <tr key={item.id}>
+              <td>{item.id.slice(0,8).toUpperCase()}</td><th scope="row" dir="auto">{item.title}</th>
+              <td><input type="checkbox" aria-label={'Choose ' + item.title} checked={linked.has(item.id) || picks.includes(item.id)}
+                disabled={linked.has(item.id)} onChange={event => setPicks(old => event.target.checked ? [...old,item.id] : old.filter(id => id !== item.id))}/></td>
+            </tr>)}
+          </tbody></table>
+        </div>}
+        <div className="qf-live-actions">
+          <Action secondary onClick={() => setPicks(null)}>Cancel</Action>
+          <Action onClick={() => {setSelected(picks); setPicks(null);}}>Use selected evidence</Action>
+        </div>
       </fieldset>}
-      {evidence.length ? <MappingTable criteria={outcome.criteria} evidence={evidence} mapping={currentMapping}
-        editable={editable && !busy} onToggle={toggle}/> : <p>No evidence selected for this outcome.</p>}
+      <MappingTable criteria={outcome.criteria} evidence={evidence} mapping={currentMapping}
+        editable={editable && !busy} onToggle={toggle} assessment={{
+          criteria: editable ? undefined : outcome.submissions[0]?.reviews.findLast(review => review.stage === 'assessor')?.criteria,
+          verified: state === 'verified',
+        }}/>
+      <details className="qf-outcome-filters"><summary>Assessment Criteria</summary><OutcomeCriteria criteria={outcome.criteria}/></details>
       {editable && <>
         <div className="qf-live-actions">
           <Action secondary disabled={busy} onClick={() => onSave(false)}>Save Draft</Action>
@@ -555,8 +592,9 @@ function ReviewerClaim({portfolio, outcome, busy, onDownload, onReview}) {
         {!evidence.length && <p>No submission available for review.</p>}
         {evidence.map(item => <EvidenceItem key={item.id} item={item} onDownload={onDownload}/>)}
       </Panel>
-      {snapshot && <Panel title={'Criterion mapping · Revision ' + submission.revision}>
-        <MappingTable criteria={snapshot.criteria} evidence={evidence} mapping={snapshot.mapping}/>
+      {snapshot && <Panel title={'Competence Claim · Revision ' + submission.revision}>
+        <MappingTable criteria={snapshot.criteria} evidence={evidence} mapping={snapshot.mapping}
+          assessment={{criteria: previousAssessment?.criteria, verified: claimState(outcome) === 'verified'}}/>
       </Panel>}
     </div>
     {snapshot && actionable && <Panel title={isAssessor ? 'Assessor Decision' : 'Verifier Decision'}>
@@ -748,6 +786,14 @@ function OpenPortfolio({db, portfolio, references, onRefresh, onBack}) {
     setUnitIndex(portfolio.units.findIndex(unit => unit.outcomes.some(item => item.id === id)));
     setOutcomeId(id); changeView('outcome');
   };
+  const jumpFromOutcome = (nextUnit, nextOutcome) => {
+    if (nextOutcome === null) {
+      setUnitIndex(nextUnit);
+      changeView('programme');
+    } else {
+      openOutcome(portfolio.units[nextUnit].outcomes[nextOutcome].id);
+    }
+  };
   const run = async (work, message) => {
     if (locking.current) return false;
     locking.current = true; setBusy(true); setError(''); setNotice('');
@@ -811,7 +857,8 @@ function OpenPortfolio({db, portfolio, references, onRefresh, onBack}) {
     await onRefresh();
   },'Evidence mappings saved across Units. Open each Outcome to submit its Competence Claim.');
   const openEvidence = () => {
-    changeView('evidence'); setEvidenceFromOutcome(true);
+    changeView('evidence');
+    setEvidenceFromOutcome(true);
   };
   const onDownload = item => run(() => downloadPortfolioEvidence(db,item));
   const isSandbox = portfolio.catalogKey === privateSandboxKey;
@@ -826,7 +873,10 @@ function OpenPortfolio({db, portfolio, references, onRefresh, onBack}) {
     ...(!learner ? [['dashboard','Overview']] : []),
     ...(libraryAvailable ? [['library','Study Library']] : []),
   ];
-  const outcomeUnit = portfolio.units.find(unit => unit.outcomes.some(item => item.id === outcomeId));
+  const outcomeUnit = portfolio.units[unitIndex];
+  const outcomeIndex = outcomeUnit?.outcomes.findIndex(item => item.id === outcomeId);
+  const outcomeMaterial = outcome && getUnitSourceMaterial(outcomeUnit?.code);
+  const referenceUnit = selectedReference?.units?.find(unit => unit.code === outcomeUnit?.code);
   return <div className="qf-live-stack" aria-busy={busy}>
     <button type="button" className="qf-plain-back" disabled={busy} onClick={onBack}><ArrowLeft size={16}/> Qualifications</button>
     <header className={'qf-live-feature qf-live-feature-open ' + (cover ? 'qf-course-theme-' + cover.color : '')}>
@@ -851,7 +901,7 @@ function OpenPortfolio({db, portfolio, references, onRefresh, onBack}) {
     {view === 'programme' && <UnitProgramme db={db} portfolio={portfolio} unitIndex={unitIndex} setUnitIndex={setUnitIndex} onOutcome={openOutcome}
       onEvidence={id => { changeView('evidence'); setEvidenceUnit(id); }} onContact={() => changeView('contact')}
       onLibrary={libraryAvailable ? () => changeView('library') : null}/>}
-    {view === 'evidence' && <EvidenceFolder key={evidenceUnit} portfolio={visiblePortfolio} initialUnitId={evidenceUnit} busy={busy} onSave={saveEvidence} onDuplicate={duplicateEvidence}
+    {view === 'evidence' && <EvidenceFolder key={evidenceUnit} portfolio={visiblePortfolio} initialUnitId={evidenceUnit} initialWizard={evidenceFromOutcome} busy={busy} onSave={saveEvidence} onDuplicate={duplicateEvidence}
       onMap={saveMultiUnitMapping} onOpenOutcome={openOutcome}
       onDownload={onDownload} onShowcase={items => run(() => downloadEvidenceShowcase(db,items))}
       onBack={evidenceFromOutcome || evidenceUnit ? () => changeView(evidenceFromOutcome ? 'outcome' : 'programme') : null}
@@ -864,26 +914,12 @@ function OpenPortfolio({db, portfolio, references, onRefresh, onBack}) {
     {view === 'library' && cover && selectedReference &&
       <QualificationSourcePreview key={selectedReference.catalog_key} item={cover}
         references={[selectedReference]} embedded onBack={() => changeView('programme')}/>}
-    {view === 'outcome' && outcome && <>
-      <div className="qf-live-actions"><Action secondary disabled={busy} onClick={() => changeView('programme')}><ArrowLeft size={16}/> Back to unit</Action><Status outcome={outcome}/></div>
-      <h2>{outcome.code} · {outcome.title}</h2>
-      <OutcomeLearningSupport unit={outcomeUnit} outcome={outcome} learner={learner}
-        onEvidence={openEvidence} onLibrary={libraryAvailable ? () => changeView('library') : null}/>
-      <div className="qf-live-grid">
-        <Panel title="Assessment Criteria"><ol className="qf-live-criteria">
-          {outcome.criteria.map(criterion => <li key={criterion.id}><strong>{criterion.code}</strong> {criterion.title}</li>)}
-        </ol></Panel>
-        <Panel title="Assessment readiness">
-          <div className="qlearn-readiness-list">
-            <div><span>Criteria to address</span><strong>{outcome.criteria.length}</strong></div>
-            <div><span>Current status</span><Status outcome={outcome}/></div>
-            {outcome.deadline && <div><span>Target date</span><strong>{formatDate(outcome.deadline)}</strong></div>}
-            <div><span>Submitted revisions</span><strong>{outcome.submissions.length}</strong></div>
-          </div>
-          {learner && <Action secondary disabled={busy} onClick={openEvidence}><FolderOpen size={16}/> Open Evidence Folder</Action>}
-          <p className="qlearn-readiness-note">An uploaded file is not an assessor submission. Link your evidence to the criteria in the Competence Claim below.</p>
-        </Panel>
-      </div>
+    {view === 'outcome' && outcome && outcomeIndex >= 0 && <QualificationOutcome
+      units={portfolio.units} unitIndex={unitIndex} outcomeIndex={outcomeIndex} onJump={jumpFromOutcome}
+      onBack={() => changeView('programme')} aim={referenceUnit?.aim || outcomeMaterial?.aim}
+      sourceUrl={selectedReference?.source_url || outcomeMaterial?.sourceUrl}
+      centreBrief={outcomeUnit.centreBrief ? <QualificationCentreBrief unit={outcomeUnit} db={db}/> : null}
+      status={<Status outcome={outcome}/>} deadline={outcome.deadline && formatDate(outcome.deadline)} busy={busy}>
       {learner ? <LearnerClaim key={outcome.id + ':' + claimVersion} portfolio={portfolio} outcome={outcome}
         mapping={mapping} updateMapping={next => setDrafts(old => ({...old,[outcome.id]:{version:claimVersion,mapping:next}}))}
         busy={busy} onSave={submit => commit('save_claim',{p_outcome:outcome.id,p_version:claimVersion,p_mapping:mapping,p_submit:submit},
@@ -893,7 +929,10 @@ function OpenPortfolio({db, portfolio, references, onRefresh, onBack}) {
           busy={busy} onDownload={onDownload} onReview={(decision,feedback,criteria) => commit('review',{
             p_outcome:outcome.id,p_version:claimVersion,p_stage:portfolio.role,p_decision:decision,p_feedback:feedback,p_criteria:criteria,
           }, 'Review recorded.')}/>}
-    </>}
+      <OutcomeLearningSupport unit={outcomeUnit}/>
+      <OutcomeRecords key={'records:' + outcome.id} unit={outcomeUnit} outcome={outcome} formatDate={formatDate}/>
+      <OutcomeContact key={'contact:' + outcome.id} outcome={outcome} formatDate={formatDate} onContact={() => changeView('contact')}/>
+    </QualificationOutcome>}
   </div>;
 }
 

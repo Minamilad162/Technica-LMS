@@ -1,3 +1,9 @@
+## 2026-11-23 — Qualification Outcome detail pages
+
+- Open a dedicated Outcome view from the Course in enrolled portfolios, syllabus and centre preview, with previous/next and Unit/Outcome jump controls.
+- Show scoped resources, status, deadlines, criterion mapping, evidence picking and an Outcome return path from the Evidence Wizard.
+- Surface recorded assessor checklists, Outcome-specific working forms and filterable, printable assessment feedback.
+
 ## 2026-11-23 — Evidence mapping disclosure fix
 
 - Fixed a live crash when expanding a Unit in the Evidence cross-Unit mapper.
