@@ -17,9 +17,9 @@ export const QUALIFICATION_NAV_ITEMS=[
 ];
 export default function QualificationInternalNav({
   items=QUALIFICATION_NAV_ITEMS,active,onChange,disabled=false,
-  ariaLabel='Qualification sections',readOnly=false,nested=false,
+  ariaLabel='Qualification sections',readOnly=false,nested=false,unitContext=false,
 }){
- return <nav className={'qf-live-nav qf-internal-nav' + (nested ? ' qf-internal-nested' : '')} aria-label={ariaLabel}
+ return <nav className={'qf-live-nav qf-internal-nav' + (nested ? ' qf-internal-nested' : '') + (unitContext ? ' qf-internal-unit' : '')} aria-label={ariaLabel}
    data-reference-mode={readOnly?'true':'false'}>
   {items.map(([key,label])=>{
    const Icon=icons[key]||BookOpen;

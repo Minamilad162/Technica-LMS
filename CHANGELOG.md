@@ -1,3 +1,9 @@
+## 2026-11-23 — Qualification Unit sections
+
+- Keep the selected Unit in view when switching between Course, Evidence, Registration, Contact and Metrics.
+- Present Unit Activity and Gap Analysis in Course and open Evidence with the selected Unit applied for enrolled learners.
+- Move Technica working templates into an optional section in Evidence.
+
 ## 2026-11-23 — Evidence Unit materials
 
 - Exposed the selected Unit’s available material, links and criteria from syllabus Evidence and the enrolled Evidence Folder.

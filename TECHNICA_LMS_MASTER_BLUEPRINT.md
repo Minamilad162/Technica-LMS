@@ -4,7 +4,7 @@
 >
 > Project: Technica Consult LMS
 > Version: 1.1.11 (Practice Center quick mode selection)
-> Last updated: 2026-11-23 (Africa/Cairo), Evidence Unit materials
+> Last updated: 2026-11-23 (Africa/Cairo), Qualification Unit sections
 > Repository: https://github.com/Minamilad162/Technica-LMS
 > Target branch: main
 > Current inspected source baseline: v1.15.0, commit 8021f604c63c59b2100d944ead86fed149eb1ceb
@@ -578,6 +578,7 @@ Add new BUG rows immediately when an issue is discovered, include reproduction, 
 | BUG-QF-001 | HIGH | FIXED IN STAGED SOURCE | The authenticated Qualifications link previously opened the browser-local demo. Both live entry points now use the portfolio API and the database persists drafts, claims, decisions and their revisions. The historic preview is restricted to developer QA. |
 | BUG-QF-002 | MEDIUM | FIXED IN SOURCE | The syllabus Course only expanded Outcomes inline. Open each Outcome in the shared view and retain the selected Unit on return. |
 | BUG-QF-003 | MEDIUM | FIXED IN SOURCE | Evidence exposed worksheets and records without the selected Unit's available source material. Reuse version-matched content and existing protected file access. |
+| BUG-QF-004 | MEDIUM | FIXED IN SOURCE | The active Unit and section navigation were separated in the layout, and entering Evidence dropped the Unit filter. Keep the Unit selector, title and section navigation together. |
 
 ## 17. Test and release checklist
 
@@ -2423,3 +2424,12 @@ The syllabus Evidence tab lists the selected Unit’s materials alongside the ex
 Learning Assistant’s 12 reference Units (Induction, CPD and 01–10) expose Activity, Evidence Folder, Gap Analysis and Contact. Technica’s four qualification syllabuses contain 30 Units with 118 Outcomes and one specification file destination per edition. The production check found no approved Unit files for these syllabuses and no resource links or approved Unit files in the two-Unit private test portfolio. Working forms remain Technica-authored templates. Individual uploaded-by, review-tag, lock and per-evidence revision operations from the reference remain open gaps; existing assessment decisions and submission revisions are stored per Outcome.
 
 Local verification: qualification reference, readiness, materials and catalogue checks, a Vite build, and a rendered component check for pinned provenance, deduplication, Outcome links and the no-material state. No migration or production evidence edit is required. Rollback is a frontend revert.
+
+
+## P103 — Qualification Unit sections (2026-11-23)
+
+Display the selected Unit and the Course, Evidence, Registration, Contact and Metrics controls together in both the source preview and the enrolled portfolio. The selected Unit remains visible while changing sections. Opening Evidence from an enrolled Unit starts with that Unit scoped in the register, with All Units still available from the filter. Registration, Contact and Metrics continue to use real programme records within the existing enrolment scope.
+
+Course exposes the Unit aim where sourced, previous/next and Unit/Outcome navigation, Activity, Evidence Folder, Gap Analysis and Contact. Enrolled progress and deadlines come from portfolio records. The source preview exposes the syllabus and clearly indicates where an enrolment is required for individual records. Technica working templates become an optional collapsed section in Evidence. They are separate from provider templates and do not replace the centre's approved documents.
+
+This change is frontend-only and reversible by reverting the commit. Qualification workflow, source provenance, readiness, catalogue, material and production build checks cover the change. Provider-specific files and the distinct reference Induction and CPD Units remain outside this change.
