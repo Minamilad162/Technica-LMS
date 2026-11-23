@@ -76,7 +76,7 @@
 .qf-live .qsrc-edition-picker{display:flex;align-items:center;gap:9px;font-size:11px}
 .qf-live .qsrc-edition-picker select{min-height:36px;padding:7px 10px;border-radius:9px}
 .qf-live .qsrc-edition-single{padding:7px 9px}
-.qf-live .qsrc-page>.qf-internal-nav{margin:0 0 3px;position:static;padding:4px;border-radius:12px;box-shadow:0 4px 14px #1438630b}
+.qf-live .qsrc-page>.qf-internal-nav{margin:0 0 3px;position:sticky;top:8px;z-index:15;padding:4px;border-radius:12px;box-shadow:0 4px 14px #1438630b}
 .qf-live .qsrc-page>.qf-internal-nav button{min-height:39px;padding:8px 11px;font-size:12px}
 .qf-live .qsrc-page>.qf-unit-strip{margin:0;padding:9px 11px}
 .qf-live .qsrc-compact-reference-note{display:flex;align-items:center;gap:7px;margin:0;color:#647c98;font-size:11px;line-height:1.4}
