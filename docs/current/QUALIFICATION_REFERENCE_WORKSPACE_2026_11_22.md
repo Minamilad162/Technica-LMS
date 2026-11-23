@@ -77,3 +77,7 @@ Centre Admin can now publish News and Events and schedule private Appointments o
 | Registration, Contact and Metrics | Reference form entry, programme diary filter/print, training metrics table/print. | Private registration, contact and training on the Technica enrolled path need a named test enrolment for browser verification. |
 
 Names, reference evidence, support destinations and provider resources remain on the reference platform. Changes in this release use existing Technica data and permissions.
+
+### Reference resource inventory and sandbox activation
+
+All seven reference resource groups were opened. They listed 20, 20, 14, 14, 16, 25 and 17 resource destinations respectively, for 126 resources plus seven folder controls. Resource actions are application links. Opening the first handbook document led to an Edge client block on the asset viewer. The resource inventory does not certify the destination contents. Technica's published private sandbox has zero attached programme resource rows, so the reference materials have no enrolled Technica counterparts to open there.

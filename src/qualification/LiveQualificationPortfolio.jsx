@@ -2,7 +2,7 @@ import React, {useEffect, useRef, useState} from 'react';
 import {ArrowLeft, ArrowRight, BookOpen, CheckCircle2, ClipboardCheck, Download, FileText, FolderOpen, GraduationCap, Layers3, LibraryBig, Link2, MessageSquare, Printer, ShieldCheck, BarChart3} from 'lucide-react';
 import PremiumLoading from '../components/PremiumLoading.jsx';
 import {QUALIFICATIONS} from './qualificationData.js';
-import {ProgrammeListPremium, qualificationFor} from './QualificationCatalogue.jsx';
+import {ProgrammeListPremium, privateSandboxKey, qualificationFor} from './QualificationCatalogue.jsx';
 import QualificationSourcePreview from './QualificationSourcePreview.jsx';
 import QualificationInternalNav from './QualificationInternalNav.jsx';
 import QualificationUnitNavigation from './QualificationUnitNavigation.jsx';
@@ -813,17 +813,18 @@ function OpenPortfolio({db, portfolio, references, onRefresh, onBack}) {
     changeView('evidence'); setEvidenceFromOutcome(true);
   };
   const onDownload = item => run(() => downloadPortfolioEvidence(db,item));
+  const isSandbox = portfolio.catalogKey === privateSandboxKey;
+  const cover = isSandbox ? null : qualificationFor(portfolio.title);
+  const selectedReference = references.find(ref => ref.catalog_key === portfolio.catalogKey ||
+    (ref.title === portfolio.title && ref.version === portfolio.version));
+  const libraryAvailable = cover && selectedReference;
   const views = [
     ...(learner ? [['dashboard','Home']] : []),
     ['programme','Course'],['evidence','Evidence'],['registration','Registration'],['contact','Contact'],
     ['metrics','Metrics'],
     ...(!learner ? [['dashboard','Overview']] : []),
-    ...(qualificationFor(portfolio.title) ? [['library','Study Library']] : []),
+    ...(libraryAvailable ? [['library','Study Library']] : []),
   ];
-  const sectionIcons = {dashboard: Layers3, programme: BookOpen, evidence: FolderOpen, registration: GraduationCap, contact: MessageSquare, metrics: BarChart3, library: LibraryBig};
-  const cover = qualificationFor(portfolio.title);
-  const selectedReference = references.find(ref => ref.catalog_key === portfolio.catalogKey ||
-    (ref.title === portfolio.title && ref.version === portfolio.version));
   const outcomeUnit = portfolio.units.find(unit => unit.outcomes.some(item => item.id === outcomeId));
   return <div className="qf-live-stack" aria-busy={busy}>
     <button type="button" className="qf-plain-back" disabled={busy} onClick={onBack}><ArrowLeft size={16}/> Qualifications</button>
@@ -845,10 +846,10 @@ function OpenPortfolio({db, portfolio, references, onRefresh, onBack}) {
       onChange={changeView} disabled={busy} ariaLabel="Programme sections"/>
     {error && <p className="qf-live-error" role="alert">{error}</p>}
     {notice && <p className="qf-live-notice" role="status">{notice}</p>}
-    {view === 'dashboard' && <PortfolioOverview db={db} portfolio={portfolio} progress={progress} onOutcome={openOutcome} onView={changeView} qualification={cover}/>}
+    {view === 'dashboard' && <PortfolioOverview db={db} portfolio={portfolio} progress={progress} onOutcome={openOutcome} onView={changeView} qualification={libraryAvailable ? cover : null}/>}
     {view === 'programme' && <UnitProgramme db={db} portfolio={portfolio} unitIndex={unitIndex} setUnitIndex={setUnitIndex} onOutcome={openOutcome}
       onEvidence={id => { changeView('evidence'); setEvidenceUnit(id); }} onContact={() => changeView('contact')}
-      onLibrary={cover ? () => changeView('library') : null}/>}
+      onLibrary={libraryAvailable ? () => changeView('library') : null}/>}
     {view === 'evidence' && <EvidenceFolder key={evidenceUnit} portfolio={visiblePortfolio} initialUnitId={evidenceUnit} busy={busy} onSave={saveEvidence} onDuplicate={duplicateEvidence}
       onMap={saveMultiUnitMapping} onOpenOutcome={openOutcome}
       onDownload={onDownload} onShowcase={items => run(() => downloadEvidenceShowcase(db,items))}
@@ -866,7 +867,7 @@ function OpenPortfolio({db, portfolio, references, onRefresh, onBack}) {
       <div className="qf-live-actions"><Action secondary disabled={busy} onClick={() => changeView('programme')}><ArrowLeft size={16}/> Back to unit</Action><Status outcome={outcome}/></div>
       <h2>{outcome.code} · {outcome.title}</h2>
       <OutcomeLearningSupport unit={outcomeUnit} outcome={outcome} learner={learner}
-        onEvidence={openEvidence} onLibrary={cover ? () => changeView('library') : null}/>
+        onEvidence={openEvidence} onLibrary={libraryAvailable ? () => changeView('library') : null}/>
       <div className="qf-live-grid">
         <Panel title="Assessment Criteria"><ol className="qf-live-criteria">
           {outcome.criteria.map(criterion => <li key={criterion.id}><strong>{criterion.code}</strong> {criterion.title}</li>)}
@@ -933,7 +934,7 @@ export default function LiveQualificationPortfolio({db}) {
       ]);
       if (current === request.current) {
         const byUnit=new Map((briefs||[]).map(item=>[item.unitId,item]));
-        setPortfolio({...data,canRecordCertificate:data.canRecordCertificate||certAuthorized===true,
+        setPortfolio({...data,catalogKey:data.catalogKey||rows?.find(row=>row.id===id)?.catalogKey,canRecordCertificate:data.canRecordCertificate||certAuthorized===true,
           units:data.units.map(unit=>({...unit,centreBrief:byUnit.get(unit.id)||null}))});
         setPreviewId('');setAdminView(false);
       }
@@ -951,7 +952,7 @@ export default function LiveQualificationPortfolio({db}) {
     ]);
     if (current === request.current) {
       const byUnit=new Map((portfolio?.units||[]).map(unit=>[unit.id,unit.centreBrief]));
-      setPortfolio({...data,canRecordCertificate:data.canRecordCertificate||certAuthorized===true,
+      setPortfolio({...data,catalogKey:data.catalogKey||portfolio.catalogKey,canRecordCertificate:data.canRecordCertificate||certAuthorized===true,
         units:data.units.map(unit=>({...unit,centreBrief:byUnit.get(unit.id)||null}))});
     }
   };

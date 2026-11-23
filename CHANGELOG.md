@@ -1,3 +1,7 @@
+## 2026-11-23 — Private qualification test access
+
+- Show the assigned private test portfolio in its own catalogue section. Offer Study Library only when a matching source edition is available.
+
 ## 2026-11-23 — Evidence Folder reference audit
 
 - Added a sortable evidence register with row details, linked Outcomes, Showcase, pagination and direct upload, duplication and mapping entry points.
