@@ -20,19 +20,23 @@ const countLinked=(unit,ids)=>{
  return unit.outcomes.reduce((n,o)=>n+o.criteria.filter(c=>set.has(c.id)).length,0);
 };
 
-export default function QualificationMultiUnitEvidence({portfolio,busy=false,onSave,onOpenOutcome}){
+export default function QualificationMultiUnitEvidence({portfolio,busy=false,onSave,onOpenOutcome,targetEvidence}){
  const [evidenceId,setEvidenceId]=useState(portfolio.evidence[0]?.id||'');
  const [selected,setSelected]=useState([]);
  const [filter,setFilter]=useState('');
  const [pending,setPending]=useState(false);
  const [expanded,setExpanded]=useState({});
- const evidence=portfolio.evidence.find(x=>x.id===evidenceId);
+ const resolvedId=portfolio.evidence.some(item=>item.id===evidenceId)?evidenceId:portfolio.evidence[0]?.id||'';
+ const evidence=portfolio.evidence.find(x=>x.id===resolvedId);
  const locked=useMemo(()=>new Set(portfolio.units.flatMap(u=>u.outcomes.filter(o=>!editableState(o.claim?.state))
   .flatMap(o=>o.criteria.map(c=>c.id)))),[portfolio]);
  useEffect(()=>{
-  setSelected(linksForEvidence(portfolio,evidenceId));setPending(false);
- },[portfolio,evidenceId]);
- const baseline=useMemo(()=>linksForEvidence(portfolio,evidenceId),[portfolio,evidenceId]);
+  if(targetEvidence)setEvidenceId(targetEvidence.id);
+ },[targetEvidence]);
+ useEffect(()=>{
+  setSelected(linksForEvidence(portfolio,resolvedId));setPending(false);
+ },[portfolio,resolvedId]);
+ const baseline=useMemo(()=>linksForEvidence(portfolio,resolvedId),[portfolio,resolvedId]);
  const selectedSet=useMemo(()=>new Set(selected),[selected]);
  const changes=selected.filter(id=>!baseline.includes(id)).length+
    baseline.filter(id=>!selectedSet.has(id)).length;
@@ -49,7 +53,7 @@ export default function QualificationMultiUnitEvidence({portfolio,busy=false,onS
   setPending(true);
  };
  const doSave=async()=>{
-  const ok=await onSave(evidenceId,selected);
+  const ok=await onSave(resolvedId,selected);
   if(ok!==false)setPending(false);
  };
  if(!portfolio.canEdit)return null;
@@ -65,11 +69,11 @@ export default function QualificationMultiUnitEvidence({portfolio,busy=false,onS
    <span><FileCheck2 size={15}/> 3 · Submit each Outcome for review</span></div>
   {!portfolio.evidence.length?<div className="qmu-empty"><FolderOpen size={22}/><div>
      <strong>Start by uploading evidence above</strong>
-     <p>Choose “Upload a file” in the Evidence Wizard. The same saved file will become
+     <p>Open Evidence Wizard and choose “Upload a file”. The same saved file will become
         available here for every Unit in this qualification.</p>
     </div></div>:<>
     <div className="qmu-toolbar">
-     <label>Evidence document<select aria-label="Choose uploaded evidence to link" value={evidenceId}
+     <label>Evidence document<select aria-label="Choose uploaded evidence to link" value={resolvedId}
        disabled={busy} onChange={e=>setEvidenceId(e.target.value)}>
        {portfolio.evidence.map(item=><option key={item.id} value={item.id}>
         {item.title} · {item.id.slice(0,8).toUpperCase()}</option>)}
