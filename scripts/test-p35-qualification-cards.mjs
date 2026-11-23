@@ -188,8 +188,10 @@ assert.match(sourcePreview,/<QualificationInternalNav active=\{section\}/,
  'Reference previews must include internal Qualifications nav without a learner enrolment');
 assert.match(live,/<QualificationInternalNav items=\{views\}/,
  'Enrolled portfolios must use the same internal nav component');
-assert.match(live,/embedded onBack=\{\(\) => changeView\('programme'\)\}/,
- 'Nested Study Library must not duplicate the real portfolio nav bar');
+assert.match(live,/<QualificationStudyLibrary portfolio=\{visiblePortfolio\} source=\{selectedReference\}/,
+ 'Enrolled and test portfolios must use the unified Study Library without duplicated navigation');
+assert.match(sourcePreview,/<QualificationStudyLibrary source=\{source\}/,
+ 'Official syllabus must use the same Study Library component with source-backed data');
 assert.match(sourcePreview,/\(embedded\|\|section==='course'\)/,
  'Source course view must be available independently of enrolment');
 assert.match(sourcePreview,/section === 'evidence'/,'Read-only evidence preparation tab missing');
