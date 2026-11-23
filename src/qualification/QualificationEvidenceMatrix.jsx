@@ -1,4 +1,4 @@
-import React,{useMemo,useState} from 'react';
+import React,{useEffect,useMemo,useRef,useState} from 'react';
 import {Check,FileText,FolderOpen,Info,Layers3,Link2,LockKeyhole,Search} from 'lucide-react';
 import QualificationMultiUnitEvidence from './QualificationMultiUnitEvidence.jsx';
 import './qualificationExperience.css';
@@ -7,6 +7,10 @@ export default function QualificationEvidenceMatrix({portfolio,source,selectedUn
  const [search,setSearch]=useState('');
  const [evidenceId,setEvidenceId]=useState('');
  const [showMapping,setShowMapping]=useState(false);
+ const editorRef=useRef(null);
+ useEffect(()=>{
+  if(showMapping)editorRef.current?.scrollIntoView({block:'start',behavior:'smooth'});
+ },[showMapping]);
  const units=portfolio?.units||source?.units||[];
  const unit=units[selectedUnitIndex]||units[0];
  const learner=portfolio?.role==='learner';
@@ -80,7 +84,7 @@ export default function QualificationEvidenceMatrix({portfolio,source,selectedUn
       <Link2 size={16}/> Edit cross-Unit links</button>}
    </aside>
   </div>
-  {showMapping&&learner&&portfolio?.canEdit&&<section className="qxp-mapping-editor">
+  {showMapping&&learner&&portfolio?.canEdit&&<section ref={editorRef} className="qxp-mapping-editor">
     <div className="qxp-section-head"><h3>Map one Evidence item across Units</h3>
      <button className="qxp-secondary" type="button" onClick={()=>setShowMapping(false)}>Close mapping</button></div>
     <QualificationMultiUnitEvidence portfolio={portfolio} busy={busy} targetEvidence={evidenceId?{id:evidenceId}:null}
