@@ -1,0 +1,102 @@
+.qf-live .qf-evidence-experience {
+  display: grid;
+  gap: 18px;
+  min-width: 0;
+}
+.qf-live .qf-evidence-command {
+  display: grid;
+  gap: 17px;
+  padding: clamp(16px, 3vw, 25px);
+  border: 1px solid #c8dcef;
+  border-radius: 18px;
+  background: linear-gradient(125deg, #e9f3fe, #f8fbff 77%);
+}
+.qf-live .qf-evidence-command-heading {
+  display: flex;
+  align-items: center;
+  gap: 13px;
+  flex-wrap: wrap;
+}
+.qf-live .qf-evidence-command-heading > div { flex: 1 1 190px; min-width: 0; }
+.qf-live .qf-evidence-command-icon {
+  display: grid;
+  place-items: center;
+  width: 49px;
+  height: 49px;
+  border-radius: 14px;
+  background: #194a79;
+  color: white;
+}
+.qf-live .qf-evidence-command h2 { margin: 0 0 3px; color: #163450; font-size: clamp(1.15rem, 2vw, 1.45rem); }
+.qf-live .qf-evidence-command p { margin: 0; color: #435c75; overflow-wrap: anywhere; }
+.qf-live .qf-evidence-primary-actions { display: flex; flex-wrap: wrap; gap: 9px; }
+.qf-live .qf-evidence-primary-actions button { min-height: 44px; }
+.qf-live .qf-evidence-wizard {
+  border-color: #9fbfdd;
+  box-shadow: 0 7px 22px #194a7914;
+  scroll-margin-top: 110px;
+}
+.qf-live .qf-evidence-wizard h3 { scroll-margin-top: 110px; }
+.qf-live .qf-evidence-mode { margin-block: 0 14px; }
+.qf-live .qf-evidence-mode [aria-pressed="true"] {
+  border-color: #87b4dd;
+  background: #e4f1fd;
+  color: #184c7a;
+}
+.qf-live .qf-evidence-file {
+  padding: 14px;
+  border: 1px dashed #90adca;
+  border-radius: 12px;
+  background: #f4f9ff;
+}
+.qf-live .qf-evidence-file-heading { display: inline-flex; align-items: center; gap: 8px; }
+.qf-live .qf-evidence-file small { color: #435c75; }
+.qf-live .qf-evidence-file input { max-width: 100%; }
+.qf-live .qf-evidence-saved {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  padding: 14px;
+  border: 1px solid #a9d4c4;
+  border-radius: 14px;
+  background: #ecf8f3;
+  color: #1b5d4c;
+  scroll-margin-top: 110px;
+}
+.qf-live .qf-evidence-saved > div { flex: 1 1 160px; min-width: 0; }
+.qf-live .qf-evidence-saved p { margin: 2px 0 0; color: #315f52; overflow-wrap: anywhere; }
+.qf-live .qf-evidence-experience .qmu-card { scroll-margin-top: 110px; }
+.qf-live .qf-evidence-experience .qmu-steps [aria-current="step"] {
+  background: #194a79;
+  color: #fff;
+  border-color: #194a79;
+}
+.qf-live .qf-evidence-record-tools { margin-bottom: 12px; }
+.qf-live .qf-evidence-experience button:focus-visible,
+.qf-live .qf-evidence-experience summary:focus-visible {
+  outline: 3px solid #2d77b9;
+  outline-offset: 2px;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .qf-live .qf-evidence-wizard,
+  .qf-live .qf-evidence-saved,
+  .qf-live .qf-evidence-experience .qsrc-evidence-access {
+    animation: qf-evidence-appear 210ms ease-out both;
+  }
+  .qf-live .qf-evidence-spinner { animation: qf-evidence-spin 850ms linear infinite; }
+  .qf-live .qf-evidence-primary-actions button,
+  .qf-live .qf-evidence-experience .qlearn-evidence-outcomes button {
+    transition: background-color 160ms ease, border-color 160ms ease, box-shadow 160ms ease;
+  }
+  .qf-live .qf-evidence-primary-actions button:hover:not(:disabled) { box-shadow: 0 4px 10px #194a7926; }
+}
+@keyframes qf-evidence-appear {
+  from { opacity: 0; transform: translateY(5px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes qf-evidence-spin { to { transform: rotate(360deg); } }
+@media (max-width: 520px) {
+  .qf-live .qf-evidence-primary-actions button { flex: 1 1 130px; }
+  .qf-live .qf-evidence-saved button { width: 100%; }
+}

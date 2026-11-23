@@ -182,7 +182,7 @@ export default function QualificationSourcePreview({item,references=[],onBack,em
     </section>
     <aside className="qsrc-aside"><SourceDocument source={source}/></aside>
   </div></>}
-  {needsUploadRoute && unit && <div className="qsrc-evidence-page">
+  {needsUploadRoute && unit && <div className="qsrc-evidence-page qf-evidence-experience">
     <section className="qsrc-evidence-access" aria-label="Evidence upload access">
       <span className="qsrc-evidence-access-icon"><Upload size={21} aria-hidden="true"/></span>
       <div>

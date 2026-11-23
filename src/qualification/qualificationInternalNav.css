@@ -42,3 +42,8 @@
  .qf-live .qf-internal-nav.qf-internal-unit{flex-wrap:wrap;overflow:visible}
  .qf-live .qf-internal-unit button{padding-inline:8px}
 }
+
+.qf-live .qf-internal-unit button[aria-pressed="true"] {
+  background: #194a79; color: #fff; border-color: #194a79;
+  box-shadow: 0 3px 8px #194a7926;
+}

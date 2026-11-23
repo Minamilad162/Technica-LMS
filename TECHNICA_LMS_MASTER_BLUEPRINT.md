@@ -4,7 +4,7 @@
 >
 > Project: Technica Consult LMS
 > Version: 1.1.11 (Practice Center quick mode selection)
-> Last updated: 2026-11-23 (Africa/Cairo), Evidence upload entry
+> Last updated: 2026-11-23 (Africa/Cairo), Evidence learner experience
 > Repository: https://github.com/Minamilad162/Technica-LMS
 > Target branch: main
 > Current inspected source baseline: v1.15.0, commit 8021f604c63c59b2100d944ead86fed149eb1ceb
@@ -2441,3 +2441,10 @@ This change is frontend-only and reversible by reverting the commit. Qualificati
 The syllabus Evidence section gives an explicit upload shortcut for matching learner enrolments. When the selected edition has no enrolment, an independently assigned private sandbox can be opened through a clearly labelled test upload action. The shortcut opens the existing Evidence Wizard and respects the enrolled portfolio's server-provided edit permission. No enrolment is created, edition published, or evidence associated across editions. A newly saved record is visible before it is mapped because the register clears search and Unit filters on successful creation.
 
 Study documents, expandable Outcome criterion links and optional Technica working templates have separate visual treatments. The ProQual reference remains unpublished and the existing private test portfolio is available to its assigned learner. Existing qualification regression tests and the production build verify the frontend change. Rollback is a frontend revert.
+
+
+## P105 — Evidence learner experience (2026-11-23)
+
+Place file upload and written evidence above the records table. Keep duplication, filtering and Showcase actions with the register. Present the active form above the register, show its selected mode and saving state, and display a confirmation with a shortcut to map the newly saved record. Focus moves to the form, the confirmation, and the mapper when opened. Unit selection and section navigation have stronger active states. Source previews keep their existing access panel and Unit materials.
+
+Reused Lucide icons and CSS transitions for file, mapping and status actions. The animations run only with no reduced-motion preference. No dependency, enrolment, database or assessment changes. Existing evidence persistence and criterion locks apply.
