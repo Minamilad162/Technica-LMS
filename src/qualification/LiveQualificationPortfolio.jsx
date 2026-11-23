@@ -142,7 +142,7 @@ function OutcomeLink({outcome, onOpen}) {
   </button>;
 }
 
-function UnitProgramme({db,portfolio, unitIndex, setUnitIndex, onOutcome, onEvidence, onContact, onLibrary}) {
+function UnitProgramme({db,portfolio, unitIndex, setUnitIndex, onOutcome, onEvidence, onContact, onLibrary, aim}) {
   const unit = portfolio.units[unitIndex] || portfolio.units[0];
   const learner = portfolio.role === 'learner';
   if (!unit) return <Panel title="Programme units"><p>No units are available.</p></Panel>;
@@ -150,8 +150,7 @@ function UnitProgramme({db,portfolio, unitIndex, setUnitIndex, onOutcome, onEvid
   const unitStarted = unitRequired.filter(outcome => claimState(outcome) !== 'not_started').length;
   const unitVerified = unitRequired.filter(outcome => claimState(outcome) === 'verified').length;
   return <>
-    <QualificationUnitNavigation units={portfolio.units} selectedIndex={unitIndex} onSelect={setUnitIndex}/>
-    <div className="qf-unit-heading"><div><span className="qf-overline" dir="ltr">{unit.code}</span><h2>{unit.title}</h2></div></div>
+    {aim && <Panel title="Unit aim"><p>{aim}</p></Panel>}
     <div className="qf-ref-unit-toolbar">
       <button type="button" disabled={unitIndex===0} onClick={()=>setUnitIndex(index=>Math.max(0,index-1))}><ArrowLeft size={15}/> Previous Unit</button>
       <label>Jump to Unit or Outcome
@@ -171,18 +170,22 @@ function UnitProgramme({db,portfolio, unitIndex, setUnitIndex, onOutcome, onEvid
       <button type="button" disabled={unitIndex===portfolio.units.length-1}
         onClick={()=>setUnitIndex(index=>Math.min(portfolio.units.length-1,index+1))}>Next Unit <ArrowRight size={15}/></button>
     </div>
-    <div className="qf-ref-unit-progress">
-      <span><strong>{unitStarted}/{unitRequired.length}</strong> Outcomes started</span>
-      <span><strong>{unitVerified}/{unitRequired.length}</strong> Outcomes verified</span>
-      <progress max={unitRequired.length||1} value={unitVerified} aria-label={'Verified Outcomes in Unit '+unit.code}/>
-    </div>
-    <QualificationCentreBrief unit={unit} db={db}/>
-    <LiveUnitLearningHub key={unit.id} unit={unit} portfolio={portfolio} onEvidence={() => onEvidence(unit.id)} onLibrary={onLibrary}/>
-    <QualificationEvidenceTemplates key={unit.id+':forms'} unit={unit}/>
-    <div className="qf-live-grid">
-      <Panel title="Activity · Learning Outcomes"><div className="qf-live-list">
+    <Panel title="Activity · Learning Outcomes">
+      <div className="qf-ref-unit-progress">
+        <span><strong>{unitStarted}/{unitRequired.length}</strong> Outcomes started</span>
+        <progress max={unitRequired.length||1} value={unitStarted} aria-label={'Started Outcomes in Unit '+unit.code}/>
+        <span><strong>{unitVerified}/{unitRequired.length}</strong> Outcomes verified</span>
+        <progress max={unitRequired.length||1} value={unitVerified} aria-label={'Verified Outcomes in Unit '+unit.code}/>
+      </div>
+      {!unit.outcomes.some(outcome => outcome.deadline) && <p>No deadline has been set.</p>}
+      <div className="qf-live-list">
         {unit.outcomes.map(outcome => <OutcomeLink key={outcome.id} outcome={outcome} onOpen={onOutcome}/>)}
-      </div></Panel>
+      </div>
+    </Panel>
+    <div className="qf-live-grid">
+      <Panel title="Evidence Folder">
+        <Action secondary onClick={() => onEvidence(unit.id)}><FolderOpen size={16}/> View Unit evidence</Action>
+      </Panel>
       <Panel title="Gap Analysis · Assessment Criteria"><div className="qf-live-gaps">
         {unit.outcomes.map(outcome => {
           const mapping = outcome.claim?.mapping;
@@ -197,14 +200,11 @@ function UnitProgramme({db,portfolio, unitIndex, setUnitIndex, onOutcome, onEvid
         })}
       </div></Panel>
     </div>
-    <div className="qf-live-grid">
-      <Panel title="Evidence Folder">
-        <Action secondary onClick={() => onEvidence(unit.id)}><FolderOpen size={16}/> View Unit evidence</Action>
-      </Panel>
-      <Panel title="Contact">
-        <Action secondary onClick={onContact}><MessageSquare size={16}/> Open programme Contact Diary</Action>
-      </Panel>
-    </div>
+    <Panel title="Contact">
+      <Action secondary onClick={onContact}><MessageSquare size={16}/> Open programme Contact Diary</Action>
+    </Panel>
+    <QualificationCentreBrief unit={unit} db={db}/>
+    <LiveUnitLearningHub key={unit.id} unit={unit} portfolio={portfolio} onEvidence={() => onEvidence(unit.id)} onLibrary={onLibrary}/>
   </>;
 }
 
@@ -219,7 +219,7 @@ function EvidenceItem({item, onDownload, uses = []}) {
   </article>;
 }
 
-function EvidenceFolder({db, portfolio, source, initialUnitId, initialWizard, onDownload, onShowcase, busy, onSave, onDuplicate, onMap, onOpenOutcome, onBack, backLabel}) {
+function EvidenceFolder({db, portfolio, source, initialUnitId, initialWizard, onSelectUnit, onDownload, onShowcase, busy, onSave, onDuplicate, onMap, onOpenOutcome, onBack, backLabel}) {
   const [mode, setMode] = useState(initialWizard ? 'choose' : '');
   const [showcase, setShowcase] = useState([]);
   const [detailId, setDetailId] = useState('');
@@ -324,7 +324,10 @@ function EvidenceFolder({db, portfolio, source, initialUnitId, initialWizard, on
         <label>Format<select value={medium} onChange={applyFilter(setMedium)}>
           <option value="">All formats</option><option value="file">File upload</option><option value="written">Written evidence</option>
         </select></label>
-        <label>Unit<select value={unitFilter} onChange={applyFilter(setUnitFilter)}>
+        <label>Unit<select value={unitFilter} onChange={event => {
+          applyFilter(setUnitFilter)(event);
+          onSelectUnit(event.target.value);
+        }}>
           <option value="">All Units</option><option value="unmapped">Unmapped</option>
           {portfolio.units.map(unit => <option key={unit.id} value={unit.id}>{unit.code} · {unit.title}</option>)}
         </select></label>
@@ -446,6 +449,10 @@ function EvidenceFolder({db, portfolio, source, initialUnitId, initialWizard, on
     onOutcome={outcome => onOpenOutcome(outcome.id)}>
     {selectedUnit.centreBrief && <QualificationCentreBrief unit={selectedUnit} db={db}/>}
   </EvidenceUnitMaterials>}
+  {portfolio.canEdit && selectedUnit?.outcomes.length > 0 && <details key={'forms:' + selectedUnit.id} className="qf-card qf-outcome-filters">
+    <summary>Technica working templates</summary>
+    <QualificationEvidenceTemplates unit={selectedUnit} compact/>
+  </details>}
   {portfolio.canEdit && <EvidencePreparationTips/>}
   </div>;
 }
@@ -880,7 +887,20 @@ function OpenPortfolio({db, portfolio, references, onRefresh, onBack}) {
   ];
   const outcomeUnit = portfolio.units[unitIndex];
   const outcomeIndex = outcomeUnit?.outcomes.findIndex(item => item.id === outcomeId);
-  const outcomeMaterial = outcome && getUnitSourceMaterial(outcomeUnit?.code);
+  const outcomeMaterial = getUnitSourceMaterial(outcomeUnit?.code);
+  const unitView = ['programme','outcome','evidence','registration','contact','metrics'].includes(view);
+  const selectContextUnit = index => {
+    setUnitIndex(index);
+    if (view === 'outcome') changeView('programme');
+    if (view === 'evidence') {
+      setEvidenceFromOutcome(false);
+      setEvidenceUnit(portfolio.units[index].id);
+    }
+  };
+  const openSection = key => {
+    changeView(key);
+    if (key === 'evidence' && unitView && outcomeUnit) setEvidenceUnit(outcomeUnit.id);
+  };
   const referenceUnit = selectedReference?.units?.find(unit => unit.code === outcomeUnit?.code);
   return <div className="qf-live-stack" aria-busy={busy}>
     <button type="button" className="qf-plain-back" disabled={busy} onClick={onBack}><ArrowLeft size={16}/> Qualifications</button>
@@ -898,15 +918,25 @@ function OpenPortfolio({db, portfolio, references, onRefresh, onBack}) {
       <div className="qf-live-feature-action"><Action secondary disabled={busy} onClick={() => run(() => onRefresh())}>Refresh</Action></div>
     </header>
     <PortfolioStatusRibbon portfolio={portfolio} progress={progress} onRegistration={()=>changeView('registration')}/>
+    {unitView && <QualificationUnitNavigation units={portfolio.units} selectedIndex={unitIndex} onSelect={selectContextUnit}/>}
     <QualificationInternalNav items={views} active={view === 'outcome' ? 'programme' : view}
-      onChange={changeView} disabled={busy} ariaLabel="Programme sections"/>
+      onChange={openSection} disabled={busy} unitContext={unitView} ariaLabel={unitView ? 'Unit sections' : 'Programme sections'}/>
+    {unitView && outcomeUnit && view !== 'outcome' && <header className="qf-unit-heading">
+      <div><span className="qf-overline">Unit {String(unitIndex + 1).padStart(2,'0')} · {outcomeUnit.code}</span>
+        <h2>{outcomeUnit.title}</h2></div>
+    </header>}
     {error && <p className="qf-live-error" role="alert">{error}</p>}
     {notice && <p className="qf-live-notice" role="status">{notice}</p>}
     {view === 'dashboard' && <PortfolioOverview db={db} portfolio={portfolio} progress={progress} onOutcome={openOutcome} onView={changeView} qualification={libraryAvailable ? cover : null}/>}
     {view === 'programme' && <UnitProgramme db={db} portfolio={portfolio} unitIndex={unitIndex} setUnitIndex={setUnitIndex} onOutcome={openOutcome}
+      aim={referenceUnit?.aim || outcomeMaterial?.aim}
       onEvidence={id => { changeView('evidence'); setEvidenceUnit(id); }} onContact={() => changeView('contact')}
       onLibrary={libraryAvailable ? () => changeView('library') : null}/>}
     {view === 'evidence' && <EvidenceFolder key={evidenceUnit} db={db} portfolio={visiblePortfolio} source={selectedReference} initialUnitId={evidenceUnit} initialWizard={evidenceFromOutcome} busy={busy} onSave={saveEvidence} onDuplicate={duplicateEvidence}
+      onSelectUnit={id => {
+        const index = portfolio.units.findIndex(unit => unit.id === id);
+        if (index >= 0) setUnitIndex(index);
+      }}
       onMap={saveMultiUnitMapping} onOpenOutcome={openOutcome}
       onDownload={onDownload} onShowcase={items => run(() => downloadEvidenceShowcase(db,items))}
       onBack={evidenceFromOutcome || evidenceUnit ? () => changeView(evidenceFromOutcome ? 'outcome' : 'programme') : null}

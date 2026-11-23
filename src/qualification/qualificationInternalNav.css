@@ -37,3 +37,8 @@
 }
 
 .qf-live .qf-internal-nav.qf-internal-nested{position:static}
+
+@media(max-width:640px){
+ .qf-live .qf-internal-nav.qf-internal-unit{flex-wrap:wrap;overflow:visible}
+ .qf-live .qf-internal-unit button{padding-inline:8px}
+}

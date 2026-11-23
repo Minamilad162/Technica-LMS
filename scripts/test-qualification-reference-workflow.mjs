@@ -78,4 +78,13 @@ assert.match(ui,/<EvidenceUnitMaterials[\s\S]*?unit=\{selectedUnit\} source=\{so
  'Enrolled Evidence should scope materials to its Unit filter');
 assert.match(unitMaterials,/source\?\.units\?\.find\(entry => entry.code === unit.code\)/,
  'Select source materials by official Unit code in the pinned edition');
+assert.match(sourcePreview,/<QualificationUnitNavigation[^\n]+>\}\s*\{!embedded&&<QualificationInternalNav/,
+ 'Reference Unit navigation must stay visible across the selected Unit sections');
+assert.match(ui,/unitView && <QualificationUnitNavigation/);
+assert.match(ui,/key === 'evidence' && unitView && outcomeUnit\) setEvidenceUnit\(outcomeUnit.id\)/,
+ 'Evidence opened from a Unit must start with that Unit selected');
+for(const view of [ui,sourcePreview]){
+ assert.match(view,/<details[^>]+>\s*<summary>Technica working templates<\/summary>/,
+  'Technica templates are optional supporting tools in Evidence');
+}
 console.log('Qualification reference workflow: programme, evidence, enrolment, contact, metrics and privacy constraints PASS');
