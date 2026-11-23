@@ -221,6 +221,8 @@ assert.match(multiUnit,/outcome\.claim\?\.mapping/,
  'Selected evidence must be loaded from existing claims');
 assert.match(multiUnit,/editableState\(o\.claim\?\.state\)/,
  'Submitted and verified work must remain locked');
+assert.match(multiUnit,/const open=event\.currentTarget\.open;\s*setExpanded\(/,
+ 'Capture the disclosure state before scheduling the React updater');
 assert.match(multiUnit,/Save mapping across Units/,
  'Bulk mapping save action missing');
 assert.match(multiUnitCss,/\.qmu-unit-grid/);

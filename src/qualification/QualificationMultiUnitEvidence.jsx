@@ -95,7 +95,11 @@ export default function QualificationMultiUnitEvidence({portfolio,busy=false,onS
         const editable=unit.outcomes.filter(o=>editableState(o.claim?.state)).flatMap(o=>o.criteria);
         const allEditable=editable.length>0&&editable.every(c=>selectedSet.has(c.id));
         return <details key={unit.id} className="qmu-unit" open={filter?true:expanded[unit.id]===true}
-          onToggle={e=>{if(filter)return;setExpanded(old=>({...old,[unit.id]:e.currentTarget.open}));}}>
+          onToggle={event=>{
+           if(filter)return;
+           const open=event.currentTarget.open;
+           setExpanded(old=>old[unit.id]===open?old:{...old,[unit.id]:open});
+         }}>
          <summary><span className="qmu-unit-num">{String(i+1).padStart(2,'0')}</span>
            <span className="qmu-unit-title"><strong>{unit.title}</strong><small>{unit.code} · {links} linked criteria</small></span>
            {links>0&&<span className="qmu-linked"><Check size={14}/> {links}</span>}
