@@ -6,6 +6,7 @@ import {ProgrammeListPremium, privateSandboxKey, qualificationFor} from './Quali
 import QualificationSourcePreview from './QualificationSourcePreview.jsx';
 import QualificationInternalNav from './QualificationInternalNav.jsx';
 import QualificationUnitNavigation from './QualificationUnitNavigation.jsx';
+import QualificationVisualDashboard, {QualificationTopStats} from './QualificationVisualDashboard.jsx';
 import {ProgrammeUpdateList, useProgrammeUpdates} from './QualificationProgrammeUpdates.jsx';
 import {printPortfolioSection} from './portfolioPrint.js';
 import QualificationMultiUnitEvidence from './QualificationMultiUnitEvidence.jsx';
@@ -814,7 +815,7 @@ function ContactDiary({db,portfolio,progress,onOutcome}) {
 
 function OpenPortfolio({db, portfolio, references, evidenceEntry, onRefresh, onBack}) {
   const entryIndex = portfolio.units.findIndex(unit => unit.code === evidenceEntry?.unitCode);
-  const [view,setView] = useState(evidenceEntry ? 'evidence' : 'programme');
+  const [view,setView] = useState(evidenceEntry ? 'evidence' : 'dashboard');
   const [unitIndex,setUnitIndex] = useState(Math.max(0, entryIndex));
   const [outcomeId,setOutcomeId] = useState('');
   const [evidenceFromOutcome,setEvidenceFromOutcome] = useState(false);
@@ -939,7 +940,7 @@ function OpenPortfolio({db, portfolio, references, evidenceEntry, onRefresh, onB
   const outcomeUnit = portfolio.units[unitIndex];
   const outcomeIndex = outcomeUnit?.outcomes.findIndex(item => item.id === outcomeId);
   const outcomeMaterial = getUnitSourceMaterial(outcomeUnit?.code);
-  const unitView = ['programme','outcome','evidence','registration','contact','metrics'].includes(view);
+  const unitView = ['dashboard','programme','outcome','evidence','registration','contact','metrics'].includes(view);
   const selectContextUnit = index => {
     setUnitIndex(index);
     if (view === 'outcome') changeView('programme');
@@ -956,31 +957,33 @@ function OpenPortfolio({db, portfolio, references, evidenceEntry, onRefresh, onB
   const referenceUnit = selectedReference?.units?.find(unit => unit.code === outcomeUnit?.code);
   return <div className="qf-live-stack" aria-busy={busy}>
     <button type="button" className="qf-plain-back" disabled={busy} onClick={onBack}><ArrowLeft size={16}/> Qualifications</button>
-    <header className={'qf-live-feature qf-live-feature-open ' + (cover ? 'qf-course-theme-' + cover.color : '')}>
-      {cover && <img src={cover.heroImage} alt="" aria-hidden="true"/>}
-      <div className="qf-live-feature-shade"/>
-      <div className="qf-live-feature-content">
-        <span className="qf-live-eyebrow">{roleLabels[portfolio.role]} · {cover?.body || 'TECHNICA'}</span>
-        <h1 className="qf-programme-title">{portfolio.title}</h1>
-        <div className="qf-live-feature-meta"><span><Layers3 size={16}/> {portfolio.units.length} Units</span>
-          <span><CheckCircle2 size={16}/> {progress.verified}/{progress.total} verified outcomes</span>
-          {portfolio.completedAt && <span><ShieldCheck size={16}/> Completed</span>}</div>
-        {!learner && <p className="qf-live-feature-learner" dir="auto">{portfolio.learner}</p>}
-      </div>
-      <div className="qf-live-feature-action"><Action secondary disabled={busy} onClick={() => run(() => onRefresh())}>Refresh</Action></div>
+    <header className="qfd-page-header">
+      <div><span className="qfd-eyebrow">{roleLabels[portfolio.role]} · {cover?.body || 'TECHNICA'}</span>
+        <h1>Qualifications</h1>
+        <p>Track your qualification progress, manage Units and evidence, and complete your assessment.</p></div>
+      <Action secondary disabled={busy} onClick={() => run(() => onRefresh())}>Refresh</Action>
     </header>
-    <PortfolioStatusRibbon portfolio={portfolio} progress={progress} onRegistration={()=>changeView('registration')}/>
+    <QualificationTopStats portfolio={portfolio} visiblePortfolio={visiblePortfolio}/>
+    {view !== 'dashboard' && <PortfolioStatusRibbon portfolio={portfolio} progress={progress} onRegistration={()=>changeView('registration')}/>}
     {unitView && <QualificationUnitNavigation units={portfolio.units} selectedIndex={unitIndex} onSelect={selectContextUnit}/>}
     <QualificationInternalNav items={views} active={view === 'outcome' ? 'programme' : view}
       onChange={openSection} disabled={busy} unitContext={unitView} ariaLabel={unitView ? 'Unit sections' : 'Programme sections'}/>
-    {unitView && outcomeUnit && view !== 'outcome' && <header className="qf-unit-heading">
+    {unitView && outcomeUnit && !['outcome','dashboard'].includes(view) && <header className="qf-unit-heading">
       <div><span className="qf-overline">Unit {String(unitIndex + 1).padStart(2,'0')} · {outcomeUnit.code}</span>
         <h2>{outcomeUnit.title}</h2></div>
     </header>}
     {error && <p className="qf-live-error" role="alert">{error}</p>}
     {notice && <p className="qf-live-notice" role="status">{notice}</p>}
     {view === 'evidence' && evidenceEntry && !portfolio.canEdit && <p>Evidence uploads are unavailable for this enrolment.</p>}
-    {view === 'dashboard' && <PortfolioOverview db={db} portfolio={portfolio} progress={progress} onOutcome={openOutcome} onView={changeView} qualification={libraryAvailable ? cover : null}/>}
+    {view === 'dashboard' && <>
+      <QualificationVisualDashboard portfolio={visiblePortfolio} progress={progress} selectedUnitIndex={unitIndex}
+        onUnit={index => {setUnitIndex(index);changeView('programme');}} onOutcome={openOutcome}
+        onEvidence={() => changeView('evidence')} onRegistration={() => changeView('registration')}/>
+      <details className="qfd-existing-tools"><summary>Tasks, messages, appointments &amp; programme resources</summary>
+        <PortfolioOverview db={db} portfolio={portfolio} progress={progress} onOutcome={openOutcome}
+          onView={changeView} qualification={libraryAvailable ? cover : null}/>
+      </details>
+    </>}
     {view === 'programme' && <UnitProgramme db={db} portfolio={portfolio} unitIndex={unitIndex} setUnitIndex={setUnitIndex} onOutcome={openOutcome}
       aim={referenceUnit?.aim || outcomeMaterial?.aim}
       onEvidence={id => { changeView('evidence'); setEvidenceUnit(id); }} onContact={() => changeView('contact')}
