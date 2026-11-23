@@ -106,6 +106,15 @@ WITH deleted AS (DELETE FROM storage.objects WHERE bucket_id='technica-qualifica
  SELECT pg_temp.expect(count(*)=0,'authenticated users cannot delete evidence objects') FROM deleted;
 WITH changed AS (UPDATE storage.objects SET metadata='{}' WHERE bucket_id='technica-qualification-evidence' RETURNING 1)
  SELECT pg_temp.expect(count(*)=0,'authenticated users cannot overwrite evidence objects') FROM changed;
+SAVEPOINT mapping_regression;
+SELECT pg_temp.expect((public.lms_qf_map_evidence_across_units(pg_temp.qid(50),pg_temp.qid(61),
+ ARRAY[pg_temp.qid(40),pg_temp.qid(41)])->>'outcomesUpdated')::integer=2,'one evidence row maps to two draft outcomes');
+SELECT pg_temp.expect((public.lms_qf_map_evidence_across_units(pg_temp.qid(50),pg_temp.qid(61),
+ ARRAY[pg_temp.qid(40),pg_temp.qid(41)])->>'outcomesUpdated')::integer=0,'mapping retries are idempotent');
+SELECT pg_temp.expect((public.lms_qf_map_evidence_across_units(pg_temp.qid(50),pg_temp.qid(61),
+ ARRAY[pg_temp.qid(40)])->>'criterionLinksChanged')::integer=1,'removing a draft link preserves other links');
+ROLLBACK TO SAVEPOINT mapping_regression;
+RELEASE SAVEPOINT mapping_regression;
 SELECT public.lms_qf_save_claim(pg_temp.qid(50),pg_temp.qid(30),0,jsonb_build_object(pg_temp.qid(40)::text,jsonb_build_array(current_setting('test.qf_written'))),false);
 SELECT pg_temp.expect(public.lms_qf_portfolio(pg_temp.qid(50))#>>'{units,0,outcomes,0,claim,state}'='draft','draft persists');
 SELECT pg_temp.denied($sql$SELECT public.lms_qf_review(pg_temp.qid(50),pg_temp.qid(30),1,'assessor','return','fake verdict','{}')$sql$, 'review access denied');
