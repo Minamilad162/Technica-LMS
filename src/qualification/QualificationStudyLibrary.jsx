@@ -7,13 +7,14 @@ export default function QualificationStudyLibrary({portfolio,source,selectedUnit
  const unit=units[selectedUnitIndex]||units[0];
  const material=source?.units?.find(x=>x.code===unit?.code)||(!portfolio?unit:null);
  const outcomes=unit?.outcomes||[];
+ const sourceUrl=source?.source_url?.startsWith('https://')?source.source_url:null;
  const resources=useMemo(()=>{
   const map=new Map();
-  if(source?.source_url)map.set(source.source_url,{title:source.title+' · specification',url:source.source_url,label:'Awarding-body specification'});
+  if(sourceUrl)map.set(sourceUrl,{title:source.title+' · specification',url:sourceUrl,label:'Awarding-body specification'});
   for(const o of outcomes)for(const r of o.resources||[])if(r.url&&/^https:\/\//.test(r.url))
    map.set(r.url,{title:r.title||'Unit resource',url:r.url,label:'Unit resource'});
   return [...map.values()];
- },[source,outcomes]);
+ },[source,sourceUrl,outcomes]);
  return <div className="qxp-library">
   <div className="qxp-section-head"><div><span className="qxp-eyebrow">QUALIFICATION RESOURCES</span><h2>Study Library</h2>
    <p>Imported Unit aims, indicative topics and available source materials for the selected programme.</p></div></div>
@@ -22,7 +23,7 @@ export default function QualificationStudyLibrary({portfolio,source,selectedUnit
     <section className="qxp-panel qxp-library-spec">
      <div><FileText size={20}/><span><strong>Qualification Specification</strong>
       <small>{source?source.version+' · '+(source.reference_number||'Official source'):'No official source edition linked to this portfolio'}</small></span></div>
-     {source?.source_url?<a href={source.source_url} target="_blank" rel="noopener noreferrer" className="qxp-secondary">
+     {sourceUrl?<a href={sourceUrl} target="_blank" rel="noopener noreferrer" className="qxp-secondary">
        <ExternalLink size={16}/> View specification</a>:<span className="qxp-muted">Source unavailable</span>}
     </section>
     <div className="qxp-library-selector"><label htmlFor="qxp-study-unit">Select Unit</label>
