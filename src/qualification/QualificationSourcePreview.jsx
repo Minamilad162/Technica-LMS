@@ -152,9 +152,9 @@ export default function QualificationSourcePreview({item,references=[],onBack,em
       </section>}
     </div>
     <aside className="qsrc-aside"><SourceDocument source={source}/>
-      <section className="qsrc-source-card"><div className="qsrc-source-card-heading"><LockKeyhole size={19}/><h3>Assessment access</h3></div>
+      <details className="qsrc-access-disclosure"><summary>Assessment access requirements</summary>
         <p>This is a reference syllabus. Evidence submissions, assessor decisions and certificate recording require a centre-published version and a genuine learner enrolment.</p>
-      </section></aside>
+      </details></aside>
     </div>
   </section>}
   {!embedded&&section==='overview'&&<QualificationSourceDashboard source={source}
