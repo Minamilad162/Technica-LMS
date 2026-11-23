@@ -2392,3 +2392,7 @@ Bug fixed: the enrolled Evidence tab buried primary actions beside cards and did
 ### P100 private sandbox verification access
 
 The authenticated catalogue displays the exact private sandbox catalogue key only when the server returns an assigned learner portfolio. The sandbox appears under a separate Private test portfolio card, outside the official offering. The same scoped APIs govern reads and uploads. Connect Study Library links only when a matching source edition exists. The existing production QA fixture was assigned to the requested tester as learner only, with no assessor, verifier or certificate entitlement. No source qualification was published.
+
+### P100 live mapping regression
+
+On the live private learner portfolio, written evidence saved successfully. Expanding a Unit in the cross-Unit mapper could blank the page because a deferred state update read the React event after its dispatch ended. Read the disclosure state synchronously and avoid unchanged updates. Retain the existing criteria permissions, server RPC and draft/submit separation. No migration is required. Revert this frontend change if rollback is needed.

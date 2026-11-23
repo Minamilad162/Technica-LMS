@@ -1,3 +1,7 @@
+## 2026-11-23 — Evidence mapping disclosure fix
+
+- Fixed a live crash when expanding a Unit in the Evidence cross-Unit mapper.
+
 ## 2026-11-23 — Private qualification test access
 
 - Show the assigned private test portfolio in its own catalogue section. Offer Study Library only when a matching source edition is available.
