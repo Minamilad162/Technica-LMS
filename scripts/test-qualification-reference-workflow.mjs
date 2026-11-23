@@ -12,6 +12,26 @@ for(const view of [ui,preview,sourcePreview]){
  assert.match(view,/<QualificationUnitNavigation units=\{/,'Use the same top Unit navigator in all three portfolio views');
 }
 assert.match(unitNav,/className="qf-number-tabs"/);
+const sourceDashboard=source('src/qualification/QualificationSourceDashboard.jsx');
+const sourceStyles=source('src/qualification/qualificationSourceDashboard.css');
+const catalogue=source('src/qualification/QualificationCatalogue.jsx');
+assert.match(sourcePreview,/useState\(embedded\?'course':'overview'\)/,
+ 'Real source-backed qualifications must open the approved overview, not only the sandbox portfolio');
+assert.ok(sourcePreview.includes('QualificationSourceDashboard source={source}'),
+ 'Every genuine OTHM / ProQual source route needs the redesigned overview');
+assert.ok(sourceDashboard.includes('source.units||[]')&&sourceDashboard.includes('source.source_url'),
+ 'The real qualification design must use imported Units and official source documents');
+assert.ok(sourceDashboard.includes('Learning Outcomes')&&sourceDashboard.includes('Assessment Criteria'),
+ 'Show verified syllabus counts, not fabricated learner progress');
+assert.ok(!sourcePreview.includes('Open test upload'),
+ 'Real qualification evidence access must never redirect to the private test sandbox');
+assert.ok(catalogue.includes("String(row.catalogKey||'').startsWith('technica-source-'+item.id+'-')"),
+ 'Recognize real learner enrolments by pinned source edition as well as title');
+assert.ok(sourceStyles.includes('.qsrc-compact-header')&&sourceStyles.includes('.qsrc-compact-unit-title'),
+ 'Apply the compact styling and avoid oversized, repeated headings');
+assert.ok(ui.includes('mappingOpen')&&ui.includes('setMappingOpen(true)'),
+ 'Keep the real evidence mapper accessible on demand');
+
 assert.match(unitNav,/aria-pressed=\{selected\}/);
 assert.doesNotMatch(sourcePreview,/qsrc-unit-list/,'Do not restore the sidebar in the source view');
 const centre=source('src/qualification/QualificationCentreAdmin.jsx');

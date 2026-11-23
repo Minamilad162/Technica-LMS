@@ -228,6 +228,7 @@ function EvidenceFolder({db, portfolio, source, initialUnitId, initialWizard, on
   const [showcase, setShowcase] = useState([]);
   const [detailId, setDetailId] = useState('');
   const [mappingTarget, setMappingTarget] = useState(null);
+  const [mappingOpen, setMappingOpen] = useState(false);
   const [search, setSearch] = useState('');
   const [type, setType] = useState('');
   const [order, setOrder] = useState('newest');
@@ -275,10 +276,14 @@ function EvidenceFolder({db, portfolio, source, initialUnitId, initialWizard, on
   };
   const openMapper = item => {
     if (item) setMappingTarget({id:item.id});
-    const mapper = document.getElementById('qualification-multi-unit-mapper');
-    mapper?.focus({preventScroll:true});
-    mapper?.scrollIntoView({block:'start'});
+    setMappingOpen(true);
   };
+  useEffect(()=>{
+    if(!mappingOpen)return;
+    const mapper=document.getElementById('qualification-multi-unit-mapper');
+    mapper?.focus({preventScroll:true});
+    mapper?.scrollIntoView({block:'start',behavior:'smooth'});
+  },[mappingOpen,mappingTarget]);
   const duplicate = portfolio.evidence.find(item => item.id === duplicateId);
   const showNewEvidence = id => {
     start('');
@@ -435,7 +440,7 @@ function EvidenceFolder({db, portfolio, source, initialUnitId, initialWizard, on
           <Download size={15} aria-hidden="true"/> Download Showcase ({selection.length})
         </Action>
       </div>
-      <details className="qf-evidence-filters" open={!!initialUnitId}>
+      <details className="qf-evidence-filters">
         <summary>Filter evidence</summary>
       <div className="qf-ref-evidence-toolbar qf-ref-evidence-filters">
         <label>Search evidence<input value={search} onChange={applyFilter(setSearch)}
@@ -545,8 +550,12 @@ function EvidenceFolder({db, portfolio, source, initialUnitId, initialWizard, on
         </section>}
       </aside>
     </div>
-  {portfolio.canEdit&&<QualificationMultiUnitEvidence portfolio={portfolio} busy={busy} targetEvidence={mappingTarget}
-    onSave={onMap} onOpenOutcome={onOpenOutcome}/>}
+  {portfolio.canEdit && mappingOpen && <section className="qfd-mapping-workspace">
+    <div className="qfd-mapping-top"><strong>Map evidence across Units</strong>
+      <button type="button" className="qfd-action qfd-secondary" onClick={()=>setMappingOpen(false)}>Close mapping</button></div>
+    <QualificationMultiUnitEvidence portfolio={portfolio} busy={busy} targetEvidence={mappingTarget}
+      onSave={onMap} onOpenOutcome={onOpenOutcome}/>
+  </section>}
   {selectedUnit && <EvidenceUnitMaterials key={selectedUnit.id} unit={selectedUnit} source={source}
     onOutcome={outcome => onOpenOutcome(outcome.id)}>
     {selectedUnit.centreBrief && <QualificationCentreBrief unit={selectedUnit} db={db}/>}
@@ -1017,7 +1026,10 @@ function OpenPortfolio({db, portfolio, references, evidenceEntry, onRefresh, onB
       <Action secondary disabled={busy} onClick={() => run(() => onRefresh())}>Refresh</Action>
     </header>
     <QualificationTopStats portfolio={portfolio} visiblePortfolio={visiblePortfolio}/>
-    {view !== 'dashboard' && <PortfolioStatusRibbon portfolio={portfolio} progress={progress} onRegistration={()=>changeView('registration')}/>}
+    {view !== 'dashboard' && <details className="qfd-portfolio-details">
+      <summary>Programme dates, progress &amp; assigned reviewers</summary>
+      <PortfolioStatusRibbon portfolio={portfolio} progress={progress} onRegistration={()=>changeView('registration')}/>
+    </details>}
     {unitView && <QualificationUnitNavigation units={portfolio.units} selectedIndex={unitIndex} onSelect={selectContextUnit}/>}
     <QualificationInternalNav items={views} active={view === 'outcome' ? 'programme' : view}
       onChange={openSection} disabled={busy} unitContext={unitView} ariaLabel={unitView ? 'Unit sections' : 'Programme sections'}/>

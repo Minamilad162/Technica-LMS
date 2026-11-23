@@ -50,7 +50,8 @@ const premium=read('src/qualification/qualificationPremium.css');
 assert.match(live,/ProgrammeListPremium/, 'The real DB-backed route must use the premium catalogue');
 assert.match(live,/<QualificationSourcePreview/, 'Source-backed qualification syllabus must be connected');
 assert.match(catalogue,/QUALIFICATIONS\.map\(item =>/, 'All three pathways must render, not only enrolled records');
-assert.match(catalogue,/assigned\.filter\(row => qualificationFor\(row\.title\)/, 'Enrolment matching must stay role-scoped');
+assert.match(catalogue,/assigned\.filter\(row =>\s*qualificationFor\(row\.title\)\?\.id === item\.id \|\|/, 'Enrolment matching must remain role-scoped');
+assert.match(catalogue,/startsWith\('technica-source-'\+item\.id\+'-'\)/, 'Enrolled qualifications must match by genuine specification ID');
 assert.match(catalogue,/onOpen\(enrolments\[0\]\.id\)/, 'Enrolled programmes must open live portfolios');
 assert.match(catalogue,/onPreview\(item\.id\)/, 'Other programmes must only open read-only syllabus');
 for(const title of ['Verified source syllabus','Assigned to you','Open portfolio','Explore actual Units']){
@@ -230,8 +231,10 @@ assert.match(multiUnit,/Save mapping across Units/,
 assert.match(multiUnitCss,/\.qmu-unit-grid/);
 assert.match(sourcePreview,/portfolio.catalogKey === source.catalog_key/,
  'Upload shortcuts must match the selected reference edition');
-assert.match(sourcePreview,/Open test upload/,
- 'An assigned test portfolio must have a clearly labelled upload shortcut');
+assert.doesNotMatch(sourcePreview,/Open test upload/,
+ 'Real qualification reference pages must not direct learners to the separate private sandbox');
+assert.match(sourcePreview,/onOpenEvidence\(portfolio\.id, unit\.code\)/,
+ 'Real evidence upload must open the authenticated learner enrolment and selected Unit');
 for(const value of [
  'p_enrolment uuid, p_evidence uuid, p_criteria uuid[]',
  'learner_id=public.lms_qf_actor() FOR UPDATE',
