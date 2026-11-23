@@ -130,7 +130,7 @@ export default function QualificationMultiUnitEvidence({portfolio,busy=false,onS
     <div className="qmu-save">
       <p><Info size={17}/> One evidence file can support several Units. Links in submitted or
        verified Outcomes are locked; no assessment is submitted by this action.</p>
-      <button type="button" disabled={busy||!pending||changes===0||!evidenceId} onClick={doSave}>
+      <button type="button" disabled={busy||!pending||changes===0||!resolvedId} onClick={doSave}>
        <Link2 size={17}/> Save mapping across Units {changes?('('+changes+' changes)'):''}</button>
     </div>
   </>}
