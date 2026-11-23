@@ -194,7 +194,7 @@
 .qf-live .qfd-portfolio-details[open]>summary{margin-bottom:10px}
 .qf-live .qfd-portfolio-details .qf-ref-ribbon{margin:0 0 12px}
 .qf-live .qf-programme-unit-strip{margin:0;padding:9px 11px}
-.qf-live .qf-internal-nav.qf-internal-unit{position:static;gap:3px;padding:4px;margin:0 0 8px;border-radius:12px;box-shadow:0 4px 12px #153e720a}
+.qf-live .qf-internal-nav.qf-internal-unit{position:sticky;top:8px;z-index:15;gap:3px;padding:4px;margin:0 0 8px;border-radius:12px;box-shadow:0 4px 12px #153e720a}
 .qf-live .qf-internal-nav.qf-internal-unit button{min-height:39px;padding:8px 11px}
 .qf-live .qf-evidence-experience{gap:10px}
 .qf-live .qf-evidence-command{padding:12px 15px;gap:10px}
