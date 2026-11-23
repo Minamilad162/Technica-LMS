@@ -1,3 +1,8 @@
+## 2026-11-23 — Evidence upload entry
+
+- Open the existing upload form directly from syllabus Evidence when the learner has a matching enrolment or an assigned private test portfolio.
+- Show newly saved evidence immediately and present materials and linked Outcomes as distinct sections.
+
 ## 2026-11-23 — Qualification Unit sections
 
 - Keep the selected Unit in view when switching between Course, Evidence, Registration, Contact and Metrics.

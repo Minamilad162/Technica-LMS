@@ -4,7 +4,7 @@
 >
 > Project: Technica Consult LMS
 > Version: 1.1.11 (Practice Center quick mode selection)
-> Last updated: 2026-11-23 (Africa/Cairo), Qualification Unit sections
+> Last updated: 2026-11-23 (Africa/Cairo), Evidence upload entry
 > Repository: https://github.com/Minamilad162/Technica-LMS
 > Target branch: main
 > Current inspected source baseline: v1.15.0, commit 8021f604c63c59b2100d944ead86fed149eb1ceb
@@ -579,6 +579,7 @@ Add new BUG rows immediately when an issue is discovered, include reproduction, 
 | BUG-QF-002 | MEDIUM | FIXED IN SOURCE | The syllabus Course only expanded Outcomes inline. Open each Outcome in the shared view and retain the selected Unit on return. |
 | BUG-QF-003 | MEDIUM | FIXED IN SOURCE | Evidence exposed worksheets and records without the selected Unit's available source material. Reuse version-matched content and existing protected file access. |
 | BUG-QF-004 | MEDIUM | FIXED IN SOURCE | The active Unit and section navigation were separated in the layout, and entering Evidence dropped the Unit filter. Keep the Unit selector, title and section navigation together. |
+| BUG-QF-005 | MEDIUM | FIXED IN SOURCE | Syllabus Evidence did not show a route to an existing eligible evidence upload, and a Unit filter could hide newly saved unmapped evidence. Add an explicit route and reveal new evidence after save. |
 
 ## 17. Test and release checklist
 
@@ -2433,3 +2434,10 @@ Display the selected Unit and the Course, Evidence, Registration, Contact and Me
 Course exposes the Unit aim where sourced, previous/next and Unit/Outcome navigation, Activity, Evidence Folder, Gap Analysis and Contact. Enrolled progress and deadlines come from portfolio records. The source preview exposes the syllabus and clearly indicates where an enrolment is required for individual records. Technica working templates become an optional collapsed section in Evidence. They are separate from provider templates and do not replace the centre's approved documents.
 
 This change is frontend-only and reversible by reverting the commit. Qualification workflow, source provenance, readiness, catalogue, material and production build checks cover the change. Provider-specific files and the distinct reference Induction and CPD Units remain outside this change.
+
+
+## P104 — Evidence upload entry and presentation (2026-11-23)
+
+The syllabus Evidence section gives an explicit upload shortcut for matching learner enrolments. When the selected edition has no enrolment, an independently assigned private sandbox can be opened through a clearly labelled test upload action. The shortcut opens the existing Evidence Wizard and respects the enrolled portfolio's server-provided edit permission. No enrolment is created, edition published, or evidence associated across editions. A newly saved record is visible before it is mapped because the register clears search and Unit filters on successful creation.
+
+Study documents, expandable Outcome criterion links and optional Technica working templates have separate visual treatments. The ProQual reference remains unpublished and the existing private test portfolio is available to its assigned learner. Existing qualification regression tests and the production build verify the frontend change. Rollback is a frontend revert.

@@ -1,5 +1,5 @@
 import React, {useState} from 'react';
-import {ArrowRight, BookOpen, CheckCircle2, ClipboardCheck, ExternalLink, FileCheck2, FileText, FolderOpen, Info, Layers3, LibraryBig, Link2, LockKeyhole, ShieldCheck} from 'lucide-react';
+import {ArrowRight, BookOpen, CheckCircle2, ChevronDown, ClipboardCheck, ExternalLink, FileCheck2, FileText, FolderOpen, Info, Layers3, LibraryBig, Link2, LockKeyhole, ShieldCheck} from 'lucide-react';
 import {getUnitSourceMaterial} from './qualificationUnitMaterial.js';
 import UnitMaterialPanel from './UnitMaterialPanel.jsx';
 import './qualificationLearningResources.css';
@@ -31,7 +31,7 @@ export function EvidenceUnitMaterials({unit, source, onOutcome, children}) {
       files.get(resource.url).outcomes.push(outcome);
     }
   }
-  return <section className="qlearn-rail-card" aria-label="Unit evidence materials">
+  return <section className="qlearn-evidence-materials" aria-label="Unit evidence materials">
     <div className="qlearn-rail-heading"><FolderOpen size={18}/><h3>Unit materials</h3></div>
     {sourceUnit?.aim && <p>{sourceUnit.aim}</p>}
     {!!sourceUnit?.indicativeTopics?.length && <details className="qf-outcome-filters">
@@ -54,13 +54,16 @@ export function EvidenceUnitMaterials({unit, source, onOutcome, children}) {
     </div>}
     {!files.size && !(sourceUnit && source.source_url) && !children && <p>No learning files are attached to this Unit.</p>}
     {children}
-    {unit.outcomes.length > 0 && <details className="qf-outcome-filters">
-      <summary>Learning Outcomes &amp; Assessment Criteria</summary>
-      <ul>{unit.outcomes.map((outcome, index) => <li key={outcome.id || outcome.code}>
-        <button type="button" className="qf-live-link" onClick={() => onOutcome(outcome, index)}>
-          {outcome.code} · {outcome.title}
-        </button>
-      </li>)}</ul>
+    {unit.outcomes.length > 0 && <details className="qlearn-evidence-disclosure">
+      <summary><span>Learning Outcomes &amp; Assessment Criteria</span><ChevronDown size={16} aria-hidden="true"/></summary>
+      <ol className="qlearn-evidence-outcomes">{unit.outcomes.map((outcome, index) =>
+        <li key={outcome.id || outcome.code}>
+          <button type="button" onClick={() => onOutcome(outcome, index)}>
+            <span className="qlearn-outcome-code">{outcome.code}</span>
+            <span><strong>{outcome.title}</strong><small>{outcome.criteria.length} assessment criteria</small></span>
+            <ArrowRight size={16} aria-hidden="true"/>
+          </button>
+        </li>)}</ol>
     </details>}
   </section>;
 }

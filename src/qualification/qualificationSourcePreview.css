@@ -185,3 +185,14 @@
 @media(max-width:650px){.qf-live .qsrc-unit-paging label{order:-1;width:100%;justify-content:space-between}
  .qf-live .qsrc-unit-paging label select{flex:1;max-width:230px}
  .qf-live .qsrc-unit-paging button{flex:1}}
+
+.qf-live .qsrc-evidence-page{display:grid;gap:14px;min-width:0}
+.qf-live .qsrc-evidence-access{display:grid;grid-template-columns:auto minmax(0,1fr) auto;align-items:center;gap:14px;padding:18px 20px;border:1px solid #ccdff0;border-radius:16px;background:#f0f7ff}
+.qf-live .qsrc-evidence-access-icon{display:grid;place-items:center;width:42px;height:42px;border-radius:11px;background:#dfedfb;color:#235c92}
+.qf-live .qsrc-evidence-access h3{margin:0 0 4px;color:#193c5f}
+.qf-live .qsrc-evidence-access p{margin:0;color:#45617e;font-size:.875rem;line-height:1.55}
+.qf-live .qsrc-evidence-access-actions{display:flex;gap:8px;flex-wrap:wrap}
+@media(max-width:650px){
+ .qf-live .qsrc-evidence-access{grid-template-columns:auto minmax(0,1fr);align-items:start}
+ .qf-live .qsrc-evidence-access-actions{grid-column:2}
+}

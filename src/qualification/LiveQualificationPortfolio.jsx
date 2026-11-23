@@ -220,7 +220,7 @@ function EvidenceItem({item, onDownload, uses = []}) {
 }
 
 function EvidenceFolder({db, portfolio, source, initialUnitId, initialWizard, onSelectUnit, onDownload, onShowcase, busy, onSave, onDuplicate, onMap, onOpenOutcome, onBack, backLabel}) {
-  const [mode, setMode] = useState(initialWizard ? 'choose' : '');
+  const [mode, setMode] = useState(initialWizard || '');
   const [showcase, setShowcase] = useState([]);
   const [detailId, setDetailId] = useState('');
   const [mappingTarget, setMappingTarget] = useState(null);
@@ -258,9 +258,19 @@ function EvidenceFolder({db, portfolio, source, initialUnitId, initialWizard, on
     document.getElementById('qualification-multi-unit-mapper')?.scrollIntoView({block:'start'});
   };
   const duplicate = portfolio.evidence.find(item => item.id === duplicateId);
+  const showNewEvidence = () => {
+    start('');
+    setUnitFilter('');
+    setSearch('');
+    setType('');
+    setMedium('');
+    setShowcaseOnly(false);
+    setOrder('newest');
+    setPage(0);
+  };
   const save = () => mode === 'duplicate'
-    ? onDuplicate(duplicate, title, reservation, () => start(''))
-    : onSave({mode,title,description,kind,body,file}, reservation, () => start(''));
+    ? onDuplicate(duplicate, title, reservation, showNewEvidence)
+    : onSave({mode,title,description,kind,body,file}, reservation, showNewEvidence);
   const links = new Map();
   for (const unit of portfolio.units) {
     for (const outcome of unit.outcomes) {
@@ -449,7 +459,7 @@ function EvidenceFolder({db, portfolio, source, initialUnitId, initialWizard, on
     onOutcome={outcome => onOpenOutcome(outcome.id)}>
     {selectedUnit.centreBrief && <QualificationCentreBrief unit={selectedUnit} db={db}/>}
   </EvidenceUnitMaterials>}
-  {portfolio.canEdit && selectedUnit?.outcomes.length > 0 && <details key={'forms:' + selectedUnit.id} className="qf-card qf-outcome-filters">
+  {portfolio.canEdit && selectedUnit?.outcomes.length > 0 && <details key={'forms:' + selectedUnit.id} className="qlearn-evidence-disclosure qsrc-evidence-templates">
     <summary>Technica working templates</summary>
     <QualificationEvidenceTemplates unit={selectedUnit} compact/>
   </details>}
@@ -764,12 +774,14 @@ function ContactDiary({db,portfolio,progress,onOutcome}) {
   </div>;
 }
 
-function OpenPortfolio({db, portfolio, references, onRefresh, onBack}) {
-  const [view,setView] = useState('programme');
-  const [unitIndex,setUnitIndex] = useState(0);
+function OpenPortfolio({db, portfolio, references, evidenceEntry, onRefresh, onBack}) {
+  const entryIndex = portfolio.units.findIndex(unit => unit.code === evidenceEntry?.unitCode);
+  const [view,setView] = useState(evidenceEntry ? 'evidence' : 'programme');
+  const [unitIndex,setUnitIndex] = useState(Math.max(0, entryIndex));
   const [outcomeId,setOutcomeId] = useState('');
   const [evidenceFromOutcome,setEvidenceFromOutcome] = useState(false);
-  const [evidenceUnit,setEvidenceUnit] = useState('');
+  const [evidenceUnit,setEvidenceUnit] = useState(evidenceEntry && entryIndex >= 0 ? portfolio.units[entryIndex].id : '');
+  const [uploadOnEntry,setUploadOnEntry] = useState(Boolean(evidenceEntry && portfolio.canEdit));
   const [drafts,setDrafts] = useState({});
   const [error,setError] = useState('');
   const [notice,setNotice] = useState('');
@@ -791,6 +803,7 @@ function OpenPortfolio({db, portfolio, references, onRefresh, onBack}) {
   const mapping = drafts[outcomeId]?.version === claimVersion ? drafts[outcomeId].mapping : outcome?.claim?.mapping || {};
   const changeView = key => {
     setView(key); setError(''); setNotice('');
+    setUploadOnEntry(false);
     setEvidenceFromOutcome(false);
     setEvidenceUnit('');
   };
@@ -893,6 +906,7 @@ function OpenPortfolio({db, portfolio, references, onRefresh, onBack}) {
     setUnitIndex(index);
     if (view === 'outcome') changeView('programme');
     if (view === 'evidence') {
+      setUploadOnEntry(false);
       setEvidenceFromOutcome(false);
       setEvidenceUnit(portfolio.units[index].id);
     }
@@ -927,12 +941,13 @@ function OpenPortfolio({db, portfolio, references, onRefresh, onBack}) {
     </header>}
     {error && <p className="qf-live-error" role="alert">{error}</p>}
     {notice && <p className="qf-live-notice" role="status">{notice}</p>}
+    {view === 'evidence' && evidenceEntry && !portfolio.canEdit && <p>Evidence uploads are unavailable for this enrolment.</p>}
     {view === 'dashboard' && <PortfolioOverview db={db} portfolio={portfolio} progress={progress} onOutcome={openOutcome} onView={changeView} qualification={libraryAvailable ? cover : null}/>}
     {view === 'programme' && <UnitProgramme db={db} portfolio={portfolio} unitIndex={unitIndex} setUnitIndex={setUnitIndex} onOutcome={openOutcome}
       aim={referenceUnit?.aim || outcomeMaterial?.aim}
       onEvidence={id => { changeView('evidence'); setEvidenceUnit(id); }} onContact={() => changeView('contact')}
       onLibrary={libraryAvailable ? () => changeView('library') : null}/>}
-    {view === 'evidence' && <EvidenceFolder key={evidenceUnit} db={db} portfolio={visiblePortfolio} source={selectedReference} initialUnitId={evidenceUnit} initialWizard={evidenceFromOutcome} busy={busy} onSave={saveEvidence} onDuplicate={duplicateEvidence}
+    {view === 'evidence' && <EvidenceFolder key={evidenceUnit} db={db} portfolio={visiblePortfolio} source={selectedReference} initialUnitId={evidenceUnit} initialWizard={evidenceFromOutcome ? 'choose' : uploadOnEntry ? 'upload' : ''} busy={busy} onSave={saveEvidence} onDuplicate={duplicateEvidence}
       onSelectUnit={id => {
         const index = portfolio.units.findIndex(unit => unit.id === id);
         if (index >= 0) setUnitIndex(index);
@@ -978,6 +993,7 @@ export default function LiveQualificationPortfolio({db}) {
   const [adminView,setAdminView] = useState(false);
   const [activeRole,setActiveRole] = useState('');
   const [portfolio,setPortfolio] = useState(null);
+  const [evidenceEntry,setEvidenceEntry] = useState(null);
   const [previewId,setPreviewId] = useState('');
   const [error,setError] = useState('');
   const [busy,setBusy] = useState(true);
@@ -998,7 +1014,7 @@ export default function LiveQualificationPortfolio({db}) {
       .finally(() => {if (id === request.current) setBusy(false);});
     return () => {request.current++;};
   }, [db,refreshKey]);
-  const open = async id => {
+  const open = async (id, entry = null) => {
     const current = ++request.current;
     setBusy(true); setError('');
     try {
@@ -1009,6 +1025,7 @@ export default function LiveQualificationPortfolio({db}) {
       ]);
       if (current === request.current) {
         const byUnit=new Map((briefs||[]).map(item=>[item.unitId,item]));
+        setEvidenceEntry(entry);
         setPortfolio({...data,catalogKey:data.catalogKey||rows?.find(row=>row.id===id)?.catalogKey,canRecordCertificate:data.canRecordCertificate||certAuthorized===true,
           units:data.units.map(unit=>({...unit,centreBrief:byUnit.get(unit.id)||null}))});
         setPreviewId('');setAdminView(false);
@@ -1039,11 +1056,14 @@ export default function LiveQualificationPortfolio({db}) {
     </div>}
     {busy ? <PremiumLoading variant="compact"/> : error ? <Panel title="Qualifications">
       <p role="alert">{error}</p><Action secondary onClick={() => setRefreshKey(value => value + 1)}>Retry</Action>
-    </Panel> : portfolio ? <OpenPortfolio key={portfolio.id} db={db} portfolio={portfolio} references={references} onRefresh={refresh}
+    </Panel> : portfolio ? <OpenPortfolio key={portfolio.id} db={db} portfolio={portfolio} references={references} evidenceEntry={evidenceEntry} onRefresh={refresh}
       onBack={() => {setPortfolio(null); setRefreshKey(value => value + 1);}}/> : adminView
       ? <QualificationCentreAdmin db={db} references={references} onBack={()=>{setAdminView(false);setRefreshKey(v=>v+1);}}/> : previewId
       ? <QualificationSourcePreview key={previewId} item={QUALIFICATIONS.find(item => item.id === previewId)}
-          references={references} onBack={() => setPreviewId('')}/>
+          references={references} onBack={() => setPreviewId('')}
+          learnerPortfolios={(rows || []).filter(row => row.role === 'learner' && !row.completedAt && row.catalogKey !== privateSandboxKey)}
+          practicePortfolio={(rows || []).find(row => row.role === 'learner' && !row.completedAt && row.catalogKey === privateSandboxKey)}
+          onOpenEvidence={(id, unitCode) => open(id, {unitCode})}/>
       : <ProgrammeListPremium rows={rows || []} references={references} activeRole={activeRole}
           onRoleChange={setActiveRole} onOpen={open} onPreview={setPreviewId}/>}
   </div>;

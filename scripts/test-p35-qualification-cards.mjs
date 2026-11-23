@@ -101,7 +101,7 @@ assert.ok(keyed.get('technica-source-othm6-2026').units.every(u=>u.aim?.length>1
 assert.match(sourcePreview,/<ReadOnlyOutcomeDetails unit=\{unit\} outcome=\{outcome\}/,'Source preview must open the selected Outcome criteria');
 assert.match(read('src/qualification/QualificationOutcome.jsx'),/<OutcomeCriteria criteria=\{outcome\.criteria\}/,
  'Read-only Outcome must render the imported assessment criteria');
-assert.match(sourcePreview,/source\.version==='November 2026'/,'Do not conflate 2023 and 2026 requirements');
+assert.match(sourcePreview,/sources.find\(s=>s.catalog_key===sourceKey\)/,'Do not conflate 2023 and 2026 requirements');
 assert.match(migration,/auth\.uid\(\) IS NULL/);
 assert.match(migration,/REVOKE ALL ON FUNCTION public\.lms_qf_reference_catalog\(\) FROM PUBLIC, anon/);
 assert.match(migration,/GRANT EXECUTE ON FUNCTION public\.lms_qf_reference_catalog\(\) TO authenticated/);
@@ -191,7 +191,7 @@ assert.match(live,/embedded onBack=\{\(\) => changeView\('programme'\)\}/,
  'Nested Study Library must not duplicate the real portfolio nav bar');
 assert.match(sourcePreview,/\(embedded\|\|section==='course'\)/,
  'Source course view must be available independently of enrolment');
-assert.match(sourcePreview,/section==='evidence'/,'Read-only evidence preparation tab missing');
+assert.match(sourcePreview,/section === 'evidence'/,'Read-only evidence preparation tab missing');
 assert.match(sourcePreview,/section==='registration'/,'Read-only registration tab missing');
 assert.match(sourcePreview,/section==='contact'/,'Reference-safe Contact Diary tab missing');
 assert.match(sourcePreview,/section==='metrics'/,'Source-backed Metrics tab missing');
@@ -228,10 +228,10 @@ assert.match(multiUnit,/const open=event\.currentTarget\.open;\s*setExpanded\(/,
 assert.match(multiUnit,/Save mapping across Units/,
  'Bulk mapping save action missing');
 assert.match(multiUnitCss,/\.qmu-unit-grid/);
-assert.match(sourcePreview,/Evidence Bank · Upload &amp; Multi-Unit Mapping/,
- 'Reference preview must explain the real Evidence Bank location');
-assert.match(sourcePreview,/Requires actual centre-approved learner enrolment/,
- 'Reference preview must block fake uploads');
+assert.match(sourcePreview,/portfolio.catalogKey === source.catalog_key/,
+ 'Upload shortcuts must match the selected reference edition');
+assert.match(sourcePreview,/Open test upload/,
+ 'An assigned test portfolio must have a clearly labelled upload shortcut');
 for(const value of [
  'p_enrolment uuid, p_evidence uuid, p_criteria uuid[]',
  'learner_id=public.lms_qf_actor() FOR UPDATE',
