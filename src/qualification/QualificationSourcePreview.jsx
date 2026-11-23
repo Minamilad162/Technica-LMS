@@ -9,7 +9,7 @@ import QualificationUnitNavigation from './QualificationUnitNavigation.jsx';
 import {QualificationIdentity,QualificationRegistrationSummary} from './QualificationRegistrationExperience.jsx';
 import QualificationEvidenceMatrix from './QualificationEvidenceMatrix.jsx';
 import QualificationStudyLibrary from './QualificationStudyLibrary.jsx';
-import QualificationSourceDashboard from './QualificationSourceDashboard.jsx';
+import QualificationSourceDashboard, {QualificationSourceStats} from './QualificationSourceDashboard.jsx';
 import QualificationOutcome, {ReadOnlyOutcomeDetails} from './QualificationOutcome.jsx';
 import {EvidenceUnitMaterials} from './QualificationLearningResources.jsx';
 
@@ -61,6 +61,7 @@ export default function QualificationSourcePreview({item,references=[],onBack,em
  return <div className={'qsrc-page'+(embedded?' qsrc-embedded':'')}>
   {!embedded&&<button type="button" className="qf-plain-back" onClick={onBack}><ArrowLeft size={17}/> All qualifications</button>}
   {!embedded&&<QualificationIdentity source={source} heroImage={item.heroImage} body={item.body} level={item.level}/>}
+   {!embedded&&<QualificationSourceStats source={source}/>}
    <div className="qsrc-edition-row">
     <div><span className="qf-overline">QUALIFICATION VERSION</span><h2>Official syllabus</h2></div>
     {sources.length>1&&<label className="qsrc-edition-picker">Specification edition
