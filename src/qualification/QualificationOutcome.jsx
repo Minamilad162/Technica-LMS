@@ -38,6 +38,7 @@ export default function QualificationOutcome({
   const previous = sequence[index - 1];
   const next = sequence[index + 1];
   const resources = outcome.resources || [];
+  const showSourceLink = sourceUrl && !resources.some(resource => resource.url === sourceUrl);
 
   useEffect(() => {
     titleRef.current?.focus();
@@ -80,19 +81,19 @@ export default function QualificationOutcome({
     </nav>
     <div className="qf-outcome-grid">
       <OutcomePanel title="Resources">
-        {(resources.length > 0 || sourceUrl || !centreBrief) && <div className="qf-outcome-table">
+        {(resources.length > 0 || showSourceLink || !centreBrief) && <div className="qf-outcome-table">
           <table>
             <thead><tr><th scope="col">Resource</th><th scope="col">Type</th></tr></thead>
             <tbody>
               {resources.map(resource => <tr key={resource.id || resource.url}>
                 <td><a href={resource.url} target="_blank" rel="noopener noreferrer">{resource.title} <ExternalLink size={14}/></a></td>
-                <td>{resource.type || 'Centre resource'}</td>
+                <td>{resource.type || (resource.url === sourceUrl ? 'Awarding-body reference' : 'Centre resource')}</td>
               </tr>)}
-              {sourceUrl && <tr>
+              {showSourceLink && <tr>
                 <td><a href={sourceUrl} target="_blank" rel="noopener noreferrer">Open source specification <ExternalLink size={14}/></a></td>
                 <td>Awarding-body reference</td>
               </tr>}
-              {!resources.length && !sourceUrl && !centreBrief && <tr><td colSpan={2}>No learning resources attached.</td></tr>}
+              {!resources.length && !showSourceLink && !centreBrief && <tr><td colSpan={2}>No learning resources attached.</td></tr>}
             </tbody>
           </table>
         </div>}
