@@ -41,7 +41,7 @@ export async function uploadPortfolioEvidence(db, enrolment, reservation, file, 
   throw error || new Error('The uploaded file could not be confirmed.');
 }
 
-async function fetchEvidenceFile(db, evidence) {
+export async function fetchEvidenceFile(db, evidence) {
   const {data, error} = await db.storage.from(bucket).download(evidence.object_path);
   if (error) throw error;
   return data;

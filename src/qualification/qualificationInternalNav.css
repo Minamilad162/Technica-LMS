@@ -35,3 +35,5 @@
 @media(prefers-reduced-motion:reduce){
  .qf-live .qf-internal-nav button{transition:none}
 }
+
+.qf-live .qf-internal-nav.qf-internal-nested{position:static}

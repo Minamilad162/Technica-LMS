@@ -1,6 +1,7 @@
 import React,{useEffect,useState} from 'react';
 import {ArrowLeft,BookOpen,CalendarDays,ClipboardList,FileText,FolderOpen,GraduationCap,
  LockKeyhole,MessageSquare,BarChart3,ShieldCheck} from 'lucide-react';
+import QualificationUnitNavigation from './QualificationUnitNavigation.jsx';
 
 // Design-only preview. It does not create enrolments, issue evidence, or call the backend.
 // All Unit, Outcome and Criterion text comes from the authenticated source catalogue.
@@ -10,7 +11,7 @@ export default function QualificationCentreLearnerPreview({version,references,on
  useEffect(()=>{setTab('course');setUnitIndex(0);},[version?.id]);
  const source=references.find(item=>item.catalog_key===version?.catalogKey);
  const units=source?.units||[];
- const unit=units[unitIndex];
+ const unit=units[unitIndex] || units[0];
  const tabs=[['course','Course',BookOpen],['evidence','Evidence',FolderOpen],
   ['registration','Registration',GraduationCap],['contact','Contact',MessageSquare],
   ['metrics','Metrics',BarChart3]];
@@ -47,12 +48,7 @@ export default function QualificationCentreLearnerPreview({version,references,on
    </nav>
    {tab==='course'&&<section className="qf-ref-preview-course">
      {units.length===0?<div className="qf-card"><p>The official source Units are not yet available for preview.</p></div>:<>
-       <nav className="qf-unit-strip" aria-label="Preview Units">
-         <span className="qf-unit-strip-label">UNITS</span>
-         <div className="qf-number-tabs">{units.map((u,i)=><button type="button" key={u.code}
-           className={'qf-number-tab '+(i===unitIndex?'active':'')} aria-pressed={i===unitIndex}
-           onClick={()=>setUnitIndex(i)} title={u.title}>{String(i+1).padStart(2,'0')}</button>)}</div>
-       </nav>
+       <QualificationUnitNavigation units={units} selectedIndex={unitIndex} onSelect={setUnitIndex}/>
        <div className="qf-unit-heading"><div><span className="qf-overline">{unit.code}</span>
          <h2>{unit.title}</h2></div></div>
        {unit.aim&&<section className="qf-card"><div className="qf-card-header"><h3>Unit aim</h3></div>

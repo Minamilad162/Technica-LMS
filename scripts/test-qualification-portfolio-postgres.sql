@@ -51,8 +51,34 @@ INSERT INTO public.lms_qualification_deadlines VALUES (pg_temp.qid(50),pg_temp.q
 INSERT INTO public.lms_qualification_evidence(id,enrolment_id,title,description,kind,body)
 VALUES (pg_temp.qid(60),pg_temp.qid(51),'Different learner','', 'Other','Private draft');
 
+-- Programme news is version-scoped. Review appointments are enrolment-scoped.
+INSERT INTO public.lms_role_assignments(user_id,role) VALUES (pg_temp.qid(3),'admin');
+SET LOCAL ROLE authenticated;
+SET LOCAL request.jwt.claim.sub = 'f0000000-0000-0000-0000-000000000003';
+SELECT public.lms_qf_admin_create_programme_update(pg_temp.qid(70),pg_temp.qid(10),NULL,'news','Centre bulletin','Published announcement',NULL);
+SELECT public.lms_qf_admin_create_programme_update(pg_temp.qid(70),pg_temp.qid(10),NULL,'news','Centre bulletin','Published announcement',NULL);
+SELECT pg_temp.denied($sql$SELECT public.lms_qf_admin_create_programme_update(pg_temp.qid(70),pg_temp.qid(10),NULL,'news','Other title','',NULL)$sql$,'conflicts');
+SELECT public.lms_qf_admin_create_programme_update(pg_temp.qid(71),pg_temp.qid(10),pg_temp.qid(50),'review','Review appointment','Private discussion',now()+interval '1 day');
+SELECT pg_temp.expect(jsonb_array_length(public.lms_qf_admin_programme_updates(pg_temp.qid(10)))=2,'retry does not duplicate centre updates');
+SELECT pg_temp.denied($sql$SELECT public.lms_qf_admin_resolve_programme_update(pg_temp.qid(10),pg_temp.qid(71),'completed')$sql$,'cannot be resolved');
+SET LOCAL request.jwt.claim.sub = 'f0000000-0000-0000-0000-000000000001';
+SELECT pg_temp.expect(jsonb_array_length(public.lms_qf_programme_updates(pg_temp.qid(50)))=2,'learner sees own review and programme bulletin');
+SELECT pg_temp.denied($sql$SELECT public.lms_qf_admin_programme_updates(pg_temp.qid(10))$sql$,'access denied');
+SELECT pg_temp.denied($sql$SELECT public.lms_qf_admin_create_programme_update(pg_temp.qid(72),pg_temp.qid(10),NULL,'news','Unauthorized','',NULL)$sql$,'access denied');
+SELECT pg_temp.denied($sql$SELECT public.lms_qf_admin_resolve_programme_update(pg_temp.qid(10),pg_temp.qid(71),'cancelled')$sql$,'access denied');
+SELECT pg_temp.denied('SELECT * FROM public.lms_qf_programme_updates', 'permission denied');
+SET LOCAL request.jwt.claim.sub = 'f0000000-0000-0000-0000-000000000004';
+SELECT pg_temp.expect(jsonb_array_length(public.lms_qf_programme_updates(pg_temp.qid(51)))=1,'other learner sees bulletin only');
+SELECT pg_temp.denied($sql$SELECT public.lms_qf_programme_updates(pg_temp.qid(50))$sql$,'access denied');
+SET LOCAL request.jwt.claim.sub = 'f0000000-0000-0000-0000-000000000003';
+SELECT public.lms_qf_admin_resolve_programme_update(pg_temp.qid(10),pg_temp.qid(71),'cancelled');
+SELECT pg_temp.expect(jsonb_array_length(public.lms_qf_programme_updates(pg_temp.qid(50)))=1,'withdrawn review disappears');
+RESET ROLE;
+DELETE FROM public.lms_role_assignments WHERE user_id=pg_temp.qid(3) AND role='admin';
+
 SET LOCAL ROLE anon;
 SELECT pg_temp.denied('SELECT public.lms_qf_list()', 'permission denied');
+SELECT pg_temp.denied($sql$SELECT public.lms_qf_programme_updates(pg_temp.qid(50))$sql$,'permission denied');
 SELECT pg_temp.expect((SELECT count(*) FROM storage.objects WHERE bucket_id='technica-qualification-evidence')=0,'anonymous Storage read denied');
 RESET ROLE;
 

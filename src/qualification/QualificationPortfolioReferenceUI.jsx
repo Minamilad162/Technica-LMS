@@ -1,6 +1,7 @@
-import React,{useEffect,useState} from 'react';
-import {CalendarDays,CheckCircle2,ClipboardList,FileText,ShieldCheck,TrendingUp,Users} from 'lucide-react';
+import React,{useEffect,useRef,useState} from 'react';
+import {CalendarDays,CheckCircle2,ClipboardList,FileText,Printer,ShieldCheck,TrendingUp,Users} from 'lucide-react';
 import {claimState,portfolioRpc} from './qualificationPortfolioApi.js';
+import {printPortfolioSection} from './portfolioPrint.js';
 
 const formatDate=value=>value?new Intl.DateTimeFormat(undefined,{dateStyle:'medium',timeZone:'UTC'}).format(new Date(value)):'Not set';
 const pct=(value,total)=>total>0?Math.round(value/total*100):0;
@@ -59,6 +60,7 @@ export function PortfolioStatusRibbon({portfolio,progress,onRegistration}){
 // OJT/Off-job hours in the reference platform have no equivalent saved records yet.
 export function PortfolioMetrics({db,portfolio,progress,onOutcome}){
  const [training,setTraining]=useState(null);
+ const printTarget=useRef(null);
  const [error,setError]=useState('');
  const [saving,setSaving]=useState(false);
  const [refresh,setRefresh]=useState(0);
@@ -128,7 +130,9 @@ export function PortfolioMetrics({db,portfolio,progress,onOutcome}){
      })}</div>
    </section>
    <section className="qf-card qf-ref-hours">
-     <div className="qf-card-header"><h3>On-the-job / Off-the-job training</h3><span>Learner-reported activity</span></div>
+     <div className="qf-card-header"><h3>On-the-job / Off-the-job training</h3><button type="button" className="qf-button qf-outline" disabled={!logged.length}
+       onClick={() => printPortfolioSection(printTarget.current)}><Printer size={16}/> Print</button></div>
+     <span>Learner-reported activity</span>
      <p>Record professional training activity here. Entries are not automatically accepted as Assessment Evidence or verified study hours.</p>
      {error&&<p className="qf-live-error" role="alert">{error} <button type="button" className="qf-live-link" onClick={()=>setRefresh(old=>old+1)}>Retry</button></p>}
      <div className="qf-ref-hours-total">
@@ -152,7 +156,8 @@ export function PortfolioMetrics({db,portfolio,progress,onOutcome}){
      </form>}
      {training===null&&!error&&<p>Loading training activity...</p>}
      {training?.length===0&&<p>No training activities have been recorded yet.</p>}
-     {!!training?.length&&<div className="qf-ref-hours-list" role="region" aria-label="Recorded training activity">
+     {!!training?.length&&<div ref={printTarget} className="qf-ref-hours-list" role="region" aria-label="Recorded training activity">
+       <h3 className="qf-print-heading">Training activity · {portfolio.title}</h3>
        <table><thead><tr><th>Date</th><th>Type</th><th>Description</th><th>Duration</th></tr></thead>
        <tbody>{training.map(item=><tr key={item.id}><td>{formatDate(item.date)}</td>
         <td>{item.category==='on_job'?'On the job':'Off the job'}</td><td dir="auto">{item.description}</td>

@@ -6,6 +6,14 @@ const status=source('src/qualification/QualificationPortfolioReferenceUI.jsx');
 const registration=source('src/qualification/QualificationCandidateRegistration.jsx');
 const css=source('src/qualification/qualificationPremium.css');
 const preview=source('src/qualification/QualificationCentreLearnerPreview.jsx');
+const sourcePreview=source('src/qualification/QualificationSourcePreview.jsx');
+const unitNav=source('src/qualification/QualificationUnitNavigation.jsx');
+for(const view of [ui,preview,sourcePreview]){
+ assert.match(view,/<QualificationUnitNavigation units=\{/,'Use the same top Unit navigator in all three portfolio views');
+}
+assert.match(unitNav,/className="qf-number-tabs"/);
+assert.match(unitNav,/aria-pressed=\{selected\}/);
+assert.doesNotMatch(sourcePreview,/qsrc-unit-list/,'Do not restore the sidebar in the source view');
 const centre=source('src/qualification/QualificationCentreAdmin.jsx');
 assert.ok(centre.includes('Preview learner workspace')&&centre.includes('<QualificationCentreLearnerPreview version={version}'));
 assert.ok(preview.includes("source?.units||[]"),'Admin preview must be backed by real specification');
@@ -24,8 +32,8 @@ assert.ok(ui.includes('<PortfolioStatusRibbon portfolio={portfolio} progress={pr
 assert.ok(status.includes('portfolio.assessor||')&&status.includes('portfolio.verifier||'),'Reviewer names must be live from enrolment');
 assert.ok(status.includes('progress.verified')&&status.includes('progress.started'),'Progress must derive from actual outcomes');
 assert.ok(status.includes('Date.now()'),'Expected timeline must be computed, not copied from screenshot');
-assert.ok(ui.includes('Jump to qualification Unit')&&ui.includes('Gap Analysis · Assessment Criteria'));
-assert.ok(ui.includes('visibleEvidence.map')&&ui.includes('onShowcase(selection)'));
+assert.ok(ui.includes('Jump to Unit or Outcome')&&ui.includes('Gap Analysis · Assessment Criteria'));
+assert.ok(ui.includes('visibleEvidence.slice(pageStart, pageStart + pageSize).map')&&ui.includes('onShowcase(selection)'));
 assert.ok(ui.includes('outcome.submissions.flatMap(submission=>Object.values(submission.snapshot?.evidence||{}))'),
  'Reviewers must see submitted evidence only, never unsubmitted learner evidence');
 assert.ok(ui.includes("portfolioRpc(db,'contact_list'")&&ui.includes("portfolioRpc(db,'contact_add'"));

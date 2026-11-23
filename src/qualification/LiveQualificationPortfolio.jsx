@@ -1,20 +1,23 @@
 import React, {useEffect, useRef, useState} from 'react';
-import {ArrowLeft, ArrowRight, BookOpen, CheckCircle2, ClipboardCheck, Download, FileText, FolderOpen, GraduationCap, Layers3, LibraryBig, MessageSquare, ShieldCheck, BarChart3} from 'lucide-react';
+import {ArrowLeft, ArrowRight, BookOpen, CheckCircle2, ClipboardCheck, Download, FileText, FolderOpen, GraduationCap, Layers3, LibraryBig, MessageSquare, Printer, ShieldCheck, BarChart3} from 'lucide-react';
 import PremiumLoading from '../components/PremiumLoading.jsx';
 import {QUALIFICATIONS} from './qualificationData.js';
 import {ProgrammeListPremium, qualificationFor} from './QualificationCatalogue.jsx';
 import QualificationSourcePreview from './QualificationSourcePreview.jsx';
 import QualificationInternalNav from './QualificationInternalNav.jsx';
+import QualificationUnitNavigation from './QualificationUnitNavigation.jsx';
+import {ProgrammeUpdateList, useProgrammeUpdates} from './QualificationProgrammeUpdates.jsx';
+import {printPortfolioSection} from './portfolioPrint.js';
 import QualificationMultiUnitEvidence from './QualificationMultiUnitEvidence.jsx';
 import QualificationCentreAdmin from './QualificationCentreAdmin.jsx';
 import QualificationCentreBrief from './QualificationCentreBrief.jsx';
 import {PortfolioStatusRibbon,PortfolioMetrics} from './QualificationPortfolioReferenceUI.jsx';
 import QualificationCandidateRegistration from './QualificationCandidateRegistration.jsx';
 import QualificationEvidenceTemplates from './QualificationEvidenceTemplates.jsx';
-import {LiveUnitLearningHub, OutcomeLearningSupport, ProgrammeMaterialSnapshot, EvidencePreparationTips} from './QualificationLearningResources.jsx';
+import {CentreResourceLinks, LiveUnitLearningHub, OutcomeLearningSupport, ProgrammeMaterialSnapshot, EvidencePreparationTips} from './QualificationLearningResources.jsx';
 import {
   canReview, claimLabels, claimState, downloadEvidenceShowcase, downloadPortfolioEvidence, evidenceExtensions,
-  evidenceKinds, evidencePayload, portfolioRpc, programmeProgress, uploadPortfolioEvidence,
+  evidenceKinds, evidencePayload, fetchEvidenceFile, portfolioRpc, programmeProgress, uploadPortfolioEvidence,
 } from './qualificationPortfolioApi.js';
 import './qualificationPortfolio.css';
 import './qualificationPremium.css';
@@ -44,40 +47,88 @@ function Status({outcome}) {
   return <span className={'qf-live-status qf-live-' + state}>{claimLabels[state]}</span>;
 }
 
-function PortfolioOverview({portfolio, progress, onOutcome, onView, qualification}) {
+function PortfolioOverview({db, portfolio, progress, onOutcome, onView, qualification}) {
   const learner = portfolio.role === 'learner';
   const pending = progress.outcomes.filter(outcome => learner
     ? ['submitted','awaiting_verification','verification_returned'].includes(claimState(outcome))
     : canReview(portfolio.role, claimState(outcome)));
   const changes = learner ? progress.outcomes.filter(outcome => claimState(outcome) === 'changes_requested') : [];
   const overdue = learner ? progress.outcomes.filter(o => o.overdue) : [];
-  const start = new Date(portfolio.startsOn).getTime();
-  const end = new Date(portfolio.targetOn).getTime();
-  const expected = portfolio.targetOn && end > start
-    ? Math.round(Math.min(1, Math.max(0, (Date.now() - start) / (end - start))) * 100) : null;
-  const percent = count => progress.total ? Math.round(count / progress.total * 100) : 0;
+  const [tab, setTab] = useState('tasks');
+  const [updates, setUpdates] = useState('news');
+  const {entries, error} = usePortfolioContactEntries(db, portfolio.id, 0, learner);
+  const feed = useProgrammeUpdates(db, learner ? portfolio.id : null);
+  const now = Date.now();
+  const showUpdates = (predicate, empty) => feed.error
+    ? <p className="qf-live-error" role="alert">{feed.error}{' '}
+        <button className="qf-live-link" type="button" onClick={feed.retry}>Retry</button></p>
+    : <ProgrammeUpdateList items={feed.items?.filter(predicate)} empty={empty}/>;
+  const homeTabs = [
+    ['tasks', 'Tasks'], ['messages', 'Messages'], ['appointments', 'Appointments'],
+    ['resources', 'Resources'], ['app', 'Mobile access'],
+  ];
+  const messages = entries?.filter(entry => entry.kind === 'message');
+  const openContact = () => onView('contact');
+  const recentContact = (items, empty) => <>
+    {error && <p className="qf-live-error" role="alert">{error}</p>}
+    {!error && !items && <p>Loading Contact Diary…</p>}
+    {items?.length === 0 && <p>{empty}</p>}
+    {!!items?.length && <div className="qf-ref-contact-history">
+      {items.slice(0, 5).map(entry => <article key={entry.id}>
+        <div><strong dir="auto">{entry.author}</strong><time dateTime={entry.createdAt}>{formatDate(entry.createdAt)}</time></div>
+        <p dir="auto">{entry.body}</p>
+      </article>)}
+    </div>}
+  </>;
   return <>
-    <div className="qf-live-progress">
-      <Panel title="Started"><div className="qf-live-kpi"><strong>{percent(progress.started)}%</strong><span>{progress.started} outcomes started</span></div><progress max={100} value={percent(progress.started)}/></Panel>
-      <Panel title="Completed"><div className="qf-live-kpi"><strong>{percent(progress.verified)}%</strong><span>{progress.verified} of {progress.total} required verified</span></div><progress max={100} value={percent(progress.verified)}/></Panel>
-      <Panel title="Expected"><div className="qf-live-kpi"><strong>{expected === null ? '—' : expected + '%'}</strong><span>{expected === null ? 'No target date' : 'Expected progress by today'}</span></div><progress max={100} value={expected ?? 0}/></Panel>
-    </div>
-    <Panel title={learner ? 'Awaiting Review' : roleLabels[portfolio.role]}>
-      <div className="qf-live-list">
-        {pending.length === 0 && <p>No outcomes awaiting action.</p>}
-        {pending.map(outcome => <OutcomeLink key={outcome.id} outcome={outcome} onOpen={onOutcome}/>)}
-      </div>
-    </Panel>
-    {learner && <>
-      {changes.length > 0 && <Panel title="Changes Requested"><div className="qf-live-list">
-        {changes.map(outcome => <OutcomeLink key={outcome.id} outcome={outcome} onOpen={onOutcome}/>)}
-      </div></Panel>}
-      <Panel title="Overdue"><div className="qf-live-list">
-        {overdue.length ? overdue.map(outcome => <OutcomeLink key={outcome.id} outcome={outcome} onOpen={onOutcome}/>) : <p>No overdue outcomes.</p>}
-      </div></Panel>
+    {learner && <QualificationInternalNav items={homeTabs} active={tab} onChange={setTab}
+      ariaLabel="Qualification home sections" nested/>}
+    {tab === 'tasks' && <>
+      <Panel title={learner ? 'Awaiting Review' : roleLabels[portfolio.role]}>
+        <div className="qf-live-list">
+          {pending.length === 0 && <p>No outcomes awaiting action.</p>}
+          {pending.map(outcome => <OutcomeLink key={outcome.id} outcome={outcome} onOpen={onOutcome}/>)}
+        </div>
+      </Panel>
+      {learner && <>
+        <Panel title="Latest Contact Diary entries" action={<Action secondary onClick={openContact}>Open Contact Diary</Action>}>
+          {recentContact(entries, 'No Contact Diary entries yet.')}
+        </Panel>
+        {changes.length > 0 && <Panel title="Changes Requested"><div className="qf-live-list">
+          {changes.map(outcome => <OutcomeLink key={outcome.id} outcome={outcome} onOpen={onOutcome}/>)}
+        </div></Panel>}
+        <Panel title="Overdue"><div className="qf-live-list">
+          {overdue.length ? overdue.map(outcome => <OutcomeLink key={outcome.id} outcome={outcome} onOpen={onOutcome}/>) : <p>No overdue outcomes.</p>}
+        </div></Panel>
+      </>}
     </>}
-    <ProgrammeMaterialSnapshot portfolio={portfolio} qualification={qualification}
-      onProgramme={() => onView('programme')} onLibrary={() => onView('library')}/>
+    {tab === 'messages' && <Panel title="Latest Messages" action={<Action secondary onClick={openContact}>Open Contact Diary</Action>}>
+      {recentContact(messages, 'No programme messages yet.')}
+    </Panel>}
+    {tab === 'appointments' && <div className="qf-live-grid">
+      <Panel title="Upcoming Appointments">{showUpdates(item => item.kind === 'appointment' && Date.parse(item.startsAt) >= now, 'No upcoming appointments.')}</Panel>
+      <Panel title="Upcoming Reviews">{showUpdates(item => item.kind === 'review' && Date.parse(item.startsAt) >= now, 'No upcoming reviews.')}</Panel>
+      <Panel title="Overdue Reviews">{showUpdates(item => item.kind === 'review' && Date.parse(item.startsAt) < now, 'No overdue reviews.')}</Panel>
+    </div>}
+    {(tab === 'resources' || !learner) && <ProgrammeMaterialSnapshot portfolio={portfolio} qualification={qualification}
+      onProgramme={() => onView('programme')} onLibrary={() => onView('library')}/>}
+    {tab === 'resources' && <Panel title="Resources by Unit">
+      <div className="qf-live-gaps">{portfolio.units.map(unit => <details key={unit.id}>
+        <summary>{unit.code} · {unit.title}</summary>
+        <CentreResourceLinks unit={unit}/>
+      </details>)}</div>
+    </Panel>}
+    {tab === 'app' && <Panel title="Technica LMS on mobile">
+      <p>Open Technica LMS in your mobile browser to access your programme and upload evidence.</p>
+      <Action secondary onClick={() => onView('evidence')}>Open Evidence Folder</Action>
+    </Panel>}
+    {learner && <Panel title="Programme updates">
+      <div className="qf-live-actions" role="group" aria-label="Programme updates">
+        {['news', 'events'].map(key => <Action key={key} secondary={updates !== key}
+          aria-pressed={updates === key} onClick={() => setUpdates(key)}>{key === 'news' ? 'News' : 'Events'}</Action>)}
+      </div>
+      {showUpdates(item => item.kind === (updates === 'news' ? 'news' : 'event'), updates === 'news' ? 'No news has been published.' : 'No events have been published.')}
+    </Panel>}
   </>;
 }
 
@@ -89,29 +140,30 @@ function OutcomeLink({outcome, onOpen}) {
   </button>;
 }
 
-function UnitProgramme({db,portfolio, unitIndex, setUnitIndex, onOutcome, onEvidence, onLibrary}) {
-  const unit = portfolio.units[unitIndex];
+function UnitProgramme({db,portfolio, unitIndex, setUnitIndex, onOutcome, onEvidence, onContact, onLibrary}) {
+  const unit = portfolio.units[unitIndex] || portfolio.units[0];
   const learner = portfolio.role === 'learner';
+  if (!unit) return <Panel title="Programme units"><p>No units are available.</p></Panel>;
   const unitRequired = unit.outcomes.filter(outcome => outcome.required);
   const unitStarted = unitRequired.filter(outcome => claimState(outcome) !== 'not_started').length;
   const unitVerified = unitRequired.filter(outcome => claimState(outcome) === 'verified').length;
   return <>
-    <div className="qf-live-section-heading"><div><span className="qf-overline">LEARNING OUTCOMES</span><h2>Programme units</h2></div><span>{portfolio.units.length} units</span></div>
-    <nav className="qf-unit-strip" aria-label="Qualification units">
-      <span className="qf-unit-strip-label">UNITS</span>
-      <div className="qf-number-tabs">
-        {portfolio.units.map((item, index) => <button type="button" key={item.id}
-          className={'qf-number-tab ' + (index === unitIndex ? 'active' : '')} aria-pressed={index === unitIndex}
-          title={item.title} aria-label={item.code + ' · ' + item.title}
-          onClick={() => setUnitIndex(index)}>{String(index + 1).padStart(2, '0')}</button>)}
-      </div>
-    </nav>
+    <QualificationUnitNavigation units={portfolio.units} selectedIndex={unitIndex} onSelect={setUnitIndex}/>
     <div className="qf-unit-heading"><div><span className="qf-overline" dir="ltr">{unit.code}</span><h2>{unit.title}</h2></div></div>
     <div className="qf-ref-unit-toolbar">
       <button type="button" disabled={unitIndex===0} onClick={()=>setUnitIndex(index=>Math.max(0,index-1))}><ArrowLeft size={15}/> Previous Unit</button>
-      <label>Jump to Unit
-        <select value={unitIndex} onChange={e=>setUnitIndex(Number(e.target.value))} aria-label="Jump to qualification Unit">
-          {portfolio.units.map((item,index)=><option key={item.id} value={index}>{String(index+1).padStart(2,'0')} · {item.title}</option>)}
+      <label>Jump to Unit or Outcome
+        <select value={'unit:' + unitIndex} onChange={event => {
+          const [kind, value] = event.target.value.split(':');
+          if (kind === 'unit') setUnitIndex(Number(value));
+          else onOutcome(value);
+        }}>
+          {portfolio.units.map((item, index) => <optgroup key={item.id} label={item.code + ' · ' + item.title}>
+            <option value={'unit:' + index}>{item.code} · Unit overview</option>
+            {item.outcomes.map(outcome => <option key={outcome.id} value={'outcome:' + outcome.id}>
+              {outcome.code} · {outcome.title}
+            </option>)}
+          </optgroup>)}
         </select>
       </label>
       <button type="button" disabled={unitIndex===portfolio.units.length-1}
@@ -123,7 +175,7 @@ function UnitProgramme({db,portfolio, unitIndex, setUnitIndex, onOutcome, onEvid
       <progress max={unitRequired.length||1} value={unitVerified} aria-label={'Verified Outcomes in Unit '+unit.code}/>
     </div>
     <QualificationCentreBrief unit={unit} db={db}/>
-    <LiveUnitLearningHub key={unit.id} unit={unit} portfolio={portfolio} onEvidence={onEvidence} onLibrary={onLibrary}/>
+    <LiveUnitLearningHub key={unit.id} unit={unit} portfolio={portfolio} onEvidence={() => onEvidence(unit.id)} onLibrary={onLibrary}/>
     <QualificationEvidenceTemplates key={unit.id+':forms'} unit={unit}/>
     <div className="qf-live-grid">
       <Panel title="Activity · Learning Outcomes"><div className="qf-live-list">
@@ -143,6 +195,14 @@ function UnitProgramme({db,portfolio, unitIndex, setUnitIndex, onOutcome, onEvid
         })}
       </div></Panel>
     </div>
+    <div className="qf-live-grid">
+      <Panel title="Evidence Folder">
+        <Action secondary onClick={() => onEvidence(unit.id)}><FolderOpen size={16}/> View Unit evidence</Action>
+      </Panel>
+      <Panel title="Contact">
+        <Action secondary onClick={onContact}><MessageSquare size={16}/> Open programme Contact Diary</Action>
+      </Panel>
+    </div>
   </>;
 }
 
@@ -157,12 +217,16 @@ function EvidenceItem({item, onDownload, uses = []}) {
   </article>;
 }
 
-function EvidenceFolder({portfolio, onDownload, onShowcase, busy, onSave, onMap, onOpenOutcome, onBack}) {
+function EvidenceFolder({portfolio, initialUnitId, onDownload, onShowcase, busy, onSave, onDuplicate, onMap, onOpenOutcome, onBack, backLabel}) {
   const [mode, setMode] = useState('');
   const [showcase, setShowcase] = useState([]);
   const [search, setSearch] = useState('');
   const [type, setType] = useState('');
   const [order, setOrder] = useState('newest');
+  const [unitFilter, setUnitFilter] = useState(initialUnitId);
+  const [page, setPage] = useState(0);
+  const [pageSize, setPageSize] = useState(25);
+  const [duplicateId, setDuplicateId] = useState('');
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [kind, setKind] = useState(evidenceKinds[0]);
@@ -170,22 +234,37 @@ function EvidenceFolder({portfolio, onDownload, onShowcase, busy, onSave, onMap,
   const [file, setFile] = useState(null);
   const reservation = useRef(null);
   const start = value => {
-    setMode(value); setBody(''); setTitle(''); setDescription(''); setFile(null); reservation.current = null;
+    setMode(value); setBody(''); setTitle(''); setDescription(''); setFile(null); setDuplicateId(''); reservation.current = null;
   };
-  const save = () => onSave({mode,title,description,kind,body,file}, reservation, () => start(''));
-  const outcomes = portfolio.units.flatMap(unit => unit.outcomes.map(outcome => ({...outcome, unitCode: unit.code})));
-  const uses = id => outcomes.filter(outcome => {
-    const mappings = [outcome.claim?.mapping, ...outcome.submissions.map(submission => submission.snapshot.mapping)];
-    return mappings.some(mapping => mapping && Object.values(mapping).some(ids => ids.includes(id)));
-  }).map(outcome => outcome.unitCode + ' / ' + outcome.code);
+  const duplicate = portfolio.evidence.find(item => item.id === duplicateId);
+  const save = () => mode === 'duplicate'
+    ? onDuplicate(duplicate, title, reservation, () => start(''))
+    : onSave({mode,title,description,kind,body,file}, reservation, () => start(''));
+  const links = new Map();
+  for (const unit of portfolio.units) {
+    for (const outcome of unit.outcomes) {
+      const ids = new Set([outcome.claim?.mapping, ...outcome.submissions.map(submission => submission.snapshot?.mapping)]
+        .flatMap(mapping => Object.values(mapping || {}).flat()));
+      for (const id of ids) {
+        if (!links.has(id)) links.set(id, {unitIds: new Set(), labels: []});
+        links.get(id).unitIds.add(unit.id);
+        links.get(id).labels.push(unit.code + ' / ' + outcome.code);
+      }
+    }
+  }
   const selection = portfolio.evidence.filter(item => showcase.includes(item.id));
-  const visibleEvidence = portfolio.evidence.filter(item=>{
-    const term=search.toLowerCase().trim();
-    return (!type||item.kind===type) && (!term||[item.title,item.filename,item.description,item.kind]
-      .some(value=>String(value||'').toLowerCase().includes(term)));
-  }).sort((a,b)=>order==='title'?a.title.localeCompare(b.title)
-    :order==='oldest'?Date.parse(a.created_at)-Date.parse(b.created_at)
-    :Date.parse(b.created_at)-Date.parse(a.created_at));
+  const term = search.toLowerCase().trim();
+  const visibleEvidence = portfolio.evidence.filter(item =>
+    (!unitFilter || (unitFilter === 'unmapped' ? !links.has(item.id) : links.get(item.id)?.unitIds.has(unitFilter))) &&
+    (!type || item.kind === type) && (!term || [item.id, item.title, item.filename, item.description, item.kind]
+      .some(value => String(value || '').toLowerCase().includes(term)))
+  ).sort((a,b) => order === 'title' ? a.title.localeCompare(b.title)
+    : order === 'oldest' ? Date.parse(a.created_at) - Date.parse(b.created_at)
+    : Date.parse(b.created_at) - Date.parse(a.created_at));
+  const lastPage = Math.max(0, Math.ceil(visibleEvidence.length / pageSize) - 1);
+  const evidencePage = Math.min(page, lastPage);
+  const pageStart = evidencePage * pageSize;
+  const applyFilter = setter => event => { setter(event.target.value); setPage(0); };
   return <div className="qlearn-evidence-stack"><EvidencePreparationTips/>
     {portfolio.canEdit&&<div className="qmu-entry">
       <div><span className="qf-overline">YOUR QUALIFICATION · EVIDENCE BANK</span>
@@ -200,15 +279,19 @@ function EvidenceFolder({portfolio, onDownload, onShowcase, busy, onSave, onMap,
       </div>
     </div>}
     <div className="qf-live-grid">
-    <Panel title="Evidence Folder" action={onBack && <Action secondary disabled={busy} onClick={onBack}>Back to outcome</Action>}>
-      <div className="qf-ref-evidence-toolbar">
-        <label>Search evidence<input value={search} onChange={e=>setSearch(e.target.value)}
-          type="search" placeholder="Title, filename or description"/></label>
-        <label>Type<select value={type} onChange={e=>setType(e.target.value)}>
+    <Panel title="Evidence Folder" action={onBack && <Action secondary disabled={busy} onClick={onBack}>{backLabel}</Action>}>
+      <div className="qf-ref-evidence-toolbar qf-ref-evidence-filters">
+        <label>Search evidence<input value={search} onChange={applyFilter(setSearch)}
+          type="search" placeholder="Reference, title, filename or description"/></label>
+        <label>Type<select value={type} onChange={applyFilter(setType)}>
           <option value="">All types</option>
           {evidenceKinds.map(kind=><option key={kind} value={kind}>{kind}</option>)}
         </select></label>
-        <label>Sort<select value={order} onChange={e=>setOrder(e.target.value)}>
+        <label>Unit<select value={unitFilter} onChange={applyFilter(setUnitFilter)}>
+          <option value="">All Units</option><option value="unmapped">Unmapped</option>
+          {portfolio.units.map(unit => <option key={unit.id} value={unit.id}>{unit.code} · {unit.title}</option>)}
+        </select></label>
+        <label>Sort<select value={order} onChange={applyFilter(setOrder)}>
           <option value="newest">Newest first</option><option value="oldest">Oldest first</option>
           <option value="title">Title A–Z</option>
         </select></label>
@@ -217,14 +300,23 @@ function EvidenceFolder({portfolio, onDownload, onShowcase, busy, onSave, onMap,
       {portfolio.evidence.length === 0 && <p>No evidence added yet.</p>}
       {portfolio.evidence.length>0&&visibleEvidence.length===0&&<p>No evidence matches the filters.</p>}
       <div className="qf-live-evidence-list">
-        {visibleEvidence.map(item => <div key={item.id}>
+        {visibleEvidence.slice(pageStart, pageStart + pageSize).map(item => <div key={item.id}>
           <span className="qf-ref-evidence-id">Evidence ref · {item.id.slice(0,8).toUpperCase()}</span>
-          <EvidenceItem item={item} onDownload={onDownload} uses={uses(item.id)}/>
+          <EvidenceItem item={item} onDownload={onDownload} uses={links.get(item.id)?.labels}/>
           <label className="qf-live-showcase"><input type="checkbox" checked={showcase.includes(item.id)} disabled={busy}
             onChange={e => setShowcase(old => e.target.checked ? [...old,item.id] : old.filter(id => id !== item.id))}
             aria-label={'Include ' + item.title + ' in showcase'}/> Include in Showcase</label>
         </div>)}
       </div>
+      {visibleEvidence.length > 0 && <div className="qf-live-actions">
+        <label className="qf-field">Records per page<select value={pageSize}
+          onChange={event => { setPageSize(Number(event.target.value)); setPage(0); }}>
+          {[10, 25, 50].map(size => <option key={size}>{size}</option>)}
+        </select></label>
+        <Action secondary disabled={evidencePage === 0} onClick={() => setPage(evidencePage - 1)}>Previous</Action>
+        <span role="status">Page {evidencePage + 1} of {lastPage + 1}</span>
+        <Action secondary disabled={evidencePage === lastPage} onClick={() => setPage(evidencePage + 1)}>Next</Action>
+      </div>}
       {portfolio.evidence.length > 0 && <Action secondary disabled={busy || !selection.length} onClick={() => onShowcase(selection)}>
         <Download size={15}/> Download Showcase ({selection.length})
       </Action>}
@@ -233,8 +325,30 @@ function EvidenceFolder({portfolio, onDownload, onShowcase, busy, onSave, onMap,
       <div className="qf-live-actions">
         <Action secondary disabled={busy || mode === 'upload'} onClick={() => start('upload')}>Upload a file</Action>
         <Action secondary disabled={busy || mode === 'write'} onClick={() => start('write')}>Write evidence</Action>
+        <Action secondary disabled={busy || mode === 'duplicate' || !portfolio.evidence.length}
+          onClick={() => start('duplicate')}>Duplication Wizard</Action>
       </div>
-      {mode && <form id="qualification-evidence-upload" className="qf-live-form" onSubmit={event => {event.preventDefault(); save();}}>
+      {mode === 'duplicate' && <form className="qf-live-form" onSubmit={event => {event.preventDefault(); save();}}>
+        <fieldset disabled={busy}>
+          <label className="qf-field">Evidence to duplicate<select required value={duplicateId}
+            onChange={event => {
+              const source = portfolio.evidence.find(item => item.id === event.target.value);
+              setDuplicateId(event.target.value);
+              setTitle(source ? ('Copy of ' + source.title).slice(0,160) : '');
+              reservation.current = null;
+            }}>
+            <option value="">Choose evidence</option>
+            {portfolio.evidence.map(item => <option key={item.id} value={item.id}>
+              {item.id.slice(0,8).toUpperCase()} · {item.title}
+            </option>)}
+          </select></label>
+          <label className="qf-field">Copy title<input dir="auto" required maxLength={160} value={title}
+            onChange={event => { setTitle(event.target.value); reservation.current = null; }}/></label>
+          <p>The copy starts with no criteria links. Use Map across Units to link the existing record without making a copy.</p>
+          <button className="qf-button qf-primary" type="submit" disabled={!duplicate || !title.trim()}>Duplicate evidence</button>
+        </fieldset>
+      </form>}
+      {['upload','write'].includes(mode) && <form id="qualification-evidence-upload" className="qf-live-form" onSubmit={event => {event.preventDefault(); save();}}>
         <fieldset disabled={busy}>
           <label className="qf-field">Title<input dir="auto" required maxLength={160} value={title} onChange={e => {setTitle(e.target.value); reservation.current = null;}}/></label>
           <label className="qf-field">Description<textarea dir="auto" maxLength={2000} rows={2} value={description} onChange={e => {setDescription(e.target.value); reservation.current = null;}}/></label>
@@ -441,36 +555,51 @@ function Registration({db, portfolio, progress, busy, onDeclare, onFinalize}) {
   </div>;
 }
 
+function usePortfolioContactEntries(db, portfolioId, refresh, enabled = true) {
+  const [entries, setEntries] = useState(null);
+  const [error, setError] = useState('');
+  useEffect(() => {
+    if (!enabled) return;
+    let active = true;
+    setEntries(null);
+    setError('');
+    portfolioRpc(db,'contact_list',{p_enrolment:portfolioId})
+      .then(result => { if (active) setEntries(Array.isArray(result) ? result : []); })
+      .catch(err => { if (active) setError(failureMessage(err)); });
+    return () => { active = false; };
+  }, [db, portfolioId, refresh, enabled]);
+  return {entries, error};
+}
+
 function ContactDiary({db,portfolio,progress,onOutcome}) {
-  const [entries,setEntries]=useState(null);
   const [error,setError]=useState('');
   const [body,setBody]=useState('');
   const [kind,setKind]=useState('message');
   const [sending,setSending]=useState(false);
   const [refresh,setRefresh]=useState(0);
-  useEffect(()=>{
-    let active=true;
-    setError('');
-    portfolioRpc(db,'contact_list',{p_enrolment:portfolio.id})
-      .then(result=>{if(active)setEntries(Array.isArray(result)?result:[]);})
-      .catch(err=>{if(active)setError(failureMessage(err));});
-    return ()=>{active=false;};
-  },[db,portfolio.id,refresh]);
+  const [search,setSearch]=useState('');
+  const [entryType,setEntryType]=useState('');
+  const printTarget=useRef(null);
+  const {entries, error:readError} = usePortfolioContactEntries(db, portfolio.id, refresh);
   const save=async event=>{
     event.preventDefault();
     if(!body.trim()||sending)return;
     setSending(true);setError('');
     try{
       await portfolioRpc(db,'contact_add',{p_enrolment:portfolio.id,p_kind:kind,p_body:body.trim()});
-      setBody('');setEntries(null);setRefresh(old=>old+1);
+      setBody('');setRefresh(old=>old+1);
     }catch(err){setError(failureMessage(err));}
     finally{setSending(false);}
   };
   const activity = progress.outcomes.flatMap(outcome => outcome.submissions.flatMap(submission =>
     submission.reviews.map((review,index) => ({...review,outcome,revision:submission.revision,index}))))
     .sort((a,b) => Date.parse(b.createdAt) - Date.parse(a.createdAt));
+  const term = search.toLowerCase().trim();
+  const filtered = entries?.filter(item => (!entryType || item.kind === entryType) &&
+    [item.author,item.body].some(value => String(value || '').toLowerCase().includes(term)));
   return <div className="qf-ref-contact">
-    <Panel title="Contact Diary · Learner / Assessor / Verifier">
+    <Panel title="Contact Diary · Learner / Assessor / Verifier" action={<Action secondary
+      disabled={!filtered?.length} onClick={() => printPortfolioSection(printTarget.current)}><Printer size={16}/> Print</Action>}>
       <p className="qf-live-copy">Messages and meeting notes are stored privately against this programme.
         Only the enrolled learner and currently assigned reviewers can access this diary. This does not send an email.</p>
       {error&&<p className="qf-live-error" role="alert">{error} <button className="qf-live-link" type="button" onClick={()=>setRefresh(old=>old+1)}>Retry</button></p>}
@@ -483,9 +612,19 @@ function ContactDiary({db,portfolio,progress,onOutcome}) {
         <button className="qf-button qf-primary" type="submit" disabled={sending||!body.trim()}>
           {sending?'Saving...':'Save Contact Diary entry'}</button>
       </form>
-      {entries===null&&!error&&<p>Loading contact records...</p>}
+      {readError&&<p className="qf-live-error" role="alert">{readError} <button className="qf-live-link" type="button" onClick={()=>setRefresh(old=>old+1)}>Retry</button></p>}
+      {entries===null&&!readError&&<p>Loading contact records...</p>}
       {entries?.length===0&&<p>No Contact Diary entries yet.</p>}
-      {!!entries?.length&&<div className="qf-ref-contact-history">{entries.map(item=><article key={item.id}>
+      {!!entries?.length && <div className="qf-ref-evidence-toolbar">
+        <label>Search Contact Diary<input type="search" value={search} onChange={event => setSearch(event.target.value)}/></label>
+        <label>Filter by entry type<select value={entryType} onChange={event => setEntryType(event.target.value)}>
+          <option value="">All entries</option><option value="message">Messages</option><option value="meeting_note">Meeting notes</option>
+        </select></label>
+      </div>}
+      {!!entries?.length && filtered?.length === 0 && <p>No Contact Diary entries match the filters.</p>}
+      {!!filtered?.length&&<div ref={printTarget} className="qf-ref-contact-history">
+        <h3 className="qf-print-heading">Contact Diary · {portfolio.title}</h3>
+        {filtered.map(item=><article key={item.id}>
         <div><strong>{item.author}</strong><span>{item.authorRole} · {item.kind==='meeting_note'?'Meeting note':'Message'}</span>
           <time dateTime={item.createdAt}>{formatDate(item.createdAt)}</time></div>
         <p dir="auto">{item.body}</p>
@@ -508,6 +647,7 @@ function OpenPortfolio({db, portfolio, references, onRefresh, onBack}) {
   const [unitIndex,setUnitIndex] = useState(0);
   const [outcomeId,setOutcomeId] = useState('');
   const [evidenceFromOutcome,setEvidenceFromOutcome] = useState(false);
+  const [evidenceUnit,setEvidenceUnit] = useState('');
   const [drafts,setDrafts] = useState({});
   const [error,setError] = useState('');
   const [notice,setNotice] = useState('');
@@ -529,7 +669,8 @@ function OpenPortfolio({db, portfolio, references, onRefresh, onBack}) {
   const mapping = drafts[outcomeId]?.version === claimVersion ? drafts[outcomeId].mapping : outcome?.claim?.mapping || {};
   const changeView = key => {
     setView(key); setError(''); setNotice('');
-    if (key !== 'evidence') setEvidenceFromOutcome(false);
+    setEvidenceFromOutcome(false);
+    setEvidenceUnit('');
   };
   const openOutcome = id => {
     setUnitIndex(portfolio.units.findIndex(unit => unit.outcomes.some(item => item.id === id)));
@@ -558,7 +699,7 @@ function OpenPortfolio({db, portfolio, references, onRefresh, onBack}) {
     }
     await onRefresh();
   }, message);
-  const saveEvidence = (fields, reservation, onSaved) => run(async () => {
+  const persistEvidence = async (fields, reservation, onSaved) => {
     const evidence = evidencePayload(fields);
     if (!reservation.current || Date.now() - reservation.current.requestedAt > 3500000) {
       reservation.current = {requestId:crypto.randomUUID(),requestedAt:Date.now()};
@@ -566,8 +707,8 @@ function OpenPortfolio({db, portfolio, references, onRefresh, onBack}) {
     const request = {...base,...evidence,p_request:reservation.current.requestId};
     if (fields.mode === 'write') {
       await portfolioRpc(db,'add_evidence',request);
-      onSaved();
       await onRefresh();
+      onSaved();
       return;
     }
     if (!reservation.current.path) {
@@ -575,9 +716,21 @@ function OpenPortfolio({db, portfolio, references, onRefresh, onBack}) {
       reservation.current = {...reservation.current,...item};
     }
     const updated = await uploadPortfolioEvidence(db,portfolio.id,reservation.current,fields.file,evidence.p_mime);
-    onSaved();
     await onRefresh(updated);
-  }, 'Evidence saved.');
+    onSaved();
+  };
+  const saveEvidence = (fields, reservation, onSaved) => run(
+    () => persistEvidence(fields, reservation, onSaved), 'Evidence saved.');
+  const duplicateEvidence = (source, title, reservation, onSaved) => run(async () => {
+    if (!source || !learner || !portfolio.canEdit) throw new Error('Choose evidence from your portfolio.');
+    const file = source.filename
+      ? new File([await fetchEvidenceFile(db, source)], source.filename)
+      : null;
+    await persistEvidence({
+      mode: file ? 'upload' : 'write', title, description: source.description || '',
+      kind: source.kind, body: source.body || '', file,
+    }, reservation, onSaved);
+  }, 'Evidence duplicated.');
   const saveMultiUnitMapping = (evidenceId,criterionIds)=>run(async()=>{
     await portfolioRpc(db,'map_evidence_across_units',{
       p_enrolment:portfolio.id,p_evidence:evidenceId,p_criteria:criterionIds,
@@ -590,8 +743,10 @@ function OpenPortfolio({db, portfolio, references, onRefresh, onBack}) {
   };
   const onDownload = item => run(() => downloadPortfolioEvidence(db,item));
   const views = [
+    ...(learner ? [['dashboard','Home']] : []),
     ['programme','Course'],['evidence','Evidence'],['registration','Registration'],['contact','Contact'],
-    ['metrics','Metrics'],['dashboard','Overview'],
+    ['metrics','Metrics'],
+    ...(!learner ? [['dashboard','Overview']] : []),
     ...(qualificationFor(portfolio.title) ? [['library','Study Library']] : []),
   ];
   const sectionIcons = {dashboard: Layers3, programme: BookOpen, evidence: FolderOpen, registration: GraduationCap, contact: MessageSquare, metrics: BarChart3, library: LibraryBig};
@@ -619,12 +774,15 @@ function OpenPortfolio({db, portfolio, references, onRefresh, onBack}) {
       onChange={changeView} disabled={busy} ariaLabel="Programme sections"/>
     {error && <p className="qf-live-error" role="alert">{error}</p>}
     {notice && <p className="qf-live-notice" role="status">{notice}</p>}
-    {view === 'dashboard' && <PortfolioOverview portfolio={portfolio} progress={progress} onOutcome={openOutcome} onView={changeView} qualification={cover}/>}
+    {view === 'dashboard' && <PortfolioOverview db={db} portfolio={portfolio} progress={progress} onOutcome={openOutcome} onView={changeView} qualification={cover}/>}
     {view === 'programme' && <UnitProgramme db={db} portfolio={portfolio} unitIndex={unitIndex} setUnitIndex={setUnitIndex} onOutcome={openOutcome}
-      onEvidence={learner ? () => changeView('evidence') : null} onLibrary={cover ? () => changeView('library') : null}/>}
-    {view === 'evidence' && <EvidenceFolder portfolio={visiblePortfolio} busy={busy} onSave={saveEvidence}
+      onEvidence={id => { changeView('evidence'); setEvidenceUnit(id); }} onContact={() => changeView('contact')}
+      onLibrary={cover ? () => changeView('library') : null}/>}
+    {view === 'evidence' && <EvidenceFolder key={evidenceUnit} portfolio={visiblePortfolio} initialUnitId={evidenceUnit} busy={busy} onSave={saveEvidence} onDuplicate={duplicateEvidence}
       onMap={saveMultiUnitMapping} onOpenOutcome={openOutcome}
-      onDownload={onDownload} onShowcase={items => run(() => downloadEvidenceShowcase(db,items))} onBack={evidenceFromOutcome ? () => changeView('outcome') : null}/>}
+      onDownload={onDownload} onShowcase={items => run(() => downloadEvidenceShowcase(db,items))}
+      onBack={evidenceFromOutcome || evidenceUnit ? () => changeView(evidenceFromOutcome ? 'outcome' : 'programme') : null}
+      backLabel={evidenceFromOutcome ? 'Back to outcome' : 'Back to Unit'}/>}
     {view === 'registration' && <Registration db={db} portfolio={portfolio} progress={progress} busy={busy}
       onDeclare={() => commit('declare',{},'Declaration accepted.')}
       onFinalize={reference => commit('finalize',{p_certificate_reference: reference},reference ? 'Certificate reference recorded.' : 'Qualification completed.')}/>}

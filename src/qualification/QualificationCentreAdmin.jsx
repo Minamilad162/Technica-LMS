@@ -4,6 +4,7 @@ import {ArrowLeft,BookCheck,BookOpen,CheckCircle2,ClipboardCheck,Download,FileCh
 import {portfolioRpc} from './qualificationPortfolioApi.js';
 import {qualificationReadiness,needsAssessmentMethodReview,sourceRubricForUnit} from './qualificationReadiness.js';
 import QualificationCentreLearnerPreview from './QualificationCentreLearnerPreview.jsx';
+import {ProgrammeUpdatesAdmin} from './QualificationProgrammeUpdates.jsx';
 import './qualificationCentreAdmin.css';
 
 const methods=[['assignment_brief','Assignment Brief'],['reflective_account','Reflective Account'],
@@ -215,6 +216,7 @@ export default function QualificationCentreAdmin({db,onBack,references=[]}){
     </div>
     <small className="qc-assessment-caveat">Database readiness is not proof of awarding-body approval or permission to issue certificates. Never publish using test references.</small>
   </section>}
+  {release&&<ProgrammeUpdatesAdmin key={version.id} db={db} version={version}/>}
   {version&&<div className="qc-columns">
    <div className="qc-main">
     <Card id="qc-centre-unit-review" title="Unit assessment plans" icon={Layers3}>

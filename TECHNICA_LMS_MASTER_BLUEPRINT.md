@@ -4,7 +4,7 @@
 >
 > Project: Technica Consult LMS
 > Version: 1.1.11 (Practice Center quick mode selection)
-> Last updated: 2026-11-22 (Africa/Cairo), Qualifications e-portfolio implementation and staged reviewer workflow
+> Last updated: 2026-11-23 (Africa/Cairo), Qualification appointments and portfolio tools
 > Repository: https://github.com/Minamilad162/Technica-LMS
 > Target branch: main
 > Current inspected source baseline: v1.15.0, commit 8021f604c63c59b2100d944ead86fed149eb1ceb
@@ -2347,3 +2347,31 @@ Verification on 2026-11-22: both Vite builds passed, the lockfile dependency aud
 ### P97 database activation — 2026-11-22
 
 Applied the Qualifications migration on the verified Technica Account project. Supabase recorded `20261122073054_qualification_portfolio`. Production postflight verified eleven RLS-enabled tables, the private evidence bucket and seven Storage policies, authenticated-only programme RPC access, and zero published qualification versions or enrolments. No learner data was provisioned. Real role testing remains dependent on centre-approved content and named assignments. Updated eight legacy CI assertions to follow current Practice, fullscreen, checkout, Admin dashboard and lesson-publishing behavior. These changes are confined to regression scripts.
+
+
+## P98 — Qualifications Home and Programme navigation (2026-11-23)
+
+| Surface | Decision and implementation | Release status |
+| --- | --- | --- |
+| Enrolled learner Home | Tasks, Messages, Appointments, Resources and Mobile access. Latest diary entries and messages use the enrolled programme Contact Diary. Resources expand by Unit and show links from the published Outcome data. News and Events have explicit unavailable states. | Appointment, News and Events feeds need centre-owned data and scheduling. Mobile access uses the Technica web workspace. |
+| Course / My Programme | One horizontal Unit selector for the enrolled portfolio, official syllabus, embedded Study Library and Centre Admin learner preview. The strip scrolls on narrow screens and keeps the selected Unit in view. Existing Induction and CPD units retain their labels where supplied by the programme data. | Existing enrolled Course remains the initial view. Previous/Next still change Units. The enrolled Jump control also opens Outcomes. |
+| Evidence / Registration / Contact / Metrics | Existing permissions and handlers carry forward. Keep Evidence Bank upload, criteria mapping, private contact and training metrics on their current RPCs. | Frontend and documentation change. No migration or production data change. |
+
+Reference walkthrough used the signed-in learner Home and My Programme, including numeric Units, Course Folder, Evidence Wizard launch, evidence filters, Duplication Wizard launch, Registration, Contact and Metrics. The attached reference flow documents the boundaries and follow-up scope. Technica uses its own visuals and programme data. Keep the original learner identity and records out of source and tests.
+
+Bug fixed: catalogue-sourced syllabus pages showed Units in a desktop sidebar while the enrolled portfolio used a top strip. The shared selector prevents these entry points from drifting. Revert this change to roll back the navigation; no migration rollback is required.
+
+Verification: Vite build and isolated Supabase bundle build passed. Qualification workflow, catalogue, material, readiness and source integrity tests passed. A local React DOM test with mocked, assignment-scoped data exercised Unit selection, Outcome jump and return, Tasks, Messages, Resources and Events. Chromium could not launch in this executor, so responsive visual and deployed learner QA remain pending. Dependency audit found zero vulnerabilities.
+
+## P99 — Qualification appointments, programme updates and portfolio tools (2026-11-23)
+
+| Surface | Current source behaviour |
+| --- | --- |
+| Centre Admin | On a published version, centre administrators can publish News or Events to that version and schedule a private Appointment or Review for one active enrolment. Updates can be withdrawn and elapsed meetings can be marked complete. Resolution records keep the administrator and time. |
+| Learner Home | Appointment, Upcoming Review and Overdue Review panels derive from scheduled records. News and Events show centre-published items for the enrolled version. Past scheduled reviews remain overdue until resolved. Agenda entries are displayed in the browser's local time. |
+| Unit / Evidence Folder | Open the evidence list pre-filtered to the selected Unit. Search by reference, filter by type or Unit, sort, and page through results. Duplication creates a new learner-owned record and, for files, a new private object through the existing reservation policy. The copy starts without mappings and the original retains its links and submitted revisions. |
+| Contact and Metrics | Search diary text and filter entry type. Print the filtered diary or recorded training activity in isolation from the rest of the page. |
+
+Publication uses the current LMS admin role. Reads are limited to active participants of a published enrolment, with edition-scoped announcements and enrolment-scoped appointments. No production records were seeded. Install the forward migration before enabling the feed on a deployment. Reverting the frontend leaves records intact. The role-scoped functions and table can remain in place after a frontend rollback.
+
+Verification: disposable PostgreSQL with the actual P1 and Qualification migrations verified permissions, private meeting isolation, idempotent publication, resolved items and the existing assessment lifecycle. React DOM interaction tests with mocked RPC and Storage exercised Home data, Unit filtering and pagination, written and file duplication, and scoped print selection. Real browser print preview, real Supabase Storage and production deployment require verification.
