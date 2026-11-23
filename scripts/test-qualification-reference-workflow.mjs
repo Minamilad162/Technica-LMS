@@ -27,7 +27,15 @@ for(const route of ["['programme','Course']","['evidence','Evidence']","['regist
  "['contact','Contact']","['metrics','Metrics']"]){
  assert.ok(ui.includes(route),'Reference workflow missing '+route);
 }
-assert.ok(ui.includes("useState(evidenceEntry ? 'evidence' : 'programme')"),'First open must land in the real learner Course');
+assert.ok(ui.includes("useState(evidenceEntry ? 'evidence' : 'dashboard')"),'Approved Qualifications overview must be the default, with the direct Evidence link unchanged');
+assert.ok(ui.includes("['programme','Course']")&&ui.includes("<QualificationUnitNavigation units={portfolio.units}"),'Original Course navigation and numbered Unit tabs must remain available');
+assert.ok(ui.includes("<QualificationTopStats portfolio={portfolio} visiblePortfolio={visiblePortfolio}/>"),'Statistics must use real RLS-scoped portfolio data');
+assert.ok(ui.includes("<QualificationVisualDashboard portfolio={visiblePortfolio}"),'Qualification overview must render the approved live layout');
+const visual=source('src/qualification/QualificationVisualDashboard.jsx');
+assert.ok(visual.includes('claimState(outcome)')&&visual.includes('portfolio.units.map')&&visual.includes('evidenceIds(unit)'),'Units, status and evidence must come from live portfolio records');
+assert.ok(visual.includes('ReviewerSnapshot')&&visual.includes('submission?.snapshot?.evidence'),'Review panels must show real submitted evidence');
+assert.ok(ui.includes('chooseEvidenceFile(event.dataTransfer.files?.[0])')&&ui.includes('onMap={saveMultiUnitMapping}'),'Drag/drop and actual multi-unit mapping must remain connected');
+assert.ok(source('src/qualification/qualificationVisualDashboard.css').includes('@media(max-width:680px)'),'Approved layouts need a responsive mobile state');
 assert.ok(ui.includes('<PortfolioStatusRibbon portfolio={portfolio} progress={progress}'));
 assert.ok(status.includes('portfolio.assessor||')&&status.includes('portfolio.verifier||'),'Reviewer names must be live from enrolment');
 assert.ok(status.includes('progress.verified')&&status.includes('progress.started'),'Progress must derive from actual outcomes');
