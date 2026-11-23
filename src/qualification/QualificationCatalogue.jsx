@@ -33,7 +33,7 @@ export function ProgrammeListPremium({rows, references = [], activeRole, onRoleC
         <h1>Qualifications</h1>
         <p>Explore your programmes, manage evidence and follow every step of your assessment journey.</p>
       </div>
-      <div className="qf-live-lead-count"><strong>03</strong><span>Qualification pathways</span></div>
+      <div className="qf-live-lead-count"><strong>{QUALIFICATIONS.length}</strong><span>Qualification pathways</span></div>
     </header>
     <nav className="qf-live-nav qf-live-role-nav" aria-label="Qualification workspaces">
       {roles.map(key => {
@@ -51,7 +51,9 @@ export function ProgrammeListPremium({rows, references = [], activeRole, onRoleC
       </div>
       <div className="qf-course-grid qf-live-catalogue">
         {QUALIFICATIONS.map(item => {
-          const enrolments = assigned.filter(row => qualificationFor(row.title)?.id === item.id);
+          const enrolments = assigned.filter(row =>
+            qualificationFor(row.title)?.id === item.id ||
+            String(row.catalogKey||'').startsWith('technica-source-'+item.id+'-'));
           const spec = sourceFor(item);
           return <article className={'qf-course-card qf-course-theme-' + item.color} key={item.id}>
             <div className="qf-course-hero">
@@ -82,15 +84,15 @@ export function ProgrammeListPremium({rows, references = [], activeRole, onRoleC
           </article>;
         })}
       </div>
-      {testPortfolios.length > 0 && <section className="qf-card">
-        <div className="qf-card-header"><h3>Private test portfolio</h3></div>
-        <p>For testing learner workflows with sample evidence.</p>
+      {testPortfolios.length > 0 && <details className="qf-card qsrc-test-disclosure">
+        <summary>Private testing workspace ({testPortfolios.length})</summary>
+        <p>Test records are separate from your official qualifications.</p>
         <div className="qf-live-list">
           {testPortfolios.map(row => <button type="button" key={row.id} onClick={() => onOpen(row.id)}>
-            <BookOpen size={19}/><span><strong>{row.title}</strong><small>Open test portfolio</small></span><ArrowRight size={18}/>
+            <BookOpen size={19}/><span><strong>{row.title}</strong><small>Open private test portfolio</small></span><ArrowRight size={18}/>
           </button>)}
         </div>
-      </section>}
+      </details>}
       {unmatched.length > 0 && <section className="qf-card">
         <div className="qf-card-header"><h3>Other assigned programmes</h3></div>
         <div className="qf-live-list">
