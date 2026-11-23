@@ -33,7 +33,7 @@ assert.ok(status.includes('portfolio.assessor||')&&status.includes('portfolio.ve
 assert.ok(status.includes('progress.verified')&&status.includes('progress.started'),'Progress must derive from actual outcomes');
 assert.ok(status.includes('Date.now()'),'Expected timeline must be computed, not copied from screenshot');
 assert.ok(ui.includes('Jump to Unit or Outcome')&&ui.includes('Gap Analysis · Assessment Criteria'));
-assert.ok(ui.includes('visibleEvidence.map')&&ui.includes('onShowcase(selection)'));
+assert.ok(ui.includes('visibleEvidence.slice(pageStart, pageStart + pageSize).map')&&ui.includes('onShowcase(selection)'));
 assert.ok(ui.includes('outcome.submissions.flatMap(submission=>Object.values(submission.snapshot?.evidence||{}))'),
  'Reviewers must see submitted evidence only, never unsubmitted learner evidence');
 assert.ok(ui.includes("portfolioRpc(db,'contact_list'")&&ui.includes("portfolioRpc(db,'contact_add'"));

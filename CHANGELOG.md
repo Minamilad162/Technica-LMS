@@ -1,3 +1,9 @@
+## 2026-11-23 — Qualification appointments and portfolio tools
+
+- Added centre-managed News, Events, Appointments and Reviews for published Qualifications.
+- Added Unit-linked evidence filters and pagination, same-portfolio evidence duplication, and scoped printing for Contact Diary and training records.
+- Added a forward migration and extended the disposable portfolio lifecycle check with scope and permission tests. No production migration was applied.
+
 ## 2026-11-23 — Qualification Home and Programme navigation
 
 - Moved the official syllabus Unit picker to a horizontal, numbered strip shared with enrolled portfolios and the Centre Admin learner preview.

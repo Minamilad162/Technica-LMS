@@ -62,3 +62,7 @@ Never copy names, contact details, photos, dates or actual evidence from the ref
 | Contact and Metrics | Contact diary with filter and print. Metrics records date, description, author, On the Job and Off the Job minutes. | Existing enrolment-scoped Contact and Metrics. Reference print and filter parity was not part of this implementation. |
 
 The walkthrough inspected visible navigation, filters and wizard entry pages. No evidence, registration, declaration or assessment was submitted or changed on the reference.
+
+### Follow-up implementation (23 November 2026)
+
+Centre Admin can now publish News and Events and schedule private Appointments or Reviews. Learner Home consumes these records. The Unit view opens a pre-filtered Evidence Folder with reference search, type and Unit filters, pagination, and a Duplication Wizard for learner-owned written evidence or files. Copies receive fresh identifiers and keep criteria mappings separate. The Contact Diary can be filtered and printed, and Metrics can print the training log. These changes preserve the existing assessment, registration and certificate rules. The new feed needs its forward migration, centre-created data and live rollout verification.
