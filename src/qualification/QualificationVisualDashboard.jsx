@@ -113,8 +113,8 @@ export default function QualificationVisualDashboard({portfolio,progress,selecte
   {surface==='overview'?<div className="qfd-main-grid">
    <div className="qfd-main-column">
     <section className="qfd-qualification-card">
-     <div className="qfd-qualification-title"><div className="qfd-title-icon"><Award size={28}/></div>
-      <div><span className="qfd-eyebrow">QUALIFICATION · {portfolio.version}</span><h2>{portfolio.title}</h2></div>
+     <div className="qfd-qualification-title"><div className="qfd-title-icon"><Award size={25}/></div>
+      <div><span className="qfd-eyebrow">VERIFIED QUALIFICATION PROGRESS</span><h2>Overall progress</h2></div>
       {status(portfolio.completedAt?'Completed':'In progress',portfolio.completedAt?'success':'accent')}</div>
      <div className="qfd-progress-head"><strong>Overall Unit progress</strong><b>{percentDone}% ({completed} of {total} Units)</b></div>
      <progress value={completed} max={total||1} aria-label="Verified Units"/>

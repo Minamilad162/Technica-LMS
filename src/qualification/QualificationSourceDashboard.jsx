@@ -4,34 +4,28 @@ import './qualificationSourceDashboard.css';
 
 // Reference catalogue is not an enrolment. These are genuine syllabus counts,
 // never fictitious learner completions, submissions or assessor decisions.
-export default function QualificationSourceDashboard({source, onUnit, onEvidence, onLibrary, onRegistration}) {
+export function QualificationSourceStats({source}){
  const units=source.units||[];
  const outcomes=units.reduce((n,unit)=>n+(unit.outcomes||[]).length,0);
  const criteria=units.reduce((n,unit)=>n+(unit.outcomes||[]).reduce((m,entry)=>m+(entry.criteria||[]).length,0),0);
- const published=source.status==='centre_published';
  const stats=[
   {title:'Official Units',value:units.length,Icon:Layers3,theme:'blue'},
   {title:'Learning Outcomes',value:outcomes,Icon:BookOpen,theme:'green'},
   {title:'Assessment Criteria',value:criteria,Icon:CheckCircle2,theme:'violet'},
  ];
+ return <section className="qsrd-stats" aria-label="Imported official specification totals">
+  {stats.map(({title,value,Icon,theme})=><article className={'qsrd-stat qsrd-'+theme} key={title}>
+   <span className="qsrd-stat-icon"><Icon size={21} aria-hidden="true"/></span>
+   <span><small>{title}</small><strong>{value}</strong></span>
+  </article>)}
+ </section>;
+}
+export default function QualificationSourceDashboard({source, onUnit, onEvidence, onLibrary, onRegistration}) {
+ const units=source.units||[];
+ const published=source.status==='centre_published';
  return <div className="qsrd-workspace">
-  <div className="qsrd-stats" aria-label="Imported qualification specification totals">
-   {stats.map(({title,value,Icon,theme})=><section className={'qsrd-stat qsrd-'+theme} key={title}>
-    <span className="qsrd-stat-icon"><Icon size={21} aria-hidden="true"/></span>
-    <span><small>{title}</small><strong>{value}</strong></span>
-   </section>)}
-  </div>
   <div className="qsrd-grid">
    <div className="qsrd-main">
-    <section className="qsrd-programme" aria-label="Official qualification details">
-     <div className="qsrd-programme-title"><span className="qsrd-programme-logo"><GraduationCap size={25}/></span>
-      <div><span className="qf-overline">OFFICIAL QUALIFICATION · {source.version}</span>
-       <h2>{source.title}</h2><small>Qualification ref: {source.reference_number||'Not provided'}</small>
-      </div>
-      <span className={'qsrd-chip '+(published?'qsrd-published':'qsrd-reference')}>{published?'Centre-published':'Reference syllabus'}</span>
-     </div>
-     <p className="qsrd-programme-intro">This view contains the imported awarding-body syllabus. Learner progress, Evidence decisions and certificates appear only inside an enrolled portfolio.</p>
-    </section>
     <section className="qsrd-table-card">
      <div className="qsrd-section-heading"><div><h2>Units</h2><small>Select a Unit to see its Learning Outcomes and Assessment Criteria.</small></div><span>{units.length} Units</span></div>
      <div className="qsrd-table-scroll" role="region" tabIndex={0} aria-label="Official qualification Units">

@@ -27,10 +27,52 @@ assert.ok(!sourcePreview.includes('Open test upload'),
  'Real qualification evidence access must never redirect to the private test sandbox');
 assert.ok(catalogue.includes("String(row.catalogKey||'').startsWith('technica-source-'+item.id+'-')"),
  'Recognize real learner enrolments by pinned source edition as well as title');
-assert.ok(sourceStyles.includes('.qsrc-compact-header')&&sourceStyles.includes('.qsrc-compact-unit-title'),
- 'Apply the compact styling and avoid oversized, repeated headings');
+assert.ok(sourceStyles.includes('.qsrc-compact-unit-title')&&source('src/qualification/qualificationExperience.css').includes('.qxp-identity'),
+ 'Use one compact shared qualification identity for real and private portfolios');
 assert.ok(ui.includes('mappingOpen')&&ui.includes('setMappingOpen(true)'),
  'Keep the real evidence mapper accessible on demand');
+
+const sharedNav=source('src/qualification/QualificationInternalNav.jsx');
+const identity=source('src/qualification/QualificationRegistrationExperience.jsx');
+const matrix=source('src/qualification/QualificationEvidenceMatrix.jsx');
+const library=source('src/qualification/QualificationStudyLibrary.jsx');
+const sharedStyles=source('src/qualification/qualificationExperience.css');
+assert.ok(sharedNav.includes("matrix:Grid3X3")&&sharedNav.includes("['matrix','Matrix']"),
+ 'Matrix must augment the original qualification navbar, not replace it');
+for(const route of ["['programme','Course']","['evidence','Evidence']","['matrix','Matrix']",
+ "['registration','Registration']","['contact','Contact']","['metrics','Metrics']","['library','Study Library']"])
+ assert.ok(ui.includes(route),'An original qualification route has been hidden: '+route);
+assert.ok(ui.includes("['library','Study Library'],"),
+ 'Private testing must see the same Study Library design as genuine enrolments');
+assert.ok(ui.includes("<QualificationIdentity portfolio={portfolio} source={selectedReference}"),
+ 'All genuine/sandbox portfolios must share the same branded identity');
+assert.ok(sourcePreview.includes("<QualificationIdentity source={source}"),
+ 'Official reference pages must share the same branded identity');
+assert.ok(ui.includes("<QualificationRegistrationSummary portfolio={portfolio}"),
+ 'Live Registration must show true enrolment/declaration/certificate states');
+assert.ok(sourcePreview.includes("<QualificationRegistrationSummary source={source}"),
+ 'Source Registration must not invent an enrolled learner');
+assert.ok(identity.includes("portfolio.declarationAt")&&identity.includes("portfolio.certificate"),
+ 'Do not fabricate registration completion or certificate records');
+assert.ok(ui.includes("<QualificationEvidenceMatrix portfolio={visiblePortfolio}"),
+ 'Real learner and reviewer Matrix must use RLS-scoped visible portfolio');
+assert.ok(sourcePreview.includes("<QualificationEvidenceMatrix source={source}"),
+ 'Reference source must show a read-only Matrix, not an editable demo');
+assert.ok(matrix.includes("o.submissions?.[0]?.snapshot?.mapping")&&
+ matrix.includes("learner")&&matrix.includes("portfolio.canEdit"),
+ 'Reviewer mapping must be read-only and based on submitted evidence snapshots');
+assert.ok(matrix.includes("<QualificationMultiUnitEvidence portfolio={portfolio}")&&
+ ui.includes("onMapSave={saveMultiUnitMapping}"),
+ 'Matrix editing must reuse authorised multi-Unit mapping rather than local fake state');
+assert.ok(ui.includes("<QualificationStudyLibrary portfolio={visiblePortfolio} source={selectedReference}")&&
+ sourcePreview.includes("<QualificationStudyLibrary source={source}"),
+ 'Every qualification context must reuse the source-backed Study Library');
+assert.ok(library.includes("source?.source_url")&&library.includes("o.resources")&&
+ !library.includes("2.4 MB"),
+ 'Study materials must come from real source links, not image-mockup filenames or sizes');
+assert.ok(sharedStyles.includes("@media(max-width:490px)"),
+ 'All redesigned tabs must be accessible on small screens');
+
 
 assert.match(unitNav,/aria-pressed=\{selected\}/);
 assert.doesNotMatch(sourcePreview,/qsrc-unit-list/,'Do not restore the sidebar in the source view');

@@ -7,6 +7,9 @@ import QualificationSourcePreview from './QualificationSourcePreview.jsx';
 import QualificationInternalNav from './QualificationInternalNav.jsx';
 import QualificationUnitNavigation from './QualificationUnitNavigation.jsx';
 import QualificationVisualDashboard, {QualificationTopStats} from './QualificationVisualDashboard.jsx';
+import {QualificationIdentity,QualificationRegistrationSummary} from './QualificationRegistrationExperience.jsx';
+import QualificationEvidenceMatrix from './QualificationEvidenceMatrix.jsx';
+import QualificationStudyLibrary from './QualificationStudyLibrary.jsx';
 import {ProgrammeUpdateList, useProgrammeUpdates} from './QualificationProgrammeUpdates.jsx';
 import {printPortfolioSection} from './portfolioPrint.js';
 import QualificationMultiUnitEvidence from './QualificationMultiUnitEvidence.jsx';
@@ -751,22 +754,18 @@ function ReviewerClaim({portfolio, outcome, busy, onDownload, onReview}) {
   </>;
 }
 
-function Registration({db, portfolio, progress, busy, onDeclare, onFinalize}) {
+function Registration({db, portfolio, source, progress, busy, onDeclare, onFinalize}) {
   const [reference, setReference] = useState('');
   const learner = portfolio.role === 'learner';
   const verifier = portfolio.role === 'verifier';
-  return <div className="qf-ref-registration">
-    <QualificationCandidateRegistration db={db} portfolio={portfolio}/>
+  return <div className="qf-ref-registration qxp-registration-actions">
+    <QualificationRegistrationSummary portfolio={portfolio} source={source} progress={progress}/>
+    <details className="qxp-registration-form-toggle">
+      <summary>Candidate registration form · {portfolio.role==='learner'?'View or edit private details':'Learner-only access'}</summary>
+      <QualificationCandidateRegistration db={db} portfolio={portfolio}/>
+    </details>
     <div className="qf-live-grid">
-    <Panel title="Programme registration & Declaration">
-      <dl className="qf-live-details">
-        <dt>Learner</dt><dd>{portfolio.learner || 'Registered learner'}</dd>
-        <dt>Specification version</dt><dd>{portfolio.version}</dd>
-        <dt>Official start</dt><dd>{formatDate(portfolio.startsOn)}</dd>
-        <dt>Anticipated end</dt><dd>{formatDate(portfolio.targetOn)}</dd>
-        <dt>Assessor</dt><dd>{portfolio.assessor || (portfolio.assessorAssigned ? 'Assigned' : 'Not assigned')}</dd>
-        <dt>Verifier</dt><dd>{portfolio.verifier || (portfolio.verifierAssigned ? 'Assigned' : 'Not assigned')}</dd>
-      </dl>
+    <Panel title="Learner Declaration">
       <h4>Declaration</h4><p className="qf-live-copy" dir="auto">{portfolio.declaration}</p>
       {portfolio.declarationAt ? <p>Accepted {formatDate(portfolio.declarationAt)}</p> :
         learner && portfolio.canEdit && <Action disabled={busy} onClick={onDeclare}>Accept Declaration</Action>}
@@ -994,15 +993,15 @@ function OpenPortfolio({db, portfolio, references, evidenceEntry, onRefresh, onB
   const libraryAvailable = cover && selectedReference;
   const views = [
     ...(learner ? [['dashboard','Home']] : []),
-    ['programme','Course'],['evidence','Evidence'],['registration','Registration'],['contact','Contact'],
+    ['programme','Course'],['evidence','Evidence'],['matrix','Matrix'],['registration','Registration'],['contact','Contact'],
     ['metrics','Metrics'],
     ...(!learner ? [['dashboard','Overview']] : []),
-    ...(libraryAvailable ? [['library','Study Library']] : []),
+    ['library','Study Library'],
   ];
   const outcomeUnit = portfolio.units[unitIndex];
   const outcomeIndex = outcomeUnit?.outcomes.findIndex(item => item.id === outcomeId);
   const outcomeMaterial = getUnitSourceMaterial(outcomeUnit?.code);
-  const unitView = ['dashboard','programme','outcome','evidence','registration','contact','metrics'].includes(view);
+  const unitView = ['dashboard','programme','outcome','evidence','matrix','registration','contact','metrics','library'].includes(view);
   const selectContextUnit = index => {
     setUnitIndex(index);
     if (view === 'outcome') changeView('programme');
@@ -1019,12 +1018,10 @@ function OpenPortfolio({db, portfolio, references, evidenceEntry, onRefresh, onB
   const referenceUnit = selectedReference?.units?.find(unit => unit.code === outcomeUnit?.code);
   return <div className="qf-live-stack" aria-busy={busy}>
     <button type="button" className="qf-plain-back" disabled={busy} onClick={onBack}><ArrowLeft size={16}/> Qualifications</button>
-    <header className="qfd-page-header">
-      <div><span className="qfd-eyebrow">{roleLabels[portfolio.role]} · {cover?.body || 'TECHNICA'}</span>
-        <h1>Qualifications</h1>
-        <p>Track your qualification progress, manage Units and evidence, and complete your assessment.</p></div>
-      <Action secondary disabled={busy} onClick={() => run(() => onRefresh())}>Refresh</Action>
-    </header>
+    <div className="qxp-top-toolbar"><span className="qxp-eyebrow">{roleLabels[portfolio.role]} · Qualification workspace</span>
+      <Action secondary disabled={busy} onClick={() => run(() => onRefresh())}>Refresh</Action></div>
+    <QualificationIdentity portfolio={portfolio} source={selectedReference} heroImage={cover?.heroImage}
+      body={cover?.body} level={cover?.level}/>
     <QualificationTopStats portfolio={portfolio} visiblePortfolio={visiblePortfolio}/>
     {view !== 'dashboard' && <details className="qfd-portfolio-details">
       <summary>Programme dates, progress &amp; assigned reviewers</summary>
@@ -1033,7 +1030,7 @@ function OpenPortfolio({db, portfolio, references, evidenceEntry, onRefresh, onB
     {unitView && <QualificationUnitNavigation units={portfolio.units} selectedIndex={unitIndex} onSelect={selectContextUnit}/>}
     <QualificationInternalNav items={views} active={view === 'outcome' ? 'programme' : view}
       onChange={openSection} disabled={busy} unitContext={unitView} ariaLabel={unitView ? 'Unit sections' : 'Programme sections'}/>
-    {unitView && outcomeUnit && !['outcome','dashboard'].includes(view) && <header className="qf-unit-heading">
+    {unitView && outcomeUnit && ['programme','evidence'].includes(view) && <header className="qf-unit-heading">
       <div><span className="qf-overline">Unit {String(unitIndex + 1).padStart(2,'0')} · {outcomeUnit.code}</span>
         <h2>{outcomeUnit.title}</h2></div>
     </header>}
@@ -1062,14 +1059,18 @@ function OpenPortfolio({db, portfolio, references, evidenceEntry, onRefresh, onB
       onDownload={onDownload} onShowcase={items => run(() => downloadEvidenceShowcase(db,items))}
       onBack={evidenceFromOutcome || evidenceUnit ? () => changeView(evidenceFromOutcome ? 'outcome' : 'programme') : null}
       backLabel={evidenceFromOutcome ? 'Back to outcome' : 'Back to Unit'}/>}
-    {view === 'registration' && <Registration db={db} portfolio={portfolio} progress={progress} busy={busy}
+    {view === 'registration' && <Registration db={db} portfolio={portfolio} source={selectedReference} progress={progress} busy={busy}
       onDeclare={() => commit('declare',{},'Declaration accepted.')}
       onFinalize={reference => commit('finalize',{p_certificate_reference: reference},reference ? 'Certificate reference recorded.' : 'Qualification completed.')}/>}
+    {view === 'matrix' && <QualificationEvidenceMatrix portfolio={visiblePortfolio} source={selectedReference}
+      selectedUnitIndex={unitIndex} onUnit={setUnitIndex} onMapSave={saveMultiUnitMapping} onOpenOutcome={openOutcome} busy={busy}/>}
     {view === 'contact' && <ContactDiary db={db} portfolio={portfolio} progress={progress} onOutcome={openOutcome}/>}
+
     {view === 'metrics' && <PortfolioMetrics db={db} portfolio={portfolio} progress={progress} onOutcome={openOutcome}/>}
-    {view === 'library' && cover && selectedReference &&
-      <QualificationSourcePreview key={selectedReference.catalog_key} item={cover}
-        references={[selectedReference]} embedded onBack={() => changeView('programme')}/>}
+    {view === 'library' && <QualificationStudyLibrary portfolio={visiblePortfolio} source={selectedReference}
+      selectedUnitIndex={unitIndex} onUnit={setUnitIndex} onOutcome={item=>openOutcome(item.id)}>
+      {outcomeUnit?.centreBrief && <QualificationCentreBrief unit={outcomeUnit} db={db}/>}
+    </QualificationStudyLibrary>}
     {view === 'outcome' && outcome && outcomeIndex >= 0 && <QualificationOutcome
       units={portfolio.units} unitIndex={unitIndex} outcomeIndex={outcomeIndex} onJump={jumpFromOutcome}
       onBack={() => changeView('programme')} aim={referenceUnit?.aim || outcomeMaterial?.aim}
