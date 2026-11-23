@@ -1,17 +1,17 @@
 import React from 'react';
-import {BarChart3,BookOpen,CalendarDays,ClipboardList,FolderOpen,GraduationCap,House,Layers3,LibraryBig,MessageSquare,Smartphone} from 'lucide-react';
+import {BarChart3,BookOpen,CalendarDays,ClipboardList,FolderOpen,GraduationCap,Grid3X3,House,Layers3,LibraryBig,MessageSquare,Smartphone} from 'lucide-react';
 import './qualificationInternalNav.css';
 
 // This navigation is shared between a real, RLS-scoped enrolled portfolio and
 // an awarding-body reference preview. Tabs never grant portfolio permissions.
 const icons={
-  programme:BookOpen,course:BookOpen,evidence:FolderOpen,
+  programme:BookOpen,course:BookOpen,evidence:FolderOpen,matrix:Grid3X3,
   registration:GraduationCap,contact:MessageSquare,metrics:BarChart3,
   dashboard:House,overview:Layers3,library:LibraryBig,
   tasks:ClipboardList,messages:MessageSquare,appointments:CalendarDays,resources:FolderOpen,app:Smartphone,
 };
 export const QUALIFICATION_NAV_ITEMS=[
-  ['course','Course'],['evidence','Evidence'],['registration','Registration'],
+  ['course','Course'],['evidence','Evidence'],['matrix','Matrix'],['registration','Registration'],
   ['contact','Contact'],['metrics','Metrics'],['overview','Overview'],
   ['library','Study Library'],
 ];
