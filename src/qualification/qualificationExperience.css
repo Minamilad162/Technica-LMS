@@ -146,3 +146,37 @@
 @media(max-width:750px){.qf-live .qxp-stage-strip{grid-template-columns:repeat(3,minmax(0,1fr))}.qf-live .qxp-registration-grid,.qf-live .qxp-reg-side{grid-template-columns:minmax(0,1fr)}.qf-live .qxp-registration-grid .qxp-reg-side{grid-column:auto}.qf-live .qxp-matrix-filters{grid-template-columns:repeat(2,minmax(0,1fr))}.qf-live .qxp-matrix-filters label:last-child{grid-column:1/-1}.qf-live .qxp-library-pair{grid-template-columns:minmax(0,1fr)}}
 @media(max-width:490px){.qf-live .qxp-identity{align-items:flex-start;flex-wrap:wrap;gap:9px;padding:12px}.qf-live .qxp-identity-mark{flex-basis:45px;height:45px;width:45px}.qf-live .qxp-identity h1{font-size:18px}.qf-live .qxp-identity .qxp-state{margin-left:54px}.qf-live .qxp-stage-strip{grid-template-columns:repeat(2,minmax(0,1fr))}.qf-live .qxp-stage{font-size:10px}.qf-live .qxp-matrix-filters,.qf-live .qxp-matrix-side{grid-template-columns:minmax(0,1fr)}.qf-live .qxp-matrix-filters label:last-child{grid-column:auto}.qf-live .qxp-library-selector{flex-wrap:wrap;gap:7px}.qf-live .qxp-library-selector select{flex-basis:100%}.qf-live .qxp-panel{padding:12px}.qf-live .qxp-facts dl>div{grid-template-columns:minmax(90px,.9fr) minmax(0,1.1fr)}}
 @media(prefers-reduced-motion:no-preference){.qf-live .qxp-primary,.qf-live .qxp-secondary,.qf-live .qxp-outcome-links button,.qf-live .qxp-library-files a{transition:background-color .15s ease,border-color .15s ease,transform .15s ease}.qf-live .qxp-primary:hover:not(:disabled){transform:translateY(-1px)}}
+
+
+/* Keep the real source page and the sandbox/enrolled pages on the same design tokens. */
+.qf-live .qxp-top-toolbar{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:-2px 0 1px}
+.qf-live .qxp-top-toolbar .qf-button{min-height:35px;padding:7px 12px;font-size:12px}
+.qf-live .qxp-identity+.qfd-stats,.qf-live .qxp-identity+.qsrd-stats{margin:11px 0 2px}
+.qf-live .qsrd-stats{gap:10px}
+.qf-live .qsrd-stat{border-radius:13px;background:linear-gradient(120deg,#fff,#f8f7ff);padding:12px 14px;box-shadow:0 5px 17px #1b3b690d}
+.qf-live .qsrd-stat-icon{color:#6146d2;background:#efeaff;border-radius:11px}
+.qf-live .qsrd-green{background:linear-gradient(120deg,#fff,#f2fff6)}
+.qf-live .qsrd-violet{background:linear-gradient(120deg,#fff,#fffbf2)}
+.qf-live .qsrd-green .qsrd-stat-icon{color:#147d58;background:#e5f8eb}
+.qf-live .qsrd-violet .qsrd-stat-icon{color:#bf6c22;background:#fff1e0}
+.qf-live .qsrd-stat small{font-size:11px}
+.qf-live .qsrd-stat strong{font-size:23px}
+.qf-live .qsrc-page>.qxp-identity{margin:0}
+.qf-live .qsrc-edition-row{padding:2px 3px;margin:0}
+.qf-live .qsrc-page>.qf-internal-nav,.qf-live .qf-live-stack>.qf-internal-nav{
+ background:#fff;border-color:#dfe3f3;box-shadow:0 5px 19px #1a376c12;
+}
+.qf-live .qf-internal-nav button[aria-pressed="true"]{background:#f1ebff;color:#6041cb;border-color:#d8cdfb}
+.qf-live .qf-internal-unit button[aria-pressed="true"]{background:#6044ce;color:#fff;border-color:#6044ce}
+.qf-live .qsrc-page .qsrd-grid{grid-template-columns:minmax(0,2.6fr) minmax(225px,.9fr)}
+.qf-live .qsrd-table-card,.qf-live .qsrd-side{border-radius:15px;border-color:#dce4f3;box-shadow:0 5px 15px #173b690b}
+.qf-live .qsrd-table-scroll table{min-width:590px}
+.qf-live .qsrd-table-scroll :is(th,td){padding:9px 10px}
+.qf-live .qsrd-table-scroll thead th{background:#f7f7fe}
+.qf-live .qsrd-small-action{color:#5f3dc6;border-color:#dfd6fa;background:#f3efff}
+.qf-live .qsrd-small-action:hover{color:#4a2eb3;background:#ebe5ff}
+.qf-live .qxp-registration-actions .qf-ref-candidate{margin:0}
+.qf-live .qxp-registration-actions>.qf-live-grid{margin:0}
+.qf-live .qxp-library-main>.qxp-panel,.qf-live .qxp-library-side>.qxp-panel{margin:0}
+@media(max-width:1100px){.qf-live .qsrc-page .qsrd-grid{grid-template-columns:minmax(0,1fr)}}
+@media(max-width:680px){.qf-live .qxp-top-toolbar{flex-wrap:wrap}.qf-live .qxp-identity+.qsrd-stats{grid-template-columns:repeat(3,minmax(0,1fr));gap:7px}.qf-live .qsrd-stat{padding:10px}.qf-live .qsrd-stat-icon{flex-basis:33px;width:33px;height:33px}.qf-live .qsrd-stat strong{font-size:19px}}
