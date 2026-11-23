@@ -2396,3 +2396,7 @@ The authenticated catalogue displays the exact private sandbox catalogue key onl
 ### P100 live mapping regression
 
 On the live private learner portfolio, written evidence saved successfully. Expanding a Unit in the cross-Unit mapper could blank the page because a deferred state update read the React event after its dispatch ended. Read the disclosure state synchronously and avoid unchanged updates. Retain the existing criteria permissions, server RPC and draft/submit separation. No migration is required. Revert this frontend change if rollback is needed.
+
+### P100 draft mapping production database repair
+
+Live learner QA surfaced a second mapper failure in PostgreSQL. Loop record variables collided with query aliases and could raise “record is not assigned yet” before saving a draft. A forward migration disambiguates those variables while retaining enrolment, storage, criteria and locked-claim checks. Local PostgreSQL lifecycle tests cover mapping one item to two outcomes, repeating the request and unlinking one criterion without affecting the original lifecycle. Production ledger recorded the function replacement as `20261123111134`.
