@@ -1,5 +1,5 @@
 import React,{useState} from 'react';
-import {ArrowLeft,ArrowRight,BarChart3,BookOpen,CheckCircle2,ExternalLink,FileText,FolderOpen,GraduationCap,Info,Layers3,LibraryBig,LockKeyhole,MessageSquare,ShieldCheck} from 'lucide-react';
+import {ArrowLeft,ArrowRight,BarChart3,BookOpen,CheckCircle2,ExternalLink,FileText,FolderOpen,GraduationCap,Info,Layers3,LibraryBig,LockKeyhole,MessageSquare,ShieldCheck,Upload} from 'lucide-react';
 
 
 import './qualificationSourcePreview.css';
@@ -29,7 +29,7 @@ function SourceDocument({source}){
  </section>;
 }
 
-export default function QualificationSourcePreview({item,references=[],onBack,embedded=false}) {
+export default function QualificationSourcePreview({item,references=[],onBack,embedded=false,learnerPortfolios=[],practicePortfolio,onOpenEvidence}) {
  const sources=getQualificationSources(item,references);
  const [sourceKey,setSourceKey]=useState(sources[0]?.catalog_key||'');
  const [unitIndex,setUnitIndex]=useState(0);
@@ -52,6 +52,8 @@ export default function QualificationSourcePreview({item,references=[],onBack,em
  const fullCount=source.units.reduce((n,u)=>n+u.outcomes.length,0);
  const acCount=source.units.reduce((n,u)=>n+u.outcomes.reduce((a,o)=>a+o.criteria.length,0),0);
  const isReference=source.status!=='centre_published';
+ const enrolled = learnerPortfolios.filter(portfolio => portfolio.catalogKey === source.catalog_key);
+ const needsUploadRoute = !embedded && section === 'evidence';
  return <div className={'qsrc-page'+(embedded?' qsrc-embedded':'')}>
   {!embedded&&<button type="button" className="qf-plain-back" onClick={onBack}><ArrowLeft size={17}/> All qualifications</button>}
   {!embedded&&<header className={'qf-live-feature qsrc-hero qf-course-theme-'+item.color}>
@@ -77,12 +79,10 @@ export default function QualificationSourcePreview({item,references=[],onBack,em
     <div><span className="qf-overline">Unit {String(unitIndex + 1).padStart(2,'0')} · {unit.code}</span>
       <h2>{unit.title}</h2></div>
   </header>}
-  <div className="qsrc-source-note"><Info size={18}/><div>
-    <strong>{isReference ? 'Verified source reference — not a learner enrolment' : 'Centre-published syllabus'}</strong>
-    <p>{source.version==='November 2026'
-      ? 'The November 2026 OTHM Level 6 specification has a new qualification number and revised Units, Learning Outcomes and Assessment Criteria. All official content shown here is source-backed; the former 2023 standards do not apply to this edition. Centre approval is required before live assessment.'
-      : 'This syllabus uses real Unit titles, Learning Outcomes and Assessment Criteria imported from the supplied awarding-body specification. It is not a demo. Centre approval is still required before using this version for live grading.'}</p>
-  </div></div>
+  {!needsUploadRoute && !embedded && <div className="qsrc-source-note">
+    <Info size={16} aria-hidden="true"/>
+    <p>{isReference ? 'Syllabus preview. This edition is pending centre approval.' : 'Syllabus preview.'}</p>
+  </div>}
   {(embedded||section==='course')&&!unit&&<div className="qsrc-empty"><Info size={19}/><p>No units are available for this edition.</p></div>}
   {(embedded||section==='course')&&outcome&&<QualificationOutcome units={source.units}
     unitIndex={unitIndex} outcomeIndex={outcomeIndex} onJump={jumpTo} onBack={()=>setOutcomeIndex(null)}
@@ -182,24 +182,36 @@ export default function QualificationSourcePreview({item,references=[],onBack,em
     </section>
     <aside className="qsrc-aside"><SourceDocument source={source}/></aside>
   </div></>}
-  {!embedded&&section==='evidence'&&unit&&<div className="qsrc-section-layout">
-    <section className="qsrc-information-card">
-      <h2>Evidence Folder</h2>
-        <div className="qsrc-evidence-heading"><FileText size={17}/>
-        <span>{unit.code} · {unit.title} · {unit.outcomes.reduce((n,o)=>n+o.criteria.length,0)} source criteria</span></div>
-      <EvidenceUnitMaterials key={unit.code + ':materials'} unit={unit} source={source}
-        onOutcome={(_, index) => {setSection('course');jumpTo(unitIndex,index);}}/>
-      {unit.outcomes.length > 0 && <details key={unit.code} className="qf-outcome-filters">
-        <summary>Technica working templates</summary>
-        <QualificationEvidenceTemplates unit={unit} compact/>
-      </details>}
+  {needsUploadRoute && unit && <div className="qsrc-evidence-page">
+    <section className="qsrc-evidence-access" aria-label="Evidence upload access">
+      <span className="qsrc-evidence-access-icon"><Upload size={21} aria-hidden="true"/></span>
+      <div>
+        <h3>{enrolled.length ? 'Upload evidence' : 'Evidence upload'}</h3>
+        {enrolled.length > 0 ? <p>Open your enrolled portfolio for this edition.</p> :
+          <p>{isReference ? 'This edition is pending centre approval. Uploads for this qualification require an enrolment after publication.' :
+            'Your account has no learner enrolment for this edition.'}</p>}
+        {!enrolled.length && practicePortfolio && <p>Use your private test portfolio to practise uploading a file.</p>}
+      </div>
+      <div className="qsrc-evidence-access-actions">
+        {enrolled.map(portfolio => <button key={portfolio.id} type="button" className="qf-button qf-primary"
+          onClick={() => onOpenEvidence(portfolio.id, unit.code)}>
+          <Upload size={16}/> {enrolled.length === 1 ? 'Upload evidence' : portfolio.title}
+        </button>)}
+        {!enrolled.length && practicePortfolio && <button type="button" className="qf-button qf-primary"
+          onClick={() => onOpenEvidence(practicePortfolio.id)}>
+          <Upload size={16}/> Open test upload
+        </button>}
+        {!enrolled.length && !practicePortfolio && <button type="button" className="qf-button qf-outline" onClick={onBack}>
+          My qualifications <ArrowRight size={16}/>
+        </button>}
+      </div>
     </section>
-    <aside className="qsrc-aside"><div className="qsrc-source-card">
-      <div className="qsrc-source-card-heading"><FolderOpen size={19}/><h3>Evidence Bank · Upload &amp; Multi-Unit Mapping</h3></div>
-      <p>Requires actual centre-approved learner enrolment. From your enrolled portfolio, open Evidence
-        to upload a file, write evidence, or link a record across Units.</p>
-      <button type="button" className="qsrc-source-link" onClick={()=>setSection('course')}>View Unit criteria <ArrowRight size={16}/></button>
-    </div></aside>
+    <EvidenceUnitMaterials key={unit.code + ':materials'} unit={unit} source={source}
+      onOutcome={(_, index) => {setSection('course');jumpTo(unitIndex,index);}}/>
+    {unit.outcomes.length > 0 && <details key={unit.code} className="qlearn-evidence-disclosure qsrc-evidence-templates">
+      <summary>Technica working templates</summary>
+      <QualificationEvidenceTemplates unit={unit} compact/>
+    </details>}
   </div>}
   {!embedded&&section==='registration'&&<div className="qsrc-section-layout">
     <section className="qsrc-information-card">

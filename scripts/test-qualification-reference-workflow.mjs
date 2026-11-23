@@ -27,7 +27,7 @@ for(const route of ["['programme','Course']","['evidence','Evidence']","['regist
  "['contact','Contact']","['metrics','Metrics']"]){
  assert.ok(ui.includes(route),'Reference workflow missing '+route);
 }
-assert.ok(ui.includes("useState('programme')"),'First open must land in the real learner Course');
+assert.ok(ui.includes("useState(evidenceEntry ? 'evidence' : 'programme')"),'First open must land in the real learner Course');
 assert.ok(ui.includes('<PortfolioStatusRibbon portfolio={portfolio} progress={progress}'));
 assert.ok(status.includes('portfolio.assessor||')&&status.includes('portfolio.verifier||'),'Reviewer names must be live from enrolment');
 assert.ok(status.includes('progress.verified')&&status.includes('progress.started'),'Progress must derive from actual outcomes');
@@ -69,7 +69,7 @@ for(const control of ['Jump to Unit/Outcome','No previous outcomes','No next out
  'Grading Checklists','Recording Forms','Programme Contact Diary']){
  assert.ok(outcomePage.includes(control),'Outcome page lost '+control);
 }
-assert.ok(ui.includes('initialWizard={evidenceFromOutcome}')&&ui.includes('Back to outcome'));
+assert.ok(ui.includes("initialWizard={evidenceFromOutcome ? 'choose' : uploadOnEntry ? 'upload' : ''}")&&ui.includes('Back to outcome'));
 assert.ok(ui.includes('Completed (Assessor Only)')&&ui.includes("commit('save_claim'"));
 const unitMaterials=source('src/qualification/QualificationLearningResources.jsx');
 assert.match(sourcePreview,/<EvidenceUnitMaterials[\s\S]*?unit=\{unit\} source=\{source\}/,
@@ -87,4 +87,7 @@ for(const view of [ui,sourcePreview]){
  assert.match(view,/<details[^>]+>\s*<summary>Technica working templates<\/summary>/,
   'Technica templates are optional supporting tools in Evidence');
 }
+assert.match(ui,/Boolean\(evidenceEntry && portfolio.canEdit\)/,
+ 'The direct upload path still requires server-provided edit permission');
+assert.match(ui,/row.role === 'learner' && !row.completedAt && row.catalogKey === privateSandboxKey/);
 console.log('Qualification reference workflow: programme, evidence, enrolment, contact, metrics and privacy constraints PASS');
