@@ -82,7 +82,7 @@ export function QualificationRegistrationSummary({portfolio,source,progress}){
     <section className="qxp-panel"><div className="qxp-panel-heading"><ShieldCheck size={19}/><h3>Centre &amp; access</h3></div>
      <p>{enrolled?'Learner and assigned reviewer permissions control this enrolment.':'An awarding-body source reference does not create a learner enrolment.'}</p>
      {source&&<div className="qxp-ref-facts"><span>Source edition</span><strong>{source.version}</strong><span>Centre publication</span><strong>{published?'Published':'Reference only'}</strong></div>}
-     {source?.source_url&&<a href={source.source_url} target="_blank" rel="noopener noreferrer" className="qxp-inline-action">Original specification <ExternalLink size={15}/></a>}
+     {source?.source_url?.startsWith('https://')&&<a href={source.source_url} target="_blank" rel="noopener noreferrer" className="qxp-inline-action">Original specification <ExternalLink size={15}/></a>}
     </section>
     <section className="qxp-panel"><div className="qxp-panel-heading"><Award size={19}/><h3>Certificate record</h3></div>
      <div className={'qxp-certificate-'+(hasCertificate?'done':'pending')}><Award size={20}/><strong>{hasCertificate?'Recorded':finished?'Awaiting issued certificate':'Not ready'}</strong></div>
