@@ -75,7 +75,7 @@ export default function QualificationSourcePreview({item,references=[],onBack,em
       </select></label>}
     {sources.length===1&&<span className="qsrc-edition-single">{source.version}</span>}
   </div>
-  {unit && <QualificationUnitNavigation units={source.units} selectedIndex={unitIndex} onSelect={index => jumpTo(index)}/>}
+  {unit && <QualificationUnitNavigation units={source.units} selectedIndex={unitIndex} onSelect={index => {jumpTo(index);if(section==='overview')setSection('course');}}/>}
   {!embedded&&<QualificationInternalNav active={section} onChange={changeSection}
     ariaLabel="Unit sections" unitContext readOnly={isReference}/>}
   {section==='course' && !embedded && isReference && <p className="qsrc-compact-reference-note"><Info size={14}/> Source reference · Enrolment and assessment remain separate.</p>}
