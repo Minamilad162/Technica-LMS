@@ -1,3 +1,8 @@
+## 2026-11-23 — Evidence and Qualification navigation UX
+
+- Separated evidence creation, the records register, and draft mapping. Added direct upload and written evidence actions and a mapping shortcut after save.
+- Improved Unit and section selection contrast, keyboard focus, and brief opt-in motion.
+
 ## 2026-11-23 — Evidence upload entry
 
 - Open the existing upload form directly from syllabus Evidence when the learner has a matching enrolment or an assigned private test portfolio.

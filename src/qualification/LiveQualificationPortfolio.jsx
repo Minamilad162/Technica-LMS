@@ -1,5 +1,5 @@
 import React, {useEffect, useRef, useState} from 'react';
-import {ArrowLeft, ArrowRight, BookOpen, CheckCircle2, ClipboardCheck, Download, FileText, FolderOpen, GraduationCap, Layers3, LibraryBig, Link2, MessageSquare, Printer, ShieldCheck, BarChart3} from 'lucide-react';
+import {ArrowLeft, ArrowRight, BookOpen, CheckCircle2, ClipboardCheck, Download, FileText, FolderOpen, GraduationCap, Layers3, LibraryBig, Link2, LoaderCircle, MessageSquare, PenLine, Printer, ShieldCheck, Upload, BarChart3} from 'lucide-react';
 import PremiumLoading from '../components/PremiumLoading.jsx';
 import {QUALIFICATIONS} from './qualificationData.js';
 import {ProgrammeListPremium, privateSandboxKey, qualificationFor} from './QualificationCatalogue.jsx';
@@ -23,6 +23,7 @@ import QualificationOutcome, {OutcomeContact, OutcomeCriteria, OutcomeRecords} f
 import {getUnitSourceMaterial} from './qualificationUnitMaterial.js';
 import './qualificationPortfolio.css';
 import './qualificationPremium.css';
+import './qualificationEvidenceExperience.css';
 
 const roleLabels = {learner: 'My Programme', assessor: 'Assessment queue', verifier: 'Verification queue'};
 const decisions = [['met','Met'], ['partial','Partially met'], ['not_met','Not met']];
@@ -221,6 +222,8 @@ function EvidenceItem({item, onDownload, uses = []}) {
 
 function EvidenceFolder({db, portfolio, source, initialUnitId, initialWizard, onSelectUnit, onDownload, onShowcase, busy, onSave, onDuplicate, onMap, onOpenOutcome, onBack, backLabel}) {
   const [mode, setMode] = useState(initialWizard || '');
+  const [savedEvidenceId, setSavedEvidenceId] = useState('');
+  const savedNotice = useRef(null);
   const [showcase, setShowcase] = useState([]);
   const [detailId, setDetailId] = useState('');
   const [mappingTarget, setMappingTarget] = useState(null);
@@ -246,6 +249,7 @@ function EvidenceFolder({db, portfolio, source, initialUnitId, initialWizard, on
     setMode(value); setBody(''); setTitle(''); setDescription(''); setFile(null); setDuplicateId(''); reservation.current = null;
   };
   const openWizard = (nextMode, source) => {
+    setSavedEvidenceId('');
     start(nextMode);
     if (source) {
       setDuplicateId(source.id);
@@ -255,10 +259,12 @@ function EvidenceFolder({db, portfolio, source, initialUnitId, initialWizard, on
   };
   const openMapper = item => {
     if (item) setMappingTarget({id:item.id});
-    document.getElementById('qualification-multi-unit-mapper')?.scrollIntoView({block:'start'});
+    const mapper = document.getElementById('qualification-multi-unit-mapper');
+    mapper?.focus({preventScroll:true});
+    mapper?.scrollIntoView({block:'start'});
   };
   const duplicate = portfolio.evidence.find(item => item.id === duplicateId);
-  const showNewEvidence = () => {
+  const showNewEvidence = id => {
     start('');
     setUnitFilter('');
     setSearch('');
@@ -267,6 +273,7 @@ function EvidenceFolder({db, portfolio, source, initialUnitId, initialWizard, on
     setShowcaseOnly(false);
     setOrder('newest');
     setPage(0);
+    setSavedEvidenceId(id || '');
   };
   const save = () => mode === 'duplicate'
     ? onDuplicate(duplicate, title, reservation, showNewEvidence)
@@ -284,7 +291,11 @@ function EvidenceFolder({db, portfolio, source, initialUnitId, initialWizard, on
     }
   }
   const selectedUnit = portfolio.units.find(unit => unit.id === unitFilter);
+  const lastSaved = portfolio.evidence.find(item => item.id === savedEvidenceId);
   const selection = portfolio.evidence.filter(item => showcase.includes(item.id));
+  useEffect(() => {
+    if (lastSaved) savedNotice.current?.focus();
+  }, [lastSaved?.id]);
   const term = search.toLowerCase().trim();
   const visibleEvidence = portfolio.evidence.filter(item =>
     (!showcaseOnly || showcase.includes(item.id)) &&
@@ -310,16 +321,86 @@ function EvidenceFolder({db, portfolio, source, initialUnitId, initialWizard, on
     </th>;
   };
   const toggleShowcase = (id, checked) => setShowcase(old => checked ? [...new Set([...old, id])] : old.filter(value => value !== id));
-  return <div className="qlearn-evidence-stack">
-    <Panel title="Evidence Folder" action={onBack && <Action secondary disabled={busy} onClick={onBack}>{backLabel}</Action>}>
-      <div className="qf-live-actions">
+  return <div className="qlearn-evidence-stack qf-evidence-experience">
+    <section className="qf-evidence-command" aria-labelledby="qualification-evidence-title">
+      <div className="qf-evidence-command-heading">
+        <span className="qf-evidence-command-icon"><FolderOpen size={24} aria-hidden="true"/></span>
+        <div><h2 id="qualification-evidence-title">Evidence Folder</h2>
+          <p>{selectedUnit ? selectedUnit.title : portfolio.title}</p>
+        </div>
+        {onBack && <Action secondary disabled={busy} onClick={onBack}>{backLabel}</Action>}
+      </div>
+      {portfolio.canEdit && <div className="qf-evidence-primary-actions">
+        <Action disabled={busy} onClick={() => openWizard('upload')}><Upload size={18} aria-hidden="true"/> Upload a file</Action>
+        <Action secondary disabled={busy} onClick={() => openWizard('write')}><PenLine size={17} aria-hidden="true"/> Write evidence</Action>
+      </div>}
+    </section>
+    {lastSaved && <div ref={savedNotice} tabIndex={-1} className="qf-evidence-saved">
+      <CheckCircle2 size={21} aria-hidden="true"/>
+      <div role="status"><strong>Evidence saved</strong><p dir="auto">{lastSaved.title}</p></div>
+      <Action secondary disabled={busy} onClick={() => openMapper(lastSaved)}>Map saved evidence <ArrowRight size={16} aria-hidden="true"/></Action>
+    </div>}
+    {portfolio.canEdit && mode && <section className="qf-card qf-evidence-wizard">
+      <div className="qf-card-header">
+        <h3 id="qualification-evidence-wizard-heading" tabIndex={-1}>{mode === 'duplicate' ? 'Duplication Wizard' : 'Evidence Wizard'}</h3>
+        <Action secondary disabled={busy} onClick={() => start('')}>Close</Action>
+      </div>
+      {mode !== 'duplicate' && <div className="qf-live-actions qf-evidence-mode" role="group" aria-label="Evidence format">
+        <Action secondary disabled={busy} aria-pressed={mode === 'upload'} onClick={() => {if (mode !== 'upload') start('upload');}}>
+          <Upload size={16} aria-hidden="true"/> File upload
+        </Action>
+        <Action secondary disabled={busy} aria-pressed={mode === 'write'} onClick={() => {if (mode !== 'write') start('write');}}>
+          <PenLine size={16} aria-hidden="true"/> Written evidence
+        </Action>
+      </div>}
+      {mode === 'duplicate' && <form className="qf-live-form" onSubmit={event => {event.preventDefault(); save();}}>
+        <fieldset disabled={busy}>
+          <label className="qf-field">Evidence to duplicate<select required value={duplicateId}
+            onChange={event => {
+              const source = portfolio.evidence.find(item => item.id === event.target.value);
+              setDuplicateId(event.target.value);
+              setTitle(source ? ('Copy of ' + source.title).slice(0,160) : '');
+              reservation.current = null;
+            }}>
+            <option value="">Choose evidence</option>
+            {portfolio.evidence.map(item => <option key={item.id} value={item.id}>
+              {item.id.slice(0,8).toUpperCase()} · {item.title}
+            </option>)}
+          </select></label>
+          <label className="qf-field">Copy title<input dir="auto" required maxLength={160} value={title}
+            onChange={event => { setTitle(event.target.value); reservation.current = null; }}/></label>
+          <p>The copy starts with no criteria links. Use Map across Units to link the existing record without making a copy.</p>
+          <button className="qf-button qf-primary" type="submit" disabled={!duplicate || !title.trim()}>Duplicate evidence</button>
+        </fieldset>
+      </form>}
+      {['upload','write'].includes(mode) && <form id="qualification-evidence-upload" className="qf-live-form" onSubmit={event => {event.preventDefault(); save();}}>
+        <fieldset disabled={busy}>
+          <label className="qf-field">Title<input dir="auto" required maxLength={160} value={title} onChange={e => {setTitle(e.target.value); reservation.current = null;}}/></label>
+          <label className="qf-field">Description<textarea dir="auto" maxLength={2000} rows={2} value={description} onChange={e => {setDescription(e.target.value); reservation.current = null;}}/></label>
+          <label className="qf-field">Evidence type<select value={kind} onChange={e => {setKind(e.target.value); reservation.current = null;}}>
+            {evidenceKinds.map(item => <option key={item}>{item}</option>)}
+          </select></label>
+          {mode === 'upload' ? <label className="qf-field qf-evidence-file">
+            <span className="qf-evidence-file-heading"><Upload size={19} aria-hidden="true"/> Evidence file</span>
+            <small>PDF, Word, Excel, JPEG or PNG · Up to 10 MB</small>
+            <input required type="file" accept={evidenceExtensions}
+              onChange={e => {setFile(e.target.files[0] || null); reservation.current = null;}}/>
+          </label> :
+            <label className="qf-field">Evidence<textarea dir="auto" required maxLength={20000} rows={6} value={body} onChange={e => {setBody(e.target.value); reservation.current = null;}}/></label>}
+          <button className="qf-button qf-primary" type="submit" disabled={!title.trim() || (mode === 'write' ? !body.trim() : !file)}>
+            {busy ? <><LoaderCircle className="qf-evidence-spinner" size={16} aria-hidden="true"/> Saving…</> : 'Save evidence'}
+          </button>
+        </fieldset>
+      </form>}
+    </section>}
+    <Panel title="Evidence records">
+      <div className="qf-live-actions qf-evidence-record-tools">
         {portfolio.canEdit && <>
-          <Action disabled={busy} onClick={() => openWizard('choose')}><FolderOpen size={16}/> Evidence Wizard</Action>
+          <Action secondary disabled={busy || !portfolio.evidence.length} onClick={() => openMapper()}><Layers3 size={16} aria-hidden="true"/> Map across Units</Action>
           <Action secondary disabled={busy || !portfolio.evidence.length} onClick={() => openWizard('duplicate')}>Duplication Wizard</Action>
-          <Action secondary disabled={busy || !portfolio.evidence.length} onClick={() => openMapper()}><Layers3 size={16}/> Map across Units</Action>
         </>}
         <Action secondary disabled={busy || !selection.length} onClick={() => onShowcase(selection)}>
-          <Download size={15}/> Download Showcase ({selection.length})
+          <Download size={15} aria-hidden="true"/> Download Showcase ({selection.length})
         </Action>
       </div>
       <details className="qf-evidence-filters" open={!!initialUnitId}>
@@ -410,49 +491,6 @@ function EvidenceFolder({db, portfolio, source, initialUnitId, initialWizard, on
         <Action secondary disabled={evidencePage === lastPage} onClick={() => setPage(evidencePage + 1)}>Next</Action>
       </div>}
     </Panel>
-    {portfolio.canEdit && mode && <section className="qf-card">
-      <div className="qf-card-header">
-        <h3 id="qualification-evidence-wizard-heading" tabIndex={-1}>{mode === 'duplicate' ? 'Duplication Wizard' : 'Evidence Wizard'}</h3>
-        <Action secondary disabled={busy} onClick={() => start('')}>Close</Action>
-      </div>
-      {mode !== 'duplicate' && <div className="qf-live-actions">
-        <Action secondary disabled={busy || mode === 'upload'} onClick={() => start('upload')}>Upload a file</Action>
-        <Action secondary disabled={busy || mode === 'write'} onClick={() => start('write')}>Write evidence</Action>
-      </div>}
-      {mode === 'duplicate' && <form className="qf-live-form" onSubmit={event => {event.preventDefault(); save();}}>
-        <fieldset disabled={busy}>
-          <label className="qf-field">Evidence to duplicate<select required value={duplicateId}
-            onChange={event => {
-              const source = portfolio.evidence.find(item => item.id === event.target.value);
-              setDuplicateId(event.target.value);
-              setTitle(source ? ('Copy of ' + source.title).slice(0,160) : '');
-              reservation.current = null;
-            }}>
-            <option value="">Choose evidence</option>
-            {portfolio.evidence.map(item => <option key={item.id} value={item.id}>
-              {item.id.slice(0,8).toUpperCase()} · {item.title}
-            </option>)}
-          </select></label>
-          <label className="qf-field">Copy title<input dir="auto" required maxLength={160} value={title}
-            onChange={event => { setTitle(event.target.value); reservation.current = null; }}/></label>
-          <p>The copy starts with no criteria links. Use Map across Units to link the existing record without making a copy.</p>
-          <button className="qf-button qf-primary" type="submit" disabled={!duplicate || !title.trim()}>Duplicate evidence</button>
-        </fieldset>
-      </form>}
-      {['upload','write'].includes(mode) && <form id="qualification-evidence-upload" className="qf-live-form" onSubmit={event => {event.preventDefault(); save();}}>
-        <fieldset disabled={busy}>
-          <label className="qf-field">Title<input dir="auto" required maxLength={160} value={title} onChange={e => {setTitle(e.target.value); reservation.current = null;}}/></label>
-          <label className="qf-field">Description<textarea dir="auto" maxLength={2000} rows={2} value={description} onChange={e => {setDescription(e.target.value); reservation.current = null;}}/></label>
-          <label className="qf-field">Evidence type<select value={kind} onChange={e => {setKind(e.target.value); reservation.current = null;}}>
-            {evidenceKinds.map(item => <option key={item}>{item}</option>)}
-          </select></label>
-          {mode === 'upload' ? <label className="qf-field">File (up to 10 MB)<input required type="file" accept={evidenceExtensions}
-            onChange={e => {setFile(e.target.files[0] || null); reservation.current = null;}}/></label> :
-            <label className="qf-field">Evidence<textarea dir="auto" required maxLength={20000} rows={6} value={body} onChange={e => {setBody(e.target.value); reservation.current = null;}}/></label>}
-          <button className="qf-button qf-primary" type="submit" disabled={!title.trim() || (mode === 'write' ? !body.trim() : !file)}>Save evidence</button>
-        </fieldset>
-      </form>}
-    </section>}
   {portfolio.canEdit&&<QualificationMultiUnitEvidence portfolio={portfolio} busy={busy} targetEvidence={mappingTarget}
     onSave={onMap} onOpenOutcome={onOpenOutcome}/>}
   {selectedUnit && <EvidenceUnitMaterials key={selectedUnit.id} unit={selectedUnit} source={source}
@@ -849,9 +887,9 @@ function OpenPortfolio({db, portfolio, references, evidenceEntry, onRefresh, onB
     }
     const request = {...base,...evidence,p_request:reservation.current.requestId};
     if (fields.mode === 'write') {
-      await portfolioRpc(db,'add_evidence',request);
+      const saved = await portfolioRpc(db,'add_evidence',request);
       await onRefresh();
-      onSaved();
+      onSaved(saved.id);
       return;
     }
     if (!reservation.current.path) {
@@ -860,10 +898,10 @@ function OpenPortfolio({db, portfolio, references, evidenceEntry, onRefresh, onB
     }
     const updated = await uploadPortfolioEvidence(db,portfolio.id,reservation.current,fields.file,evidence.p_mime);
     await onRefresh(updated);
-    onSaved();
+    onSaved(reservation.current.id);
   };
   const saveEvidence = (fields, reservation, onSaved) => run(
-    () => persistEvidence(fields, reservation, onSaved), 'Evidence saved.');
+    () => persistEvidence(fields, reservation, onSaved));
   const duplicateEvidence = (source, title, reservation, onSaved) => run(async () => {
     if (!source || !learner || !portfolio.canEdit) throw new Error('Choose evidence from your portfolio.');
     const file = source.filename
@@ -873,7 +911,7 @@ function OpenPortfolio({db, portfolio, references, evidenceEntry, onRefresh, onB
       mode: file ? 'upload' : 'write', title, description: source.description || '',
       kind: source.kind, body: source.body || '', file,
     }, reservation, onSaved);
-  }, 'Evidence duplicated.');
+  });
   const saveMultiUnitMapping = (evidenceId,criterionIds)=>run(async()=>{
     await portfolioRpc(db,'map_evidence_across_units',{
       p_enrolment:portfolio.id,p_evidence:evidenceId,p_criteria:criterionIds,

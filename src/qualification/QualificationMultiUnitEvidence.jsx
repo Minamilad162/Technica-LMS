@@ -57,20 +57,18 @@ export default function QualificationMultiUnitEvidence({portfolio,busy=false,onS
   if(ok!==false)setPending(false);
  };
  if(!portfolio.canEdit)return null;
- return <section id="qualification-multi-unit-mapper" className="qmu-card" aria-label="Map one evidence file across multiple qualification units">
+ return <section id="qualification-multi-unit-mapper" className="qmu-card" tabIndex={-1} aria-label="Map one evidence file across multiple qualification units">
   <div className="qmu-head"><div className="qmu-logo"><Link2 size={23}/></div>
    <div><span className="qf-overline">EVIDENCE BANK · UNIT MAPPING</span>
     <h2>Link one evidence to multiple Units</h2>
-    <p>Choose a document you uploaded once. Link it to relevant Learning Outcomes and
-      Assessment Criteria across this enrolled qualification. Drafts are saved without submitting them.</p>
+    <p>Select the assessment criteria this evidence supports, then save your draft links.</p>
    </div></div>
   <div className="qmu-steps"><span><CheckCircle2 size={15}/> 1 · Upload evidence</span>
-   <span><Link2 size={15}/> 2 · Map to Units &amp; Criteria</span>
+   <span aria-current="step"><Link2 size={15}/> 2 · Map to Units &amp; Criteria</span>
    <span><FileCheck2 size={15}/> 3 · Submit each Outcome for review</span></div>
   {!portfolio.evidence.length?<div className="qmu-empty"><FolderOpen size={22}/><div>
      <strong>Start by uploading evidence above</strong>
-     <p>Open Evidence Wizard and choose “Upload a file”. The same saved file will become
-        available here for every Unit in this qualification.</p>
+     <p>Use Upload a file or Write evidence to add an item to this portfolio.</p>
     </div></div>:<>
     <div className="qmu-toolbar">
      <label>Evidence document<select aria-label="Choose uploaded evidence to link" value={resolvedId}

@@ -90,4 +90,8 @@ for(const view of [ui,sourcePreview]){
 assert.match(ui,/Boolean\(evidenceEntry && portfolio.canEdit\)/,
  'The direct upload path still requires server-provided edit permission');
 assert.match(ui,/row.role === 'learner' && !row.completedAt && row.catalogKey === privateSandboxKey/);
+assert.ok(ui.indexOf('qf-evidence-wizard') < ui.indexOf('<Panel title="Evidence records">'),
+ 'The upload form must appear above the records register');
+assert.match(ui,/openMapper\(lastSaved\)/,'Saved evidence must carry its own identity into the Unit mapper');
+assert.match(source('src/qualification/qualificationEvidenceExperience.css'),/prefers-reduced-motion: no-preference/);
 console.log('Qualification reference workflow: programme, evidence, enrolment, contact, metrics and privacy constraints PASS');
