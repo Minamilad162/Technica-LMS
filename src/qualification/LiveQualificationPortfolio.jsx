@@ -765,15 +765,7 @@ function Registration({db, portfolio, source, progress, busy, onDeclare, onFinal
       <QualificationCandidateRegistration db={db} portfolio={portfolio}/>
     </details>
     <div className="qf-live-grid">
-    <Panel title="Programme registration & Declaration">
-      <dl className="qf-live-details">
-        <dt>Learner</dt><dd>{portfolio.learner || 'Registered learner'}</dd>
-        <dt>Specification version</dt><dd>{portfolio.version}</dd>
-        <dt>Official start</dt><dd>{formatDate(portfolio.startsOn)}</dd>
-        <dt>Anticipated end</dt><dd>{formatDate(portfolio.targetOn)}</dd>
-        <dt>Assessor</dt><dd>{portfolio.assessor || (portfolio.assessorAssigned ? 'Assigned' : 'Not assigned')}</dd>
-        <dt>Verifier</dt><dd>{portfolio.verifier || (portfolio.verifierAssigned ? 'Assigned' : 'Not assigned')}</dd>
-      </dl>
+    <Panel title="Learner Declaration">
       <h4>Declaration</h4><p className="qf-live-copy" dir="auto">{portfolio.declaration}</p>
       {portfolio.declarationAt ? <p>Accepted {formatDate(portfolio.declarationAt)}</p> :
         learner && portfolio.canEdit && <Action disabled={busy} onClick={onDeclare}>Accept Declaration</Action>}
