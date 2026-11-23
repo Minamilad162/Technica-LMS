@@ -22,7 +22,8 @@ export function ProgrammeListPremium({rows, references = [], activeRole, onRoleC
   const roles = ['learner', ...['assessor', 'verifier'].filter(key => activeRows.some(row => row.role === key))];
   const role = roles.includes(activeRole) ? activeRole : 'learner';
   const assigned = activeRows.filter(row => row.role === role);
-  const unmatched = assigned.filter(row => !qualificationFor(row.title));
+  const unmatched = assigned.filter(row => !qualificationFor(row.title) &&
+    !/^technica-source-(othm6|othm7|nvq6)-/.test(String(row.catalogKey||'')));
   const sourceFor = item => references.find(source => source.catalog_key === (
     item.id === 'othm6' ? 'technica-source-othm6-2026' :
     item.id === 'othm7' ? 'technica-source-othm7-2023' : 'technica-source-nvq6-2018'));
