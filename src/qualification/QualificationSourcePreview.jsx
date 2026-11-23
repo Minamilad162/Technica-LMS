@@ -6,6 +6,9 @@ import './qualificationSourcePreview.css';
 import QualificationEvidenceTemplates from './QualificationEvidenceTemplates.jsx';
 import QualificationInternalNav from './QualificationInternalNav.jsx';
 import QualificationUnitNavigation from './QualificationUnitNavigation.jsx';
+import {QualificationIdentity,QualificationRegistrationSummary} from './QualificationRegistrationExperience.jsx';
+import QualificationEvidenceMatrix from './QualificationEvidenceMatrix.jsx';
+import QualificationStudyLibrary from './QualificationStudyLibrary.jsx';
 import QualificationSourceDashboard from './QualificationSourceDashboard.jsx';
 import QualificationOutcome, {ReadOnlyOutcomeDetails} from './QualificationOutcome.jsx';
 import {EvidenceUnitMaterials} from './QualificationLearningResources.jsx';
@@ -57,17 +60,8 @@ export default function QualificationSourcePreview({item,references=[],onBack,em
  const needsUploadRoute = !embedded && section === 'evidence';
  return <div className={'qsrc-page'+(embedded?' qsrc-embedded':'')}>
   {!embedded&&<button type="button" className="qf-plain-back" onClick={onBack}><ArrowLeft size={17}/> All qualifications</button>}
-  {!embedded&&<header className="qsrc-compact-header">
-    <div className="qsrc-compact-emblem"><img src={item.heroImage} alt="" aria-hidden="true"/></div>
-    <div className="qsrc-compact-header-copy">
-      <span className="qf-overline">{item.body} · OFFICIAL QUALIFICATION</span>
-      <h1>{source.title}</h1>
-      <div className="qsrc-compact-meta"><span><GraduationCap size={14}/> Level {item.level}</span>
-        <span><Layers3 size={14}/> {source.units.length} Units</span>
-        <span>{source.reference_number}</span></div>
-    </div>
-  </header>}
-  <div className="qsrc-edition-row">
+  {!embedded&&<QualificationIdentity source={source} heroImage={item.heroImage} body={item.body} level={item.level}/>}
+   <div className="qsrc-edition-row">
     <div><span className="qf-overline">QUALIFICATION VERSION</span><h2>Official syllabus</h2></div>
     {sources.length>1&&<label className="qsrc-edition-picker">Specification edition
       <select value={source.catalog_key} onChange={e=>{setSourceKey(e.target.value);jumpTo(0);}}>
@@ -190,22 +184,9 @@ export default function QualificationSourcePreview({item,references=[],onBack,em
       <QualificationEvidenceTemplates unit={unit} compact/>
     </details>}
   </div>}
-  {!embedded&&section==='registration'&&<div className="qsrc-section-layout">
-    <section className="qsrc-information-card">
-      <span className="qf-overline">REGISTRATION</span><h2>Qualification registration</h2>
-      <div className="qsrc-fact-rows">
-        <div><span>Programme</span><strong>{source.title}</strong></div>
-        <div><span>Qualification number</span><strong>{source.reference_number}</strong></div>
-        <div><span>Specification</span><strong>{source.version}</strong></div>
-        <div><span>Reference status</span><strong>{isReference?'Not yet published by centre':'Centre-published'}</strong></div>
-        <div><span>Learner registration</span><strong>Not enrolled in this preview</strong></div>
-        <div><span>Certificate</span><strong>No certificate associated with this preview</strong></div>
-      </div>
-      <p>Real registration, learner declarations, assigned Assessor and Verifier, target dates,
-        and certificate references remain available only in a genuine enrolled portfolio.</p>
-    </section><aside className="qsrc-aside"><SourceDocument source={source}/></aside>
-  </div>}
-  {!embedded&&section==='contact'&&<div className="qsrc-section-layout">
+  {!embedded&&section==='registration'&&<QualificationRegistrationSummary source={source}/>}
+   {!embedded&&section==='matrix'&&<QualificationEvidenceMatrix source={source} selectedUnitIndex={unitIndex} onUnit={index=>jumpTo(index)}/>}
+     {!embedded&&section==='contact'&&<div className="qsrc-section-layout">
     <section className="qsrc-information-card">
       <span className="qf-overline">COMMUNICATIONS</span><h2>Contact Diary</h2>
       <div className="qsrc-empty"><MessageSquare size={21}/><div><h3>No learner correspondence in a syllabus preview</h3>
@@ -231,27 +212,8 @@ export default function QualificationSourcePreview({item,references=[],onBack,em
       })}</div>
     </section><aside className="qsrc-aside"><SourceDocument source={source}/></aside>
   </div>}
-  {!embedded&&section==='library'&&unit&&<div className="qsrc-section-layout">
-    <section className="qsrc-information-card">
-      <span className="qf-overline">STUDY LIBRARY</span><h2>Original source material</h2>
-      <p>Read the imported Unit aims and indicative topics alongside the original awarding-body
-        specification. Centre-authored Assignment Briefs and private uploaded files are
-        separate from this reference library.</p>
-      <label className="qsrc-unit-select">Unit
-        <select value={unitIndex} onChange={e=>setUnitIndex(Number(e.target.value))}>
-          {source.units.map((u,index)=><option key={u.code} value={index}>{String(index+1).padStart(2,'0')} · {u.title}</option>)}
-        </select>
-      </label>
-      <div className="qsrc-source-unit-brief">
-        <span className="qf-overline">{unit.code}</span><h3>{unit.title}</h3>
-        {unit.aim?<p>{unit.aim}</p>:<p>The source did not provide an imported Unit aim for this edition.</p>}
-        {unit.indicativeTopics?.length>0&&<>
-          <h4>Indicative study topics</h4>
-          <ul>{unit.indicativeTopics.map((topic,index)=><li key={index}>{topic}</li>)}</ul>
-        </>}
-        {unit.assessmentNote&&<p className="qsrc-material-note">{unit.assessmentNote}</p>}
-      </div>
-    </section><aside className="qsrc-aside"><SourceDocument source={source}/></aside>
-  </div>}
- </div>;
+  {!embedded&&section==='library'&&<QualificationStudyLibrary source={source} selectedUnitIndex={unitIndex}
+     onUnit={index=>jumpTo(index)}
+     onOutcome={(_,index)=>{jumpTo(unitIndex,index);setSection('course');}}/>}
+   </div>;
 }
