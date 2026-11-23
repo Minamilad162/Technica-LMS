@@ -61,4 +61,14 @@ const trainingSQL=source('supabase/migrations/202611220011_qualification_trainin
 assert.ok(trainingSQL.includes("actor IS DISTINCT FROM e.learner_id"));
 assert.ok(trainingSQL.includes('p_date<e.starts_on')&&trainingSQL.includes('p_date>current_date'));
 assert.ok(css.includes('.qf-ref-ribbon')&&css.includes('.qf-ref-unit-toolbar')&&css.includes('.qf-ref-candidate'));
+const outcomePage=source('src/qualification/QualificationOutcome.jsx');
+for(const view of [ui,preview,sourcePreview]){
+ assert.match(view,/<QualificationOutcome\s+units=\{/,'Course items must open the same dedicated Outcome page');
+}
+for(const control of ['Jump to Unit/Outcome','No previous outcomes','No next outcomes','Resources','Deadline',
+ 'Grading Checklists','Recording Forms','Programme Contact Diary']){
+ assert.ok(outcomePage.includes(control),'Outcome page lost '+control);
+}
+assert.ok(ui.includes('initialWizard={evidenceFromOutcome}')&&ui.includes('Back to outcome'));
+assert.ok(ui.includes('Completed (Assessor Only)')&&ui.includes("commit('save_claim'"));
 console.log('Qualification reference workflow: programme, evidence, enrolment, contact, metrics and privacy constraints PASS');

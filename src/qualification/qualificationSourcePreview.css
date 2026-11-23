@@ -36,24 +36,6 @@
 .qf-live .qsrc-section-heading{display:flex;align-items:center;gap:10px;margin-bottom:14px;color:#3579b4}
 .qf-live .qsrc-section-heading h3{font-size:16px;font-weight:850;color:#1f3c5d;margin:0}
 .qf-live .qsrc-outcome{border:1px solid #e1e9f5;background:#fcfdff;border-radius:12px;margin-bottom:9px;overflow:hidden}
-.qf-live .qsrc-outcome[open]{background:#fff;border-color:#bad5f0}
-.qf-live .qsrc-outcome summary{display:flex;align-items:center;gap:12px;list-style:none;cursor:pointer;
- padding:13px 15px}
-.qf-live .qsrc-outcome summary::-webkit-details-marker{display:none}
-.qf-live .qsrc-outcome summary>svg{flex-shrink:0;color:#7f9bb7;transition:transform .16s}
-.qf-live .qsrc-outcome[open] summary>svg{transform:rotate(180deg)}
-.qf-live .qsrc-outcome-number{display:grid;place-items:center;min-width:33px;height:33px;
- border-radius:10px;background:#e9f2fd;color:#3176b6;font-size:11px;font-weight:850}
-.qf-live .qsrc-outcome-head{flex:1;min-width:0;display:grid;gap:4px}
-.qf-live .qsrc-outcome-head strong{font-size:12.5px;color:#264b73;line-height:1.5}
-.qf-live .qsrc-outcome-head small{font-size:11px;color:#879bb0}
-.qf-live .qsrc-outcome-body{padding:0 14px 15px;border-top:1px solid #edf2f8}
-.qf-live .qsrc-outcome-guidance{font-size:11px;color:#7189a1;line-height:1.65;margin:12px 0}
-.qf-live .qsrc-criteria-list{list-style:none;margin:12px 0 0;padding:0;display:grid;gap:8px}
-.qf-live .qsrc-criteria-list li{display:flex;align-items:flex-start;gap:11px;padding:11px 12px;
- border:1px solid #e4ebf6;background:#fafcff;border-radius:10px}
-.qf-live .qsrc-criteria-list li>span{flex-shrink:0;min-width:37px;color:#2f7aba;font-size:12px;font-weight:850}
-.qf-live .qsrc-criteria-list p{font-size:12px;color:#425d7c;line-height:1.65;margin:0;overflow-wrap:anywhere}
 .qf-live .qsrc-aside{display:grid;gap:14px;min-width:0}
 .qf-live .qsrc-source-card{display:grid;gap:13px;background:#fff;border:1px solid #e1eaf6;
  padding:18px;border-radius:15px;box-shadow:0 7px 20px #173b690b}
@@ -86,11 +68,6 @@
 }
 @media(max-width:400px){.qf-live .qsrc-outcomes,.qf-live .qsrc-materials{padding:12px}
  .qf-live .qsrc-unit-heading{padding:16px}
- .qf-live .qsrc-outcome summary{padding:11px}
- .qf-live .qsrc-outcome-body{padding:0 10px 12px}
-}
-@media(prefers-reduced-motion:reduce){
- .qf-live .qsrc-outcome summary>svg{transition:none}
 }
 
 .qf-live .qsrc-card-edition{font-size:12px;line-height:1.55;color:#6d85a1;margin:-5px 0 16px}

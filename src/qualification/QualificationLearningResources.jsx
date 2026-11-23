@@ -79,33 +79,12 @@ export function LiveUnitLearningHub({unit, portfolio, onEvidence, onLibrary}) {
   </div>;
 }
 
-export function OutcomeLearningSupport({unit, outcome, onEvidence, onLibrary, learner}) {
-  const material = getUnitSourceMaterial(unit?.code);
-  const resources = outcome.resources || [];
-  return <div className="qlearn-outcome-support">
-    <div className="qlearn-outcome-main">
-      <section className="qlearn-outcome-intro">
-        <span className="qf-overline">LEARNING OUTCOME · {outcome.code}</span>
-        <h3>Outcome guidance &amp; study material</h3>
-        <p>{outcome.title}</p>
-        {outcome.guidance ? <div className="qlearn-guidance"><BookOpen size={18}/><div><strong>Centre guidance</strong><p dir="auto">{outcome.guidance}</p></div></div> :
-          <div className="qlearn-guidance"><Info size={18}/><div><strong>Preparing your claim</strong>
-            <p>Read every criterion below, choose evidence demonstrating each requirement and map it before submission. No additional centre guidance has been published for this outcome.</p></div></div>}
-      </section>
-      {material && <UnitMaterialPanel key={unit.code} unitCode={unit.code} compact/>}
-      {!material && <div className="qlearn-outcome-reference"><Info size={17}/> No separate unit source document is attached to this centre-specific Unit. Its saved criteria remain the assessment requirements.</div>}
-    </div>
-    <aside className="qlearn-rail">
-      <section className="qlearn-rail-card">
-        <div className="qlearn-rail-heading"><FolderOpen size={18}/><h3>Outcome resources</h3><span>{resources.length}</span></div>
-        {resources.length ? <div className="qlearn-resource-links">
-          {resources.map(resource => <a key={resource.id} href={resource.url} target="_blank" rel="noopener noreferrer"><FileText size={17}/>
-            <span><strong>{resource.title}</strong><small>Centre-published resource</small></span><ExternalLink size={15}/></a>)}
-        </div> : <div className="qlearn-empty"><Info size={17}/><p>No downloadable assignment brief or template has been published for this outcome.</p></div>}
-      </section>
-      <AssessmentGuide learner={learner} onEvidence={learner ? onEvidence : null} onLibrary={onLibrary}/>
-    </aside>
-  </div>;
+export function OutcomeLearningSupport({unit}) {
+  if (!getUnitSourceMaterial(unit?.code)) return null;
+  return <details className="qf-card qf-outcome-filters">
+    <summary>Unit study material</summary>
+    <UnitMaterialPanel key={unit.code} unitCode={unit.code} compact/>
+  </details>;
 }
 
 export function ProgrammeReferenceLibrary({qualification}) {
