@@ -367,7 +367,7 @@ export function AdminMockPanel({db,asp}){
   </div>
  </div>;
 }
-export function AdminUsersPanel({db}){
+export function AdminUsersPanel({db,onAssignQualification}){
  const [search,setSearch]=useState(''),[query,setQuery]=useState(''),[page,setPage]=useState(0);
  const [data,setData]=useState(null),[selected,setSelected]=useState(null),[detail,setDetail]=useState(null);
  const [loading,setLoading]=useState(true),[error,setError]=useState(''),[detailError,setDetailError]=useState('');
@@ -423,6 +423,7 @@ export function AdminUsersPanel({db}){
        <span className={'at-user-state '+currentUser?.status}>{currentUser?.status==='suspended'?'Blocked':'Active'}</span>
       </div>
      </div></div>
+     {onAssignQualification&&currentUser?.status==='active'&&<button type="button" className="at-outline" onClick={()=>onAssignQualification(selected.id)}><GraduationCap size={16}/> Assign Qualification</button>}
      <AdminUserControls key={selected.id} db={db} userId={selected.id} onChanged={()=>setRefresh(n=>n+1)}/>
     </div>}
     {!selected?<div className="at-empty"><Users size={24}/> Select a learner to view their subscriptions, progress and exam results.</div>:
