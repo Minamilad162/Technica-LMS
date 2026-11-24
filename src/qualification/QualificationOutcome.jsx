@@ -156,7 +156,7 @@ export function OutcomeContact({outcome, onContact, formatDate}) {
     <button className="qf-button qf-outline" type="button" disabled={!filtered.length}
       onClick={() => printPortfolioSection(printTarget.current)}><Printer size={16}/> Print</button>
   </div>}>
-    <details className="qf-outcome-filters"><summary>Filter</summary>
+    {!!entries.length && <section aria-label="Feedback filters">
       <div className="qf-outcome-filter-fields">
         <label>Category<select value={category} onChange={event => setCategory(event.target.value)}>
           <option value="">All decisions</option><option value="accept">Accepted</option><option value="return">Returned</option>
@@ -169,7 +169,7 @@ export function OutcomeContact({outcome, onContact, formatDate}) {
           <option value="new">Newest first</option><option value="old">Oldest first</option>
         </select></label>
       </div>
-    </details>
+    </section>}
     <div ref={printTarget} className="qf-ref-contact-history">
       <h3 className="qf-print-heading">Outcome contact · {outcome.title}</h3>
       {!filtered.length && <p>{entries.length ? 'No feedback matches the filters.' : 'No outcome feedback recorded.'}</p>}

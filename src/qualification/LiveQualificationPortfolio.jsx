@@ -231,7 +231,7 @@ function EvidenceItem({item, onDownload, uses = []}) {
   </article>;
 }
 
-function EvidenceFolder({db, portfolio, source, initialUnitId, initialWizard, onSelectUnit, onDownload, onShowcase, busy, onSave, onDuplicate, onMap, onOpenOutcome, onBack, backLabel}) {
+function EvidenceFolder({db, portfolio, source, initialUnitId, initialWizard, onSelectUnit, onDownload, onShowcase, busy, onSave, onDuplicate, onMap, onOpenOutcome, onBack, backLabel, saveError, onClearError}) {
   const [mode, setMode] = useState(initialWizard || '');
   const [savedEvidenceId, setSavedEvidenceId] = useState('');
   const savedNotice = useRef(null);
@@ -255,13 +255,24 @@ function EvidenceFolder({db, portfolio, source, initialUnitId, initialWizard, on
   const [file, setFile] = useState(null);
   const [uploadError, setUploadError] = useState('');
   const [dropActive, setDropActive] = useState(false);
-  const dropInput = useRef(null);
+  const evidenceDialog = useRef(null);
   const reservation = useRef(null);
+  const dialogOpen = Boolean(portfolio.canEdit && mode);
   useEffect(() => {
-    if (initialWizard) document.getElementById('qualification-evidence-wizard-heading')?.focus();
-  }, [initialWizard]);
+    const dialog = evidenceDialog.current;
+    if (!dialogOpen || !dialog) return;
+    dialog.showModal();
+    dialog.querySelector('h3').focus();
+    return () => dialog.close();
+  }, [dialogOpen]);
   const start = value => {
-    setMode(value); setBody(''); setTitle(''); setDescription(''); setFile(null); setUploadError(''); setDuplicateId(''); reservation.current = null;
+    setMode(value); setBody(''); setTitle(''); setDescription(''); setFile(null); setUploadError(''); setDuplicateId('');
+    reservation.current = null;
+    onClearError();
+  };
+  const closeWizard = () => {
+    evidenceDialog.current?.close();
+    start('');
   };
   const openWizard = (nextMode, source) => {
     setSavedEvidenceId('');
@@ -270,19 +281,19 @@ function EvidenceFolder({db, portfolio, source, initialUnitId, initialWizard, on
       setDuplicateId(source.id);
       setTitle(('Copy of ' + source.title).slice(0, 160));
     }
-    requestAnimationFrame(() => document.getElementById('qualification-evidence-wizard-heading')?.focus());
   };
   const chooseEvidenceFile = chosen => {
     if (!chosen) return;
     const extension = '.' + String(chosen.name.split('.').pop() || '').toLowerCase();
     if (!evidenceExtensions.split(',').includes(extension) || !chosen.size || chosen.size > 10485760) {
-      setUploadError('Choose PDF, Word, Excel, JPEG or PNG evidence up to 10 MB.');
+      setUploadError('Choose a non-empty PDF, DOCX, XLSX, JPG or PNG up to 10 MB.');
       return;
     }
-    start('upload');
+    setUploadError('');
     setFile(chosen);
-    setTitle(chosen.name.replace(/\.[^.]+$/, '').slice(0,160));
-    requestAnimationFrame(() => document.getElementById('qualification-evidence-wizard-heading')?.focus());
+    setTitle(previous => previous || chosen.name.replace(/\.[^.]+$/, '').slice(0,160));
+    reservation.current = null;
+    onClearError();
   };
   const openMapper = item => {
     if (item) setMappingTarget({id:item.id});
@@ -344,9 +355,14 @@ function EvidenceFolder({db, portfolio, source, initialUnitId, initialWizard, on
   const evidencePage = Math.min(page, lastPage);
   const pageStart = evidencePage * pageSize;
   const applyFilter = setter => event => { setter(event.target.value); setPage(0); };
+  const hasEvidenceFilters = Boolean(search || type || medium || unitFilter || showcaseOnly);
+  const clearEvidenceFilters = () => {
+    setSearch(''); setType(''); setMedium(''); setUnitFilter(''); setShowcaseOnly(false); setPage(0);
+    onSelectUnit('');
+  };
   const sortColumn = (label, ascending, descending) => {
     const direction = order === ascending ? 'ascending' : order === descending ? 'descending' : undefined;
-    return <th scope="col" aria-sort={direction}>
+    return <th role="columnheader" scope="col" aria-sort={direction}>
       <button type="button" className="qf-live-link" onClick={() => {
         setOrder(direction === 'ascending' ? descending : ascending); setPage(0);
       }}>{label}{direction && <span aria-hidden="true">{direction === 'ascending' ? ' ↑' : ' ↓'}</span>}</button>
@@ -363,33 +379,39 @@ function EvidenceFolder({db, portfolio, source, initialUnitId, initialWizard, on
         {onBack && <Action secondary disabled={busy} onClick={onBack}>{backLabel}</Action>}
       </div>
       {portfolio.canEdit && <div className="qf-evidence-primary-actions">
-        <Action disabled={busy} onClick={() => dropInput.current?.click()}><Upload size={18} aria-hidden="true"/> Upload a file</Action>
+        <Action disabled={busy} onClick={() => openWizard('upload')}><Upload size={18} aria-hidden="true"/> Upload a file</Action>
         <Action secondary disabled={busy} onClick={() => openWizard('write')}><PenLine size={17} aria-hidden="true"/> Write evidence</Action>
       </div>}
     </section>
     {portfolio.canEdit && <section className={'qfd-upload-drop'+(dropActive?' is-dragging':'')}
       aria-label="Upload qualification evidence" onDragOver={event => {event.preventDefault();setDropActive(true);}}
       onDragLeave={event => {if(!event.currentTarget.contains(event.relatedTarget))setDropActive(false);}}
-      onDrop={event => {event.preventDefault();setDropActive(false);if(!busy)chooseEvidenceFile(event.dataTransfer.files?.[0]);}}>
-      <input ref={dropInput} type="file" accept={evidenceExtensions} className="qfd-upload-input"
-        aria-label="Select evidence file" disabled={busy} onChange={event => {chooseEvidenceFile(event.target.files?.[0]);event.target.value='';}}/>
+      onDrop={event => {
+        event.preventDefault();
+        setDropActive(false);
+        const chosen = event.dataTransfer.files?.[0];
+        if (!busy && chosen) {openWizard('upload'); chooseEvidenceFile(chosen);}
+      }}>
       <span className="qfd-drop-icon"><Upload size={28} aria-hidden="true"/></span>
       <h3>Upload Evidence</h3>
       <p>Drag and drop a file here or <button type="button" className="qf-live-link" disabled={busy}
-        onClick={() => dropInput.current?.click()}>browse files</button></p>
+        onClick={() => openWizard('upload')}>browse files</button></p>
       <small>PDF, DOCX, XLSX, JPG, PNG · Max 10 MB per file</small>
-      {uploadError&&<p className="qfd-upload-error" role="alert">{uploadError}</p>}
     </section>}
     {lastSaved && <div ref={savedNotice} tabIndex={-1} className="qf-evidence-saved">
       <CheckCircle2 size={21} aria-hidden="true"/>
       <div role="status"><strong>Evidence saved</strong><p dir="auto">{lastSaved.title}</p></div>
       <Action secondary disabled={busy} onClick={() => openMapper(lastSaved)}>Map saved evidence <ArrowRight size={16} aria-hidden="true"/></Action>
     </div>}
-    {portfolio.canEdit && mode && <section className="qf-card qf-evidence-wizard">
+    {dialogOpen && <dialog ref={evidenceDialog} className="qf-card qf-evidence-wizard"
+      aria-labelledby="qualification-evidence-wizard-heading" aria-busy={busy}
+      onCancel={event => {event.preventDefault(); if (!busy) closeWizard();}}>
       <div className="qf-card-header">
-        <h3 id="qualification-evidence-wizard-heading" tabIndex={-1}>{mode === 'duplicate' ? 'Duplication Wizard' : 'Evidence Wizard'}</h3>
-        <Action secondary disabled={busy} onClick={() => start('')}>Close</Action>
+        <h3 id="qualification-evidence-wizard-heading" tabIndex={-1}>{mode === 'duplicate' ? 'Duplicate evidence' : mode === 'upload' ? 'Upload evidence' : mode === 'write' ? 'Write evidence' : 'Add evidence'}</h3>
+        <Action secondary disabled={busy} onClick={closeWizard}>Close</Action>
       </div>
+      {mode === 'choose' && <p>Choose how you want to add evidence to your folder.</p>}
+      {saveError && <p className="qf-live-error" role="alert">{saveError}</p>}
       {mode !== 'duplicate' && <div className="qf-live-actions qf-evidence-mode" role="group" aria-label="Evidence format">
         <Action secondary disabled={busy} aria-pressed={mode === 'upload'} onClick={() => {if (mode !== 'upload') start('upload');}}>
           <Upload size={16} aria-hidden="true"/> File upload
@@ -429,16 +451,17 @@ function EvidenceFolder({db, portfolio, source, initialUnitId, initialWizard, on
             <span className="qf-evidence-file-heading"><Upload size={19} aria-hidden="true"/> Evidence file</span>
             <small>PDF, Word, Excel, JPEG or PNG · Up to 10 MB</small>
             <input required={!file} type="file" accept={evidenceExtensions}
-              onChange={e => {setFile(e.target.files[0] || null); reservation.current = null;}}/>
+              onChange={event => {chooseEvidenceFile(event.target.files?.[0]); event.target.value = '';}}/>
             {file && <small className="qfd-file-selected">Selected file: {file.name}</small>}
           </label> :
             <label className="qf-field">Evidence<textarea dir="auto" required maxLength={20000} rows={6} value={body} onChange={e => {setBody(e.target.value); reservation.current = null;}}/></label>}
-          <button className="qf-button qf-primary" type="submit" disabled={!title.trim() || (mode === 'write' ? !body.trim() : !file)}>
+          {uploadError && <p className="qf-live-error" role="alert">{uploadError}</p>}
+          <button className="qf-button qf-primary" type="submit" disabled={!!uploadError || !title.trim() || (mode === 'write' ? !body.trim() : !file)}>
             {busy ? <><LoaderCircle className="qf-evidence-spinner" size={16} aria-hidden="true"/> Saving…</> : 'Save evidence'}
           </button>
         </fieldset>
       </form>}
-    </section>}
+    </dialog>}
     <div className="qfd-evidence-workspace">
       <div className="qfd-evidence-primary">
     <Panel title="Evidence records">
@@ -451,8 +474,7 @@ function EvidenceFolder({db, portfolio, source, initialUnitId, initialWizard, on
           <Download size={15} aria-hidden="true"/> Download Showcase ({selection.length})
         </Action>
       </div>
-      <details className="qf-evidence-filters">
-        <summary>Filter evidence{unitFilter && ' · ' + (unitFilter === 'unmapped' ? 'Unmapped' : portfolio.units.find(unit => unit.id === unitFilter)?.code || 'All Units')}</summary>
+      <section className="qf-evidence-filters" aria-label="Evidence filters">
       <div className="qf-ref-evidence-toolbar qf-ref-evidence-filters">
         <label>Search evidence<input value={search} onChange={applyFilter(setSearch)}
           type="search" placeholder="Reference, title, filename or description"/></label>
@@ -476,38 +498,41 @@ function EvidenceFolder({db, portfolio, source, initialUnitId, initialWizard, on
           <option value="reference">Reference A–Z</option><option value="reference-desc">Reference Z–A</option>
         </select></label>
       </div>
-      <label className="qf-live-showcase"><input type="checkbox" checked={showcaseOnly}
-        onChange={event => { setShowcaseOnly(event.target.checked); setPage(0); }}/> Showcase selection only</label>
-      </details>
+      <div className="qf-evidence-filter-actions">
+        <label className="qf-live-showcase"><input type="checkbox" checked={showcaseOnly}
+          onChange={event => { setShowcaseOnly(event.target.checked); setPage(0); }}/> Showcase selection only</label>
+        {hasEvidenceFilters && <button type="button" className="qf-live-link" onClick={clearEvidenceFilters}>Clear filters</button>}
+      </div>
+      </section>
       <p className="qf-ref-evidence-count" role="status">Displaying {visibleEvidence.length} of {portfolio.evidence.length} evidence records</p>
       <div className="qf-evidence-table" role="region" aria-label="Evidence records" tabIndex={0}>
-        <table>
-          <thead><tr>
+        <table role="table">
+          <thead role="rowgroup"><tr role="row">
             {sortColumn('Ref','reference','reference-desc')}
             {sortColumn('Title','title','title-desc')}
-            <th scope="col">Type</th>
+            <th role="columnheader" scope="col">Type</th>
             {sortColumn('Uploaded','oldest','newest')}
-            <th scope="col">Used in</th><th scope="col">Showcase</th><th scope="col">Actions</th>
+            <th role="columnheader" scope="col">Used in</th><th role="columnheader" scope="col">Showcase</th><th role="columnheader" scope="col">Actions</th>
           </tr></thead>
-          <tbody>
-            {!visibleEvidence.length && <tr><td colSpan={7}>{portfolio.evidence.length ? 'No evidence matches the filters.' : 'No evidence has been added yet.'}</td></tr>}
+          <tbody role="rowgroup">
+            {!visibleEvidence.length && <tr role="row"><td role="cell" colSpan={7}>{portfolio.evidence.length ? 'No evidence matches the filters.' : 'No evidence has been added yet.'}</td></tr>}
             {visibleEvidence.slice(pageStart, pageStart + pageSize).map(item => {
               const expanded = detailId === item.id;
               return <React.Fragment key={item.id}>
-                <tr>
-                  <td><span className="qf-ref-evidence-id">{item.id.slice(0,8).toUpperCase()}</span></td>
-                  <th scope="row"><button type="button" className="qf-live-link" dir="auto" aria-expanded={expanded}
+                <tr className="qf-evidence-record" role="row">
+                  <td role="cell"><span className="qf-ref-evidence-id">{item.id.slice(0,8).toUpperCase()}</span></td>
+                  <th role="rowheader" scope="row"><button type="button" className="qf-live-link" dir="auto" aria-expanded={expanded}
                     aria-controls={'evidence-details-' + item.id}
                     onClick={() => setDetailId(expanded ? '' : item.id)}>{item.title}</button></th>
-                  <td>{item.kind}<small>{item.filename ? 'File upload' : 'Written evidence'}</small></td>
-                  <td>{formatDate(item.created_at)}</td>
-                  <td>{links.has(item.id) ? <ul className="qf-evidence-outcomes">{links.get(item.id).outcomes.map(outcome =>
+                  <td role="cell">{item.kind}<small>{item.filename ? 'File upload' : 'Written evidence'}</small></td>
+                  <td role="cell">{formatDate(item.created_at)}</td>
+                  <td role="cell">{links.has(item.id) ? <ul className="qf-evidence-outcomes">{links.get(item.id).outcomes.map(outcome =>
                     <li key={outcome.id}><button type="button" className="qf-live-link" disabled={busy}
                       onClick={() => onOpenOutcome(outcome.id)}>{outcome.label}</button></li>)}</ul> : 'Unmapped'}</td>
-                  <td><input type="checkbox" checked={showcase.includes(item.id)} disabled={busy}
+                  <td role="cell"><label className="qf-evidence-showcase-toggle"><input type="checkbox" checked={showcase.includes(item.id)} disabled={busy}
                     aria-label={'Include ' + item.title + ' in Showcase'}
-                    onChange={event => toggleShowcase(item.id, event.target.checked)}/></td>
-                  <td><div className="qf-evidence-row-actions">
+                    onChange={event => toggleShowcase(item.id, event.target.checked)}/><span>Showcase</span></label></td>
+                  <td role="cell"><div className="qf-evidence-row-actions">
                     {item.filename && <Action secondary disabled={busy} aria-label={'Download ' + item.title} onClick={() => onDownload(item)}><Download size={15}/></Action>}
                     {portfolio.canEdit && <>
                       <Action secondary disabled={busy} aria-label={'Map ' + item.title} onClick={() => openMapper(item)}><Link2 size={15}/></Action>
@@ -515,8 +540,8 @@ function EvidenceFolder({db, portfolio, source, initialUnitId, initialWizard, on
                     </>}
                   </div></td>
                 </tr>
-                <tr id={'evidence-details-' + item.id} hidden={!expanded}>
-                  <td colSpan={7}>{expanded && <div className="qf-evidence-details">
+                <tr role="row" id={'evidence-details-' + item.id} hidden={!expanded}>
+                  <td role="cell" colSpan={7}>{expanded && <div className="qf-evidence-details">
                     {item.description && <p dir="auto">{item.description}</p>}
                     {item.body && <p className="qf-live-copy" dir="auto">{item.body}</p>}
                     {item.filename && <span dir="auto">{item.filename}</span>}
@@ -1096,7 +1121,7 @@ function OpenPortfolio({db, portfolio, references, evidenceEntry, onRefresh, onB
       aim={referenceUnit?.aim || outcomeMaterial?.aim} sourceUrl={selectedReference?.source_url}
       onEvidence={id => { changeView('evidence'); scopeEvidence(id); }} onContact={() => changeView('contact')}
       onLibrary={libraryAvailable ? () => changeView('library') : null}/>}
-    {view === 'evidence' && <EvidenceFolder key={evidenceUnit} db={db} portfolio={visiblePortfolio} source={selectedReference} initialUnitId={evidenceFilter} initialWizard={taskEvidenceMode || (evidenceOrigin ? 'choose' : uploadOnEntry ? 'upload' : '')} busy={busy} onSave={saveEvidence} onDuplicate={duplicateEvidence}
+    {view === 'evidence' && <EvidenceFolder key={evidenceUnit} db={db} portfolio={visiblePortfolio} source={selectedReference} initialUnitId={evidenceFilter} saveError={error} onClearError={() => setError('')} initialWizard={taskEvidenceMode || (evidenceOrigin ? 'choose' : uploadOnEntry ? 'upload' : '')} busy={busy} onSave={saveEvidence} onDuplicate={duplicateEvidence}
       onSelectUnit={id => {
         setEvidenceFilter(id);
         const index = portfolio.units.findIndex(unit => unit.id === id);

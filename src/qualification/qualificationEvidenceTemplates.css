@@ -41,3 +41,7 @@
 @media(max-width:450px){.qf-live .qt-action-bar button{flex:1}
  .qf-live .qt-intro-icon{width:37px;height:37px}
  .qf-live .qt-intro h3{font-size:15px}}
+
+.qf-live .qt-layout,
+.qf-live .qt-form-nav button span { min-width: 0; }
+.qf-live .qt-form-nav button span { overflow-wrap: anywhere; }

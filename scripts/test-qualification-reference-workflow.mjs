@@ -97,7 +97,7 @@ assert.ok(ui.includes("<QualificationVisualDashboard portfolio={visiblePortfolio
 const visual=source('src/qualification/QualificationVisualDashboard.jsx');
 assert.ok(visual.includes('claimState(outcome)')&&visual.includes('portfolio.units.map')&&visual.includes('evidenceIds(unit)'),'Units, status and evidence must come from live portfolio records');
 assert.ok(visual.includes('ReviewerSnapshot')&&visual.includes('submission?.snapshot?.evidence'),'Review panels must show real submitted evidence');
-assert.ok(ui.includes('chooseEvidenceFile(event.dataTransfer.files?.[0])')&&ui.includes('onMap={saveMultiUnitMapping}'),'Drag/drop and actual multi-unit mapping must remain connected');
+assert.ok(ui.includes('const chosen = event.dataTransfer.files?.[0]')&&ui.includes('chooseEvidenceFile(chosen)')&&ui.includes('onMap={saveMultiUnitMapping}'),'Drag/drop and actual multi-unit mapping must remain connected');
 assert.ok(source('src/qualification/qualificationVisualDashboard.css').includes('@media(max-width:680px)'),'Approved layouts need a responsive mobile state');
 assert.ok(ui.includes('<PortfolioStatusRibbon portfolio={portfolio} progress={progress}'));
 assert.ok(status.includes('portfolio.assessor||')&&status.includes('portfolio.verifier||'),'Reviewer names must be live from enrolment');
@@ -161,8 +161,10 @@ for(const view of [ui,sourcePreview]){
 assert.match(ui,/Boolean\(evidenceEntry && !evidenceEntry.reviewRole && portfolio.canEdit\)/,
  'The direct upload path still requires server-provided edit permission');
 assert.match(ui,/row.role === 'learner' && !row.completedAt && row.catalogKey === privateSandboxKey/);
-assert.ok(ui.indexOf('qf-evidence-wizard') < ui.indexOf('<Panel title="Evidence records">'),
- 'The upload form must appear above the records register');
+assert.match(ui, /<dialog ref=\{evidenceDialog\}/, 'The evidence form opens as a modal');
+assert.match(ui, /dialog\.showModal\(\)/, 'The browser must trap focus in the evidence dialog');
+assert.match(ui, /<section className="qf-evidence-filters" aria-label="Evidence filters">/, 'Evidence filters are always visible');
+assert.match(matrix, /setMappingEvidenceId\(id/, 'Opening the mapper keeps the list filter untouched');
 assert.match(ui,/openMapper\(lastSaved\)/,'Saved evidence must carry its own identity into the Unit mapper');
 assert.match(source('src/qualification/qualificationEvidenceExperience.css'),/prefers-reduced-motion: no-preference/);
 assert.match(ui,/onAddEvidence=\{learner && portfolio.canEdit \? \(\) => openEvidence\('matrix'\)/);

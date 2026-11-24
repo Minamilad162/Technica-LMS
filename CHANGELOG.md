@@ -1,3 +1,9 @@
+## 2026-11-24 — Qualification evidence dialogs and visible filters
+
+- Open file uploads, written evidence and duplication in a focused modal. Keep file validation and save errors in the dialog.
+- Show Evidence register filters upfront, with a reset action. Display Evidence records as cards on small screens.
+- Keep Matrix filters independent of the mapping editor, and improve task and feedback filter discoverability.
+
 ## 2026-11-24 — Enrolled qualification learner journey
 
 - Guide learners from Home and Tasks & Evidence to their next available step, with clear submission requirements.
