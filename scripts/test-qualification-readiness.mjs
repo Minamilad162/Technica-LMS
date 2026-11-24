@@ -99,3 +99,17 @@ assert.ok(preview.includes('Evidence submissions, assessor decisions and certifi
 assert.ok(live.includes("portfolioRpc(db,'admin_workspace')")===false,'Learner route must not query the privileged admin workspace');
 assert.ok(live.includes("portfolioRpc(db,'list')") && live.includes('enrolments.length === 1')===false);
 console.log('Qualification readiness: read-only, source-backed, role-isolated and no fabricated release: PASS');
+
+
+const adminCenter=read('src/qualification/QualificationAdminCenter.jsx');
+const adminStyles=read('src/qualification/qualificationAdminCenter.css');
+assert.ok(admin.includes('<AdminQualificationNavigation section={section}')&&admin.includes('<AdminQualificationCatalog versions={versions}'),'Q01 admin layout uses real workspace records');
+assert.ok(admin.includes('<AdminQualificationDetail version={version}')&&admin.includes("onEnrol={()=>setSection('enrolments')}"),'Selected edition connects to existing enrolment workflow');
+assert.ok(adminCenter.includes('version.publishedAt?')&&adminCenter.includes('Ready for enrolment · No learners yet'),'Zero learners never prevent a released edition from being active');
+assert.ok(adminCenter.includes('r.published?')&&adminCenter.includes("No learners enrolled yet."),'Readiness is based on publication, not student count');
+assert.ok(adminCenter.includes('refs.find(r=>r.catalog_key===v?.catalogKey)'),'Reference number is edition-specific, never guessed');
+assert.ok(adminCenter.includes('v.version')&&adminCenter.includes('learnersOf(v).length')&&adminCenter.includes('approvedCount(v)'),'All visible edition metrics use actual data');
+for(const action of ['admin_assign','admin_publish','admin_authorize_staff','admin_reassign','admin_reserve_document','admin_approve_document','admin_certificate_authorize'])
+ assert.ok(admin.includes("'"+action+"'"),'Existing governed action must remain available: '+action);
+assert.ok(admin.includes("hidden={section!=='enrolments'}")&&admin.includes("hidden={section!=='staff'}"),'Admin controls are separated into navigation views');
+assert.ok(adminStyles.includes('@media(max-width:620px)')&&adminStyles.includes('prefers-reduced-motion'),'Responsive admin layout respects reduced motion');
