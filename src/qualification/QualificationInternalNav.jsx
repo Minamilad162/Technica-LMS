@@ -8,7 +8,7 @@ const icons={
   programme:BookOpen,course:BookOpen,evidence:FolderOpen,matrix:Grid3X3,
   registration:GraduationCap,contact:MessageSquare,metrics:BarChart3,
   dashboard:House,overview:Layers3,library:LibraryBig,
-  tasks:ClipboardList,messages:MessageSquare,appointments:CalendarDays,resources:FolderOpen,app:Smartphone,
+  tasks:ClipboardList,review:ClipboardList,reviewTasks:ClipboardList,messages:MessageSquare,appointments:CalendarDays,resources:FolderOpen,app:Smartphone,
 };
 export const QUALIFICATION_NAV_ITEMS=[
   ['course','Course'],['evidence','Evidence'],['matrix','Matrix'],['registration','Registration'],
