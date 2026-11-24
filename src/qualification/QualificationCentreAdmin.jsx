@@ -1,6 +1,6 @@
-import React,{useEffect,useMemo,useState} from 'react';
+import React,{useEffect,useMemo,useRef,useState} from 'react';
 import {ArrowLeft,BookCheck,BookOpen,CheckCircle2,ClipboardCheck,Download,FileCheck2,FilePlus2,
- FileText,FolderClosed,GraduationCap,Info,Layers3,LockKeyhole,RefreshCw,Search,ShieldAlert,ShieldCheck,UploadCloud,Users} from 'lucide-react';
+ FileText,FolderClosed,GraduationCap,Info,Layers3,LockKeyhole,RefreshCw,Search,ShieldAlert,ShieldCheck,UploadCloud,Users,UserRound,Ellipsis,ChevronDown} from 'lucide-react';
 import {portfolioRpc} from './qualificationPortfolioApi.js';
 import {qualificationReadiness,needsAssessmentMethodReview,sourceRubricForUnit,publicationChecks,validPublicationReference,bulkBriefReview,defaultPublicationReference,DEFAULT_LEARNER_DECLARATION} from './qualificationReadiness.js';
 import QualificationCentreLearnerPreview from './QualificationCentreLearnerPreview.jsx';
@@ -35,6 +35,7 @@ export default function QualificationCentreAdmin({db,onBack,references=[],initia
  const [attest,setAttest]=useState(false);
  const [fileTitle,setFileTitle]=useState(''),[fileKind,setFileKind]=useState(methods[0][0]),
  [file,setFile]=useState(null),[fileAttest,setFileAttest]=useState(false);
+ const staffRevokeRef=useRef(null);
  const [revokeUser,setRevokeUser]=useState(''),[revokeRole,setRevokeRole]=useState(''),
  [revokeReason,setRevokeReason]=useState('');
  const [staffUser,setStaffUser]=useState(''),[staffRole,setStaffRole]=useState('assessor'),
@@ -344,40 +345,76 @@ export default function QualificationCentreAdmin({db,onBack,references=[],initia
      </Card>
      {section==='enrolments'&&<AssignmentWorkspace db={db} versions={versions} staff={staff} busy={saving}
       initialVersionId={version?.id} initialLearnerId={initialLearnerId} onAssign={onAssign} onReassign={onReassign} onAuthorise={authoriseInline}/>}
-    <Card title="Qualified assessment staff" icon={ShieldCheck} hidden={section!=='staff'}>
-      <p className="qc-secondary">A person may only serve as Assessor or Internal Verifier after the centre confirms their actual professional competence. These roles are distinct from a normal LMS login.</p>
-      <AccountSelect db={db} role={staffRole} label="Staff account" value={staffUser} onChange={id=>{setStaffUser(id);setStaffAttest(false);}} staff={staff} revision={staff.length} disabled={saving}/>
-      <label className="qc-field">Approved assessment role
-        <select value={staffRole} disabled={saving} onChange={e=>{setStaffRole(e.target.value);setStaffUser('');setStaffAttest(false);}}>
-          <option value="assessor">Assessor</option><option value="verifier">Internal Verifier</option>
-        </select></label>
-      <label className="qc-field">Documented competence / authorisation reference
-        <input value={staffReference} maxLength={220} disabled={saving}
-          onChange={e=>{setStaffReference(e.target.value);setStaffAttest(false);}} placeholder="Training centre competency verification / assessor qualification record"/></label>
-      <label className="qc-confirm"><input type="checkbox" checked={staffAttest} disabled={saving}
-        onChange={e=>setStaffAttest(e.target.checked)}/>
-        <span>I confirm the centre has verified this person’s competence and authorisation for this assessment role.</span></label>
-      <button type="button" className="qc-primary" disabled={saving||!staffUser||!staffAttest||staffReference.trim().length<12}
-        onClick={authorizeStaff}><ShieldCheck size={16}/> Authorise reviewer</button>
-      <div className="qc-staff-list"><strong>Authorised centre reviewers ({staff.length})</strong>
-        {staff.map(s=><div key={s.userId+':'+s.role}><span>{s.name||people.find(p=>p.id===s.userId)?.email||s.userId} · {s.role}</span>
-          <small>{s.reference}</small><small>{enrolmentRows(versions).filter(e=>!e.completedAt&&(s.role==='assessor'?e.assessorId:e.verifierId)===s.userId).length} active assigned portfolios</small></div>)}
-        {!staff.length&&<p className="qc-secondary">No competent assessors or verifiers have been authorised yet.</p>}
-      </div>
-      {!!staff.length&&<details className="qc-revoke"><summary>Revoke a professional reviewer authorization</summary>
-        <label className="qc-field">Authorised reviewer<select value={revokeUser+':'+revokeRole}
-          onChange={e=>{const item=staff.find(s=>s.userId+':'+s.role===e.target.value);
-            setRevokeUser(item?.userId||'');setRevokeRole(item?.role||'');}}>
-          <option value=":">Choose reviewer and role</option>
-          {staff.map(s=><option key={s.userId+':'+s.role} value={s.userId+':'+s.role}>
-            {s.name||people.find(p=>p.id===s.userId)?.email||s.userId} · {s.role}</option>)}
-        </select></label>
-        <label className="qc-field">Documented reason<textarea rows={2} value={revokeReason}
-          onChange={e=>setRevokeReason(e.target.value)} maxLength={1000} disabled={saving}/></label>
-        <button type="button" className="qc-outline" disabled={saving||!revokeUser||revokeReason.trim().length<15}
-          onClick={revokeStaff}>Revoke authorization</button>
+    <section className="qsr-workspace" hidden={section!=='staff'} aria-labelledby="qsr-title">
+      <section className="qsr-authorise-panel">
+        <header className="qsr-hero">
+          <span className="qsr-hero-icon"><ShieldCheck size={31}/></span>
+          <div><h2 id="qsr-title">Qualified assessment staff</h2>
+            <p>A person may only serve as Assessor or Internal Verifier after the centre confirms their actual professional competence. These roles are distinct from a normal LMS login.</p></div>
+        </header>
+        <div className="qsr-authorise-layout">
+          <aside className="qsr-guide">
+            <div className="qsr-guide-head"><span className="qsr-guide-icon"><Users size={24}/></span>
+              <div><h3>Authorise a reviewer</h3><p>Confirm the person's account, role and competence reference, then authorise them to review on behalf of the centre.</p></div></div>
+            <ol>{['Select staff account','Choose assessment role','Add competence reference','Confirm and authorise'].map((step,index)=><li key={step}><span>{index+1}</span>{step}</li>)}</ol>
+          </aside>
+          <div className="qsr-form">
+            <div className="qsr-fields">
+              <AccountSelect db={db} role={staffRole} label="Staff account" value={staffUser} onChange={id=>{setStaffUser(id);setStaffAttest(false);}} staff={staff} revision={staff.length} disabled={saving}/>
+              <label className="qc-field">Approved assessment role
+                <select value={staffRole} disabled={saving} onChange={e=>{setStaffRole(e.target.value);setStaffAttest(false);}}>
+                  <option value="assessor">Assessor</option><option value="verifier">Internal Verifier</option>
+                </select></label>
+              <label className="qc-field qsr-reference">Documented competence / authorisation reference
+                <input value={staffReference} maxLength={220} disabled={saving}
+                  onChange={e=>{setStaffReference(e.target.value);setStaffAttest(false);}} placeholder="Training centre competency verification / assessor qualification record"/></label>
+            </div>
+            <label className="qc-confirm"><input type="checkbox" checked={staffAttest} disabled={saving}
+              onChange={e=>setStaffAttest(e.target.checked)}/>
+              <span>I confirm the centre has verified this person’s competence and authorisation for this assessment role.</span></label>
+            <button type="button" className="qc-primary" disabled={saving||!staffUser||!staffAttest||staffReference.trim().length<12}
+              onClick={authorizeStaff}><ShieldCheck size={19}/> Authorise reviewer</button>
+          </div>
+        </div>
+      </section>
+      <section className="qsr-directory" aria-label="Authorised centre reviewers">
+        <header><span className="qsr-directory-icon"><Users size={23}/></span><h2>Authorised centre reviewers ({staff.length})</h2></header>
+        <div className="qsr-reviewer-grid">
+          {staff.map(s=>{const key=s.userId+':'+s.role;
+            const name=s.name||people.find(p=>p.id===s.userId)?.email||s.userId;
+            const assigned=enrolmentRows(versions).filter(e=>!e.completedAt&&(s.role==='assessor'?e.assessorId:e.verifierId)===s.userId).length;
+            return <article className="qsr-reviewer" key={key}>
+              <div className="qsr-reviewer-head"><span className="qsr-person-icon"><UserRound size={23}/></span>
+                <strong>{name}</strong><span className={'qsr-role '+s.role}>{s.role==='assessor'?'Assessor':'Verifier'}</span>
+                <details className="qsr-card-menu"><summary aria-label={'Actions for '+name+' '+s.role}><Ellipsis size={19}/></summary>
+                  <div><button type="button" disabled={saving} onClick={e=>{e.currentTarget.closest('details').open=false;setRevokeUser(s.userId);setRevokeRole(s.role);setRevokeReason('');if(staffRevokeRef.current){staffRevokeRef.current.open=true;staffRevokeRef.current.scrollIntoView({block:'nearest',behavior:'auto'});}}}><ShieldAlert size={16}/> Revoke authorisation</button></div>
+                </details>
+              </div>
+              <div className="qsr-reviewer-meta"><FileText size={17}/><span>{s.reference}</span></div>
+              <div className="qsr-reviewer-meta"><Layers3 size={17}/><span>{assigned} active assigned {assigned===1?'portfolio':'portfolios'}</span></div>
+            </article>;
+          })}
+        </div>
+        {!staff.length&&<div className="qsr-empty"><Users size={26}/><strong>No authorised reviewers yet</strong><span>Authorise an eligible staff account above to get started.</span></div>}
+      </section>
+      {!!staff.length&&<details className="qc-revoke qsr-revoke" ref={staffRevokeRef}>
+        <summary><ChevronDown size={19}/> Revoke a professional reviewer authorization</summary>
+        <div className="qsr-revoke-form">
+          <label className="qc-field">Authorised reviewer<select disabled={saving} value={revokeUser+':'+revokeRole}
+            onChange={e=>{const item=staff.find(s=>s.userId+':'+s.role===e.target.value);
+              setRevokeUser(item?.userId||'');setRevokeRole(item?.role||'');setRevokeReason('');}}>
+            <option value=":">Choose reviewer and role</option>
+            {staff.map(s=><option key={s.userId+':'+s.role} value={s.userId+':'+s.role}>
+              {s.name||people.find(p=>p.id===s.userId)?.email||s.userId} · {s.role}</option>)}
+          </select></label>
+          <label className="qc-field">Documented reason<textarea rows={2} value={revokeReason}
+            onChange={e=>setRevokeReason(e.target.value)} maxLength={1000} disabled={saving}/></label>
+          <p className="qsr-revoke-note"><Info size={16}/> Future decisions for this role will be blocked. Reassign any unfinished portfolios affected.</p>
+          <button type="button" className="qc-outline" disabled={saving||!staff.some(s=>s.userId===revokeUser&&s.role===revokeRole)||revokeReason.trim().length<15}
+            onClick={revokeStaff}><ShieldAlert size={17}/> Revoke authorization</button>
+        </div>
       </details>}
-    </Card>
+    </section>
     <Card title="Certificate issuer authorization" icon={FileCheck2} hidden={section!=='certificates'}>
       <p className="qc-secondary">Releasing a qualification does not authorise certificate issuance. The verifier can only record an actually issued certificate after the awarding body’s authority has been documented.</p>
       {!release?<p className="qc-locked"><LockKeyhole size={16}/> Release the centre-approved programme first.</p>:
@@ -406,7 +443,7 @@ export default function QualificationCentreAdmin({db,onBack,references=[],initia
     <Card title="Release governance" icon={ShieldAlert} hidden={!(catalogueVisible&&setupTab==='release')}>
       <p className="qc-secondary">This edition is based on the supplied awarding-body specification. The centre must confirm it is the appropriate version for the learner, assessment requirements, and regulatory conditions.</p>
       <ul className="qc-gov-list"><li><CheckCircle2 size={15}/> Real source Unit rubric preserved</li>
-       <li><CheckCircle2 size={15}/> Learner / Assessor / Verifier are separate</li>
+       <li><CheckCircle2 size={15}/> Learner is separate; verification decisions remain independent</li>
        <li><CheckCircle2 size={15}/> Evidence stored privately</li>
        <li><LockKeyhole size={15}/> Certificate recording remains disabled until externally authorised</li></ul>
     </Card>
