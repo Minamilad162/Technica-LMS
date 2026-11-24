@@ -1,11 +1,11 @@
-import React,{useEffect,useId,useMemo,useState} from 'react';
+import React,{useEffect,useId,useMemo,useRef,useState} from 'react';
 import {ArrowRight,CheckCircle2,ClipboardCheck,GraduationCap,Info,Search,ShieldCheck,UserPlus,Users,X} from 'lucide-react';
 import {portfolioRpc} from './qualificationPortfolioApi.js';
 import './qualificationEnrolments.css';
 
 const labelOf=p=>p?.name||p?.email||'Account';
 const clean=s=>String(s||'').toLowerCase().trim();
-const dateToday=()=>new Date().toLocaleDateString('en-CA');
+const dateToday=()=>{const d=new Date();return [d.getFullYear(),String(d.getMonth()+1).padStart(2,'0'),String(d.getDate()).padStart(2,'0')].join('-');};
 const roleLabel={learner:'Learner',assessor:'Assessor',verifier:'Internal Verifier'};
 const validRef=s=>s.trim().length>=12&&s.trim().length<=220&&!/(placeholder|sandbox|demo|test|pending)/i.test(s);
 const authorized=(staff,id,role)=>staff.some(s=>s.userId===id&&s.role===role);
@@ -60,6 +60,8 @@ export function AssignmentWorkspace({db,versions,staff,busy,initialVersionId,ini
  const [query,setQuery]=useState(''),[filter,setFilter]=useState('all'),[status,setStatus]=useState('all');
  const [editing,setEditing]=useState(null),[editAssessor,setEditAssessor]=useState(''),[editVerifier,setEditVerifier]=useState(''),[reason,setReason]=useState('');
  const [revision,setRevision]=useState(0);
+ const editRef=useRef(null);
+ useEffect(()=>{if(editing)editRef.current?.scrollIntoView({block:'start'});},[editing]);
  const rows=useMemo(()=>enrolmentRows(versions),[versions]);
  const matching=rows.filter(e=>(filter==='all'||filter===e.versionId)&&(status==='all'||(status==='completed'?!!e.completedAt:!e.completedAt))&&[e.learner,e.assessor,e.verifier,e.title,e.edition].some(s=>clean(s).includes(clean(query))));
  const duplicate=rows.some(e=>e.versionId===versionId&&e.learnerId===learner);
@@ -98,7 +100,7 @@ export function AssignmentWorkspace({db,versions,staff,busy,initialVersionId,ini
    </tbody></table></div>
    {!matching.length&&<div className="qe-empty"><Users size={25}/><strong>{rows.length?'No matching enrolments':'No learners enrolled yet'}</strong><span>{rows.length?'Change the filters to see other records.':'Assign a learner when ready. A live qualification can have zero enrolments.'}</span></div>}
   </section>
-  {editing&&<section className="qc-card qe-edit" aria-label="Edit reviewers"><header><ClipboardCheck size={20}/><div><h3>Edit reviewers</h3><p>{editing.learner} · {editing.title} · {editing.edition}</p></div><button type="button" className="qc-outline" disabled={busy} onClick={()=>setEditing(null)} aria-label="Close reviewer editor"><X size={17}/></button></header>
+  {editing&&<section ref={editRef} className="qc-card qe-edit" aria-label="Edit reviewers"><header><ClipboardCheck size={20}/><div><h3>Edit reviewers</h3><p>{editing.learner} · {editing.title} · {editing.edition}</p></div><button type="button" className="qc-outline" disabled={busy} onClick={()=>setEditing(null)} aria-label="Close reviewer editor"><X size={17}/></button></header>
     <div className="qe-fields"><AccountSelect db={db} role="assessor" label="Assessor" value={editAssessor} onChange={setEditAssessor} disabled={busy} revision={revision} exclude={[editing.learnerId,editVerifier]} staff={staff} onAuthorise={authorize}/>
     <AccountSelect db={db} role="verifier" label="Internal Verifier" value={editVerifier} onChange={setEditVerifier} disabled={busy} revision={revision} exclude={[editing.learnerId,editAssessor]} staff={staff} onAuthorise={authorize}/></div>
     <label className="qc-field">Reason for reassignment<textarea rows={3} value={reason} disabled={busy} maxLength={1500} onChange={e=>setReason(e.target.value)} placeholder="Explain the reviewer change (at least 15 characters)"/></label>
