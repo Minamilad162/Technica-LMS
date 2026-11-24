@@ -9,6 +9,7 @@ import './qualificationCentreAdmin.css';
 import {QualificationPublishBar,QualificationPublishDialog} from './QualificationPublish.jsx';
 import {AdminQualificationNavigation,AdminQualificationCatalog,AdminQualificationDetail} from './QualificationAdminCenter.jsx';
 import {AccountSelect,AssignmentWorkspace,enrolmentRows} from './QualificationEnrolments.jsx';
+import {TaskAdminWorkspace} from './QualificationTasks.jsx';
 
 const methods=[['assignment_brief','Assignment Brief'],['reflective_account','Reflective Account'],
  ['witness_testimony','Witness Testimony'],['cpd_record','CPD Record'],
@@ -47,7 +48,9 @@ export default function QualificationCentreAdmin({db,onBack,references=[],initia
  const [publishOpen,setPublishOpen]=useState(false);
  const [bulkOpen,setBulkOpen]=useState(false),[bulkAttest,setBulkAttest]=useState(false);
  const [section,setSection]=useState(initialLearnerId?'enrolments':'overview'),[setupTab,setSetupTab]=useState('summary');
+ const [taskTab,setTaskTab]=useState('briefs');
  const catalogueVisible=['overview','qualifications'].includes(section);
+ const changeTaskTab=next=>{if(next!==taskTab&&confirmDiscard())setTaskTab(next);};
  const selectVersion=v=>{if(v.id===version?.id)return true;if(!confirmDiscard())return false;setVersionId(v.id);setUnitId(v.units[0]?.id||'');setFile(null);setFileTitle('');return true;};
  const openSetup=tab=>{setSection('qualifications');setSetupTab(tab);};
  const [loading,setLoading]=useState(true),[saving,setSaving]=useState(false),
@@ -210,6 +213,7 @@ export default function QualificationCentreAdmin({db,onBack,references=[],initia
   {catalogueVisible&&<AdminQualificationDetail version={version} references={references} staff={staff}
      tab={setupTab} onTab={setSetupTab} saving={saving} onPreview={()=>setPreviewWorkspace(true)}
      onEnrol={()=>setSection('enrolments')}/>}
+  {section==='plans'&&<header className="qt-banner"><ClipboardCheck size={32}/><div><h2>Assessment Plans &amp; Tasks</h2><p>Create reusable task templates, link official assessment criteria and assign them to learners.</p></div></header>}
   {!catalogueVisible&&version&&!['enrolments','staff'].includes(section)&&<div className="qac-section-context">
     <label htmlFor="qac-edition-select">Qualification edition</label>
     <select id="qac-edition-select" disabled={saving} value={version.id}
@@ -245,8 +249,12 @@ export default function QualificationCentreAdmin({db,onBack,references=[],initia
     <small className="qc-assessment-caveat">Database readiness is not proof of awarding-body approval or permission to issue certificates. Never publish using test references.</small>
   </section>}
   {section==='updates'&&(release?<ProgrammeUpdatesAdmin key={version.id} db={db} version={version}/>:<Notice>Publish this edition before creating programme updates or appointments.</Notice>)}
+  {section==='plans'&&version&&<nav className="qt-tabs" aria-label="Assessment plans sections">
+    {[[FileText,'briefs','Unit Briefs'],[Layers3,'templates','Task Templates'],[ClipboardCheck,'assigned','Assigned Tasks']].map(([Icon,id,label])=><button key={id} type="button" disabled={saving} aria-pressed={taskTab===id} onClick={()=>changeTaskTab(id)}><Icon size={17}/>{label}</button>)}
+  </nav>}
+  {section==='plans'&&version&&taskTab!=='briefs'&&<TaskAdminWorkspace key={version.id+':'+taskTab} db={db} version={version} tab={taskTab}/>}
   {version&&<div className="qac-setup-content">
-    <Card id="qc-centre-unit-review" title="Unit assessment plans" icon={Layers3} hidden={!(section==='plans'||(catalogueVisible&&['units','plans'].includes(setupTab)))}>
+    <Card id="qc-centre-unit-review" title="Unit assessment plans" icon={Layers3} hidden={!((section==='plans'&&taskTab==='briefs')||(catalogueVisible&&['units','plans'].includes(setupTab)))}>
       <p className="qc-secondary">The real Learning Outcomes and Assessment Criteria are already imported.
         These centre-authored brief drafts must be checked against the current programme before approval.</p>
       {!release&&<section className="qc-bulk-approval" aria-label="Approve all Unit briefs">
@@ -448,7 +456,7 @@ export default function QualificationCentreAdmin({db,onBack,references=[],initia
        <li><LockKeyhole size={15}/> Certificate recording remains disabled until externally authorised</li></ul>
     </Card>
   </div>}
-  {(catalogueVisible||section==='plans')&&version&&<QualificationPublishBar version={version} dirty={briefDirty} canSave={canSaveDraft}
+  {(catalogueVisible||(section==='plans'&&taskTab==='briefs'))&&version&&<QualificationPublishBar version={version} dirty={briefDirty} canSave={canSaveDraft}
     saving={saving} onSave={()=>onBrief(false)} onPublish={openPublish} onEnrol={()=>setSection('enrolments')}/>}
   {publishOpen&&version&&!release&&<QualificationPublishDialog version={version} references={references} dirty={briefDirty}
     saving={saving} error={error} approvalRef={approvalRef} declaration={declaration} attest={attest}
