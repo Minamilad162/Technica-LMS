@@ -183,3 +183,25 @@
 
 .qf-live .qxp-empty { flex-wrap: wrap; }
 .qf-live .qxp-empty > span { flex: 1 1 180px; }
+
+.qf-live .qxp-matrix-save {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 8px 12px;
+  border: 1px solid #dbe6f3;
+  border-radius: 10px;
+  background: #f7faff;
+  color: #375575;
+  font-size: .8rem;
+}
+.qf-live .qxp-matrix-save .qf-live-actions { margin: 0; }
+.qf-live .qxp-cell-control { cursor: pointer; }
+.qf-live .qxp-cell-control input { width: 17px; height: 17px; accent-color: #1d714f; cursor: pointer; }
+.qf-live .qxp-cell-control:focus-within { outline: 2px solid #3279bd; outline-offset: 1px; }
+.qf-live .qxp-matrix-scroller tbody td.qxp-cell-draft { background: #fff0d6; }
+@media (max-width: 540px) {
+  .qf-live .qxp-matrix-scroller .qxp-matrix-item { min-width: 128px; max-width: 150px; overflow-wrap: anywhere; }
+}

@@ -225,7 +225,7 @@ assert.match(multiUnit,/portfolio\.units\.map/,
  'Criteria and Units must come from the actual enrolled qualification');
 assert.match(multiUnit,/outcome\.claim\?\.mapping/,
  'Selected evidence must be loaded from existing claims');
-assert.match(multiUnit,/editableState\(o\.claim\?\.state\)/,
+assert.match(multiUnit,/isEvidenceMappingEditable\(o\)/,
  'Submitted and verified work must remain locked');
 assert.match(multiUnit,/const open=event\.currentTarget\.open;\s*setExpanded\(/,
  'Capture the disclosure state before scheduling the React updater');

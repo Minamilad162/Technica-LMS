@@ -497,11 +497,11 @@ function EvidenceFolder({db, portfolio, source, initialUnitId, initialWizard, on
           <option value="title">Title A–Z</option><option value="title-desc">Title Z–A</option>
           <option value="reference">Reference A–Z</option><option value="reference-desc">Reference Z–A</option>
         </select></label>
-      </div>
-      <div className="qf-evidence-filter-actions">
-        <label className="qf-live-showcase"><input type="checkbox" checked={showcaseOnly}
-          onChange={event => { setShowcaseOnly(event.target.checked); setPage(0); }}/> Showcase selection only</label>
-        {hasEvidenceFilters && <button type="button" className="qf-live-link" onClick={clearEvidenceFilters}>Clear filters</button>}
+        <div className="qf-evidence-filter-actions">
+          <label className="qf-live-showcase"><input type="checkbox" checked={showcaseOnly}
+            onChange={event => { setShowcaseOnly(event.target.checked); setPage(0); }}/> Showcase only</label>
+          <button type="button" className="qf-live-link" disabled={!hasEvidenceFilters} onClick={clearEvidenceFilters}>Clear filters</button>
+        </div>
       </div>
       </section>
       <p className="qf-ref-evidence-count" role="status">Displaying {visibleEvidence.length} of {portfolio.evidence.length} evidence records</p>
@@ -931,6 +931,7 @@ function OpenPortfolio({db, portfolio, references, evidenceEntry, onRefresh, onB
   };
   const [uploadOnEntry,setUploadOnEntry] = useState(Boolean(evidenceEntry && !evidenceEntry.reviewRole && portfolio.canEdit));
   const [drafts,setDrafts] = useState({});
+  const [matrixDraft,setMatrixDraft] = useState(()=>new Map());
   const [error,setError] = useState('');
   const [notice,setNotice] = useState('');
   const [busy,setBusy] = useState(false);
@@ -1040,6 +1041,17 @@ function OpenPortfolio({db, portfolio, references, evidenceEntry, onRefresh, onB
     setDrafts({}); // Versions change across multiple claims. Avoid stale outcome drafts.
     await onRefresh();
   },'Evidence mappings saved across Units. Open each Outcome to submit its Competence Claim.');
+  const saveMatrixLinks = updates => run(async () => {
+    try {
+      for (const update of updates) {
+        await portfolioRpc(db,'save_claim',{
+          ...base, p_outcome:update.outcomeId, p_version:update.version, p_mapping:update.mapping, p_submit:false,
+        });
+      }
+    } finally {
+      await onRefresh();
+    }
+  }, 'Evidence links saved.');
   const openEvidence = origin => {
     changeView('evidence');
     setEvidenceOrigin(origin);
@@ -1135,7 +1147,7 @@ function OpenPortfolio({db, portfolio, references, evidenceEntry, onRefresh, onB
       onDeclare={() => commit('declare',{},'Declaration accepted.')}
       onFinalize={reference => commit('finalize',{p_certificate_reference: reference},reference ? 'Certificate reference recorded.' : 'Qualification completed.')}/>}
     {view === 'matrix' && <QualificationEvidenceMatrix portfolio={visiblePortfolio} source={selectedReference}
-      selectedUnitIndex={unitIndex} onUnit={setUnitIndex} onAddEvidence={learner && portfolio.canEdit ? () => openEvidence('matrix') : null} onMapSave={saveMultiUnitMapping} onOpenOutcome={openOutcome} busy={busy}/>}
+      selectedUnitIndex={unitIndex} onUnit={setUnitIndex} onAddEvidence={learner && portfolio.canEdit ? () => openEvidence('matrix') : null} onMapSave={saveMultiUnitMapping} onSaveMatrix={saveMatrixLinks} matrixDraft={matrixDraft} setMatrixDraft={setMatrixDraft} onOpenOutcome={openOutcome} busy={busy}/>}
     {view === 'contact' && <ContactDiary db={db} portfolio={portfolio} progress={progress} onOutcome={openOutcome}/>}
 
     {view === 'metrics' && <PortfolioMetrics db={db} portfolio={portfolio} progress={progress} onOutcome={openOutcome}/>}
