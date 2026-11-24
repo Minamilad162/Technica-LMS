@@ -2,6 +2,7 @@ import React, {useState} from 'react';
 import {ArrowLeft, ArrowRight, BookOpen, CheckCircle2, ChevronRight, ClipboardCheck, GraduationCap, Layers3, LockKeyhole, ShieldCheck} from 'lucide-react';
 import {QUALIFICATIONS} from './qualificationData.js';
 import UnitMaterialPanel from './UnitMaterialPanel.jsx';
+import {ReviewerQueue} from './QualificationReviewerWorkspace.jsx';
 
 // Reference catalogue entries are NOT enrolments. Real portfolio access only comes from lms_qf_list.
 export function qualificationFor(title = '') {
@@ -106,20 +107,7 @@ export function ProgrammeListPremium({rows, references = [], activeRole, onRoleC
         The syllabuses are sourced from awarding-body documents and imported into the reference database. Evidence, assessment and certificates require a separately approved and enrolled programme.
       </p>
     </> : <>
-      <div className="qf-live-section-heading">
-        <div><span className="qf-overline">REVIEW WORKSPACE</span><h2>{roleLabels[role]}</h2></div>
-        <span>{assigned.length} assigned</span>
-      </div>
-      <section className="qf-card">
-        <div className="qf-card-header"><h3>{role === 'assessor' ? 'Learner submissions' : 'Internal verification'}</h3></div>
-        {!assigned.length && <p className="qf-empty qf-empty-compact">No assigned portfolios in this queue.</p>}
-        <div className="qf-live-list qf-live-review-list">
-          {assigned.map(row => <button type="button" key={row.id} onClick={() => onOpen(row.id)}>
-            <ClipboardCheck size={21}/><span><strong>{row.title}</strong>
-              <small>{row.learner || 'Learner'} · {row.pending} awaiting review</small></span><ArrowRight size={19}/>
-          </button>)}
-        </div>
-      </section>
+      <ReviewerQueue key={role} rows={assigned} role={role} onOpen={onOpen}/>
     </>}
   </>;
 }
