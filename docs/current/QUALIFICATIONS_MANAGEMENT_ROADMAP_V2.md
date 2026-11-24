@@ -74,6 +74,8 @@ Acceptance: enrolment and staff reachable within two navigation actions; existin
 Acceptance: authorised human can release exact approved edition once; missing methods/briefs and non-admin release rejected by server. Actual release requires genuine records, separate from implementation.
 
 ### Q03 — Roles & staff management
+
+**Owner clarification (24 November 2026):** Reviewer assignment is per learner enrolment pinned to an exact Live qualification edition, never a single reviewer assignment shared across the qualification. Provide one searchable Assign Qualification workspace with registered active learner account, Live edition, Assessor, Internal Verifier, start date and optional target date. Existing active Admin accounts must be discoverable by name/email in both reviewer selectors. Show their actual role-specific competence/authorisation status and allow the authorised centre administrator to record genuine role authorisation inline if needed; Admin status alone does not confer assessment authority. Do not fabricate competence records. The enrolment can only be saved with eligible distinct reviewers and learner, enforced by the server. Existing staff authorisation/revocation rules remain in force. The same admin can hold both professional roles and serve in different enrolments, subject to independent review and historical self-review guards. Provide central enrolment table with filters and an Edit Reviewers action prefilled with current assignments, permitting change of either or both reviewers, using audited reassignment and preserving historical decisions/evidence. Staff directory remains a supporting screen, not the primary assignment workflow. Coordinate Q03 and Q04 designs to avoid duplicate assignment forms; retain the approved UI gate before implementation.
 - [ ] Q03.1 Search users and manage multiple documented reviewer role authorisations on the same account.
 - [ ] Q03.2 Role workspace switch using server-authorised eligibility/assignments, never client privilege toggles.
 - [ ] Q03.3 Eligible admin self-selection as assessor OR verifier; distinct reviewers per enrolment and historical own-work verification prevention.
@@ -82,9 +84,9 @@ Acceptance: authorised human can release exact approved edition once; missing me
 Acceptance: independent reviewer decisions enforced server-side; assigned authorised users see only allowed data; audit preserved.
 
 ### Q04 — Learner enrolment engine
-- [ ] Q04.1 Shared wizard from Users and Qualifications: learner, exact released edition, assessor, verifier, start/target dates, confirm.
+- [ ] Q04.1 Shared searchable assignment workspace from Users and Qualifications: active learner account, exact Live edition, assessor, verifier, start/target dates, confirm. Reviewer selectors discover registered active Admin accounts and display real role eligibility; allow governed inline authorisation rather than requiring separate navigation.
 - [ ] Q04.2 Reuse admin_assign RPC; validate active user, version, date order, duplicates and reviewer conflicts server-side.
-- [ ] Q04.3 Learner/enrolment list/detail, assignment status, deadlines, portfolio link, audited reviewer change. Separate subscription and qualification access.
+- [ ] Q04.3 Central searchable learner/enrolment list/detail, assignment status, deadlines, portfolio link, audited reviewer change (prefill both current reviewers; allow changing either or both). Preserve historical evidence and decisions. Separate subscription and qualification access.
 - [ ] Q04.4 Immediately show assigned real qualification in My Qualifications, open actual portfolio and Evidence without private sandbox fallback.
 - [ ] Q04.5 Explain unavailable evidence access accurately with appropriate support/admin route.
 Acceptance: eligible admin enrols real user without SQL; learner opens correct portfolio and uploads permitted files; assigned reviewers see it; unrelated users denied. No fabricated production records.
@@ -153,6 +155,8 @@ Acceptance: required checks passed, deployment independently verified, acceptanc
 | 2026-11-24 | Q02 | Owner requested Approve All Unit Briefs alongside individual approval. PR #124 merged at b814b1a209e7dab54e74571c3b93896c632f7b8e; CI run 45344657403 passed, including atomic rollback, stale text, role isolation, preserved approvals, and published-edition lock. Migration 202611240001 applied to Technica production; RPC and privileges verified. Fixed pre-existing ambiguous alias in individual brief RPC. No Unit approvals or publications were performed in production. | Bulk approval implemented and database verified; visual rollout pending | Owner reviews deployed screen and performs genuine centre approval |
 
 | 2026-11-24 | Q02 | Owner requested editable publication defaults. Proposed learner declaration and edition-specific internal publication decision reference, never an invented awarding-body approval. Existing explicit human sign-off and publication audit remain mandatory. Q03 mockup to be reviewed before implementation. | Implementation under validation | Verify CI and deployed UI; Q03 design approval |
+
+| 2026-11-24 | Q02/Q03/Q04 | PR #125 merged at 0dd1e0f12afb033320fbc2bca40e06653e4f1fd1 after CI run 45345574620 passed both validate and PostgreSQL smoke. Editable internal publication reference and proposed declaration defaults; no production publication. Owner clarified learner-specific assignment via searchable active user/Admin dropdowns, inline genuine reviewer authorisation and editable individual assignments. | Q02 defaults merged/CI verified, rollout not independently verified; Q03/Q04 UI review pending | Present revised central enrolment assignment mockup, obtain approval before implementation |
 
 ### Production edition audit — 24 November 2026
 
