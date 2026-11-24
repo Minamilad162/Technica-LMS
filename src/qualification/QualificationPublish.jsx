@@ -45,9 +45,13 @@ export function QualificationPublishDialog({version,references,dirty,saving,erro
    <div className="qpub-enrolment"><Users size={21}/><div><strong>{version.enrolments?.length||0} Enrolled learners</strong><small>Enrolments and learner-specific reviewer assignments are not required for publication.</small></div><CheckCircle2 size={19}/></div>
    {!!pendingResources&&<p className="qpub-note">{pendingResources} uploaded resource(s) are awaiting approval. Unapproved files remain unavailable to learners; optional resources do not block publication.</p>}
    <section className="qpub-form"><h3><ShieldCheck size={18}/> Centre sign-off</h3>
-    <label className="qc-field">Centre approval / authorisation reference<input value={approvalRef} maxLength={180} disabled={saving} onChange={e=>onApprovalRef(e.target.value)} placeholder="Genuine centre approval record"/></label>
+    <label className="qc-field">Centre approval / authorisation reference<input value={approvalRef} maxLength={180} disabled={saving} onChange={e=>onApprovalRef(e.target.value)} placeholder="Internal publication decision or actual centre reference"/></label>
+    <p className="qpub-note"><Info size={15}/> The suggested reference identifies this internal centre publication decision. It is not an awarding-body approval number. Replace it if your centre uses a separate documented reference.</p>
     {approvalRef&&!validPublicationReference(approvalRef)&&<p className="qpub-note">Enter a genuine reference of at least 10 characters; draft, test and placeholder references are not accepted.</p>}
     <label className="qc-field">Learner declaration (full approved wording)<textarea value={declaration} maxLength={5000} disabled={saving} rows={4} onChange={e=>onDeclaration(e.target.value)} placeholder="Enter the approved declaration learners must accept before assessment…"/></label>
+    <p className="qpub-note">The suggested learner declaration is editable. Review and adopt it before confirming centre sign-off.</p>
+    {declaration.trim().length<70&&<p className="qpub-alert">Enter a complete learner declaration (at least 70 characters).</p>}
+    {!attest&&<p className="qpub-note">Confirm your authority and approval of this edition to enable publication.</p>}
     <label className="qc-confirm"><input type="checkbox" checked={attest} disabled={saving} onChange={e=>onAttest(e.target.checked)}/><span>I am authorised by Technica Consult to approve this exact edition, its approved Unit briefs and learner declaration. Assessments will follow centre quality assurance.</span></label>
    </section>
    <p className="qpub-note"><LockKeyhole size={15}/> Publication locks this edition's assessment structure and allows eligible enrolments. It does not automatically enrol learners or authorise certificate issuance.</p>
