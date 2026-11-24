@@ -10,6 +10,7 @@ import {QualificationPublishBar,QualificationPublishDialog} from './Qualificatio
 import {AdminQualificationNavigation,AdminQualificationCatalog,AdminQualificationDetail} from './QualificationAdminCenter.jsx';
 import {AccountSelect,AssignmentWorkspace,enrolmentRows} from './QualificationEnrolments.jsx';
 import {TaskAdminWorkspace} from './QualificationTasks.jsx';
+import QualificationMonitoring from './QualificationMonitoring.jsx';
 
 const methods=[['assignment_brief','Assignment Brief'],['reflective_account','Reflective Account'],
  ['witness_testimony','Witness Testimony'],['cpd_record','CPD Record'],
@@ -49,7 +50,7 @@ export default function QualificationCentreAdmin({db,onBack,references=[],initia
  const [bulkOpen,setBulkOpen]=useState(false),[bulkAttest,setBulkAttest]=useState(false);
  const [section,setSection]=useState(initialLearnerId?'enrolments':'overview'),[setupTab,setSetupTab]=useState('summary');
  const [taskTab,setTaskTab]=useState('briefs');
- const catalogueVisible=['overview','qualifications'].includes(section);
+ const catalogueVisible=section==='qualifications';
  const changeTaskTab=next=>{if(next!==taskTab&&confirmDiscard())setTaskTab(next);};
  const selectVersion=v=>{if(v.id===version?.id)return true;if(!confirmDiscard())return false;setVersionId(v.id);setUnitId(v.units[0]?.id||'');setFile(null);setFileTitle('');return true;};
  const openSetup=tab=>{setSection('qualifications');setSetupTab(tab);};
@@ -207,6 +208,11 @@ export default function QualificationCentreAdmin({db,onBack,references=[],initia
   <AdminQualificationNavigation section={section} onSection={setSection}/>
   {error&&<p role="alert" className="qc-error">{error}</p>}
   {message&&<p role="status" className="qc-success-message"><CheckCircle2 size={16}/>{message}</p>}
+  {section==='overview'&&<QualificationMonitoring db={db} versions={versions} staff={staff}
+    onEnrolments={()=>{if(confirmDiscard())setSection('enrolments');}}
+    onTasks={id=>{const next=versions.find(v=>v.id===id);if(next&&selectVersion(next)){setTaskTab('assigned');setSection('plans');}}}
+    onCertificates={id=>{const next=versions.find(v=>v.id===id);if(next&&!selectVersion(next))return;if(confirmDiscard())setSection('certificates');}}
+    onStaff={()=>{if(confirmDiscard())setSection('staff');}}/>}
   {catalogueVisible&&<AdminQualificationCatalog versions={versions} version={version} references={references}
      staff={staff} saving={saving} onSelect={v=>{if(selectVersion(v))setSetupTab('summary');}}
      onSection={setSection} onTab={openSetup}/>}
@@ -214,7 +220,7 @@ export default function QualificationCentreAdmin({db,onBack,references=[],initia
      tab={setupTab} onTab={setSetupTab} saving={saving} onPreview={()=>setPreviewWorkspace(true)}
      onEnrol={()=>setSection('enrolments')}/>}
   {section==='plans'&&<header className="qt-banner"><ClipboardCheck size={32}/><div><h2>Assessment Plans &amp; Tasks</h2><p>Create reusable task templates, link official assessment criteria and assign them to learners.</p></div></header>}
-  {!catalogueVisible&&version&&!['enrolments','staff'].includes(section)&&<div className="qac-section-context">
+  {!catalogueVisible&&version&&!['overview','enrolments','staff'].includes(section)&&<div className="qac-section-context">
     <label htmlFor="qac-edition-select">Qualification edition</label>
     <select id="qac-edition-select" disabled={saving} value={version.id}
       onChange={e=>{const next=versions.find(v=>v.id===e.target.value);if(next)selectVersion(next);}}>
