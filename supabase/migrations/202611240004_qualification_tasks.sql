@@ -62,8 +62,8 @@ DECLARE t public.lms_qf_task_templates; validated jsonb; actor uuid:=public.lms_
 BEGIN
  IF actor IS NULL OR NOT public.lms_qf_admin_access() THEN RAISE EXCEPTION 'Task administration denied.' USING ERRCODE='42501'; END IF;
  IF p_id IS NULL OR p_approve IS NULL OR NOT EXISTS(SELECT 1 FROM public.lms_qualification_versions WHERE id=p_version AND catalog_key LIKE 'technica-source-%') THEN RAISE EXCEPTION 'Select an official edition.'; END IF;
- validated:=public.lms_qf_task_spec(p_version,p_spec,p_approve);
  PERFORM 1 FROM public.lms_qualification_versions WHERE id=p_version FOR UPDATE;
+ validated:=public.lms_qf_task_spec(p_version,p_spec,p_approve);
  SELECT * INTO t FROM public.lms_qf_task_templates WHERE id=p_id FOR UPDATE;
  IF FOUND THEN
   IF t.version_id<>p_version THEN RAISE EXCEPTION 'Template edition mismatch.'; END IF;
@@ -135,6 +135,7 @@ CREATE FUNCTION public.lms_qf_task_admin_workspace(p_version uuid)
 RETURNS jsonb LANGUAGE plpgsql STABLE SECURITY DEFINER SET search_path='' AS $fn$
 BEGIN
  IF NOT public.lms_qf_admin_access() THEN RAISE EXCEPTION 'Task administration denied.' USING ERRCODE='42501'; END IF;
+ IF NOT EXISTS(SELECT 1 FROM public.lms_qualification_versions WHERE id=p_version AND catalog_key LIKE 'technica-source-%') THEN RAISE EXCEPTION 'Select an official edition.'; END IF;
  RETURN jsonb_build_object('units',coalesce((SELECT jsonb_agg(jsonb_build_object('id',u.id,'code',u.code,'title',u.title,'outcomes',
   (SELECT coalesce(jsonb_agg(jsonb_build_object('id',o.id,'code',o.code,'title',o.title,'criteria',
    (SELECT coalesce(jsonb_agg(jsonb_build_object('id',c.id,'code',c.code,'title',c.title) ORDER BY c.position),'[]') FROM public.lms_qualification_criteria c WHERE c.outcome_id=o.id))
@@ -153,6 +154,7 @@ BEGIN
  SELECT 1 FROM public.lms_qf_staff_authorisations a WHERE a.user_id=actor AND a.revoked_at IS NULL AND
  ((a.role='assessor' AND e.assessor_id=actor) OR (a.role='verifier' AND e.verifier_id=actor)))) THEN
  RAISE EXCEPTION 'Task portfolio access denied.' USING ERRCODE='42501'; END IF;
+ IF NOT EXISTS(SELECT 1 FROM public.lms_qualification_versions WHERE id=e.version_id AND published_at IS NOT NULL AND catalog_key LIKE 'technica-source-%') THEN RETURN '[]'::jsonb; END IF;
  RETURN public.lms_qf_task_rows(e.version_id,e.id);
 END $fn$;
 REVOKE ALL ON FUNCTION public.lms_qf_task_spec(uuid,jsonb,boolean),public.lms_qf_task_rows(uuid,uuid),
