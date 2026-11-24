@@ -211,7 +211,7 @@ function UnitProgramme({db,portfolio, unitIndex, setUnitIndex, onOutcome, onEvid
     <Panel title="Contact">
       <Action secondary onClick={onContact}><MessageSquare size={16}/> Open programme Contact Diary</Action>
     </Panel>
-    <QualificationCentreBrief unit={unit} db={db}/>
+    <div id="qualification-current-unit-brief"><QualificationCentreBrief unit={unit} db={db}/></div>
     <LiveUnitLearningHub key={unit.id} unit={unit} portfolio={portfolio} onEvidence={() => onEvidence(unit.id)} onLibrary={onLibrary}/>
   </>;
 }
@@ -915,7 +915,7 @@ function OpenPortfolio({db, portfolio, references, evidenceEntry, onRefresh, onB
     setEvidenceUnit('');
   };
   const openTaskEvidence=mode=>{changeView('evidence');setTaskEvidenceMode(mode);setTaskJourney(true);};
-  const openTaskUnit=index=>{setUnitIndex(index);changeView('programme');setTaskJourney(true);};
+  const openTaskUnit=index=>{setUnitIndex(index);changeView('programme');setTaskJourney(true);requestAnimationFrame(()=>document.getElementById('qualification-current-unit-brief')?.scrollIntoView({block:'start'}));};
   const openOutcome = id => {
     setUnitIndex(portfolio.units.findIndex(unit => unit.outcomes.some(item => item.id === id)));
     setOutcomeId(id); changeView('outcome');
@@ -1049,7 +1049,7 @@ function OpenPortfolio({db, portfolio, references, evidenceEntry, onRefresh, onB
     {view === 'evidence' && evidenceEntry && !portfolio.canEdit && <p>Evidence uploads are unavailable for this enrolment.</p>}
     {learner&&view!=='tasks'&&taskJourney&&<div className="qf-live-actions"><Action secondary disabled={busy} onClick={()=>{changeView('tasks');setTaskJourney(false);}}><ArrowLeft size={16}/> Back to My Tasks</Action></div>}
     {learner&&view==='tasks'&&<QualificationLearnerTasks db={db} portfolio={portfolio} progress={progress} selectedId={selectedTaskId} onSelect={setSelectedTaskId} busy={busy}
-      onView={key=>{changeView(key);setTaskJourney(true);}} onOutcome={id=>{openOutcome(id);setTaskJourney(true);}} onUnit={openTaskUnit} onEvidence={openTaskEvidence}/>}
+      onView={(key,index)=>{if(Number.isInteger(index))setUnitIndex(index);changeView(key);setTaskJourney(true);}} onOutcome={id=>{openOutcome(id);setTaskJourney(true);}} onUnit={openTaskUnit} onEvidence={openTaskEvidence}/>}
     {view === 'dashboard' && <>
       <QualificationVisualDashboard portfolio={visiblePortfolio} progress={progress} selectedUnitIndex={unitIndex}
         onUnit={index => {setUnitIndex(index);changeView('programme');}} onOutcome={openOutcome}
