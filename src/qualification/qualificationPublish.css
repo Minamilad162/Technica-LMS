@@ -1,0 +1,53 @@
+/* Q02: compact publication controls within the existing qualification setup. */
+.qf-live .qpub-bar{position:sticky;bottom:0;z-index:12;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;padding:12px 15px;margin-top:5px;background:#fff;border:1px solid #d5e2f1;border-radius:13px;box-shadow:0 -5px 22px #1c3e7412}
+.qf-live .qpub-bar-info{display:flex;align-items:center;gap:10px;min-width:0}
+.qf-live .qpub-indicator{width:10px;height:10px;border-radius:50%;flex:0 0 10px;background:#dda34c;box-shadow:0 0 0 4px #fff1d8}
+.qf-live .qpub-indicator.live{background:#23965a;box-shadow:0 0 0 4px #e6f7eb}
+.qf-live .qpub-bar-info strong,.qf-live .qpub-bar-info small{display:block}
+.qf-live .qpub-bar-info strong{font-size:13px;color:#223c5c}
+.qf-live .qpub-bar-info small{font-size:11px;color:#657e99;margin-top:3px}
+.qf-live .qpub-bar-actions{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.qf-live .qpub-bar-actions button,.qf-live .qpub-dialog-footer button{min-height:42px}
+.qf-live .qpub-bar-actions .qc-primary,.qf-live .qpub-dialog-footer .qc-primary{background:#164f9a;border-color:#164f9a}
+.qf-live .qpub-dialog{box-sizing:border-box;width:min(620px,calc(100% - 24px));max-height:calc(100dvh - 28px);padding:0;border:1px solid #d9e4f3;border-radius:18px;color:#1c3658;background:#fff;box-shadow:0 24px 70px #102e6540;overflow:auto}
+.qf-live .qpub-dialog::backdrop{background:#10233b66;backdrop-filter:blur(3px)}
+.qf-live .qpub-dialog-head{display:flex;align-items:center;gap:12px;padding:17px 19px;border-bottom:1px solid #e1e9f3;background:linear-gradient(115deg,#fff,#f0f6ff)}
+.qf-live .qpub-hero-icon{display:grid;place-items:center;width:46px;height:46px;flex:0 0 46px;border-radius:13px;color:#2058a2;background:#e1edff}
+.qf-live .qpub-dialog-head>div{flex:1;min-width:0}
+.qf-live .qpub-dialog-head h2{font-size:20px;line-height:1.3;margin:0 0 4px;letter-spacing:-.025em}
+.qf-live .qpub-dialog-head p{font-size:11px;line-height:1.4;margin:0;color:#607995}
+.qf-live .qpub-close{display:grid;place-items:center;width:34px;height:34px;border:0;border-radius:9px;background:transparent;color:#54708c;cursor:pointer}
+.qf-live .qpub-close:hover{background:#e4edf9}
+.qf-live .qpub-dialog-body{display:grid;gap:12px;padding:17px 19px}
+.qf-live .qpub-check-title{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.qf-live .qpub-check-title h3,.qf-live .qpub-form h3{font-size:15px;margin:0;color:#234063}
+.qf-live .qpub-check-title strong{font-size:12px;color:#225ca5}
+.qf-live .qpub-progress{height:7px;width:100%;accent-color:#2364b8}
+.qf-live .qpub-checks{list-style:none;margin:0;padding:0;border:1px solid #e3eaf4;border-radius:12px}
+.qf-live .qpub-checks li{display:flex;align-items:center;gap:10px;min-height:43px;padding:8px 11px;font-size:12px;border-bottom:1px solid #e5ebf5}
+.qf-live .qpub-checks li:last-child{border-bottom:0}
+.qf-live .qpub-checks li>span:nth-child(2){flex:1;min-width:0;font-weight:700}
+.qf-live .qpub-check-icon{display:grid;place-items:center;width:27px;height:27px;flex:0 0 27px;border-radius:8px}
+.qf-live .qpub-check-icon.ok{background:#e5f6ec;color:#21905a}
+.qf-live .qpub-check-icon.pending{background:#fff1da;color:#af7325}
+.qf-live .qpub-check-ok,.qf-live .qpub-check-pending{font-size:10px;font-weight:750;white-space:nowrap}
+.qf-live .qpub-check-ok{color:#19814b}
+.qf-live .qpub-check-pending{color:#a2631a}
+.qf-live .qpub-review{display:flex;align-items:center;gap:5px;border:0;background:#eaf2ff;color:#245ca4;border-radius:7px;padding:6px 8px;font-size:11px;font-weight:750;cursor:pointer}
+.qf-live .qpub-enrolment{display:flex;align-items:center;gap:10px;background:#eaf5ff;border:1px solid #d2e6fa;border-radius:10px;padding:11px;color:#2969a5}
+.qf-live .qpub-enrolment>div{flex:1;min-width:0}
+.qf-live .qpub-enrolment strong,.qf-live .qpub-enrolment small{display:block}
+.qf-live .qpub-enrolment strong{font-size:12px}
+.qf-live .qpub-enrolment small{font-size:11px;margin-top:3px;line-height:1.5}
+.qf-live .qpub-enrolment>svg:last-child{color:#21945e}
+.qf-live .qpub-form{display:grid;gap:10px;padding:12px;border:1px solid #e1e9f4;border-radius:12px;background:#fafcff}
+.qf-live .qpub-form h3{display:flex;align-items:center;gap:8px}
+.qf-live .qpub-form .qc-field{margin:0}
+.qf-live .qpub-note,.qf-live .qpub-alert{display:flex;align-items:flex-start;gap:7px;font-size:11px;line-height:1.55;color:#647a92;margin:0}
+.qf-live .qpub-alert{padding:10px;background:#fff4df;border-radius:8px;color:#966018}
+.qf-live .qpub-note svg,.qf-live .qpub-alert svg{flex:0 0 auto}
+.qf-live .qpub-dialog-footer{position:sticky;bottom:0;background:#fff;display:flex;justify-content:flex-end;gap:9px;padding:12px 19px;border-top:1px solid #e1e9f4}
+.qf-live .qpub-dialog :is(button,input,textarea):focus-visible,.qf-live .qpub-bar button:focus-visible{outline:3px solid #80ace4;outline-offset:2px}
+.qf-live .qpub-settings-actions{display:flex;gap:9px;align-items:center;flex-wrap:wrap;margin-top:12px}
+@media(max-width:600px){.qf-live .qpub-bar{padding:10px;gap:9px}.qf-live .qpub-bar-actions{width:100%}.qf-live .qpub-bar-actions button{flex:1}.qf-live .qpub-dialog-head,.qf-live .qpub-dialog-body{padding:12px}.qf-live .qpub-dialog-footer{padding:10px 12px}.qf-live .qpub-dialog-footer button{flex:1}.qf-live .qpub-bar-info small{font-size:10px}}
+@media(prefers-reduced-motion:no-preference){.qf-live .qpub-dialog[open]{animation:qpub-in .18s ease-out both}@keyframes qpub-in{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}}
