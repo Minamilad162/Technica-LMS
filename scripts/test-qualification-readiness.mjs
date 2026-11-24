@@ -214,3 +214,12 @@ assert.equal(taskDetails({spec:{criteria:['missing']}},portfolioFixture).missing
 assert.equal(taskCounts([taskFixture,{status:'Verified'},{status:'Cancelled'}]).completed,1);
 assert.equal(matchesTask({status:'Cancelled',overdue:true},'overdue'),false);
 console.log('Q06 learner task workspace and real criterion progress: PASS');
+
+const reviewUi=read('src/qualification/QualificationReviewerWorkspace.jsx');
+const reviewSql=read('supabase/migrations/202611240006_qualification_reviewer_workspaces.sql');
+assert.ok(reviewUi.includes('ReviewerQueue')&&reviewUi.includes('ReviewerPortfolioWorkspace')&&reviewUi.includes('Pending criteria'));
+assert.ok(learnerPortfolio.includes("portfolioRpc(db,'reviewer_queue')")&&learnerPortfolio.includes("p_role:portfolio.role")&&learnerPortfolio.includes('p_stage:portfolio.role'));
+assert.ok(learnerPortfolio.includes('!outcome.independentBlocked')&&reviewSql.includes('Reviewer access denied')&&reviewSql.includes('sa.revoked_at IS NULL'));
+assert.ok(reviewSql.includes("actor_role<>'verifier' OR EXISTS")&&reviewSql.includes("'independentBlocked'"));
+assert.ok(reviewUi.includes("onOpen(row.id,{reviewRole:role,outcomeId:o.id})"));
+console.log('Q07 role-specific queue, independent review and direct navigation: PASS');
