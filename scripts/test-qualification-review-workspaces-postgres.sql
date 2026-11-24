@@ -24,10 +24,11 @@ INSERT INTO public.lms_qualification_versions(id,catalog_key,title,version,appro
 INSERT INTO public.lms_qualification_units(id,version_id,code,title,position) VALUES(pg_temp.qid(20),pg_temp.qid(10),'U01','Unit',1);
 INSERT INTO public.lms_qualification_outcomes(id,unit_id,code,title,position) VALUES(pg_temp.qid(30),pg_temp.qid(20),'LO1','Outcome',1);
 INSERT INTO public.lms_qualification_criteria(id,outcome_id,code,title,position) VALUES(pg_temp.qid(40),pg_temp.qid(30),'1.1','Criterion',1);
-UPDATE public.lms_qualification_versions SET published_at=now() WHERE id=pg_temp.qid(10);
+
 
 INSERT INTO public.lms_qualification_outcomes(id,unit_id,code,title,position) VALUES(pg_temp.qid(31),pg_temp.qid(20),'LO2','Private draft outcome',2);
 INSERT INTO public.lms_qualification_criteria(id,outcome_id,code,title,position) VALUES(pg_temp.qid(41),pg_temp.qid(31),'2.1','Criterion 2',1);
+UPDATE public.lms_qualification_versions SET published_at=now() WHERE id=pg_temp.qid(10);
 SET LOCAL ROLE authenticated;
 SET LOCAL request.jwt.claim.sub='f5000000-0000-0000-0000-000000000001';
 SELECT set_config('test.review.e1',public.lms_qf_admin_assign_simple(pg_temp.qid(10),pg_temp.qid(5),pg_temp.qid(2),pg_temp.qid(2),current_date,null,'',true)::text,true);
