@@ -19,7 +19,9 @@ Scope: OTHM Level 6 (2026 and 2023 editions distinct), OTHM Level 7, ProQual Lev
 
 Admin Qualification Management Center: Dashboard, Qualifications, Learners & Enrolments, Assessors & Verifiers, Tasks & Assessment Plans, Assessment Center, Certificates, Reports & Audit Log. Visible entry points from Admin Users > Assign Qualification and Qualifications > Enrol Learner must invoke the same validated wizard.
 
-Separate one-time edition setup/release from daily learner enrolment and monitoring. Each enrolment pins an exact version, learner, authorised assessor, independent verifier, start date and optional target date. Admin may hold several roles and select their own eligible account as assessor OR verifier on a given enrolment, with explicit workspace switching. Keep current distinct-person assignment guard; prevent verification of one's own earlier assessment even after reassignment. Admin alone cannot grade. Role authority is server-controlled, documented and revocable.
+Separate one-time edition setup/release from daily learner enrolment and monitoring.
+
+**Owner clarification — independent qualification lifecycle (24 November 2026):** An edition may be created, configured, approved and released with zero students, zero enrolments and no assigned enrolment-specific assessor/verifier. Having no subscribers or assigned students is a normal operational state, not a readiness blocker. Do not require a learner or learner-specific reviewer assignment to create, save or release a qualification. Retain genuine centre approval and any actual applicable programme-level staffing requirements; do not confuse these with individual enrolment assignments. A released edition with no learners is displayed as Released / Ready for enrolment, with 0 enrolled learners. Reviewer assignment and independent reviewer checks occur when enrolling a learner. Reusable assessment/task templates may be prepared before enrolment; individual tasks, deadlines, evidence and decisions require the relevant enrolment. Never manufacture an enrolment to activate a qualification. Publication does not grant a learner assessment access automatically. Each enrolment pins an exact version, learner, authorised assessor, independent verifier, start date and optional target date. Admin may hold several roles and select their own eligible account as assessor OR verifier on a given enrolment, with explicit workspace switching. Keep current distinct-person assignment guard; prevent verification of one's own earlier assessment even after reassignment. Admin alone cannot grade. Role authority is server-controlled, documented and revocable.
 
 Tasks reference real Unit/LO/AC identifiers and existing claim/submission records; one evidence file can support multiple Units. No separate grading engine. Maintain separate activation, enrolment, task, claim and certificate states. Assessment task flow: Assigned -> In progress -> Submitted -> Awaiting assessment -> Changes requested / resubmission OR Awaiting verification -> Return to assessor OR Verified. Derive completion from applicable verified required claims; non-grading tasks have explicit separate semantics. Overdue is a computed flag. Preserve revisions, feedback, decisions, private storage and audit trail.
 
@@ -53,7 +55,7 @@ Acceptance: dated baseline report, verified facts and explicit unknowns; no prod
 ### Q01 — Admin Management Center
 - [ ] Q01.1 Add clearly visible admin menu entry and compact dashboard/navigation.
 - [ ] Q01.2 Separate qualifications, enrolments, staff, tasks, assessment, certificates and reporting. No dead controls or unlabeled unfinished modules.
-- [ ] Q01.3 Real version/readiness cards, blocker explanations and direct action links.
+- [ ] Q01.3 Real version/readiness cards, blocker explanations and direct action links. Show zero enrolments as a normal empty state, not an activation blocker; keep edition status independent of learner assignment.
 - [ ] Q01.4 Visible Enrol Learner and Assign Qualification actions, eventually shared Q04 wizard.
 - [ ] Q01.5 Preserve Unit brief editor, material approval, updates/appointments, release, staff/reassignment and issuer controls; remove repeated sections.
 Acceptance: enrolment and staff reachable within two navigation actions; existing functions preserved; non-admin access denied; desktop/mobile checked.
@@ -63,7 +65,7 @@ Acceptance: enrolment and staff reachable within two navigation actions; existin
 - [ ] Q02.2 One-time guided review: official criteria, real methods/instructions, resources, declaration, genuine centre reference and authorised release.
 - [ ] Q02.3 Make readiness blockers actionable instead of generic disabled forms.
 - [ ] Q02.4 Verify applicable awarding-body/centre procedures and preserve release guards and immutable pinned edition.
-- [ ] Q02.5 Test reference-only access before release and enrolment eligibility afterward.
+- [ ] Q02.5 Test reference-only access before release and enrolment eligibility afterward, including creating and releasing a fully approved edition with zero learners and no enrolment-specific reviewer assignments.
 Acceptance: authorised human can release exact approved edition once; missing methods/briefs and non-admin release rejected by server. Actual release requires genuine records, separate from implementation.
 
 ### Q03 — Roles & staff management
@@ -83,7 +85,7 @@ Acceptance: independent reviewer decisions enforced server-side; assigned author
 Acceptance: eligible admin enrols real user without SQL; learner opens correct portfolio and uploads permitted files; assigned reviewers see it; unrelated users denied. No fabricated production records.
 
 ### Q05 — Assessment plans & tasks
-- [ ] Q05.1 Design reusable approved templates per exact edition and individual enrolment plans.
+- [ ] Q05.1 Design reusable approved templates per exact edition (including editions with zero learners) and individual enrolment plans.
 - [ ] Q05.2 Fields: title, instructions, learner/enrolment, related Units/LOs/AC, evidence requirements, authorised attachments, assigned assessor, deadline, status, feedback/revision references.
 - [ ] Q05.3 Admin/assigned assessor creates and schedules tasks with multi-Unit support and template reuse.
 - [ ] Q05.4 Integrate versioned claims, submission snapshots, feedback and resubmission; derive completion and overdue correctly; audit edits/cancellation.
@@ -122,6 +124,7 @@ Acceptance: required checks passed, deployment independently verified, acceptanc
 
 ## Implementation and tracking rules
 
+- **Owner UI approval gate:** Before implementing each UI-bearing phase or materially different screen, prepare a faithful high-fidelity mockup using actual system scope and existing Technica branding/navigation, present it to the owner, and obtain explicit approval. Record approved design reference and any changes in the session log. Do not implement unapproved UI. For non-visual audit/backend work, present the relevant workflow/technical plan rather than inventing a screen. Keep mockup data illustrative and distinguish it from real production data.
 - Small coherent PRs by phase; Q02/Q03 can run in parallel after Q01, Q06/Q07 after dependencies.
 - No destructive resets, fake official data, approval bypass, self-verification, or weakening existing role/RLS/storage protection.
 - Additive versioned migrations only where needed; preflight, tests and correct project verification. Separate development test writes from authorised production actions.
@@ -133,6 +136,8 @@ Acceptance: required checks passed, deployment independently verified, acceptanc
 | Date | Phase | Change / evidence | Status | Next |
 |---|---|---|---|---|
 | 2026-11-24 | Planning | Owner approved V2 scope; roadmap recorded. Baseline PR #121. No new code or production data changes. | Roadmap established | Q00 baseline audit, then Q01 admin redesign |
+
+| 2026-11-24 | Planning | Owner clarified zero-student qualifications are valid; edition activation independent of enrolment and learner reviewer assignment. Added UI mockup approval gate before implementation. | Requirements updated; no code or production data changes | Q00 audit; Q01 revised mockup for approval |
 
 ### Next session
 Start Q00. Read this roadmap, verify current code and production state without mutation, and record the precise reasons for unavailable Evidence upload. Continue to Q01 when baseline is verified.
