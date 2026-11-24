@@ -39,7 +39,7 @@ Status vocabulary: PLANNED, IN PROGRESS, BLOCKED, IMPLEMENTED, VERIFIED, DONE. I
 | Q05 | Assessment plans & tasks | IN PROGRESS | Q04 | Approved four-step UI; templates and assignments merged, CI passed, migration installed; rescheduling/cancellation merged and verified; visual and operational acceptance pending |
 | Q06 | Learner workspace | IN PROGRESS | Q05 | PR #131 merged and CI passed; authenticated visual and operational acceptance pending |
 | Q07 | Assessor & verifier workspaces | IN PROGRESS | Q04, Q05 | PR #132 merged and CI passed; migration 202611240006 installed; authenticated visual and operational acceptance pending |
-| Q08 | Monitoring & completion | IN PROGRESS | Q05–Q07 | Approved dashboard and scoped read models implemented in branch; CI, migration and live QA pending |
+| Q08 | Monitoring & completion | IN PROGRESS | Q05–Q07 | PR #133 merged; CI passed; migration 202611240007 installed and permissions verified; live QA pending |
 | Q09 | E2E QA & release | PLANNED | Q01–Q08 | Staged test identities and production verification |
 
 ## Detailed checklist and acceptance criteria
@@ -183,7 +183,7 @@ Acceptance: required checks passed, deployment independently verified, acceptanc
 
 | 2026-11-24 | Q07 | Reviewer queue, workload counts, learner/outcome filters and split review workspace implemented on codex/q07-review-workspaces. Explicit protected role reads, immutable submitted snapshots, no private draft mapping, independent reviewer warning, existing review and task actions. Migration 202611240006 and disposable integration tests. | PR #132 merged at a7acfd14a96b7a3b2f2793dde4f86eeee7ecd5de; CI run 45359283457 passed build, regression and PostgreSQL review tests after updating direct evidence guard assertion and immutable fixture setup. Migration 202611240006 applied. | Verify deployed UI and complete authenticated lifecycle QA before Q07 acceptance; Q08 design gate next. |
 
-| 2026-11-24 | Q08 | Approved monitoring dashboard, official KPI read model, filtered CSV audit reports, scoped event feed and receipt table. Existing finalisation and certificate rules retained. Migration 202611240007 and disposable role-isolation tests added. | Code implemented; CI and production migration pending | Verify tests; complete live visual/operational QA, notification delivery coverage and audit completeness in Q09. |
+| 2026-11-24 | Q08 | Approved monitoring dashboard, official KPI read model, filtered CSV audit reports, scoped event feed and receipt table. Existing finalisation and certificate rules retained. Migration 202611240007 and disposable role-isolation tests added. | PR #133 merged at 624bb43b287e484fd03d208ebfa2b648e26a05db; CI 45380553304 passed; migration 202611240007 applied and nine installation/permission checks passed. | Complete live visual/operational QA, notification delivery coverage and audit completeness in Q09. |
 
 ### Production edition audit — 24 November 2026
 
