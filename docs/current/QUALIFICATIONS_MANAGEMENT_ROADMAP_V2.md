@@ -36,7 +36,7 @@ Status vocabulary: PLANNED, IN PROGRESS, BLOCKED, IMPLEMENTED, VERIFIED, DONE. I
 | Q02 | Qualification activation | IN PROGRESS | Q01 | Simplified Draft/Live publication UI merged PR #123, CI passed; live visual QA and genuine centre publication pending |
 | Q03 | Roles & staff management | IN PROGRESS | Q01 | PR #126 merged; role selection, inline authorisation, reassignment guards and workload CI verified, production RPC installed; live workspace/visual acceptance pending |
 | Q04 | Learner enrolment engine | IN PROGRESS | Q02, Q03 | PR #126 merged; assignment and Users entry CI verified; production migration installed; live enrolment and visual acceptance pending |
-| Q05 | Assessment plans & tasks | PLANNED | Q04 | Task/claim architecture |
+| Q05 | Assessment plans & tasks | IN PROGRESS | Q04 | Approved four-step UI; reusable templates and individual assignments implemented in branch, CI and live validation pending |
 | Q06 | Learner workspace | PLANNED | Q05 | Existing Evidence/Matrix/Outcome integration |
 | Q07 | Assessor & verifier workspaces | PLANNED | Q04, Q05 | Independent review queues |
 | Q08 | Monitoring & completion | PLANNED | Q05–Q07 | Real metrics, notifications, issuer safeguards |
@@ -168,6 +168,8 @@ Acceptance: required checks passed, deployment independently verified, acceptanc
 | 2026-11-24 | Q04 | Approved compact assignment mockup implemented on codex/q04-compact-enrolment-form, with combined searchable account controls, optional note, single-step audited staff approval and same-account role allocation while preserving independent decisions. New migration 202611240003 and CI integration tests. | PR #127 merged at f0272132759819ac88c43d87c9097725ace69483; CI run 45348973331 passed; migration 202611240003 installed and production RPCs, note column, same-account allocation and independent decision guard verified | Authenticated Cloudflare visual QA and owner acceptance pending |
 
 | 2026-11-24 | Q03 | Owner approved revised Assessors & Verifiers mockup. Implemented blue header, two-column authorisation form with guide, responsive live role cards and role-specific revoke shortcut. Existing directory, competence attestation, workload and audited revocation RPCs preserved. UI-only; no database mutation or migration. | PR #128 merged at f3696983938dbebede5660c98fec58b9a81d88a7; CI run 45350488588 passed build, frontend regression and PostgreSQL lifecycle/role isolation; no migration required | Authenticated Cloudflare visual QA and owner acceptance pending |
+
+| 2026-11-24 | Q05 | Owner approved four-step task builder. Task Templates belong to the exact qualification edition and can exist without learners. Assigned Tasks belong to individual enrolments with saved instructions, selected criteria across Units, approved materials, individual due dates and existing reviewer assignments. Supports direct individual tasks, approved template reuse, assessor assignment for own portfolios and learner task display linked to existing outcomes/evidence. Migration 202611240004, no separate grading engine. | Code in branch; CI and production validation pending. Cancellation/rescheduling and full Q06/Q07 acceptance remain open. | Test and verify rollout before marking phase complete. |
 
 ### Production edition audit — 24 November 2026
 
