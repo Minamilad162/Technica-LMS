@@ -452,3 +452,5 @@ jobs:
           psql -h localhost -U postgres -v ON_ERROR_STOP=1 -f scripts/test-qualification-enrolment-directory-postgres.sql
           psql -h localhost -U postgres -v ON_ERROR_STOP=1 -f supabase/migrations/202611240003_qualification_compact_assignment.sql
           psql -h localhost -U postgres -v ON_ERROR_STOP=1 -f scripts/test-qualification-compact-assignment-postgres.sql
+          psql -h localhost -U postgres -v ON_ERROR_STOP=1 -f supabase/migrations/202611240004_qualification_tasks.sql
+          psql -h localhost -U postgres -v ON_ERROR_STOP=1 -f scripts/test-qualification-tasks-postgres.sql

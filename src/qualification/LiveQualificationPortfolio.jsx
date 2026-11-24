@@ -14,6 +14,7 @@ import {ProgrammeUpdateList, useProgrammeUpdates} from './QualificationProgramme
 import {printPortfolioSection} from './portfolioPrint.js';
 import QualificationMultiUnitEvidence from './QualificationMultiUnitEvidence.jsx';
 import QualificationCentreAdmin from './QualificationCentreAdmin.jsx';
+import {PortfolioAssignedTasks} from './QualificationTasks.jsx';
 import QualificationCentreBrief from './QualificationCentreBrief.jsx';
 import {PortfolioStatusRibbon,PortfolioMetrics} from './QualificationPortfolioReferenceUI.jsx';
 import QualificationCandidateRegistration from './QualificationCandidateRegistration.jsx';
@@ -91,6 +92,7 @@ function PortfolioOverview({db, portfolio, progress, onOutcome, onView, qualific
     {learner && <QualificationInternalNav items={homeTabs} active={tab} onChange={setTab}
       ariaLabel="Qualification home sections" nested/>}
     {tab === 'tasks' && <>
+      <PortfolioAssignedTasks db={db} portfolio={portfolio} onOutcome={onOutcome} onView={onView}/>
       <Panel title={learner ? 'Awaiting Review' : roleLabels[portfolio.role]}>
         <div className="qf-live-list">
           {pending.length === 0 && <p>No outcomes awaiting action.</p>}
