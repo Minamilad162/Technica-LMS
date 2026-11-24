@@ -38,7 +38,7 @@ Status vocabulary: PLANNED, IN PROGRESS, BLOCKED, IMPLEMENTED, VERIFIED, DONE. I
 | Q04 | Learner enrolment engine | IN PROGRESS | Q02, Q03 | PR #126 merged; assignment and Users entry CI verified; production migration installed; live enrolment and visual acceptance pending |
 | Q05 | Assessment plans & tasks | IN PROGRESS | Q04 | Approved four-step UI; templates and assignments merged, CI passed, migration installed; rescheduling/cancellation merged and verified; visual and operational acceptance pending |
 | Q06 | Learner workspace | IN PROGRESS | Q05 | PR #131 merged and CI passed; authenticated visual and operational acceptance pending |
-| Q07 | Assessor & verifier workspaces | IN PROGRESS | Q04, Q05 | Reviewer queue and split workspace implemented in branch; CI, migration and visual/E2E acceptance pending |
+| Q07 | Assessor & verifier workspaces | IN PROGRESS | Q04, Q05 | PR #132 merged and CI passed; migration 202611240006 installed; authenticated visual and operational acceptance pending |
 | Q08 | Monitoring & completion | PLANNED | Q05–Q07 | Real metrics, notifications, issuer safeguards |
 | Q09 | E2E QA & release | PLANNED | Q01–Q08 | Staged test identities and production verification |
 
@@ -179,7 +179,7 @@ Acceptance: required checks passed, deployment independently verified, acceptanc
 
 | 2026-11-24 | Q06 | Owner approved split-pane learner Tasks & Evidence design. Implemented on codex/q06-learner-workspace, with real task progress, filters, linked criteria and reviewer feedback, protected materials and existing evidence/Outcome routes. | PR #131 merged at c1be86198ed1227321a4a915e3e976ad2dabe56b; CI 45356008105 passed; no migration required. | Authenticated visual and end-to-end QA pending: upload, mapping, submission, return and resubmission using authorised accounts. |
 
-| 2026-11-24 | Q07 | Reviewer queue, workload counts, learner/outcome filters and split review workspace implemented on codex/q07-review-workspaces. Explicit protected role reads, immutable submitted snapshots, no private draft mapping, independent reviewer warning, existing review and task actions. Migration 202611240006 and disposable integration tests. | Code implemented; CI/migration/visual acceptance pending | Verify tests and deployment; complete authenticated lifecycle QA before Q07 acceptance. |
+| 2026-11-24 | Q07 | Reviewer queue, workload counts, learner/outcome filters and split review workspace implemented on codex/q07-review-workspaces. Explicit protected role reads, immutable submitted snapshots, no private draft mapping, independent reviewer warning, existing review and task actions. Migration 202611240006 and disposable integration tests. | PR #132 merged at a7acfd14a96b7a3b2f2793dde4f86eeee7ecd5de; CI run 45359283457 passed build, regression and PostgreSQL review tests after updating direct evidence guard assertion and immutable fixture setup. Migration 202611240006 applied. | Verify deployed UI and complete authenticated lifecycle QA before Q07 acceptance; Q08 design gate next. |
 
 ### Production edition audit — 24 November 2026
 
