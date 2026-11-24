@@ -146,7 +146,7 @@ export function PortfolioAssignedTasks({db,portfolio,onOutcome,onView}){
    {units.flatMap(u=>u.outcomes.filter(o=>o.criteria.some(c=>t.spec.criteria.includes(c.id))).map(o=><div key={o.id} className="qt-outcome-link"><div><strong>{u.code} · {o.code}</strong><small>{o.criteria.filter(c=>t.spec.criteria.includes(c.id)).map(c=>c.code+' '+c.title).join(' · ')}</small></div><button className="qf-button qf-outline" onClick={()=>onOutcome(o.id)}>Open Outcome <ArrowRight size={15}/></button></div>))}
    {documents.filter(d=>t.spec.documents.includes(d.id)).map(d=><button key={d.id} type="button" className="qf-button qf-outline" onClick={()=>openFile(d)}><Paperclip size={16}/> {d.title}</button>)}
    {t.spec.documents.some(id=>!documents.some(d=>d.id===id))&&<p>Some linked materials are unavailable to this account. Contact the centre.</p>}
-   <TaskManagement db={db} task={t} reload={reload}/>
+   {portfolio.role==='assessor'&&<TaskManagement db={db} task={t} reload={reload}/>}
    {portfolio.role==='learner'&&!t.cancelledAt&&<button type="button" className="qf-button qf-primary" onClick={()=>onView('evidence')}>Open Evidence Folder</button>}
   </div></details>)}</div>}
  </section>;
