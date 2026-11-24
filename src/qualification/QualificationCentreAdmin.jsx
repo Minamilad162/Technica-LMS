@@ -8,6 +8,7 @@ import {ProgrammeUpdatesAdmin} from './QualificationProgrammeUpdates.jsx';
 import './qualificationCentreAdmin.css';
 import {QualificationPublishBar,QualificationPublishDialog} from './QualificationPublish.jsx';
 import {AdminQualificationNavigation,AdminQualificationCatalog,AdminQualificationDetail} from './QualificationAdminCenter.jsx';
+import {AccountSelect,AssignmentWorkspace,enrolmentRows} from './QualificationEnrolments.jsx';
 
 const methods=[['assignment_brief','Assignment Brief'],['reflective_account','Reflective Account'],
  ['witness_testimony','Witness Testimony'],['cpd_record','CPD Record'],
@@ -25,21 +26,17 @@ function PeopleSelect({label,value,onChange,people,disabled}){return <label clas
   {people.map(p=><option value={p.id} key={p.id}>{p.name||p.email} · {p.email}</option>)}
  </select></label>;}
 
-export default function QualificationCentreAdmin({db,onBack,references=[]}){
+export default function QualificationCentreAdmin({db,onBack,references=[],initialLearnerId=''}){
  const [versions,setVersions]=useState([]),[people,setPeople]=useState([]),[staff,setStaff]=useState([]);
  const [search,setSearch]=useState(''),[versionId,setVersionId]=useState(''),[unitId,setUnitId]=useState('');
  const [instructions,setInstructions]=useState(''),[assessmentMethods,setAssessmentMethods]=useState('');
  const [reviewChecks,setReviewChecks]=useState({rubric:false,methods:false,authority:false});
  const [approvalRef,setApprovalRef]=useState(''),[declaration,setDeclaration]=useState('');
- const [attest,setAttest]=useState(false),[learner,setLearner]=useState(''),[assessor,setAssessor]=useState(''),
- [verifier,setVerifier]=useState(''),[startOn,setStartOn]=useState(()=>new Date().toISOString().slice(0,10)),
- [targetOn,setTargetOn]=useState('');
+ const [attest,setAttest]=useState(false);
  const [fileTitle,setFileTitle]=useState(''),[fileKind,setFileKind]=useState(methods[0][0]),
  [file,setFile]=useState(null),[fileAttest,setFileAttest]=useState(false);
  const [revokeUser,setRevokeUser]=useState(''),[revokeRole,setRevokeRole]=useState(''),
- [revokeReason,setRevokeReason]=useState(''),[reassignId,setReassignId]=useState(''),
- [reassignAssessor,setReassignAssessor]=useState(''),[reassignVerifier,setReassignVerifier]=useState(''),
- [reassignReason,setReassignReason]=useState('');
+ [revokeReason,setRevokeReason]=useState('');
  const [staffUser,setStaffUser]=useState(''),[staffRole,setStaffRole]=useState('assessor'),
  [staffReference,setStaffReference]=useState(''),[staffAttest,setStaffAttest]=useState(false);
  const [issuerName,setIssuerName]=useState(''),[issuerRef,setIssuerRef]=useState(''),
@@ -48,9 +45,9 @@ export default function QualificationCentreAdmin({db,onBack,references=[]}){
  const [previewWorkspace,setPreviewWorkspace]=useState(false);
  const [publishOpen,setPublishOpen]=useState(false);
  const [bulkOpen,setBulkOpen]=useState(false),[bulkAttest,setBulkAttest]=useState(false);
- const [section,setSection]=useState('overview'),[setupTab,setSetupTab]=useState('summary');
+ const [section,setSection]=useState(initialLearnerId?'enrolments':'overview'),[setupTab,setSetupTab]=useState('summary');
  const catalogueVisible=['overview','qualifications'].includes(section);
- const selectVersion=v=>{if(v.id===version?.id)return true;if(!confirmDiscard())return false;setVersionId(v.id);setUnitId(v.units[0]?.id||'');setReassignId('');setLearner('');setAssessor('');setVerifier('');setFile(null);setFileTitle('');return true;};
+ const selectVersion=v=>{if(v.id===version?.id)return true;if(!confirmDiscard())return false;setVersionId(v.id);setUnitId(v.units[0]?.id||'');setFile(null);setFileTitle('');return true;};
  const openSetup=tab=>{setSection('qualifications');setSetupTab(tab);};
  const [loading,setLoading]=useState(true),[saving,setSaving]=useState(false),
  [message,setMessage]=useState(''),[error,setError]=useState('');
@@ -168,16 +165,13 @@ export default function QualificationCentreAdmin({db,onBack,references=[]}){
    p_user:revokeUser,p_role:revokeRole,p_reason:revokeReason.trim()
   }),'Reviewer authorization revoked. Reassign any unfinished portfolios using this reviewer.');
  };
- const reassignStaff=()=>{
-  if(!window.confirm('Reassign these reviewers on an active qualification? Existing assessment decisions are preserved in the audit trail.'))return;
-  run(()=>portfolioRpc(db,'admin_reassign',{
-    p_enrolment:reassignId,p_assessor:reassignAssessor,p_verifier:reassignVerifier,p_reason:reassignReason.trim()
-  }),'Active portfolio reviewers reassigned with auditable reason. Previous assessment decisions remain intact.');
- };
- const onAssign=()=>run(()=>portfolioRpc(db,'admin_assign',{
-  p_version:version.id,p_learner:learner,p_assessor:assessor,p_verifier:verifier,p_start:startOn,
-  p_target:targetOn||null
- }),'Learner enrolled in the real qualification. Assessment permissions are assigned.');
+ const authoriseInline=(id,role,reference)=>run(()=>portfolioRpc(db,'admin_authorize_staff',{
+  p_user:id,p_role:role,p_reference:reference,p_attest:true
+ }),'Professional reviewer authorisation recorded.');
+ const onReassign=payload=>run(()=>portfolioRpc(db,'admin_reassign',payload),
+  'Active portfolio reviewers reassigned with auditable reason. Previous decisions remain intact.');
+ const onAssign=payload=>run(()=>portfolioRpc(db,'admin_assign',payload),
+  'Learner enrolled in the selected qualification. Assessment permissions are assigned.');
  const onUpload=()=>{
   if(!file) return;
   const ext=file.name.split('.').pop()?.toLowerCase();
@@ -215,7 +209,7 @@ export default function QualificationCentreAdmin({db,onBack,references=[]}){
   {catalogueVisible&&<AdminQualificationDetail version={version} references={references} staff={staff}
      tab={setupTab} onTab={setSetupTab} saving={saving} onPreview={()=>setPreviewWorkspace(true)}
      onEnrol={()=>setSection('enrolments')}/>}
-  {!catalogueVisible&&version&&<div className="qac-section-context">
+  {!catalogueVisible&&version&&!['enrolments','staff'].includes(section)&&<div className="qac-section-context">
     <label htmlFor="qac-edition-select">Qualification edition</label>
     <select id="qac-edition-select" disabled={saving} value={version.id}
       onChange={e=>{const next=versions.find(v=>v.id===e.target.value);if(next)selectVersion(next);}}>
@@ -348,54 +342,18 @@ export default function QualificationCentreAdmin({db,onBack,references=[]}){
         <div className="qpub-settings-actions"><button type="button" className="qc-outline" disabled={saving} onClick={openPublish}><ShieldCheck size={17}/> Review publication readiness</button></div>
        </>}
      </Card>
-     <Card title="Learner & reviewer assignment" icon={Users} hidden={section!=='enrolments'}>
-      <p className="qc-secondary">Only Live, centre-approved qualifications can be assigned. Reviewers must be different active users.</p>
-      <div className="qc-people-search"><input aria-label="Find users by name or email" value={search}
-        onChange={e=>setSearch(e.target.value)} placeholder="Search active accounts"/>
-        <button type="button" onClick={findPeople} disabled={saving}><Search size={17}/></button></div>
-      <PeopleSelect label="Learner" value={learner} onChange={setLearner} people={people} disabled={saving||!release}/>
-      <PeopleSelect label="Assessor" value={assessor} onChange={setAssessor}
-        people={people.filter(p=>staff.some(s=>s.role==='assessor'&&s.userId===p.id))} disabled={saving||!release}/>
-      <PeopleSelect label="Internal Verifier" value={verifier} onChange={setVerifier}
-        people={people.filter(p=>staff.some(s=>s.role==='verifier'&&s.userId===p.id))} disabled={saving||!release}/>
-      <div className="qc-dates"><label className="qc-field">Start date<input type="date" value={startOn}
-        onChange={e=>setStartOn(e.target.value)} disabled={saving||!release}/></label>
-      <label className="qc-field">Target date<input type="date" value={targetOn}
-        min={startOn} onChange={e=>setTargetOn(e.target.value)} disabled={saving||!release}/></label></div>
-      <button type="button" className="qc-primary" disabled={saving||!release||!learner||!assessor||!verifier||
-        new Set([learner,assessor,verifier]).size!==3} onClick={onAssign}><GraduationCap size={17}/> Enrol &amp; assign</button>
-      {!release&&<p className="qc-locked"><LockKeyhole size={16}/> Publish the qualification after approving all Unit briefs before enrolling.</p>}
-      <hr/><h4>Current enrolments</h4>
-      {version.enrolments.length?version.enrolments.map(e=><div className="qc-enrolled" key={e.id}>
-         <strong>{e.learner}</strong><small>Assessor: {e.assessor} · Verifier: {e.verifier}</small>
-         <small>{e.completedAt?'Completed':'In progress'} · Started {e.startOn}</small>
-         {!e.completedAt&&<button className="qc-inline-action" type="button" onClick={()=>{setReassignId(e.id);
-          setReassignAssessor('');setReassignVerifier('');setReassignReason('');}}>
-          Change reviewers</button>}
-      </div>):<p className="qc-secondary">No active learner enrolments on this edition.</p>}
-      {reassignId&&<div className="qc-reassign">
-        <h4>Documented reassignment</h4>
-        <PeopleSelect label="Replacement Assessor" value={reassignAssessor} onChange={setReassignAssessor}
-          people={people.filter(p=>staff.some(s=>s.role==='assessor'&&s.userId===p.id))} disabled={saving}/>
-        <PeopleSelect label="Replacement Verifier" value={reassignVerifier} onChange={setReassignVerifier}
-          people={people.filter(p=>staff.some(s=>s.role==='verifier'&&s.userId===p.id))} disabled={saving}/>
-        <label className="qc-field">Reason for changing reviewers<textarea rows={2} maxLength={1500}
-          value={reassignReason} disabled={saving} onChange={e=>setReassignReason(e.target.value)}/></label>
-        <button className="qc-outline" type="button" onClick={reassignStaff}
-          disabled={saving||reassignReason.trim().length<15||!reassignAssessor||!reassignVerifier||
-            reassignAssessor===reassignVerifier}>Save audited reassignment</button>
-      </div>}
-    </Card>
+     {section==='enrolments'&&<AssignmentWorkspace db={db} versions={versions} staff={staff} busy={saving}
+      initialVersionId={version?.id} initialLearnerId={initialLearnerId} onAssign={onAssign} onReassign={onReassign} onAuthorise={authoriseInline}/>}
     <Card title="Qualified assessment staff" icon={ShieldCheck} hidden={section!=='staff'}>
       <p className="qc-secondary">A person may only serve as Assessor or Internal Verifier after the centre confirms their actual professional competence. These roles are distinct from a normal LMS login.</p>
-      <PeopleSelect label="Staff account" value={staffUser} onChange={setStaffUser} people={people} disabled={saving}/>
+      <AccountSelect db={db} role={staffRole} label="Staff account" value={staffUser} onChange={id=>{setStaffUser(id);setStaffAttest(false);}} staff={staff} revision={staff.length} disabled={saving}/>
       <label className="qc-field">Approved assessment role
-        <select value={staffRole} disabled={saving} onChange={e=>setStaffRole(e.target.value)}>
+        <select value={staffRole} disabled={saving} onChange={e=>{setStaffRole(e.target.value);setStaffUser('');setStaffAttest(false);}}>
           <option value="assessor">Assessor</option><option value="verifier">Internal Verifier</option>
         </select></label>
       <label className="qc-field">Documented competence / authorisation reference
         <input value={staffReference} maxLength={220} disabled={saving}
-          onChange={e=>setStaffReference(e.target.value)} placeholder="Training centre competency verification / assessor qualification record"/></label>
+          onChange={e=>{setStaffReference(e.target.value);setStaffAttest(false);}} placeholder="Training centre competency verification / assessor qualification record"/></label>
       <label className="qc-confirm"><input type="checkbox" checked={staffAttest} disabled={saving}
         onChange={e=>setStaffAttest(e.target.checked)}/>
         <span>I confirm the centre has verified this person’s competence and authorisation for this assessment role.</span></label>
@@ -403,7 +361,7 @@ export default function QualificationCentreAdmin({db,onBack,references=[]}){
         onClick={authorizeStaff}><ShieldCheck size={16}/> Authorise reviewer</button>
       <div className="qc-staff-list"><strong>Authorised centre reviewers ({staff.length})</strong>
         {staff.map(s=><div key={s.userId+':'+s.role}><span>{s.name||people.find(p=>p.id===s.userId)?.email||s.userId} · {s.role}</span>
-          <small>{s.reference}</small></div>)}
+          <small>{s.reference}</small><small>{enrolmentRows(versions).filter(e=>!e.completedAt&&(s.role==='assessor'?e.assessorId:e.verifierId)===s.userId).length} active assigned portfolios</small></div>)}
         {!staff.length&&<p className="qc-secondary">No competent assessors or verifiers have been authorised yet.</p>}
       </div>
       {!!staff.length&&<details className="qc-revoke"><summary>Revoke a professional reviewer authorization</summary>
