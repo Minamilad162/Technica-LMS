@@ -1,21 +1,8 @@
 import React,{useEffect,useRef} from 'react';
 import {ArrowRight,CheckCircle2,Info,LockKeyhole,Rocket,Save,ShieldCheck,Users,X} from 'lucide-react';
-import {needsAssessmentMethodReview,sourceRubricForUnit} from './qualificationReadiness.js';
+import {publicationChecks,validPublicationReference} from './qualificationReadiness.js';
 import './qualificationPublish.css';
 
-// Publication status is independent of enrolment and reviewer counts.
-export const editionStatus=version=>version?.publishedAt?'Live':'Draft';
-export function publicationChecks(version,references){
- const units=version?.units||[];
- return [
-  {id:'rubric',label:'Official qualification structure verified',ok:units.length>0&&units.every(u=>sourceRubricForUnit(references,version,u).complete),tab:'units'},
-  {id:'briefs',label:'All Unit Assessment Plans approved',ok:units.length>0&&units.every(u=>u.brief?.status==='approved'&&Boolean(u.brief?.approvedAt)),tab:'plans'},
-  {id:'methods',label:'Assessment methods confirmed',ok:units.length>0&&units.every(u=>!needsAssessmentMethodReview(u.brief?.methods)),tab:'plans'},
- ];
-}
-export function validPublicationReference(value){
- return value.trim().length>=10&&!/(pending|placeholder|test|sandbox|demo|source reference|draft)/i.test(value);
-}
 export function QualificationPublishBar({version,dirty,canSave,saving,onSave,onPublish,onEnrol}){
  const live=!!version.publishedAt;
  return <footer className="qpub-bar" aria-label="Qualification publishing actions">
