@@ -1,3 +1,9 @@
+## 2026-11-24 — Direct Matrix links and compact evidence filters
+
+- Place the Evidence register filters in one desktop row with a responsive layout for narrow screens.
+- Add editable Matrix checkboxes, a pending count, Save links and Discard. Carry selections across unit and filter changes.
+- Save only the changed Outcome drafts through the version-checked claim RPC. Submitted and verified Outcomes remain read-only.
+
 ## 2026-11-24 — Qualification evidence dialogs and visible filters
 
 - Open file uploads, written evidence and duplication in a focused modal. Keep file validation and save errors in the dialog.

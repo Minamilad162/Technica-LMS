@@ -1,3 +1,4 @@
+import {buildMatrixUpdates,isEvidenceMappingEditable} from '../src/qualification/qualificationMatrixDraft.js';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import {learnerNextStep, restoreLearnerSection} from '../src/qualification/learnerPortfolioJourney.js';
@@ -171,6 +172,26 @@ assert.match(ui,/onAddEvidence=\{learner && portfolio.canEdit \? \(\) => openEvi
 assert.match(ui,/onBack=\{evidenceOrigin \|\| evidenceUnit \? \(\) => changeView\(evidenceOrigin \|\| 'programme'\)/);
 assert.match(ui,/view === 'evidence' \? evidenceFilter : ''/,'Share and restore the applied Evidence Unit filter');
 assert.match(ui,/setUnitFilter\(''\);\s*onSelectUnit\(''\)/,'A saved record clears the Unit filter in the browser route too');
+const mappingUnits = [{outcomes:[
+ {id:'one',criteria:[{id:'a'},{id:'b'}],claim:{state:'draft',version:3,mapping:{a:['keep','remove'],b:['keep']}}},
+ {id:'two',criteria:[{id:'c'}],claim:{state:'changes_requested',version:2,mapping:{}}},
+ {id:'locked',criteria:[{id:'d'}],claim:{state:'submitted',version:4,mapping:{}}},
+]}];
+const matrixDraft = new Map([
+ ['a',new Map([['new',true],['remove',false]])],['b',new Map([['keep',true],['gone',true]])],
+ ['c',new Map([['new',true]])],['d',new Map([['new',true]])]
+]);
+const available = new Set(['new','keep','remove']);
+assert.deepEqual(buildMatrixUpdates(mappingUnits,matrixDraft,available),[
+ {outcomeId:'one',version:3,mapping:{a:['keep','new'],b:['keep']},editable:true,count:2},
+ {outcomeId:'two',version:2,mapping:{c:['new']},editable:true,count:1},
+ {outcomeId:'locked',version:4,mapping:{d:['new']},editable:false,count:1},
+]);
+mappingUnits[0].outcomes[0].claim.mapping.a=['keep','new','other'];
+assert.deepEqual(buildMatrixUpdates(mappingUnits,matrixDraft,available).map(item=>item.outcomeId), ['two','locked'],
+ 'Already applied edits drop out on refresh and unrelated links remain untouched');
+assert.equal(isEvidenceMappingEditable({claim:{state:'verified'}}),false);
+assert.match(ui,/p_version:update.version, p_mapping:update.mapping, p_submit:false/);
 const outcome = {id:'lo',title:'First assessment',required:true,criteria:[{id:'ac'}]};
 const units = [{id:'u1',outcomes:[]},{id:'u2',outcomes:[outcome]}];
 const portfolio = {units,evidence:[],canEdit:true,assessorAssigned:false,declarationAt:'2026-11-24'};

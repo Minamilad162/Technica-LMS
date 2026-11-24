@@ -1,10 +1,10 @@
 import React,{useEffect,useMemo,useState} from 'react';
 import {ArrowRight,Check,CheckCircle2,FileCheck2,FolderOpen,Info,Layers3,Link2,LockKeyhole,Search} from 'lucide-react';
+import {isEvidenceMappingEditable} from './qualificationMatrixDraft.js';
 import './qualificationMultiUnitEvidence.css';
 
 // The evidence item belongs to ONE real enrolment; its identity is reused across
 // multiple official Units, Outcomes and Criteria. Submitted claims stay immutable.
-const editableState=state=>!state||['draft','changes_requested'].includes(state);
 const linksForEvidence=(portfolio,evidenceId)=>{
  const ids=[];
  for(const unit of portfolio.units)for(const outcome of unit.outcomes){
@@ -28,7 +28,7 @@ export default function QualificationMultiUnitEvidence({portfolio,busy=false,onS
  const [expanded,setExpanded]=useState({});
  const resolvedId=portfolio.evidence.some(item=>item.id===evidenceId)?evidenceId:portfolio.evidence[0]?.id||'';
  const evidence=portfolio.evidence.find(x=>x.id===resolvedId);
- const locked=useMemo(()=>new Set(portfolio.units.flatMap(u=>u.outcomes.filter(o=>!editableState(o.claim?.state))
+ const locked=useMemo(()=>new Set(portfolio.units.flatMap(u=>u.outcomes.filter(o=>!isEvidenceMappingEditable(o))
   .flatMap(o=>o.criteria.map(c=>c.id)))),[portfolio]);
  useEffect(()=>{
   if(targetEvidence)setEvidenceId(targetEvidence.id);
@@ -48,7 +48,7 @@ export default function QualificationMultiUnitEvidence({portfolio,busy=false,onS
   setPending(true);
  };
  const setUnit=(unit,checked)=>{
-  const ids=unit.outcomes.filter(o=>editableState(o.claim?.state)).flatMap(o=>o.criteria.map(c=>c.id));
+  const ids=unit.outcomes.filter(o=>isEvidenceMappingEditable(o)).flatMap(o=>o.criteria.map(c=>c.id));
   setSelected(prev=>checked?[...new Set([...prev,...ids])]:prev.filter(id=>!ids.includes(id)));
   setPending(true);
  };
@@ -90,7 +90,7 @@ export default function QualificationMultiUnitEvidence({portfolio,busy=false,onS
           .some(s=>String(s).toLowerCase().includes(search)));
         if(!outcomes.length)return null;
         const links=countLinked(unit,selected);
-        const editable=unit.outcomes.filter(o=>editableState(o.claim?.state)).flatMap(o=>o.criteria);
+        const editable=unit.outcomes.filter(o=>isEvidenceMappingEditable(o)).flatMap(o=>o.criteria);
         const allEditable=editable.length>0&&editable.every(c=>selectedSet.has(c.id));
         return <details key={unit.id} className="qmu-unit" open={filter?true:expanded[unit.id]===true}
           onToggle={event=>{
@@ -106,7 +106,7 @@ export default function QualificationMultiUnitEvidence({portfolio,busy=false,onS
           {editable.length>0&&<label className="qmu-select-all"><input type="checkbox" checked={allEditable}
             disabled={busy} onChange={e=>setUnit(unit,e.target.checked)}/> Link evidence to all editable criteria in this Unit</label>}
           {outcomes.map(o=>{
-           const canEdit=editableState(o.claim?.state);
+           const canEdit=isEvidenceMappingEditable(o);
            return <div className="qmu-outcome" key={o.id}>
              <div className="qmu-outcome-head"><strong>{o.code} · {o.title}</strong>
                <span>{canEdit?'Draft mapping':<><LockKeyhole size={13}/> In assessment / verified</>}</span></div>
