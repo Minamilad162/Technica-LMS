@@ -31,8 +31,8 @@ Status vocabulary: PLANNED, IN PROGRESS, BLOCKED, IMPLEMENTED, VERIFIED, DONE. I
 
 | ID | Phase | Status | Dependencies | Next evidence / blocker |
 |---|---|---|---|---|
-| Q00 | Baseline & architecture | IN PROGRESS | None | Repository and existing admin RPC inspected; fresh production/deployment audit remains |
-| Q01 | Admin Management Center | IN PROGRESS | Q00 | Approved catalogue/setup UI implemented in branch; CI, visual QA and remaining management surfaces pending |
+| Q00 | Baseline & architecture | IN PROGRESS | None | Repository/RPC inventory and 24 Nov production edition counts verified read-only; remaining migration/deployment/route audit |
+| Q01 | Admin Management Center | IN PROGRESS | Q00 | Approved catalogue/setup UI merged (PR #122), CI verified; authenticated visual QA and remaining management surfaces pending |
 | Q02 | Qualification activation | PLANNED | Q01 | Genuine centre inputs for production release |
 | Q03 | Roles & staff management | PLANNED | Q01 | Documented reviewer competence |
 | Q04 | Learner enrolment engine | PLANNED | Q02, Q03 | Real edition and eligible independent reviewers |
@@ -143,6 +143,19 @@ Acceptance: required checks passed, deployment independently verified, acceptanc
 | 2026-11-24 | Planning | Owner clarified zero-student qualifications are valid; edition activation independent of enrolment and learner reviewer assignment. Added UI mockup approval gate before implementation. | Requirements updated; no code or production data changes | Q00 audit; Q01 revised mockup for approval |
 
 | 2026-11-24 | Q01 | Owner approved revised qualification setup mockup. Implemented source-backed admin dashboard, edition filters/grid/list, workflow, detail tabs and separate admin navigation on branch codex/q01-admin-approved-design. Existing RPCs retained; no migration or production mutation. | IN PROGRESS — CI and authenticated visual QA pending | Complete validation, merge only after checks; finish Q00 live audit before further phases |
+
+| 2026-11-24 | Q00/Q01 | PR #122 merged at 68fef8243a6c3d79933da72957625681fd1d0d8c. Production build, qualification regression and disposable PostgreSQL role isolation CI passed (run 45338207225). Read-only production audit: four official editions, zero released, zero approved Unit briefs, zero enrolments. | Approved catalogue/setup subdeliverable merged and CI verified; full Q00/Q01 acceptance still pending | Verify Cloudflare deployment and authenticated desktop/mobile rendering; obtain owner acceptance before next UI phase |
+
+### Production edition audit — 24 November 2026
+
+| Edition | Units | Outcomes | Criteria | Approved briefs | Released | Enrolments |
+|---|---:|---:|---:|---:|---|---:|
+| ProQual NVQ L6 February 2018 | 10 | 45 | 202 | 0 | No | 0 |
+| OTHM L6 December 2023 legacy | 7 | 29 | 123 | 0 | No | 0 |
+| OTHM L6 November 2026 | 7 | 25 | 120 | 0 | No | 0 |
+| OTHM L7 December 2023 | 6 | 19 | 65 | 0 | No | 0 |
+
+Source: read-only aggregate query on Technica production Supabase, 24 November. No real records were changed. CI uses disposable PostgreSQL; live activation and authenticated visual QA remain separate. An edition can be active with zero enrolments after genuine centre release.
 
 ### Next session
 Read this roadmap. Finish Q00 fresh production/deployment audit and Q01 acceptance (including visual QA); confirm real edition release/enrolment access without fabricating approvals. Q02 remains subject to its own owner-approved design.
