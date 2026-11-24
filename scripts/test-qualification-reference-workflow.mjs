@@ -89,7 +89,7 @@ for(const route of ["['programme','Course']","['evidence','Evidence']","['regist
  "['contact','Contact']","['metrics','Metrics']"]){
  assert.ok(ui.includes(route),'Reference workflow missing '+route);
 }
-assert.ok(ui.includes("useState(evidenceEntry ? 'evidence' : portfolio.role==='learner'?'tasks':'dashboard')"),'Approved learner task workspace is default; reviewer overview and direct evidence entry remain');
+assert.ok(ui.includes("useState(evidenceEntry?.reviewRole?'review':evidenceEntry ? 'evidence' : portfolio.role==='learner'?'tasks':'review')"),'Learner task workspace and explicit review workspace are defaults; direct evidence entry remains');
 assert.ok(ui.includes("['programme','Course']")&&ui.includes("<QualificationUnitNavigation units={portfolio.units}"),'Original Course navigation and numbered Unit tabs must remain available');
 assert.ok(ui.includes("<QualificationTopStats portfolio={portfolio} visiblePortfolio={visiblePortfolio}/>"),'Statistics must use real RLS-scoped portfolio data');
 assert.ok(ui.includes("<QualificationVisualDashboard portfolio={visiblePortfolio}"),'Qualification overview must render the approved live layout');
