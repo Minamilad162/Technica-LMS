@@ -168,9 +168,9 @@ export default function QualificationCentreAdmin({db,onBack,references=[],initia
  const authoriseInline=(id,role,reference)=>run(()=>portfolioRpc(db,'admin_authorize_staff',{
   p_user:id,p_role:role,p_reference:reference,p_attest:true
  }),'Professional reviewer authorisation recorded.');
- const onReassign=payload=>run(()=>portfolioRpc(db,'admin_reassign',payload),
+ const onReassign=payload=>run(()=>portfolioRpc(db,'admin_reassign_simple',payload),
   'Active portfolio reviewers reassigned with auditable reason. Previous decisions remain intact.');
- const onAssign=payload=>run(()=>portfolioRpc(db,'admin_assign',payload),
+ const onAssign=payload=>run(()=>portfolioRpc(db,'admin_assign_simple',payload),
   'Learner enrolled in the selected qualification. Assessment permissions are assigned.');
  const onUpload=()=>{
   if(!file) return;
