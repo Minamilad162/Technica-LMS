@@ -270,3 +270,73 @@
 .qf-live .qc-bulk-review .qc-bulk-blockers{color:#a36322;font-weight:700}
 .qf-live .qc-bulk-review .qc-actions{justify-content:flex-end}
 @media(max-width:600px){.qf-live .qc-bulk-approval{padding:10px}.qf-live .qc-bulk-top>button{width:100%}.qf-live .qc-bulk-row>div{flex-basis:100%}}
+
+/* Q03 — approved reviewer management layout. Inherits Technica typography. */
+.qf-live .qsr-workspace{display:grid;gap:17px;min-width:0;color:#18365c}
+.qf-live .qsr-workspace[hidden]{display:none!important}
+.qf-live .qsr-authorise-panel{min-width:0;background:#fff;border:1px solid #dce7f6;border-radius:15px;box-shadow:0 8px 22px #194b8110}
+.qf-live .qsr-hero{display:flex;align-items:center;gap:18px;padding:18px 20px;border-radius:14px 14px 0 0;background:radial-gradient(ellipse at 104% 135%,#c7defa 0%,#e1edfc 33%,transparent 65%),linear-gradient(115deg,#f4f8fd,#e5effc)}
+.qf-live .qsr-hero-icon,.qf-live .qsr-guide-icon,.qf-live .qsr-person-icon,.qf-live .qsr-directory-icon{display:grid;place-items:center;flex:0 0 auto;border-radius:10px;background:linear-gradient(145deg,#e2f0ff,#d3e6fb);color:#1257ad}
+.qf-live .qsr-hero-icon{width:57px;height:57px;border-radius:13px}
+.qf-live .qsr-hero h2{font-size:clamp(21px,2.15vw,28px);font-weight:850;letter-spacing:-.035em;line-height:1.25;color:#102d55;margin:0 0 5px}
+.qf-live .qsr-hero p{margin:0;font-size:13px;line-height:1.6;color:#416387}
+.qf-live .qsr-authorise-layout{display:grid;grid-template-columns:minmax(210px,1fr) minmax(0,3.3fr);gap:15px;padding:15px}
+.qf-live .qsr-guide{background:linear-gradient(150deg,#edf5ff,#e1effd);border:1px solid #d0e3f8;border-radius:11px;padding:16px;min-width:0}
+.qf-live .qsr-guide-head{display:flex;align-items:flex-start;gap:11px}
+.qf-live .qsr-guide-icon{width:44px;height:44px}
+.qf-live .qsr-guide-head>div{min-width:0;flex:1}
+.qf-live .qsr-guide h3{font-size:16px;color:#142f56;letter-spacing:-.02em;line-height:1.35;margin:1px 0 5px}
+.qf-live .qsr-guide p{font-size:12px;line-height:1.6;color:#355879;margin:0}
+.qf-live .qsr-guide ol{list-style:none;display:grid;gap:10px;padding:0;margin:20px 0 0}
+.qf-live .qsr-guide li{display:flex;align-items:center;gap:10px;font-size:12px;color:#24476e;line-height:1.4}
+.qf-live .qsr-guide li>span{display:grid;place-items:center;width:25px;height:25px;flex:0 0 25px;background:#cce3fc;border-radius:50%;color:#22588e;font-weight:800}
+.qf-live .qsr-form{min-width:0;border:1px solid #d1e0f3;border-radius:11px;padding:15px 18px;background:#fcfdff}
+.qf-live .qsr-fields{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:13px 24px;align-items:start}
+.qf-live .qsr-fields .qc-field{margin:0;color:#1c395d;font-size:13px}
+.qf-live .qsr-reference{grid-column:1/-1}
+.qf-live .qsr-fields .qc-field :is(input,select){min-height:41px;border-radius:9px;border-color:#bcd1ed;font-size:13px;padding:9px 11px}
+.qf-live .qsr-fields .qe-label{color:#1c395d;font-size:13px;font-weight:770}
+.qf-live .qsr-fields .qe-combo-control{min-height:41px}
+.qf-live .qsr-fields .qe-combo-control input{font-size:13px}
+.qf-live .qsr-form .qc-confirm{margin:13px 0;align-items:center;background:#ebf4fe;border-color:#d9e8f8;padding:10px 12px}
+.qf-live .qsr-form .qc-confirm input{accent-color:#166879;margin-top:0;width:18px;height:18px}
+.qf-live .qsr-form .qc-confirm span{color:#23486f}
+.qf-live .qsr-form .qc-primary{background:linear-gradient(115deg,#0866b9,#104b99);border-color:#1457a4;min-height:43px;padding:11px 22px;box-shadow:0 5px 12px #1559ab23;font-size:13px}
+.qf-live .qsr-directory{min-width:0}
+.qf-live .qsr-directory>header{display:flex;align-items:center;gap:10px;margin:0 0 12px;padding:0 6px}
+.qf-live .qsr-directory-icon{width:35px;height:35px}
+.qf-live .qsr-directory h2{font-size:20px;font-weight:850;color:#152f56;margin:0;letter-spacing:-.02em}
+.qf-live .qsr-reviewer-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:15px}
+.qf-live .qsr-reviewer{display:grid;align-content:start;gap:15px;padding:15px 18px;min-width:0;border:1px solid #d1e0f3;border-radius:13px;background:linear-gradient(135deg,#fff,#f7faff);box-shadow:0 7px 14px #244c7c0b}
+.qf-live .qsr-reviewer-head{display:flex;align-items:center;gap:9px;min-width:0;flex-wrap:wrap}
+.qf-live .qsr-person-icon{width:38px;height:38px}
+.qf-live .qsr-reviewer-head>strong{flex:1;min-width:90px;overflow-wrap:anywhere;color:#132f58;font-size:13px;line-height:1.45;font-weight:850}
+.qf-live .qsr-role{flex:0 0 auto;border-radius:30px;background:#dcecff;color:#14549f;padding:5px 10px;font-size:11px;font-weight:800}
+.qf-live .qsr-role.verifier{background:#e2efff;color:#245eaa}
+.qf-live .qsr-reviewer-meta{display:flex;align-items:flex-start;gap:9px;color:#345575;font-size:12px;line-height:1.55;min-width:0}
+.qf-live .qsr-reviewer-meta>svg{flex:0 0 auto;color:#275e99;margin-top:1px}
+.qf-live .qsr-reviewer-meta>span{min-width:0;overflow-wrap:anywhere}
+.qf-live .qsr-card-menu{position:relative;flex:0 0 auto}
+.qf-live .qsr-card-menu summary{list-style:none;cursor:pointer;display:grid;place-items:center;color:#245b9b;width:28px;height:28px;border-radius:6px}
+.qf-live .qsr-card-menu summary::-webkit-details-marker,.qf-live .qsr-revoke summary::-webkit-details-marker{display:none}
+.qf-live .qsr-card-menu summary:hover{background:#e2edfb}
+.qf-live .qsr-card-menu>div{position:absolute;top:100%;right:0;z-index:10;border:1px solid #d1e0f3;padding:5px;background:#fff;border-radius:9px;box-shadow:0 8px 20px #183a6026;min-width:175px}
+.qf-live .qsr-card-menu button{display:flex;gap:7px;align-items:center;white-space:nowrap;border:0;background:#fff;color:#9c423a;padding:9px;border-radius:6px;cursor:pointer;font:inherit;font-size:11px}
+.qf-live .qsr-card-menu button:hover:not(:disabled){background:#fff0ed}
+.qf-live .qsr-empty{display:grid;justify-items:center;gap:7px;text-align:center;border:1px dashed #cbddef;border-radius:12px;background:#f8fbff;padding:24px;color:#557598;font-size:12px}
+.qf-live .qsr-empty strong{font-size:14px;color:#274c76}
+.qf-live .qsr-revoke{margin:0;padding:0;background:#eaf3ff;border-color:#cbdff6;overflow:visible}
+.qf-live .qsr-revoke>summary{display:flex;align-items:center;gap:16px;padding:16px 20px;list-style:none;font-size:15px;color:#18365e;font-weight:850}
+.qf-live .qsr-revoke[open]>summary{margin:0;border-bottom:1px solid #d2e2f6}
+.qf-live .qsr-revoke[open]>summary svg{transform:rotate(180deg)}
+.qf-live .qsr-revoke[open]{gap:0}
+.qf-live .qsr-revoke-form{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:13px;padding:15px 20px;background:#fbfdff;border-radius:0 0 12px 12px}
+.qf-live .qsr-revoke-form .qc-field{margin:0}
+.qf-live .qsr-revoke-note{display:flex;align-items:center;gap:7px;align-self:center;margin:0;color:#607b98;font-size:12px;line-height:1.5}
+.qf-live .qsr-revoke-note svg{flex:0 0 auto}
+.qf-live .qsr-revoke-form>.qc-outline{justify-self:end;color:#a34d41;border-color:#e5c5c0}
+.qf-live .qsr-workspace :is(button,summary,input,select,textarea):focus-visible{outline:3px solid #80ace4;outline-offset:2px}
+@media(max-width:1100px){.qf-live .qsr-reviewer-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.qf-live .qsr-authorise-layout{grid-template-columns:minmax(190px,1fr) minmax(0,2.6fr)}}
+@media(max-width:780px){.qf-live .qsr-authorise-layout{grid-template-columns:1fr}.qf-live .qsr-guide ol{grid-template-columns:repeat(2,minmax(0,1fr));margin-top:12px}.qf-live .qsr-guide-head p{max-width:100%}.qf-live .qsr-fields{gap:12px}.qf-live .qsr-hero{padding:15px;gap:12px}}
+@media(max-width:550px){.qf-live .qsr-hero{align-items:flex-start}.qf-live .qsr-hero-icon{width:42px;height:42px}.qf-live .qsr-hero-icon svg{width:24px}.qf-live .qsr-hero h2{font-size:20px}.qf-live .qsr-hero p{font-size:12px}.qf-live .qsr-authorise-layout{padding:10px;gap:10px}.qf-live .qsr-form,.qf-live .qsr-guide{padding:12px}.qf-live .qsr-fields,.qf-live .qsr-reviewer-grid,.qf-live .qsr-revoke-form{grid-template-columns:1fr}.qf-live .qsr-guide li{font-size:11px}.qf-live .qsr-form .qc-primary,.qf-live .qsr-revoke-form>.qc-outline{width:100%}.qf-live .qsr-directory h2{font-size:17px}.qf-live .qsr-revoke>summary{padding:13px;gap:9px;font-size:13px}.qf-live .qsr-revoke-form{padding:12px}}
+@media(prefers-reduced-motion:no-preference){.qf-live .qsr-reviewer{transition:box-shadow .2s ease,border-color .2s ease}.qf-live .qsr-reviewer:hover{border-color:#9abce6;box-shadow:0 8px 19px #204b7d17}}
