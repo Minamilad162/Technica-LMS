@@ -49,7 +49,7 @@ export default function QualificationCentreAdmin({db,onBack,references=[]}){
  const [publishOpen,setPublishOpen]=useState(false);
  const [section,setSection]=useState('overview'),[setupTab,setSetupTab]=useState('summary');
  const catalogueVisible=['overview','qualifications'].includes(section);
- const selectVersion=v=>{if(v.id!==version?.id&&!confirmDiscard())return false;setVersionId(v.id);setUnitId(v.units[0]?.id||'');setReassignId('');setLearner('');setAssessor('');setVerifier('');setFile(null);setFileTitle('');return true;};
+ const selectVersion=v=>{if(v.id===version?.id)return true;if(!confirmDiscard())return false;setVersionId(v.id);setUnitId(v.units[0]?.id||'');setReassignId('');setLearner('');setAssessor('');setVerifier('');setFile(null);setFileTitle('');return true;};
  const openSetup=tab=>{setSection('qualifications');setSetupTab(tab);};
  const [loading,setLoading]=useState(true),[saving,setSaving]=useState(false),
  [message,setMessage]=useState(''),[error,setError]=useState('');
@@ -129,7 +129,14 @@ export default function QualificationCentreAdmin({db,onBack,references=[]}){
   }),'Qualification is now Live. The approved edition is locked and ready for eligible enrolments.');
   if(ok){setPublishOpen(false);setAttest(false);}
  };
- const openPublish=()=>{setError('');setAttest(false);setPublishOpen(true);};
+ const openPublish=()=>{if(saving||release)return;setError('');setAttest(false);setPublishOpen(true);};
+ const reviewPublication=tab=>{
+  setPublishOpen(false);
+  const next=tab==='units'?version.units.find(u=>!sourceRubricForUnit(references,version,u).complete):
+   version.units.find(u=>u.brief?.status!=='approved'||!u.brief?.approvedAt||needsAssessmentMethodReview(u.brief?.methods));
+  if(next&&!briefDirty)chooseUnit(next.id);
+  openSetup(briefDirty?'plans':tab);
+ };
  const authorizeCertificate=()=>run(async()=>{
     await portfolioRpc(db,'admin_certificate_authorize',{
       p_version:version.id,p_issuer_name:issuerName.trim(),p_reference:issuerRef.trim(),
@@ -420,6 +427,6 @@ export default function QualificationCentreAdmin({db,onBack,references=[]}){
   {publishOpen&&version&&!release&&<QualificationPublishDialog version={version} references={references} dirty={briefDirty}
     saving={saving} error={error} approvalRef={approvalRef} declaration={declaration} attest={attest}
     onApprovalRef={v=>{setApprovalRef(v);setAttest(false);}} onDeclaration={v=>{setDeclaration(v);setAttest(false);}}
-    onAttest={setAttest} onClose={()=>setPublishOpen(false)} onReview={tab=>{setPublishOpen(false);openSetup(tab);}} onPublish={onPublish}/>}
+    onAttest={setAttest} onClose={()=>setPublishOpen(false)} onReview={reviewPublication} onPublish={onPublish}/>}
  </div>;
 }
