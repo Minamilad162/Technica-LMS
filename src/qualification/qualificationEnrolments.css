@@ -1,0 +1,47 @@
+/* Shared qualification enrolment workspace — inherits the Technica shell and typography. */
+.qf-live .qe-workspace{display:grid;gap:12px;min-width:0}
+.qf-live .qe-stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+.qf-live .qe-stat{display:flex;align-items:center;gap:10px;padding:13px;border:1px solid #dce7f5;border-radius:13px;background:#fff;box-shadow:0 4px 14px #1c41690a}
+.qf-live .qe-stat>span{display:grid;place-items:center;width:42px;height:42px;flex:0 0 42px;border-radius:11px;background:#e7f1ff;color:#1b5ca9}
+.qf-live .qe-stat:nth-child(3)>span{color:#238455;background:#e5f7eb}
+.qf-live .qe-stat:nth-child(4)>span{color:#7252b7;background:#f1ecff}
+.qf-live .qe-stat>div{display:grid;gap:3px}
+.qf-live .qe-stat small{font-size:11px;color:#617b98}
+.qf-live .qe-stat strong{font-size:24px;color:#183a5c;line-height:1.2}
+.qf-live .qe-workspace .qc-card{padding:16px}
+.qf-live .qe-workspace .qc-card>header{display:flex;align-items:center;gap:10px;margin-bottom:13px;color:#245da5}
+.qf-live .qe-workspace .qc-card>header>div{flex:1;min-width:0}
+.qf-live .qe-workspace .qc-card>header h3{font-size:18px;margin:0;color:#1b385c}
+.qf-live .qe-workspace .qc-card>header p{font-size:12px;margin:4px 0 0;color:#627b94;line-height:1.4}
+.qf-live .qe-fields{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;align-items:start}
+.qf-live .qe-account{display:grid;gap:7px;min-width:0}
+.qf-live .qe-label{color:#355777;font-weight:750;font-size:12px}
+.qf-live .qe-search{display:flex;align-items:center;gap:8px;border:1px solid #cddbed;border-radius:9px;background:#fff;padding:0 10px;color:#6383a4;min-width:0}
+.qf-live .qe-search input{border:0;background:transparent;min-height:38px;width:100%;min-width:0;font:inherit;font-size:12px;color:#27486a}
+.qf-live .qe-account select,.qf-live .qe-filters select{width:100%;min-width:0;min-height:40px;border:1px solid #cddbed;border-radius:9px;padding:8px 10px;background:#fff;color:#24486b;font:inherit;font-size:12px}
+.qf-live .qe-account small{font-size:11px;color:#647e98}
+.qf-live .qe-eligibility{display:flex;align-items:center;gap:6px;padding:7px 9px;font-size:11px;font-weight:740;border-radius:8px;background:#fff4e3;color:#99631a}
+.qf-live .qe-eligibility.ok{background:#e8f7ed;color:#1d8355}
+.qf-live .qe-authorise{display:grid;gap:10px;padding:12px;border:1px solid #d9e7f8;border-radius:10px;background:#f5f9ff}
+.qf-live .qe-authorise .qc-field,.qf-live .qe-fields .qc-field{margin:0}
+.qf-live .qe-footer{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;border-top:1px solid #e3eaf4;padding-top:13px;margin-top:14px}
+.qf-live .qe-footer>span{display:flex;align-items:center;gap:7px;font-size:11px;color:#637e99;line-height:1.5;flex:1;min-width:170px}
+.qf-live .qe-footer>span svg{flex:0 0 auto;color:#2667ae}
+.qf-live .qe-filters{display:grid;grid-template-columns:minmax(180px,1.4fr) minmax(160px,1fr) minmax(110px,.6fr);gap:9px;margin-bottom:12px}
+.qf-live .qe-scroll{overflow-x:auto;border:1px solid #dfe8f3;border-radius:10px}
+.qf-live .qe-scroll table{width:100%;border-collapse:collapse;min-width:850px}
+.qf-live .qe-scroll :is(th,td){padding:11px 10px;border-bottom:1px solid #e7edf5;text-align:left;font-size:12px;color:#2b4869;vertical-align:middle}
+.qf-live .qe-scroll th{background:#f4f8fd;font-size:11px;white-space:nowrap}
+.qf-live .qe-scroll td small{display:block;color:#7588a1;font-size:10px;margin-top:4px}
+.qf-live .qe-scroll td .qc-outline{white-space:nowrap;font-size:11px}
+.qf-live .qe-scroll tbody tr:last-child td{border-bottom:0}
+.qf-live .qe-status{padding:5px 8px;border-radius:20px;white-space:nowrap;background:#e7efff;color:#2c5da7;font-size:10px;font-weight:750}
+.qf-live .qe-status.done{background:#e4f5e9;color:#187844}
+.qf-live .qe-empty{display:grid;justify-items:center;gap:6px;padding:24px 12px;text-align:center;color:#7187a1;font-size:12px}
+.qf-live .qe-empty strong{color:#325777;font-size:14px}
+.qf-live .qe-error,.qf-live .qe-account .qe-error{color:#ac403e;font-size:12px;line-height:1.5}
+.qf-live .qe-edit{border-color:#90b7e6!important;scroll-margin:20px}
+.qf-live .qe-edit>.qc-field{margin-top:12px}
+.qf-live .qe-workspace :is(button,input,select,textarea):focus-visible{outline:3px solid #8fb7e9;outline-offset:2px}
+@media(max-width:850px){.qf-live .qe-stats{grid-template-columns:repeat(2,minmax(0,1fr))}.qf-live .qe-filters{grid-template-columns:repeat(2,minmax(0,1fr))}.qf-live .qe-filters>.qe-search{grid-column:1/-1}}
+@media(max-width:600px){.qf-live .qe-fields,.qf-live .qe-filters{grid-template-columns:minmax(0,1fr)}.qf-live .qe-filters>.qe-search{grid-column:auto}.qf-live .qe-workspace .qc-card{padding:11px}.qf-live .qe-footer .qc-primary{width:100%}.qf-live .qe-stat{padding:9px}.qf-live .qe-stat>span{width:34px;height:34px;flex-basis:34px}}
