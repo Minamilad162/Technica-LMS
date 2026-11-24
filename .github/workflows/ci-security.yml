@@ -450,3 +450,5 @@ jobs:
           psql -h localhost -U postgres -v ON_ERROR_STOP=1 -f supabase/migrations/202611220007_qualification_reviewer_revocation_audit.sql
           psql -h localhost -U postgres -v ON_ERROR_STOP=1 -f supabase/migrations/202611240002_qualification_enrolment_directory.sql
           psql -h localhost -U postgres -v ON_ERROR_STOP=1 -f scripts/test-qualification-enrolment-directory-postgres.sql
+          psql -h localhost -U postgres -v ON_ERROR_STOP=1 -f supabase/migrations/202611240003_qualification_compact_assignment.sql
+          psql -h localhost -U postgres -v ON_ERROR_STOP=1 -f scripts/test-qualification-compact-assignment-postgres.sql
