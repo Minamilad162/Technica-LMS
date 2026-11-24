@@ -180,3 +180,6 @@
 .qf-live .qxp-library-main>.qxp-panel,.qf-live .qxp-library-side>.qxp-panel{margin:0}
 @media(max-width:1100px){.qf-live .qsrc-page .qsrd-grid{grid-template-columns:minmax(0,1fr)}}
 @media(max-width:680px){.qf-live .qxp-top-toolbar{flex-wrap:wrap}.qf-live .qxp-identity+.qsrd-stats{grid-template-columns:repeat(3,minmax(0,1fr));gap:7px}.qf-live .qsrd-stat{padding:10px}.qf-live .qsrd-stat-icon{flex-basis:33px;width:33px;height:33px}.qf-live .qsrd-stat strong{font-size:19px}}
+
+.qf-live .qxp-empty { flex-wrap: wrap; }
+.qf-live .qxp-empty > span { flex: 1 1 180px; }

@@ -1,3 +1,10 @@
+## 2026-11-24 — Enrolled qualification learner journey
+
+- Guide learners from Home and Tasks & Evidence to their next available step, with clear submission requirements.
+- Restore the selected portfolio, Unit, section and Outcome after reload.
+- Add evidence shortcuts to empty mapping views, correct Matrix accessibility labels, and remove duplicate resource links.
+- Distinguish enrolled portfolios from syllabus previews and surface approved learner instructions.
+
 ## 2026-11-23 — Evidence and Qualification navigation UX
 
 - Separated evidence creation, the records register, and draft mapping. Added direct upload and written evidence actions and a mapping shortcut after save.

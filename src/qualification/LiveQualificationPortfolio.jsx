@@ -1,4 +1,6 @@
 import React, {useEffect, useRef, useState} from 'react';
+import {useLocation, useNavigate} from 'react-router-dom';
+import {learnerNextStep, restoreLearnerSection} from './learnerPortfolioJourney.js';
 import {ArrowLeft, ArrowRight, BookOpen, CheckCircle2, ClipboardCheck, Download, FileText, FolderOpen, GraduationCap, Layers3, LibraryBig, Link2, LoaderCircle, MessageSquare, PenLine, Printer, ShieldCheck, Upload, BarChart3} from 'lucide-react';
 import PremiumLoading from '../components/PremiumLoading.jsx';
 import {QUALIFICATIONS} from './qualificationData.js';
@@ -152,7 +154,7 @@ function OutcomeLink({outcome, onOpen}) {
   </button>;
 }
 
-function UnitProgramme({db,portfolio, unitIndex, setUnitIndex, onOutcome, onEvidence, onContact, onLibrary, aim}) {
+function UnitProgramme({db,portfolio, unitIndex, setUnitIndex, onOutcome, onEvidence, onContact, onLibrary, aim, sourceUrl}) {
   const unit = portfolio.units[unitIndex] || portfolio.units[0];
   const learner = portfolio.role === 'learner';
   if (!unit) return <Panel title="Programme units"><p>No units are available.</p></Panel>;
@@ -213,8 +215,8 @@ function UnitProgramme({db,portfolio, unitIndex, setUnitIndex, onOutcome, onEvid
     <Panel title="Contact">
       <Action secondary onClick={onContact}><MessageSquare size={16}/> Open programme Contact Diary</Action>
     </Panel>
-    <div id="qualification-current-unit-brief"><QualificationCentreBrief unit={unit} db={db}/></div>
-    <LiveUnitLearningHub key={unit.id} unit={unit} portfolio={portfolio} onEvidence={() => onEvidence(unit.id)} onLibrary={onLibrary}/>
+    <div id="qualification-current-unit-brief"><QualificationCentreBrief unit={unit} db={db} learner={learner}/></div>
+    <LiveUnitLearningHub key={unit.id} unit={unit} portfolio={portfolio} sourceUrl={sourceUrl} onEvidence={() => onEvidence(unit.id)} onLibrary={onLibrary}/>
   </>;
 }
 
@@ -665,7 +667,7 @@ function LearnerClaim({portfolio, outcome, mapping, updateMapping, busy, onSave,
     </div>}>
       {editable && picks !== null && <fieldset className="qf-live-choose qf-outcome-picker" disabled={busy}>
         <legend>Choose evidence for this outcome</legend>
-        {!portfolio.evidence.length ? <p>Add evidence to your folder first.</p> : <div className="qf-outcome-table">
+        {!portfolio.evidence.length ? <p>Add evidence to your folder, then return here to link it to the criteria.</p> : <div className="qf-outcome-table">
           <table><thead><tr><th scope="col">Ref</th><th scope="col">Document</th><th scope="col">
             <label><input type="checkbox" aria-label="Select all evidence"
               checked={portfolio.evidence.every(item => linked.has(item.id) || picks.includes(item.id))}
@@ -680,7 +682,8 @@ function LearnerClaim({portfolio, outcome, mapping, updateMapping, busy, onSave,
         </div>}
         <div className="qf-live-actions">
           <Action secondary onClick={() => setPicks(null)}>Cancel</Action>
-          <Action onClick={() => {setSelected(picks); setPicks(null);}}>Use selected evidence</Action>
+          {portfolio.evidence.length ? <Action onClick={() => {setSelected(picks); setPicks(null);}}>Use selected evidence</Action>
+            : <Action onClick={onEvidence}>Add evidence</Action>}
         </div>
       </fieldset>}
       <MappingTable criteria={outcome.criteria} evidence={evidence} mapping={currentMapping}
@@ -880,17 +883,18 @@ function ContactDiary({db,portfolio,progress,onOutcome}) {
   </div>;
 }
 
-function OpenPortfolio({db, portfolio, references, evidenceEntry, onRefresh, onBack}) {
+function OpenPortfolio({db, portfolio, references, evidenceEntry, onRefresh, onBack, initialLink, onLocationChange}) {
+  const initial = restoreLearnerSection(portfolio.units, initialLink);
   const entryIndex = portfolio.units.findIndex(unit => unit.code === evidenceEntry?.unitCode);
-  const [view,setView] = useState(evidenceEntry?.reviewRole?'review':evidenceEntry ? 'evidence' : portfolio.role==='learner'?'tasks':'review');
+  const [view,setView] = useState(evidenceEntry?.reviewRole?'review':evidenceEntry ? 'evidence' : portfolio.role==='learner'?initial.view:'review');
   const [selectedReviewId,setSelectedReviewId]=useState(evidenceEntry?.outcomeId||'');
   const [selectedTaskId,setSelectedTaskId]=useState('');
   const [taskEvidenceMode,setTaskEvidenceMode]=useState('');
   const [taskJourney,setTaskJourney]=useState(false);
-  const [unitIndex,setUnitIndex] = useState(Math.max(0, entryIndex));
-  const [outcomeId,setOutcomeId] = useState('');
+  const [unitIndex,setUnitIndex] = useState(entryIndex >= 0 ? entryIndex : initial.unitIndex);
+  const [outcomeId,setOutcomeId] = useState(initial.outcomeId);
   const [evidenceFromOutcome,setEvidenceFromOutcome] = useState(false);
-  const [evidenceUnit,setEvidenceUnit] = useState(evidenceEntry && entryIndex >= 0 ? portfolio.units[entryIndex].id : '');
+  const [evidenceUnit,setEvidenceUnit] = useState(evidenceEntry && entryIndex >= 0 ? portfolio.units[entryIndex].id : initial.view === 'evidence' ? portfolio.units[initial.unitIndex]?.id || '' : '');
   const [uploadOnEntry,setUploadOnEntry] = useState(Boolean(evidenceEntry && !evidenceEntry.reviewRole && portfolio.canEdit));
   const [drafts,setDrafts] = useState({});
   const [error,setError] = useState('');
@@ -900,6 +904,9 @@ function OpenPortfolio({db, portfolio, references, evidenceEntry, onRefresh, onB
   const progress = programmeProgress(portfolio);
   const outcome = progress.outcomes.find(item => item.id === outcomeId);
   const learner = portfolio.role === 'learner';
+  useEffect(() => {
+    if (learner) onLocationChange(portfolio.id, view, portfolio.units[unitIndex]?.id, view === 'outcome' ? outcomeId : '');
+  }, [learner, onLocationChange, outcomeId, portfolio.id, portfolio.units, unitIndex, view]);
   // Reviewers only see evidence already included in submitted, authorised snapshots.
   // The main evidence folder is intentionally learner-only in the backend RPC.
   const visiblePortfolio = learner ? portfolio : {
@@ -1006,7 +1013,7 @@ function OpenPortfolio({db, portfolio, references, evidenceEntry, onRefresh, onB
   const libraryAvailable = cover && selectedReference;
   const views = [
     ...(learner ? [['dashboard','Home'],['tasks','Tasks & Evidence']] : []),
-    ['programme','Course'],['evidence','Evidence'],['matrix','Matrix'],['registration','Registration'],['contact','Contact'],
+    ['programme',learner?'Units':'Course'],['evidence','Evidence'],['matrix','Matrix'],['registration','Registration'],['contact','Contact'],
     ['metrics','Metrics'],
     ...(!learner ? [['review',portfolio.role==='assessor'?'Assessment':'Verification'],['reviewTasks','Assigned Tasks'],['dashboard','Overview']] : []),
     ['library','Study Library'],
@@ -1030,6 +1037,12 @@ function OpenPortfolio({db, portfolio, references, evidenceEntry, onRefresh, onB
     if (key === 'evidence' && unitView && outcomeUnit) setEvidenceUnit(outcomeUnit.id);
   };
   const referenceUnit = selectedReference?.units?.find(unit => unit.code === outcomeUnit?.code);
+  const nextStep = learner ? learnerNextStep(portfolio) : null;
+  const followNextStep = () => {
+    if (nextStep.outcomeId) openOutcome(nextStep.outcomeId);
+    else if (nextStep.section === 'programme') openTaskUnit(nextStep.unitIndex);
+    else if (nextStep.section) openSection(nextStep.section);
+  };
   return <div className={"qf-live-stack"+(learner&&view==='tasks'?' qlt-shell':'')} style={learner&&view==='tasks'&&cover?.heroImage?{'--qlt-hero-image':`url("${cover.heroImage}")`}:undefined} aria-busy={busy}>
     <button type="button" className="qf-plain-back" disabled={busy} onClick={onBack}><ArrowLeft size={16}/> Qualifications</button>
     <div className="qxp-top-toolbar"><span className="qxp-eyebrow">{roleLabels[portfolio.role]} · Qualification workspace</span>
@@ -1052,21 +1065,21 @@ function OpenPortfolio({db, portfolio, references, evidenceEntry, onRefresh, onB
     {notice && <p className="qf-live-notice" role="status">{notice}</p>}
     {view === 'evidence' && evidenceEntry && !evidenceEntry.reviewRole && !portfolio.canEdit && <p>Evidence uploads are unavailable for this enrolment.</p>}
     {learner&&view!=='tasks'&&taskJourney&&<div className="qf-live-actions"><Action secondary disabled={busy} onClick={()=>{changeView('tasks');setTaskJourney(false);}}><ArrowLeft size={16}/> Back to My Tasks</Action></div>}
-    {learner&&view==='tasks'&&<QualificationLearnerTasks db={db} portfolio={portfolio} progress={progress} selectedId={selectedTaskId} onSelect={setSelectedTaskId} busy={busy}
+    {learner&&view==='tasks'&&<QualificationLearnerTasks db={db} portfolio={portfolio} progress={progress} nextStep={nextStep} onNextStep={followNextStep} selectedId={selectedTaskId} onSelect={setSelectedTaskId} busy={busy}
       onView={(key,index)=>{if(Number.isInteger(index))setUnitIndex(index);changeView(key);setTaskJourney(true);}} onOutcome={id=>{openOutcome(id);setTaskJourney(true);}} onUnit={openTaskUnit} onEvidence={openTaskEvidence}/>}
     {!learner&&view==='review'&&<ReviewerPortfolioWorkspace db={db} portfolio={portfolio} selectedId={selectedReviewId} onSelect={setSelectedReviewId} busy={busy} onOpenTasks={()=>changeView('reviewTasks')} onOpenUnit={id=>{setSelectedReviewId(id);openOutcome(id);}} renderReview={id=>{const item=progress.outcomes.find(o=>o.id===id);return item?<ReviewerClaim key={item.id+':'+(item.claim?.version||0)} portfolio={portfolio} outcome={item} busy={busy} onDownload={onDownload} onReview={(decision,feedback,criteria)=>commit('review',{p_outcome:item.id,p_version:item.claim?.version||0,p_stage:portfolio.role,p_decision:decision,p_feedback:feedback,p_criteria:criteria},'Review recorded.')}/>:null;}}/>}
     {!learner&&view==='reviewTasks'&&<PortfolioAssignedTasks db={db} portfolio={portfolio} onOutcome={openOutcome} onView={changeView}/>}
     {view === 'dashboard' && <>
       <QualificationVisualDashboard portfolio={visiblePortfolio} progress={progress} selectedUnitIndex={unitIndex}
         onUnit={index => {setUnitIndex(index);changeView('programme');}} onOutcome={openOutcome}
-        onEvidence={() => changeView('evidence')} onRegistration={() => changeView('registration')}/>
+        nextStep={nextStep} onNextStep={followNextStep} busy={busy} onEvidence={() => changeView('evidence')} onRegistration={() => changeView('registration')}/>
       <details className="qfd-existing-tools"><summary>Tasks, messages, appointments &amp; programme resources</summary>
         <PortfolioOverview db={db} portfolio={portfolio} progress={progress} onOutcome={openOutcome}
           onView={changeView} qualification={libraryAvailable ? cover : null}/>
       </details>
     </>}
     {view === 'programme' && <UnitProgramme db={db} portfolio={portfolio} unitIndex={unitIndex} setUnitIndex={setUnitIndex} onOutcome={openOutcome}
-      aim={referenceUnit?.aim || outcomeMaterial?.aim}
+      aim={referenceUnit?.aim || outcomeMaterial?.aim} sourceUrl={selectedReference?.source_url}
       onEvidence={id => { changeView('evidence'); setEvidenceUnit(id); }} onContact={() => changeView('contact')}
       onLibrary={libraryAvailable ? () => changeView('library') : null}/>}
     {view === 'evidence' && <EvidenceFolder key={evidenceUnit} db={db} portfolio={visiblePortfolio} source={selectedReference} initialUnitId={evidenceUnit} initialWizard={taskEvidenceMode || (evidenceFromOutcome ? 'choose' : uploadOnEntry ? 'upload' : '')} busy={busy} onSave={saveEvidence} onDuplicate={duplicateEvidence}
@@ -1082,19 +1095,19 @@ function OpenPortfolio({db, portfolio, references, evidenceEntry, onRefresh, onB
       onDeclare={() => commit('declare',{},'Declaration accepted.')}
       onFinalize={reference => commit('finalize',{p_certificate_reference: reference},reference ? 'Certificate reference recorded.' : 'Qualification completed.')}/>}
     {view === 'matrix' && <QualificationEvidenceMatrix portfolio={visiblePortfolio} source={selectedReference}
-      selectedUnitIndex={unitIndex} onUnit={setUnitIndex} onMapSave={saveMultiUnitMapping} onOpenOutcome={openOutcome} busy={busy}/>}
+      selectedUnitIndex={unitIndex} onUnit={setUnitIndex} onAddEvidence={learner && portfolio.canEdit ? () => openTaskEvidence('choose') : null} onMapSave={saveMultiUnitMapping} onOpenOutcome={openOutcome} busy={busy}/>}
     {view === 'contact' && <ContactDiary db={db} portfolio={portfolio} progress={progress} onOutcome={openOutcome}/>}
 
     {view === 'metrics' && <PortfolioMetrics db={db} portfolio={portfolio} progress={progress} onOutcome={openOutcome}/>}
     {view === 'library' && <QualificationStudyLibrary portfolio={visiblePortfolio} source={selectedReference}
       selectedUnitIndex={unitIndex} onUnit={setUnitIndex} onOutcome={item=>openOutcome(item.id)}>
-      {outcomeUnit?.centreBrief && <QualificationCentreBrief unit={outcomeUnit} db={db}/>}
+      {outcomeUnit?.centreBrief && <QualificationCentreBrief unit={outcomeUnit} db={db} learner={learner}/>}
     </QualificationStudyLibrary>}
     {view === 'outcome' && outcome && outcomeIndex >= 0 && <QualificationOutcome
       units={portfolio.units} unitIndex={unitIndex} outcomeIndex={outcomeIndex} onJump={jumpFromOutcome}
       onBack={() => changeView(learner?'programme':'review')} aim={referenceUnit?.aim || outcomeMaterial?.aim}
       sourceUrl={selectedReference?.source_url || outcomeMaterial?.sourceUrl}
-      centreBrief={outcomeUnit.centreBrief ? <QualificationCentreBrief unit={outcomeUnit} db={db}/> : null}
+      centreBrief={outcomeUnit.centreBrief ? <QualificationCentreBrief unit={outcomeUnit} db={db} learner={learner}/> : null}
       status={<Status outcome={outcome}/>} deadline={outcome.deadline && formatDate(outcome.deadline)} busy={busy}>
       {learner ? <LearnerClaim key={outcome.id + ':' + claimVersion} portfolio={portfolio} outcome={outcome}
         mapping={mapping} updateMapping={next => setDrafts(old => ({...old,[outcome.id]:{version:claimVersion,mapping:next}}))}
@@ -1113,6 +1126,12 @@ function OpenPortfolio({db, portfolio, references, evidenceEntry, onRefresh, onB
 }
 
 export default function LiveQualificationPortfolio({db,adminEntry=false,initialLearnerId=''}) {
+  const location = useLocation();
+  const navigate = useNavigate();
+  const route = useRef({location, navigate});
+  route.current = {location, navigate};
+  const initialLink = useRef(new URLSearchParams(location.search));
+  const restored = useRef(false);
   const [rows,setRows] = useState(null);
   const [references,setReferences] = useState([]);
   const [adminEnabled,setAdminEnabled] = useState(false);
@@ -1120,6 +1139,18 @@ export default function LiveQualificationPortfolio({db,adminEntry=false,initialL
   const [activeRole,setActiveRole] = useState('');
   const [portfolio,setPortfolio] = useState(null);
   const [evidenceEntry,setEvidenceEntry] = useState(null);
+  const [portfolioLink,setPortfolioLink] = useState(null);
+  const syncLocation = React.useCallback((id, section, unit, outcome) => {
+    const {location, navigate} = route.current;
+    if (location.pathname !== '/qualifications') return;
+    const params = new URLSearchParams(location.search);
+    for (const [key, value] of Object.entries({portfolio:id, section, unit, outcome})) {
+      if (value) params.set(key, value);
+      else params.delete(key);
+    }
+    const search = params.size ? '?' + params.toString() : '';
+    if (search !== location.search) navigate({pathname:location.pathname, search}, {replace:true, preventScrollReset:true});
+  }, []);
   const [previewId,setPreviewId] = useState('');
   const [error,setError] = useState('');
   const [busy,setBusy] = useState(true);
@@ -1140,7 +1171,7 @@ export default function LiveQualificationPortfolio({db,adminEntry=false,initialL
       .finally(() => {if (id === request.current) setBusy(false);});
     return () => {request.current++;};
   }, [db,refreshKey]);
-  const open = async (id, entry = null) => {
+  const open = async (id, entry = null, link = null) => {
     const current = ++request.current;
     setBusy(true); setError('');
     try {
@@ -1152,6 +1183,7 @@ export default function LiveQualificationPortfolio({db,adminEntry=false,initialL
       if (current === request.current) {
         const byUnit=new Map((briefs||[]).map(item=>[item.unitId,item]));
         setEvidenceEntry(entry);
+        setPortfolioLink(link);
         setPortfolio({...data,catalogKey:data.catalogKey||rows?.find(row=>row.id===id)?.catalogKey,canRecordCertificate:data.canRecordCertificate||certAuthorized===true,
           units:data.units.map(unit=>({...unit,centreBrief:byUnit.get(unit.id)||null}))});
         setPreviewId('');setAdminView(false);
@@ -1162,6 +1194,18 @@ export default function LiveQualificationPortfolio({db,adminEntry=false,initialL
       if (current === request.current) setBusy(false);
     }
   };
+  useEffect(() => {
+    if (restored.current || rows === null || busy || adminEntry) return;
+    restored.current = true;
+    const params = initialLink.current;
+    const id = params.get('portfolio');
+    if (!id || location.pathname !== '/qualifications') return;
+    if (rows.some(row => row.id === id && row.role === 'learner')) {
+      open(id, null, {section:params.get('section'), unit:params.get('unit'), outcome:params.get('outcome')});
+    } else {
+      syncLocation();
+    }
+  }, [rows, busy, adminEntry]);
   const refresh = async updated => {
     const current = request.current;
     const [data,certAuthorized] = await Promise.all([
@@ -1182,8 +1226,8 @@ export default function LiveQualificationPortfolio({db,adminEntry=false,initialL
     </div>}
     {busy ? <PremiumLoading variant="compact"/> : error ? <Panel title="Qualifications">
       <p role="alert">{error}</p><Action secondary onClick={() => setRefreshKey(value => value + 1)}>Retry</Action>
-    </Panel> : portfolio ? <OpenPortfolio key={portfolio.id+':'+portfolio.role} db={db} portfolio={portfolio} references={references} evidenceEntry={evidenceEntry} onRefresh={refresh}
-      onBack={() => {setPortfolio(null); setRefreshKey(value => value + 1);}}/> : adminView && adminEnabled
+    </Panel> : portfolio ? <OpenPortfolio key={portfolio.id+':'+portfolio.role} db={db} portfolio={portfolio} references={references} evidenceEntry={evidenceEntry} onRefresh={refresh} initialLink={portfolioLink} onLocationChange={syncLocation}
+      onBack={() => {if (portfolio.role === 'learner') syncLocation();setPortfolio(null); setRefreshKey(value => value + 1);}}/> : adminView && adminEnabled
       ? <QualificationCentreAdmin db={db} references={references} initialLearnerId={initialLearnerId} onBack={()=>{setAdminView(false);setRefreshKey(v=>v+1);}}/> : previewId
       ? <QualificationSourcePreview key={previewId} item={QUALIFICATIONS.find(item => item.id === previewId)}
           references={references} onBack={() => setPreviewId('')}

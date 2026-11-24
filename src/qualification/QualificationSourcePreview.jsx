@@ -73,7 +73,7 @@ export default function QualificationSourcePreview({item,references=[],onBack,em
   {unit && <QualificationUnitNavigation units={source.units} selectedIndex={unitIndex} onSelect={index => {jumpTo(index);if(section==='overview')setSection('course');}}/>}
   {!embedded&&<QualificationInternalNav active={section} onChange={changeSection}
     ariaLabel="Unit sections" unitContext readOnly={isReference}/>}
-  {section==='course' && !embedded && isReference && <p className="qsrc-compact-reference-note"><Info size={14}/> Source reference · Enrolment and assessment remain separate.</p>}
+  {!embedded && !enrolled.length && <p className="qsrc-compact-reference-note"><Info size={14}/> Read-only syllabus preview. Evidence and assessment are available in your enrolled portfolio.</p>}
   {(embedded||section==='course')&&!unit&&<div className="qsrc-empty"><Info size={19}/><p>No units are available for this edition.</p></div>}
   {(embedded||section==='course')&&outcome&&<QualificationOutcome units={source.units}
     unitIndex={unitIndex} outcomeIndex={outcomeIndex} onJump={jumpTo} onBack={()=>setOutcomeIndex(null)}

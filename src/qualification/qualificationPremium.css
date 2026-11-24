@@ -333,3 +333,5 @@
 .qf-live .qf-evidence-details{overflow-wrap:anywhere;padding:6px 12px;background:#f4f8fe}
 .qf-live .qf-evidence-outcomes{list-style:none;padding:0;margin:0}
 .qf-live .qf-evidence-outcomes button{text-align:start}
+
+.qf-live .qf-reference-catalogue { margin-top: 20px; padding-top: 8px; border-top: 1px solid #dce5ef; }

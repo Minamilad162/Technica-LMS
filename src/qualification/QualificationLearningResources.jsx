@@ -6,14 +6,21 @@ import './qualificationLearningResources.css';
 
 // The published assessment rubric is authoritative for an enrolled portfolio.
 // The three historical specifications below are supporting reference documents only.
-export function CentreResourceLinks({unit, onOutcome}) {
-  const published = unit.outcomes.flatMap(outcome =>
-    (outcome.resources || []).map(resource => ({...resource, outcomeId:outcome.id, outcomeCode:outcome.code})));
+export function CentreResourceLinks({unit, onOutcome, sourceUrl}) {
+  const grouped = new Map();
+  for (const outcome of unit.outcomes) {
+    for (const resource of outcome.resources || []) {
+      if (!resource.url) continue;
+      if (!grouped.has(resource.url)) grouped.set(resource.url, {resource, codes: new Set()});
+      grouped.get(resource.url).codes.add(outcome.code);
+    }
+  }
+  const published = [...grouped.values()];
   return <section className="qlearn-rail-card" aria-label="Unit resources">
     <div className="qlearn-rail-heading"><FolderOpen size={18}/><h3>Resources</h3><span>{published.length}</span></div>
     {published.length ? <div className="qlearn-resource-links">
-      {published.map(resource => <a key={resource.id} href={resource.url} target="_blank" rel="noopener noreferrer">
-        <FileText size={17}/><span><strong>{resource.title}</strong><small>{resource.outcomeCode} · Centre-published resource</small></span><ExternalLink size={15}/>
+      {published.map(({resource,codes}) => <a key={resource.url} href={resource.url} target="_blank" rel="noopener noreferrer">
+        <FileText size={17}/><span><strong>{resource.title}</strong><small>{resource.url === sourceUrl ? 'Awarding-body specification' : 'Centre-published resource'} · Outcomes {[...codes].join(', ')}</small></span><ExternalLink size={15}/>
       </a>)}
     </div> : <div className="qlearn-empty"><Info size={17}/><p>No centre-published learning files or templates are attached to this Unit yet. The source outline is separate from an approved assignment brief.</p></div>}
     {onOutcome && <p className="qlearn-rail-foot">Choose a Learning Outcome below to view its assessment criteria and submission requirements.</p>}
@@ -109,7 +116,7 @@ function CustomUnitOverview({unit}) {
   </section>;
 }
 
-export function LiveUnitLearningHub({unit, portfolio, onEvidence, onLibrary}) {
+export function LiveUnitLearningHub({unit, portfolio, sourceUrl, onEvidence, onLibrary}) {
   const material = getUnitSourceMaterial(unit.code);
   return <div className="qlearn-layout">
     <div className="qlearn-primary" aria-label="Unit learning material">
@@ -121,7 +128,7 @@ export function LiveUnitLearningHub({unit, portfolio, onEvidence, onLibrary}) {
       </div>
     </div>
     <aside className="qlearn-rail" aria-label="Unit resources and actions">
-      <CentreResourceLinks unit={unit}/>
+      <CentreResourceLinks unit={unit} sourceUrl={sourceUrl}/>
       <AssessmentGuide learner={portfolio.role === 'learner'} onEvidence={portfolio.role === 'learner' ? onEvidence : null} onLibrary={onLibrary}/>
     </aside>
   </div>;

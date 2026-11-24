@@ -49,12 +49,13 @@ const catalogue=read('src/qualification/QualificationCatalogue.jsx');
 const premium=read('src/qualification/qualificationPremium.css');
 assert.match(live,/ProgrammeListPremium/, 'The real DB-backed route must use the premium catalogue');
 assert.match(live,/<QualificationSourcePreview/, 'Source-backed qualification syllabus must be connected');
-assert.match(catalogue,/QUALIFICATIONS\.map\(item =>/, 'All three pathways must render, not only enrolled records');
+assert.match(catalogue,/enrolledItems\.map\(renderCard\)/, 'Enrolled qualifications have their own list');
+assert.match(catalogue,/referenceItems\.map\(renderCard\)/, 'Remaining pathways render as source previews');
 assert.match(catalogue,/assigned\.filter\(row =>\s*qualificationFor\(row\.title\)\?\.id === item\.id \|\|/, 'Enrolment matching must remain role-scoped');
-assert.match(catalogue,/startsWith\('technica-source-'\+item\.id\+'-'\)/, 'Enrolled qualifications must match by genuine specification ID');
+assert.match(catalogue,/startsWith\('technica-source-' \+ item\.id \+ '-'\)/, 'Enrolled qualifications must match by genuine specification ID');
 assert.match(catalogue,/onOpen\(enrolments\[0\]\.id\)/, 'Enrolled programmes must open live portfolios');
 assert.match(catalogue,/onPreview\(item\.id\)/, 'Other programmes must only open read-only syllabus');
-for(const title of ['Verified source syllabus','Assigned to you','Open portfolio','Explore actual Units']){
+for(const title of ['Verified source syllabus','Assigned to you','Open portfolio','Preview syllabus']){
  assert.ok(catalogue.includes(title), 'Missing catalogue label: '+title);
 }
 for(const className of ['qf-live-lead','qf-live-feature','qf-live-kpi','qf-live-preview-notice']){

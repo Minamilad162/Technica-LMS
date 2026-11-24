@@ -2,6 +2,7 @@ import React,{useEffect,useState} from 'react';
 import {ArrowRight,BookOpen,CalendarDays,CheckCircle2,ClipboardCheck,Clock3,FileText,Filter,FolderOpen,Info,Layers3,Link2,MessageSquare,PenLine,Send,Target,Upload,RotateCcw,Grid3X3} from 'lucide-react';
 import {portfolioRpc,claimLabels} from './qualificationPortfolioApi.js';
 import {taskDetails,taskCounts,matchesTask,editableStates} from './learnerTaskModel.js';
+import QualificationNextStep from './QualificationNextStep.jsx';
 import './qualificationLearnerTasks.css';
 
 const formatDate=value=>value?new Intl.DateTimeFormat('en-GB',{dateStyle:'medium',timeZone:'UTC'}).format(new Date(value)):'Not set';
@@ -9,7 +10,7 @@ const statusLabel=t=>t.status==='Verified'?'Completed':t.status==='Awaiting revi
 const statusTone=t=>t.status==='Verified'?'green':t.status==='Changes requested'?'red':t.status==='Awaiting review'?'purple':t.status==='Cancelled'?'muted':'blue';
 const Badge=({task})=><span className={'qlt-badge '+statusTone(task)}>{statusLabel(task)}</span>;
 function Panel({icon:Icon,title,children,extra}){return <section className="qlt-panel"><header><Icon size={21}/><h3>{title}</h3>{extra}</header>{children}</section>;}
-export default function QualificationLearnerTasks({db,portfolio,progress,selectedId,onSelect,onView,onOutcome,onUnit,onEvidence,busy}){
+export default function QualificationLearnerTasks({db,portfolio,progress,selectedId,onSelect,onView,onOutcome,onUnit,onEvidence,busy,nextStep,onNextStep}){
  const [tasks,setTasks]=useState(null),[error,setError]=useState(''),[retry,setRetry]=useState(0);
  const [filter,setFilter]=useState('all'),[page,setPage]=useState(0),[showFilters,setShowFilters]=useState(false),[showSubmit,setShowSubmit]=useState(false);
  const [fileError,setFileError]=useState('');
@@ -44,7 +45,10 @@ export default function QualificationLearnerTasks({db,portfolio,progress,selecte
     {!matching.length&&<div className="qlt-empty"><FolderOpen size={30}/><strong>{tasks.length?'No tasks match this filter':'No assigned tasks yet'}</strong><span>{tasks.length?'Select another filter.':'Tasks will appear when your assessment team assigns them.'}</span></div>}
     {last>0&&<div className="qlt-pagination"><button disabled={page===0} onClick={()=>{setPage(p=>p-1);setShowSubmit(false);}}>Previous</button><span>{Math.min(page,last)+1} / {last+1}</span><button disabled={page>=last} onClick={()=>{setPage(p=>p+1);setShowSubmit(false);}}>Next</button></div>}
    </aside>
-   <section className="qlt-detail-card" aria-label="Selected task details">{!selected?<div className="qlt-empty qlt-no-task"><ClipboardCheck size={42}/><h2>Your assessment workspace</h2><p>Select a task to view its instructions, linked criteria and reviewer feedback. You can still access the programme and evidence folder.</p><button className="qf-button qf-outline" onClick={()=>onView('programme')}>View Units</button><button className="qf-button qf-primary" onClick={()=>onView('evidence')}>Evidence Folder</button></div>:<>
+   <section className="qlt-detail-card" aria-label="Selected task details">{!selected?<div className="qlt-empty qlt-no-task"><ClipboardCheck size={42}/><h2>{tasks.length ? 'No task selected' : 'Get started with your qualification'}</h2>
+       {tasks.length ? <p>Choose a different filter to see another task.</p> :
+        <QualificationNextStep step={nextStep} onAction={onNextStep} busy={busy}
+          onEvidence={()=>onView('evidence')}/>}</div>:<>
     <header className="qlt-detail-head"><span className="qlt-file-icon"><FileText size={30}/></span><div><h2>{selected.spec.title} <Badge task={selected}/></h2><p>{detail.groups.map(g=>'Unit '+String(g.index+1).padStart(2,'0')+' – '+g.unit.title).join(' · ')}</p></div><div className="qlt-due"><CalendarDays size={19}/><span><small>Due date</small><strong>{formatDate(selected.dueOn)}</strong></span></div></header>
     <div className="qlt-steps" aria-label="Evidence journey">{[[FileText,'Prepare Evidence'],[Layers3,'Map to Criteria'],[Send,'Submit for Assessment']].map(([Icon,label],i)=><button type="button" key={label} aria-current={step===i?'step':undefined} className={step===i?'current':step>i?'done':''} disabled={busy||!canWork} onClick={()=>{if(i===0)onEvidence('upload');else if(i===1)onView('matrix',detail.groups[0]?.index);else setShowSubmit(s=>!s);}}><Icon size={21}/><b>{i+1}</b>{label}</button>)}</div>
     <div className="qlt-detail-grid">

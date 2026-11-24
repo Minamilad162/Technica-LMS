@@ -3,7 +3,7 @@ import {BookCheck,Download,FileCheck2,Info,LockKeyhole,ShieldCheck} from 'lucide
 import './qualificationCentreBrief.css';
 
 const bucket='technica-qualification-materials';
-export default function QualificationCentreBrief({unit,db}){
+export default function QualificationCentreBrief({unit,db,learner=false}){
  const brief=unit.centreBrief;
  const [busy,setBusy]=useState(''),[error,setError]=useState('');
  if(!brief)return <section className="qb-empty"><Info size={17}/><span>No approved Unit assignment brief has been published for your enrolled edition. Contact the centre before relying on working templates for an official submission.</span></section>;
@@ -20,8 +20,10 @@ export default function QualificationCentreBrief({unit,db}){
   <header><div className="qb-icon"><BookCheck size={23}/></div><div><span className="qf-overline">CENTRE APPROVED · ASSESSMENT INSTRUCTIONS</span>
     <h3>{unit.code} — Assessment Brief</h3>
     <p>Approved by the training centre on {new Date(brief.approvedAt).toLocaleDateString()}.</p></div><ShieldCheck size={23}/></header>
-  <details><summary>Read approved Unit instructions</summary><div className="qb-body">{brief.instructions}</div></details>
-  {brief.methods&&<div className="qb-methods"><strong>Approved assessment methods and conditions</strong><p>{brief.methods}</p></div>}
+  <details open={learner}><summary>Read approved Unit instructions</summary><div className="qb-body">{brief.instructions}</div></details>
+  {learner&&<p className="qb-learner-guidance">Prepare the work described in the Unit instructions. Link your evidence to the relevant criteria, then submit each complete Outcome for assessment.</p>}
+  {brief.methods&&(learner ? <details><summary>How your work will be assessed</summary><div className="qb-body">{brief.methods}</div></details>
+    : <div className="qb-methods"><strong>Approved assessment methods and conditions</strong><p>{brief.methods}</p></div>)}
   {!!brief.files?.length&&<div className="qb-files">
    <strong>Protected centre-issued resource files</strong>
    {brief.files.map(file=><button type="button" disabled={busy===file.id} key={file.id} onClick={()=>open(file)}>

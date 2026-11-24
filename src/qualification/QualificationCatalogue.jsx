@@ -28,6 +28,42 @@ export function ProgrammeListPremium({rows, references = [], activeRole, onRoleC
   const sourceFor = item => references.find(source => source.catalog_key === (
     item.id === 'othm6' ? 'technica-source-othm6-2026' :
     item.id === 'othm7' ? 'technica-source-othm7-2023' : 'technica-source-nvq6-2018'));
+  const assignedFor = item => assigned.filter(row =>
+    qualificationFor(row.title)?.id === item.id ||
+    String(row.catalogKey || '').startsWith('technica-source-' + item.id + '-'));
+  const enrolledItems = QUALIFICATIONS.filter(item => assignedFor(item).length);
+  const referenceItems = QUALIFICATIONS.filter(item => !assignedFor(item).length);
+  const renderCard = item => {
+    const enrolments = assignedFor(item);
+    const spec = sourceFor(item);
+    return <article className={'qf-course-card qf-course-theme-' + item.color} key={item.id}>
+      <div className="qf-course-hero">
+        <img src={item.heroImage} alt="" loading="lazy" decoding="async" aria-hidden="true"/>
+        <div className="qf-course-hero-shade" aria-hidden="true"/>
+        <div className="qf-course-hero-head"><span>PROFESSIONAL QUALIFICATION</span><span className="qf-course-hero-level">LEVEL {item.level}</span></div>
+        <div className="qf-course-hero-brand"><strong>{item.body}</strong></div>
+      </div>
+      <div className="qf-course-body">
+        <span className={'qf-live-card-label ' + (enrolments.length ? 'assigned' : '')}>
+          {enrolments.length ? <><CheckCircle2 size={15}/> Assigned to you</> : <><BookOpen size={15}/> Verified source syllabus</>}
+        </span>
+        <h2>{spec?.title || item.name}</h2>
+        <p className="qsrc-card-edition">{spec ? spec.version + ' · ' + spec.reference_number : 'Source import unavailable'}</p>
+        <div className="qf-course-foot">
+          <span className="qf-course-units"><Layers3 size={17}/> {spec?.units.length ?? item.units.length} Units</span>
+          <button type="button" onClick={() => enrolments.length === 1 ? onOpen(enrolments[0].id) : onPreview(item.id)}
+            aria-label={(enrolments.length === 1 ? 'Open ' : 'Preview ') + item.name}>
+            {enrolments.length === 1 ? 'Open portfolio' : 'Preview syllabus'} <ArrowRight size={17}/>
+          </button>
+        </div>
+        {enrolments.length > 1 && <div className="qf-live-multi-enrolments" aria-label="Assigned portfolios">
+          {enrolments.map(row => <button type="button" key={row.id} onClick={() => onOpen(row.id)}>
+            <span>{row.title}</span><ChevronRight size={17}/>
+          </button>)}
+        </div>}
+      </div>
+    </article>;
+  };
   return <>
     <header className="qf-live-lead">
       <div className="qf-live-lead-content">
@@ -47,45 +83,21 @@ export function ProgrammeListPremium({rows, references = [], activeRole, onRoleC
       })}
     </nav>
     {role === 'learner' ? <>
-      <div className="qf-live-section-heading">
-        <div><span className="qf-overline">YOUR LEARNING PATH</span><h2>Choose a qualification</h2></div>
-        <span>{assigned.length} assigned {assigned.length === 1 ? 'portfolio' : 'portfolios'}</span>
-      </div>
-      <div className="qf-course-grid qf-live-catalogue">
-        {QUALIFICATIONS.map(item => {
-          const enrolments = assigned.filter(row =>
-            qualificationFor(row.title)?.id === item.id ||
-            String(row.catalogKey||'').startsWith('technica-source-'+item.id+'-'));
-          const spec = sourceFor(item);
-          return <article className={'qf-course-card qf-course-theme-' + item.color} key={item.id}>
-            <div className="qf-course-hero">
-              <img src={item.heroImage} alt="" loading="lazy" decoding="async" aria-hidden="true"/>
-              <div className="qf-course-hero-shade" aria-hidden="true"/>
-              <div className="qf-course-hero-head"><span>PROFESSIONAL QUALIFICATION</span><span className="qf-course-hero-level">LEVEL {item.level}</span></div>
-              <div className="qf-course-hero-brand"><strong>{item.body}</strong></div>
-            </div>
-            <div className="qf-course-body">
-              <span className={'qf-live-card-label ' + (enrolments.length ? 'assigned' : '')}>
-                {enrolments.length ? <><CheckCircle2 size={15}/> Assigned to you</> : <><BookOpen size={15}/> Verified source syllabus</>}
-              </span>
-              <h2>{spec?.title || item.name}</h2>
-              <p className="qsrc-card-edition">{spec ? spec.version + ' · ' + spec.reference_number : 'Source import unavailable'}</p>
-              <div className="qf-course-foot">
-                <span className="qf-course-units"><Layers3 size={17}/> {spec?.units.length ?? item.units.length} Units</span>
-                <button type="button" onClick={() => enrolments.length === 1 ? onOpen(enrolments[0].id) : onPreview(item.id)}
-                  aria-label={(enrolments.length === 1 ? 'Open ' : 'Preview ') + item.name}>
-                  {enrolments.length === 1 ? 'Open portfolio' : 'Explore actual Units'} <ArrowRight size={17}/>
-                </button>
-              </div>
-              {enrolments.length > 1 && <div className="qf-live-multi-enrolments" aria-label="Assigned portfolios">
-                {enrolments.map(row => <button type="button" key={row.id} onClick={() => onOpen(row.id)}>
-                  <span>{row.title}</span><ChevronRight size={17}/>
-                </button>)}
-              </div>}
-            </div>
-          </article>;
-        })}
-      </div>
+      <section aria-labelledby="qf-assigned-programmes">
+        <div className="qf-live-section-heading">
+          <h2 id="qf-assigned-programmes">My enrolled qualifications</h2>
+          <span>{assigned.length} assigned {assigned.length === 1 ? 'portfolio' : 'portfolios'}</span>
+        </div>
+        {enrolledItems.length ? <div className="qf-course-grid qf-live-catalogue">{enrolledItems.map(renderCard)}</div>
+          : !unmatched.length && <p>No official qualifications are assigned to your account yet.</p>}
+      </section>
+      {referenceItems.length > 0 && <section className="qf-reference-catalogue" aria-labelledby="qf-reference-programmes">
+        <div className="qf-live-section-heading">
+          <h2 id="qf-reference-programmes">Reference syllabuses</h2>
+          <span>Read-only previews</span>
+        </div>
+        <div className="qf-course-grid qf-live-catalogue">{referenceItems.map(renderCard)}</div>
+      </section>}
       {testPortfolios.length > 0 && <details className="qf-card qsrc-test-disclosure">
         <summary>Private testing workspace ({testPortfolios.length})</summary>
         <p>Test records are separate from your official qualifications.</p>

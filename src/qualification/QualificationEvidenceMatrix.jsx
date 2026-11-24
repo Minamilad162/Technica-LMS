@@ -3,7 +3,7 @@ import {Check,FileText,FolderOpen,Info,Layers3,Link2,LockKeyhole,Search} from 'l
 import QualificationMultiUnitEvidence from './QualificationMultiUnitEvidence.jsx';
 import './qualificationExperience.css';
 
-export default function QualificationEvidenceMatrix({portfolio,source,selectedUnitIndex=0,onUnit,onMapSave,onOpenOutcome,busy=false}){
+export default function QualificationEvidenceMatrix({portfolio,source,selectedUnitIndex=0,onUnit,onMapSave,onOpenOutcome,onAddEvidence,busy=false}){
  const [search,setSearch]=useState('');
  const [evidenceId,setEvidenceId]=useState('');
  const [showMapping,setShowMapping]=useState(false);
@@ -34,7 +34,7 @@ export default function QualificationEvidenceMatrix({portfolio,source,selectedUn
  return <div className="qxp-matrix">
   <div className="qxp-section-head"><div><span className="qxp-eyebrow">EVIDENCE FOLDER</span><h2>Evidence Mapping Matrix</h2>
    <p>Cross-reference evidence to the actual Assessment Criteria. A green check means linked, not assessor-approved.</p></div>
-   {learner&&portfolio.canEdit&&<button type="button" className="qxp-primary" disabled={busy||!evidence.length} onClick={()=>beginMapping('')}>
+   {learner&&portfolio.canEdit&&!!evidence.length&&<button type="button" className="qxp-primary" disabled={busy||!evidence.length} onClick={()=>beginMapping('')}>
     <Link2 size={17}/> Link Evidence</button>}
   </div>
   <div className="qxp-matrix-filters">
@@ -58,13 +58,14 @@ export default function QualificationEvidenceMatrix({portfolio,source,selectedUn
       return <tr key={item.id}><th scope="row" className="qxp-matrix-item">
        <span className="qxp-file"><FileText size={20}/><span><strong dir="auto">{item.title}</strong>
         <small>{item.kind||'Evidence'} · {matches} of {criteria.length} criteria linked</small></span></span>
-       </th>{criteria.map(c=><td key={c.id||c.code}>
-        {links.get(c.id)?.has(item.id)?<span className="qxp-cell linked" aria-label={'Linked to '+c.code}><Check size={18}/></span>:
-        <span className="qxp-cell" aria-label={'Not linked to '+c.code}>—</span>}</td>)}</tr>;
+       </th>{criteria.map(c=><td key={c.id||c.code} aria-label={(links.get(c.id)?.has(item.id) ? 'Linked to ' : 'Not linked to ')+c.code}>
+        {links.get(c.id)?.has(item.id)?<span className="qxp-cell linked" aria-hidden="true"><Check size={18}/></span>:
+        <span className="qxp-cell" aria-hidden="true">—</span>}</td>)}</tr>;
      })}</tbody></table>
     </div>:<div className="qxp-empty"><Info size={20}/> No imported Assessment Criteria for this Unit.</div>}
     {!evidence.length&&<div className="qxp-empty"><FolderOpen size={19}/>
-     {portfolio?'No evidence is available for this portfolio view. Upload evidence before mapping.':'This official syllabus has no learner evidence. Open an enrolled qualification to map files.'}</div>}
+     <span>{onAddEvidence?'Add evidence to your folder before linking it to criteria.':portfolio?'No evidence is available for this portfolio view.':'Open an enrolled qualification to map evidence to criteria.'}</span>
+     {onAddEvidence&&<button type="button" className="qxp-primary" disabled={busy} onClick={onAddEvidence}>Add evidence</button>}</div>}
     {!!evidence.length&&!filtered.length&&<p className="qxp-empty">No evidence matches the selected filters.</p>}
     <div className="qxp-matrix-legend"><span><Check size={16}/> Linked to criterion</span><span>— Not mapped</span>
       <span><LockKeyhole size={14}/> Submitted and verified Outcome mappings are read-only</span></div>
@@ -80,7 +81,7 @@ export default function QualificationEvidenceMatrix({portfolio,source,selectedUn
       <div><dt>Linked in selected Unit</dt><dd>{linked}</dd></div>
       <div><dt>Unlinked in selected Unit</dt><dd>{evidence.length-linked}</dd></div></dl>
     </section>
-    {learner&&portfolio.canEdit&&<button type="button" className="qxp-primary qxp-full" disabled={busy||!evidence.length} onClick={()=>beginMapping(evidenceId)}>
+    {learner&&portfolio.canEdit&&!!evidence.length&&<button type="button" className="qxp-primary qxp-full" disabled={busy||!evidence.length} onClick={()=>beginMapping(evidenceId)}>
       <Link2 size={16}/> Edit cross-Unit links</button>}
    </aside>
   </div>
