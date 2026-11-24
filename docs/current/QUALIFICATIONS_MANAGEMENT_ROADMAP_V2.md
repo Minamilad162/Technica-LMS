@@ -38,7 +38,7 @@ Status vocabulary: PLANNED, IN PROGRESS, BLOCKED, IMPLEMENTED, VERIFIED, DONE. I
 | Q04 | Learner enrolment engine | IN PROGRESS | Q02, Q03 | PR #126 merged; assignment and Users entry CI verified; production migration installed; live enrolment and visual acceptance pending |
 | Q05 | Assessment plans & tasks | IN PROGRESS | Q04 | Approved four-step UI; templates and assignments merged, CI passed, migration installed; rescheduling/cancellation merged and verified; visual and operational acceptance pending |
 | Q06 | Learner workspace | IN PROGRESS | Q05 | PR #131 merged and CI passed; authenticated visual and operational acceptance pending |
-| Q07 | Assessor & verifier workspaces | PLANNED | Q04, Q05 | Independent review queues |
+| Q07 | Assessor & verifier workspaces | IN PROGRESS | Q04, Q05 | Reviewer queue and split workspace implemented in branch; CI, migration and visual/E2E acceptance pending |
 | Q08 | Monitoring & completion | PLANNED | Q05–Q07 | Real metrics, notifications, issuer safeguards |
 | Q09 | E2E QA & release | PLANNED | Q01–Q08 | Staged test identities and production verification |
 
@@ -112,6 +112,8 @@ Acceptance: actual assigned task reaches learner with instructions and deadline;
 Acceptance: learner completes task, maps one file to multiple eligible Units, submits, receives changes and resubmits; other portfolios and locked snapshots protected; desktop/mobile checks.
 
 ### Q07 — Assessor & verifier workspaces
+
+Owner approved implementation after reviewer mockup. Explicit role-scoped queues and portfolio reads support separately assigned Assessor/Verifier roles even on one account; independent verification remains mandatory. Existing review decision RPC, snapshot history, task management and original navigation retained.
 - [ ] Q07.1 Assessor queue: assigned learners, new submissions, returned work, overdue tasks, pending criteria, workload, filters and direct review.
 - [ ] Q07.2 Reuse criterion-level assessment and feedback/return/accept RPCs; manage assigned tasks within role.
 - [ ] Q07.3 Verifier queue: assessor decisions, submitted snapshots, feedback and accept/return for reassessment.
@@ -176,6 +178,8 @@ Acceptance: required checks passed, deployment independently verified, acceptanc
 | 2026-11-24 | Q05 | Added task lifecycle actions: deadline change and cancellation with note/reason, optimistic revision guard and audit history; existing evidence/decisions preserved, verified tasks locked. Admin and assigned authorised assessor only. Migration 202611240005 and regression tests. | PR #130 merged at e36341a47b0135903670fec183399c4b0b1a645b; CI run 45353362343 passed; migration 202611240005 installed and privileges/revision column verified | Authenticated visual and end-to-end operational acceptance pending; Q06 design gate next. |
 
 | 2026-11-24 | Q06 | Owner approved split-pane learner Tasks & Evidence design. Implemented on codex/q06-learner-workspace, with real task progress, filters, linked criteria and reviewer feedback, protected materials and existing evidence/Outcome routes. | PR #131 merged at c1be86198ed1227321a4a915e3e976ad2dabe56b; CI 45356008105 passed; no migration required. | Authenticated visual and end-to-end QA pending: upload, mapping, submission, return and resubmission using authorised accounts. |
+
+| 2026-11-24 | Q07 | Reviewer queue, workload counts, learner/outcome filters and split review workspace implemented on codex/q07-review-workspaces. Explicit protected role reads, immutable submitted snapshots, no private draft mapping, independent reviewer warning, existing review and task actions. Migration 202611240006 and disposable integration tests. | Code implemented; CI/migration/visual acceptance pending | Verify tests and deployment; complete authenticated lifecycle QA before Q07 acceptance. |
 
 ### Production edition audit — 24 November 2026
 
