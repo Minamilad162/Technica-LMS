@@ -26,8 +26,8 @@ INSERT INTO public.lms_qualification_outcomes(id,unit_id,code,title,position)
 INSERT INTO public.lms_qualification_criteria(id,outcome_id,code,title,position)
  VALUES(pg_temp.qid(40),pg_temp.qid(30),'1.1','First criterion',1),(pg_temp.qid(41),pg_temp.qid(31),'1.1','Second criterion',1);
 INSERT INTO public.lms_qf_centre_briefs(unit_id,assessment_instructions,assessment_methods)
- VALUES(pg_temp.qid(20),repeat('Reviewed fixture instructions. ',4),'Written assignment and verified workplace evidence'),
-       (pg_temp.qid(21),repeat('Reviewed fixture instructions. ',4),'Methods must be selected and justified by the centre assessor');
+ VALUES(pg_temp.qid(20),btrim(repeat('Reviewed fixture instructions. ',4)),'Written assignment and verified workplace evidence'),
+       (pg_temp.qid(21),btrim(repeat('Reviewed fixture instructions. ',4)),'Methods must be selected and justified by the centre assessor');
 SELECT set_config('test.bulk.expected',(SELECT jsonb_object_agg(unit_id::text,jsonb_build_object('instructions',assessment_instructions,'methods',assessment_methods))::text FROM public.lms_qf_centre_briefs WHERE unit_id IN(pg_temp.qid(20),pg_temp.qid(21))),true);
 SET LOCAL ROLE authenticated;
 SET LOCAL request.jwt.claim.sub='f1000000-0000-0000-0000-000000000002';
