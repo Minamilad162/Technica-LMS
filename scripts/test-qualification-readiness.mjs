@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
-import {qualificationReadiness,needsAssessmentMethodReview,sourceRubricForUnit,publicationChecks,editionStatus,validPublicationReference} from '../src/qualification/qualificationReadiness.js';
+import {qualificationReadiness,needsAssessmentMethodReview,sourceRubricForUnit,publicationChecks,editionStatus,validPublicationReference,bulkBriefReview} from '../src/qualification/qualificationReadiness.js';
 
 const approvedAt='2026-11-22T09:00:00Z';
 const unit=(id,approved=false)=>({
@@ -132,3 +132,15 @@ assert.ok(publish.includes('!dirty&&!version.publishedAt')&&publish.includes('En
 assert.ok(publish.includes('node.showModal()')&&publish.includes('onCancel='));
 assert.ok(!adminCenter.includes('In Setup'),'Use Draft and Live consistently on admin cards');
 console.log('Q02 draft/live publication readiness, zero enrolments, exact edition and modal wiring: PASS');
+
+const draftForBulk={...sourceVersion,units:[{...rubricUnit,id:'u1',brief:{status:'draft',instructions:'Real centre-reviewed instructions. '.repeat(4),methods:'Written assignment and verified workplace evidence'}}]};
+let bulk=bulkBriefReview(draftForBulk,[rubricExample]);
+assert.equal(bulk.ready,true);
+assert.equal(bulk.pending,1);
+assert.equal(bulk.expected.u1.methods,draftForBulk.units[0].brief.methods);
+assert.equal(bulkBriefReview({...draftForBulk,publishedAt:approvedAt},[rubricExample]).ready,false);
+assert.equal(bulkBriefReview(draftForBulk,[]).ready,false);
+assert.equal(bulkBriefReview({...draftForBulk,units:[{...draftForBulk.units[0],brief:{...draftForBulk.units[0].brief,methods:'Methods must be selected and justified by the centre assessor'}}]},[rubricExample]).ready,false);
+assert.ok(admin.includes('Approve All Unit Briefs')&&admin.includes('Approve Unit brief'));
+assert.ok(admin.includes("portfolioRpc(db,'admin_approve_all_briefs'")&&admin.includes('p_expected:bulkReview.expected'));
+console.log('Bulk Unit approval eligibility and single/bulk workflow: PASS');
