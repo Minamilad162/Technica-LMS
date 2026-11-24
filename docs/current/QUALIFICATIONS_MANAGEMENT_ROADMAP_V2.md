@@ -150,6 +150,8 @@ Acceptance: required checks passed, deployment independently verified, acceptanc
 
 | 2026-11-24 | Q02 | Owner approved integrated Save Draft/Publish approach. PR #123 merged at 28e4e2c1a65a63302309cdaea2355163c18204c5; validate and disposable PostgreSQL CI passed (run 45343338463). No migration or live publication. | Integrated publication UI CI-verified; full Q02 acceptance pending | Check deployed UI and genuine authorised publication; Q03 design approval before implementation |
 
+| 2026-11-24 | Q02 | Owner requested Approve All Unit Briefs alongside individual approval. PR #124 merged at b814b1a209e7dab54e74571c3b93896c632f7b8e; CI run 45344657403 passed, including atomic rollback, stale text, role isolation, preserved approvals, and published-edition lock. Migration 202611240001 applied to Technica production; RPC and privileges verified. Fixed pre-existing ambiguous alias in individual brief RPC. No Unit approvals or publications were performed in production. | Bulk approval implemented and database verified; visual rollout pending | Owner reviews deployed screen and performs genuine centre approval |
+
 ### Production edition audit — 24 November 2026
 
 | Edition | Units | Outcomes | Criteria | Approved briefs | Released | Enrolments |
