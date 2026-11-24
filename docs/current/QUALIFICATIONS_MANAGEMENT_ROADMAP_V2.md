@@ -39,7 +39,7 @@ Status vocabulary: PLANNED, IN PROGRESS, BLOCKED, IMPLEMENTED, VERIFIED, DONE. I
 | Q05 | Assessment plans & tasks | IN PROGRESS | Q04 | Approved four-step UI; templates and assignments merged, CI passed, migration installed; rescheduling/cancellation merged and verified; visual and operational acceptance pending |
 | Q06 | Learner workspace | IN PROGRESS | Q05 | PR #131 merged and CI passed; authenticated visual and operational acceptance pending |
 | Q07 | Assessor & verifier workspaces | IN PROGRESS | Q04, Q05 | PR #132 merged and CI passed; migration 202611240006 installed; authenticated visual and operational acceptance pending |
-| Q08 | Monitoring & completion | PLANNED | Q05–Q07 | Real metrics, notifications, issuer safeguards |
+| Q08 | Monitoring & completion | IN PROGRESS | Q05–Q07 | Approved dashboard and scoped read models implemented in branch; CI, migration and live QA pending |
 | Q09 | E2E QA & release | PLANNED | Q01–Q08 | Staged test identities and production verification |
 
 ## Detailed checklist and acceptance criteria
@@ -121,6 +121,8 @@ Owner approved implementation after reviewer mockup. Explicit role-scoped queues
 Acceptance: learner submit -> assessor return -> resubmit -> assessor accept -> distinct verifier return -> assessor follow-up -> verifier accept; stale, out-of-order and self-review attempts rejected.
 
 ### Q08 — Monitoring, notifications & completion
+
+Owner approved monitoring mockup. Overview becomes the monitoring dashboard; All Qualifications retains setup catalogue. Live official-edition enrolment/Outcome/task KPIs, reviewer workload, deadline drilldowns and completion readiness; Reports & Audit with filters and CSV; qualification-specific in-app notification feed with per-account read receipts. Historical event projections use current authorised membership; no email or global bell integration. Existing finalisation and externally issued certificate authority rules are unchanged.
 - [ ] Q08.1 Actual KPIs and drilldowns: active enrolments, progress, pending assessment/verification, overdue tasks, completed learners and reviewer workload. Label count units; exclude sandbox by default.
 - [ ] Q08.2 Scoped deduplicated in-app notifications for assignment, deadlines, submissions, feedback, returns, verification and completion. Email only when separately configured/authorised.
 - [ ] Q08.3 Reports and audit log by version, learner, reviewer, date and status; permission-scoped exports, minimal sensitive profile exposure.
@@ -180,6 +182,8 @@ Acceptance: required checks passed, deployment independently verified, acceptanc
 | 2026-11-24 | Q06 | Owner approved split-pane learner Tasks & Evidence design. Implemented on codex/q06-learner-workspace, with real task progress, filters, linked criteria and reviewer feedback, protected materials and existing evidence/Outcome routes. | PR #131 merged at c1be86198ed1227321a4a915e3e976ad2dabe56b; CI 45356008105 passed; no migration required. | Authenticated visual and end-to-end QA pending: upload, mapping, submission, return and resubmission using authorised accounts. |
 
 | 2026-11-24 | Q07 | Reviewer queue, workload counts, learner/outcome filters and split review workspace implemented on codex/q07-review-workspaces. Explicit protected role reads, immutable submitted snapshots, no private draft mapping, independent reviewer warning, existing review and task actions. Migration 202611240006 and disposable integration tests. | PR #132 merged at a7acfd14a96b7a3b2f2793dde4f86eeee7ecd5de; CI run 45359283457 passed build, regression and PostgreSQL review tests after updating direct evidence guard assertion and immutable fixture setup. Migration 202611240006 applied. | Verify deployed UI and complete authenticated lifecycle QA before Q07 acceptance; Q08 design gate next. |
+
+| 2026-11-24 | Q08 | Approved monitoring dashboard, official KPI read model, filtered CSV audit reports, scoped event feed and receipt table. Existing finalisation and certificate rules retained. Migration 202611240007 and disposable role-isolation tests added. | Code implemented; CI and production migration pending | Verify tests; complete live visual/operational QA, notification delivery coverage and audit completeness in Q09. |
 
 ### Production edition audit — 24 November 2026
 
