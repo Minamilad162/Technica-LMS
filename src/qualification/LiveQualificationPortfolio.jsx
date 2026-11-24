@@ -17,6 +17,7 @@ import QualificationCentreAdmin from './QualificationCentreAdmin.jsx';
 import {PortfolioAssignedTasks} from './QualificationTasks.jsx';
 import QualificationLearnerTasks from './QualificationLearnerTasks.jsx';
 import {ReviewerPortfolioWorkspace} from './QualificationReviewerWorkspace.jsx';
+import {QualificationNotifications} from './QualificationMonitoring.jsx';
 import QualificationCentreBrief from './QualificationCentreBrief.jsx';
 import {PortfolioStatusRibbon,PortfolioMetrics} from './QualificationPortfolioReferenceUI.jsx';
 import QualificationCandidateRegistration from './QualificationCandidateRegistration.jsx';
@@ -1189,7 +1190,7 @@ export default function LiveQualificationPortfolio({db,adminEntry=false,initialL
           learnerPortfolios={(rows || []).filter(row => row.role === 'learner' && !row.completedAt && row.catalogKey !== privateSandboxKey)}
           practicePortfolio={(rows || []).find(row => row.role === 'learner' && !row.completedAt && row.catalogKey === privateSandboxKey)}
           onOpenEvidence={(id, unitCode) => open(id, {unitCode})}/>
-      : <ProgrammeListPremium rows={rows || []} references={references} activeRole={activeRole}
-          onRoleChange={setActiveRole} onOpen={open} onPreview={setPreviewId}/>}
+      : <><details className="qm-notification-drawer"><summary>Qualification Notifications</summary><QualificationNotifications db={db} compact/></details><ProgrammeListPremium rows={rows || []} references={references} activeRole={activeRole}
+          onRoleChange={setActiveRole} onOpen={open} onPreview={setPreviewId}/></>}
   </div>;
 }

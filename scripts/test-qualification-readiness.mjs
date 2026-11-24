@@ -223,3 +223,12 @@ assert.ok(learnerPortfolio.includes('!outcome.independentBlocked')&&reviewSql.in
 assert.ok(reviewSql.includes("actor_role<>'verifier' OR EXISTS")&&reviewSql.includes("'independentBlocked'"));
 assert.ok(reviewUi.includes("onOpen(row.id,{reviewRole:role,outcomeId:o.id})"));
 console.log('Q07 role-specific queue, independent review and direct navigation: PASS');
+
+const monitoringUi=read('src/qualification/QualificationMonitoring.jsx');
+const monitoringSql=read('supabase/migrations/202611240007_qualification_monitoring.sql');
+assert.ok(admin.includes("section==='overview'&&<QualificationMonitoring")&&admin.includes("catalogueVisible=section==='qualifications'"));
+assert.ok(monitoringUi.includes("useRead(db,'monitoring'")&&monitoringUi.includes("'Reports & Audit'")&&monitoringUi.includes('exportCsv'));
+assert.ok(monitoringUi.includes("portfolioRpc(db,'notification_read'")&&learnerPortfolio.includes('<QualificationNotifications db={db} compact/>'));
+assert.ok(monitoringSql.includes("Monitoring access denied")&&monitoringSql.includes("Audit access denied")&&monitoringSql.includes("lms_qf_notification_reads ENABLE ROW LEVEL SECURITY"));
+assert.ok(monitoringSql.includes("v.catalog_key LIKE 'technica-source-%'")&&!monitoringSql.includes('CREATE OR REPLACE FUNCTION public.lms_qf_finalize'));
+console.log('Q08 monitoring, audit export and role-scoped notifications: PASS');
