@@ -16,6 +16,7 @@ import QualificationMultiUnitEvidence from './QualificationMultiUnitEvidence.jsx
 import QualificationCentreAdmin from './QualificationCentreAdmin.jsx';
 import {PortfolioAssignedTasks} from './QualificationTasks.jsx';
 import QualificationLearnerTasks from './QualificationLearnerTasks.jsx';
+import {ReviewerPortfolioWorkspace} from './QualificationReviewerWorkspace.jsx';
 import QualificationCentreBrief from './QualificationCentreBrief.jsx';
 import {PortfolioStatusRibbon,PortfolioMetrics} from './QualificationPortfolioReferenceUI.jsx';
 import QualificationCandidateRegistration from './QualificationCandidateRegistration.jsx';
@@ -713,7 +714,7 @@ function ReviewerClaim({portfolio, outcome, busy, onDownload, onReview}) {
   const previousAssessment = submission?.reviews.findLast(review => review.stage === 'assessor');
   const [selected, setSelected] = useState(previousAssessment?.criteria || {});
   const [feedback, setFeedback] = useState('');
-  const actionable = !portfolio.completedAt && canReview(portfolio.role, claimState(outcome));
+  const actionable = !portfolio.completedAt && !outcome.independentBlocked && canReview(portfolio.role, claimState(outcome));
   const evidence = Object.values(snapshot?.evidence || {});
   return <>
     <div className="qf-live-grid">
@@ -726,6 +727,7 @@ function ReviewerClaim({portfolio, outcome, busy, onDownload, onReview}) {
           assessment={{criteria: previousAssessment?.criteria, verified: claimState(outcome) === 'verified'}}/>
       </Panel>}
     </div>
+    {outcome.independentBlocked&&claimState(outcome)==='awaiting_verification'&&<div className="qr-blocked"><ShieldCheck size={20}/> Independent verification required. Ask the centre administrator to assign an independent verifier for this submission.</div>}
     {snapshot && actionable && <Panel title={isAssessor ? 'Assessor Decision' : 'Verifier Decision'}>
       {isAssessor && snapshot.criteria.map(criterion => <label key={criterion.id} className="qf-field">
         <span>{criterion.code} · {criterion.title}</span>
@@ -879,7 +881,8 @@ function ContactDiary({db,portfolio,progress,onOutcome}) {
 
 function OpenPortfolio({db, portfolio, references, evidenceEntry, onRefresh, onBack}) {
   const entryIndex = portfolio.units.findIndex(unit => unit.code === evidenceEntry?.unitCode);
-  const [view,setView] = useState(evidenceEntry ? 'evidence' : portfolio.role==='learner'?'tasks':'dashboard');
+  const [view,setView] = useState(evidenceEntry?.reviewRole?'review':evidenceEntry ? 'evidence' : portfolio.role==='learner'?'tasks':'review');
+  const [selectedReviewId,setSelectedReviewId]=useState(evidenceEntry?.outcomeId||'');
   const [selectedTaskId,setSelectedTaskId]=useState('');
   const [taskEvidenceMode,setTaskEvidenceMode]=useState('');
   const [taskJourney,setTaskJourney]=useState(false);
@@ -887,7 +890,7 @@ function OpenPortfolio({db, portfolio, references, evidenceEntry, onRefresh, onB
   const [outcomeId,setOutcomeId] = useState('');
   const [evidenceFromOutcome,setEvidenceFromOutcome] = useState(false);
   const [evidenceUnit,setEvidenceUnit] = useState(evidenceEntry && entryIndex >= 0 ? portfolio.units[entryIndex].id : '');
-  const [uploadOnEntry,setUploadOnEntry] = useState(Boolean(evidenceEntry && portfolio.canEdit));
+  const [uploadOnEntry,setUploadOnEntry] = useState(Boolean(evidenceEntry && !evidenceEntry.reviewRole && portfolio.canEdit));
   const [drafts,setDrafts] = useState({});
   const [error,setError] = useState('');
   const [notice,setNotice] = useState('');
@@ -1004,13 +1007,13 @@ function OpenPortfolio({db, portfolio, references, evidenceEntry, onRefresh, onB
     ...(learner ? [['dashboard','Home'],['tasks','Tasks & Evidence']] : []),
     ['programme','Course'],['evidence','Evidence'],['matrix','Matrix'],['registration','Registration'],['contact','Contact'],
     ['metrics','Metrics'],
-    ...(!learner ? [['dashboard','Overview']] : []),
+    ...(!learner ? [['review',portfolio.role==='assessor'?'Assessment':'Verification'],['reviewTasks','Assigned Tasks'],['dashboard','Overview']] : []),
     ['library','Study Library'],
   ];
   const outcomeUnit = portfolio.units[unitIndex];
   const outcomeIndex = outcomeUnit?.outcomes.findIndex(item => item.id === outcomeId);
   const outcomeMaterial = getUnitSourceMaterial(outcomeUnit?.code);
-  const unitView = ['dashboard','tasks','programme','outcome','evidence','matrix','registration','contact','metrics','library'].includes(view);
+  const unitView = ['dashboard','tasks','review','reviewTasks','programme','outcome','evidence','matrix','registration','contact','metrics','library'].includes(view);
   const selectContextUnit = index => {
     setUnitIndex(index);
     if (view === 'outcome'||view==='tasks') changeView('programme');
@@ -1032,7 +1035,7 @@ function OpenPortfolio({db, portfolio, references, evidenceEntry, onRefresh, onB
       <Action secondary disabled={busy} onClick={() => run(() => onRefresh())}>Refresh</Action></div>
     <QualificationIdentity portfolio={portfolio} source={selectedReference} heroImage={cover?.heroImage}
       body={cover?.body} level={cover?.level}/>
-    {view!=='tasks'&&<QualificationTopStats portfolio={portfolio} visiblePortfolio={visiblePortfolio}/>}
+    {!['tasks','review'].includes(view)&&<QualificationTopStats portfolio={portfolio} visiblePortfolio={visiblePortfolio}/>}
     {view !== 'dashboard' && view!=='tasks' && <details className="qfd-portfolio-details">
       <summary>Programme dates, progress &amp; assigned reviewers</summary>
       <PortfolioStatusRibbon portfolio={portfolio} progress={progress} onRegistration={()=>changeView('registration')}/>
@@ -1046,10 +1049,12 @@ function OpenPortfolio({db, portfolio, references, evidenceEntry, onRefresh, onB
     </header>}
     {error && <p className="qf-live-error" role="alert">{error}</p>}
     {notice && <p className="qf-live-notice" role="status">{notice}</p>}
-    {view === 'evidence' && evidenceEntry && !portfolio.canEdit && <p>Evidence uploads are unavailable for this enrolment.</p>}
+    {view === 'evidence' && evidenceEntry && !evidenceEntry.reviewRole && !portfolio.canEdit && <p>Evidence uploads are unavailable for this enrolment.</p>}
     {learner&&view!=='tasks'&&taskJourney&&<div className="qf-live-actions"><Action secondary disabled={busy} onClick={()=>{changeView('tasks');setTaskJourney(false);}}><ArrowLeft size={16}/> Back to My Tasks</Action></div>}
     {learner&&view==='tasks'&&<QualificationLearnerTasks db={db} portfolio={portfolio} progress={progress} selectedId={selectedTaskId} onSelect={setSelectedTaskId} busy={busy}
       onView={(key,index)=>{if(Number.isInteger(index))setUnitIndex(index);changeView(key);setTaskJourney(true);}} onOutcome={id=>{openOutcome(id);setTaskJourney(true);}} onUnit={openTaskUnit} onEvidence={openTaskEvidence}/>}
+    {!learner&&view==='review'&&<ReviewerPortfolioWorkspace db={db} portfolio={portfolio} selectedId={selectedReviewId} onSelect={setSelectedReviewId} busy={busy} onOpenTasks={()=>changeView('reviewTasks')} onOpenUnit={id=>{setSelectedReviewId(id);openOutcome(id);}} renderReview={id=>{const item=progress.outcomes.find(o=>o.id===id);return item?<ReviewerClaim key={item.id+':'+(item.claim?.version||0)} portfolio={portfolio} outcome={item} busy={busy} onDownload={onDownload} onReview={(decision,feedback,criteria)=>commit('review',{p_outcome:item.id,p_version:item.claim?.version||0,p_stage:portfolio.role,p_decision:decision,p_feedback:feedback,p_criteria:criteria},'Review recorded.')}/>:null;}}/>}
+    {!learner&&view==='reviewTasks'&&<PortfolioAssignedTasks db={db} portfolio={portfolio} onOutcome={openOutcome} onView={changeView}/>}
     {view === 'dashboard' && <>
       <QualificationVisualDashboard portfolio={visiblePortfolio} progress={progress} selectedUnitIndex={unitIndex}
         onUnit={index => {setUnitIndex(index);changeView('programme');}} onOutcome={openOutcome}
@@ -1086,7 +1091,7 @@ function OpenPortfolio({db, portfolio, references, evidenceEntry, onRefresh, onB
     </QualificationStudyLibrary>}
     {view === 'outcome' && outcome && outcomeIndex >= 0 && <QualificationOutcome
       units={portfolio.units} unitIndex={unitIndex} outcomeIndex={outcomeIndex} onJump={jumpFromOutcome}
-      onBack={() => changeView('programme')} aim={referenceUnit?.aim || outcomeMaterial?.aim}
+      onBack={() => changeView(learner?'programme':'review')} aim={referenceUnit?.aim || outcomeMaterial?.aim}
       sourceUrl={selectedReference?.source_url || outcomeMaterial?.sourceUrl}
       centreBrief={outcomeUnit.centreBrief ? <QualificationCentreBrief unit={outcomeUnit} db={db}/> : null}
       status={<Status outcome={outcome}/>} deadline={outcome.deadline && formatDate(outcome.deadline)} busy={busy}>
@@ -1122,10 +1127,10 @@ export default function LiveQualificationPortfolio({db,adminEntry=false,initialL
   useEffect(() => {
     const id = ++request.current;
     setBusy(true); setError('');
-    Promise.all([portfolioRpc(db,'list'),portfolioRpc(db,'reference_catalog'),portfolioRpc(db,'admin_access')])
-      .then(([data,sourceData,canManage]) => {
+    Promise.all([portfolioRpc(db,'list'),portfolioRpc(db,'reference_catalog'),portfolioRpc(db,'admin_access'),portfolioRpc(db,'reviewer_queue')])
+      .then(([data,sourceData,canManage,reviewRows]) => {
         if (id === request.current) {
-          setRows(data);
+          setRows([...(data||[]).filter(r=>r.role==='learner'),...(reviewRows||[])]);
           setReferences(Array.isArray(sourceData) ? sourceData : []);
           setAdminEnabled(canManage === true);
         }
@@ -1139,7 +1144,7 @@ export default function LiveQualificationPortfolio({db,adminEntry=false,initialL
     setBusy(true); setError('');
     try {
       const [data,briefs,certAuthorized] = await Promise.all([
-        portfolioRpc(db,'portfolio',{p_enrolment:id}),
+        entry?.reviewRole?portfolioRpc(db,'review_portfolio',{p_enrolment:id,p_role:entry.reviewRole}):portfolioRpc(db,'portfolio',{p_enrolment:id}),
         portfolioRpc(db,'programme_briefs',{p_enrolment:id}),
         portfolioRpc(db,'certificate_access',{p_enrolment:id}),
       ]);
@@ -1159,7 +1164,7 @@ export default function LiveQualificationPortfolio({db,adminEntry=false,initialL
   const refresh = async updated => {
     const current = request.current;
     const [data,certAuthorized] = await Promise.all([
-      updated || portfolioRpc(db,'portfolio',{p_enrolment:portfolio.id}),
+      portfolio.role==='learner'?(updated || portfolioRpc(db,'portfolio',{p_enrolment:portfolio.id})):portfolioRpc(db,'review_portfolio',{p_enrolment:portfolio.id,p_role:portfolio.role}),
       portfolioRpc(db,'certificate_access',{p_enrolment:portfolio.id}),
     ]);
     if (current === request.current) {
@@ -1176,7 +1181,7 @@ export default function LiveQualificationPortfolio({db,adminEntry=false,initialL
     </div>}
     {busy ? <PremiumLoading variant="compact"/> : error ? <Panel title="Qualifications">
       <p role="alert">{error}</p><Action secondary onClick={() => setRefreshKey(value => value + 1)}>Retry</Action>
-    </Panel> : portfolio ? <OpenPortfolio key={portfolio.id} db={db} portfolio={portfolio} references={references} evidenceEntry={evidenceEntry} onRefresh={refresh}
+    </Panel> : portfolio ? <OpenPortfolio key={portfolio.id+':'+portfolio.role} db={db} portfolio={portfolio} references={references} evidenceEntry={evidenceEntry} onRefresh={refresh}
       onBack={() => {setPortfolio(null); setRefreshKey(value => value + 1);}}/> : adminView && adminEnabled
       ? <QualificationCentreAdmin db={db} references={references} initialLearnerId={initialLearnerId} onBack={()=>{setAdminView(false);setRefreshKey(v=>v+1);}}/> : previewId
       ? <QualificationSourcePreview key={previewId} item={QUALIFICATIONS.find(item => item.id === previewId)}
