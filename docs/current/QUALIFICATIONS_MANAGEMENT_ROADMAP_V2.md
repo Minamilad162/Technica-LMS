@@ -171,6 +171,8 @@ Acceptance: required checks passed, deployment independently verified, acceptanc
 
 | 2026-11-24 | Q05 | Owner approved four-step task builder. Task Templates belong to the exact qualification edition and can exist without learners. Assigned Tasks belong to individual enrolments with saved instructions, selected criteria across Units, approved materials, individual due dates and existing reviewer assignments. Supports direct individual tasks, approved template reuse, assessor assignment for own portfolios and learner task display linked to existing outcomes/evidence. Migration 202611240004, no separate grading engine. | PR #129 merged at 5e12e135d52b50d80101dcca99a0d7e125451294; CI run 45352890831 passed; migration 202611240004 installed. Cancellation/rescheduling and full Q06/Q07 acceptance remain open. | Test and verify rollout before marking phase complete. |
 
+| 2026-11-24 | Q05 | Added task lifecycle actions: deadline change and cancellation with note/reason, optimistic revision guard and audit history; existing evidence/decisions preserved, verified tasks locked. Admin and assigned authorised assessor only. Migration 202611240005 and regression tests. | Branch implementation; CI and rollout pending | Validate migration and UI; Q06 visual/operational acceptance remains open. |
+
 ### Production edition audit — 24 November 2026
 
 | Edition | Units | Outcomes | Criteria | Approved briefs | Released | Enrolments |
