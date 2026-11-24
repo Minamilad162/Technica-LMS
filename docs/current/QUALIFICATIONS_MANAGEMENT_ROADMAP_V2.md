@@ -37,7 +37,7 @@ Status vocabulary: PLANNED, IN PROGRESS, BLOCKED, IMPLEMENTED, VERIFIED, DONE. I
 | Q03 | Roles & staff management | IN PROGRESS | Q01 | PR #126 merged; role selection, inline authorisation, reassignment guards and workload CI verified, production RPC installed; live workspace/visual acceptance pending |
 | Q04 | Learner enrolment engine | IN PROGRESS | Q02, Q03 | PR #126 merged; assignment and Users entry CI verified; production migration installed; live enrolment and visual acceptance pending |
 | Q05 | Assessment plans & tasks | IN PROGRESS | Q04 | Approved four-step UI; templates and assignments merged, CI passed, migration installed; rescheduling/cancellation merged and verified; visual and operational acceptance pending |
-| Q06 | Learner workspace | PLANNED | Q05 | Existing Evidence/Matrix/Outcome integration |
+| Q06 | Learner workspace | IN PROGRESS | Q05 | PR #131 merged and CI passed; authenticated visual and operational acceptance pending |
 | Q07 | Assessor & verifier workspaces | PLANNED | Q04, Q05 | Independent review queues |
 | Q08 | Monitoring & completion | PLANNED | Q05–Q07 | Real metrics, notifications, issuer safeguards |
 | Q09 | E2E QA & release | PLANNED | Q01–Q08 | Staged test identities and production verification |
