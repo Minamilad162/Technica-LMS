@@ -2,10 +2,11 @@ import React,{useEffect,useMemo,useState} from 'react';
 import {ArrowLeft,BookCheck,BookOpen,CheckCircle2,ClipboardCheck,Download,FileCheck2,FilePlus2,
  FileText,FolderClosed,GraduationCap,Info,Layers3,LockKeyhole,RefreshCw,Search,ShieldAlert,ShieldCheck,UploadCloud,Users} from 'lucide-react';
 import {portfolioRpc} from './qualificationPortfolioApi.js';
-import {qualificationReadiness,needsAssessmentMethodReview,sourceRubricForUnit} from './qualificationReadiness.js';
+import {qualificationReadiness,needsAssessmentMethodReview,sourceRubricForUnit,publicationChecks,validPublicationReference} from './qualificationReadiness.js';
 import QualificationCentreLearnerPreview from './QualificationCentreLearnerPreview.jsx';
 import {ProgrammeUpdatesAdmin} from './QualificationProgrammeUpdates.jsx';
 import './qualificationCentreAdmin.css';
+import {QualificationPublishBar,QualificationPublishDialog} from './QualificationPublish.jsx';
 import {AdminQualificationNavigation,AdminQualificationCatalog,AdminQualificationDetail} from './QualificationAdminCenter.jsx';
 
 const methods=[['assignment_brief','Assignment Brief'],['reflective_account','Reflective Account'],
@@ -45,16 +46,22 @@ export default function QualificationCentreAdmin({db,onBack,references=[]}){
  [issuerUrl,setIssuerUrl]=useState(''),[issuerAttest,setIssuerAttest]=useState(false),
  [issuerStatus,setIssuerStatus]=useState(null);
  const [previewWorkspace,setPreviewWorkspace]=useState(false);
+ const [publishOpen,setPublishOpen]=useState(false);
  const [section,setSection]=useState('overview'),[setupTab,setSetupTab]=useState('summary');
  const catalogueVisible=['overview','qualifications'].includes(section);
- const selectVersion=v=>{setVersionId(v.id);setUnitId(v.units[0]?.id||'');setReassignId('');setLearner('');setAssessor('');setVerifier('');setFile(null);setFileTitle('');};
+ const selectVersion=v=>{if(v.id===version?.id)return true;if(!confirmDiscard())return false;setVersionId(v.id);setUnitId(v.units[0]?.id||'');setReassignId('');setLearner('');setAssessor('');setVerifier('');setFile(null);setFileTitle('');return true;};
  const openSetup=tab=>{setSection('qualifications');setSetupTab(tab);};
  const [loading,setLoading]=useState(true),[saving,setSaving]=useState(false),
  [message,setMessage]=useState(''),[error,setError]=useState('');
  const version=versions.find(v=>v.id===versionId)||versions[0];
  const unit=version?.units?.find(u=>u.id===unitId)||version?.units?.[0];
  const release=!!version?.publishedAt;
- const approved=version?.units.filter(u=>u.brief?.status==='approved').length||0;
+ const briefDirty=Boolean(!release&&unit&&(instructions!==(unit.brief?.instructions||'')||assessmentMethods!==(unit.brief?.methods||'')));
+ const confirmDiscard=()=>!briefDirty||window.confirm('Discard unsaved changes to this Unit? Save Draft first to retain them.');
+ const chooseUnit=id=>{if(id===unit?.id||confirmDiscard()){setUnitId(id);setFile(null);setFileTitle('');}};
+ const canSaveDraft=Boolean(briefDirty&&instructions.trim().length>=80);
+ useEffect(()=>{if(!briefDirty)return;const prevent=e=>{e.preventDefault();e.returnValue='';};window.addEventListener('beforeunload',prevent);return()=>window.removeEventListener('beforeunload',prevent);},[briefDirty]);
+ const approved=version?.units.filter(u=>u.brief?.status==='approved'&&Boolean(u.brief?.approvedAt)).length||0;
  const total=version?.units.length||0;
  const documents=unit?.documents||[];
  const readiness=qualificationReadiness(version,staff);
@@ -97,8 +104,8 @@ export default function QualificationCentreAdmin({db,onBack,references=[]}){
  },[db,version?.id,version?.publishedAt]);
  const run=async(callback,success,preferredUnit)=>{
   setSaving(true);setMessage('');setError('');
-  try{await callback();await reload(version?.id,preferredUnit||unit?.id);setMessage(success);}
-  catch(e){setError(errText(e));}
+  try{await callback();await reload(version?.id,preferredUnit||unit?.id);setMessage(success);return true;}
+  catch(e){setError(errText(e));return false;}
   finally{setSaving(false);}
  };
  const findPeople=async()=>{
@@ -114,9 +121,22 @@ export default function QualificationCentreAdmin({db,onBack,references=[]}){
    approve?'Unit brief approved by centre administrator.':'Draft saved for centre review.',
    approve?nextUnapproved?.id:undefined);
  };
- const onPublish=()=>run(()=>portfolioRpc(db,'admin_publish',{
-  p_version:version.id,p_approval_reference:approvalRef.trim(),p_declaration:declaration.trim(),p_attest:attest
- }),'Programme version published and locked. You can now assign distinct learner, assessor and verifier.');
+ const onPublish=async()=>{
+  if(saving||release||briefDirty||!publicationChecks(version,references).every(c=>c.ok)||
+     !validPublicationReference(approvalRef)||declaration.trim().length<70||!attest)return;
+  const ok=await run(()=>portfolioRpc(db,'admin_publish',{
+   p_version:version.id,p_approval_reference:approvalRef.trim(),p_declaration:declaration.trim(),p_attest:attest
+  }),'Qualification is now Live. The approved edition is locked and ready for eligible enrolments.');
+  if(ok){setPublishOpen(false);setAttest(false);}
+ };
+ const openPublish=()=>{if(saving||release)return;setError('');setAttest(false);setPublishOpen(true);};
+ const reviewPublication=tab=>{
+  setPublishOpen(false);
+  const next=tab==='units'?version.units.find(u=>!sourceRubricForUnit(references,version,u).complete):
+   version.units.find(u=>u.brief?.status!=='approved'||!u.brief?.approvedAt||needsAssessmentMethodReview(u.brief?.methods));
+  if(next&&!briefDirty)chooseUnit(next.id);
+  openSetup(briefDirty?'plans':tab);
+ };
  const authorizeCertificate=()=>run(async()=>{
     await portfolioRpc(db,'admin_certificate_authorize',{
       p_version:version.id,p_issuer_name:issuerName.trim(),p_reference:issuerRef.trim(),
@@ -170,7 +190,7 @@ export default function QualificationCentreAdmin({db,onBack,references=[]}){
  if(previewWorkspace)return <QualificationCentreLearnerPreview version={version}
    references={references} onBack={()=>setPreviewWorkspace(false)}/>;
  return <div className="qc-workspace">
-  <header className="qac-header"><div><button className="qc-back" type="button" onClick={onBack}><ArrowLeft size={16}/> Back to Qualifications</button>
+  <header className="qac-header"><div><button className="qc-back" type="button" onClick={()=>{if(confirmDiscard())onBack();}}><ArrowLeft size={16}/> Back to Qualifications</button>
     <span className="qf-overline">CENTRE OPERATIONS · ADMIN ACCESS</span><h1>Qualification Management</h1>
     <p>Set up, manage and deliver professional qualifications.</p></div>
     <button type="button" className="qc-primary" disabled={!version||saving} onClick={()=>openSetup('units')}><GraduationCap size={17}/> Manage qualification</button>
@@ -179,7 +199,7 @@ export default function QualificationCentreAdmin({db,onBack,references=[]}){
   {error&&<p role="alert" className="qc-error">{error}</p>}
   {message&&<p role="status" className="qc-success-message"><CheckCircle2 size={16}/>{message}</p>}
   {catalogueVisible&&<AdminQualificationCatalog versions={versions} version={version} references={references}
-     staff={staff} saving={saving} onSelect={v=>{selectVersion(v);setSetupTab('summary');}}
+     staff={staff} saving={saving} onSelect={v=>{if(selectVersion(v))setSetupTab('summary');}}
      onSection={setSection} onTab={openSetup}/>}
   {catalogueVisible&&<AdminQualificationDetail version={version} references={references} staff={staff}
      tab={setupTab} onTab={setSetupTab} saving={saving} onPreview={()=>setPreviewWorkspace(true)}
@@ -190,7 +210,7 @@ export default function QualificationCentreAdmin({db,onBack,references=[]}){
       onChange={e=>{const next=versions.find(v=>v.id===e.target.value);if(next)selectVersion(next);}}>
       {versions.map(v=><option key={v.id} value={v.id}>{v.title} · {v.version}</option>)}
     </select>
-    <Pill ready={release}>{release?'Released':'In Setup'}</Pill>
+    <Pill ready={release}>{release?'Live':'Draft'}</Pill>
   </div>}
   {catalogueVisible&&!versions.length&&!error&&<Notice>No official qualification editions are available. The catalogue is source-backed; new-edition authoring is not enabled in this release.</Notice>}
     {version&&catalogueVisible&&setupTab==='release'&&<section className="qc-assessment-readiness" aria-label="Assessment access readiness">
@@ -199,7 +219,7 @@ export default function QualificationCentreAdmin({db,onBack,references=[]}){
         <p>Technical access opens only after centre publication and genuine learner enrolment.</p></div>
       <span className={'qc-assessment-readiness-status '+(readiness.published?'is-ready':'is-locked')}>
         {readiness.published?<CheckCircle2 size={16}/>:<LockKeyhole size={16}/>}
-        {readiness.published?'Released · Ready for enrolment':'In Setup'}
+        {readiness.published?'Live · Ready for enrolment':'Draft'}
       </span>
     </div>
     <div className="qc-assessment-readiness-grid">
@@ -212,7 +232,7 @@ export default function QualificationCentreAdmin({db,onBack,references=[]}){
     <div className="qc-assessment-next">
       <div><strong>{readiness.published?'Delivery options':'Next required action'}</strong><p>{readiness.published?'Published. Zero enrolled learners is a normal state; assign reviewers when enrolling.':readiness.next}</p></div>
       {!readiness.published&&readiness.pendingUnits.length>0&&<button className="qc-outline" type="button"
-        onClick={()=>{setUnitId(readiness.pendingUnits[0].id);openSetup('plans');}}>
+        onClick={()=>{chooseUnit(readiness.pendingUnits[0].id);openSetup('plans');}}>
         Review next Unit · {readiness.pendingUnits[0].code}
       </button>}
     </div>
@@ -224,7 +244,7 @@ export default function QualificationCentreAdmin({db,onBack,references=[]}){
       <p className="qc-secondary">The real Learning Outcomes and Assessment Criteria are already imported.
         These centre-authored brief drafts must be checked against the current programme before approval.</p>
       <div className="qc-unit-pills">{version.units.map((u,index)=><button key={u.id} type="button"
-        disabled={saving} className={unit?.id===u.id?'active':''} onClick={()=>setUnitId(u.id)}
+        disabled={saving} className={unit?.id===u.id?'active':''} onClick={()=>chooseUnit(u.id)}
         title={u.title}>Unit {String(index+1).padStart(2,'0')} · {u.code}{u.brief?.status==='approved'&&<CheckCircle2 size={15}/>}</button>)}</div>
       {unit&&<div className="qc-unit-editor">
        <div className="qc-unit-head"><div><span className="qf-overline">{unit.code}</span><h3>{unit.title}</h3>
@@ -264,15 +284,14 @@ export default function QualificationCentreAdmin({db,onBack,references=[]}){
           I am authorised by Technica Consult to approve this centre-authored Unit brief.</label>
        </fieldset>}
        <div className="qc-actions">
-        <button type="button" className="qc-outline" disabled={saving||release||!instructions.trim()}
-          onClick={()=>onBrief(false)}><FileText size={16}/> Save draft</button>
+        
         <button type="button" className="qc-primary" disabled={!canApproveBrief}
           onClick={()=>onBrief(true)}><BookCheck size={16}/> Approve Unit brief</button>
        </div>
       </div>}
     </Card>
     <Card title="Centre resources · protected uploads" icon={FolderClosed} hidden={!(catalogueVisible&&setupTab==='materials')}>
-      <div className="qc-unit-pills" aria-label="Resource Unit selector">{version.units.map((u,index)=><button key={u.id} type="button" disabled={saving} className={unit?.id===u.id?'active':''} onClick={()=>{setUnitId(u.id);setFile(null);setFileTitle('');}} title={u.title}>Unit {String(index+1).padStart(2,'0')} · {u.code}</button>)}</div>
+      <div className="qc-unit-pills" aria-label="Resource Unit selector">{version.units.map((u,index)=><button key={u.id} type="button" disabled={saving} className={unit?.id===u.id?'active':''} onClick={()=>chooseUnit(u.id)} title={u.title}>Unit {String(index+1).padStart(2,'0')} · {u.code}</button>)}</div>
       <p className="qc-secondary">Upload genuine centre-authorised Assignment Briefs, Reflective Account forms, Witness Testimony forms, CPD records or evidence matrices. Drafts cannot be viewed by learners until approved.</p>
       <div className="qc-document-list">{documents.map(d=><div key={d.id}>
         <FileCheck2 size={19}/><div><strong>{d.title}</strong><small>{d.kind.replaceAll('_',' ')} · {d.filename} · {stamp(d.createdAt)}</small></div>
@@ -290,28 +309,16 @@ export default function QualificationCentreAdmin({db,onBack,references=[]}){
          onClick={onUpload}><UploadCloud size={16}/> Upload to protected centre library</button>
       </div>
     </Card>
-    <Card title="Release an assessed qualification" icon={ShieldCheck} hidden={!(catalogueVisible&&setupTab==='release')}>
-      <div className="qc-release-readiness"><Pill ready={approved===total&&total>0}>{approved}/{total} Centre-approved Unit briefs</Pill>
-      <Pill ready={version.units.every(u=>u.criteria>0)}>{version.units.reduce((n,u)=>n+u.criteria,0)} assessment criteria</Pill></div>
-      <p className="qc-secondary">Release locks the rubric and opens real enrolments. This is a formal administrative action, not an automatic conversion of a reference specification.</p>
-      {release?<div className="qc-release-done"><CheckCircle2 size={19}/> Published {stamp(version.publishedAt)} · {version.approvalReference}</div>:<>
-        <label className="qc-field">Centre approval / authorisation reference
-          <input value={approvalRef} maxLength={180} disabled={saving} onChange={e=>setApprovalRef(e.target.value)}
-            placeholder="Enter the genuine centre authorization or approval record"/></label>
-        <label className="qc-field">Learner declaration (full approved wording)
-          <textarea value={declaration} maxLength={5000} disabled={saving} rows={4}
-            onChange={e=>setDeclaration(e.target.value)} placeholder="The approved declaration the learner must accept before assessment…"/></label>
-        <label className="qc-confirm"><input type="checkbox" checked={attest} disabled={saving} onChange={e=>setAttest(e.target.checked)}/>
-          <span>I am authorised by the centre to approve this exact qualification issue, each Unit brief and the learner declaration. All assessments will follow centre quality assurance.</span></label>
-        <button className="qc-primary" type="button"
-          disabled={saving||!attest||approved!==total||approvalRef.trim().length<10||declaration.trim().length<70}
-          onClick={()=>{if(window.confirm('Publish and permanently lock this centre-approved qualification edition?'))onPublish();}}>
-          <ShieldCheck size={17}/> Release approved qualification
-        </button>
-      </>}
-    </Card>
-    <Card title="Learner & reviewer assignment" icon={Users} hidden={section!=='enrolments'}>
-      <p className="qc-secondary">Only published, centre-approved qualifications can be assigned. Reviewers must be different active users.</p>
+    <Card title="Publication settings" icon={ShieldCheck} hidden={!(catalogueVisible&&setupTab==='release')}>
+       <p className="qc-secondary">Keep working in Draft until the official structure, Unit briefs and assessment methods are approved. Publish once the authorised centre sign-off is complete.</p>
+       {release?<div className="qc-release-done"><CheckCircle2 size={19}/> Live since {stamp(version.publishedAt)} · {version.approvalReference}</div>:<>
+        <div className="qc-release-readiness">{publicationChecks(version,references).map(check=><Pill key={check.id} ready={check.ok}>{check.label}</Pill>)}</div>
+        <p className="qc-secondary">Centre approval reference and the full learner declaration are recorded during publication. Zero enrolled learners is valid.</p>
+        <div className="qpub-settings-actions"><button type="button" className="qc-outline" disabled={saving} onClick={openPublish}><ShieldCheck size={17}/> Review publication readiness</button></div>
+       </>}
+     </Card>
+     <Card title="Learner & reviewer assignment" icon={Users} hidden={section!=='enrolments'}>
+      <p className="qc-secondary">Only Live, centre-approved qualifications can be assigned. Reviewers must be different active users.</p>
       <div className="qc-people-search"><input aria-label="Find users by name or email" value={search}
         onChange={e=>setSearch(e.target.value)} placeholder="Search active accounts"/>
         <button type="button" onClick={findPeople} disabled={saving}><Search size={17}/></button></div>
@@ -326,7 +333,7 @@ export default function QualificationCentreAdmin({db,onBack,references=[]}){
         min={startOn} onChange={e=>setTargetOn(e.target.value)} disabled={saving||!release}/></label></div>
       <button type="button" className="qc-primary" disabled={saving||!release||!learner||!assessor||!verifier||
         new Set([learner,assessor,verifier]).size!==3} onClick={onAssign}><GraduationCap size={17}/> Enrol &amp; assign</button>
-      {!release&&<p className="qc-locked"><LockKeyhole size={16}/> Release and sign off all Unit briefs before enrolling.</p>}
+      {!release&&<p className="qc-locked"><LockKeyhole size={16}/> Publish the qualification after approving all Unit briefs before enrolling.</p>}
       <hr/><h4>Current enrolments</h4>
       {version.enrolments.length?version.enrolments.map(e=><div className="qc-enrolled" key={e.id}>
          <strong>{e.learner}</strong><small>Assessor: {e.assessor} · Verifier: {e.verifier}</small>
@@ -415,5 +422,11 @@ export default function QualificationCentreAdmin({db,onBack,references=[]}){
        <li><LockKeyhole size={15}/> Certificate recording remains disabled until externally authorised</li></ul>
     </Card>
   </div>}
+  {(catalogueVisible||section==='plans')&&version&&<QualificationPublishBar version={version} dirty={briefDirty} canSave={canSaveDraft}
+    saving={saving} onSave={()=>onBrief(false)} onPublish={openPublish} onEnrol={()=>setSection('enrolments')}/>}
+  {publishOpen&&version&&!release&&<QualificationPublishDialog version={version} references={references} dirty={briefDirty}
+    saving={saving} error={error} approvalRef={approvalRef} declaration={declaration} attest={attest}
+    onApprovalRef={v=>{setApprovalRef(v);setAttest(false);}} onDeclaration={v=>{setDeclaration(v);setAttest(false);}}
+    onAttest={setAttest} onClose={()=>setPublishOpen(false)} onReview={reviewPublication} onPublish={onPublish}/>}
  </div>;
 }

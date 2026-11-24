@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
-import {qualificationReadiness,needsAssessmentMethodReview,sourceRubricForUnit} from '../src/qualification/qualificationReadiness.js';
+import {qualificationReadiness,needsAssessmentMethodReview,sourceRubricForUnit,publicationChecks,editionStatus,validPublicationReference} from '../src/qualification/qualificationReadiness.js';
 
 const approvedAt='2026-11-22T09:00:00Z';
 const unit=(id,approved=false)=>({
@@ -113,3 +113,22 @@ for(const action of ['admin_assign','admin_publish','admin_authorize_staff','adm
  assert.ok(admin.includes("'"+action+"'"),'Existing governed action must remain available: '+action);
 assert.ok(admin.includes("hidden={section!=='enrolments'}")&&admin.includes("hidden={section!=='staff'}"),'Admin controls are separated into navigation views');
 assert.ok(adminStyles.includes('@media(max-width:620px)')&&adminStyles.includes('prefers-reduced-motion'),'Responsive admin layout respects reduced motion');
+
+const sourceVersion={catalogKey:rubricVersion.catalogKey,units:[{...rubricUnit,brief:{status:'approved',approvedAt,methods:'Written assignment and verified workplace evidence'}}],enrolments:[]};
+assert.equal(editionStatus(sourceVersion),'Draft');
+assert.equal(editionStatus({...sourceVersion,publishedAt:approvedAt}),'Live','Published status is independent of learner/reviewer counts');
+assert.ok(publicationChecks(sourceVersion,[rubricExample]).every(c=>c.ok));
+assert.equal(publicationChecks(sourceVersion,[])[0].ok,false,'Missing exact source rubric blocks publication');
+assert.equal(publicationChecks({...sourceVersion,units:[]},[rubricExample]).every(c=>c.ok),false);
+const badMethod={...sourceVersion,units:[{...sourceVersion.units[0],brief:{...sourceVersion.units[0].brief,methods:'Methods must be selected and justified by the centre assessor'}}]};
+assert.equal(publicationChecks(badMethod,[rubricExample]).find(c=>c.id==='methods').ok,false);
+assert.equal(validPublicationReference('draft record ABC-001'),false);
+assert.equal(validPublicationReference('CENTRE/2026/001'),true);
+const publish=read('src/qualification/QualificationPublish.jsx');
+assert.ok(admin.includes('<QualificationPublishBar version={version}')&&admin.includes('<QualificationPublishDialog version={version}'));
+assert.ok(admin.includes('onSave={()=>onBrief(false)}')&&admin.includes('briefDirty&&instructions.trim().length>=80'),'Draft saves actual edited Unit without revoking unchanged approval');
+assert.ok(admin.includes('if(saving||release||briefDirty||!publicationChecks')&&admin.includes("portfolioRpc(db,'admin_publish'"),'Existing governed RPC only after validated confirmation');
+assert.ok(publish.includes('!dirty&&!version.publishedAt')&&publish.includes('Enrolments and learner-specific reviewer assignments are not required for publication.'));
+assert.ok(publish.includes('node.showModal()')&&publish.includes('onCancel='));
+assert.ok(!adminCenter.includes('In Setup'),'Use Draft and Live consistently on admin cards');
+console.log('Q02 draft/live publication readiness, zero enrolments, exact edition and modal wiring: PASS');
