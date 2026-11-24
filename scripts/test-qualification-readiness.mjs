@@ -109,7 +109,7 @@ assert.ok(adminCenter.includes('version.publishedAt?')&&adminCenter.includes('Re
 assert.ok(adminCenter.includes('r.published?')&&adminCenter.includes("No learners enrolled yet."),'Readiness is based on publication, not student count');
 assert.ok(adminCenter.includes('refs.find(r=>r.catalog_key===v?.catalogKey)'),'Reference number is edition-specific, never guessed');
 assert.ok(adminCenter.includes('v.version')&&adminCenter.includes('learnersOf(v).length')&&adminCenter.includes('approvedCount(v)'),'All visible edition metrics use actual data');
-for(const action of ['admin_assign','admin_publish','admin_authorize_staff','admin_reassign','admin_reserve_document','admin_approve_document','admin_certificate_authorize'])
+for(const action of ['admin_assign_simple','admin_publish','admin_authorize_staff','admin_reassign_simple','admin_reserve_document','admin_approve_document','admin_certificate_authorize'])
  assert.ok(admin.includes("'"+action+"'"),'Existing governed action must remain available: '+action);
 assert.ok(admin.includes("section==='enrolments'&&<AssignmentWorkspace")&&admin.includes("hidden={section!=='staff'}"),'Admin controls are separated into navigation views');
 assert.ok(adminStyles.includes('@media(max-width:620px)')&&adminStyles.includes('prefers-reduced-motion'),'Responsive admin layout respects reduced motion');
@@ -160,9 +160,15 @@ const adminUsers=read('src/production/AdminToolsPanels.jsx');
 const adminWorkspace=read('src/production/AdminToolsWorkspace.jsx');
 assert.ok(assignment.includes("portfolioRpc(db,'admin_directory'")&&assignment.includes('p_selected:value||null'),'Independent server search retains selected reviewer');
 assert.ok(assignment.includes('setEditAssessor(e.assessorId')&&assignment.includes('setEditVerifier(e.verifierId'),'Edit current reviewers, not blank fields');
-assert.ok(assignment.includes('onAuthorise(value,role,reference.trim())')&&assignment.includes('!attest||!validRef(reference)'),'Documented authorisation is explicit');
+assert.ok(assignment.includes('p_attest:true')&&assignment.includes('By assigning, you confirm'),'Documented authorisation is explicit');
 assert.ok(assignment.includes('versions.filter(v=>v.publishedAt)')&&assignment.includes('e.learnerId===learner'),'Exact live edition, duplicate checks');
 assert.ok(adminUsers.includes('onAssignQualification(selected.id)')&&adminWorkspace.includes('initialLearnerId={qualificationLearner}'),'Users directory opens same assignment workspace');
 assert.ok(dirSql.includes('public.lms_qf_admin_access()')&&dirSql.includes("r.role='admin'")&&dirSql.includes("s.revoked_at IS NULL"));
 assert.ok(dirSql.includes('Independent verification required')&&dirSql.includes('This learner is already enrolled'));
 console.log('Q03/Q04 assignment and reviewer directory integration: PASS');
+
+const simpleAssignmentSql=read('supabase/migrations/202611240003_qualification_compact_assignment.sql');
+assert.ok(assignment.includes('role="combobox"')&&assignment.includes('p_note:note.trim()')&&assignment.includes('l!==a&&l!==v'));
+assert.ok(simpleAssignmentSql.includes('admin_note')&&simpleAssignmentSql.includes('p_attest IS DISTINCT FROM true')&&simpleAssignmentSql.includes('CASE WHEN p_assessor=p_verifier THEN 2 ELSE 3 END'));
+assert.ok(admin.includes("portfolioRpc(db,'admin_assign_simple'")&&admin.includes("portfolioRpc(db,'admin_reassign_simple'"));
+console.log('Compact assignment and optional note: PASS');

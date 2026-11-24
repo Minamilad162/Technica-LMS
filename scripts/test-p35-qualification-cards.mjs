@@ -154,7 +154,7 @@ assert.match(centre,/admin_certificate_authorize/,'Must require real external is
 assert.match(centre,/admin_authorize_staff/,'Staff competence admin action missing');
 assert.match(centre,/admin_staff/,'Reviewers must be filtered to centre-authorized staff');
 const assignmentUi=read('src/qualification/QualificationEnrolments.jsx');
-assert.ok(assignmentUi.includes("authorized(staff,assessor,'assessor')")&&assignmentUi.includes("authorized(staff,verifier,'verifier')"),'Selection may discover registered admins but actual assignment must require role-specific authorisation');
+assert.ok(assignmentUi.includes("selected(assessorAccount,assessor,'assessor')")&&assignmentUi.includes("selected(verifierAccount,verifier,'verifier')"),'Selection may discover registered admins but actual assignment must require role-specific authorisation');
 assert.match(live,/portfolioRpc\(db,'certificate_access'/,'Certificate eligibility not linked to actual issuer authority');
 assert.match(issuerSql,/lms_qf_certificate_issuer_authorisations/,'Issuer authorization must be persisted');
 assert.match(issuerSql,/e\.completed_at IS NULL/,'Unfinished outcomes may not create certificates');
