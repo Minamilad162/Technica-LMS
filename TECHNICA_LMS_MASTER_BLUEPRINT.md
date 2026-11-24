@@ -2461,3 +2461,5 @@ Reused Lucide icons and CSS transitions for file, mapping and status actions. Th
 | Catalogue | Show assigned programmes and read-only syllabus previews under distinct headings. Retain preview tabs and enrolment restrictions. |
 
 Decision log: implement the 24 November learner audit without changes to production records, reviewer assignment, programme eligibility or assessment rules. Rollback is a frontend revert. Local verification covers the build and qualification reference workflow, portfolio, readiness, card, material and routing regressions. Authenticated deployment verification is tracked separately.
+
+Authenticated 24 November production smoke confirmed the official OTHM Level 6 learner entry, first evidence action, Unit brief, one deduplicated official specification link, and reload of Study Library Unit 02 and Outcome 02.1. The smoke found a mislabelled return action after opening the Evidence Wizard from Matrix. Keep the return destination tied to the originating screen. Evidence saving and the assessment lifecycle were outside this read-only smoke.

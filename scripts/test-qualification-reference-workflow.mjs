@@ -140,7 +140,7 @@ for(const control of ['Jump to Unit/Outcome','No previous outcomes','No next out
  'Grading Checklists','Recording Forms','Programme Contact Diary']){
  assert.ok(outcomePage.includes(control),'Outcome page lost '+control);
 }
-assert.ok(ui.includes("initialWizard={taskEvidenceMode || (evidenceFromOutcome ? 'choose' : uploadOnEntry ? 'upload' : '')}")&&ui.includes('Back to outcome'));
+assert.ok(ui.includes("initialWizard={taskEvidenceMode || (evidenceOrigin ? 'choose' : uploadOnEntry ? 'upload' : '')}")&&ui.includes('Back to outcome'));
 assert.ok(ui.includes('Completed (Assessor Only)')&&ui.includes("commit('save_claim'"));
 const unitMaterials=source('src/qualification/QualificationLearningResources.jsx');
 assert.match(sourcePreview,/<EvidenceUnitMaterials[\s\S]*?unit=\{unit\} source=\{source\}/,
@@ -165,6 +165,8 @@ assert.ok(ui.indexOf('qf-evidence-wizard') < ui.indexOf('<Panel title="Evidence 
  'The upload form must appear above the records register');
 assert.match(ui,/openMapper\(lastSaved\)/,'Saved evidence must carry its own identity into the Unit mapper');
 assert.match(source('src/qualification/qualificationEvidenceExperience.css'),/prefers-reduced-motion: no-preference/);
+assert.match(ui,/onAddEvidence=\{learner && portfolio.canEdit \? \(\) => openEvidence\('matrix'\)/);
+assert.match(ui,/onBack=\{evidenceOrigin \|\| evidenceUnit \? \(\) => changeView\(evidenceOrigin \|\| 'programme'\)/);
 const outcome = {id:'lo',title:'First assessment',required:true,criteria:[{id:'ac'}]};
 const units = [{id:'u1',outcomes:[]},{id:'u2',outcomes:[outcome]}];
 const portfolio = {units,evidence:[],canEdit:true,assessorAssigned:false,declarationAt:'2026-11-24'};
