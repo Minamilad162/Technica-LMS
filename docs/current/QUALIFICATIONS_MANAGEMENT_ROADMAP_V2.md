@@ -103,6 +103,8 @@ Acceptance: eligible admin enrols real user without SQL; learner opens correct p
 Acceptance: actual assigned task reaches learner with instructions and deadline; criteria belong to correct edition; upload alone cannot mark task verified; no parallel grading system.
 
 ### Q06 — Learner workspace
+
+**Owner-approved design (24 November 2026):** Blue qualification hero and live progress strip, two-pane My Tasks / selected task workspace, status filters, deadline, evidence journey, instructions, linked criteria, evidence requirements and actual reviewer feedback. Preserve original application navigation and numbered Units. Use existing evidence upload/write, multi-unit Matrix and governed Outcome submission (including declaration, complete Outcome mapping and locked snapshots); no fabricated progress or tasks. UI-only change. Visual comparison and authenticated end-to-end acceptance remain pending.
 - [ ] Q06.1 Prominent My Tasks, active/overdue/returned/submitted/completed filters, next action and deadlines.
 - [ ] Q06.2 Task opens existing Outcome, Evidence upload/written evidence and cross-Unit Matrix mapping.
 - [ ] Q06.3 Governed submission, actual criterion coverage, reviewer feedback, locked snapshots and resubmission.
@@ -172,6 +174,8 @@ Acceptance: required checks passed, deployment independently verified, acceptanc
 | 2026-11-24 | Q05 | Owner approved four-step task builder. Task Templates belong to the exact qualification edition and can exist without learners. Assigned Tasks belong to individual enrolments with saved instructions, selected criteria across Units, approved materials, individual due dates and existing reviewer assignments. Supports direct individual tasks, approved template reuse, assessor assignment for own portfolios and learner task display linked to existing outcomes/evidence. Migration 202611240004, no separate grading engine. | PR #129 merged at 5e12e135d52b50d80101dcca99a0d7e125451294; CI run 45352890831 passed; migration 202611240004 installed. Cancellation/rescheduling completed separately in PR #130; full Q06/Q07 acceptance remains open. | Test and verify rollout before marking phase complete. |
 
 | 2026-11-24 | Q05 | Added task lifecycle actions: deadline change and cancellation with note/reason, optimistic revision guard and audit history; existing evidence/decisions preserved, verified tasks locked. Admin and assigned authorised assessor only. Migration 202611240005 and regression tests. | PR #130 merged at e36341a47b0135903670fec183399c4b0b1a645b; CI run 45353362343 passed; migration 202611240005 installed and privileges/revision column verified | Authenticated visual and end-to-end operational acceptance pending; Q06 design gate next. |
+
+| 2026-11-24 | Q06 | Owner approved split-pane learner Tasks & Evidence design. Implemented on codex/q06-learner-workspace, with real task progress, filters, linked criteria and reviewer feedback, protected materials and existing evidence/Outcome routes. | Implementation pending CI and live visual/end-to-end QA | Validate build and tests; test upload, mapping, submission, return and resubmission using authorised accounts. |
 
 ### Production edition audit — 24 November 2026
 

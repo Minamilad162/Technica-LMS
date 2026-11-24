@@ -89,7 +89,7 @@ for(const route of ["['programme','Course']","['evidence','Evidence']","['regist
  "['contact','Contact']","['metrics','Metrics']"]){
  assert.ok(ui.includes(route),'Reference workflow missing '+route);
 }
-assert.ok(ui.includes("useState(evidenceEntry ? 'evidence' : 'dashboard')"),'Approved Qualifications overview must be the default, with the direct Evidence link unchanged');
+assert.ok(ui.includes("useState(evidenceEntry ? 'evidence' : portfolio.role==='learner'?'tasks':'dashboard')"),'Approved learner task workspace is default; reviewer overview and direct evidence entry remain');
 assert.ok(ui.includes("['programme','Course']")&&ui.includes("<QualificationUnitNavigation units={portfolio.units}"),'Original Course navigation and numbered Unit tabs must remain available');
 assert.ok(ui.includes("<QualificationTopStats portfolio={portfolio} visiblePortfolio={visiblePortfolio}/>"),'Statistics must use real RLS-scoped portfolio data');
 assert.ok(ui.includes("<QualificationVisualDashboard portfolio={visiblePortfolio}"),'Qualification overview must render the approved live layout');
@@ -139,7 +139,7 @@ for(const control of ['Jump to Unit/Outcome','No previous outcomes','No next out
  'Grading Checklists','Recording Forms','Programme Contact Diary']){
  assert.ok(outcomePage.includes(control),'Outcome page lost '+control);
 }
-assert.ok(ui.includes("initialWizard={evidenceFromOutcome ? 'choose' : uploadOnEntry ? 'upload' : ''}")&&ui.includes('Back to outcome'));
+assert.ok(ui.includes("initialWizard={taskEvidenceMode || (evidenceFromOutcome ? 'choose' : uploadOnEntry ? 'upload' : '')}")&&ui.includes('Back to outcome'));
 assert.ok(ui.includes('Completed (Assessor Only)')&&ui.includes("commit('save_claim'"));
 const unitMaterials=source('src/qualification/QualificationLearningResources.jsx');
 assert.match(sourcePreview,/<EvidenceUnitMaterials[\s\S]*?unit=\{unit\} source=\{source\}/,

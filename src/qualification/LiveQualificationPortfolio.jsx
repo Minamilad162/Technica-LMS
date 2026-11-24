@@ -15,6 +15,7 @@ import {printPortfolioSection} from './portfolioPrint.js';
 import QualificationMultiUnitEvidence from './QualificationMultiUnitEvidence.jsx';
 import QualificationCentreAdmin from './QualificationCentreAdmin.jsx';
 import {PortfolioAssignedTasks} from './QualificationTasks.jsx';
+import QualificationLearnerTasks from './QualificationLearnerTasks.jsx';
 import QualificationCentreBrief from './QualificationCentreBrief.jsx';
 import {PortfolioStatusRibbon,PortfolioMetrics} from './QualificationPortfolioReferenceUI.jsx';
 import QualificationCandidateRegistration from './QualificationCandidateRegistration.jsx';
@@ -92,7 +93,7 @@ function PortfolioOverview({db, portfolio, progress, onOutcome, onView, qualific
     {learner && <QualificationInternalNav items={homeTabs} active={tab} onChange={setTab}
       ariaLabel="Qualification home sections" nested/>}
     {tab === 'tasks' && <>
-      <PortfolioAssignedTasks db={db} portfolio={portfolio} onOutcome={onOutcome} onView={onView}/>
+      {learner?<Action secondary onClick={()=>onView('tasks')}><ClipboardCheck size={17}/> Open My Tasks</Action>:<PortfolioAssignedTasks db={db} portfolio={portfolio} onOutcome={onOutcome} onView={onView}/>}
       <Panel title={learner ? 'Awaiting Review' : roleLabels[portfolio.role]}>
         <div className="qf-live-list">
           {pending.length === 0 && <p>No outcomes awaiting action.</p>}
@@ -210,7 +211,7 @@ function UnitProgramme({db,portfolio, unitIndex, setUnitIndex, onOutcome, onEvid
     <Panel title="Contact">
       <Action secondary onClick={onContact}><MessageSquare size={16}/> Open programme Contact Diary</Action>
     </Panel>
-    <QualificationCentreBrief unit={unit} db={db}/>
+    <div id="qualification-current-unit-brief"><QualificationCentreBrief unit={unit} db={db}/></div>
     <LiveUnitLearningHub key={unit.id} unit={unit} portfolio={portfolio} onEvidence={() => onEvidence(unit.id)} onLibrary={onLibrary}/>
   </>;
 }
@@ -878,7 +879,10 @@ function ContactDiary({db,portfolio,progress,onOutcome}) {
 
 function OpenPortfolio({db, portfolio, references, evidenceEntry, onRefresh, onBack}) {
   const entryIndex = portfolio.units.findIndex(unit => unit.code === evidenceEntry?.unitCode);
-  const [view,setView] = useState(evidenceEntry ? 'evidence' : 'dashboard');
+  const [view,setView] = useState(evidenceEntry ? 'evidence' : portfolio.role==='learner'?'tasks':'dashboard');
+  const [selectedTaskId,setSelectedTaskId]=useState('');
+  const [taskEvidenceMode,setTaskEvidenceMode]=useState('');
+  const [taskJourney,setTaskJourney]=useState(false);
   const [unitIndex,setUnitIndex] = useState(Math.max(0, entryIndex));
   const [outcomeId,setOutcomeId] = useState('');
   const [evidenceFromOutcome,setEvidenceFromOutcome] = useState(false);
@@ -906,9 +910,12 @@ function OpenPortfolio({db, portfolio, references, evidenceEntry, onRefresh, onB
   const changeView = key => {
     setView(key); setError(''); setNotice('');
     setUploadOnEntry(false);
+    setTaskEvidenceMode('');
     setEvidenceFromOutcome(false);
     setEvidenceUnit('');
   };
+  const openTaskEvidence=mode=>{changeView('evidence');setTaskEvidenceMode(mode);setTaskJourney(true);};
+  const openTaskUnit=index=>{setUnitIndex(index);changeView('programme');setTaskJourney(true);requestAnimationFrame(()=>document.getElementById('qualification-current-unit-brief')?.scrollIntoView({block:'start'}));};
   const openOutcome = id => {
     setUnitIndex(portfolio.units.findIndex(unit => unit.outcomes.some(item => item.id === id)));
     setOutcomeId(id); changeView('outcome');
@@ -994,7 +1001,7 @@ function OpenPortfolio({db, portfolio, references, evidenceEntry, onRefresh, onB
     (ref.title === portfolio.title && ref.version === portfolio.version));
   const libraryAvailable = cover && selectedReference;
   const views = [
-    ...(learner ? [['dashboard','Home']] : []),
+    ...(learner ? [['dashboard','Home'],['tasks','Tasks & Evidence']] : []),
     ['programme','Course'],['evidence','Evidence'],['matrix','Matrix'],['registration','Registration'],['contact','Contact'],
     ['metrics','Metrics'],
     ...(!learner ? [['dashboard','Overview']] : []),
@@ -1003,10 +1010,10 @@ function OpenPortfolio({db, portfolio, references, evidenceEntry, onRefresh, onB
   const outcomeUnit = portfolio.units[unitIndex];
   const outcomeIndex = outcomeUnit?.outcomes.findIndex(item => item.id === outcomeId);
   const outcomeMaterial = getUnitSourceMaterial(outcomeUnit?.code);
-  const unitView = ['dashboard','programme','outcome','evidence','matrix','registration','contact','metrics','library'].includes(view);
+  const unitView = ['dashboard','tasks','programme','outcome','evidence','matrix','registration','contact','metrics','library'].includes(view);
   const selectContextUnit = index => {
     setUnitIndex(index);
-    if (view === 'outcome') changeView('programme');
+    if (view === 'outcome'||view==='tasks') changeView('programme');
     if (view === 'evidence') {
       setUploadOnEntry(false);
       setEvidenceFromOutcome(false);
@@ -1014,18 +1021,19 @@ function OpenPortfolio({db, portfolio, references, evidenceEntry, onRefresh, onB
     }
   };
   const openSection = key => {
+    setTaskJourney(false);
     changeView(key);
     if (key === 'evidence' && unitView && outcomeUnit) setEvidenceUnit(outcomeUnit.id);
   };
   const referenceUnit = selectedReference?.units?.find(unit => unit.code === outcomeUnit?.code);
-  return <div className="qf-live-stack" aria-busy={busy}>
+  return <div className={"qf-live-stack"+(learner&&view==='tasks'?' qlt-shell':'')} style={learner&&view==='tasks'&&cover?.heroImage?{'--qlt-hero-image':`url("${cover.heroImage}")`}:undefined} aria-busy={busy}>
     <button type="button" className="qf-plain-back" disabled={busy} onClick={onBack}><ArrowLeft size={16}/> Qualifications</button>
     <div className="qxp-top-toolbar"><span className="qxp-eyebrow">{roleLabels[portfolio.role]} · Qualification workspace</span>
       <Action secondary disabled={busy} onClick={() => run(() => onRefresh())}>Refresh</Action></div>
     <QualificationIdentity portfolio={portfolio} source={selectedReference} heroImage={cover?.heroImage}
       body={cover?.body} level={cover?.level}/>
-    <QualificationTopStats portfolio={portfolio} visiblePortfolio={visiblePortfolio}/>
-    {view !== 'dashboard' && <details className="qfd-portfolio-details">
+    {view!=='tasks'&&<QualificationTopStats portfolio={portfolio} visiblePortfolio={visiblePortfolio}/>}
+    {view !== 'dashboard' && view!=='tasks' && <details className="qfd-portfolio-details">
       <summary>Programme dates, progress &amp; assigned reviewers</summary>
       <PortfolioStatusRibbon portfolio={portfolio} progress={progress} onRegistration={()=>changeView('registration')}/>
     </details>}
@@ -1039,6 +1047,9 @@ function OpenPortfolio({db, portfolio, references, evidenceEntry, onRefresh, onB
     {error && <p className="qf-live-error" role="alert">{error}</p>}
     {notice && <p className="qf-live-notice" role="status">{notice}</p>}
     {view === 'evidence' && evidenceEntry && !portfolio.canEdit && <p>Evidence uploads are unavailable for this enrolment.</p>}
+    {learner&&view!=='tasks'&&taskJourney&&<div className="qf-live-actions"><Action secondary disabled={busy} onClick={()=>{changeView('tasks');setTaskJourney(false);}}><ArrowLeft size={16}/> Back to My Tasks</Action></div>}
+    {learner&&view==='tasks'&&<QualificationLearnerTasks db={db} portfolio={portfolio} progress={progress} selectedId={selectedTaskId} onSelect={setSelectedTaskId} busy={busy}
+      onView={(key,index)=>{if(Number.isInteger(index))setUnitIndex(index);changeView(key);setTaskJourney(true);}} onOutcome={id=>{openOutcome(id);setTaskJourney(true);}} onUnit={openTaskUnit} onEvidence={openTaskEvidence}/>}
     {view === 'dashboard' && <>
       <QualificationVisualDashboard portfolio={visiblePortfolio} progress={progress} selectedUnitIndex={unitIndex}
         onUnit={index => {setUnitIndex(index);changeView('programme');}} onOutcome={openOutcome}
@@ -1052,7 +1063,7 @@ function OpenPortfolio({db, portfolio, references, evidenceEntry, onRefresh, onB
       aim={referenceUnit?.aim || outcomeMaterial?.aim}
       onEvidence={id => { changeView('evidence'); setEvidenceUnit(id); }} onContact={() => changeView('contact')}
       onLibrary={libraryAvailable ? () => changeView('library') : null}/>}
-    {view === 'evidence' && <EvidenceFolder key={evidenceUnit} db={db} portfolio={visiblePortfolio} source={selectedReference} initialUnitId={evidenceUnit} initialWizard={evidenceFromOutcome ? 'choose' : uploadOnEntry ? 'upload' : ''} busy={busy} onSave={saveEvidence} onDuplicate={duplicateEvidence}
+    {view === 'evidence' && <EvidenceFolder key={evidenceUnit} db={db} portfolio={visiblePortfolio} source={selectedReference} initialUnitId={evidenceUnit} initialWizard={taskEvidenceMode || (evidenceFromOutcome ? 'choose' : uploadOnEntry ? 'upload' : '')} busy={busy} onSave={saveEvidence} onDuplicate={duplicateEvidence}
       onSelectUnit={id => {
         const index = portfolio.units.findIndex(unit => unit.id === id);
         if (index >= 0) setUnitIndex(index);
