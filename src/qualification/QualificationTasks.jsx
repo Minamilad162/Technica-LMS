@@ -77,6 +77,28 @@ function AssignTemplate({version,template,onCancel,onAssign,busy}){
  {!version.publishedAt||!enrolments.length?<p>No active learner enrolments available. Publish and enrol a learner first.</p>:null}
  <footer className="qt-actions"><button className="qc-outline" type="button" disabled={busy} onClick={onCancel}>Cancel</button><span/><button className="qc-primary" type="button" disabled={busy||!version.publishedAt||!selected||!due||due<selected.startOn} onClick={()=>onAssign(id.current,learner,template.id,null,due)}>Assign Task</button></footer></section>;
 }
+function TaskManagement({db,task,reload}){
+ const [action,setAction]=useState(''),[due,setDue]=useState(task.dueOn),[reason,setReason]=useState(''),[busy,setBusy]=useState(false),[error,setError]=useState('');
+ const lock=useRef(false);
+ const close=()=>{setAction('');setError('');setReason('');setDue(task.dueOn);};
+ const ready=action==='reschedule'?due&&due!==task.dueOn&&due>=task.startOn:reason.trim().length>=3;
+ const save=async()=>{if(lock.current||!ready)return;if(action==='cancel'&&!window.confirm('Cancel this task? Existing evidence and assessment decisions will be retained.'))return;
+ lock.current=true;setBusy(true);setError('');
+ try{await portfolioRpc(db,'task_manage',{p_task:task.id,p_revision:task.revision,p_action:action,p_due:action==='reschedule'?due:null,p_reason:reason.trim()});close();reload();}
+ catch(e){setError(err(e));}finally{setBusy(false);lock.current=false;}
+ };
+ if(!task.canManage)return task.cancelReason?<small>Cancellation reason: {task.cancelReason}</small>:null;
+ return <div className="qt-management">
+ {!action?<div className="qt-manage-buttons"><button className="qc-outline" type="button" onClick={()=>setAction('reschedule')}>Change deadline</button><button className="qc-outline qt-cancel-task" type="button" onClick={()=>setAction('cancel')}>Cancel task</button></div>:<div className="qt-manage-form">
+ <strong>{action==='reschedule'?'Change deadline':'Cancel assigned task'}</strong>
+ {action==='reschedule'&&<label className="qc-field">New deadline<input type="date" min={task.startOn} value={due} onChange={e=>setDue(e.target.value)} disabled={busy}/></label>}
+ <label className="qc-field">{action==='cancel'?'Cancellation reason *':'Note (optional)'}<textarea maxLength={1000} rows={2} value={reason} onChange={e=>setReason(e.target.value)} disabled={busy}/></label>
+ <small>Existing evidence and assessment decisions are preserved.</small>
+ {error&&<p role="alert" className="qc-error">{error}</p>}
+ <div className="qt-manage-buttons"><button type="button" className="qc-outline" disabled={busy} onClick={close}>Back</button><button className="qc-primary" type="button" disabled={busy||!ready} onClick={save}>{busy?'Saving…':action==='reschedule'?'Save deadline':'Confirm cancellation'}</button></div>
+ </div>}
+ </div>;
+}
 export function TaskAdminWorkspace({db,version,tab}){
  const {data,error:loadError,reload}=useTaskData(db,'task_admin_workspace',{p_version:version.id},version.id);
  const [editor,setEditor]=useState(null),[assigning,setAssigning]=useState(null),[busy,setBusy]=useState(false),[error,setError]=useState(''),[message,setMessage]=useState('');
@@ -97,7 +119,7 @@ export function TaskAdminWorkspace({db,version,tab}){
   {editor?<TaskBuilder key={editor.key} mode={editor.mode} initial={editor.initial} version={version} units={units} documents={documents} busy={busy} error={error} onClose={()=>{setEditor(null);setError('');}} onSave={save}/>:<>
    <section className="qt-panel"><header className="qt-list-head"><div><h3>{tab==='templates'?'Task Templates':'Assigned Tasks'}</h3><p>{tab==='templates'?'Reusable plans for this qualification edition.':'Individual tasks, deadlines and assessment progress.'}</p></div><button className="qc-primary" type="button" disabled={busy||(tab!=='templates'&&(!version.publishedAt||!(version.enrolments||[]).some(e=>!e.completedAt)))} onClick={()=>{setError('');setEditor({mode:tab==='templates'?'template':'individual',key:uid()});}}><Plus size={18}/> {tab==='templates'?'Create Task Template':'Create Individual Task'}</button></header>
    <input className="qt-search" aria-label="Search tasks" value={query} onChange={e=>setQuery(e.target.value)} placeholder="Search tasks…"/>
-   {tab==='templates'?<div className="qt-list">{matching(templates).map(t=><article key={t.id}><span className="qt-icon"><FileText size={23}/></span><div><h4>{t.spec.title}</h4><small>{t.spec.kind} · {selectedUnits(units,t.spec).length} Units · {t.spec.criteria.length} Criteria</small></div><TaskStatus status={t.approvedAt?'Approved':'Draft'}/><button type="button" className="qc-outline" disabled={busy} onClick={()=>{setAssigning(null);setEditor({mode:'template',key:uid(),initial:t.approvedAt?{spec:t.spec}:t});}}>{t.approvedAt?'Copy':'Edit'}</button>{t.approvedAt&&<button className="qc-primary" disabled={busy||!version.publishedAt||!(version.enrolments||[]).some(e=>!e.completedAt)} type="button" onClick={()=>setAssigning(t)}>Assign</button>}</article>)}{!matching(templates).length&&<div className="qt-empty">No matching task templates. Create a template to get started.</div>}</div>:<div className="qt-list">{matching(tasks).map(t=><article key={t.id}><span className="qt-icon"><ClipboardCheck size={22}/></span><div><h4>{t.spec.title}</h4><small>{t.learner} · Due {t.dueOn} · Assessor: {t.assessor}</small></div><TaskStatus status={t.status} overdue={t.overdue}/></article>)}{!matching(tasks).length&&<div className="qt-empty">No matching assigned tasks. Assign an approved template or create an individual task.</div>}</div>}
+   {tab==='templates'?<div className="qt-list">{matching(templates).map(t=><article key={t.id}><span className="qt-icon"><FileText size={23}/></span><div><h4>{t.spec.title}</h4><small>{t.spec.kind} · {selectedUnits(units,t.spec).length} Units · {t.spec.criteria.length} Criteria</small></div><TaskStatus status={t.approvedAt?'Approved':'Draft'}/><button type="button" className="qc-outline" disabled={busy} onClick={()=>{setAssigning(null);setEditor({mode:'template',key:uid(),initial:t.approvedAt?{spec:t.spec}:t});}}>{t.approvedAt?'Copy':'Edit'}</button>{t.approvedAt&&<button className="qc-primary" disabled={busy||!version.publishedAt||!(version.enrolments||[]).some(e=>!e.completedAt)} type="button" onClick={()=>setAssigning(t)}>Assign</button>}</article>)}{!matching(templates).length&&<div className="qt-empty">No matching task templates. Create a template to get started.</div>}</div>:<div className="qt-list">{matching(tasks).map(t=><article key={t.id}><span className="qt-icon"><ClipboardCheck size={22}/></span><div><h4>{t.spec.title}</h4><small>{t.learner} · Due {t.dueOn} · Assessor: {t.assessor}</small></div><TaskStatus status={t.status} overdue={t.overdue}/><TaskManagement db={db} task={t} reload={reload}/></article>)}{!matching(tasks).length&&<div className="qt-empty">No matching assigned tasks. Assign an approved template or create an individual task.</div>}</div>}
    </section>{assigning&&<AssignTemplate key={assigning.id} version={version} template={assigning} onCancel={()=>setAssigning(null)} onAssign={assign} busy={busy}/>}
   </>}
  </div>;
@@ -124,6 +146,7 @@ export function PortfolioAssignedTasks({db,portfolio,onOutcome,onView}){
    {units.flatMap(u=>u.outcomes.filter(o=>o.criteria.some(c=>t.spec.criteria.includes(c.id))).map(o=><div key={o.id} className="qt-outcome-link"><div><strong>{u.code} · {o.code}</strong><small>{o.criteria.filter(c=>t.spec.criteria.includes(c.id)).map(c=>c.code+' '+c.title).join(' · ')}</small></div><button className="qf-button qf-outline" onClick={()=>onOutcome(o.id)}>Open Outcome <ArrowRight size={15}/></button></div>))}
    {documents.filter(d=>t.spec.documents.includes(d.id)).map(d=><button key={d.id} type="button" className="qf-button qf-outline" onClick={()=>openFile(d)}><Paperclip size={16}/> {d.title}</button>)}
    {t.spec.documents.some(id=>!documents.some(d=>d.id===id))&&<p>Some linked materials are unavailable to this account. Contact the centre.</p>}
+   <TaskManagement db={db} task={t} reload={reload}/>
    {portfolio.role==='learner'&&!t.cancelledAt&&<button type="button" className="qf-button qf-primary" onClick={()=>onView('evidence')}>Open Evidence Folder</button>}
   </div></details>)}</div>}
  </section>;
