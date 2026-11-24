@@ -1,6 +1,6 @@
 import React,{useState} from 'react';
 import {ArrowRight,BookOpen,CheckCircle2,ClipboardCheck,Eye,FileText,FolderOpen,GraduationCap,Grid2X2,LayoutDashboard,Layers3,List,Search,Settings,ShieldCheck,Users,Award,CalendarDays,ChevronRight} from 'lucide-react';
-import {qualificationReadiness} from './qualificationReadiness.js';
+import {qualificationReadiness,editionStatus} from './qualificationReadiness.js';
 import {qualificationFor} from './QualificationCatalogue.jsx';
 import './qualificationAdminCenter.css';
 
@@ -22,7 +22,7 @@ function Mark({version}){
  const item=qualificationFor(version?.title);
  return <span className={'qac-mark qac-mark-'+(item?.color||'blue')}><span>{item?.body||'Qualification'}</span></span>;
 }
-function State({version}){return <span className={'qac-state '+(version.publishedAt?'active':'setup')}>{version.publishedAt?'Live':'Draft'}</span>;}
+function State({version}){return <span className={'qac-state '+(version.publishedAt?'active':'setup')}>{editionStatus(version)}</span>;}
 function Stat({label,value,detail,Icon,tone,onClick}){
  return <button type="button" className={'qac-stat qac-'+tone} onClick={onClick}><span className="qac-stat-icon"><Icon size={23}/></span>
   <span><strong>{value}</strong><b>{label}</b><small>{detail}</small></span></button>;
@@ -86,7 +86,7 @@ export function AdminQualificationDetail({version,references,staff,tab,onTab,onP
    <button type="button" className="qc-outline" disabled={saving} onClick={onPreview}><Eye size={16}/> Preview</button><button type="button" className="qc-outline" onClick={()=>onTab(version.publishedAt?'materials':'units')}><Settings size={16}/> Manage qualification</button></header>
   <nav className="qac-detail-tabs" aria-label="Selected qualification setup">{setupTabs.map(([id,label,Icon])=><button type="button" key={id} aria-pressed={tab===id} onClick={()=>onTab(id)}><Icon size={16}/>{label}{id==='units'?' ('+total+')':id==='materials'?' ('+documents.length+')':id==='plans'?' ('+approved+')':''}</button>)}</nav>
   {tab==='summary'&&<div className="qac-summary-grid">
-   <section className="qac-summary-panel"><h3>Qualification Summary</h3><dl>{[['Awarding Body',item?.body||'Not recorded'],['Qualification Number',source?.reference_number||'Not recorded'],['Specification',version.version],['Total Units',total],['Learning Outcomes',unitsOf(version).reduce((n,u)=>n+Number(u.outcomes||0),0)],['Assessment Criteria',unitsOf(version).reduce((n,u)=>n+Number(u.criteria||0),0)],['Status',version.publishedAt?'Live':'Draft']].map(([label,value])=><div key={label}><dt>{label}</dt><dd>{value}</dd></div>)}</dl></section>
+   <section className="qac-summary-panel"><h3>Qualification Summary</h3><dl>{[['Awarding Body',item?.body||'Not recorded'],['Qualification Number',source?.reference_number||'Not recorded'],['Specification',version.version],['Total Units',total],['Learning Outcomes',unitsOf(version).reduce((n,u)=>n+Number(u.outcomes||0),0)],['Assessment Criteria',unitsOf(version).reduce((n,u)=>n+Number(u.criteria||0),0)],['Status',editionStatus(version)]].map(([label,value])=><div key={label}><dt>{label}</dt><dd>{value}</dd></div>)}</dl></section>
    <section className="qac-summary-panel"><h3>{version.publishedAt?'Setup Completion':'Unit Brief Approval'}</h3><div className="qac-completion"><div className={'qac-ring '+(version.publishedAt?'released':'')} style={{'--qac-progress':progress+'%'}}><strong>{progress}%</strong></div><ul>{[['Qualification details',!!version.catalogKey],['Units & structure',total>0&&!r.incompleteRubric.length],['Approved Unit briefs ('+approved+'/'+total+')',total>0&&approved===total],['Published & ready for enrolment',r.published]].map(([label,done])=><li key={label} className={done?'done':''}><CheckCircle2 size={16}/>{label}</li>)}</ul></div></section>
    <aside className="qac-ready-panel"><div className={r.published?'qac-ready':'qac-pending'}><CheckCircle2 size={25}/><div><strong>{r.published?'Ready for Enrolment':'Qualification draft'}</strong><p>{r.published?'This qualification is live. '+(!r.enrolments?'No learners enrolled yet.':'Manage learner enrolments when needed.'):r.next}</p></div></div>
     <button className="qc-primary" type="button" onClick={r.published?onEnrol:()=>onTab(r.pendingUnits.length?'plans':'release')}><Users size={17}/>{r.published?'Enrol Learners':'Continue Setup'}<ArrowRight size={16}/></button>
