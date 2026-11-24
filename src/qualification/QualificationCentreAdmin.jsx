@@ -61,7 +61,7 @@ export default function QualificationCentreAdmin({db,onBack,references=[]}){
  const chooseUnit=id=>{if(id===unit?.id||confirmDiscard()){setUnitId(id);setFile(null);setFileTitle('');}};
  const canSaveDraft=Boolean(briefDirty&&instructions.trim().length>=80);
  useEffect(()=>{if(!briefDirty)return;const prevent=e=>{e.preventDefault();e.returnValue='';};window.addEventListener('beforeunload',prevent);return()=>window.removeEventListener('beforeunload',prevent);},[briefDirty]);
- const approved=version?.units.filter(u=>u.brief?.status==='approved').length||0;
+ const approved=version?.units.filter(u=>u.brief?.status==='approved'&&Boolean(u.brief?.approvedAt)).length||0;
  const total=version?.units.length||0;
  const documents=unit?.documents||[];
  const readiness=qualificationReadiness(version,staff);
@@ -195,7 +195,7 @@ export default function QualificationCentreAdmin({db,onBack,references=[]}){
      staff={staff} saving={saving} onSelect={v=>{if(selectVersion(v))setSetupTab('summary');}}
      onSection={setSection} onTab={openSetup}/>}
   {catalogueVisible&&<AdminQualificationDetail version={version} references={references} staff={staff}
-     tab={setupTab} onTab={setSetupTab} saving={saving} onPreview={()=>{if(confirmDiscard())setPreviewWorkspace(true);}}
+     tab={setupTab} onTab={setSetupTab} saving={saving} onPreview={()=>setPreviewWorkspace(true)}
      onEnrol={()=>setSection('enrolments')}/>}
   {!catalogueVisible&&version&&<div className="qac-section-context">
     <label htmlFor="qac-edition-select">Qualification edition</label>
@@ -311,7 +311,7 @@ export default function QualificationCentreAdmin({db,onBack,references=[]}){
        </>}
      </Card>
      <Card title="Learner & reviewer assignment" icon={Users} hidden={section!=='enrolments'}>
-      <p className="qc-secondary">Only published, centre-approved qualifications can be assigned. Reviewers must be different active users.</p>
+      <p className="qc-secondary">Only Live, centre-approved qualifications can be assigned. Reviewers must be different active users.</p>
       <div className="qc-people-search"><input aria-label="Find users by name or email" value={search}
         onChange={e=>setSearch(e.target.value)} placeholder="Search active accounts"/>
         <button type="button" onClick={findPeople} disabled={saving}><Search size={17}/></button></div>
@@ -326,7 +326,7 @@ export default function QualificationCentreAdmin({db,onBack,references=[]}){
         min={startOn} onChange={e=>setTargetOn(e.target.value)} disabled={saving||!release}/></label></div>
       <button type="button" className="qc-primary" disabled={saving||!release||!learner||!assessor||!verifier||
         new Set([learner,assessor,verifier]).size!==3} onClick={onAssign}><GraduationCap size={17}/> Enrol &amp; assign</button>
-      {!release&&<p className="qc-locked"><LockKeyhole size={16}/> Release and sign off all Unit briefs before enrolling.</p>}
+      {!release&&<p className="qc-locked"><LockKeyhole size={16}/> Publish the qualification after approving all Unit briefs before enrolling.</p>}
       <hr/><h4>Current enrolments</h4>
       {version.enrolments.length?version.enrolments.map(e=><div className="qc-enrolled" key={e.id}>
          <strong>{e.learner}</strong><small>Assessor: {e.assessor} · Verifier: {e.verifier}</small>
