@@ -135,7 +135,7 @@ BEGIN
  END IF;
  SELECT * INTO e FROM public.lms_qualification_enrolments WHERE id=p_enrolment FOR UPDATE;
  IF NOT FOUND OR e.completed_at IS NOT NULL THEN RAISE EXCEPTION 'Only incomplete real portfolios can be reassigned.'; END IF;
- IF p_attest IS DISTINCT FROM true OR char_length(coalesce(p_note,''))>1500 OR p_assessor IS NULL OR p_verifier IS NULL
+ IF p_attest IS DISTINCT FROM true OR char_length(coalesce(p_note,''))>1475 OR p_assessor IS NULL OR p_verifier IS NULL
   OR p_assessor=e.learner_id OR p_verifier=e.learner_id
   OR (p_assessor=e.assessor_id AND p_verifier=e.verifier_id)
  THEN RAISE EXCEPTION 'Confirm the reviewer change and choose valid accounts distinct from the learner.'; END IF;
@@ -146,7 +146,7 @@ BEGIN
  PERFORM public.lms_qf_approve_assignment_staff(p_verifier,'verifier',e.version_id,p_attest);
  INSERT INTO public.lms_qf_reassignment_events(enrolment_id,previous_assessor,previous_verifier,
    next_assessor,next_verifier,reason,authorized_by)
- VALUES(e.id,e.assessor_id,e.verifier_id,p_assessor,p_verifier,coalesce(nullif(btrim(coalesce(p_note,'')),''),'Reviewer assignment changed by centre administrator.'),(SELECT auth.uid()));
+ VALUES(e.id,e.assessor_id,e.verifier_id,p_assessor,p_verifier,'Reviewer reassignment: '||coalesce(nullif(btrim(coalesce(p_note,'')),''),'No additional note.'),(SELECT auth.uid()));
  UPDATE public.lms_qualification_enrolments
  SET assessor_id=p_assessor,verifier_id=p_verifier WHERE id=e.id;
 END $fn$;
