@@ -33,7 +33,7 @@ jobs:
         run: npm test
       - name: Build unsigned portable Windows pilot
         run: npm run dist:win
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: technica-windows-protection-pilot
           path: desktop/secure-viewer/dist/*.exe
