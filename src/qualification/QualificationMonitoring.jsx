@@ -1,4 +1,4 @@
-import React,{useEffect,useMemo,useState} from 'react';
+import React,{useEffect,useState} from 'react';
 import {Activity,Award,Bell,CheckCircle2,ClipboardCheck,Clock3,Download,FileText,Filter,Info,Monitor,RefreshCw,Search,ShieldCheck,Users} from 'lucide-react';
 import {portfolioRpc} from './qualificationPortfolioApi.js';
 import {qualificationFor} from './QualificationCatalogue.jsx';
@@ -6,7 +6,7 @@ import './qualificationMonitoring.css';
 
 const clean=s=>String(s||'').toLowerCase().trim();
 const date=d=>d?new Date(d).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric',timeZone:'Africa/Cairo'}):'—';
-const today=()=>new Intl.DateTimeFormat('en-CA',{timeZone:'Africa/Cairo',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date());
+const today=()=>{const p=new Intl.DateTimeFormat('en-GB',{timeZone:'Africa/Cairo',year:'numeric',month:'2-digit',day:'2-digit'}).formatToParts(new Date());return ['year','month','day'].map(k=>p.find(v=>v.type===k).value).join('-');};
 const daysAgo=n=>{const d=new Date();d.setUTCDate(d.getUTCDate()-n);return d.toISOString().slice(0,10);};
 const eventLabel=k=>({enrolment_assigned:'Qualification assigned',reviewers_reassigned:'Reviewers reassigned',outcome_submitted:'Outcome submitted',assessor_accept:'Assessment accepted',assessor_return:'Changes requested',verifier_accept:'Outcome verified',verifier_return:'Verification returned',task_assigned:'Task assigned',task_rescheduled:'Deadline changed',task_cancelled:'Task cancelled',task_deadline:'Task due / overdue',qualification_completed:'Qualification completed',certificate_recorded:'External certificate recorded'}[k]||String(k).replaceAll('_',' '));
 const errorText=e=>e?.message||'Unable to load qualification records.';
