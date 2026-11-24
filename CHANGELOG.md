@@ -1,7 +1,7 @@
 ## 2026-11-24 — Enrolled qualification learner journey
 
 - Guide learners from Home and Tasks & Evidence to their next available step, with clear submission requirements.
-- Restore the selected portfolio, Unit, section and Outcome after reload.
+- Restore the selected portfolio, Unit, section, Outcome and Evidence Unit filter after reload.
 - Add evidence shortcuts to empty mapping views, return to the originating screen, correct Matrix accessibility labels, and remove duplicate resource links.
 - Distinguish enrolled portfolios from syllabus previews and surface approved learner instructions.
 
