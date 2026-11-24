@@ -33,7 +33,7 @@ Status vocabulary: PLANNED, IN PROGRESS, BLOCKED, IMPLEMENTED, VERIFIED, DONE. I
 |---|---|---|---|---|
 | Q00 | Baseline & architecture | IN PROGRESS | None | Repository/RPC inventory and 24 Nov production edition counts verified read-only; remaining migration/deployment/route audit |
 | Q01 | Admin Management Center | IN PROGRESS | Q00 | Approved catalogue/setup UI merged (PR #122), CI verified; authenticated visual QA and remaining management surfaces pending |
-| Q02 | Qualification activation | PLANNED | Q01 | Genuine centre inputs for production release |
+| Q02 | Qualification activation | IN PROGRESS | Q01 | Simplified Draft/Live publication UI merged PR #123, CI passed; live visual QA and genuine centre publication pending |
 | Q03 | Roles & staff management | PLANNED | Q01 | Documented reviewer competence |
 | Q04 | Learner enrolment engine | PLANNED | Q02, Q03 | Real edition and eligible independent reviewers |
 | Q05 | Assessment plans & tasks | PLANNED | Q04 | Task/claim architecture |
@@ -64,9 +64,11 @@ Owner approved the 24 November mockup of the blue/white administrator catalogue,
 Acceptance: enrolment and staff reachable within two navigation actions; existing functions preserved; non-admin access denied; desktop/mobile checked.
 
 ### Q02 — Qualification activation
+
+**Owner-approved simplification (24 November 2026):** Retain Overview, Units, Materials, Assessment Plans and Settings; no separate activation wizard. Sticky Save Draft persists the selected edited Unit brief through the existing admin RPC; uploaded resources have their existing upload/approval lifecycle. Publish Qualification opens a compact dialog showing actual source/brief/method checks and requires genuine centre reference, full learner declaration and fresh attestation. Status is Draft or Live based on persisted publishedAt, independently of enrolment count. Publication locks the edition and does not enrol anyone or authorise certificate issuing. Archive and creation/cloning of new editions are separate governed features, not implemented by this change. No database migration or production data mutation.
 - [ ] Q02.1 Show exact official source, version, reference, actual rubric and brief counts.
 - [ ] Q02.2 One-time guided review: official criteria, real methods/instructions, resources, declaration, genuine centre reference and authorised release.
-- [ ] Q02.3 Make readiness blockers actionable instead of generic disabled forms.
+- [x] Q02.3 Make readiness blockers actionable instead of generic disabled forms. PR #123: dialog links to actual blocking Unit; automated qualification tests passed.
 - [ ] Q02.4 Verify applicable awarding-body/centre procedures and preserve release guards and immutable pinned edition.
 - [ ] Q02.5 Test reference-only access before release and enrolment eligibility afterward, including creating and releasing a fully approved edition with zero learners and no enrolment-specific reviewer assignments.
 Acceptance: authorised human can release exact approved edition once; missing methods/briefs and non-admin release rejected by server. Actual release requires genuine records, separate from implementation.
@@ -146,6 +148,8 @@ Acceptance: required checks passed, deployment independently verified, acceptanc
 
 | 2026-11-24 | Q00/Q01 | PR #122 merged at 68fef8243a6c3d79933da72957625681fd1d0d8c. Production build, qualification regression and disposable PostgreSQL role isolation CI passed (run 45338207225). Read-only production audit: four official editions, zero released, zero approved Unit briefs, zero enrolments. | Approved catalogue/setup subdeliverable merged and CI verified; full Q00/Q01 acceptance still pending | Verify Cloudflare deployment and authenticated desktop/mobile rendering; obtain owner acceptance before next UI phase |
 
+| 2026-11-24 | Q02 | Owner approved integrated Save Draft/Publish approach. PR #123 merged at 28e4e2c1a65a63302309cdaea2355163c18204c5; validate and disposable PostgreSQL CI passed (run 45343338463). No migration or live publication. | Integrated publication UI CI-verified; full Q02 acceptance pending | Check deployed UI and genuine authorised publication; Q03 design approval before implementation |
+
 ### Production edition audit — 24 November 2026
 
 | Edition | Units | Outcomes | Criteria | Approved briefs | Released | Enrolments |
@@ -158,4 +162,4 @@ Acceptance: required checks passed, deployment independently verified, acceptanc
 Source: read-only aggregate query on Technica production Supabase, 24 November. No real records were changed. CI uses disposable PostgreSQL; live activation and authenticated visual QA remain separate. An edition can be active with zero enrolments after genuine centre release.
 
 ### Next session
-Read this roadmap. Finish Q00 fresh production/deployment audit and Q01 acceptance (including visual QA); confirm real edition release/enrolment access without fabricating approvals. Q02 remains subject to its own owner-approved design.
+Read this roadmap. Finish Q00 fresh production/deployment audit and Q01 acceptance (including visual QA); confirm real edition release/enrolment access without fabricating approvals. Q02 simplified UI approved and merged; verify authenticated Cloudflare deployment and authorised actual publication before marking DONE. Prepare Q03 reviewer management design for owner review next.
