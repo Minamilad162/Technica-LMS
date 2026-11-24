@@ -2,11 +2,11 @@ import React,{useEffect,useMemo,useState} from 'react';
 import {ArrowLeft,BookCheck,BookOpen,CheckCircle2,ClipboardCheck,Download,FileCheck2,FilePlus2,
  FileText,FolderClosed,GraduationCap,Info,Layers3,LockKeyhole,RefreshCw,Search,ShieldAlert,ShieldCheck,UploadCloud,Users} from 'lucide-react';
 import {portfolioRpc} from './qualificationPortfolioApi.js';
-import {qualificationReadiness,needsAssessmentMethodReview,sourceRubricForUnit} from './qualificationReadiness.js';
+import {qualificationReadiness,needsAssessmentMethodReview,sourceRubricForUnit,publicationChecks,validPublicationReference} from './qualificationReadiness.js';
 import QualificationCentreLearnerPreview from './QualificationCentreLearnerPreview.jsx';
 import {ProgrammeUpdatesAdmin} from './QualificationProgrammeUpdates.jsx';
 import './qualificationCentreAdmin.css';
-import {QualificationPublishBar,QualificationPublishDialog,publicationChecks,validPublicationReference} from './QualificationPublish.jsx';
+import {QualificationPublishBar,QualificationPublishDialog} from './QualificationPublish.jsx';
 import {AdminQualificationNavigation,AdminQualificationCatalog,AdminQualificationDetail} from './QualificationAdminCenter.jsx';
 
 const methods=[['assignment_brief','Assignment Brief'],['reflective_account','Reflective Account'],
