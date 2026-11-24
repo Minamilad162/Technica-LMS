@@ -45,3 +45,46 @@
 .qf-live .qe-workspace :is(button,input,select,textarea):focus-visible{outline:3px solid #8fb7e9;outline-offset:2px}
 @media(max-width:850px){.qf-live .qe-stats{grid-template-columns:repeat(2,minmax(0,1fr))}.qf-live .qe-filters{grid-template-columns:repeat(2,minmax(0,1fr))}.qf-live .qe-filters>.qe-search{grid-column:1/-1}}
 @media(max-width:600px){.qf-live .qe-fields,.qf-live .qe-filters{grid-template-columns:minmax(0,1fr)}.qf-live .qe-filters>.qe-search{grid-column:auto}.qf-live .qe-workspace .qc-card{padding:11px}.qf-live .qe-footer .qc-primary{width:100%}.qf-live .qe-stat{padding:9px}.qf-live .qe-stat>span{width:34px;height:34px;flex-basis:34px}}
+
+/* Approved compact assignment design — one control per field, no inline qualification forms. */
+.qf-live .qe-workspace{gap:14px}
+.qf-live .qe-workspace .qc-card{padding:16px 18px;border-radius:15px}
+.qf-live .qe-workspace .qc-card>header{gap:12px;margin-bottom:15px}
+.qf-live .qe-heading-icon{display:grid;place-items:center;width:47px;height:47px;flex:0 0 47px;color:#1355a7;background:linear-gradient(135deg,#e9f2ff,#dceaff);border-radius:12px;box-shadow:0 3px 9px #154c9610}
+.qf-live .qe-workspace .qc-card>header h3{font-size:21px;letter-spacing:-.025em;font-weight:850}
+.qf-live .qe-fields{gap:12px 19px}
+.qf-live .qe-fields>.qc-field,.qf-live .qe-account{display:block}
+.qf-live .qe-label{display:block;margin-bottom:6px;font-size:13px;color:#213d62}
+.qf-live .qe-required{color:#b64141}
+.qf-live .qe-optional{display:inline-block;margin-left:5px;background:#eaf0ff;color:#456696;font-size:10px;font-weight:650;padding:2px 7px;border-radius:20px}
+.qf-live .qe-combo{position:relative;min-width:0}
+.qf-live .qe-combo-control{display:flex;align-items:center;gap:9px;min-height:42px;border:1px solid #bfd3ef;background:#fff;border-radius:9px;padding:0 10px;color:#426c9b}
+.qf-live .qe-combo-control:focus-within{border-color:#629ce0;box-shadow:0 0 0 3px #dceaff}
+.qf-live .qe-combo-control>svg{flex:0 0 auto}
+.qf-live .qe-combo-control input{width:100%;min-width:0;flex:1;border:0;background:transparent;font:inherit;font-size:12px;color:#233e5f;padding:10px 0;outline:none}
+.qf-live .qe-combo-control input:focus-visible{outline:0!important}
+.qf-live .qe-combo-control button{border:0;background:transparent;color:#426c9b;display:grid;place-items:center;padding:4px;cursor:pointer}
+.qf-live .qe-options{position:absolute;top:100%;left:0;right:0;z-index:35;margin-top:4px;max-height:265px;overflow:auto;background:#fff;border:1px solid #cbdcf1;border-radius:10px;box-shadow:0 12px 30px #193d6625;padding:4px}
+.qf-live .qe-options button{display:flex;align-items:center;gap:9px;width:100%;border:0;border-radius:7px;padding:8px;background:#fff;text-align:left;color:#183a60;cursor:pointer}
+.qf-live .qe-options button:hover:not(:disabled),.qf-live .qe-options button.qe-option-active{background:#edf4ff}
+.qf-live .qe-options button:disabled{opacity:.45;cursor:not-allowed}
+.qf-live .qe-options button>span:nth-child(2),.qf-live .qe-person>span:last-child{flex:1;min-width:0}
+.qf-live .qe-options strong,.qf-live .qe-options small{display:block;overflow-wrap:anywhere;font-size:12px}
+.qf-live .qe-options small{font-size:11px;color:#627f9d;margin-top:3px}
+.qf-live .qe-option-message{padding:12px;font-size:11px;color:#607c99}
+.qf-live .qe-avatar{display:grid;place-items:center;width:35px;height:35px;flex:0 0 35px;border-radius:50%;background:#e3edff;color:#1e59a0;font-size:11px;font-weight:800}
+.qf-live .qe-team-note{grid-column:1/-1;display:flex;align-items:center;gap:8px;padding:8px 11px;background:#eaf2ff;border-radius:8px;color:#255b9b;font-size:11px;line-height:1.45}
+.qf-live .qe-note{grid-column:1/-1}
+.qf-live .qe-note textarea{margin-top:5px;min-height:65px}
+.qf-live .qe-footer{margin-top:12px;padding-top:12px;border:0}
+.qf-live .qe-footer>span{background:#eaf2ff;padding:10px;border-radius:8px;color:#26568d}
+.qf-live .qe-footer .qc-primary{background:linear-gradient(100deg,#165dbb,#103d8f);border-color:#1857a8;min-width:215px;min-height:43px;border-radius:9px}
+.qf-live .qe-table-card .qe-scroll{border:0}
+.qf-live .qe-scroll th{background:#e7f0fc;color:#18365b}
+.qf-live .qe-scroll tbody tr:nth-child(even){background:#f7faff}
+.qf-live .qe-person{display:flex;align-items:center;gap:8px}
+.qf-live .qe-person small{overflow-wrap:anywhere}
+.qf-live .qe-scroll td small{max-width:250px;overflow-wrap:anywhere}
+.qf-live .qe-scroll td button{display:inline-flex;align-items:center;gap:5px}
+.qf-live .qe-assign,.qf-live .qe-edit{overflow:visible!important}
+@media(max-width:600px){.qf-live .qe-workspace .qc-card{padding:11px}.qf-live .qe-heading-icon{width:38px;height:38px;flex-basis:38px}.qf-live .qe-workspace .qc-card>header h3{font-size:18px}.qf-live .qe-footer .qc-primary{width:100%;min-width:0}.qf-live .qe-fields{gap:12px}}
