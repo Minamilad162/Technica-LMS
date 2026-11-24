@@ -191,3 +191,6 @@ assert.ok(tasksUi.includes("task_portfolio")&&tasksUi.includes('onOutcome(o.id)'
 assert.ok(tasksSql.includes('lms_qf_task_templates ENABLE ROW LEVEL SECURITY')&&tasksSql.includes('lms_qf_assigned_tasks ENABLE ROW LEVEL SECURITY'));
 assert.ok(tasksSql.includes("t.approved_at IS NOT NULL")&&tasksSql.includes("e.assessor_id=actor")&&tasksSql.includes("q.state='verified'"));
 console.log('Q05 task template and per-enrolment integration: PASS');
+
+assert.ok(tasksUi.includes("portfolioRpc(db,'task_manage'")&&tasksUi.includes('p_revision:task.revision')&&tasksUi.includes('task.canManage'));
+console.log('Q05 governed task management UI: PASS');
