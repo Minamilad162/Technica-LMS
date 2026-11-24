@@ -64,3 +64,17 @@ export function publicationChecks(version,references){
 export function validPublicationReference(value){
  return value.trim().length>=10&&!/(pending|placeholder|test|sandbox|demo|source reference|draft)/i.test(value);
 }
+
+export function bulkBriefReview(version,references){
+ const units=version?.units||[];
+ const rows=units.map(unit=>{
+  const brief=unit.brief||{}, blockers=[];
+  if(!sourceRubricForUnit(references,version,unit).complete)blockers.push('Official criteria need verification');
+  if((brief.instructions||'').trim().length<80||(brief.instructions||'').trim().length>30000)blockers.push('Complete Unit instructions');
+  if(needsAssessmentMethodReview(brief.methods)||(brief.methods||'').trim().length>3000)blockers.push('Select genuine assessment methods');
+  return {id:unit.id,code:unit.code,title:unit.title,approved:brief.status==='approved'&&Boolean(brief.approvedAt),blockers};
+ });
+ const pending=rows.filter(row=>!row.approved).length;
+ const expected=Object.fromEntries(units.map(u=>[u.id,{instructions:u.brief?.instructions??null,methods:u.brief?.methods??null}]));
+ return {rows,pending,expected,ready:!version?.publishedAt&&pending>0&&rows.every(row=>!row.blockers.length)};
+}
