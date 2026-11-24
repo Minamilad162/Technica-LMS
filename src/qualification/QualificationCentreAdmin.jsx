@@ -2,7 +2,7 @@ import React,{useEffect,useMemo,useState} from 'react';
 import {ArrowLeft,BookCheck,BookOpen,CheckCircle2,ClipboardCheck,Download,FileCheck2,FilePlus2,
  FileText,FolderClosed,GraduationCap,Info,Layers3,LockKeyhole,RefreshCw,Search,ShieldAlert,ShieldCheck,UploadCloud,Users} from 'lucide-react';
 import {portfolioRpc} from './qualificationPortfolioApi.js';
-import {qualificationReadiness,needsAssessmentMethodReview,sourceRubricForUnit,publicationChecks,validPublicationReference} from './qualificationReadiness.js';
+import {qualificationReadiness,needsAssessmentMethodReview,sourceRubricForUnit,publicationChecks,validPublicationReference,bulkBriefReview} from './qualificationReadiness.js';
 import QualificationCentreLearnerPreview from './QualificationCentreLearnerPreview.jsx';
 import {ProgrammeUpdatesAdmin} from './QualificationProgrammeUpdates.jsx';
 import './qualificationCentreAdmin.css';
@@ -47,6 +47,7 @@ export default function QualificationCentreAdmin({db,onBack,references=[]}){
  [issuerStatus,setIssuerStatus]=useState(null);
  const [previewWorkspace,setPreviewWorkspace]=useState(false);
  const [publishOpen,setPublishOpen]=useState(false);
+ const [bulkOpen,setBulkOpen]=useState(false),[bulkAttest,setBulkAttest]=useState(false);
  const [section,setSection]=useState('overview'),[setupTab,setSetupTab]=useState('summary');
  const catalogueVisible=['overview','qualifications'].includes(section);
  const selectVersion=v=>{if(v.id===version?.id)return true;if(!confirmDiscard())return false;setVersionId(v.id);setUnitId(v.units[0]?.id||'');setReassignId('');setLearner('');setAssessor('');setVerifier('');setFile(null);setFileTitle('');return true;};
@@ -66,6 +67,9 @@ export default function QualificationCentreAdmin({db,onBack,references=[]}){
  const documents=unit?.documents||[];
  const readiness=qualificationReadiness(version,staff);
  const sourceRubric=sourceRubricForUnit(references,version,unit);
+ const bulkReview=bulkBriefReview(version,references);
+ useEffect(()=>{setBulkOpen(false);setBulkAttest(false);},[version?.id]);
+ useEffect(()=>{setBulkAttest(false);},[versions,briefDirty]);
  const methodsNeedReview=needsAssessmentMethodReview(assessmentMethods);
  const canApproveBrief=Boolean(!saving&&!release&&unit&&sourceRubric.complete&&
    instructions.trim().length>=80&&!methodsNeedReview&&
@@ -120,6 +124,13 @@ export default function QualificationCentreAdmin({db,onBack,references=[]}){
    p_unit:unit.id,p_instructions:instructions,p_methods:assessmentMethods,p_approve:approve}),
    approve?'Unit brief approved by centre administrator.':'Draft saved for centre review.',
    approve?nextUnapproved?.id:undefined);
+ };
+ const onApproveAll=async()=>{
+  if(saving||release||briefDirty||!bulkReview.ready||!bulkAttest)return;
+  const ok=await run(()=>portfolioRpc(db,'admin_approve_all_briefs',{
+   p_version:version.id,p_expected:bulkReview.expected,p_attest:true
+  }),'All Unit briefs approved for the selected qualification. The edition remains Draft until published.');
+  if(ok){setBulkOpen(false);setBulkAttest(false);}
  };
  const onPublish=async()=>{
   if(saving||release||briefDirty||!publicationChecks(version,references).every(c=>c.ok)||
@@ -243,6 +254,26 @@ export default function QualificationCentreAdmin({db,onBack,references=[]}){
     <Card id="qc-centre-unit-review" title="Unit assessment plans" icon={Layers3} hidden={!(section==='plans'||(catalogueVisible&&['units','plans'].includes(setupTab)))}>
       <p className="qc-secondary">The real Learning Outcomes and Assessment Criteria are already imported.
         These centre-authored brief drafts must be checked against the current programme before approval.</p>
+      {!release&&<section className="qc-bulk-approval" aria-label="Approve all Unit briefs">
+        <div className="qc-bulk-top"><div><strong>Qualification-wide approval</strong><small>{bulkReview.rows.length-bulkReview.pending} of {bulkReview.rows.length} Unit briefs approved</small></div>
+         <button className="qc-outline" type="button" aria-expanded={bulkOpen} disabled={saving||!bulkReview.pending}
+           onClick={()=>{setBulkAttest(false);setBulkOpen(old=>!old);}}><BookCheck size={17}/> Approve All Unit Briefs</button></div>
+        {bulkOpen&&<div className="qc-bulk-review">
+         <p>Review all saved briefs for this edition. Existing approvals will remain unchanged.</p>
+         <div className="qc-bulk-rows">{bulkReview.rows.map((row,index)=><div key={row.id} className="qc-bulk-row">
+          <div><strong>Unit {String(index+1).padStart(2,'0')} · {row.code}</strong><small>{row.title}</small>
+           {!!row.blockers.length&&<small className="qc-bulk-blockers">{row.blockers.join(' · ')}</small>}</div>
+          <Pill ready={!row.blockers.length}>{row.blockers.length?'Needs review':row.approved?'Approved':'Ready for approval'}</Pill>
+          {!!row.blockers.length&&<button className="qc-inline-action" type="button" disabled={saving} onClick={()=>chooseUnit(row.id)}>Review Unit</button>}
+         </div>)}</div>
+         {briefDirty&&<p className="qc-bulk-blockers">Save the selected Unit draft before approving all briefs.</p>}
+         <label className="qc-confirm"><input type="checkbox" checked={bulkAttest} disabled={saving||briefDirty||!bulkReview.ready}
+          onChange={e=>setBulkAttest(e.target.checked)}/><span>I am authorised by Technica Consult and have reviewed all Unit briefs against their official criteria, selected assessment methods and acceptance conditions.</span></label>
+         <div className="qc-actions"><button className="qc-outline" type="button" disabled={saving} onClick={()=>{setBulkOpen(false);setBulkAttest(false);}}>Cancel</button>
+          <button className="qc-primary" type="button" disabled={saving||briefDirty||!bulkReview.ready||!bulkAttest}
+           onClick={onApproveAll}><BookCheck size={17}/>{saving?'Approving…':'Confirm Approval · '+bulkReview.pending+' Units'}</button></div>
+        </div>}
+      </section>}
       <div className="qc-unit-pills">{version.units.map((u,index)=><button key={u.id} type="button"
         disabled={saving} className={unit?.id===u.id?'active':''} onClick={()=>chooseUnit(u.id)}
         title={u.title}>Unit {String(index+1).padStart(2,'0')} · {u.code}{u.brief?.status==='approved'&&<CheckCircle2 size={15}/>}</button>)}</div>
