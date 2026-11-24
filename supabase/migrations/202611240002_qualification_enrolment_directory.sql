@@ -10,11 +10,11 @@ BEGIN
  SELECT coalesce(jsonb_agg(jsonb_build_object('id',q.id,'name',q.full_name,'email',q.email,'isAdmin',q.is_admin,'eligible',q.eligible) ORDER BY (q.id=p_selected) DESC NULLS LAST,q.full_name,q.id),'[]'::jsonb)
  INTO payload FROM (
  SELECT p.id,p.full_name,u.email,
-  EXISTS(SELECT 1 FROM public.lms_role_assignments r WHERE r.user_id=p.id AND r.role='admin') AS is_admin,
+  EXISTS(SELECT 1 FROM public.lms_role_assignments r WHERE r.user_id=p.id AND r.role='admin' AND r.revoked_at IS NULL) AS is_admin,
   (p.account_status='active' AND (p_role='learner' OR EXISTS(SELECT 1 FROM public.lms_qf_staff_authorisations s WHERE s.user_id=p.id AND s.role=p_role AND s.revoked_at IS NULL))) AS eligible
  FROM public.lms_profiles p JOIN auth.users u ON u.id=p.id
  WHERE (p.id=p_selected OR (p.account_status='active'
-  AND (p_role='learner' OR EXISTS(SELECT 1 FROM public.lms_role_assignments r WHERE r.user_id=p.id AND r.role='admin')
+  AND (p_role='learner' OR EXISTS(SELECT 1 FROM public.lms_role_assignments r WHERE r.user_id=p.id AND r.role='admin' AND r.revoked_at IS NULL)
    OR EXISTS(SELECT 1 FROM public.lms_qf_staff_authorisations s WHERE s.user_id=p.id AND s.role=p_role AND s.revoked_at IS NULL))
   AND (coalesce(btrim(p_search),'')='' OR p.full_name ILIKE '%'||left(btrim(p_search),80)||'%' OR u.email ILIKE '%'||left(btrim(p_search),80)||'%'))))
  ORDER BY (p.id=p_selected) DESC NULLS LAST,p.full_name,p.id LIMIT 50
