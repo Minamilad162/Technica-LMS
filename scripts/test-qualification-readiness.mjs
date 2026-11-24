@@ -194,3 +194,23 @@ console.log('Q05 task template and per-enrolment integration: PASS');
 
 assert.ok(tasksUi.includes("portfolioRpc(db,'task_manage'")&&tasksUi.includes('p_revision:task.revision')&&tasksUi.includes('task.canManage'));
 console.log('Q05 governed task management UI: PASS');
+
+const learnerTasks=read('src/qualification/QualificationLearnerTasks.jsx');
+const learnerModel=read('src/qualification/learnerTaskModel.js');
+const learnerPortfolio=read('src/qualification/LiveQualificationPortfolio.jsx');
+assert.ok(learnerTasks.includes("portfolioRpc(db,'task_portfolio'")&&learnerTasks.includes('detail.feedback')&&learnerTasks.includes("onEvidence('upload')")&&learnerTasks.includes("onEvidence('write')"));
+assert.ok(learnerPortfolio.includes("['tasks','Tasks & Evidence']")&&learnerPortfolio.includes('Back to My Tasks')&&learnerPortfolio.includes('taskEvidenceMode ||'));
+assert.ok(learnerTasks.includes('Review before submission')&&learnerTasks.includes('onOutcome(o.outcome.id)')&&!learnerTasks.includes("portfolioRpc(db,'save_claim'"));
+const {taskDetails,taskCounts,matchesTask}=await import('../src/qualification/learnerTaskModel.js');
+const taskFixture={id:'a',status:'In progress',spec:{criteria:['c1','c2']}};
+const portfolioFixture={units:[{id:'u',code:'U1',outcomes:[{id:'o',code:'LO1',criteria:[{id:'c1'},{id:'c2'},{id:'c3'}],claim:{state:'draft',mapping:{c1:['file'],c2:['file']}}}]}]};
+const d=taskDetails(taskFixture,portfolioFixture);
+assert.equal(d.mapped,2);assert.equal(d.verified,0);assert.equal(d.percent,0);assert.equal(d.active[0].allCovered,false,'Task subset does not satisfy entire Outcome');
+portfolioFixture.units[0].outcomes[0].claim.state='verified';
+portfolioFixture.units[0].outcomes[0].submissions=[{snapshot:{mapping:{c1:['file'],c2:['file'],c3:['file']}},revision:1,reviews:[{stage:'assessor',feedback:'Reviewed',createdAt:'2026-11-24'}]}];
+const verifiedTask=taskDetails(taskFixture,portfolioFixture);
+assert.equal(verifiedTask.percent,100);assert.equal(verifiedTask.feedback.length,1);
+assert.equal(taskDetails({spec:{criteria:['missing']}},portfolioFixture).missing,1);
+assert.equal(taskCounts([taskFixture,{status:'Verified'},{status:'Cancelled'}]).completed,1);
+assert.equal(matchesTask({status:'Cancelled',overdue:true},'overdue'),false);
+console.log('Q06 learner task workspace and real criterion progress: PASS');
