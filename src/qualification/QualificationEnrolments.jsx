@@ -7,9 +7,6 @@ const labelOf=p=>p?.name||p?.email||'Account';
 const clean=s=>String(s||'').toLowerCase().trim();
 const dateToday=()=>{const d=new Date();return [d.getFullYear(),String(d.getMonth()+1).padStart(2,'0'),String(d.getDate()).padStart(2,'0')].join('-');};
 const roleLabel={learner:'Learner',assessor:'Assessor',verifier:'Internal Verifier'};
-const validRef=s=>s.trim().length>=12&&s.trim().length<=220&&!/(placeholder|sandbox|demo|test|pending)/i.test(s);
-const authorized=(staff,id,role)=>staff.some(s=>s.userId===id&&s.role===role);
-const distinct=(...ids)=>ids.every(Boolean)&&new Set(ids).size===ids.length;
 
 export function AccountSelect({db,role='learner',value,onChange,disabled,revision=0,exclude=[],label=roleLabel[role],onSelection,compact=false}){
  const id=useId(),root=useRef(null),input=useRef(null);
@@ -34,7 +31,7 @@ export function AccountSelect({db,role='learner',value,onChange,disabled,revisio
   if(e.key==='Escape'){setOpen(false);setQuery('');setActive(-1);return;}
   if(e.key==='Tab'){setOpen(false);setQuery('');return;}
   if(e.key==='ArrowDown'||e.key==='ArrowUp'){e.preventDefault();setOpen(true);const step=e.key==='ArrowDown'?1:-1;let n=active;
-   for(let k=0;k<options.length;k++){n=(n+step+options.length)%options.length;if(allowed(options[n])){setActive(n);break;}}
+   for(let k=0;k<options.length;k++){n=(n+step+options.length)%options.length;if(options[n]&&allowed(options[n])){setActive(n);break;}}
   }else if(e.key==='Enter'&&open){e.preventDefault();choose(options[active]||options.find(allowed));}
  };
  return <div className="qe-account qe-combo" ref={root}>
@@ -46,7 +43,7 @@ export function AccountSelect({db,role='learner',value,onChange,disabled,revisio
     placeholder={value&&!current?'Loading selected account…':'Search and select '+label.toLowerCase()+'…'}
     onFocus={()=>{setQuery('');setOpen(true);}} onClick={()=>setOpen(true)} onChange={e=>{setQuery(e.target.value);setOpen(true);setActive(-1);}} onKeyDown={navigate}/>
    {value&&<button type="button" aria-label={'Clear '+label} disabled={disabled} onClick={clear}><X size={15}/></button>}
-   <button type="button" aria-label={'Open '+label+' list'} disabled={disabled} onClick={()=>{if(open){setOpen(false);setQuery('');}else input.current?.focus();}}><ChevronDown size={17}/></button>
+   <button type="button" aria-label={'Open '+label+' list'} disabled={disabled} onClick={()=>{if(open){setOpen(false);setQuery('');}else{setOpen(true);input.current?.focus();}}}><ChevronDown size={17}/></button>
   </div>
   {open&&<div className="qe-options" id={id+'-options'} role="listbox" aria-label={label}>
    {loading&&<div className="qe-option-message">Searching accounts…</div>}
@@ -61,7 +58,7 @@ export function AccountSelect({db,role='learner',value,onChange,disabled,revisio
  </div>;
 }
 export const enrolmentRows=versions=>versions.flatMap(v=>(v.enrolments||[]).map(e=>({...e,versionId:v.id,title:v.title,edition:v.version,live:!!v.publishedAt})));
-export function AssignmentWorkspace({db,versions,staff,busy,initialVersionId,initialLearnerId='',onAssign,onReassign,onAuthorise}){
+export function AssignmentWorkspace({db,versions,staff,busy,initialVersionId,initialLearnerId='',onAssign,onReassign}){
  const live=versions.filter(v=>v.publishedAt);
  const [versionId,setVersionId]=useState(()=>live.some(v=>v.id===initialVersionId)?initialVersionId:live[0]?.id||'');
  const [learner,setLearner]=useState(initialLearnerId),[assessor,setAssessor]=useState(''),[verifier,setVerifier]=useState('');
@@ -69,11 +66,11 @@ export function AssignmentWorkspace({db,versions,staff,busy,initialVersionId,ini
  const [learnerAccount,setLearnerAccount]=useState(null),[assessorAccount,setAssessorAccount]=useState(null),[verifierAccount,setVerifierAccount]=useState(null),[editAssessorAccount,setEditAssessorAccount]=useState(null),[editVerifierAccount,setEditVerifierAccount]=useState(null);
  const [query,setQuery]=useState(''),[filter,setFilter]=useState('all'),[status,setStatus]=useState('all');
  const [editing,setEditing]=useState(null),[editAssessor,setEditAssessor]=useState(''),[editVerifier,setEditVerifier]=useState(''),[reason,setReason]=useState('');
- const [revision,setRevision]=useState(0);
+ const revision=staff.length;
  const editRef=useRef(null);
  useEffect(()=>{if(editing)editRef.current?.scrollIntoView({block:'start'});},[editing]);
  const rows=useMemo(()=>enrolmentRows(versions),[versions]);
- const matching=rows.filter(e=>(filter==='all'||filter===e.versionId)&&(status==='all'||(status==='completed'?!!e.completedAt:!e.completedAt))&&[e.learner,e.assessor,e.verifier,e.title,e.edition].some(s=>clean(s).includes(clean(query))));
+ const matching=rows.filter(e=>(filter==='all'||filter===e.versionId)&&(status==='all'||(status==='completed'?!!e.completedAt:!e.completedAt))&&[e.learner,e.learnerEmail,e.assessor,e.assessorEmail,e.verifier,e.verifierEmail,e.title,e.edition].some(s=>clean(s).includes(clean(query))));
  const duplicate=rows.some(e=>e.versionId===versionId&&e.learnerId===learner);
  const validTeam=(l,a,v)=>!!l&&!!a&&!!v&&l!==a&&l!==v;
  const selected=(p,id,role)=>p?.id===id&&(p.eligible||(role!=='learner'&&p.isAdmin&&p.active!==false));
