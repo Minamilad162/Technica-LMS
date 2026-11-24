@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
-import {qualificationReadiness,needsAssessmentMethodReview,sourceRubricForUnit,publicationChecks,editionStatus,validPublicationReference,bulkBriefReview} from '../src/qualification/qualificationReadiness.js';
+import {qualificationReadiness,needsAssessmentMethodReview,sourceRubricForUnit,publicationChecks,editionStatus,validPublicationReference,bulkBriefReview,defaultPublicationReference,DEFAULT_LEARNER_DECLARATION} from '../src/qualification/qualificationReadiness.js';
 
 const approvedAt='2026-11-22T09:00:00Z';
 const unit=(id,approved=false)=>({
@@ -144,3 +144,12 @@ assert.equal(bulkBriefReview({...draftForBulk,units:[{...draftForBulk.units[0],b
 assert.ok(admin.includes('Approve All Unit Briefs')&&admin.includes('Approve Unit brief'));
 assert.ok(admin.includes("portfolioRpc(db,'admin_approve_all_briefs'")&&admin.includes('p_expected:bulkReview.expected'));
 console.log('Bulk Unit approval eligibility and single/bulk workflow: PASS');
+
+assert.equal(defaultPublicationReference(null),'');
+assert.equal(defaultPublicationReference({id:'123'}),'TECHNICA-INTERNAL-PUBLICATION-123');
+assert.notEqual(defaultPublicationReference({id:'123'}),defaultPublicationReference({id:'456'}));
+assert.ok(validPublicationReference(defaultPublicationReference({id:'123'})));
+assert.ok(DEFAULT_LEARNER_DECLARATION.length>=70&&DEFAULT_LEARNER_DECLARATION.length<=5000);
+assert.ok(admin.includes('setApprovalRef(defaultPublicationReference(version))')&&admin.includes('setDeclaration(DEFAULT_LEARNER_DECLARATION)'));
+assert.ok(admin.includes('setAttest(false)')&&publish.includes('not an awarding-body approval number'));
+console.log('Q02 proposed sign-off defaults preserve explicit approval: PASS');

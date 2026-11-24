@@ -78,3 +78,11 @@ export function bulkBriefReview(version,references){
  const expected=Object.fromEntries(units.map(u=>[u.id,{instructions:u.brief?.instructions??null,methods:u.brief?.methods??null}]));
  return {rows,pending,expected,ready:!version?.publishedAt&&pending>0&&rows.every(row=>!row.blockers.length)};
 }
+
+ // Proposed centre declaration: editable and not approved until the authorised user signs off.
+export const DEFAULT_LEARNER_DECLARATION = 'I declare that the work and evidence I submit for this qualification are my own, authentic, accurate and attributable to me. I will acknowledge all sources and assistance, including any permitted use of AI, and will not submit misleading or plagiarised work. I will follow Technica Consult and the awarding body assessment, confidentiality and academic integrity requirements, and cooperate with assessment and internal quality assurance. I understand that suspected malpractice may be investigated under the applicable procedures.';
+export function defaultPublicationReference(version){
+ // This identifies the internal publication decision created by the existing audited RPC.
+ // It is NOT an awarding-body accreditation or an already granted approval.
+ return version?.id ? 'TECHNICA-INTERNAL-PUBLICATION-'+version.id : '';
+}

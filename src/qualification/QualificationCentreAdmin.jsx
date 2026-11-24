@@ -2,7 +2,7 @@ import React,{useEffect,useMemo,useState} from 'react';
 import {ArrowLeft,BookCheck,BookOpen,CheckCircle2,ClipboardCheck,Download,FileCheck2,FilePlus2,
  FileText,FolderClosed,GraduationCap,Info,Layers3,LockKeyhole,RefreshCw,Search,ShieldAlert,ShieldCheck,UploadCloud,Users} from 'lucide-react';
 import {portfolioRpc} from './qualificationPortfolioApi.js';
-import {qualificationReadiness,needsAssessmentMethodReview,sourceRubricForUnit,publicationChecks,validPublicationReference,bulkBriefReview} from './qualificationReadiness.js';
+import {qualificationReadiness,needsAssessmentMethodReview,sourceRubricForUnit,publicationChecks,validPublicationReference,bulkBriefReview,defaultPublicationReference,DEFAULT_LEARNER_DECLARATION} from './qualificationReadiness.js';
 import QualificationCentreLearnerPreview from './QualificationCentreLearnerPreview.jsx';
 import {ProgrammeUpdatesAdmin} from './QualificationProgrammeUpdates.jsx';
 import './qualificationCentreAdmin.css';
@@ -96,7 +96,7 @@ export default function QualificationCentreAdmin({db,onBack,references=[]}){
   return ()=>{alive=false;};
  },[db]);
  useEffect(()=>{setInstructions(unit?.brief?.instructions||'');setAssessmentMethods(unit?.brief?.methods||'');setReviewChecks({rubric:false,methods:false,authority:false});},[unit?.id,unit?.brief?.approvedAt,unit?.brief?.instructions,unit?.brief?.methods]);
- useEffect(()=>{setApprovalRef('');setAttest(false);setDeclaration('');},[version?.id]);
+ useEffect(()=>{setApprovalRef(defaultPublicationReference(version));setAttest(false);setDeclaration(DEFAULT_LEARNER_DECLARATION);},[version?.id]);
  useEffect(()=>{
   if(!version?.id)return;
   let alive=true;

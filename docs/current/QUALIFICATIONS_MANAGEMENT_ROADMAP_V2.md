@@ -152,6 +152,8 @@ Acceptance: required checks passed, deployment independently verified, acceptanc
 
 | 2026-11-24 | Q02 | Owner requested Approve All Unit Briefs alongside individual approval. PR #124 merged at b814b1a209e7dab54e74571c3b93896c632f7b8e; CI run 45344657403 passed, including atomic rollback, stale text, role isolation, preserved approvals, and published-edition lock. Migration 202611240001 applied to Technica production; RPC and privileges verified. Fixed pre-existing ambiguous alias in individual brief RPC. No Unit approvals or publications were performed in production. | Bulk approval implemented and database verified; visual rollout pending | Owner reviews deployed screen and performs genuine centre approval |
 
+| 2026-11-24 | Q02 | Owner requested editable publication defaults. Proposed learner declaration and edition-specific internal publication decision reference, never an invented awarding-body approval. Existing explicit human sign-off and publication audit remain mandatory. Q03 mockup to be reviewed before implementation. | Implementation under validation | Verify CI and deployed UI; Q03 design approval |
+
 ### Production edition audit — 24 November 2026
 
 | Edition | Units | Outcomes | Criteria | Approved briefs | Released | Enrolments |
