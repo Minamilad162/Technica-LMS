@@ -16,10 +16,11 @@ export default function QualificationLearnerTasks({db,portfolio,progress,selecte
  useEffect(()=>{let alive=true;setTasks(null);setError('');
   portfolioRpc(db,'task_portfolio',{p_enrolment:portfolio.id}).then(rows=>{if(alive)setTasks(Array.isArray(rows)?rows:[]);}).catch(e=>{if(alive)setError(e?.message||'Unable to load assigned tasks.');});
   return()=>{alive=false;};
- },[db,portfolio.id,retry]);
+ },[db,portfolio,retry]);
  const counts=taskCounts(tasks||[]),matching=(tasks||[]).filter(t=>matchesTask(t,filter));
  const pageSize=5,last=Math.max(0,Math.ceil(matching.length/pageSize)-1),visible=matching.slice(Math.min(page,last)*pageSize,(Math.min(page,last)+1)*pageSize);
- const selected=matching.find(t=>t.id===selectedId)||visible[0];
+ const selected=visible.find(t=>t.id===selectedId)||visible[0];
+ useEffect(()=>{const index=matching.findIndex(t=>t.id===selectedId);if(index>=0)setPage(Math.floor(index/pageSize));},[tasks]);
  const detail=taskDetails(selected,portfolio);
  const overall=progress.total?Math.round(progress.verified*100/progress.total):0;
  const canWork=!!selected&&selected.status!=='Cancelled'&&selected.status!=='Verified'&&portfolio.canEdit&&detail.active.length>0;
@@ -43,9 +44,9 @@ export default function QualificationLearnerTasks({db,portfolio,progress,selecte
     {!matching.length&&<div className="qlt-empty"><FolderOpen size={30}/><strong>{tasks.length?'No tasks match this filter':'No assigned tasks yet'}</strong><span>{tasks.length?'Select another filter.':'Tasks will appear when your assessment team assigns them.'}</span></div>}
     {last>0&&<div className="qlt-pagination"><button disabled={page===0} onClick={()=>{setPage(p=>p-1);setShowSubmit(false);}}>Previous</button><span>{Math.min(page,last)+1} / {last+1}</span><button disabled={page>=last} onClick={()=>{setPage(p=>p+1);setShowSubmit(false);}}>Next</button></div>}
    </aside>
-   <main className="qlt-detail-card">{!selected?<div className="qlt-empty qlt-no-task"><ClipboardCheck size={42}/><h2>Your assessment workspace</h2><p>Select a task to view its instructions, linked criteria and reviewer feedback. You can still access the programme and evidence folder.</p><button className="qf-button qf-outline" onClick={()=>onView('programme')}>View Units</button><button className="qf-button qf-primary" onClick={()=>onView('evidence')}>Evidence Folder</button></div>:<>
+   <section className="qlt-detail-card" aria-label="Selected task details">{!selected?<div className="qlt-empty qlt-no-task"><ClipboardCheck size={42}/><h2>Your assessment workspace</h2><p>Select a task to view its instructions, linked criteria and reviewer feedback. You can still access the programme and evidence folder.</p><button className="qf-button qf-outline" onClick={()=>onView('programme')}>View Units</button><button className="qf-button qf-primary" onClick={()=>onView('evidence')}>Evidence Folder</button></div>:<>
     <header className="qlt-detail-head"><span className="qlt-file-icon"><FileText size={30}/></span><div><h2>{selected.spec.title} <Badge task={selected}/></h2><p>{detail.groups.map(g=>'Unit '+String(g.index+1).padStart(2,'0')+' – '+g.unit.title).join(' · ')}</p></div><div className="qlt-due"><CalendarDays size={19}/><span><small>Due date</small><strong>{formatDate(selected.dueOn)}</strong></span></div></header>
-    <div className="qlt-steps" aria-label="Evidence journey">{[[FileText,'Prepare Evidence'],[Layers3,'Map to Criteria'],[Send,'Submit for Assessment']].map(([Icon,label],i)=><button type="button" key={label} aria-current={step===i?'step':undefined} className={step===i?'current':step>i?'done':''} disabled={busy||!canWork} onClick={()=>{if(i===0)onEvidence('upload');else if(i===1)onView('matrix');else setShowSubmit(s=>!s);}}><Icon size={21}/><b>{i+1}</b>{label}</button>)}</div>
+    <div className="qlt-steps" aria-label="Evidence journey">{[[FileText,'Prepare Evidence'],[Layers3,'Map to Criteria'],[Send,'Submit for Assessment']].map(([Icon,label],i)=><button type="button" key={label} aria-current={step===i?'step':undefined} className={step===i?'current':step>i?'done':''} disabled={busy||!canWork} onClick={()=>{if(i===0)onEvidence('upload');else if(i===1)onView('matrix',detail.groups[0]?.index);else setShowSubmit(s=>!s);}}><Icon size={21}/><b>{i+1}</b>{label}</button>)}</div>
     <div className="qlt-detail-grid">
      <Panel icon={Target} title="Task Instructions"><p className="qlt-copy">{selected.spec.instructions}</p><small>{selected.spec.kind}</small></Panel>
      <Panel icon={Link2} title="Linked Learning Outcomes & Assessment Criteria" extra={<span className="qlt-coverage">{detail.verified}/{selected.spec.criteria.length} verified</span>}>
@@ -62,7 +63,7 @@ export default function QualificationLearnerTasks({db,portfolio,progress,selecte
     {selected.cancelledAt&&<div className="qlt-info"><Info size={18}/> Task cancelled. {selected.cancelReason||''} Existing evidence and decisions remain in the portfolio.</div>}
     {showSubmit&&<Panel icon={Send} title="Review before submission"><p>Submit each linked Outcome through its existing competence claim. All criteria in that Outcome must be covered, even if this task links only some of them.</p>{!portfolio.declarationAt&&<p>Accept your learner declaration in <button className="qlt-outcome" onClick={()=>onView('registration')}>Registration</button> before submission.</p>}{!portfolio.assessorAssigned&&<p>An active assessor must be assigned.</p>}{detail.outcomes.map(o=><div key={o.outcome.id} className="qlt-submit-row"><div><strong>{o.outcome.code} · {o.outcome.title}</strong><small>{claimLabels[o.state]} · {o.allCovered?'All Outcome criteria mapped':'Some Outcome criteria need evidence'}</small></div><button className="qf-button qf-outline" onClick={()=>onOutcome(o.outcome.id)}>{editableStates.includes(o.state)?o.state==='changes_requested'?'Review & resubmit':'Review & submit':'View record'}</button></div>)}</Panel>}
     <footer className="qlt-actions"><button type="button" className="qf-button qf-outline" disabled={busy||!detail.groups.length} onClick={()=>onUnit(detail.groups[0].index)}><BookOpen size={17}/> View Unit Brief</button><button type="button" className="qf-button qf-outline" disabled={busy} onClick={()=>onView('matrix')}><Grid3X3 size={17}/> Open Matrix</button><button type="button" className="qf-button qf-primary" disabled={busy||!canWork} onClick={()=>onEvidence('upload')}><Upload size={18}/> Upload Evidence</button><button type="button" className="qf-button qf-outline" disabled={busy||!canWork} onClick={()=>onEvidence('write')}><PenLine size={17}/> Write Evidence</button><button type="button" className="qf-button qf-primary" disabled={busy||!canWork} onClick={()=>setShowSubmit(s=>!s)}><Send size={18}/> Submit for Assessment</button></footer>
-   </>}</main>
+   </>}</section>
   </div>}
  </div>;
 }
