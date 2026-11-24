@@ -11,7 +11,6 @@ const toggle=(values,ids)=>ids.every(id=>values.includes(id))?values.filter(id=>
 const unitCriteria=u=>u.outcomes.flatMap(o=>o.criteria.map(c=>c.id));
 const complete=s=>s.title.trim()&&s.instructions.trim().length>=10&&s.criteria.length>0&&s.evidence.trim().length>=3;
 const selectedUnits=(units,spec)=>units.filter(u=>unitCriteria(u).some(id=>spec.criteria.includes(id)));
-const localDate=()=>{const d=new Date();return [d.getFullYear(),String(d.getMonth()+1).padStart(2,'0'),String(d.getDate()).padStart(2,'0')].join('-');};
 const err=e=>e?.message||'The operation could not be completed.';
 function useTaskData(db,rpc,args,key){
  const [data,setData]=useState(null),[error,setError]=useState(''),[revision,setRevision]=useState(0);
@@ -33,7 +32,7 @@ function TaskSummary({spec,units,version,documents,mode}){
 }
 function TaskBuilder({units,version,documents,initial,mode,onClose,onSave,busy,error}){
  const [spec,setSpec]=useState(()=>initial?.spec||blank()),[step,setStep]=useState(0),[unitId,setUnitId]=useState(units[0]?.id||'');
- const [enrolment,setEnrolment]=useState(''),[due,setDue]=useState('');
+ const [enrolment,setEnrolment]=useState(version.enrolments?.length===1?version.enrolments[0].id:''),[due,setDue]=useState('');
  const id=useRef(initial?.id||uid());
  const linked=selectedUnits(units,spec),unit=units.find(u=>u.id===unitId);
  const eligible=(version.enrolments||[]).filter(e=>!e.completedAt);
@@ -105,11 +104,26 @@ export function TaskAdminWorkspace({db,version,tab}){
 }
 export function PortfolioAssignedTasks({db,portfolio,onOutcome,onView}){
  const {data,error,reload}=useTaskData(db,'task_portfolio',{p_enrolment:portfolio.id},portfolio.id);
- const units=portfolio.units||[];
- return <section className="qf-card qt-portfolio-tasks"><div className="qf-card-header"><h3>{portfolio.role==='learner'?'My Assigned Tasks':'Assigned Tasks'}</h3></div>
+ const units=portfolio.units||[],[editor,setEditor]=useState(false),[busy,setBusy]=useState(false),[actionError,setActionError]=useState(''),[notice,setNotice]=useState('');
+ const lock=useRef(false);
+ const documents=units.flatMap(u=>(u.centreBrief?.files||[]).map(d=>({...d,unit:u.code})));
+ const version={title:portfolio.title,version:portfolio.version,enrolments:[{id:portfolio.id,learner:portfolio.learner,assessor:portfolio.assessor,verifier:portfolio.verifier,startOn:portfolio.startsOn,completedAt:portfolio.completedAt}]};
+ const save=async payload=>{if(lock.current)return;lock.current=true;setBusy(true);setActionError('');setNotice('');
+  try{await portfolioRpc(db,'task_assign',{p_id:payload.id,p_enrolment:portfolio.id,p_template:null,p_spec:payload.spec,p_due:payload.due});setEditor(false);setNotice('Individual task assigned.');reload();}
+  catch(e){setActionError(err(e));}finally{setBusy(false);lock.current=false;}
+ };
+ const openFile=async d=>{setActionError('');try{const {data,error}=await db.storage.from('technica-qualification-materials').createSignedUrl(d.path,60);
+  if(error||!data?.signedUrl)throw error||new Error('Approved material is unavailable.');window.open(data.signedUrl,'_blank','noopener,noreferrer');
+ }catch(e){setActionError(err(e));}};
+ return <section className="qf-card qt-portfolio-tasks"><div className="qf-card-header"><h3>{portfolio.role==='learner'?'My Assigned Tasks':'Assigned Tasks'}</h3>
+  {portfolio.role==='assessor'&&!portfolio.completedAt&&!editor&&<button className="qf-button qf-primary" onClick={()=>{setActionError('');setEditor(true);}}><Plus size={16}/> Create Individual Task</button>}</div>
+  {notice&&<p role="status">{notice}</p>}
+  {editor&&<TaskBuilder mode="individual" version={version} units={units} documents={documents} busy={busy} error={actionError} onSave={save} onClose={()=>{setEditor(false);setActionError('');}}/>}
+  {!editor&&actionError&&<p role="alert" className="qf-live-error">{actionError}</p>}
   {error?<p role="alert">{error} <button className="qf-button qf-outline" onClick={reload}>Retry</button></p>:!data?<p>Loading tasks…</p>:!data.length?<p>No individual tasks assigned yet.</p>:<div className="qt-list">{data.map(t=><details key={t.id} className="qt-task-detail"><summary><div><strong>{t.spec.title}</strong><small>Due {t.dueOn} · {t.spec.kind}</small></div><TaskStatus status={t.status} overdue={t.overdue}/></summary><div className="qt-task-body"><strong>Instructions</strong><p className="qt-copy">{t.spec.instructions}</p><strong>Evidence required</strong><p className="qt-copy">{t.spec.evidence}</p>
    {units.flatMap(u=>u.outcomes.filter(o=>o.criteria.some(c=>t.spec.criteria.includes(c.id))).map(o=><div key={o.id} className="qt-outcome-link"><div><strong>{u.code} · {o.code}</strong><small>{o.criteria.filter(c=>t.spec.criteria.includes(c.id)).map(c=>c.code+' '+c.title).join(' · ')}</small></div><button className="qf-button qf-outline" onClick={()=>onOutcome(o.id)}>Open Outcome <ArrowRight size={15}/></button></div>))}
-   {!!t.spec.documents.length&&<button type="button" className="qf-button qf-outline" onClick={()=>onView('library')}><Paperclip size={16}/> Open approved materials ({t.spec.documents.length})</button>}
+   {documents.filter(d=>t.spec.documents.includes(d.id)).map(d=><button key={d.id} type="button" className="qf-button qf-outline" onClick={()=>openFile(d)}><Paperclip size={16}/> {d.title}</button>)}
+   {t.spec.documents.some(id=>!documents.some(d=>d.id===id))&&<p>Some linked materials are unavailable to this account. Contact the centre.</p>}
    {portfolio.role==='learner'&&!t.cancelledAt&&<button type="button" className="qf-button qf-primary" onClick={()=>onView('evidence')}>Open Evidence Folder</button>}
   </div></details>)}</div>}
  </section>;
