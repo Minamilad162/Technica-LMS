@@ -181,3 +181,13 @@ assert.ok(admin.includes('setRevokeUser(s.userId);setRevokeRole(s.role)')&&admin
 assert.ok(admin.includes('!staffAttest||staffReference.trim().length<12')&&admin.includes("portfolioRpc(db,'admin_authorize_staff'"),'Existing documented role authorisation guards preserved');
 assert.ok(reviewerStyles.includes('.qsr-reviewer-grid{display:grid;grid-template-columns:repeat(3')&&reviewerStyles.includes('.qsr-fields,.qf-live .qsr-reviewer-grid,.qf-live .qsr-revoke-form{grid-template-columns:1fr}'),'Reviewer cards adapt to mobile');
 console.log('Q03 approved reviewer dashboard layout and preserved actions: PASS');
+
+const tasksUi=read('src/qualification/QualificationTasks.jsx');
+const tasksSql=read('supabase/migrations/202611240004_qualification_tasks.sql');
+assert.ok(admin.includes('<TaskAdminWorkspace key=')&&admin.includes("'Task Templates'")&&admin.includes("'Assigned Tasks'"));
+assert.ok(tasksUi.includes('Task Details')&&tasksUi.includes('Link to Units')&&tasksUi.includes('Review & Save'));
+assert.ok(tasksUi.includes("portfolioRpc(db,'task_save_template'")&&tasksUi.includes("portfolioRpc(db,'task_assign'"));
+assert.ok(tasksUi.includes("task_portfolio")&&tasksUi.includes('onOutcome(o.id)')&&tasksUi.includes("createSignedUrl(d.path,60)"));
+assert.ok(tasksSql.includes('lms_qf_task_templates ENABLE ROW LEVEL SECURITY')&&tasksSql.includes('lms_qf_assigned_tasks ENABLE ROW LEVEL SECURITY'));
+assert.ok(tasksSql.includes("t.approved_at IS NOT NULL")&&tasksSql.includes("e.assessor_id=actor")&&tasksSql.includes("q.state='verified'"));
+console.log('Q05 task template and per-enrolment integration: PASS');
