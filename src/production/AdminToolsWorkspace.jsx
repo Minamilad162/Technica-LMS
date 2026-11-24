@@ -53,6 +53,7 @@ export default function AdminToolsWorkspace({db,initialTab='overview',onExit,onT
  const [coursesLoading,setCoursesLoading]=useState(true),[coursesError,setCoursesError]=useState('');
  const [catalogRevision,setCatalogRevision]=useState(0);
  const [questionBankDirty,setQuestionBankDirty]=useState(false);
+ const [qualificationLearner,setQualificationLearner]=useState('');
  const bankDirtyChanged=useCallback(flag=>setQuestionBankDirty(!!flag),[]);
  useEffect(()=>{setTab(ids.has(initialTab)?initialTab:'overview');},[initialTab]);
  useEffect(()=>{let live=true;setState('checking');setError('');
@@ -76,7 +77,7 @@ export default function AdminToolsWorkspace({db,initialTab='overview',onExit,onT
   if(!ids.has(id)||id===tab)return;
   if((tab==='questions'||tab==='exams')&&questionBankDirty&&
      !window.confirm('You have unsaved Question Bank changes. Discard them and leave this page?'))return;
-  setQuestionBankDirty(false);setTab(id);onTabChange?.(id);
+  setQuestionBankDirty(false);if(id!=='qualifications')setQualificationLearner('');setTab(id);onTabChange?.(id);
  };
  const asp=courses.find(c=>c.slug==='asp');
  if(state==='checking')return <PremiumLoading variant="page"/>;
@@ -103,14 +104,14 @@ export default function AdminToolsWorkspace({db,initialTab='overview',onExit,onT
   <section id={'at-panel-'+tab} role="tabpanel" aria-labelledby={'at-tab-'+tab} className="at-panel">
    {tab==='overview'&&<AdminDashboardPanel db={db} onNavigate={change}/>}
    {tab==='courses'&&<AdminCoursesPanel db={db}/>}
-   {tab==='qualifications'&&<React.Suspense fallback={<PremiumLoading variant="compact"/>}><QualificationsWorkspace admin db={db}/></React.Suspense>}
+   {tab==='qualifications'&&<React.Suspense fallback={<PremiumLoading variant="compact"/>}><QualificationsWorkspace admin db={db} initialLearnerId={qualificationLearner}/></React.Suspense>}
    {tab==='questions'&&<AdminCourseBank db={db} courses={courses} asp={asp} mode="bank"
      coursesLoading={coursesLoading} coursesError={coursesError} onDirtyChange={bankDirtyChanged}
      onRefreshCourses={()=>setCatalogRevision(v=>v+1)} onGoToCourses={()=>change('courses')}/>}
    {tab==='exams'&&<AdminCourseBank db={db} courses={courses} asp={asp} mode="mock"
      coursesLoading={coursesLoading} coursesError={coursesError} onDirtyChange={bankDirtyChanged}
      onRefreshCourses={()=>setCatalogRevision(v=>v+1)} onGoToCourses={()=>change('courses')}/>} 
-   {tab==='users'&&<AdminUsersPanel db={db}/>}
+   {tab==='users'&&<AdminUsersPanel db={db} onAssignQualification={id=>{setQualificationLearner(id);change('qualifications');}}/>}
    {tab==='subscriptions'&&<React.Suspense fallback={<PremiumLoading variant="compact"/>}><AdminSubscriptionsPanel db={db}/></React.Suspense>}
    {tab==='system'&&<AdminSystemPanel db={db}/>}
   </section>

@@ -111,7 +111,7 @@ assert.ok(adminCenter.includes('refs.find(r=>r.catalog_key===v?.catalogKey)'),'R
 assert.ok(adminCenter.includes('v.version')&&adminCenter.includes('learnersOf(v).length')&&adminCenter.includes('approvedCount(v)'),'All visible edition metrics use actual data');
 for(const action of ['admin_assign','admin_publish','admin_authorize_staff','admin_reassign','admin_reserve_document','admin_approve_document','admin_certificate_authorize'])
  assert.ok(admin.includes("'"+action+"'"),'Existing governed action must remain available: '+action);
-assert.ok(admin.includes("hidden={section!=='enrolments'}")&&admin.includes("hidden={section!=='staff'}"),'Admin controls are separated into navigation views');
+assert.ok(admin.includes("section==='enrolments'&&<AssignmentWorkspace")&&admin.includes("hidden={section!=='staff'}"),'Admin controls are separated into navigation views');
 assert.ok(adminStyles.includes('@media(max-width:620px)')&&adminStyles.includes('prefers-reduced-motion'),'Responsive admin layout respects reduced motion');
 
 const sourceVersion={catalogKey:rubricVersion.catalogKey,units:[{...rubricUnit,brief:{status:'approved',approvedAt,methods:'Written assignment and verified workplace evidence'}}],enrolments:[]};
@@ -153,3 +153,16 @@ assert.ok(DEFAULT_LEARNER_DECLARATION.length>=70&&DEFAULT_LEARNER_DECLARATION.le
 assert.ok(admin.includes('setApprovalRef(defaultPublicationReference(version))')&&admin.includes('setDeclaration(DEFAULT_LEARNER_DECLARATION)'));
 assert.ok(admin.includes('setAttest(false)')&&publish.includes('not an awarding-body approval number'));
 console.log('Q02 proposed sign-off defaults preserve explicit approval: PASS');
+
+const assignment=read('src/qualification/QualificationEnrolments.jsx');
+const dirSql=read('supabase/migrations/202611240002_qualification_enrolment_directory.sql');
+const adminUsers=read('src/production/AdminToolsPanels.jsx');
+const adminWorkspace=read('src/production/AdminToolsWorkspace.jsx');
+assert.ok(assignment.includes("portfolioRpc(db,'admin_directory'")&&assignment.includes('p_selected:value||null'),'Independent server search retains selected reviewer');
+assert.ok(assignment.includes('setEditAssessor(e.assessorId')&&assignment.includes('setEditVerifier(e.verifierId'),'Edit current reviewers, not blank fields');
+assert.ok(assignment.includes('onAuthorise(value,role,reference.trim())')&&assignment.includes('!attest||!validRef(reference)'),'Documented authorisation is explicit');
+assert.ok(assignment.includes('versions.filter(v=>v.publishedAt)')&&assignment.includes('e.learnerId===learner'),'Exact live edition, duplicate checks');
+assert.ok(adminUsers.includes('onAssignQualification(selected.id)')&&adminWorkspace.includes('initialLearnerId={qualificationLearner}'),'Users directory opens same assignment workspace');
+assert.ok(dirSql.includes('public.lms_qf_admin_access()')&&dirSql.includes("r.role='admin'")&&dirSql.includes("s.revoked_at IS NULL"));
+assert.ok(dirSql.includes('Independent verification required')&&dirSql.includes('This learner is already enrolled'));
+console.log('Q03/Q04 assignment and reviewer directory integration: PASS');

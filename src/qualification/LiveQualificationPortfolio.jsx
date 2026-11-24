@@ -1093,7 +1093,7 @@ function OpenPortfolio({db, portfolio, references, evidenceEntry, onRefresh, onB
   </div>;
 }
 
-export default function LiveQualificationPortfolio({db,adminEntry=false}) {
+export default function LiveQualificationPortfolio({db,adminEntry=false,initialLearnerId=''}) {
   const [rows,setRows] = useState(null);
   const [references,setReferences] = useState([]);
   const [adminEnabled,setAdminEnabled] = useState(false);
@@ -1165,7 +1165,7 @@ export default function LiveQualificationPortfolio({db,adminEntry=false}) {
       <p role="alert">{error}</p><Action secondary onClick={() => setRefreshKey(value => value + 1)}>Retry</Action>
     </Panel> : portfolio ? <OpenPortfolio key={portfolio.id} db={db} portfolio={portfolio} references={references} evidenceEntry={evidenceEntry} onRefresh={refresh}
       onBack={() => {setPortfolio(null); setRefreshKey(value => value + 1);}}/> : adminView && adminEnabled
-      ? <QualificationCentreAdmin db={db} references={references} onBack={()=>{setAdminView(false);setRefreshKey(v=>v+1);}}/> : previewId
+      ? <QualificationCentreAdmin db={db} references={references} initialLearnerId={initialLearnerId} onBack={()=>{setAdminView(false);setRefreshKey(v=>v+1);}}/> : previewId
       ? <QualificationSourcePreview key={previewId} item={QUALIFICATIONS.find(item => item.id === previewId)}
           references={references} onBack={() => setPreviewId('')}
           learnerPortfolios={(rows || []).filter(row => row.role === 'learner' && !row.completedAt && row.catalogKey !== privateSandboxKey)}

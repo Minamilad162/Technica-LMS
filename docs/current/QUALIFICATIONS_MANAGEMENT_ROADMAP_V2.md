@@ -34,8 +34,8 @@ Status vocabulary: PLANNED, IN PROGRESS, BLOCKED, IMPLEMENTED, VERIFIED, DONE. I
 | Q00 | Baseline & architecture | IN PROGRESS | None | Repository/RPC inventory and 24 Nov production edition counts verified read-only; remaining migration/deployment/route audit |
 | Q01 | Admin Management Center | IN PROGRESS | Q00 | Approved catalogue/setup UI merged (PR #122), CI verified; authenticated visual QA and remaining management surfaces pending |
 | Q02 | Qualification activation | IN PROGRESS | Q01 | Simplified Draft/Live publication UI merged PR #123, CI passed; live visual QA and genuine centre publication pending |
-| Q03 | Roles & staff management | PLANNED | Q01 | Documented reviewer competence |
-| Q04 | Learner enrolment engine | PLANNED | Q02, Q03 | Real edition and eligible independent reviewers |
+| Q03 | Roles & staff management | IN PROGRESS | Q01 | Shared searchable reviewer selection, inline authorisation and audit guards implemented; integration/visual acceptance pending |
+| Q04 | Learner enrolment engine | IN PROGRESS | Q02, Q03 | Central individual assignment, Users entry and edit reviewers implemented; tests, migration and live enrolment pending |
 | Q05 | Assessment plans & tasks | PLANNED | Q04 | Task/claim architecture |
 | Q06 | Learner workspace | PLANNED | Q05 | Existing Evidence/Matrix/Outcome integration |
 | Q07 | Assessor & verifier workspaces | PLANNED | Q04, Q05 | Independent review queues |
@@ -157,6 +157,8 @@ Acceptance: required checks passed, deployment independently verified, acceptanc
 | 2026-11-24 | Q02 | Owner requested editable publication defaults. Proposed learner declaration and edition-specific internal publication decision reference, never an invented awarding-body approval. Existing explicit human sign-off and publication audit remain mandatory. Q03 mockup to be reviewed before implementation. | Implementation under validation | Verify CI and deployed UI; Q03 design approval |
 
 | 2026-11-24 | Q02/Q03/Q04 | PR #125 merged at 0dd1e0f12afb033320fbc2bca40e06653e4f1fd1 after CI run 45345574620 passed both validate and PostgreSQL smoke. Editable internal publication reference and proposed declaration defaults; no production publication. Owner clarified learner-specific assignment via searchable active user/Admin dropdowns, inline genuine reviewer authorisation and editable individual assignments. | Q02 defaults merged/CI verified, rollout not independently verified; Q03/Q04 UI review pending | Present revised central enrolment assignment mockup, obtain approval before implementation |
+
+| 2026-11-24 | Q03/Q04 | Owner approved central assignment design. Implemented shared Assignment Workspace, independent server searches of registered learners and admin/authorised reviewer candidates, inline explicit competence approval, prefilled reviewer editor, role-specific staff workload, Users entry, duplicate guard and historical self-verification protection. Migration 202611240002 and disposable SQL tests added. | Implementation in branch codex/q03-q04-enrolment-management, validation pending | Validate CI, deploy migration only after checks, verify Cloudflare and real authorised enrolment (zero live official editions in latest read-only audit) |
 
 ### Production edition audit — 24 November 2026
 

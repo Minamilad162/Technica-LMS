@@ -30,7 +30,7 @@ assert.match(app,/path="\/qualifications"[^\n]+legacyBrowserQa\?<QualificationsW
 assert.match(learner,/lj-qualification-mode/);
 assert.match(learner,/screen==="qualifications"\?<QualificationsWorkspace db=\{db\}\/>/);
 assert.match(admin,/tab===\x27qualifications\x27&&<React\.Suspense/);
-assert.match(admin,/<QualificationsWorkspace admin db=\{db\}\/>/);
+assert.match(admin,/<QualificationsWorkspace admin db=\{db\} initialLearnerId=\{qualificationLearner\}\/>/);
 assert.match(css,/\.qf-matrix-scroll/);
 assert.match(css,/@media\(max-width:700px\)/);
 assert.match(css,/prefers-reduced-motion/);

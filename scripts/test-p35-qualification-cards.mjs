@@ -153,8 +153,8 @@ const reviewerSql=read('supabase/migrations/202611220006_qualification_reviewer_
 assert.match(centre,/admin_certificate_authorize/,'Must require real external issuer authorization');
 assert.match(centre,/admin_authorize_staff/,'Staff competence admin action missing');
 assert.match(centre,/admin_staff/,'Reviewers must be filtered to centre-authorized staff');
-assert.match(centre,/s\.role==='assessor'/,'Assessor dropdown incorrectly shows unqualified users');
-assert.match(centre,/s\.role==='verifier'/,'Verifier dropdown incorrectly shows unqualified users');
+const assignmentUi=read('src/qualification/QualificationEnrolments.jsx');
+assert.ok(assignmentUi.includes("authorized(staff,assessor,'assessor')")&&assignmentUi.includes("authorized(staff,verifier,'verifier')"),'Selection may discover registered admins but actual assignment must require role-specific authorisation');
 assert.match(live,/portfolioRpc\(db,'certificate_access'/,'Certificate eligibility not linked to actual issuer authority');
 assert.match(issuerSql,/lms_qf_certificate_issuer_authorisations/,'Issuer authorization must be persisted');
 assert.match(issuerSql,/e\.completed_at IS NULL/,'Unfinished outcomes may not create certificates');

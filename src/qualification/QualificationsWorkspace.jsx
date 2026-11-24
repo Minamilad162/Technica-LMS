@@ -235,7 +235,7 @@ function AdminQualifications(){
   {notice&&<div className="qf-toast" role="status">{notice}<button type="button" aria-label="Dismiss message" onClick={()=>setNotice('')}><X size={16}/></button></div>}
  </div>;
 }
-export default function QualificationsWorkspace({admin=false, db}){
- if(db) return <LiveQualificationPortfolio db={db} adminEntry={admin}/>;
+export default function QualificationsWorkspace({admin=false, db,initialLearnerId=''}){
+ if(db) return <LiveQualificationPortfolio db={db} adminEntry={admin} initialLearnerId={initialLearnerId}/>;
  return admin?<AdminQualifications/>:<LearnerQualifications/>;
 }
