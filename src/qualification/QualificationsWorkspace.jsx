@@ -236,6 +236,6 @@ function AdminQualifications(){
  </div>;
 }
 export default function QualificationsWorkspace({admin=false, db}){
- if(db) return <LiveQualificationPortfolio db={db}/>;
+ if(db) return <LiveQualificationPortfolio db={db} adminEntry={admin}/>;
  return admin?<AdminQualifications/>:<LearnerQualifications/>;
 }

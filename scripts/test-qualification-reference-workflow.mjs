@@ -77,7 +77,7 @@ assert.ok(sharedStyles.includes("@media(max-width:490px)"),
 assert.match(unitNav,/aria-pressed=\{selected\}/);
 assert.doesNotMatch(sourcePreview,/qsrc-unit-list/,'Do not restore the sidebar in the source view');
 const centre=source('src/qualification/QualificationCentreAdmin.jsx');
-assert.ok(centre.includes('Preview learner workspace')&&centre.includes('<QualificationCentreLearnerPreview version={version}'));
+assert.ok(centre.includes('onPreview={()=>setPreviewWorkspace(true)}')&&centre.includes('<QualificationCentreLearnerPreview version={version}'),'Preview action opens the original source-backed learner workspace');
 assert.ok(preview.includes("source?.units||[]"),'Admin preview must be backed by real specification');
 assert.ok(preview.includes("No real learner, assessment decision, evidence record, or enrolment is created."));
 assert.ok(preview.includes('Gap Analysis · Assessment Criteria'));

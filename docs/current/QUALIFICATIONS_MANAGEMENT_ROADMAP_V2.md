@@ -31,8 +31,8 @@ Status vocabulary: PLANNED, IN PROGRESS, BLOCKED, IMPLEMENTED, VERIFIED, DONE. I
 
 | ID | Phase | Status | Dependencies | Next evidence / blocker |
 |---|---|---|---|---|
-| Q00 | Baseline & architecture | PLANNED | None | Fresh read-only audit and route inventory |
-| Q01 | Admin Management Center | PLANNED | Q00 | Admin navigation and separated workspaces |
+| Q00 | Baseline & architecture | IN PROGRESS | None | Repository and existing admin RPC inspected; fresh production/deployment audit remains |
+| Q01 | Admin Management Center | IN PROGRESS | Q00 | Approved catalogue/setup UI implemented in branch; CI, visual QA and remaining management surfaces pending |
 | Q02 | Qualification activation | PLANNED | Q01 | Genuine centre inputs for production release |
 | Q03 | Roles & staff management | PLANNED | Q01 | Documented reviewer competence |
 | Q04 | Learner enrolment engine | PLANNED | Q02, Q03 | Real edition and eligible independent reviewers |
@@ -53,6 +53,9 @@ Status vocabulary: PLANNED, IN PROGRESS, BLOCKED, IMPLEMENTED, VERIFIED, DONE. I
 Acceptance: dated baseline report, verified facts and explicit unknowns; no production writes.
 
 ### Q01 — Admin Management Center
+
+Owner approved the 24 November mockup of the blue/white administrator catalogue, KPI row, selectable edition cards, right-hand setup workflow, and selected-edition summary/tabs with a zero-enrolment ready state. Preserve the existing app shell and use actual source edition names/counts, not illustrative figures. New-edition authoring, archive, actual assessment queue totals and full reporting are not exposed as fake controls; they need their own governed implementation. The Q01 dashboard uses approved Unit brief counts instead of unavailable assessment totals. Existing Unit briefs, protected materials, release, enrolment, reviewer authorisation, programme updates and issuer authority remain real actions.
+
 - [ ] Q01.1 Add clearly visible admin menu entry and compact dashboard/navigation.
 - [ ] Q01.2 Separate qualifications, enrolments, staff, tasks, assessment, certificates and reporting. No dead controls or unlabeled unfinished modules.
 - [ ] Q01.3 Real version/readiness cards, blocker explanations and direct action links. Show zero enrolments as a normal empty state, not an activation blocker; keep edition status independent of learner assignment.
@@ -139,5 +142,7 @@ Acceptance: required checks passed, deployment independently verified, acceptanc
 
 | 2026-11-24 | Planning | Owner clarified zero-student qualifications are valid; edition activation independent of enrolment and learner reviewer assignment. Added UI mockup approval gate before implementation. | Requirements updated; no code or production data changes | Q00 audit; Q01 revised mockup for approval |
 
+| 2026-11-24 | Q01 | Owner approved revised qualification setup mockup. Implemented source-backed admin dashboard, edition filters/grid/list, workflow, detail tabs and separate admin navigation on branch codex/q01-admin-approved-design. Existing RPCs retained; no migration or production mutation. | IN PROGRESS — CI and authenticated visual QA pending | Complete validation, merge only after checks; finish Q00 live audit before further phases |
+
 ### Next session
-Start Q00. Read this roadmap, verify current code and production state without mutation, and record the precise reasons for unavailable Evidence upload. Continue to Q01 when baseline is verified.
+Read this roadmap. Finish Q00 fresh production/deployment audit and Q01 acceptance (including visual QA); confirm real edition release/enrolment access without fabricating approvals. Q02 remains subject to its own owner-approved design.

@@ -1093,11 +1093,11 @@ function OpenPortfolio({db, portfolio, references, evidenceEntry, onRefresh, onB
   </div>;
 }
 
-export default function LiveQualificationPortfolio({db}) {
+export default function LiveQualificationPortfolio({db,adminEntry=false}) {
   const [rows,setRows] = useState(null);
   const [references,setReferences] = useState([]);
   const [adminEnabled,setAdminEnabled] = useState(false);
-  const [adminView,setAdminView] = useState(false);
+  const [adminView,setAdminView] = useState(adminEntry);
   const [activeRole,setActiveRole] = useState('');
   const [portfolio,setPortfolio] = useState(null);
   const [evidenceEntry,setEvidenceEntry] = useState(null);
@@ -1164,7 +1164,7 @@ export default function LiveQualificationPortfolio({db}) {
     {busy ? <PremiumLoading variant="compact"/> : error ? <Panel title="Qualifications">
       <p role="alert">{error}</p><Action secondary onClick={() => setRefreshKey(value => value + 1)}>Retry</Action>
     </Panel> : portfolio ? <OpenPortfolio key={portfolio.id} db={db} portfolio={portfolio} references={references} evidenceEntry={evidenceEntry} onRefresh={refresh}
-      onBack={() => {setPortfolio(null); setRefreshKey(value => value + 1);}}/> : adminView
+      onBack={() => {setPortfolio(null); setRefreshKey(value => value + 1);}}/> : adminView && adminEnabled
       ? <QualificationCentreAdmin db={db} references={references} onBack={()=>{setAdminView(false);setRefreshKey(v=>v+1);}}/> : previewId
       ? <QualificationSourcePreview key={previewId} item={QUALIFICATIONS.find(item => item.id === previewId)}
           references={references} onBack={() => setPreviewId('')}
