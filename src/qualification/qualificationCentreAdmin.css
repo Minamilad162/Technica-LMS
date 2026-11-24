@@ -255,3 +255,18 @@
  .qf-live .qf-ref-preview-hero>svg{display:none}
  .qf-live .qf-ref-preview-banner button{width:100%;justify-content:center}
  .qf-live .qc-top-actions>.qc-outline{white-space:normal}}
+
+/* Q02: qualification-wide brief approval, independent of publication. */
+.qf-live .qc-bulk-approval{border:1px solid #d7e5f6;border-radius:12px;background:#f5f9ff;margin:12px 0;padding:12px 14px}
+.qf-live .qc-bulk-top{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.qf-live .qc-bulk-top>div,.qf-live .qc-bulk-row>div{display:grid;gap:4px;min-width:0}
+.qf-live .qc-bulk-top strong,.qf-live .qc-bulk-row strong{font-size:13px;color:#23456d}
+.qf-live .qc-bulk-top small,.qf-live .qc-bulk-row small{font-size:11px;color:#607d99;line-height:1.45}
+.qf-live .qc-bulk-review{display:grid;gap:10px;border-top:1px solid #dbe6f4;margin-top:10px;padding-top:10px}
+.qf-live .qc-bulk-review>p{font-size:12px;margin:0;color:#456789}
+.qf-live .qc-bulk-rows{display:grid;gap:6px}
+.qf-live .qc-bulk-row{display:flex;align-items:center;gap:10px;padding:9px 11px;border:1px solid #dfe8f5;background:#fff;border-radius:9px;flex-wrap:wrap}
+.qf-live .qc-bulk-row>div{flex:1;min-width:160px}
+.qf-live .qc-bulk-review .qc-bulk-blockers{color:#a36322;font-weight:700}
+.qf-live .qc-bulk-review .qc-actions{justify-content:flex-end}
+@media(max-width:600px){.qf-live .qc-bulk-approval{padding:10px}.qf-live .qc-bulk-top>button{width:100%}.qf-live .qc-bulk-row>div{flex-basis:100%}}
