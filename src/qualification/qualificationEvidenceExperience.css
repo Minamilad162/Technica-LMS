@@ -100,3 +100,50 @@
   .qf-live .qf-evidence-primary-actions button { flex: 1 1 130px; }
   .qf-live .qf-evidence-saved button { width: 100%; }
 }
+
+.qf-live dialog.qf-evidence-wizard {
+  position: fixed;
+  inset: 0;
+  box-sizing: border-box;
+  width: min(600px, calc(100% - 24px));
+  max-height: calc(100dvh - 24px);
+  margin: auto;
+  overflow: auto;
+  overscroll-behavior: contain;
+  color: #183552;
+  box-shadow: 0 24px 75px #142b4b40;
+}
+.qf-live dialog.qf-evidence-wizard::backdrop { background: #13284388; }
+.qf-live .qf-evidence-filter-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.qf-live .qf-evidence-showcase-toggle { display: inline-flex; align-items: center; gap: 6px; }
+.qf-live .qf-evidence-showcase-toggle span { display: none; }
+.qf-live .qlt-icon-button { display: inline-flex; align-items: center; gap: 5px; font-size: .75rem; }
+
+@media (max-width: 640px) {
+  .qf-live .qf-evidence-experience .qf-evidence-table { overflow: visible; border: 0; }
+  .qf-live .qf-evidence-experience .qf-evidence-table table { display: block; min-width: 0; }
+  .qf-live .qf-evidence-table thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
+  .qf-live .qf-evidence-table thead:focus-within { position: static; width: auto; height: auto; clip-path: none; overflow: auto; }
+  .qf-live .qf-evidence-table tbody { display: grid; gap: 8px; min-width: 0; }
+  .qf-live .qf-evidence-table tbody tr:not([hidden]) {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px 12px;
+    padding: 12px;
+    border: 1px solid #dce7f2;
+    border-radius: 12px;
+    background: #fff;
+  }
+  .qf-live .qf-evidence-experience .qf-evidence-table tbody :is(th,td) { min-width: 0; padding: 0; border: 0; overflow-wrap: anywhere; }
+  .qf-live .qf-evidence-record th,
+  .qf-live .qf-evidence-record td:nth-child(n+5),
+  .qf-live .qf-evidence-table tbody td[colspan] { grid-column: 1/-1; }
+  .qf-live .qf-evidence-record th { grid-row: 1; }
+  .qf-live .qf-evidence-showcase-toggle span { display: inline; }
+}

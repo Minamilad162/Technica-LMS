@@ -7,6 +7,7 @@ export default function QualificationEvidenceMatrix({portfolio,source,selectedUn
  const [search,setSearch]=useState('');
  const [evidenceId,setEvidenceId]=useState('');
  const [showMapping,setShowMapping]=useState(false);
+ const [mappingEvidenceId,setMappingEvidenceId]=useState('');
  const editorRef=useRef(null);
  useEffect(()=>{
   if(showMapping)editorRef.current?.scrollIntoView({block:'start',behavior:'smooth'});
@@ -30,12 +31,14 @@ export default function QualificationEvidenceMatrix({portfolio,source,selectedUn
   (!search.trim()||[item.title,item.kind,item.filename].some(value=>String(value||'').toLowerCase().includes(search.trim().toLowerCase()))));
  const linked=evidence.filter(item=>criteria.some(c=>links.get(c.id)?.has(item.id))).length;
  const mappedCriteria=criteria.filter(c=>evidence.some(item=>links.get(c.id)?.has(item.id))).length;
- const beginMapping=id=>{setEvidenceId(id||evidence[0]?.id||'');setShowMapping(true);};
+ const beginMapping=id=>{setMappingEvidenceId(id||'');setShowMapping(true);};
  return <div className="qxp-matrix">
   <div className="qxp-section-head"><div><span className="qxp-eyebrow">EVIDENCE FOLDER</span><h2>Evidence Mapping Matrix</h2>
    <p>Cross-reference evidence to the actual Assessment Criteria. A green check means linked, not assessor-approved.</p></div>
-   {learner&&portfolio.canEdit&&!!evidence.length&&<button type="button" className="qxp-primary" disabled={busy||!evidence.length} onClick={()=>beginMapping('')}>
-    <Link2 size={17}/> Link Evidence</button>}
+   {!!evidence.length&&learner&&portfolio.canEdit&&<div className="qf-live-actions">
+    {onAddEvidence&&<button type="button" className="qxp-secondary" disabled={busy} onClick={onAddEvidence}>Add evidence</button>}
+    <button type="button" className="qxp-primary" disabled={busy} onClick={()=>beginMapping(evidenceId)}><Link2 size={17}/> Link Evidence</button>
+   </div>}
   </div>
   <div className="qxp-matrix-filters">
    <label>Unit<select value={selectedUnitIndex} onChange={e=>onUnit(Number(e.target.value))}>
@@ -66,7 +69,8 @@ export default function QualificationEvidenceMatrix({portfolio,source,selectedUn
     {!evidence.length&&<div className="qxp-empty"><FolderOpen size={19}/>
      <span>{onAddEvidence?'Add evidence to your folder before linking it to criteria.':portfolio?'No evidence is available for this portfolio view.':'Open an enrolled qualification to map evidence to criteria.'}</span>
      {onAddEvidence&&<button type="button" className="qxp-primary" disabled={busy} onClick={onAddEvidence}>Add evidence</button>}</div>}
-    {!!evidence.length&&!filtered.length&&<p className="qxp-empty">No evidence matches the selected filters.</p>}
+    {!!evidence.length&&!filtered.length&&<div className="qxp-empty"><span>No evidence matches the selected filters.</span>
+      <button type="button" className="qxp-secondary" onClick={()=>{setSearch('');setEvidenceId('');}}>Clear filters</button></div>}
     <div className="qxp-matrix-legend"><span><Check size={16}/> Linked to criterion</span><span>— Not mapped</span>
       <span><LockKeyhole size={14}/> Submitted and verified Outcome mappings are read-only</span></div>
    </div>
@@ -88,7 +92,7 @@ export default function QualificationEvidenceMatrix({portfolio,source,selectedUn
   {showMapping&&learner&&portfolio?.canEdit&&<section ref={editorRef} className="qxp-mapping-editor">
     <div className="qxp-section-head"><h3>Map one Evidence item across Units</h3>
      <button className="qxp-secondary" type="button" onClick={()=>setShowMapping(false)}>Close mapping</button></div>
-    <QualificationMultiUnitEvidence portfolio={portfolio} busy={busy} targetEvidence={evidenceId?{id:evidenceId}:null}
+    <QualificationMultiUnitEvidence portfolio={portfolio} busy={busy} targetEvidence={mappingEvidenceId?{id:mappingEvidenceId}:null}
      onSave={onMapSave} onOpenOutcome={onOpenOutcome}/>
    </section>}
  </div>;
