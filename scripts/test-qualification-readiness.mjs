@@ -172,3 +172,12 @@ assert.ok(assignment.includes('role="combobox"')&&assignment.includes('p_note:no
 assert.ok(simpleAssignmentSql.includes('admin_note')&&simpleAssignmentSql.includes('p_attest IS DISTINCT FROM true')&&simpleAssignmentSql.includes('CASE WHEN p_assessor=p_verifier THEN 2 ELSE 3 END'));
 assert.ok(admin.includes("portfolioRpc(db,'admin_assign_simple'")&&admin.includes("portfolioRpc(db,'admin_reassign_simple'"));
 console.log('Compact assignment and optional note: PASS');
+
+const reviewerStyles=read('src/qualification/qualificationCentreAdmin.css');
+assert.ok(admin.includes('className="qsr-authorise-layout"')&&admin.includes('className="qsr-reviewer-grid"'),'Approved staff layout is wired into the admin workspace');
+assert.ok(admin.includes('Authorised centre reviewers ({staff.length})')&&admin.includes('staff.map(s=>'),'Cards and count use actual role authorisations');
+assert.ok(admin.includes("enrolmentRows(versions).filter(e=>!e.completedAt&&(s.role==='assessor'?e.assessorId:e.verifierId)===s.userId)"),'Reviewer workload remains role-specific and data-backed');
+assert.ok(admin.includes('setRevokeUser(s.userId);setRevokeRole(s.role)')&&admin.includes('onClick={revokeStaff}'),'Card action selects exact role for existing governed revocation');
+assert.ok(admin.includes('!staffAttest||staffReference.trim().length<12')&&admin.includes("portfolioRpc(db,'admin_authorize_staff'"),'Existing documented role authorisation guards preserved');
+assert.ok(reviewerStyles.includes('.qsr-reviewer-grid{display:grid;grid-template-columns:repeat(3')&&reviewerStyles.includes('.qsr-fields,.qf-live .qsr-reviewer-grid,.qf-live .qsr-revoke-form{grid-template-columns:1fr}'),'Reviewer cards adapt to mobile');
+console.log('Q03 approved reviewer dashboard layout and preserved actions: PASS');
