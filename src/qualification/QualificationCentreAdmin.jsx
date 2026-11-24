@@ -6,6 +6,7 @@ import {qualificationReadiness,needsAssessmentMethodReview,sourceRubricForUnit} 
 import QualificationCentreLearnerPreview from './QualificationCentreLearnerPreview.jsx';
 import {ProgrammeUpdatesAdmin} from './QualificationProgrammeUpdates.jsx';
 import './qualificationCentreAdmin.css';
+import {AdminQualificationNavigation,AdminQualificationCatalog,AdminQualificationDetail} from './QualificationAdminCenter.jsx';
 
 const methods=[['assignment_brief','Assignment Brief'],['reflective_account','Reflective Account'],
  ['witness_testimony','Witness Testimony'],['cpd_record','CPD Record'],
@@ -16,7 +17,7 @@ const errText=e=>e?.message||'This action could not be completed.';
 const stamp=date=>date?new Date(date).toLocaleDateString(undefined,{dateStyle:'medium'}):'Not yet';
 function Pill({ready,children}){return <span className={'qc-pill '+(ready?'qc-success':'qc-pending')}>{ready?<CheckCircle2 size={13}/>:<Info size={13}/>} {children}</span>;}
 function Notice({children}){return <div className="qc-notice"><Info size={18}/><span>{children}</span></div>;}
-function Card({title,icon:Icon,children,id}){return <section id={id} className="qc-card"><header><Icon size={19}/><h3>{title}</h3></header>{children}</section>;}
+function Card({title,icon:Icon,children,id,hidden=false}){return <section id={id} hidden={hidden} className="qc-card"><header><Icon size={19}/><h3>{title}</h3></header>{children}</section>;}
 function PeopleSelect({label,value,onChange,people,disabled}){return <label className="qc-field">{label}
  <select value={value} onChange={e=>onChange(e.target.value)} disabled={disabled} required>
   <option value="">Select active account</option>
@@ -44,6 +45,10 @@ export default function QualificationCentreAdmin({db,onBack,references=[]}){
  [issuerUrl,setIssuerUrl]=useState(''),[issuerAttest,setIssuerAttest]=useState(false),
  [issuerStatus,setIssuerStatus]=useState(null);
  const [previewWorkspace,setPreviewWorkspace]=useState(false);
+ const [section,setSection]=useState('overview'),[setupTab,setSetupTab]=useState('summary');
+ const catalogueVisible=['overview','qualifications'].includes(section);
+ const selectVersion=v=>{setVersionId(v.id);setUnitId(v.units[0]?.id||'');setReassignId('');setLearner('');setAssessor('');setVerifier('');setFile(null);setFileTitle('');};
+ const openSetup=tab=>{setSection('qualifications');setSetupTab(tab);};
  const [loading,setLoading]=useState(true),[saving,setSaving]=useState(false),
  [message,setMessage]=useState(''),[error,setError]=useState('');
  const version=versions.find(v=>v.id===versionId)||versions[0];
@@ -165,38 +170,36 @@ export default function QualificationCentreAdmin({db,onBack,references=[]}){
  if(previewWorkspace)return <QualificationCentreLearnerPreview version={version}
    references={references} onBack={()=>setPreviewWorkspace(false)}/>;
  return <div className="qc-workspace">
-  <div className="qc-top"><div><button className="qc-back" type="button" onClick={onBack}><ArrowLeft size={17}/> Back to Qualifications</button>
-   <span className="qf-overline">CENTRE OPERATIONS · ADMIN ACCESS</span><h1>Qualification Management</h1>
-   <p>Authorise source-backed programmes, approve Unit assessment briefs, attach private resources and enrol real learners.</p>
-  </div><div className="qc-top-actions">
-    <button type="button" className="qc-outline" disabled={!version||saving} onClick={()=>setPreviewWorkspace(true)}>
-      <BookOpen size={16}/> Preview learner workspace
-    </button>
-    <div className="qc-top-icon"><ShieldCheck size={31}/></div>
-   </div></div>
-  <Notice>Imported awarding-body specifications are real reference material, not evidence of centre approval.
-    Only your centre administrator can release a version. Certificates stay disabled until there is an externally issued certificate reference and a separate authorised configuration.</Notice>
+  <header className="qac-header"><div><button className="qc-back" type="button" onClick={onBack}><ArrowLeft size={16}/> Back to Qualifications</button>
+    <span className="qf-overline">CENTRE OPERATIONS · ADMIN ACCESS</span><h1>Qualification Management</h1>
+    <p>Set up, manage and deliver professional qualifications.</p></div>
+    <button type="button" className="qc-primary" disabled={!version||saving} onClick={()=>openSetup('units')}><GraduationCap size={17}/> Manage qualification</button>
+  </header>
+  <AdminQualificationNavigation section={section} onSection={setSection}/>
   {error&&<p role="alert" className="qc-error">{error}</p>}
   {message&&<p role="status" className="qc-success-message"><CheckCircle2 size={16}/>{message}</p>}
-  <div className="qc-versions" aria-label="Choose qualification edition">
-   {versions.map(v=>{
-    const passed=v.units.filter(u=>u.brief?.status==='approved').length;
-    return <button key={v.id} type="button" className={v.id===version?.id?'selected':''}
-      disabled={saving} onClick={()=>{setVersionId(v.id);setUnitId(v.units[0]?.id||'');}}>
-      <span>{v.title}</span><small>{v.version} · {v.units.length} Units</small>
-      <Pill ready={!!v.publishedAt}>{v.publishedAt?'Released':'Centre approval pending'}</Pill>
-      <div className="qc-mini-track"><div style={{width:`${v.units.length?Math.round(passed/v.units.length*100):0}%`}}/></div>
-      <small>{passed}/{v.units.length} Unit briefs approved</small>
-    </button>;
-   })}
-  </div>
-  {version&&<section className="qc-assessment-readiness" aria-label="Assessment access readiness">
+  {catalogueVisible&&<AdminQualificationCatalog versions={versions} version={version} references={references}
+     staff={staff} saving={saving} onSelect={v=>{selectVersion(v);setSetupTab('summary');}}
+     onSection={setSection} onTab={openSetup}/>}
+  {catalogueVisible&&<AdminQualificationDetail version={version} references={references} staff={staff}
+     tab={setupTab} onTab={setSetupTab} saving={saving} onPreview={()=>setPreviewWorkspace(true)}
+     onEnrol={()=>setSection('enrolments')}/>}
+  {!catalogueVisible&&version&&<div className="qac-section-context">
+    <label htmlFor="qac-edition-select">Qualification edition</label>
+    <select id="qac-edition-select" disabled={saving} value={version.id}
+      onChange={e=>{const next=versions.find(v=>v.id===e.target.value);if(next)selectVersion(next);}}>
+      {versions.map(v=><option key={v.id} value={v.id}>{v.title} · {v.version}</option>)}
+    </select>
+    <Pill ready={release}>{release?'Released':'In Setup'}</Pill>
+  </div>}
+  {catalogueVisible&&!versions.length&&!error&&<Notice>No official qualification editions are available. The catalogue is source-backed; new-edition authoring is not enabled in this release.</Notice>}
+    {version&&catalogueVisible&&setupTab==='release'&&<section className="qc-assessment-readiness" aria-label="Assessment access readiness">
     <div className="qc-assessment-readiness-heading">
       <div><span className="qf-overline">LIVE CENTRE RECORDS</span><h2>Assessment access readiness</h2>
         <p>Technical access opens only after centre publication and genuine learner enrolment.</p></div>
-      <span className={'qc-assessment-readiness-status '+(readiness.live?'is-ready':'is-locked')}>
-        {readiness.live?<CheckCircle2 size={16}/>:<LockKeyhole size={16}/>}
-        {readiness.live?'Enrolments active':'Not yet available'}
+      <span className={'qc-assessment-readiness-status '+(readiness.published?'is-ready':'is-locked')}>
+        {readiness.published?<CheckCircle2 size={16}/>:<LockKeyhole size={16}/>}
+        {readiness.published?'Released · Ready for enrolment':'In Setup'}
       </span>
     </div>
     <div className="qc-assessment-readiness-grid">
@@ -207,24 +210,22 @@ export default function QualificationCentreAdmin({db,onBack,references=[]}){
       <div><strong>{readiness.enrolments}</strong><span>Real learner enrolments</span></div>
     </div>
     <div className="qc-assessment-next">
-      <div><strong>Next required action</strong><p>{readiness.next}</p></div>
+      <div><strong>{readiness.published?'Delivery options':'Next required action'}</strong><p>{readiness.published?'Published. Zero enrolled learners is a normal state; assign reviewers when enrolling.':readiness.next}</p></div>
       {!readiness.published&&readiness.pendingUnits.length>0&&<button className="qc-outline" type="button"
-        onClick={()=>{setUnitId(readiness.pendingUnits[0].id);
-          document.getElementById('qc-centre-unit-review')?.scrollIntoView({behavior:'smooth',block:'start'});}}>
+        onClick={()=>{setUnitId(readiness.pendingUnits[0].id);openSetup('plans');}}>
         Review next Unit · {readiness.pendingUnits[0].code}
       </button>}
     </div>
     <small className="qc-assessment-caveat">Database readiness is not proof of awarding-body approval or permission to issue certificates. Never publish using test references.</small>
   </section>}
-  {release&&<ProgrammeUpdatesAdmin key={version.id} db={db} version={version}/>}
-  {version&&<div className="qc-columns">
-   <div className="qc-main">
-    <Card id="qc-centre-unit-review" title="Unit assessment plans" icon={Layers3}>
+  {section==='updates'&&(release?<ProgrammeUpdatesAdmin key={version.id} db={db} version={version}/>:<Notice>Publish this edition before creating programme updates or appointments.</Notice>)}
+  {version&&<div className="qac-setup-content">
+    <Card id="qc-centre-unit-review" title="Unit assessment plans" icon={Layers3} hidden={!(section==='plans'||(catalogueVisible&&['units','plans'].includes(setupTab)))}>
       <p className="qc-secondary">The real Learning Outcomes and Assessment Criteria are already imported.
         These centre-authored brief drafts must be checked against the current programme before approval.</p>
-      <div className="qc-unit-pills">{version.units.map(u=><button key={u.id} type="button"
+      <div className="qc-unit-pills">{version.units.map((u,index)=><button key={u.id} type="button"
         disabled={saving} className={unit?.id===u.id?'active':''} onClick={()=>setUnitId(u.id)}
-        title={u.title}>{u.code}{u.brief?.status==='approved'&&<CheckCircle2 size={15}/>}</button>)}</div>
+        title={u.title}>Unit {String(index+1).padStart(2,'0')} · {u.code}{u.brief?.status==='approved'&&<CheckCircle2 size={15}/>}</button>)}</div>
       {unit&&<div className="qc-unit-editor">
        <div className="qc-unit-head"><div><span className="qf-overline">{unit.code}</span><h3>{unit.title}</h3>
         <small>{unit.outcomes} Outcomes · {unit.criteria} Criteria</small></div>
@@ -270,7 +271,8 @@ export default function QualificationCentreAdmin({db,onBack,references=[]}){
        </div>
       </div>}
     </Card>
-    <Card title="Centre resources · protected uploads" icon={FolderClosed}>
+    <Card title="Centre resources · protected uploads" icon={FolderClosed} hidden={!(catalogueVisible&&setupTab==='materials')}>
+      <div className="qc-unit-pills" aria-label="Resource Unit selector">{version.units.map((u,index)=><button key={u.id} type="button" disabled={saving} className={unit?.id===u.id?'active':''} onClick={()=>{setUnitId(u.id);setFile(null);setFileTitle('');}} title={u.title}>Unit {String(index+1).padStart(2,'0')} · {u.code}</button>)}</div>
       <p className="qc-secondary">Upload genuine centre-authorised Assignment Briefs, Reflective Account forms, Witness Testimony forms, CPD records or evidence matrices. Drafts cannot be viewed by learners until approved.</p>
       <div className="qc-document-list">{documents.map(d=><div key={d.id}>
         <FileCheck2 size={19}/><div><strong>{d.title}</strong><small>{d.kind.replaceAll('_',' ')} · {d.filename} · {stamp(d.createdAt)}</small></div>
@@ -288,7 +290,7 @@ export default function QualificationCentreAdmin({db,onBack,references=[]}){
          onClick={onUpload}><UploadCloud size={16}/> Upload to protected centre library</button>
       </div>
     </Card>
-    <Card title="Release an assessed qualification" icon={ShieldCheck}>
+    <Card title="Release an assessed qualification" icon={ShieldCheck} hidden={!(catalogueVisible&&setupTab==='release')}>
       <div className="qc-release-readiness"><Pill ready={approved===total&&total>0}>{approved}/{total} Centre-approved Unit briefs</Pill>
       <Pill ready={version.units.every(u=>u.criteria>0)}>{version.units.reduce((n,u)=>n+u.criteria,0)} assessment criteria</Pill></div>
       <p className="qc-secondary">Release locks the rubric and opens real enrolments. This is a formal administrative action, not an automatic conversion of a reference specification.</p>
@@ -308,9 +310,7 @@ export default function QualificationCentreAdmin({db,onBack,references=[]}){
         </button>
       </>}
     </Card>
-   </div>
-   <aside className="qc-aside">
-    <Card title="Learner & reviewer assignment" icon={Users}>
+    <Card title="Learner & reviewer assignment" icon={Users} hidden={section!=='enrolments'}>
       <p className="qc-secondary">Only published, centre-approved qualifications can be assigned. Reviewers must be different active users.</p>
       <div className="qc-people-search"><input aria-label="Find users by name or email" value={search}
         onChange={e=>setSearch(e.target.value)} placeholder="Search active accounts"/>
@@ -348,7 +348,7 @@ export default function QualificationCentreAdmin({db,onBack,references=[]}){
             reassignAssessor===reassignVerifier}>Save audited reassignment</button>
       </div>}
     </Card>
-    <Card title="Qualified assessment staff" icon={ShieldCheck}>
+    <Card title="Qualified assessment staff" icon={ShieldCheck} hidden={section!=='staff'}>
       <p className="qc-secondary">A person may only serve as Assessor or Internal Verifier after the centre confirms their actual professional competence. These roles are distinct from a normal LMS login.</p>
       <PeopleSelect label="Staff account" value={staffUser} onChange={setStaffUser} people={people} disabled={saving}/>
       <label className="qc-field">Approved assessment role
@@ -382,7 +382,7 @@ export default function QualificationCentreAdmin({db,onBack,references=[]}){
           onClick={revokeStaff}>Revoke authorization</button>
       </details>}
     </Card>
-    <Card title="Certificate issuer authorization" icon={FileCheck2}>
+    <Card title="Certificate issuer authorization" icon={FileCheck2} hidden={section!=='certificates'}>
       <p className="qc-secondary">Releasing a qualification does not authorise certificate issuance. The verifier can only record an actually issued certificate after the awarding body’s authority has been documented.</p>
       {!release?<p className="qc-locked"><LockKeyhole size={16}/> Release the centre-approved programme first.</p>:
        issuerStatus?<div className="qc-release-done"><CheckCircle2 size={19}/>
@@ -407,14 +407,13 @@ export default function QualificationCentreAdmin({db,onBack,references=[]}){
         </button>
        </>}
     </Card>
-    <Card title="Release governance" icon={ShieldAlert}>
+    <Card title="Release governance" icon={ShieldAlert} hidden={!(catalogueVisible&&setupTab==='release')}>
       <p className="qc-secondary">This edition is based on the supplied awarding-body specification. The centre must confirm it is the appropriate version for the learner, assessment requirements, and regulatory conditions.</p>
       <ul className="qc-gov-list"><li><CheckCircle2 size={15}/> Real source Unit rubric preserved</li>
        <li><CheckCircle2 size={15}/> Learner / Assessor / Verifier are separate</li>
        <li><CheckCircle2 size={15}/> Evidence stored privately</li>
        <li><LockKeyhole size={15}/> Certificate recording remains disabled until externally authorised</li></ul>
     </Card>
-   </aside>
   </div>}
  </div>;
 }
