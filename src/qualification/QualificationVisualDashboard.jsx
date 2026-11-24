@@ -1,6 +1,7 @@
 import React,{useState} from 'react';
 import {ArrowRight,Award,BookOpenCheck,Check,CheckCircle2,ClipboardCheck,Clock3,FileText,FolderOpen,Layers3,ShieldCheck,UserRound} from 'lucide-react';
 import {canReview,claimLabels,claimState} from './qualificationPortfolioApi.js';
+import QualificationNextStep from './QualificationNextStep.jsx';
 import './qualificationVisualDashboard.css';
 
 const activeReviewStates=['submitted','awaiting_verification','verification_returned'];
@@ -93,7 +94,7 @@ function ReviewerSnapshot({unit,onOutcome}){
   })}
  </div>;
 }
-export default function QualificationVisualDashboard({portfolio,progress,selectedUnitIndex,onUnit,onOutcome,onEvidence,onRegistration}){
+export default function QualificationVisualDashboard({portfolio,progress,selectedUnitIndex,onUnit,onOutcome,onEvidence,onRegistration,nextStep,onNextStep,busy}){
  const [surface,setSurface]=useState('overview');
  const total=portfolio.units.length;
  const completed=portfolio.units.filter(unitVerified).length;
@@ -122,8 +123,9 @@ export default function QualificationVisualDashboard({portfolio,progress,selecte
       <div><UserRound size={20}/><span>Learner<strong dir="auto">{portfolio.learner||'Not available'}</strong></span></div>
       <div><BookOpenCheck size={20}/><span>Assessor<strong dir="auto">{portfolio.assessor||'Not assigned'}</strong></span></div>
       <div><ShieldCheck size={20}/><span>Verifier<strong dir="auto">{portfolio.verifier||'Not assigned'}</strong></span></div>
-      <div><Clock3 size={20}/><span>Next action<strong>{next?next.code+' · '+(claimLabels[claimState(next)]||'Open'):(portfolio.completedAt?'Qualification completed':'No pending action')}</strong></span></div>
+      {!nextStep&&<div><Clock3 size={20}/><span>Next action<strong>{next?next.code+' · '+(claimLabels[claimState(next)]||'Open'):(portfolio.completedAt?'Qualification completed':'No pending action')}</strong></span></div>}
      </div>
+     {nextStep&&<QualificationNextStep step={nextStep} onAction={onNextStep} busy={busy}/>}
     </section>
     <section className="qfd-unit-card">
      <div className="qfd-card-head"><h2>Units</h2><span>{total} Units · {progress.verified} / {progress.total} required Outcomes verified</span></div>

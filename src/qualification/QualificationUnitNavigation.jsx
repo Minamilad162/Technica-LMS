@@ -28,5 +28,6 @@ export default function QualificationUnitNavigation({units, selectedIndex, onSel
         </button>;
       })}
     </div>
+    {!!units[selectedIndex] && <span className="qf-selected-unit-title" dir="auto">{units[selectedIndex].title}</span>}
   </nav>;
 }

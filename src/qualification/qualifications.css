@@ -264,3 +264,16 @@
 .qf-programme-unit-strip .qf-number-tab[aria-pressed="true"] {
   background: #194a79; color: #fff; border-color: #194a79;
 }
+
+.qf-programme-unit-strip { flex-wrap: wrap; }
+.qf-selected-unit-title {
+  flex: 1 1 220px;
+  min-width: 0;
+  color: #233b58;
+  font-size: .875rem;
+  font-weight: 700;
+  overflow-wrap: anywhere;
+}
+@media (max-width: 700px) {
+  .qf-selected-unit-title { flex-basis: 100%; }
+}

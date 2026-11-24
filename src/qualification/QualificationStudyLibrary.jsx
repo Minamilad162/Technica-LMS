@@ -11,7 +11,7 @@ export default function QualificationStudyLibrary({portfolio,source,selectedUnit
  const resources=useMemo(()=>{
   const map=new Map();
   if(sourceUrl)map.set(sourceUrl,{title:source.title+' · specification',url:sourceUrl,label:'Awarding-body specification'});
-  for(const o of outcomes)for(const r of o.resources||[])if(r.url&&/^https:\/\//.test(r.url))
+  for(const o of outcomes)for(const r of o.resources||[])if(r.url&&r.url!==sourceUrl&&/^https:\/\//.test(r.url))
    map.set(r.url,{title:r.title||'Unit resource',url:r.url,label:'Unit resource'});
   return [...map.values()];
  },[source,sourceUrl,outcomes]);
@@ -32,11 +32,10 @@ export default function QualificationStudyLibrary({portfolio,source,selectedUnit
      </select></div>
     <section className="qxp-panel"><div className="qxp-panel-heading"><BookOpenCheck size={20}/><h3>Unit Aim</h3></div>
      <p>{material?.aim||'No Unit aim has been imported for this specification edition.'}</p></section>
-    <div className="qxp-library-pair">
-     <section className="qxp-panel"><div className="qxp-panel-heading"><Layers3 size={20}/><h3>Indicative Study Topics</h3></div>
-      {material?.indicativeTopics?.length?<ul className="qxp-topic-list">{material.indicativeTopics.map((topic,i)=><li key={i}>{topic}</li>)}</ul>:
-       <p>No indicative study topics are available for this Unit.</p>}
-     </section>
+    <div className={material?.indicativeTopics?.length ? "qxp-library-pair" : undefined}>
+     {!!material?.indicativeTopics?.length&&<section className="qxp-panel"><div className="qxp-panel-heading"><Layers3 size={20}/><h3>Indicative Study Topics</h3></div>
+      <ul className="qxp-topic-list">{material.indicativeTopics.map((topic,i)=><li key={i}>{topic}</li>)}</ul>
+     </section>}
      <section className="qxp-panel"><div className="qxp-panel-heading"><GraduationCap size={20}/><h3>Learning Outcomes</h3></div>
       {outcomes.length?<div className="qxp-outcome-links">{outcomes.map((o,i)=><button key={o.id||o.code||i} type="button" onClick={()=>onOutcome(o,i)}>
        <b>{o.code}</b><span>{o.title}<small>{o.criteria?.length||0} Assessment Criteria</small></span><ArrowRight size={16}/>
@@ -46,7 +45,7 @@ export default function QualificationStudyLibrary({portfolio,source,selectedUnit
     <section className="qxp-panel"><div className="qxp-panel-heading"><FolderOpen size={20}/><h3>Source Materials</h3></div>
      {resources.length?<div className="qxp-library-files">{resources.map(r=><a key={r.url} href={r.url} target="_blank" rel="noopener noreferrer">
       <FileText size={20}/><span><strong>{r.title}</strong><small>{r.label}</small></span><span>Open <ExternalLink size={15}/></span>
-     </a>)}</div>:<p>No accessible source links have been recorded for this Unit.</p>}
+     </a>)}</div>:<p>{sourceUrl ? 'See the qualification specification above and the Unit brief where available.' : 'No source documents are linked to this Unit.'}</p>}
      {children}
     </section>
    </div>

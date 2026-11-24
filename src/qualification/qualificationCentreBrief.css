@@ -28,3 +28,5 @@
  border-radius:12px;color:#8f6c46;font-size:11.5px;line-height:1.65;margin:10px 0}
 .qf-live .qb-empty svg{flex-shrink:0;margin-top:2px}
 .qf-live .qb-error{padding:9px;color:#a54e39;background:#fff5f1;border-radius:8px;font-size:11px}
+
+.qb-learner-guidance { margin: 12px 0; color: #233b58; line-height: 1.5; }

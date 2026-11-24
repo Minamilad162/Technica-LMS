@@ -4,7 +4,7 @@
 >
 > Project: Technica Consult LMS
 > Version: 1.1.11 (Practice Center quick mode selection)
-> Last updated: 2026-11-23 (Africa/Cairo), Evidence learner experience
+> Last updated: 2026-11-24 (Africa/Cairo), enrolled learner qualification journey
 > Repository: https://github.com/Minamilad162/Technica-LMS
 > Target branch: main
 > Current inspected source baseline: v1.15.0, commit 8021f604c63c59b2100d944ead86fed149eb1ceb
@@ -2448,3 +2448,16 @@ Study documents, expandable Outcome criterion links and optional Technica workin
 Place file upload and written evidence above the records table. Keep duplication, filtering and Showcase actions with the register. Present the active form above the register, show its selected mode and saving state, and display a confirmation with a shortcut to map the newly saved record. Focus moves to the form, the confirmation, and the mapper when opened. Unit selection and section navigation have stronger active states. Source previews keep their existing access panel and Unit materials.
 
 Reused Lucide icons and CSS transitions for file, mapping and status actions. The animations run only with no reduced-motion preference. No dependency, enrolment, database or assessment changes. Existing evidence persistence and criterion locks apply.
+
+
+## P106 — Enrolled learner qualification journey (2026-11-24)
+
+| Surface | Decision / regression addressed |
+| --- | --- |
+| Home and Tasks & Evidence | Show an actionable next step from the existing claim, evidence, declaration and reviewer data. Empty assigned-task lists can still lead to preparation. Display the unassigned-assessor submission blocker without blocking preparation. |
+| Unit navigation | Keep the numbered strip and show the selected Unit title. Learner Course becomes Units. Enrolled learner routes restore the portfolio, section, Unit and Outcome after reload using validated IDs. Reviewer entry and existing permission checks remain in place. |
+| Evidence and Matrix | Empty mapping and evidence selection provide a direct evidence action. Matrix accessible cell labels use the exact displayed criterion codes. Existing private Storage, mapping RPC and assessment transitions remain authoritative. |
+| Learning material | Count unique resource URLs and retain linked Outcome codes. Omit the empty indicative-topics panel where the pinned source supplies no topics. Show approved learner instructions prominently and keep reviewer methods in a labelled disclosure. No curriculum wording is invented. |
+| Catalogue | Show assigned programmes and read-only syllabus previews under distinct headings. Retain preview tabs and enrolment restrictions. |
+
+Decision log: implement the 24 November learner audit without changes to production records, reviewer assignment, programme eligibility or assessment rules. Rollback is a frontend revert. Local verification covers the build and qualification reference workflow, portfolio, readiness, card, material and routing regressions. Authenticated deployment verification is tracked separately.

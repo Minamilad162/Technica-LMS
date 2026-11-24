@@ -1,0 +1,20 @@
+.qf-next-step {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 14px;
+  padding: 18px;
+  border: 1px solid #dce5ef;
+  border-radius: 14px;
+  background: #f5f8fc;
+  color: #162f4e;
+}
+.qf-next-step > div:first-child { flex: 1 1 240px; min-width: 0; }
+.qf-next-step h3 { margin: 0 0 6px; font-size: 1rem; }
+.qf-next-step p { margin: 0; font-size: .875rem; line-height: 1.45; }
+.qf-next-step .qf-next-step-blocked { display: flex; align-items: start; gap: 7px; margin-top: 9px; color: #714a12; }
+.qf-next-step-blocked svg { flex: none; }
+.qf-next-step-actions { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; }
+.qlt-no-task .qf-next-step { align-self: stretch; text-align: start; }
+.qfd-qualification-card .qf-next-step { margin-top: 16px; }

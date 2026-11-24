@@ -1,5 +1,6 @@
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
+import {learnerNextStep, restoreLearnerSection} from '../src/qualification/learnerPortfolioJourney.js';
 const source=path=>readFileSync(new URL('../'+path,import.meta.url),'utf8');
 const ui=source('src/qualification/LiveQualificationPortfolio.jsx');
 const status=source('src/qualification/QualificationPortfolioReferenceUI.jsx');
@@ -25,7 +26,7 @@ assert.ok(sourceDashboard.includes('Learning Outcomes')&&sourceDashboard.include
  'Show verified syllabus counts, not fabricated learner progress');
 assert.ok(!sourcePreview.includes('Open test upload'),
  'Real qualification evidence access must never redirect to the private test sandbox');
-assert.ok(catalogue.includes("String(row.catalogKey||'').startsWith('technica-source-'+item.id+'-')"),
+assert.ok(catalogue.includes("String(row.catalogKey || '').startsWith('technica-source-' + item.id + '-')"),
  'Recognize real learner enrolments by pinned source edition as well as title');
 assert.ok(sourceStyles.includes('.qsrc-compact-unit-title')&&source('src/qualification/qualificationExperience.css').includes('.qxp-identity'),
  'Use one compact shared qualification identity for real and private portfolios');
@@ -39,7 +40,7 @@ const library=source('src/qualification/QualificationStudyLibrary.jsx');
 const sharedStyles=source('src/qualification/qualificationExperience.css');
 assert.ok(sharedNav.includes("matrix:Grid3X3")&&sharedNav.includes("['matrix','Matrix']"),
  'Matrix must augment the original qualification navbar, not replace it');
-for(const route of ["['programme','Course']","['evidence','Evidence']","['matrix','Matrix']",
+for(const route of ["['programme',learner?'Units':'Course']","['evidence','Evidence']","['matrix','Matrix']",
  "['registration','Registration']","['contact','Contact']","['metrics','Metrics']","['library','Study Library']"])
  assert.ok(ui.includes(route),'An original qualification route has been hidden: '+route);
 assert.ok(ui.includes("['library','Study Library'],"),
@@ -85,12 +86,12 @@ assert.ok(!/(?:portfolioRpc|db\.rpc|db\.from|db\.storage|supabase\.rpc)\(/.test(
  'Source-only visual preview must have zero backend mutations');
 
 
-for(const route of ["['programme','Course']","['evidence','Evidence']","['registration','Registration']",
+for(const route of ["['programme',learner?'Units':'Course']","['evidence','Evidence']","['registration','Registration']",
  "['contact','Contact']","['metrics','Metrics']"]){
  assert.ok(ui.includes(route),'Reference workflow missing '+route);
 }
-assert.ok(ui.includes("useState(evidenceEntry?.reviewRole?'review':evidenceEntry ? 'evidence' : portfolio.role==='learner'?'tasks':'review')"),'Learner task workspace and explicit review workspace are defaults; direct evidence entry remains');
-assert.ok(ui.includes("['programme','Course']")&&ui.includes("<QualificationUnitNavigation units={portfolio.units}"),'Original Course navigation and numbered Unit tabs must remain available');
+assert.ok(ui.includes("useState(evidenceEntry?.reviewRole?'review':evidenceEntry ? 'evidence' : portfolio.role==='learner'?initial.view:'review')"),'Learner task workspace and explicit review workspace are defaults; direct evidence entry remains');
+assert.ok(ui.includes("['programme',learner?'Units':'Course']")&&ui.includes("<QualificationUnitNavigation units={portfolio.units}"),'Learner Units and numbered navigation must remain available');
 assert.ok(ui.includes("<QualificationTopStats portfolio={portfolio} visiblePortfolio={visiblePortfolio}/>"),'Statistics must use real RLS-scoped portfolio data');
 assert.ok(ui.includes("<QualificationVisualDashboard portfolio={visiblePortfolio}"),'Qualification overview must render the approved live layout');
 const visual=source('src/qualification/QualificationVisualDashboard.jsx');
@@ -164,4 +165,25 @@ assert.ok(ui.indexOf('qf-evidence-wizard') < ui.indexOf('<Panel title="Evidence 
  'The upload form must appear above the records register');
 assert.match(ui,/openMapper\(lastSaved\)/,'Saved evidence must carry its own identity into the Unit mapper');
 assert.match(source('src/qualification/qualificationEvidenceExperience.css'),/prefers-reduced-motion: no-preference/);
+const outcome = {id:'lo',title:'First assessment',required:true,criteria:[{id:'ac'}]};
+const units = [{id:'u1',outcomes:[]},{id:'u2',outcomes:[outcome]}];
+const portfolio = {units,evidence:[],canEdit:true,assessorAssigned:false,declarationAt:'2026-11-24'};
+assert.deepEqual(restoreLearnerSection(units,{section:'library',unit:'u2'}), {view:'library',unitIndex:1,outcomeId:''});
+assert.deepEqual(restoreLearnerSection(units,{section:'outcome',unit:'u1',outcome:'lo'}), {view:'outcome',unitIndex:1,outcomeId:'lo'});
+assert.deepEqual(restoreLearnerSection(units,{section:'outcome',unit:'foreign',outcome:'foreign'}), {view:'programme',unitIndex:0,outcomeId:''});
+assert.equal(restoreLearnerSection(units,{section:'review'}).view,'tasks');
+assert.equal(learnerNextStep(portfolio).unitIndex,1);
+assert.match(learnerNextStep(portfolio).blocked,/assign an assessor/);
+portfolio.evidence = [{id:'evidence'}];
+assert.equal(learnerNextStep(portfolio).outcomeId,'lo');
+outcome.claim = {state:'draft',mapping:{ac:['evidence']}};
+assert.equal(learnerNextStep(portfolio).title,'Review your mapped evidence');
+portfolio.assessorAssigned = true;
+assert.equal(learnerNextStep({...portfolio,declarationAt:null}).section,'registration');
+assert.equal(learnerNextStep(portfolio).title,'Review and submit your claim');
+outcome.claim.state = 'changes_requested';
+assert.equal(learnerNextStep(portfolio).title,'Review requested changes');
+outcome.claim.state = 'submitted';
+assert.equal(learnerNextStep(portfolio).title,'Waiting for review');
+assert.equal(learnerNextStep({...portfolio,completedAt:'2026-11-24'}).title,'Qualification completed');
 console.log('Qualification reference workflow: programme, evidence, enrolment, contact, metrics and privacy constraints PASS');

@@ -198,3 +198,8 @@ Source: read-only aggregate query on Technica production Supabase, 24 November. 
 
 ### Next session
 Read this roadmap. Finish Q00 fresh production/deployment audit and Q01 acceptance (including visual QA); confirm real edition release/enrolment access without fabricating approvals. Q02 simplified UI approved and merged; verify authenticated Cloudflare deployment and authorised actual publication before marking DONE. Prepare Q03 reviewer management design for owner review next.
+
+
+### 24 November learner audit follow-up
+
+Implemented the Q06 learner next step, empty-state evidence actions, in-portfolio links, readable Unit context, unique resource counts and catalogue grouping. The qualification workflow and existing role/permission tests pass locally. No new migration is required. Production acceptance remains dependent on authenticated checks of the deployed revision and valid learner-specific reviewer assignments for the assessment lifecycle.
