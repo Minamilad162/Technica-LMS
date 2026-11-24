@@ -893,7 +893,7 @@ function OpenPortfolio({db, portfolio, references, evidenceEntry, onRefresh, onB
   const [taskJourney,setTaskJourney]=useState(false);
   const [unitIndex,setUnitIndex] = useState(entryIndex >= 0 ? entryIndex : initial.unitIndex);
   const [outcomeId,setOutcomeId] = useState(initial.outcomeId);
-  const [evidenceFromOutcome,setEvidenceFromOutcome] = useState(false);
+  const [evidenceOrigin,setEvidenceOrigin] = useState('');
   const [evidenceUnit,setEvidenceUnit] = useState(evidenceEntry && entryIndex >= 0 ? portfolio.units[entryIndex].id : initial.view === 'evidence' ? portfolio.units[initial.unitIndex]?.id || '' : '');
   const [uploadOnEntry,setUploadOnEntry] = useState(Boolean(evidenceEntry && !evidenceEntry.reviewRole && portfolio.canEdit));
   const [drafts,setDrafts] = useState({});
@@ -922,11 +922,16 @@ function OpenPortfolio({db, portfolio, references, evidenceEntry, onRefresh, onB
     setView(key); setError(''); setNotice('');
     setUploadOnEntry(false);
     setTaskEvidenceMode('');
-    setEvidenceFromOutcome(false);
+    setEvidenceOrigin('');
     setEvidenceUnit('');
   };
   const openTaskEvidence=mode=>{changeView('evidence');setTaskEvidenceMode(mode);setTaskJourney(true);};
-  const openTaskUnit=index=>{setUnitIndex(index);changeView('programme');setTaskJourney(true);requestAnimationFrame(()=>document.getElementById('qualification-current-unit-brief')?.scrollIntoView({block:'start'}));};
+  const openUnitBrief = (index, fromTasks) => {
+    setUnitIndex(index);
+    changeView('programme');
+    setTaskJourney(fromTasks);
+    requestAnimationFrame(() => document.getElementById('qualification-current-unit-brief')?.scrollIntoView({block:'start'}));
+  };
   const openOutcome = id => {
     setUnitIndex(portfolio.units.findIndex(unit => unit.outcomes.some(item => item.id === id)));
     setOutcomeId(id); changeView('outcome');
@@ -1001,9 +1006,9 @@ function OpenPortfolio({db, portfolio, references, evidenceEntry, onRefresh, onB
     setDrafts({}); // Versions change across multiple claims. Avoid stale outcome drafts.
     await onRefresh();
   },'Evidence mappings saved across Units. Open each Outcome to submit its Competence Claim.');
-  const openEvidence = () => {
+  const openEvidence = origin => {
     changeView('evidence');
-    setEvidenceFromOutcome(true);
+    setEvidenceOrigin(origin);
   };
   const onDownload = item => run(() => downloadPortfolioEvidence(db,item));
   const isSandbox = portfolio.catalogKey === privateSandboxKey;
@@ -1027,7 +1032,7 @@ function OpenPortfolio({db, portfolio, references, evidenceEntry, onRefresh, onB
     if (view === 'outcome'||view==='tasks') changeView('programme');
     if (view === 'evidence') {
       setUploadOnEntry(false);
-      setEvidenceFromOutcome(false);
+      setEvidenceOrigin('');
       setEvidenceUnit(portfolio.units[index].id);
     }
   };
@@ -1040,7 +1045,7 @@ function OpenPortfolio({db, portfolio, references, evidenceEntry, onRefresh, onB
   const nextStep = learner ? learnerNextStep(portfolio) : null;
   const followNextStep = () => {
     if (nextStep.outcomeId) openOutcome(nextStep.outcomeId);
-    else if (nextStep.section === 'programme') openTaskUnit(nextStep.unitIndex);
+    else if (nextStep.section === 'programme') openUnitBrief(nextStep.unitIndex, view === 'tasks');
     else if (nextStep.section) openSection(nextStep.section);
   };
   return <div className={"qf-live-stack"+(learner&&view==='tasks'?' qlt-shell':'')} style={learner&&view==='tasks'&&cover?.heroImage?{'--qlt-hero-image':`url("${cover.heroImage}")`}:undefined} aria-busy={busy}>
@@ -1066,7 +1071,7 @@ function OpenPortfolio({db, portfolio, references, evidenceEntry, onRefresh, onB
     {view === 'evidence' && evidenceEntry && !evidenceEntry.reviewRole && !portfolio.canEdit && <p>Evidence uploads are unavailable for this enrolment.</p>}
     {learner&&view!=='tasks'&&taskJourney&&<div className="qf-live-actions"><Action secondary disabled={busy} onClick={()=>{changeView('tasks');setTaskJourney(false);}}><ArrowLeft size={16}/> Back to My Tasks</Action></div>}
     {learner&&view==='tasks'&&<QualificationLearnerTasks db={db} portfolio={portfolio} progress={progress} nextStep={nextStep} onNextStep={followNextStep} selectedId={selectedTaskId} onSelect={setSelectedTaskId} busy={busy}
-      onView={(key,index)=>{if(Number.isInteger(index))setUnitIndex(index);changeView(key);setTaskJourney(true);}} onOutcome={id=>{openOutcome(id);setTaskJourney(true);}} onUnit={openTaskUnit} onEvidence={openTaskEvidence}/>}
+      onView={(key,index)=>{if(Number.isInteger(index))setUnitIndex(index);changeView(key);setTaskJourney(true);}} onOutcome={id=>{openOutcome(id);setTaskJourney(true);}} onUnit={index => openUnitBrief(index, true)} onEvidence={openTaskEvidence}/>}
     {!learner&&view==='review'&&<ReviewerPortfolioWorkspace db={db} portfolio={portfolio} selectedId={selectedReviewId} onSelect={setSelectedReviewId} busy={busy} onOpenTasks={()=>changeView('reviewTasks')} onOpenUnit={id=>{setSelectedReviewId(id);openOutcome(id);}} renderReview={id=>{const item=progress.outcomes.find(o=>o.id===id);return item?<ReviewerClaim key={item.id+':'+(item.claim?.version||0)} portfolio={portfolio} outcome={item} busy={busy} onDownload={onDownload} onReview={(decision,feedback,criteria)=>commit('review',{p_outcome:item.id,p_version:item.claim?.version||0,p_stage:portfolio.role,p_decision:decision,p_feedback:feedback,p_criteria:criteria},'Review recorded.')}/>:null;}}/>}
     {!learner&&view==='reviewTasks'&&<PortfolioAssignedTasks db={db} portfolio={portfolio} onOutcome={openOutcome} onView={changeView}/>}
     {view === 'dashboard' && <>
@@ -1082,20 +1087,20 @@ function OpenPortfolio({db, portfolio, references, evidenceEntry, onRefresh, onB
       aim={referenceUnit?.aim || outcomeMaterial?.aim} sourceUrl={selectedReference?.source_url}
       onEvidence={id => { changeView('evidence'); setEvidenceUnit(id); }} onContact={() => changeView('contact')}
       onLibrary={libraryAvailable ? () => changeView('library') : null}/>}
-    {view === 'evidence' && <EvidenceFolder key={evidenceUnit} db={db} portfolio={visiblePortfolio} source={selectedReference} initialUnitId={evidenceUnit} initialWizard={taskEvidenceMode || (evidenceFromOutcome ? 'choose' : uploadOnEntry ? 'upload' : '')} busy={busy} onSave={saveEvidence} onDuplicate={duplicateEvidence}
+    {view === 'evidence' && <EvidenceFolder key={evidenceUnit} db={db} portfolio={visiblePortfolio} source={selectedReference} initialUnitId={evidenceUnit} initialWizard={taskEvidenceMode || (evidenceOrigin ? 'choose' : uploadOnEntry ? 'upload' : '')} busy={busy} onSave={saveEvidence} onDuplicate={duplicateEvidence}
       onSelectUnit={id => {
         const index = portfolio.units.findIndex(unit => unit.id === id);
         if (index >= 0) setUnitIndex(index);
       }}
       onMap={saveMultiUnitMapping} onOpenOutcome={openOutcome}
       onDownload={onDownload} onShowcase={items => run(() => downloadEvidenceShowcase(db,items))}
-      onBack={evidenceFromOutcome || evidenceUnit ? () => changeView(evidenceFromOutcome ? 'outcome' : 'programme') : null}
-      backLabel={evidenceFromOutcome ? 'Back to outcome' : 'Back to Unit'}/>}
+      onBack={evidenceOrigin || evidenceUnit ? () => changeView(evidenceOrigin || 'programme') : null}
+      backLabel={evidenceOrigin === 'outcome' ? 'Back to outcome' : evidenceOrigin === 'matrix' ? 'Back to Matrix' : 'Back to Unit'}/>}
     {view === 'registration' && <Registration db={db} portfolio={portfolio} source={selectedReference} progress={progress} busy={busy}
       onDeclare={() => commit('declare',{},'Declaration accepted.')}
       onFinalize={reference => commit('finalize',{p_certificate_reference: reference},reference ? 'Certificate reference recorded.' : 'Qualification completed.')}/>}
     {view === 'matrix' && <QualificationEvidenceMatrix portfolio={visiblePortfolio} source={selectedReference}
-      selectedUnitIndex={unitIndex} onUnit={setUnitIndex} onAddEvidence={learner && portfolio.canEdit ? () => openTaskEvidence('choose') : null} onMapSave={saveMultiUnitMapping} onOpenOutcome={openOutcome} busy={busy}/>}
+      selectedUnitIndex={unitIndex} onUnit={setUnitIndex} onAddEvidence={learner && portfolio.canEdit ? () => openEvidence('matrix') : null} onMapSave={saveMultiUnitMapping} onOpenOutcome={openOutcome} busy={busy}/>}
     {view === 'contact' && <ContactDiary db={db} portfolio={portfolio} progress={progress} onOutcome={openOutcome}/>}
 
     {view === 'metrics' && <PortfolioMetrics db={db} portfolio={portfolio} progress={progress} onOutcome={openOutcome}/>}
@@ -1113,7 +1118,7 @@ function OpenPortfolio({db, portfolio, references, evidenceEntry, onRefresh, onB
         mapping={mapping} updateMapping={next => setDrafts(old => ({...old,[outcome.id]:{version:claimVersion,mapping:next}}))}
         busy={busy} onSave={submit => commit('save_claim',{p_outcome:outcome.id,p_version:claimVersion,p_mapping:mapping,p_submit:submit},
           submit ? 'Competence claim submitted.' : 'Draft saved.')}
-        onEvidence={openEvidence} onRegistration={() => changeView('registration')} onDownload={onDownload}/> :
+        onEvidence={() => openEvidence('outcome')} onRegistration={() => changeView('registration')} onDownload={onDownload}/> :
         <ReviewerClaim key={outcome.id + ':' + claimVersion} portfolio={portfolio} outcome={outcome}
           busy={busy} onDownload={onDownload} onReview={(decision,feedback,criteria) => commit('review',{
             p_outcome:outcome.id,p_version:claimVersion,p_stage:portfolio.role,p_decision:decision,p_feedback:feedback,p_criteria:criteria,
