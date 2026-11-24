@@ -152,7 +152,7 @@ assert.match(unitMaterials,/source\?\.units\?\.find\(entry => entry.code === uni
 assert.match(sourcePreview,/<QualificationUnitNavigation[^\n]+>\}\s*\{!embedded&&<QualificationInternalNav/,
  'Reference Unit navigation must stay visible across the selected Unit sections');
 assert.match(ui,/unitView && <QualificationUnitNavigation/);
-assert.match(ui,/key === 'evidence' && unitView && outcomeUnit\) setEvidenceUnit\(outcomeUnit.id\)/,
+assert.match(ui,/key === 'evidence' && unitView && outcomeUnit\) scopeEvidence\(outcomeUnit.id\)/,
  'Evidence opened from a Unit must start with that Unit selected');
 for(const view of [ui,sourcePreview]){
  assert.match(view,/<details[^>]+>\s*<summary>Technica working templates<\/summary>/,
@@ -167,6 +167,8 @@ assert.match(ui,/openMapper\(lastSaved\)/,'Saved evidence must carry its own ide
 assert.match(source('src/qualification/qualificationEvidenceExperience.css'),/prefers-reduced-motion: no-preference/);
 assert.match(ui,/onAddEvidence=\{learner && portfolio.canEdit \? \(\) => openEvidence\('matrix'\)/);
 assert.match(ui,/onBack=\{evidenceOrigin \|\| evidenceUnit \? \(\) => changeView\(evidenceOrigin \|\| 'programme'\)/);
+assert.match(ui,/view === 'evidence' \? evidenceFilter : ''/,'Share and restore the applied Evidence Unit filter');
+assert.match(ui,/setUnitFilter\(''\);\s*onSelectUnit\(''\)/,'A saved record clears the Unit filter in the browser route too');
 const outcome = {id:'lo',title:'First assessment',required:true,criteria:[{id:'ac'}]};
 const units = [{id:'u1',outcomes:[]},{id:'u2',outcomes:[outcome]}];
 const portfolio = {units,evidence:[],canEdit:true,assessorAssigned:false,declarationAt:'2026-11-24'};

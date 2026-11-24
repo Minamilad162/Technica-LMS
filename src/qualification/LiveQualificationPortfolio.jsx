@@ -298,6 +298,7 @@ function EvidenceFolder({db, portfolio, source, initialUnitId, initialWizard, on
   const showNewEvidence = id => {
     start('');
     setUnitFilter('');
+    onSelectUnit('');
     setSearch('');
     setType('');
     setMedium('');
@@ -451,7 +452,7 @@ function EvidenceFolder({db, portfolio, source, initialUnitId, initialWizard, on
         </Action>
       </div>
       <details className="qf-evidence-filters">
-        <summary>Filter evidence</summary>
+        <summary>Filter evidence{unitFilter && ' · ' + (unitFilter === 'unmapped' ? 'Unmapped' : portfolio.units.find(unit => unit.id === unitFilter)?.code || 'All Units')}</summary>
       <div className="qf-ref-evidence-toolbar qf-ref-evidence-filters">
         <label>Search evidence<input value={search} onChange={applyFilter(setSearch)}
           type="search" placeholder="Reference, title, filename or description"/></label>
@@ -894,7 +895,15 @@ function OpenPortfolio({db, portfolio, references, evidenceEntry, onRefresh, onB
   const [unitIndex,setUnitIndex] = useState(entryIndex >= 0 ? entryIndex : initial.unitIndex);
   const [outcomeId,setOutcomeId] = useState(initial.outcomeId);
   const [evidenceOrigin,setEvidenceOrigin] = useState('');
-  const [evidenceUnit,setEvidenceUnit] = useState(evidenceEntry && entryIndex >= 0 ? portfolio.units[entryIndex].id : initial.view === 'evidence' ? portfolio.units[initial.unitIndex]?.id || '' : '');
+  const linkedScope = initial.view === 'evidence' ? initialLink?.scope : '';
+  const entryEvidenceUnit = evidenceEntry && entryIndex >= 0 ? portfolio.units[entryIndex].id
+    : portfolio.units.some(unit => unit.id === linkedScope) ? linkedScope : '';
+  const [evidenceUnit,setEvidenceUnit] = useState(entryEvidenceUnit);
+  const [evidenceFilter,setEvidenceFilter] = useState(linkedScope === 'unmapped' ? linkedScope : entryEvidenceUnit);
+  const scopeEvidence = unitId => {
+    setEvidenceUnit(unitId);
+    setEvidenceFilter(unitId);
+  };
   const [uploadOnEntry,setUploadOnEntry] = useState(Boolean(evidenceEntry && !evidenceEntry.reviewRole && portfolio.canEdit));
   const [drafts,setDrafts] = useState({});
   const [error,setError] = useState('');
@@ -905,8 +914,8 @@ function OpenPortfolio({db, portfolio, references, evidenceEntry, onRefresh, onB
   const outcome = progress.outcomes.find(item => item.id === outcomeId);
   const learner = portfolio.role === 'learner';
   useEffect(() => {
-    if (learner) onLocationChange(portfolio.id, view, portfolio.units[unitIndex]?.id, view === 'outcome' ? outcomeId : '');
-  }, [learner, onLocationChange, outcomeId, portfolio.id, portfolio.units, unitIndex, view]);
+    if (learner) onLocationChange(portfolio.id, view, portfolio.units[unitIndex]?.id, view === 'outcome' ? outcomeId : '', view === 'evidence' ? evidenceFilter : '');
+  }, [evidenceFilter, learner, onLocationChange, outcomeId, portfolio.id, portfolio.units, unitIndex, view]);
   // Reviewers only see evidence already included in submitted, authorised snapshots.
   // The main evidence folder is intentionally learner-only in the backend RPC.
   const visiblePortfolio = learner ? portfolio : {
@@ -923,7 +932,7 @@ function OpenPortfolio({db, portfolio, references, evidenceEntry, onRefresh, onB
     setUploadOnEntry(false);
     setTaskEvidenceMode('');
     setEvidenceOrigin('');
-    setEvidenceUnit('');
+    scopeEvidence('');
   };
   const openTaskEvidence=mode=>{changeView('evidence');setTaskEvidenceMode(mode);setTaskJourney(true);};
   const openUnitBrief = (index, fromTasks) => {
@@ -1033,13 +1042,13 @@ function OpenPortfolio({db, portfolio, references, evidenceEntry, onRefresh, onB
     if (view === 'evidence') {
       setUploadOnEntry(false);
       setEvidenceOrigin('');
-      setEvidenceUnit(portfolio.units[index].id);
+      scopeEvidence(portfolio.units[index].id);
     }
   };
   const openSection = key => {
     setTaskJourney(false);
     changeView(key);
-    if (key === 'evidence' && unitView && outcomeUnit) setEvidenceUnit(outcomeUnit.id);
+    if (key === 'evidence' && unitView && outcomeUnit) scopeEvidence(outcomeUnit.id);
   };
   const referenceUnit = selectedReference?.units?.find(unit => unit.code === outcomeUnit?.code);
   const nextStep = learner ? learnerNextStep(portfolio) : null;
@@ -1085,10 +1094,11 @@ function OpenPortfolio({db, portfolio, references, evidenceEntry, onRefresh, onB
     </>}
     {view === 'programme' && <UnitProgramme db={db} portfolio={portfolio} unitIndex={unitIndex} setUnitIndex={setUnitIndex} onOutcome={openOutcome}
       aim={referenceUnit?.aim || outcomeMaterial?.aim} sourceUrl={selectedReference?.source_url}
-      onEvidence={id => { changeView('evidence'); setEvidenceUnit(id); }} onContact={() => changeView('contact')}
+      onEvidence={id => { changeView('evidence'); scopeEvidence(id); }} onContact={() => changeView('contact')}
       onLibrary={libraryAvailable ? () => changeView('library') : null}/>}
-    {view === 'evidence' && <EvidenceFolder key={evidenceUnit} db={db} portfolio={visiblePortfolio} source={selectedReference} initialUnitId={evidenceUnit} initialWizard={taskEvidenceMode || (evidenceOrigin ? 'choose' : uploadOnEntry ? 'upload' : '')} busy={busy} onSave={saveEvidence} onDuplicate={duplicateEvidence}
+    {view === 'evidence' && <EvidenceFolder key={evidenceUnit} db={db} portfolio={visiblePortfolio} source={selectedReference} initialUnitId={evidenceFilter} initialWizard={taskEvidenceMode || (evidenceOrigin ? 'choose' : uploadOnEntry ? 'upload' : '')} busy={busy} onSave={saveEvidence} onDuplicate={duplicateEvidence}
       onSelectUnit={id => {
+        setEvidenceFilter(id);
         const index = portfolio.units.findIndex(unit => unit.id === id);
         if (index >= 0) setUnitIndex(index);
       }}
@@ -1145,11 +1155,11 @@ export default function LiveQualificationPortfolio({db,adminEntry=false,initialL
   const [portfolio,setPortfolio] = useState(null);
   const [evidenceEntry,setEvidenceEntry] = useState(null);
   const [portfolioLink,setPortfolioLink] = useState(null);
-  const syncLocation = React.useCallback((id, section, unit, outcome) => {
+  const syncLocation = React.useCallback((id, section, unit, outcome, scope) => {
     const {location, navigate} = route.current;
     if (location.pathname !== '/qualifications') return;
     const params = new URLSearchParams(location.search);
-    for (const [key, value] of Object.entries({portfolio:id, section, unit, outcome})) {
+    for (const [key, value] of Object.entries({portfolio:id, section, unit, outcome, scope})) {
       if (value) params.set(key, value);
       else params.delete(key);
     }
@@ -1206,7 +1216,7 @@ export default function LiveQualificationPortfolio({db,adminEntry=false,initialL
     const id = params.get('portfolio');
     if (!id || location.pathname !== '/qualifications') return;
     if (rows.some(row => row.id === id && row.role === 'learner')) {
-      open(id, null, {section:params.get('section'), unit:params.get('unit'), outcome:params.get('outcome')});
+      open(id, null, {section:params.get('section'), unit:params.get('unit'), outcome:params.get('outcome'), scope:params.get('scope')});
     } else {
       syncLocation();
     }
