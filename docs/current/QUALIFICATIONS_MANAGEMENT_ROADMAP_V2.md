@@ -175,7 +175,7 @@ Acceptance: required checks passed, deployment independently verified, acceptanc
 
 | 2026-11-24 | Q05 | Added task lifecycle actions: deadline change and cancellation with note/reason, optimistic revision guard and audit history; existing evidence/decisions preserved, verified tasks locked. Admin and assigned authorised assessor only. Migration 202611240005 and regression tests. | PR #130 merged at e36341a47b0135903670fec183399c4b0b1a645b; CI run 45353362343 passed; migration 202611240005 installed and privileges/revision column verified | Authenticated visual and end-to-end operational acceptance pending; Q06 design gate next. |
 
-| 2026-11-24 | Q06 | Owner approved split-pane learner Tasks & Evidence design. Implemented on codex/q06-learner-workspace, with real task progress, filters, linked criteria and reviewer feedback, protected materials and existing evidence/Outcome routes. | Implementation pending CI and live visual/end-to-end QA | Validate build and tests; test upload, mapping, submission, return and resubmission using authorised accounts. |
+| 2026-11-24 | Q06 | Owner approved split-pane learner Tasks & Evidence design. Implemented on codex/q06-learner-workspace, with real task progress, filters, linked criteria and reviewer feedback, protected materials and existing evidence/Outcome routes. | PR #131 merged at c1be86198ed1227321a4a915e3e976ad2dabe56b; CI 45356008105 passed; no migration required. | Authenticated visual and end-to-end QA pending: upload, mapping, submission, return and resubmission using authorised accounts. |
 
 ### Production edition audit — 24 November 2026
 
