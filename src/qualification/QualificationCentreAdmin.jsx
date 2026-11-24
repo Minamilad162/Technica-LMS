@@ -362,7 +362,7 @@ export default function QualificationCentreAdmin({db,onBack,references=[],initia
             <div className="qsr-fields">
               <AccountSelect db={db} role={staffRole} label="Staff account" value={staffUser} onChange={id=>{setStaffUser(id);setStaffAttest(false);}} staff={staff} revision={staff.length} disabled={saving}/>
               <label className="qc-field">Approved assessment role
-                <select value={staffRole} disabled={saving} onChange={e=>{setStaffRole(e.target.value);setStaffAttest(false);}}>
+                <select value={staffRole} disabled={saving} onChange={e=>{setStaffRole(e.target.value);setStaffUser('');setStaffAttest(false);}}>
                   <option value="assessor">Assessor</option><option value="verifier">Internal Verifier</option>
                 </select></label>
               <label className="qc-field qsr-reference">Documented competence / authorisation reference
