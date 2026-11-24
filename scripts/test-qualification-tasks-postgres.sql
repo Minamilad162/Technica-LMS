@@ -58,6 +58,10 @@ SET LOCAL request.jwt.claim.sub='f4000000-0000-0000-0000-000000000005';
 SELECT pg_temp.expect(jsonb_array_length(public.lms_qf_task_portfolio(current_setting('test.task.e1')::uuid))=1,'learner sees own task');
 SELECT pg_temp.denied($sql$SELECT public.lms_qf_task_portfolio(current_setting('test.task.e2')::uuid)$sql$,'Task portfolio access denied');
 SELECT pg_temp.denied($sql$SELECT public.lms_qf_task_assign(pg_temp.qid(62),current_setting('test.task.e1')::uuid,null,pg_temp.spec(),current_date+10)$sql$,'Task assignment denied');
+RESET ROLE;
+-- Isolate assessor privileges: the account was an Admin when authorised, but no longer has that role.
+UPDATE public.lms_role_assignments SET revoked_at=now() WHERE user_id=pg_temp.qid(2) AND role='admin';
+SET LOCAL ROLE authenticated;
 SET LOCAL request.jwt.claim.sub='f4000000-0000-0000-0000-000000000002';
 SELECT pg_temp.expect(public.lms_qf_task_assign(pg_temp.qid(62),current_setting('test.task.e1')::uuid,null,pg_temp.spec(),current_date+10)=pg_temp.qid(62),'assigned assessor can create individual task');
 SELECT pg_temp.denied($sql$SELECT public.lms_qf_task_assign(pg_temp.qid(63),current_setting('test.task.e2')::uuid,null,pg_temp.spec(),current_date+10)$sql$,'Task assignment denied');
