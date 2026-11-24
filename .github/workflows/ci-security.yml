@@ -457,3 +457,5 @@ jobs:
           psql -h localhost -U postgres -v ON_ERROR_STOP=1 -f scripts/test-qualification-tasks-postgres.sql
           psql -h localhost -U postgres -v ON_ERROR_STOP=1 -f supabase/migrations/202611240006_qualification_reviewer_workspaces.sql
           psql -h localhost -U postgres -v ON_ERROR_STOP=1 -f scripts/test-qualification-review-workspaces-postgres.sql
+          psql -h localhost -U postgres -v ON_ERROR_STOP=1 -f supabase/migrations/202611240007_qualification_monitoring.sql
+          psql -h localhost -U postgres -v ON_ERROR_STOP=1 -f scripts/test-qualification-monitoring-postgres.sql
