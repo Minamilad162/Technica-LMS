@@ -157,7 +157,7 @@ for(const view of [ui,sourcePreview]){
  assert.match(view,/<details[^>]+>\s*<summary>Technica working templates<\/summary>/,
   'Technica templates are optional supporting tools in Evidence');
 }
-assert.match(ui,/Boolean\(evidenceEntry && portfolio.canEdit\)/,
+assert.match(ui,/Boolean\(evidenceEntry && !evidenceEntry.reviewRole && portfolio.canEdit\)/,
  'The direct upload path still requires server-provided edit permission');
 assert.match(ui,/row.role === 'learner' && !row.completedAt && row.catalogKey === privateSandboxKey/);
 assert.ok(ui.indexOf('qf-evidence-wizard') < ui.indexOf('<Panel title="Evidence records">'),
